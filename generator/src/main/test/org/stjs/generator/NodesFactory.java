@@ -9,7 +9,7 @@ import org.stjs.generator.handlers.RuleBasedVisitor;
 
 public class NodesFactory {
 
-	public static ClassOrInterfaceDeclarationPartial newClassOrIntefaceDeclaration() {
+	public static ClassOrInterfaceDeclarationPartial newClassOrIntefarceDeclaration() {
 		return new ClassOrInterfaceDeclarationPartial();
 	}
 	
