@@ -13,12 +13,12 @@ public class ClassOrInterfaceDeclarationHandlerTest {
 	public void shouldPrintNameWithMembers() throws Exception {
 		handlerTester(ClassOrInterfaceDeclarationHandler.class).
 		assertGenerateString("functionName={arg1,arg2};",
-				newClassOrIntefarceDeclaration()
-							.withName("functionName")
-							.addBodyDeclaration(stub("arg1"))
-							.addBodyDeclaration(stub("arg2"))
-							.build());
+			newClassOrIntefarceDeclaration()
+				.withName("functionName")
+				.addBodyDeclaration(stub("arg1"))
+				.addBodyDeclaration(stub("arg2"))
+				.build());
 	}
 	
-	
+
 }
