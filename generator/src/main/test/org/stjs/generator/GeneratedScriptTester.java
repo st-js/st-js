@@ -7,6 +7,7 @@ import japa.parser.ast.visitor.VoidVisitor;
 import org.stjs.generator.handlers.RuleBasedVisitor;
 
 public class GeneratedScriptTester {
+	
 	public static GeneratedScriptTester handlerTester(Class<? extends VoidVisitor<?>> handlerClass) {
 		return new GeneratedScriptTester(handlerClass);
 	}
