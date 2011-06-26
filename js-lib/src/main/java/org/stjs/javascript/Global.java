@@ -23,6 +23,9 @@ public class Global {
 		return null;
 	}
 
+	public static void alert(String expr) {
+	}
+
 	public static double parseFloat(Object expr) {
 		return 0;
 	}

@@ -5,10 +5,10 @@
 
 	<groupId>org.stjs</groupId>
 	<artifactId>examples</artifactId>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 	<name>Strongly-typed Javascript:Examples</name>
 
-   <parent>
+	<parent>
 		<groupId>org.stjs</groupId>
 		<artifactId>parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
@@ -30,4 +30,22 @@
 		</dependency>
 	</dependencies>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.stjs</groupId>
+				<artifactId>maven-plugin</artifactId>
+				<version>1.0.0-SNAPSHOT</version>
+				<executions>	
+					<execution>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	
 </project>

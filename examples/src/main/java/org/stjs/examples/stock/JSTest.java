@@ -1,6 +1,7 @@
 package org.stjs.examples.stock;
 
 import static org.stjs.javascript.Global.$;
+import static org.stjs.javascript.Global.alert;
 
 import org.stjs.javascript.jquery.ChangeListener;
 import org.stjs.javascript.jquery.Event;
@@ -31,5 +32,9 @@ public class JSTest {
 			}
 		});
 
+	}
+
+	public void hello() {
+		alert("Hello2");
 	}
 }

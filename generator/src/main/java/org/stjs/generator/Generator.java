@@ -3,6 +3,8 @@ package org.stjs.generator;
 import japa.parser.JavaParser;
 import japa.parser.ast.CompilationUnit;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
 
@@ -24,7 +26,7 @@ public class Generator {
 		return (new MatchingRule(name, xpath, new NodeHandlerWithPriority(handler, priority)));
 	}
 
-	private static void rules(RuleBasedVisitor ruleVisitor) {
+	private void rules(RuleBasedVisitor ruleVisitor) {
 		// to skip
 		ruleVisitor.addRule(rule("Parameter Type", "//Parameter/ReferenceType", 100, new SkipHandler(ruleVisitor)));
 		ruleVisitor.addRule(rule("Parameter Type", "//PackageDeclaration", 100, new SkipHandler(ruleVisitor)));
@@ -80,10 +82,8 @@ public class Generator {
 
 	}
 
-	@SuppressWarnings("unchecked")
-	public static void main(String[] args) throws Exception {
-		InputStream in = Thread.currentThread().getContextClassLoader()
-				.getResourceAsStream("com/swissquote/foundation/js/test/Transaction.java");
+	public void generateJavascript(File inputFile, File outputFile) throws Exception {
+		InputStream in = new FileInputStream(inputFile);
 
 		RuleBasedVisitor ruleVisitor = new RuleBasedVisitor();
 
@@ -102,7 +102,7 @@ public class Generator {
 			ruleVisitor.generate(cu);
 
 			System.out.println("----------------------------");
-			FileWriter writer = new FileWriter("target/Transaction.js");
+			FileWriter writer = new FileWriter(outputFile);
 			writer.write(ruleVisitor.getSource());
 			writer.flush();
 			writer.close();
