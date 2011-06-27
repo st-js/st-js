@@ -10,9 +10,14 @@ public class PreConditions {
 		}
 	}
 	
-	public static void notNull(Object obj, String message, Object... args) {
+	public static <T> T checkNotNull(T obj) {
+		return checkNotNull(obj, "");
+	}
+	
+	public static <T> T checkNotNull(T obj, String message, Object... args) {
 		if (obj == null) {
 			throw new NullPointerException(format(message, args));
 		}
+		return obj;
 	}
 }

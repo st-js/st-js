@@ -1,22 +1,16 @@
 package org.stjs.generator;
 
 import static org.stjs.generator.PreConditions.checkState;
-import static org.stjs.generator.PreConditions.notNull;
-import japa.parser.ast.Node;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.body.VariableDeclaratorId;
 import japa.parser.ast.expr.Expression;
-import japa.parser.ast.expr.VariableDeclarationExpr;
-import japa.parser.ast.type.PrimitiveType;
 import japa.parser.ast.type.Type;
-import japa.parser.ast.type.PrimitiveType.Primitive;
 import japa.parser.ast.visitor.GenericVisitor;
 import japa.parser.ast.visitor.VoidVisitor;
 
-import org.stjs.generator.NodesFactory.PartialFieldDeclaration;
 import org.stjs.generator.handlers.RuleBasedVisitor;
 
 public class NodesFactory {

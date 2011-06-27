@@ -1,11 +1,14 @@
 package org.stjs.generator.handlers;
 
+import static org.stjs.generator.handlers.utils.Joiner.joiner;
 import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.PrimitiveType;
 
 import java.util.Iterator;
+
+import org.stjs.generator.handlers.utils.Joiner;
 
 public class FieldDeclarationHandler extends DefaultHandler {
 
@@ -16,13 +19,7 @@ public class FieldDeclarationHandler extends DefaultHandler {
 	@Override
 	public void visit(FieldDeclaration n, Object arg) {
 		n.getType().accept(getRuleVisitor(), arg);
-		for (Iterator<VariableDeclarator> i = n.getVariables().iterator(); i.hasNext();) {
-			VariableDeclarator var = i.next();
-			var.accept(getRuleVisitor(), arg);
-			if (i.hasNext()) {
-				getPrinter().print(", ");
-			}
-		}
+		joiner(getRuleVisitor()).on(", ").join(n.getVariables(), arg);
 	}
 
 	@Override
