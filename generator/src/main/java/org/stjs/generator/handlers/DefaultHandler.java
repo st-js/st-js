@@ -5,7 +5,7 @@ import japa.parser.ast.visitor.VoidVisitorAdapter;
 import org.stjs.generator.handlers.DumpVisitor.SourcePrinter;
 
 
-public class DefaultHandler extends VoidVisitorAdapter<Object> {
+public abstract class DefaultHandler extends VoidVisitorAdapter<Object> {
 	private final RuleBasedVisitor ruleVisitor;
 
 	public DefaultHandler(RuleBasedVisitor ruleVisitor) {

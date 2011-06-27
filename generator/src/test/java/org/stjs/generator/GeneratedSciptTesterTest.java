@@ -10,7 +10,7 @@ public class GeneratedSciptTesterTest {
 
 	@Test(expected=AssertionError.class)
 	public void shouldThrowAnAssertionError() throws Exception {
-		handlerTester(ClassOrInterfaceDeclarationHandler.class)
+		handlerTester(ClassOrInterfaceDeclarationHandler.class, false)
 		.assertGenerateString("XXX",
 				newClassOrIntefarceDeclaration()
 						.withName("functionName")
