@@ -1,4 +1,4 @@
-package org.stjs.generator;
+package org.stjs.generator.handlers.utils;
 
 import static java.lang.String.format;
 

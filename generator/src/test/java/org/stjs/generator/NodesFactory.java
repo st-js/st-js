@@ -1,6 +1,6 @@
 package org.stjs.generator;
 
-import static org.stjs.generator.PreConditions.checkState;
+import static org.stjs.generator.handlers.utils.PreConditions.checkState;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.FieldDeclaration;

@@ -1,6 +1,6 @@
 package org.stjs.generator.handlers.utils;
 
-import static org.stjs.generator.PreConditions.checkNotNull;
+import static org.stjs.generator.handlers.utils.PreConditions.checkNotNull;
 import japa.parser.ast.Node;
 
 import java.util.Iterator;
