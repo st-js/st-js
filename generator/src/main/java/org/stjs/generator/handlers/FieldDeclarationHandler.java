@@ -6,10 +6,6 @@ import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.PrimitiveType;
 
-import java.util.Iterator;
-
-import org.stjs.generator.handlers.utils.Joiner;
-
 public class FieldDeclarationHandler extends DefaultHandler {
 
 	public FieldDeclarationHandler(RuleBasedVisitor ruleVisitor) {

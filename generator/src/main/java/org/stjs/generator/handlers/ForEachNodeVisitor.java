@@ -83,7 +83,7 @@ import japa.parser.ast.type.WildcardType;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
 
 public class ForEachNodeVisitor<V> extends VoidVisitorAdapter<V> {
-	protected V process(@SuppressWarnings("unused") Node node, V arg) {
+	protected V process(Node node, V arg) {
 		return arg;
 	}
 

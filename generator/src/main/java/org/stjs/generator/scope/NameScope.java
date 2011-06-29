@@ -1,7 +1,14 @@
 package org.stjs.generator.scope;
 
+import static java.util.Collections.emptySet;
+import static org.stjs.generator.handlers.utils.Sets.union;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import org.stjs.generator.scope.NameType.IdentifierName;
+import org.stjs.generator.scope.NameType.MethodName;
 
 /**
  * This class contains all the names defined in a given scope. If a name is search in the given scope and is not found
@@ -28,10 +35,32 @@ abstract public class NameScope {
 	 * @param name
 	 * @return
 	 */
-	abstract public QualifiedName resolveMethod(String name, NameScope currentScope);
+	abstract public QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope);
 
-	abstract public QualifiedName resolveIdentifier(String name, NameScope currentScope);
+	abstract public QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope);
+	
+	Set<QualifiedName<MethodName>> getOwnMethods() {
+		return emptySet();
+	}
 
+	Set<QualifiedName<IdentifierName>> getOwnIdentifiers() {
+		return emptySet();
+	}
+
+	public Set<QualifiedName<MethodName>> getMethods() {
+		if (parent != null) {
+			return union(parent.getMethods(), getOwnMethods());
+		}
+		return getOwnMethods();
+	}
+	
+	public Set<QualifiedName<IdentifierName>> getIdentifiers() {
+		if (parent != null) {
+			return union(parent.getIdentifiers(), getOwnIdentifiers());
+		}
+		return getOwnIdentifiers();
+	}
+	
 	public NameScope getParent() {
 		return parent;
 	}
@@ -39,5 +68,7 @@ abstract public class NameScope {
 	public List<NameScope> getChildren() {
 		return children;
 	}
+
+	
 
 }

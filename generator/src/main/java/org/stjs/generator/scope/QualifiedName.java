@@ -1,6 +1,6 @@
 package org.stjs.generator.scope;
 
-public class QualifiedName {
+public class QualifiedName<T extends NameType> {
 	private final String scopeName;
 	private final String name;
 
@@ -22,5 +22,7 @@ public class QualifiedName {
 	public String getName() {
 		return name;
 	}
+	
+	
 
 }

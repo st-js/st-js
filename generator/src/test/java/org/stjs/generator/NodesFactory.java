@@ -12,6 +12,7 @@ import japa.parser.ast.visitor.GenericVisitor;
 import japa.parser.ast.visitor.VoidVisitor;
 
 import org.stjs.generator.handlers.RuleBasedVisitor;
+import org.stjs.generator.handlers.utils.Lists;
 
 public class NodesFactory {
 

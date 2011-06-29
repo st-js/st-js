@@ -23,39 +23,30 @@ import japa.parser.ast.visitor.VoidVisitorAdapter;
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  * 
  */
-public class ScopeVisitor extends VoidVisitorAdapter<Boolean> {
-	private final ImportScope rootScope = new ImportScope();
-	private NameScope currentScope = rootScope;
+public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 
-	public ImportScope getRootScope() {
-		return rootScope;
+	@Override
+	public void visit(BlockStmt n, NameScope currentScope) {
+		super.visit(n, new VariableScope(currentScope));
 	}
 
 	@Override
-	public void visit(BlockStmt n, Boolean arg) {
-		currentScope = new VariableScope(currentScope);
-		super.visit(n, arg);
-		currentScope = currentScope.getParent();
+	public void visit(CatchClause n, NameScope currentScope) {
+		super.visit(n, new ParameterScope(currentScope, n.getExcept().getId().getName()));
 	}
 
 	@Override
-	public void visit(CatchClause n, Boolean arg) {
-		currentScope = new ParameterScope(currentScope, n.getExcept().getId().getName());
-		super.visit(n, arg);
-		currentScope = currentScope.getParent();
-	}
-
-	@Override
-	public void visit(ClassOrInterfaceDeclaration n, Boolean arg) {
-		NameScope saveScope = currentScope;
+	public void visit(ClassOrInterfaceDeclaration n, NameScope currentScope) {
+		NameScope classScope = currentScope;
 		if (n.getExtends() != null && n.getExtends().size() > 0 && !n.isInterface()) {
-			currentScope = new ParentTypeScope(currentScope, n.getExtends().get(0).getName());
+			classScope = new ParentTypeScope(classScope, n.getExtends().get(0).getName());
 		}
 
 		if (n.getMembers() != null) {
-			TypeScope typeScope = new TypeScope(currentScope);
-			currentScope = typeScope;
+			TypeScope typeScope = new TypeScope(classScope);
+			classScope = typeScope;
 			for (BodyDeclaration member : n.getMembers()) {
+				member.accept(this, classScope);
 				if (member instanceof FieldDeclaration) {
 					FieldDeclaration field = (FieldDeclaration) member;
 					for (VariableDeclarator var : field.getVariables()) {
@@ -74,51 +65,46 @@ public class ScopeVisitor extends VoidVisitorAdapter<Boolean> {
 					}
 
 				}
-				member.accept(this, arg);
 			}
 
 		}
-		super.visit(n, arg);
-		currentScope = saveScope;
 	}
 
 	@Override
-	public void visit(ConstructorDeclaration n, Boolean arg) {
+	public void visit(ConstructorDeclaration n, NameScope currentScope) {
 		ParameterScope paramScope = new ParameterScope(currentScope);
 		for (Parameter p : n.getParameters()) {
 			paramScope.addParameter(p.getId().getName());
 		}
-		currentScope = paramScope;
-		super.visit(n, arg);
-		currentScope = currentScope.getParent();
+		super.visit(n, paramScope);
 	}
 
 	@Override
-	public void visit(EnumDeclaration n, Boolean arg) {
+	public void visit(EnumDeclaration n, NameScope arg) {
 		// TODO Auto-generated method stub
 		super.visit(n, arg);
 	}
 
 	@Override
-	public void visit(ForeachStmt n, Boolean arg) {
+	public void visit(ForeachStmt n, NameScope arg) {
 		// TODO Auto-generated method stub
 		super.visit(n, arg);
 	}
 
 	@Override
-	public void visit(ForStmt n, Boolean arg) {
+	public void visit(ForStmt n, NameScope arg) {
 		// TODO Auto-generated method stub
 		super.visit(n, arg);
 	}
 
 	@Override
-	public void visit(MethodCallExpr n, Boolean arg) {
+	public void visit(MethodCallExpr n, NameScope arg) {
 		// here identify call
 		super.visit(n, arg);
 	}
 
 	@Override
-	public void visit(SwitchStmt n, Boolean arg) {
+	public void visit(SwitchStmt n, NameScope arg) {
 		// TODO Auto-generated method stub
 		super.visit(n, arg);
 	}

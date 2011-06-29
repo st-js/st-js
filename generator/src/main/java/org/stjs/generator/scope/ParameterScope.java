@@ -3,6 +3,9 @@ package org.stjs.generator.scope;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.stjs.generator.scope.NameType.IdentifierName;
+import org.stjs.generator.scope.NameType.MethodName;
+
 /**
  * This scope is for the a method's parameters.
  * 
@@ -28,9 +31,9 @@ public class ParameterScope extends NameScope {
 	}
 
 	@Override
-	public QualifiedName resolveIdentifier(String name, NameScope currentScope) {
+	public QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope) {
 		if (parameters.contains(name)) {
-			return new QualifiedName(PARAMETER_SCOPE_NAME, name);
+			return new QualifiedName<IdentifierName>(PARAMETER_SCOPE_NAME, name);
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(name, currentScope);
@@ -39,7 +42,7 @@ public class ParameterScope extends NameScope {
 	}
 
 	@Override
-	public QualifiedName resolveMethod(String name, NameScope currentScope) {
+	public QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope) {
 		if (getParent() != null) {
 			return getParent().resolveMethod(name, currentScope);
 		}

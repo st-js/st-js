@@ -3,6 +3,9 @@ package org.stjs.generator.scope;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.stjs.generator.scope.NameType.IdentifierName;
+import org.stjs.generator.scope.NameType.MethodName;
+
 /**
  * This scope is for the variables defined within a block
  * 
@@ -23,9 +26,9 @@ public class VariableScope extends NameScope {
 	}
 
 	@Override
-	public QualifiedName resolveIdentifier(String name, NameScope currentScope) {
+	public QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope) {
 		if (variables.contains(name)) {
-			return new QualifiedName(VARIABLE_SCOPE_NAME, name);
+			return new QualifiedName<IdentifierName>(VARIABLE_SCOPE_NAME, name);
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(name, currentScope);
@@ -34,7 +37,7 @@ public class VariableScope extends NameScope {
 	}
 
 	@Override
-	public QualifiedName resolveMethod(String name, NameScope currentScope) {
+	public QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope) {
 		if (getParent() != null) {
 			return getParent().resolveMethod(name, currentScope);
 		}

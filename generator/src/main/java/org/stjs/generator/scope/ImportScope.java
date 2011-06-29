@@ -1,5 +1,8 @@
 package org.stjs.generator.scope;
 
+import org.stjs.generator.scope.NameType.IdentifierName;
+import org.stjs.generator.scope.NameType.MethodName;
+
 /**
  * This scope tries to solve the methods inside the static imports and the identifiers (that can be the name of a class)
  * in the imports, the current package and the default packages.
@@ -8,12 +11,14 @@ package org.stjs.generator.scope;
  * 
  */
 public class ImportScope extends NameScope {
+	
+	
 	public ImportScope() {
 		super(null);
 	}
 
 	@Override
-	public QualifiedName resolveMethod(String name, NameScope currentScope) {
+	public QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope) {
 		if (getParent() != null) {
 			return getParent().resolveMethod(name, currentScope);
 		}
@@ -21,7 +26,7 @@ public class ImportScope extends NameScope {
 	}
 
 	@Override
-	public QualifiedName resolveIdentifier(String name, NameScope currentScope) {
+	public QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope) {
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(name, currentScope);
 		}
