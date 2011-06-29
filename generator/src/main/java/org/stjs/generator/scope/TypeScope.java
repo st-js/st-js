@@ -29,8 +29,8 @@ public class TypeScope extends NameScope {
 	private final Set<String> instanceFields = new HashSet<String>();
 	private final Set<String> instanceMethods = new HashSet<String>();
 
-	public TypeScope(NameScope parent) {
-		super(parent);
+	public TypeScope(String name, NameScope parent) {
+		super(name, parent);
 	}
 
 	private boolean isInCurrentTypeScope(NameScope scope) {
@@ -50,15 +50,15 @@ public class TypeScope extends NameScope {
 	}
 
 	@Override
-	public QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope) {
+	protected QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope) {
 		if (instanceMethods.contains(name)) {
 			if (isInCurrentTypeScope(currentScope)) {
-				return new QualifiedName<MethodName>(THIS_SCOPE, name);
+				return new QualifiedName<MethodName>(THIS_SCOPE, name, this);
 			}
-			return new QualifiedName<MethodName>(OUTER_SCOPE, name);
+			return new QualifiedName<MethodName>(OUTER_SCOPE, name, this);
 		}
 		if (staticMethods.contains(name)) {
-			return new QualifiedName<MethodName>(STATIC_SCOPE, name);
+			return new QualifiedName<MethodName>(STATIC_SCOPE, name, this);
 		}
 		if (getParent() != null) {
 			return getParent().resolveMethod(name, currentScope);
@@ -67,15 +67,15 @@ public class TypeScope extends NameScope {
 	}
 
 	@Override
-	public QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope) {
 		if (instanceFields.contains(name)) {
 			if (isInCurrentTypeScope(currentScope)) {
-				return new QualifiedName<IdentifierName>(THIS_SCOPE, name);
+				return new QualifiedName<IdentifierName>(THIS_SCOPE, name, this);
 			}
-			return new QualifiedName<IdentifierName>(OUTER_SCOPE, name);
+			return new QualifiedName<IdentifierName>(OUTER_SCOPE, name, this);
 		}
 		if (staticFields.contains(name)) {
-			return new QualifiedName<IdentifierName>(STATIC_SCOPE, name);
+			return new QualifiedName<IdentifierName>(STATIC_SCOPE, name, this);
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(name, currentScope);
@@ -98,29 +98,24 @@ public class TypeScope extends NameScope {
 	public void addInstanceMethod(String name) {
 		instanceMethods.add(name);
 	}
-	
+
 	@Override
 	public Set<QualifiedName<IdentifierName>> getOwnIdentifiers() {
-		return transform(
-				union(staticFields,instanceFields),
-				new ToQualifiedName<IdentifierName>());
+		return transform(union(staticFields, instanceFields), new ToQualifiedName<IdentifierName>());
 	}
-	
-	private static class ToQualifiedName<T extends NameType> implements
-		Function<String, QualifiedName<T>> {
+
+	private class ToQualifiedName<T extends NameType> implements Function<String, QualifiedName<T>> {
 
 		@Override
 		public QualifiedName<T> apply(String name) {
-			return new QualifiedName<T>(null, name);
+			return new QualifiedName<T>(null, name, TypeScope.this);
 		}
-		
+
 	}
 
 	@Override
 	public Set<QualifiedName<MethodName>> getOwnMethods() {
-		return transform(
-				union(staticMethods, instanceMethods),
-				new ToQualifiedName<MethodName>());
+		return transform(union(staticMethods, instanceMethods), new ToQualifiedName<MethodName>());
 	}
 
 	@Override

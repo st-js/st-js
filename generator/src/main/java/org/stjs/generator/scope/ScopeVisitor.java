@@ -1,5 +1,7 @@
 package org.stjs.generator.scope;
 
+import japa.parser.ast.CompilationUnit;
+import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
@@ -26,13 +28,25 @@ import japa.parser.ast.visitor.VoidVisitorAdapter;
 public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 
 	@Override
+	public void visit(CompilationUnit n, NameScope currentScope) {
+		ImportScope scope = new ImportScope(currentScope, n.getPackage() != null ? n.getPackage().getName().getName()
+				: null);
+		if (n.getImports() != null) {
+			for (ImportDeclaration importDecl : n.getImports()) {
+				scope.addImport(importDecl.getName().getName(), importDecl.isStatic(), importDecl.isAsterisk());
+			}
+		}
+		super.visit(n, scope);
+	}
+
+	@Override
 	public void visit(BlockStmt n, NameScope currentScope) {
-		super.visit(n, new VariableScope(currentScope));
+		super.visit(n, new VariableScope("block-" + n.getBeginLine(), currentScope));
 	}
 
 	@Override
 	public void visit(CatchClause n, NameScope currentScope) {
-		super.visit(n, new ParameterScope(currentScope, n.getExcept().getId().getName()));
+		super.visit(n, new ParameterScope("catch-" + n.getBeginLine(), currentScope, n.getExcept().getId().getName()));
 	}
 
 	@Override
@@ -43,7 +57,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 		}
 
 		if (n.getMembers() != null) {
-			TypeScope typeScope = new TypeScope(classScope);
+			TypeScope typeScope = new TypeScope("type-" + n.getName(), classScope);
 			classScope = typeScope;
 			for (BodyDeclaration member : n.getMembers()) {
 				member.accept(this, classScope);
@@ -72,7 +86,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 
 	@Override
 	public void visit(ConstructorDeclaration n, NameScope currentScope) {
-		ParameterScope paramScope = new ParameterScope(currentScope);
+		ParameterScope paramScope = new ParameterScope("constructor-" + n.getBeginLine(), currentScope);
 		for (Parameter p : n.getParameters()) {
 			paramScope.addParameter(p.getId().getName());
 		}

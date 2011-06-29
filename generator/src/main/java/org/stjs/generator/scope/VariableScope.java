@@ -17,8 +17,8 @@ public class VariableScope extends NameScope {
 
 	private final Set<String> variables = new HashSet<String>();
 
-	public VariableScope(NameScope parent) {
-		super(parent);
+	public VariableScope(String name, NameScope parent) {
+		super(name, parent);
 	}
 
 	public void addParameter(String parameter) {
@@ -26,9 +26,9 @@ public class VariableScope extends NameScope {
 	}
 
 	@Override
-	public QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope) {
 		if (variables.contains(name)) {
-			return new QualifiedName<IdentifierName>(VARIABLE_SCOPE_NAME, name);
+			return new QualifiedName<IdentifierName>(VARIABLE_SCOPE_NAME, name, this);
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(name, currentScope);
@@ -37,7 +37,7 @@ public class VariableScope extends NameScope {
 	}
 
 	@Override
-	public QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope) {
+	protected QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope) {
 		if (getParent() != null) {
 			return getParent().resolveMethod(name, currentScope);
 		}

@@ -22,11 +22,42 @@ abstract public class NameScope {
 
 	private final List<NameScope> children = new ArrayList<NameScope>();
 
-	public NameScope(NameScope parent) {
+	private final String name;
+
+	public NameScope(String name, NameScope parent) {
+		this.name = name;
 		this.parent = parent;
 		if (this.parent != null) {
 			this.parent.children.add(this);
 		}
+	}
+
+	/**
+	 * this is the name of the scope that will help identify the scope among its siblings
+	 * 
+	 * @return
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * 
+	 * @return the full name from the root in a dot-notation.
+	 */
+	public String getPath() {
+		if (getParent() != null) {
+			return getParent().getName() + "." + name;
+		}
+		return name;
+	}
+
+	public QualifiedName<MethodName> resolveMethod(String name) {
+		return resolveMethod(name, this);
+	}
+
+	public QualifiedName<IdentifierName> resolveIdentifier(String name) {
+		return resolveIdentifier(name, this);
 	}
 
 	/**
@@ -35,10 +66,10 @@ abstract public class NameScope {
 	 * @param name
 	 * @return
 	 */
-	abstract public QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope);
+	abstract protected QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope);
 
-	abstract public QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope);
-	
+	abstract protected QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope);
+
 	Set<QualifiedName<MethodName>> getOwnMethods() {
 		return emptySet();
 	}
@@ -53,14 +84,14 @@ abstract public class NameScope {
 		}
 		return getOwnMethods();
 	}
-	
+
 	public Set<QualifiedName<IdentifierName>> getIdentifiers() {
 		if (parent != null) {
 			return union(parent.getIdentifiers(), getOwnIdentifiers());
 		}
 		return getOwnIdentifiers();
 	}
-	
+
 	public NameScope getParent() {
 		return parent;
 	}
@@ -69,6 +100,12 @@ abstract public class NameScope {
 		return children;
 	}
 
-	
+	public void dump(String indent) {
+		System.out.print(indent);
+		System.out.println(getName());
+		for (NameScope child : children) {
+			child.dump(indent + "\t");
+		}
+	}
 
 }

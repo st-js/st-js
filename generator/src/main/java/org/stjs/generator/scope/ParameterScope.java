@@ -17,12 +17,12 @@ public class ParameterScope extends NameScope {
 
 	private final Set<String> parameters = new HashSet<String>();
 
-	public ParameterScope(NameScope parent) {
-		super(parent);
+	public ParameterScope(String name, NameScope parent) {
+		super(name, parent);
 	}
 
-	public ParameterScope(NameScope parent, String parameter) {
-		this(parent);
+	public ParameterScope(String name, NameScope parent, String parameter) {
+		this(name, parent);
 		parameters.add(parameter);
 	}
 
@@ -31,9 +31,9 @@ public class ParameterScope extends NameScope {
 	}
 
 	@Override
-	public QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope) {
 		if (parameters.contains(name)) {
-			return new QualifiedName<IdentifierName>(PARAMETER_SCOPE_NAME, name);
+			return new QualifiedName<IdentifierName>(PARAMETER_SCOPE_NAME, name, this);
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(name, currentScope);
@@ -42,7 +42,7 @@ public class ParameterScope extends NameScope {
 	}
 
 	@Override
-	public QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope) {
+	protected QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope) {
 		if (getParent() != null) {
 			return getParent().resolveMethod(name, currentScope);
 		}

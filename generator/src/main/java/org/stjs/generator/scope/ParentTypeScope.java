@@ -13,12 +13,12 @@ public class ParentTypeScope extends NameScope {
 	private final String className;
 
 	public ParentTypeScope(NameScope parent, String className) {
-		super(parent);
+		super("parent-" + className, parent);
 		this.className = className;
 	}
 
 	@Override
-	public QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope) {
+	protected QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope) {
 		if (getParent() != null) {
 			return getParent().resolveMethod(name, currentScope);
 		}
@@ -26,7 +26,7 @@ public class ParentTypeScope extends NameScope {
 	}
 
 	@Override
-	public QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope) {
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(name, currentScope);
 		}

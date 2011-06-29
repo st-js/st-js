@@ -106,17 +106,7 @@ public class Generator {
 			writer.write(ruleVisitor.getSource());
 			writer.flush();
 			writer.close();
-			/*
-			 * ASTCompilationUnit pmd = (ASTCompilationUnit) new Java16Parser().parse(new InputStreamReader(in));
-			 * //chose the node for each node for (MatchingRule rule : rules) { List<SimpleNode> nodes =
-			 * pmd.findChildNodesWithXPath(rule.getRule()); for (SimpleNode node : nodes) { NodeHandlerWithPriority nh =
-			 * nodeHandlers.get(node); if ((nh == null) || (nh.getPriority() < rule.getHandler().getPriority())) {
-			 * System.out.println("Rule:" + rule.getName() + " node:" + node); nodeHandlers.put(node,
-			 * rule.getHandler()); } } }
-			 * 
-			 * JsPrinter printer = new JsPrinter(new OutputStreamWriter(System.out)); processNode(pmd, printer);
-			 * printer.close();
-			 */
+
 		} finally {
 			in.close();
 		}
