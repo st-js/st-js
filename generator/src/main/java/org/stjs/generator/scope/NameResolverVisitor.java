@@ -4,8 +4,10 @@ import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
 import japa.parser.ast.body.EnumDeclaration;
+import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.expr.ObjectCreationExpr;
 import japa.parser.ast.expr.QualifiedNameExpr;
 import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.stmt.CatchClause;
@@ -32,6 +34,16 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 	private final Map<SourcePosition, QualifiedName<MethodName>> resolvedMethods = new HashMap<SourcePosition, QualifiedName<MethodName>>();
 	private final Map<SourcePosition, QualifiedName<IdentifierName>> resolvedIdentifiers = new HashMap<SourcePosition, QualifiedName<IdentifierName>>();
 
+	private final NameScope rootScope;
+
+	public NameResolverVisitor(NameScope rootScope) {
+		this.rootScope = rootScope;
+	}
+
+	public NameScope getRootScope() {
+		return rootScope;
+	}
+
 	public Map<SourcePosition, QualifiedName<MethodName>> getResolvedMethods() {
 		return resolvedMethods;
 	}
@@ -56,6 +68,11 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 	}
 
 	@Override
+	public void visit(MethodDeclaration n, NameScopeWalker currentScope) {
+		super.visit(n, currentScope.nextChild());
+	}
+
+	@Override
 	public void visit(ClassOrInterfaceDeclaration n, NameScopeWalker currentScope) {
 		NameScopeWalker classScope = currentScope;
 		if (n.getExtends() != null && n.getExtends().size() > 0 && !n.isInterface()) {
@@ -66,6 +83,15 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 			classScope = currentScope.nextChild();
 		}
 		super.visit(n, classScope);
+	}
+
+	@Override
+	public void visit(ObjectCreationExpr n, NameScopeWalker currentScope) {
+		NameScopeWalker nextScope = currentScope;
+		if (n.getAnonymousClassBody() != null) {
+			nextScope = currentScope.nextChild();
+		}
+		super.visit(n, nextScope);
 	}
 
 	@Override

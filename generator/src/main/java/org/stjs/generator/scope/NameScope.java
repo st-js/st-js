@@ -47,7 +47,7 @@ abstract public class NameScope {
 	 */
 	public String getPath() {
 		if (getParent() != null) {
-			return getParent().getName() + "." + name;
+			return getParent().getPath() + "." + name;
 		}
 		return name;
 	}
@@ -104,7 +104,7 @@ abstract public class NameScope {
 		System.out.print(indent);
 		System.out.println(getName());
 		for (NameScope child : children) {
-			child.dump(indent + "\t");
+			child.dump(indent + "  ");
 		}
 	}
 

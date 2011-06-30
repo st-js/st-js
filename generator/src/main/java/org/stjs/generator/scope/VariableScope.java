@@ -21,8 +21,8 @@ public class VariableScope extends NameScope {
 		super(name, parent);
 	}
 
-	public void addParameter(String parameter) {
-		variables.add(parameter);
+	public void addVariable(String var) {
+		variables.add(var);
 	}
 
 	@Override

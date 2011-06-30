@@ -1,21 +1,13 @@
 package org.stjs.generator.scope;
 
 import static junit.framework.Assert.assertEquals;
-import static org.stjs.generator.handlers.utils.Sets.transform;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
-import japa.parser.ast.body.FieldDeclaration;
-import japa.parser.ast.expr.AnnotationExpr;
-import japa.parser.ast.expr.ArrayInitializerExpr;
-import japa.parser.ast.expr.Expression;
-import japa.parser.ast.expr.NameExpr;
-import japa.parser.ast.expr.SingleMemberAnnotationExpr;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Set;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -23,44 +15,14 @@ import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import org.junit.Test;
+import org.stjs.generator.SourcePosition;
 import org.stjs.generator.handlers.XmlVisitor;
-import org.stjs.generator.handlers.utils.Function;
-import org.stjs.generator.handlers.utils.Lists;
-import org.stjs.generator.handlers.utils.Sets;
+import org.stjs.generator.scope.NameType.IdentifierName;
 
 public class ScopeTest {
-	private String declaration = "class A {" + //
-			"@ScopeIdentifiers()" + //
-			"int x = 0;" + //
+	private static final int MY_TAB_CONFIG = 4;
 
-			"@ScopeIdentifiers(x)" + //
-			"B instanceB = null;" + //
-			"{" + //
-			"	instanceB.y = 2;" + //
-			"}" + //
-
-			"class B {" + //
-
-			"	@ScopeIdentifiers({instanceB,x})" + //
-			"	int y;" + //
-
-			"	void m() {" + //
-			"		x++;" + //
-			"	}" + //
-			"}" + //
-			"}";
-
-	private String declarationWithWrongScope = "class A {" + //
-			"@ScopeIdentifiers(y)" + //
-			"int x = 0;" + //
-			"}";
-
-	@Test(expected = AssertionError.class)
-	public void testScopeWithError() throws ParseException {
-		assertScope(declarationWithWrongScope);
-	}
-
-	private void dumpXML(CompilationUnit cu) throws IOException {
+	void dumpXML(CompilationUnit cu) throws IOException {
 		// create the DOM
 		Document dom = DocumentHelper.createDocument();
 		Element root = dom.addElement("root");
@@ -74,74 +36,85 @@ public class ScopeTest {
 		writer.write(dom);
 	}
 
-	@Test
-	public void testScope() throws ParseException, IOException {
+	private NameResolverVisitor getNameResolver(String clazz) throws ParseException, IOException {
 		CompilationUnit cu = null;
 		// parse the file
-		cu = JavaParser.parse(Thread.currentThread().getContextClassLoader()
-				.getResourceAsStream("test/Declaration1.java"));
+		cu = JavaParser.parse(Thread.currentThread().getContextClassLoader().getResourceAsStream(clazz));
 		ScopeVisitor scopes = new ScopeVisitor();
 		NameScope rootScope = new FullyQualifiedScope();
 		scopes.visit(cu, rootScope);
 		rootScope.dump("");
 
-		NameResolverVisitor resolver = new NameResolverVisitor();
+		NameResolverVisitor resolver = new NameResolverVisitor(rootScope);
 		resolver.visit(cu, new NameScopeWalker(rootScope));
 
-		dumpXML(cu);
-		System.out.println("METHODS");
-		System.out.println(resolver.getResolvedMethods());
-		System.out.println("IDENTIFIERS");
+		// dumpXML(cu);
+		return resolver;
+	}
+
+	@Test
+	public void testScopeParam() throws ParseException, IOException {
+		NameResolverVisitor resolver = getNameResolver("test/Declaration1.java");
+
+		assertScopeIdent(resolver, "param", 16, column(20, 2), "root.import.type-Declaration1.param-14");
 		System.out.println(resolver.getResolvedIdentifiers());
-		assertScope(declaration);
 	}
 
-	private void assertScope(String src) throws ParseException {
-		CompilationUnit cu = null;
-		// parse the file
-		cu = JavaParser.parse(new ByteArrayInputStream(src.getBytes()));
-		ScopeVisitor scopes = new ScopeVisitor() {
-			@Override
-			public void visit(FieldDeclaration n, NameScope scope) {
-				Set<String> emptySet = Collections.<String> emptySet();
-				AnnotationExpr annotation = Lists.getOnlyElement(n.getAnnotations());
-				Set<String> identifiersExpected = Sets.newHashSet();
-				// TODO : visitor instead of instanceof?
-				if (annotation instanceof SingleMemberAnnotationExpr) {
-					Expression memberValue = ((SingleMemberAnnotationExpr) annotation).getMemberValue();
-					if (memberValue instanceof NameExpr) {
-						identifiersExpected.add(((NameExpr) memberValue).getName());
-					}
-					if (memberValue instanceof ArrayInitializerExpr) {
-						for (Expression exp : ((ArrayInitializerExpr) memberValue).getValues()) {
-							identifiersExpected.add(exp.toString());
-						}
-
-					}
-				}
-				assertScopeEquals(emptySet, identifiersExpected, scope, n);
-
-			}
-
-		};
-		cu.accept(scopes, new FullyQualifiedScope());
+	@Test
+	public void testScopeVariable() throws ParseException, IOException {
+		NameResolverVisitor resolver = getNameResolver("test/Declaration1.java");
+		assertScopeIdent(resolver, "var", 16, column(28, 2), "root.import.type-Declaration1.param-14.block-14");
 	}
 
-	private void assertScopeEquals(Set<String> methodNames, Set<String> identifierNames, NameScope scope,
-			FieldDeclaration expression) {
-		Function<QualifiedName<?>, String> unwrapper = new Function<QualifiedName<?>, String>() {
-			@Override
-			public String apply(QualifiedName<?> input) {
-				return input.getName();
-			}
-		};
-		Set<String> methods = transform(scope.getMethods(), unwrapper);
-		Set<String> identifiers = transform(scope.getIdentifiers(), unwrapper);
-		System.out.println(String.format("Expression \n%s\nexpected %s\ngot %s\n\n", expression, identifierNames,
-				identifiers));
-		assertEquals(methodNames, methods);
-		assertEquals(identifierNames, identifiers);
+	@Test
+	public void testScopeType() throws ParseException, IOException {
+		NameResolverVisitor resolver = getNameResolver("test/Declaration1.java");
+		assertScopeIdent(resolver, "type", 16, column(34, 2), "root.import.type-Declaration1");
+	}
 
+	@Test
+	public void testScopeInnerOuter() throws ParseException, IOException {
+		NameResolverVisitor resolver = getNameResolver("test/Declaration1.java");
+		assertScopeIdent(resolver, "type", 23, column(28, 4),
+				"root.import.type-Declaration1.param-14.block-14.anonymous-18");
+		assertScopeIdent(resolver, null, 24, column(28, 4), "-");
+		// TODO - how to handle the outer value Declaration1.this.type
+		assertScopeIdent(resolver, "out", 25, column(28, 4), "root.import.type-Declaration1");
+	}
+
+	@Test
+	public void testScopeParent() throws ParseException, IOException {
+		NameResolverVisitor resolver = getNameResolver("test/Declaration1.java");
+		assertScopeIdent(resolver, "parent", 16, column(34, 2), "root.import.type-Declaration1");
+	}
+
+	@Test
+	public void testScopeImport() throws ParseException, IOException {
+		NameResolverVisitor resolver = getNameResolver("test/Declaration1.java");
+		assertScopeIdent(resolver, "imp", 16, column(34, 2), "root.import");
+	}
+
+	private void assertScopeIdent(NameResolverVisitor resolver, String identName, int line, int column, String scopePath) {
+		QualifiedName<IdentifierName> qname = resolver.getResolvedIdentifiers().get(new SourcePosition(line, column));
+		if (identName == null) {
+			assertNull(qname);
+			return;
+		}
+		assertNotNull(qname);
+		assertEquals(identName, qname.getName());
+		assertNotNull(qname.getScope());
+		assertEquals(scopePath, qname.getScope().getPath());
+	}
+
+	/**
+	 * The AST parser uses a 8-space tab when calculating the column. translate it to a 4-space tab
+	 * 
+	 * @param columnInEditor
+	 * @param tabs
+	 * @return
+	 */
+	private int column(int columnInEditor, int tabs) {
+		return columnInEditor + (8 - MY_TAB_CONFIG) * tabs;
 	}
 
 }
