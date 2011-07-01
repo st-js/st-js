@@ -1,6 +1,8 @@
 package org.stjs.maven;
 
 import java.io.File;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -9,6 +11,7 @@ import java.util.Set;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.compiler.util.scan.InclusionScanException;
 import org.codehaus.plexus.compiler.util.scan.SourceInclusionScanner;
 import org.codehaus.plexus.compiler.util.scan.StaleSourceScanner;
@@ -23,9 +26,16 @@ import org.stjs.generator.Generator;
  * 
  * @goal generate
  * @phase compile
+ * @requiresDependencyResolution runtime
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class STJSMavenPlugin extends AbstractMojo {
+	/**
+	 * @parameter expression="${project}"
+	 * @required
+	 * @readonly
+	 */
+	private MavenProject project;
 
 	/**
 	 * The source directories containing the sources to be compiled.
@@ -67,8 +77,23 @@ public class STJSMavenPlugin extends AbstractMojo {
 	 */
 	private int staleMillis;
 
+	private ClassLoader getBuiltProjectClassLoader() throws MojoExecutionException {
+		try {
+			List<String> runtimeClasspathElements = project.getRuntimeClasspathElements();
+			URL[] runtimeUrls = new URL[runtimeClasspathElements.size()];
+			for (int i = 0; i < runtimeClasspathElements.size(); i++) {
+				String element = runtimeClasspathElements.get(i);
+				runtimeUrls[i] = new File(element).toURI().toURL();
+			}
+			return new URLClassLoader(runtimeUrls, Thread.currentThread().getContextClassLoader());
+		} catch (Exception ex) {
+			throw new MojoExecutionException("Cannot get builtProjectClassLoader");
+		}
+	}
+
 	public void execute() throws MojoExecutionException {
 		getLog().info("Generating javascript files");
+		ClassLoader builtProjectClassLoader = getBuiltProjectClassLoader();
 		Generator generator = new Generator();
 		SourceMapping mapping = new SuffixMapping(".java", ".js");
 		List<File> sources = new ArrayList<File>();
@@ -85,7 +110,7 @@ public class STJSMavenPlugin extends AbstractMojo {
 						getLog().error("Cannot create output directory:" + absoluteTarget.getParentFile());
 						continue;
 					}
-					generator.generateJavascript(absoluteSource, absoluteTarget);
+					generator.generateJavascript(builtProjectClassLoader, absoluteSource, absoluteTarget);
 				} catch (InclusionScanException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

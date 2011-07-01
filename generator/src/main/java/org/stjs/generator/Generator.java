@@ -82,7 +82,9 @@ public class Generator {
 
 	}
 
-	public void generateJavascript(File inputFile, File outputFile) throws Exception {
+	public void generateJavascript(ClassLoader builtProjectClassLoader, File inputFile, File outputFile)
+			throws Exception {
+		System.out.println("CLAZZ:" + builtProjectClassLoader.loadClass("org.stjs.examples.stock.JSTest"));
 		InputStream in = new FileInputStream(inputFile);
 
 		RuleBasedVisitor ruleVisitor = new RuleBasedVisitor();
