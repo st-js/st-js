@@ -13,10 +13,9 @@ import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.stmt.CatchClause;
 import japa.parser.ast.stmt.ForStmt;
 import japa.parser.ast.stmt.ForeachStmt;
-import japa.parser.ast.stmt.SwitchStmt;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.stjs.generator.SourcePosition;
@@ -31,8 +30,8 @@ import org.stjs.generator.scope.NameType.MethodName;
  * 
  */
 public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
-	private final Map<SourcePosition, QualifiedName<MethodName>> resolvedMethods = new HashMap<SourcePosition, QualifiedName<MethodName>>();
-	private final Map<SourcePosition, QualifiedName<IdentifierName>> resolvedIdentifiers = new HashMap<SourcePosition, QualifiedName<IdentifierName>>();
+	private final Map<SourcePosition, QualifiedName<MethodName>> resolvedMethods = new LinkedHashMap<SourcePosition, QualifiedName<MethodName>>();
+	private final Map<SourcePosition, QualifiedName<IdentifierName>> resolvedIdentifiers = new LinkedHashMap<SourcePosition, QualifiedName<IdentifierName>>();
 
 	private final NameScope rootScope;
 
@@ -80,7 +79,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		}
 
 		if (n.getMembers() != null) {
-			classScope = currentScope.nextChild();
+			classScope = classScope.nextChild();
 		}
 		super.visit(n, classScope);
 	}
@@ -107,20 +106,12 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 
 	@Override
 	public void visit(ForeachStmt n, NameScopeWalker currentScope) {
-		// TODO Auto-generated method stub
-		super.visit(n, currentScope);
+		super.visit(n, currentScope.nextChild());
 	}
 
 	@Override
 	public void visit(ForStmt n, NameScopeWalker currentScope) {
-		// TODO Auto-generated method stub
-		super.visit(n, currentScope);
-	}
-
-	@Override
-	public void visit(SwitchStmt n, NameScopeWalker currentScope) {
-		// TODO Auto-generated method stub
-		super.visit(n, currentScope);
+		super.visit(n, currentScope.nextChild());
 	}
 
 	/*------ method having to resolve identifiers ---------*/

@@ -5,6 +5,8 @@ import japa.parser.ast.body.Parameter;
 
 import java.util.Iterator;
 
+import org.stjs.generator.GenerationContext;
+
 public class MethodDeclarationHandler extends DefaultHandler {
 	private final boolean anonymous;
 
@@ -14,7 +16,7 @@ public class MethodDeclarationHandler extends DefaultHandler {
 	}
 
 	@Override
-	public void visit(MethodDeclaration n, Object arg) {
+	public void visit(MethodDeclaration n, GenerationContext arg) {
 		getPrinter().print(" ");
 		if (anonymous) {
 			getPrinter().print("function");
@@ -34,7 +36,7 @@ public class MethodDeclarationHandler extends DefaultHandler {
 			}
 		}
 		getPrinter().print(")");
-		//skip  throws
+		// skip throws
 		if (n.getBody() == null) {
 			getPrinter().print(";");
 		} else {
@@ -44,7 +46,7 @@ public class MethodDeclarationHandler extends DefaultHandler {
 	}
 
 	@Override
-	public void visit(Parameter n, Object arg) {
+	public void visit(Parameter n, GenerationContext arg) {
 		n.getType().accept(getRuleVisitor(), arg);
 		n.getId().accept(getRuleVisitor(), arg);
 	}

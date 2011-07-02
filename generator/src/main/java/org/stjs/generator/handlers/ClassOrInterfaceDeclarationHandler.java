@@ -5,13 +5,15 @@ import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 
 import java.util.List;
 
+import org.stjs.generator.GenerationContext;
+
 public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 
 	public ClassOrInterfaceDeclarationHandler(RuleBasedVisitor ruleVisitor) {
 		super(ruleVisitor);
 	}
 
-	private void printMembers(List<BodyDeclaration> members, Object arg) {
+	private void printMembers(List<BodyDeclaration> members, GenerationContext arg) {
 		for (int i = 0; i < members.size(); ++i) {
 			BodyDeclaration member = members.get(i);
 			getPrinter().printLn();
@@ -24,7 +26,7 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 	}
 
 	@Override
-	public void visit(ClassOrInterfaceDeclaration n, Object arg) {
+	public void visit(ClassOrInterfaceDeclaration n, GenerationContext arg) {
 
 		getPrinter().print(n.getName());
 

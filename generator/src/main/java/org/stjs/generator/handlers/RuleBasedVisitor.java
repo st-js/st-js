@@ -91,13 +91,11 @@ import java.util.Map;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.XMLWriter;
+import org.stjs.generator.GenerationContext;
 import org.stjs.generator.MatchingRule;
 import org.stjs.generator.NodeHandlerWithPriority;
 
-
-public class RuleBasedVisitor extends DumpVisitor {
+public class RuleBasedVisitor extends DumpVisitor<GenerationContext> {
 	private final Map<Node, NodeHandlerWithPriority> nodeHandlers = new IdentityHashMap<Node, NodeHandlerWithPriority>();
 
 	private final List<MatchingRule> rules = new ArrayList<MatchingRule>();
@@ -106,38 +104,40 @@ public class RuleBasedVisitor extends DumpVisitor {
 		rules.add(rule);
 	}
 
-	public void generate(CompilationUnit cu) throws IOException {
-		//create the DOM
+	public void generate(CompilationUnit cu, GenerationContext context) throws IOException {
+		// create the DOM
 		Document dom = DocumentHelper.createDocument();
 		Element root = dom.addElement("root");
 
 		new XmlVisitor().visit(cu, root);
 
-		//print
+		// print
 		// Pretty print the document to System.out
-		OutputFormat format = OutputFormat.createPrettyPrint();
-		XMLWriter writer = new XMLWriter(System.out, format);
-		writer.write(dom);
+		// OutputFormat format = OutputFormat.createPrettyPrint();
+		// XMLWriter writer = new XMLWriter(System.out, format);
+		// writer.write(dom);
 
-		//chose the rule for each node
+		// chose the rule for each node
 		for (MatchingRule rule : rules) {
 			@SuppressWarnings("unchecked")
 			List<Element> nodes = dom.selectNodes(rule.getRule());
 			for (Element node : nodes) {
 				NodeHandlerWithPriority nh = nodeHandlers.get(node.getData());
 				if ((nh == null) || (nh.getPriority() < rule.getHandler().getPriority())) {
-					System.out.println("Rule:" + rule.getName() + " node:" + node.getData());
+					// System.out.println("Rule:" + rule.getName() + " node:" + node.getData());
 					nodeHandlers.put((Node) node.getData(), rule.getHandler());
 				}
 			}
 		}
 
-		//visit all the nodes now
-		visit(cu, null);
+		// visit all the nodes now
+		visit(cu, context);
 	}
 
-	protected VoidVisitor<Object> getVisitor(Node node, Object arg) {
-		if (Boolean.FALSE.equals(arg)) {//TODO find a better way
+	protected VoidVisitor<GenerationContext> getVisitor(Node node, GenerationContext context) {
+		if (context.isSkipHandlers()) {// TODO find a better way
+			// next call should check
+			context.checkHandlers();
 			return null;
 		}
 		NodeHandlerWithPriority nh = nodeHandlers.get(node);
@@ -148,792 +148,792 @@ public class RuleBasedVisitor extends DumpVisitor {
 	}
 
 	@Override
-	public void visit(CompilationUnit n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(CompilationUnit n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(PackageDeclaration n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(PackageDeclaration n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ImportDeclaration n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ImportDeclaration n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(TypeParameter n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(TypeParameter n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(LineComment n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(LineComment n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(BlockComment n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(BlockComment n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ClassOrInterfaceDeclaration n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ClassOrInterfaceDeclaration n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(EnumDeclaration n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(EnumDeclaration n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(EmptyTypeDeclaration n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(EmptyTypeDeclaration n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(EnumConstantDeclaration n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(EnumConstantDeclaration n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(AnnotationDeclaration n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(AnnotationDeclaration n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(AnnotationMemberDeclaration n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(AnnotationMemberDeclaration n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(FieldDeclaration n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(FieldDeclaration n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(VariableDeclarator n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(VariableDeclarator n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(VariableDeclaratorId n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(VariableDeclaratorId n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ConstructorDeclaration n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ConstructorDeclaration n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(MethodDeclaration n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(MethodDeclaration n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(Parameter n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(Parameter n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(EmptyMemberDeclaration n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(EmptyMemberDeclaration n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(InitializerDeclaration n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(InitializerDeclaration n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(JavadocComment n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(JavadocComment n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ClassOrInterfaceType n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ClassOrInterfaceType n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(PrimitiveType n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(PrimitiveType n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ReferenceType n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ReferenceType n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(VoidType n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(VoidType n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(WildcardType n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(WildcardType n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ArrayAccessExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ArrayAccessExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ArrayCreationExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ArrayCreationExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ArrayInitializerExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ArrayInitializerExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(AssignExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(AssignExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(BinaryExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(BinaryExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(CastExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(CastExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ClassExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ClassExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ConditionalExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ConditionalExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(EnclosedExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(EnclosedExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(FieldAccessExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(FieldAccessExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(InstanceOfExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(InstanceOfExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(StringLiteralExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(StringLiteralExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(IntegerLiteralExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(IntegerLiteralExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(LongLiteralExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(LongLiteralExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(IntegerLiteralMinValueExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(IntegerLiteralMinValueExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(LongLiteralMinValueExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(LongLiteralMinValueExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(CharLiteralExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(CharLiteralExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(DoubleLiteralExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(DoubleLiteralExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(BooleanLiteralExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(BooleanLiteralExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(NullLiteralExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(NullLiteralExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(MethodCallExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(MethodCallExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(NameExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(NameExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ObjectCreationExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ObjectCreationExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(QualifiedNameExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(QualifiedNameExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ThisExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ThisExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(SuperExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(SuperExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(UnaryExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(UnaryExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(VariableDeclarationExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(VariableDeclarationExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(MarkerAnnotationExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(MarkerAnnotationExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(SingleMemberAnnotationExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(SingleMemberAnnotationExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(NormalAnnotationExpr n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(NormalAnnotationExpr n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(MemberValuePair n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(MemberValuePair n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ExplicitConstructorInvocationStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ExplicitConstructorInvocationStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(TypeDeclarationStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(TypeDeclarationStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(AssertStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(AssertStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(BlockStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(BlockStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(LabeledStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(LabeledStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(EmptyStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(EmptyStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ExpressionStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ExpressionStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(SwitchStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(SwitchStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(SwitchEntryStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(SwitchEntryStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(BreakStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(BreakStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ReturnStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ReturnStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(IfStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(IfStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(WhileStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(WhileStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ContinueStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ContinueStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(DoStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(DoStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ForeachStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ForeachStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ForStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ForStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(ThrowStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(ThrowStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(SynchronizedStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(SynchronizedStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(TryStmt n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(TryStmt n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 
 	@Override
-	public void visit(CatchClause n, Object arg) {
-		VoidVisitor<Object> visitor = getVisitor(n, arg);
+	public void visit(CatchClause n, GenerationContext context) {
+		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
 		if (visitor != null) {
-			visitor.visit(n, Boolean.TRUE);
+			visitor.visit(n, context);
 		} else {
-			super.visit(n, Boolean.TRUE);
+			super.visit(n, context);
 		}
 	}
 

@@ -4,6 +4,8 @@ import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.expr.ObjectCreationExpr;
 
+import org.stjs.generator.GenerationContext;
+
 public class InlineFunctionHandler extends DefaultHandler {
 	public InlineFunctionHandler(RuleBasedVisitor ruleVisitor) {
 		super(ruleVisitor);
@@ -19,14 +21,14 @@ public class InlineFunctionHandler extends DefaultHandler {
 	}
 
 	@Override
-	public void visit(ObjectCreationExpr n, Object arg) {
+	public void visit(ObjectCreationExpr n, GenerationContext arg) {
 		MethodDeclaration method = getMethodDeclaration(n);
 		if (method == null) {
-			//TODO error here
+			// TODO error here
 			return;
 		}
 		method.accept(getRuleVisitor(), arg);
-		//getRuleVisitor().visit(, Boolean.TRUE);
+		// getRuleVisitor().visit(, Boolean.TRUE);
 	}
 
 }

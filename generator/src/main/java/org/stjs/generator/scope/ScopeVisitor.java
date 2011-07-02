@@ -11,16 +11,15 @@ import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.body.ModifierSet;
 import japa.parser.ast.body.Parameter;
 import japa.parser.ast.body.VariableDeclarator;
-import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.ObjectCreationExpr;
 import japa.parser.ast.expr.VariableDeclarationExpr;
 import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.stmt.CatchClause;
 import japa.parser.ast.stmt.ForStmt;
 import japa.parser.ast.stmt.ForeachStmt;
-import japa.parser.ast.stmt.SwitchStmt;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
 
+import java.io.File;
 import java.util.List;
 
 import org.stjs.generator.handlers.utils.PreConditions;
@@ -33,10 +32,22 @@ import org.stjs.generator.handlers.utils.PreConditions;
  */
 public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 
+	private final File inputFile;
+	/**
+	 * this is the class loader where the class corresponding to the parsed source is defined
+	 */
+	private final ClassLoader classLoader;
+
+	public ScopeVisitor(File inputFile, ClassLoader classLoader) {
+		super();
+		this.classLoader = classLoader;
+		this.inputFile = inputFile;
+	}
+
 	@Override
 	public void visit(CompilationUnit n, NameScope currentScope) {
 		ImportScope scope = new ImportScope(currentScope, n.getPackage() != null ? n.getPackage().getName().getName()
-				: null);
+				: null, classLoader);
 		if (n.getImports() != null) {
 			for (ImportDeclaration importDecl : n.getImports()) {
 				scope.addImport(importDecl.getName().getName(), importDecl.isStatic(), importDecl.isAsterisk());
@@ -59,6 +70,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 				varScope.addVariable(var.getId().getName());
 			}
 		}
+
 		super.visit(n, currentScope);
 	}
 
@@ -82,11 +94,13 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 	public void visit(ClassOrInterfaceDeclaration n, NameScope currentScope) {
 		NameScope classScope = currentScope;
 		if (n.getExtends() != null && n.getExtends().size() > 0 && !n.isInterface()) {
-			classScope = new ParentTypeScope(classScope, n.getExtends().get(0).getName());
+			String parentClassName = n.getExtends().get(0).getName();
+
+			classScope = new ParentTypeScope(classScope, parentClassName);
 		}
 
 		if (n.getMembers() != null) {
-			classScope = visitTypeDeclaration("type-" + n.getName(), n.getMembers(), currentScope);
+			classScope = visitTypeDeclaration("type-" + n.getName(), n.getMembers(), classScope);
 		}
 		super.visit(n, classScope);
 	}
@@ -141,27 +155,13 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 	}
 
 	@Override
-	public void visit(ForeachStmt n, NameScope arg) {
-		// TODO Auto-generated method stub
-		super.visit(n, arg);
+	public void visit(ForeachStmt n, NameScope currentScope) {
+		super.visit(n, new VariableScope("foreach-" + n.getBeginLine(), currentScope));
 	}
 
 	@Override
-	public void visit(ForStmt n, NameScope arg) {
-		// TODO Auto-generated method stub
-		super.visit(n, arg);
-	}
-
-	@Override
-	public void visit(MethodCallExpr n, NameScope arg) {
-		// here identify call
-		super.visit(n, arg);
-	}
-
-	@Override
-	public void visit(SwitchStmt n, NameScope arg) {
-		// TODO Auto-generated method stub
-		super.visit(n, arg);
+	public void visit(ForStmt n, NameScope currentScope) {
+		super.visit(n, new VariableScope("for-" + n.getBeginLine(), currentScope));
 	}
 
 }

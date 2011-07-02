@@ -8,6 +8,7 @@ public class Bean1 {
 	}
 
 	public static int stat;
+	public static int parentPrivate;
 
 	public static int stat() {
 		return 2;

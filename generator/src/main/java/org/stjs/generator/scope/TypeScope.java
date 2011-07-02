@@ -18,7 +18,7 @@ import org.stjs.generator.scope.NameType.MethodName;
  */
 public class TypeScope extends NameScope {
 
-	private static final String THIS_SCOPE = "this";
+	public static final String THIS_SCOPE = "this";
 
 	private static final String OUTER_SCOPE = "outer";
 

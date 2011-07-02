@@ -1,9 +1,10 @@
 package test;
 
+import static test.Bean1.parentPrivate;
 import static test.Bean1.stat;
 
 @SuppressWarnings("unused")
-public class Declaration1 {
+public class Declaration1 extends ParentDeclaration1 {
 	int param = 1;
 	int var = 2;
 	int type = 3;
@@ -23,7 +24,17 @@ public class Declaration1 {
 				int exp3 = type + 1;
 				int exp4 = this.type + 1;
 				int exp5 = out + Declaration1.this.type + 1;
+				int exp6 = parentPrivate + parentProtected + parentPackage + parentPublic;
 			}
 		};
+	}
+
+	public void y() {
+		for (int i = 0; i < 10; ++i) {
+		}
+
+		for (int i : new int[] { 1, 2 }) {
+		}
+
 	}
 }

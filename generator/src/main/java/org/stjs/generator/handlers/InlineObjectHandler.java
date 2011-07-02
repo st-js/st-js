@@ -8,6 +8,8 @@ import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.stmt.ExpressionStmt;
 import japa.parser.ast.stmt.Statement;
 
+import org.stjs.generator.GenerationContext;
+
 public class InlineObjectHandler extends DefaultHandler {
 	public InlineObjectHandler(RuleBasedVisitor ruleVisitor) {
 		super(ruleVisitor);
@@ -23,18 +25,17 @@ public class InlineObjectHandler extends DefaultHandler {
 	}
 
 	@Override
-	public void visit(ObjectCreationExpr n, Object arg) {
+	public void visit(ObjectCreationExpr n, GenerationContext arg) {
 		InitializerDeclaration block = getInitializerDeclaration(n);
 		if (block == null) {
-			//TODO error here
+			// TODO error here
 			return;
 		}
 		block.accept(getRuleVisitor(), arg);
-		//getRuleVisitor().visit(, Boolean.TRUE);
 	}
 
 	@Override
-	public void visit(BlockStmt n, Object arg) {
+	public void visit(BlockStmt n, GenerationContext arg) {
 		getPrinter().printLn("{");
 		if (n.getStmts() != null) {
 			getPrinter().indent();
@@ -52,21 +53,21 @@ public class InlineObjectHandler extends DefaultHandler {
 	}
 
 	@Override
-	public void visit(ExpressionStmt n, Object arg) {
+	public void visit(ExpressionStmt n, GenerationContext arg) {
 		n.getExpression().accept(getRuleVisitor(), arg);
 	}
 
 	@Override
-	public void visit(AssignExpr n, Object arg) {
+	public void visit(AssignExpr n, GenerationContext arg) {
 		n.getTarget().accept(getRuleVisitor(), arg);
 		getPrinter().print(" ");
 		switch (n.getOperator()) {
-			case assign:
-				getPrinter().print(":");
-				break;
-			default:
-				//TODO - what here!?
-				break;
+		case assign:
+			getPrinter().print(":");
+			break;
+		default:
+			// TODO - what here!?
+			break;
 		}
 		getPrinter().print(" ");
 		n.getValue().accept(getRuleVisitor(), arg);

@@ -28,6 +28,7 @@ public class Transaction {
 	public Map<String, Double> rates;
 
 	public void init() {
+		autoComment = "go";
 		$(".datePicker").datepicker(new DatePickerOptions() {
 			{
 				dateFormat = "dd.mm.yy";
