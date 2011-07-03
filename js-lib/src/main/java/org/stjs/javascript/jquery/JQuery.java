@@ -1,12 +1,10 @@
 package org.stjs.javascript.jquery;
 
-import org.stjs.javascript.jquery.plugins.DatePickerOptions;
-import org.stjs.javascript.jquery.plugins.SliderOptions;
-
 /**
- * jquery intreface for all jquery method + all used plugins in a web app. it can be mocked easily for testing purposes
+ * jquery interface for all jquery method + all used plugins in a web app. it can be mocked easily for testing purposes.
+ * Compatible with jquery 1.6
  */
-public interface JQuery {
+public interface JQuery<FullJQuery extends JQuery<?>> {
 	public void change(ChangeListener changeListener);
 
 	public void val(Object d);
@@ -17,18 +15,19 @@ public interface JQuery {
 
 	public void attr(String name, String value);
 
+	public String attr(String attrName);
+
 	public String val();
 
 	public void hide();
 
 	public void trigger(String string);
 
-	public void datepicker(DatePickerOptions options);
-
 	public boolean hasClass(String css);
 
 	public void submit();
 
+	/************* events ***************/
 	public void click(ClickListener clickListener);
 
 	public void focus(FocusListener focusListener);
@@ -39,13 +38,15 @@ public interface JQuery {
 
 	public void removeClass(String string);
 
-	public void slider(String string, String string2, double p);
-
-	public String slider(String string, String string2);
-
 	public void text(Object txt);
 
-	public void slider(SliderOptions sliderOptions);
+	public FullJQuery appendTo(String target);
 
-	public String attr(String attrName);
+	public FullJQuery parent(String selector);
+
+	public FullJQuery parents(String selector);
+
+	public void remove();
+
+	public FullJQuery find(String selector);
 }

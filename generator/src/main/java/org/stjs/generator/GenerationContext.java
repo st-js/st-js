@@ -1,5 +1,7 @@
 package org.stjs.generator;
 
+import java.io.File;
+import java.util.Collections;
 import java.util.Map;
 
 import org.stjs.generator.scope.NameType.IdentifierName;
@@ -19,10 +21,18 @@ public class GenerationContext {
 
 	private boolean skipHandlers = false;
 
-	public GenerationContext(Map<SourcePosition, QualifiedName<MethodName>> resolvedMethods,
+	private final File inputFile;
+
+	public GenerationContext(File inputFile, Map<SourcePosition, QualifiedName<MethodName>> resolvedMethods,
 			Map<SourcePosition, QualifiedName<IdentifierName>> resolvedIdentifiers) {
 		this.resolvedMethods = resolvedMethods;
 		this.resolvedIdentifiers = resolvedIdentifiers;
+		this.inputFile = inputFile;
+	}
+
+	public GenerationContext(File inputFile) {
+		this(inputFile, Collections.<SourcePosition, QualifiedName<MethodName>> emptyMap(), Collections
+				.<SourcePosition, QualifiedName<IdentifierName>> emptyMap());
 	}
 
 	public QualifiedName<MethodName> resolveMethod(SourcePosition pos) {
@@ -45,6 +55,10 @@ public class GenerationContext {
 
 	public boolean isSkipHandlers() {
 		return skipHandlers;
+	}
+
+	public File getInputFile() {
+		return inputFile;
 	}
 
 }

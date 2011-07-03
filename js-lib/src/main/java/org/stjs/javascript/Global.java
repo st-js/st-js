@@ -1,25 +1,25 @@
 package org.stjs.javascript;
 
-import org.stjs.javascript.jquery.GlobalJquery;
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.GlobalJQuery;
+import org.stjs.javascript.jquery.JQueryAndPlugins;
 
 public class Global {
-	public static GlobalJquery $;
+	public static GlobalJQuery $;
 
 	/**
 	 * jquery constructors
 	 */
-	public static JQuery $(String path) {
+	public static JQueryAndPlugins $(String path) {
 		// return new JQuery(path);
 		return null;
 	}
 
-	public static JQuery $(Object path) {
+	public static JQueryAndPlugins $(Object path) {
 		// return new JQuery(path);
 		return null;
 	}
 
-	public static Object eval(String expr) {
+	public static <T> T eval(String expr) {
 		return null;
 	}
 

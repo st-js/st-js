@@ -22,6 +22,8 @@ import japa.parser.ast.visitor.VoidVisitorAdapter;
 import java.io.File;
 import java.util.List;
 
+import org.stjs.generator.JavascriptKeywords;
+import org.stjs.generator.SourcePosition;
 import org.stjs.generator.handlers.utils.PreConditions;
 
 /**
@@ -46,8 +48,8 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 
 	@Override
 	public void visit(CompilationUnit n, NameScope currentScope) {
-		ImportScope scope = new ImportScope(currentScope, n.getPackage() != null ? n.getPackage().getName().getName()
-				: null, classLoader);
+		ImportScope scope = new ImportScope(inputFile, currentScope, n.getPackage() != null ? n.getPackage().getName()
+				.getName() : null, classLoader);
 		if (n.getImports() != null) {
 			for (ImportDeclaration importDecl : n.getImports()) {
 				scope.addImport(importDecl.getName().getName(), importDecl.isStatic(), importDecl.isAsterisk());
@@ -58,7 +60,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 
 	@Override
 	public void visit(BlockStmt n, NameScope currentScope) {
-		super.visit(n, new VariableScope("block-" + n.getBeginLine(), currentScope));
+		super.visit(n, new VariableScope(inputFile, "block-" + n.getBeginLine(), currentScope));
 	}
 
 	@Override
@@ -67,6 +69,8 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 		if (n.getVars() != null) {
 			VariableScope varScope = (VariableScope) currentScope;
 			for (VariableDeclarator var : n.getVars()) {
+				JavascriptKeywords.checkIdentifier(inputFile,
+						new SourcePosition(var.getBeginLine(), var.getBeginColumn()), var.getId().getName());
 				varScope.addVariable(var.getId().getName());
 			}
 		}
@@ -76,14 +80,19 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 
 	@Override
 	public void visit(CatchClause n, NameScope currentScope) {
-		super.visit(n, new ParameterScope("catch-" + n.getBeginLine(), currentScope, n.getExcept().getId().getName()));
+		JavascriptKeywords.checkIdentifier(inputFile, new SourcePosition(n.getBeginLine(), n.getBeginColumn()), n
+				.getExcept().getId().getName());
+		super.visit(n, new ParameterScope(inputFile, "catch-" + n.getBeginLine(), currentScope, n.getExcept().getId()
+				.getName()));
 	}
 
 	@Override
 	public void visit(MethodDeclaration n, NameScope currentScope) {
-		ParameterScope scope = new ParameterScope("param-" + n.getBeginLine(), currentScope);
+		ParameterScope scope = new ParameterScope(inputFile, "param-" + n.getBeginLine(), currentScope);
 		if (n.getParameters() != null) {
 			for (Parameter p : n.getParameters()) {
+				JavascriptKeywords.checkIdentifier(inputFile, new SourcePosition(p.getBeginLine(), p.getBeginColumn()),
+						p.getId().getName());
 				scope.addParameter(p.getId().getName());
 			}
 		}
@@ -96,7 +105,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 		if (n.getExtends() != null && n.getExtends().size() > 0 && !n.isInterface()) {
 			String parentClassName = n.getExtends().get(0).getName();
 
-			classScope = new ParentTypeScope(classScope, parentClassName);
+			classScope = new ParentTypeScope(inputFile, classScope, parentClassName);
 		}
 
 		if (n.getMembers() != null) {
@@ -106,11 +115,13 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 	}
 
 	private NameScope visitTypeDeclaration(String name, List<BodyDeclaration> declarations, NameScope currentScope) {
-		TypeScope typeScope = new TypeScope(name, currentScope);
+		TypeScope typeScope = new TypeScope(inputFile, name, currentScope);
 		for (BodyDeclaration member : declarations) {
 			if (member instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) member;
 				for (VariableDeclarator var : field.getVariables()) {
+					JavascriptKeywords.checkIdentifier(inputFile,
+							new SourcePosition(var.getBeginLine(), var.getBeginColumn()), var.getId().getName());
 					if (ModifierSet.isStatic(field.getModifiers())) {
 						typeScope.addStaticField(var.getId().getName());
 					} else {
@@ -119,6 +130,8 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 				}
 			} else if (member instanceof MethodDeclaration) {
 				MethodDeclaration method = (MethodDeclaration) member;
+				JavascriptKeywords.checkMethod(inputFile,
+						new SourcePosition(method.getBeginLine(), method.getBeginColumn()), method.getName());
 				if (ModifierSet.isStatic(method.getModifiers())) {
 					typeScope.addStaticMethod(method.getName());
 				} else {
@@ -141,7 +154,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 
 	@Override
 	public void visit(ConstructorDeclaration n, NameScope currentScope) {
-		ParameterScope paramScope = new ParameterScope("constructor-" + n.getBeginLine(), currentScope);
+		ParameterScope paramScope = new ParameterScope(inputFile, "constructor-" + n.getBeginLine(), currentScope);
 		for (Parameter p : n.getParameters()) {
 			paramScope.addParameter(p.getId().getName());
 		}
@@ -156,12 +169,12 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 
 	@Override
 	public void visit(ForeachStmt n, NameScope currentScope) {
-		super.visit(n, new VariableScope("foreach-" + n.getBeginLine(), currentScope));
+		super.visit(n, new VariableScope(inputFile, "foreach-" + n.getBeginLine(), currentScope));
 	}
 
 	@Override
 	public void visit(ForStmt n, NameScope currentScope) {
-		super.visit(n, new VariableScope("for-" + n.getBeginLine(), currentScope));
+		super.visit(n, new VariableScope(inputFile, "for-" + n.getBeginLine(), currentScope));
 	}
 
 }

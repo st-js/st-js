@@ -1,5 +1,8 @@
 package org.stjs.generator.scope;
 
+import java.io.File;
+
+import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
 
@@ -11,18 +14,18 @@ import org.stjs.generator.scope.NameType.MethodName;
  */
 public class FullyQualifiedScope extends NameScope {
 
-	public FullyQualifiedScope() {
-		super("root", null);
+	public FullyQualifiedScope(File inputFile) {
+		super(inputFile, "root", null);
 	}
 
 	@Override
-	protected QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope) {
+	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	protected QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
 		// TODO Auto-generated method stub
 		return null;
 	}

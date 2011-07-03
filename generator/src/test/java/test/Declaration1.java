@@ -6,15 +6,15 @@ import static test.Bean1.stat;
 @SuppressWarnings("unused")
 public class Declaration1 extends ParentDeclaration1 {
 	int param = 1;
-	int var = 2;
+	int var2 = 2;
 	int type = 3;
 	int out = 4;
 	int imp = 5;
 	int stat2 = 6;
 
 	public void x(int param) {
-		int var = 11;
-		int exp1 = param + var + type + out + imp + stat + stat2;
+		int var2 = 11;
+		int exp1 = param + var2 + type + out + imp + stat + stat2;
 		int exp2 = Bean1.stat;
 		new Runnable() {
 			int type = 1;

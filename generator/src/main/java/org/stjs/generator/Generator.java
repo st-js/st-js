@@ -43,6 +43,8 @@ public class Generator {
 
 		ruleVisitor.addRule(rule("VariableDeclaration", "//VariableDeclaratorId", 100, new VariableDeclarationHandler(
 				ruleVisitor)));
+		ruleVisitor.addRule(rule("VariableDeclaration", "//VariableDeclarationExpr", 100,
+				new VariableDeclarationHandler(ruleVisitor)));
 
 		ruleVisitor.addRule(rule("Variable Type", "//VariableDeclarationExpr/ReferenceType/ClassOrInterfaceType", 100,
 				new VariableTypeHandler(ruleVisitor)));
@@ -50,6 +52,7 @@ public class Generator {
 				new VariableTypeHandler(ruleVisitor)));
 
 		ruleVisitor.addRule(rule("Annotations", "//MarkerAnnotationExpr", 100, new SkipHandler(ruleVisitor)));
+		ruleVisitor.addRule(rule("Cast expressions", "//CastExpr", 100, new SkipHandler(ruleVisitor)));
 
 		ruleVisitor
 				.addRule(rule("Method", "//MethodDeclaration", 100, new MethodDeclarationHandler(ruleVisitor, false)));
@@ -101,7 +104,7 @@ public class Generator {
 		try {
 			in = new FileInputStream(inputFile);
 		} catch (FileNotFoundException e) {
-			throw new JavascriptGenerationException(inputFile, e);
+			throw new JavascriptGenerationException(inputFile, null, e);
 		}
 
 		RuleBasedVisitor ruleVisitor = new RuleBasedVisitor();
@@ -115,14 +118,14 @@ public class Generator {
 
 			// resolve first the fields and the methods
 			ScopeVisitor scopes = new ScopeVisitor(inputFile, Thread.currentThread().getContextClassLoader());
-			NameScope rootScope = new FullyQualifiedScope();
+			NameScope rootScope = new FullyQualifiedScope(inputFile);
 			scopes.visit(cu, rootScope);
 			NameResolverVisitor resolver = new NameResolverVisitor(rootScope);
 			resolver.visit(cu, new NameScopeWalker(rootScope));
 
 			System.out.println("----------------------------");
 			ruleVisitor.generate(cu,
-					new GenerationContext(resolver.getResolvedMethods(), resolver.getResolvedIdentifiers()));
+					new GenerationContext(inputFile, resolver.getResolvedMethods(), resolver.getResolvedIdentifiers()));
 
 			System.out.println("----------------------------");
 			FileWriter writer = new FileWriter(outputFile);
@@ -130,9 +133,9 @@ public class Generator {
 			writer.flush();
 			writer.close();
 		} catch (ParseException e) {
-			throw new JavascriptGenerationException(inputFile, e);
+			throw new JavascriptGenerationException(inputFile, null, e);
 		} catch (IOException e) {
-			throw new JavascriptGenerationException(inputFile, e);
+			throw new JavascriptGenerationException(inputFile, null, e);
 		} finally {
 			try {
 				in.close();

@@ -13,23 +13,44 @@ public class JavascriptGenerationException extends RuntimeException {
 
 	private final File inputFile;
 
-	public JavascriptGenerationException(File inputFile, String message, Throwable cause) {
+	private final SourcePosition sourcePosition;
+
+	public JavascriptGenerationException(File inputFile, SourcePosition sourcePosition, String message, Throwable cause) {
 		super(message, cause);
 		this.inputFile = inputFile;
+		this.sourcePosition = sourcePosition;
 	}
 
-	public JavascriptGenerationException(File inputFile, String message) {
+	public JavascriptGenerationException(File inputFile, SourcePosition sourcePosition, String message) {
 		super(message);
 		this.inputFile = inputFile;
+		this.sourcePosition = sourcePosition;
 	}
 
-	public JavascriptGenerationException(File inputFile, Throwable cause) {
+	public JavascriptGenerationException(File inputFile, SourcePosition sourcePosition, Throwable cause) {
 		super(cause);
 		this.inputFile = inputFile;
+		this.sourcePosition = sourcePosition;
 	}
 
 	public File getInputFile() {
 		return inputFile;
 	}
 
+	public SourcePosition getSourcePosition() {
+		return sourcePosition;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(super.toString());
+		sb.append("(").append(inputFile);
+		if (sourcePosition != null) {
+			sb.append(":").append(sourcePosition.getLine());
+		}
+		sb.append(")");
+
+		return sb.toString();
+	}
 }

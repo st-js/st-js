@@ -1,15 +1,11 @@
 <html>
 <head>
-<script src="${pageContext.request.contextPath}/js/jquery.js" language="javascript"></script>
-<script src="${pageContext.request.contextPath}/generated-js/org/stjs/examples/stock/JSTest.js" language="javascript"></script>
 
-<script language="javascript">
-onload=function(){
-	JSTest.hello();
-}
-</script>
 </head>
 <body>
-Good morning
+<h1>Stronlgy-typed Javascript - Examples</h1>
+<ul>
+<li><a href="stock/index.jsp">Stocks</a></li>
+</ul>
 </body>
 </html>

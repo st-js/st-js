@@ -1,10 +1,12 @@
 package org.stjs.generator.scope;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
 
@@ -18,12 +20,12 @@ public class ParentTypeScope extends NameScope {
 	private Class<?> parentClass;
 	private final String parentClassName;
 
-	public ParentTypeScope(NameScope parent, String parentClassName) {
-		super("parent-" + parentClassName, parent);
+	public ParentTypeScope(File inputFile, NameScope parent, String parentClassName) {
+		super(inputFile, "parent-" + parentClassName, parent);
 		this.parentClassName = parentClassName;
 	}
 
-	private ImportScope getImportScope() {
+	private ImportScope getImportScope(SourcePosition pos) {
 		NameScope s = getParent();
 		while (s != null) {
 			if (s instanceof ImportScope) {
@@ -31,20 +33,21 @@ public class ParentTypeScope extends NameScope {
 			}
 			s = s.getParent();
 		}
-		throw new JavascriptGenerationException(null, "No import scope found in the hierarchy of parent scope");
+		throw new JavascriptGenerationException(getInputFile(), pos,
+				"No import scope found in the hierarchy of parent scope");
 	}
 
 	@Override
-	protected QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope) {
+	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
 		if (parentClass == null) {
-			parentClass = getImportScope().resolveClass(parentClassName);
+			parentClass = getImportScope(pos).resolveClass(pos, parentClassName);
 		}
 		Method method = getAccesibleMethod(parentClass, name);
 		if (method != null) {
 			return new QualifiedName<NameType.MethodName>(TypeScope.THIS_SCOPE, name, this);
 		}
 		if (getParent() != null) {
-			return getParent().resolveMethod(name, currentScope);
+			return getParent().resolveMethod(pos, name, currentScope);
 		}
 		return null;
 	}
@@ -70,16 +73,16 @@ public class ParentTypeScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
 		if (parentClass == null) {
-			parentClass = getImportScope().resolveClass(parentClassName);
+			parentClass = getImportScope(pos).resolveClass(pos, parentClassName);
 		}
 		Field method = getAccesibleField(parentClass, name);
 		if (method != null) {
 			return new QualifiedName<NameType.IdentifierName>(TypeScope.THIS_SCOPE, name, this);
 		}
 		if (getParent() != null) {
-			return getParent().resolveIdentifier(name, currentScope);
+			return getParent().resolveIdentifier(pos, name, currentScope);
 		}
 		return null;
 	}

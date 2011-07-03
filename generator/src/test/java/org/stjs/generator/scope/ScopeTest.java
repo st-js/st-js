@@ -37,7 +37,7 @@ public class ScopeTest {
 		// parse the file
 		cu = JavaParser.parse(Thread.currentThread().getContextClassLoader().getResourceAsStream(clazz));
 		ScopeVisitor scopes = new ScopeVisitor(new File(clazz), Thread.currentThread().getContextClassLoader());
-		NameScope rootScope = new FullyQualifiedScope();
+		NameScope rootScope = new FullyQualifiedScope(new File(clazz));
 		scopes.visit(cu, rootScope);
 		// rootScope.dump("");
 
@@ -60,14 +60,14 @@ public class ScopeTest {
 	@Test
 	public void testScopeVariable() throws ParseException, IOException {
 		NameResolverVisitor resolver = getNameResolver("test/Declaration1.java");
-		assertScope(resolver).line(17).column(28, 2).assertName("var")
+		assertScope(resolver).line(17).column(28, 2).assertName("var2")
 				.assertScopePath("root.import.parent-ParentDeclaration1.type-Declaration1.param-15.block-15");
 	}
 
 	@Test
 	public void testScopeType() throws ParseException, IOException {
 		NameResolverVisitor resolver = getNameResolver("test/Declaration1.java");
-		assertScope(resolver).line(17).column(34, 2).assertName("type")
+		assertScope(resolver).line(17).column(35, 2).assertName("type")
 				.assertScopePath("root.import.parent-ParentDeclaration1.type-Declaration1");
 	}
 
@@ -103,7 +103,7 @@ public class ScopeTest {
 	@Test
 	public void testScopeImport() throws ParseException, IOException {
 		NameResolverVisitor resolver = getNameResolver("test/Declaration1.java");
-		assertScope(resolver).line(17).column(53, 2).assertName("stat").assertScopePath("root.import");
+		assertScope(resolver).line(17).column(54, 2).assertName("stat").assertScopePath("root.import");
 	}
 
 	// TODO the same for methods with Declaration2

@@ -3,9 +3,11 @@ package org.stjs.generator.scope;
 import static org.stjs.generator.handlers.utils.Sets.transform;
 import static org.stjs.generator.handlers.utils.Sets.union;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.stjs.generator.SourcePosition;
 import org.stjs.generator.handlers.utils.Function;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
@@ -29,8 +31,8 @@ public class TypeScope extends NameScope {
 	private final Set<String> instanceFields = new HashSet<String>();
 	private final Set<String> instanceMethods = new HashSet<String>();
 
-	public TypeScope(String name, NameScope parent) {
-		super(name, parent);
+	public TypeScope(File inputFile, String name, NameScope parent) {
+		super(inputFile, name, parent);
 	}
 
 	private boolean isInCurrentTypeScope(NameScope scope) {
@@ -50,7 +52,7 @@ public class TypeScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope) {
+	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
 		if (instanceMethods.contains(name)) {
 			if (isInCurrentTypeScope(currentScope)) {
 				return new QualifiedName<MethodName>(THIS_SCOPE, name, this);
@@ -61,13 +63,13 @@ public class TypeScope extends NameScope {
 			return new QualifiedName<MethodName>(STATIC_SCOPE, name, this);
 		}
 		if (getParent() != null) {
-			return getParent().resolveMethod(name, currentScope);
+			return getParent().resolveMethod(pos, name, currentScope);
 		}
 		return null;
 	}
 
 	@Override
-	protected QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
 		if (instanceFields.contains(name)) {
 			if (isInCurrentTypeScope(currentScope)) {
 				return new QualifiedName<IdentifierName>(THIS_SCOPE, name, this);
@@ -78,7 +80,7 @@ public class TypeScope extends NameScope {
 			return new QualifiedName<IdentifierName>(STATIC_SCOPE, name, this);
 		}
 		if (getParent() != null) {
-			return getParent().resolveIdentifier(name, currentScope);
+			return getParent().resolveIdentifier(pos, name, currentScope);
 		}
 		return null;
 	}

@@ -8,12 +8,15 @@
 	<packaging>jar</packaging>
 	<name>Strongly-typed Javascript:Generator</name>
 
-    <parent>
+	<parent>
 		<groupId>org.stjs</groupId>
 		<artifactId>parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
-	
+
+	<properties>
+	</properties>
+
 	<repositories>
 
 		<!-- releases repository -->
@@ -31,7 +34,7 @@
 			<id>codehaus.snapshots</id>
 			<url>http://snapshots.repository.codehaus.org</url>
 		</repository>
-		
+
 		<repository>
 			<id>releases</id>
 			<url>https://javaparser.googlecode.com/svn/maven2</url>
@@ -42,14 +45,21 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
-		
 	</repositories>
 
-	<properties>
-	</properties>
 
+	<build>
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+			</testResource>
+			<testResource>
+				<directory>src/test/java</directory>
+			</testResource>
+		</testResources>
+	</build>
+	
 	<dependencies>
-
 		<dependency>
 			<groupId>com.google.code.javaparser</groupId>
 			<artifactId>javaparser</artifactId>
@@ -61,14 +71,14 @@
 			<artifactId>jaxen</artifactId>
 			<version>1.1.1</version>
 		</dependency>
-		
+
 		<dependency>
-	      <groupId>junit</groupId>
-	      <artifactId>junit</artifactId>
-	      <version>4.8.1</version>
-	      <scope>test</scope>
-	    </dependency>
-		
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.1</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 </project>

@@ -120,7 +120,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		if (n.getScope() == null) {
 			// only for methods without a scope
 			SourcePosition pos = new SourcePosition(n.getBeginLine(), n.getBeginColumn());
-			QualifiedName<MethodName> qname = currentScope.getScope().resolveMethod(n.getName());
+			QualifiedName<MethodName> qname = currentScope.getScope().resolveMethod(pos, n.getName());
 			if (qname != null) {
 				resolvedMethods.put(pos, qname);
 			}
@@ -137,7 +137,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 	@Override
 	public void visit(NameExpr n, NameScopeWalker currentScope) {
 		SourcePosition pos = new SourcePosition(n.getBeginLine(), n.getBeginColumn());
-		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(n.getName());
+		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(pos, n.getName());
 		if (qname != null) {
 			resolvedIdentifiers.put(pos, qname);
 		}

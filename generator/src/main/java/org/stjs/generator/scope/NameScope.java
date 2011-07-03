@@ -3,10 +3,12 @@ package org.stjs.generator.scope;
 import static java.util.Collections.emptySet;
 import static org.stjs.generator.handlers.utils.Sets.union;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
 
@@ -18,18 +20,20 @@ import org.stjs.generator.scope.NameType.MethodName;
  * 
  */
 abstract public class NameScope {
+	private final File inputFile;
 	private final NameScope parent;
 
 	private final List<NameScope> children = new ArrayList<NameScope>();
 
 	private final String name;
 
-	public NameScope(String name, NameScope parent) {
+	public NameScope(File inputFile, String name, NameScope parent) {
 		this.name = name;
 		this.parent = parent;
 		if (this.parent != null) {
 			this.parent.children.add(this);
 		}
+		this.inputFile = inputFile;
 	}
 
 	/**
@@ -52,12 +56,12 @@ abstract public class NameScope {
 		return name;
 	}
 
-	public QualifiedName<MethodName> resolveMethod(String name) {
-		return resolveMethod(name, this);
+	public QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name) {
+		return resolveMethod(pos, name, this);
 	}
 
-	public QualifiedName<IdentifierName> resolveIdentifier(String name) {
-		return resolveIdentifier(name, this);
+	public QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name) {
+		return resolveIdentifier(pos, name, this);
 	}
 
 	/**
@@ -66,9 +70,10 @@ abstract public class NameScope {
 	 * @param name
 	 * @return
 	 */
-	abstract protected QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope);
+	abstract protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope);
 
-	abstract protected QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope);
+	abstract protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name,
+			NameScope currentScope);
 
 	Set<QualifiedName<MethodName>> getOwnMethods() {
 		return emptySet();
@@ -98,6 +103,10 @@ abstract public class NameScope {
 
 	public List<NameScope> getChildren() {
 		return children;
+	}
+
+	public File getInputFile() {
+		return inputFile;
 	}
 
 	public void dump(String indent) {

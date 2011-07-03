@@ -2,6 +2,7 @@ package org.stjs.generator.handlers;
 
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.PackageDeclaration;
+import japa.parser.ast.expr.CastExpr;
 import japa.parser.ast.expr.MarkerAnnotationExpr;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.ReferenceType;
@@ -37,5 +38,13 @@ public class SkipHandler extends DefaultHandler {
 	@Override
 	public void visit(MarkerAnnotationExpr n, GenerationContext arg) {
 		// skip
+	}
+
+	@Override
+	public void visit(CastExpr n, GenerationContext arg) {
+		// skip to cast type - continue with the expression
+		if (n.getExpr() != null) {
+			n.getExpr().accept(getRuleVisitor(), arg);
+		}
 	}
 }

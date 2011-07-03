@@ -14,7 +14,7 @@ import test.Declaration1;
 public class GeneratorTest {
 	@Test
 	public void testGenerator() throws ParseException, IOException {
-		generate("src/test/resources/test/Declaration1.java", Declaration1.class);
+		generate("src/test/java/test/Declaration1.java", Declaration1.class);
 	}
 
 	private void generate(String sourceFile, Class<?> clazz) throws ParseException, IOException {

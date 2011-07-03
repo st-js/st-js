@@ -1,5 +1,6 @@
 package org.stjs.generator.scope;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
 
@@ -28,8 +30,8 @@ public class ImportScope extends NameScope {
 	private Set<String> starImports = new LinkedHashSet<String>();
 	private Set<String> staticStarImports = new LinkedHashSet<String>();
 
-	public ImportScope(NameScope parent, String currentPackage, ClassLoader classLoader) {
-		super("import", parent);
+	public ImportScope(File inputFile, NameScope parent, String currentPackage, ClassLoader classLoader) {
+		super(inputFile, "import", parent);
 		this.currentPackage = currentPackage;
 		this.classLoader = classLoader;
 	}
@@ -61,7 +63,7 @@ public class ImportScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<MethodName> resolveMethod(String name, NameScope currentScope) {
+	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
 		String imp = findImport(staticExactImports, name);
 		if (imp != null) {
 			// TODO check it's a method and not a field
@@ -82,13 +84,13 @@ public class ImportScope extends NameScope {
 		}
 
 		if (getParent() != null) {
-			return getParent().resolveMethod(name, currentScope);
+			return getParent().resolveMethod(pos, name, currentScope);
 		}
 		return null;
 	}
 
 	@Override
-	protected QualifiedName<IdentifierName> resolveIdentifier(String name, NameScope currentScope) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
 		String imp = findImport(staticExactImports, name);
 		if (imp != null) {
 			// TODO check it's a field and not a method
@@ -112,7 +114,7 @@ public class ImportScope extends NameScope {
 		// search in java.lang
 
 		if (getParent() != null) {
-			return getParent().resolveIdentifier(name, currentScope);
+			return getParent().resolveIdentifier(pos, name, currentScope);
 		}
 		return null;
 	}
@@ -128,7 +130,7 @@ public class ImportScope extends NameScope {
 	 * @param parentClassName
 	 * @return
 	 */
-	public Class<?> resolveClass(String className) {
+	public Class<?> resolveClass(SourcePosition pos, String className) {
 		Class<?> resolvedClass = resolvedClasses.get(className);
 		if (resolvedClass != null) {
 			return resolvedClass;
@@ -176,6 +178,6 @@ public class ImportScope extends NameScope {
 
 			}
 		}
-		throw new JavascriptGenerationException(null, "Cannot load class:" + className);
+		throw new JavascriptGenerationException(getInputFile(), pos, "Cannot load class:" + className);
 	}
 }
