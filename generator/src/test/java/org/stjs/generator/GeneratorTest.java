@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
+import org.stjs.generator.node.js.NodeJSExecutor;
+import org.stjs.generator.node.js.NodeJSExecutor.ExecutionResult;
 
 import test.Declaration1;
 
@@ -18,10 +20,12 @@ public class GeneratorTest {
 	private void generate(String sourceFile, Class<?> clazz) throws ParseException, IOException {
 
 		Generator generator = new Generator();
-
+		NodeJSExecutor executor = new NodeJSExecutor();
+		File outputFile = new File("target/x.js");
 		generator.generateJavascript(Thread.currentThread().getContextClassLoader(), clazz, new File(sourceFile),
-				new File("target/x.js"));
-
+				outputFile);
+		ExecutionResult execution = executor.run(outputFile);
+		System.out.println(execution.toString());
 	}
 
 }
