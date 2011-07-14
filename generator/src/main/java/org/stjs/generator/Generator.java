@@ -16,6 +16,7 @@ import org.stjs.generator.handlers.DefaultHandler;
 import org.stjs.generator.handlers.FieldDeclarationHandler;
 import org.stjs.generator.handlers.InlineFunctionHandler;
 import org.stjs.generator.handlers.InlineObjectHandler;
+import org.stjs.generator.handlers.LoopHandler;
 import org.stjs.generator.handlers.MethodDeclarationHandler;
 import org.stjs.generator.handlers.NameResolverHandler;
 import org.stjs.generator.handlers.RuleBasedVisitor;
@@ -96,6 +97,8 @@ public class Generator {
 
 		ruleVisitor.addRule(rule("Method calls", "//MethodCallExpr", 100, new NameResolverHandler(ruleVisitor)));
 
+		// loops
+		ruleVisitor.addRule(rule("For Each", "//ForeachStmt", 100, new LoopHandler(ruleVisitor)));
 	}
 
 	public void generateJavascript(ClassLoader builtProjectClassLoader, Class<?> inputClass, File inputFile,

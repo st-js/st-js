@@ -12,21 +12,27 @@ import org.stjs.generator.scope.QualifiedName;
 import org.stjs.generator.scope.TypeScope;
 
 public class NameResolverHandler extends DefaultHandler {
+	private SpecialMethodHandlers specialMethodHandlers = new SpecialMethodHandlers();
+
 	public NameResolverHandler(RuleBasedVisitor ruleVisitor) {
 		super(ruleVisitor);
 	}
 
 	@Override
 	public void visit(MethodCallExpr n, GenerationContext context) {
+		QualifiedName<MethodName> qname = null;
 		if (n.getScope() == null) {
 			// only for methods without a scope
 			SourcePosition pos = new SourcePosition(n.getBeginLine(), n.getBeginColumn());
-			QualifiedName<MethodName> qname = context.resolveMethod(pos);
+			qname = context.resolveMethod(pos);
+
+		}
+		if (!specialMethodHandlers.handle(this, n, qname, context)) {
 			if (qname != null && TypeScope.THIS_SCOPE.equals(qname.getScope())) {
 				getPrinter().print("this.");
 			}
+			n.accept(getRuleVisitor(), context.skipHandlers());
 		}
-		n.accept(getRuleVisitor(), context.skipHandlers());
 	}
 
 	@Override

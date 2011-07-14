@@ -23,7 +23,7 @@ public class Global {
 		return null;
 	}
 
-	public static void alert(String expr) {
+	public static void alert(Object expr) {
 	}
 
 	public static double parseFloat(Object expr) {
@@ -37,4 +37,13 @@ public class Global {
 	public static <T> T nvl(T value, T valueIfNull) {
 		return value;
 	}
+
+	public static <V> Array<V> $array() {
+		return null;
+	}
+
+	public static <V> Map<V> $map() {
+		return null;
+	}
+
 }

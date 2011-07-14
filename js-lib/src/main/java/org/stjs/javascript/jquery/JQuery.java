@@ -1,6 +1,7 @@
 package org.stjs.javascript.jquery;
 
-import java.util.Map;
+import org.stjs.javascript.Array;
+import org.stjs.javascript.Map;
 
 /**
  * jquery interface for all jquery method + all used plugins in a web app. it can be mocked easily for testing purposes.
@@ -8,8 +9,90 @@ import java.util.Map;
  */
 public interface JQuery<FullJQuery extends JQuery<?>> {
 	/************* ajax ***************/
+	public FullJQuery ajaxStart(AjaxHandler handler);
+
+	public FullJQuery ajaxStop(AjaxHandler handler);
+
+	public FullJQuery ajaxSend(AjaxHandler handler);
+
+	public FullJQuery ajaxComplete(AjaxHandler handler);
+
+	public FullJQuery ajaxSuccess(AjaxHandler handler);
+
+	public FullJQuery load(String url, Map<String> data, AjaxHandler handler);
 
 	/************* effects ***************/
+	public FullJQuery animate(Map<String> properties);
+
+	public FullJQuery animate(Map<String> properties, Object duration, String easing, Runnable complete);
+
+	public FullJQuery animate(Map<String> properties, AnimateOptions options);
+
+	public FullJQuery clearQueue(String queueName);
+
+	public FullJQuery delay(int duration, String queueName);
+
+	public FullJQuery dequeue(String queueName);
+
+	public FullJQuery fadeIn(Object duration);
+
+	public FullJQuery fadeIn(Object duration, String easing);
+
+	public FullJQuery fadeIn(Object duration, String easing, Runnable complete);
+
+	public FullJQuery fadeOut(Object duration);
+
+	public FullJQuery fadeOut(Object duration, String easing);
+
+	public FullJQuery fadeOut(Object duration, String easing, Runnable complete);
+
+	public FullJQuery fadeTo(Object duration, double opacity);
+
+	public FullJQuery fadeTo(Object duration, double opacity, Runnable complete);
+
+	public FullJQuery fadeToggle(Object duration);
+
+	public FullJQuery fadeToggle(Object duration, String easing);
+
+	public FullJQuery fadeToggle(Object duration, String easing, Runnable complete);
+
+	public FullJQuery hide(Object duration);
+
+	public FullJQuery hide(Object duration, String easing, Runnable complete);
+
+	public FullJQuery show(Object duration);
+
+	public FullJQuery show(Object duration, String easing, Runnable complete);
+
+	public FullJQuery queue(String queueName);
+
+	public FullJQuery slideDown();
+
+	public FullJQuery slideDown(Object duration);
+
+	public FullJQuery slideDown(Object duration, String easing, Runnable complete);
+
+	public FullJQuery slideToggle();
+
+	public FullJQuery slideToggle(Object duration);
+
+	public FullJQuery slideToggle(Object duration, String easing, Runnable complete);
+
+	public FullJQuery slideUp();
+
+	public FullJQuery slideUp(Object duration);
+
+	public FullJQuery slideUp(Object duration, String easing, Runnable complete);
+
+	public FullJQuery stop();
+
+	public FullJQuery stop(boolean clearQueue, boolean jumpToEnd);
+
+	public FullJQuery toggle(boolean showOrHide);
+
+	public FullJQuery toggle(Object duration);
+
+	public FullJQuery toggle(Object duration, String easing, Runnable complete);
 
 	/************* attributes ***************/
 	public FullJQuery addClass(String className);
@@ -24,7 +107,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery val(Object d);
 
-	public String val();
+	public Object val();
 
 	public FullJQuery attr(String name, String value);
 
@@ -42,13 +125,9 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public String html();
 
-	public void show();
+	public FullJQuery show();
 
-	public void hide();
-
-	public void trigger(String string);
-
-	public void submit();
+	public FullJQuery hide();
 
 	/************* core ***************/
 	public DOMElement get(int index);
@@ -65,14 +144,14 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public int size();
 
-	public DOMElement[] toArray();
+	public Array<DOMElement> toArray();
 
 	/************* css ***************/
 	public Object css(String propertyName);
 
 	public FullJQuery css(String propertyName, Object value);
 
-	public FullJQuery css(Map<String, Object> propertyMap);
+	public FullJQuery css(Map<Object> propertyMap);
 
 	public int height();
 
@@ -111,27 +190,245 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery data(String key, Object value);
 
-	public FullJQuery data(Map<String, Object> map);
+	public FullJQuery data(Map<Object> map);
 
 	public FullJQuery removeData(String key);
 
 	public FullJQuery removeData();
 
 	/************* events ***************/
-	public void change(ChangeListener changeListener);
+	public FullJQuery bind(String eventType, EventHandler handler);
 
-	public void click(ClickListener clickListener);
+	public FullJQuery bind(String eventType, Map<Object> eventData, EventHandler handler);
 
-	public void focus(FocusListener focusListener);
+	public FullJQuery bind(Map<EventHandler> handlers);
 
-	public void keyup(KeyupListener keyupListener);
+	public FullJQuery blur(EventHandler handler);
 
-	public void text(Object txt);
+	public FullJQuery blur();
 
-	public FullJQuery appendTo(String target);
+	public FullJQuery change(EventHandler handler);
+
+	public FullJQuery change();
+
+	public FullJQuery click(EventHandler handler);
+
+	public FullJQuery click();
+
+	public FullJQuery dblclick(EventHandler handler);
+
+	public FullJQuery dblclick();
+
+	public FullJQuery delegate(String selector, String eventType, EventHandler handler);
+
+	public FullJQuery delegate(String selector, String eventType, Map<Object> eventData, EventHandler handler);
+
+	public FullJQuery delegate(String selector, Map<EventHandler> handlers);
+
+	public FullJQuery die();
+
+	public FullJQuery die(String eventType);
+
+	public FullJQuery die(Map<EventHandler> handlers);
+
+	public FullJQuery error(EventHandler handler);
+
+	public FullJQuery focus(EventHandler handler);
+
+	public FullJQuery focus();
+
+	public FullJQuery focusin(EventHandler handler);
+
+	public FullJQuery focusout(EventHandler handler);
+
+	public FullJQuery hover(EventHandler handlerIn, EventHandler handlerOut);
+
+	public FullJQuery hover(EventHandler handler);
+
+	public FullJQuery keydown(EventHandler handler);
+
+	public FullJQuery keydown();
+
+	public FullJQuery keypress(EventHandler handler);
+
+	public FullJQuery keyup();
+
+	public FullJQuery live(String eventType, EventHandler handler);
+
+	public FullJQuery live(String eventType, Map<Object> eventData, EventHandler handler);
+
+	public FullJQuery live(Map<EventHandler> handlers);
+
+	public FullJQuery load(EventHandler handler);
+
+	public FullJQuery mousedown(EventHandler handler);
+
+	public FullJQuery mousedown();
+
+	public FullJQuery mouseenter(EventHandler handler);
+
+	public FullJQuery mouseenter();
+
+	public FullJQuery mouseleave(EventHandler handler);
+
+	public FullJQuery mouseleave();
+
+	public FullJQuery mousemove(EventHandler handler);
+
+	public FullJQuery mousemove();
+
+	public FullJQuery mouseout(EventHandler handler);
+
+	public FullJQuery mouseout();
+
+	public FullJQuery mouseover(EventHandler handler);
+
+	public FullJQuery mouseover();
+
+	public FullJQuery mouseup(EventHandler handler);
+
+	public FullJQuery mouseup();
+
+	public FullJQuery one(String eventType, EventHandler handler);
+
+	public FullJQuery one(String eventType, Map<Object> eventData, EventHandler handler);
+
+	public FullJQuery ready(EventHandler handler);
+
+	public FullJQuery resize(EventHandler handler);
+
+	public FullJQuery resize();
+
+	public FullJQuery scroll(EventHandler handler);
+
+	public FullJQuery scroll();
+
+	public FullJQuery select(EventHandler handler);
+
+	public FullJQuery select();
+
+	public FullJQuery submit(EventHandler handler);
+
+	public FullJQuery submit();
+
+	public FullJQuery toggle(EventHandler handlerIn, EventHandler handlerOut);
+
+	public FullJQuery trigger(String eventType, Map<String> extraParams);
+
+	public FullJQuery trigger(Event event);
+
+	public FullJQuery triggerHandler(String eventType, Map<String> extraParams);
+
+	public FullJQuery unbind();
+
+	public FullJQuery unbind(String eventType);
+
+	public FullJQuery unbind(String eventType, EventHandler handler);
+
+	public FullJQuery unbind(Event event);
+
+	public FullJQuery undelegate();
+
+	public FullJQuery undelegate(String selector, String eventType, EventHandler handler);
+
+	public FullJQuery undelegate(String selector, String eventType, Map<Object> eventData, EventHandler handler);
+
+	public FullJQuery undelegate(String selector, Map<EventHandler> handlers);
+
+	public FullJQuery unload(EventHandler handler);
 
 	/************* manipulation ***************/
-	public void remove();
+	public FullJQuery after(String selector);
+
+	public FullJQuery after(FullJQuery jq);
+
+	public FullJQuery after(DOMElement element);
+
+	public FullJQuery append(Object content);
+
+	public FullJQuery append(FullJQuery jq);
+
+	public FullJQuery append(DOMElement element);
+
+	public FullJQuery appendTo(String selector);
+
+	public FullJQuery appendTo(FullJQuery jq);
+
+	public FullJQuery appendTo(DOMElement element);
+
+	public FullJQuery before(String selector);
+
+	public FullJQuery before(FullJQuery jq);
+
+	public FullJQuery before(DOMElement element);
+
+	public FullJQuery clone();
+
+	public FullJQuery clone(boolean withDataAndEvents, boolean deepWithDataAndEvents);
+
+	public FullJQuery detach(String selector);
+
+	public FullJQuery empty();
+
+	public FullJQuery insertAfter(String selector);
+
+	public FullJQuery insertAfter(FullJQuery jq);
+
+	public FullJQuery insertAfter(DOMElement element);
+
+	public FullJQuery insertBefore(String selector);
+
+	public FullJQuery insertBefore(FullJQuery jq);
+
+	public FullJQuery insertBefore(DOMElement element);
+
+	public FullJQuery prepend(String selector);
+
+	public FullJQuery prepend(FullJQuery jq);
+
+	public FullJQuery prepend(DOMElement element);
+
+	public FullJQuery prependTo(String selector);
+
+	public FullJQuery prependTo(FullJQuery jq);
+
+	public FullJQuery prependTo(DOMElement element);
+
+	public FullJQuery remove();
+
+	public FullJQuery remove(String selector);
+
+	public FullJQuery replaceAll(String selector);
+
+	public FullJQuery replaceWith(DOMElement element);
+
+	public FullJQuery replaceWith(String selector);
+
+	public FullJQuery replaceWith(FullJQuery jq);
+
+	public FullJQuery text(String txt);
+
+	public String text();
+
+	public FullJQuery unwrap();
+
+	public FullJQuery wrap(DOMElement element);
+
+	public FullJQuery wrap(String selector);
+
+	public FullJQuery wrap(FullJQuery jq);
+
+	public FullJQuery wrapAll(DOMElement element);
+
+	public FullJQuery wrapAll(String selector);
+
+	public FullJQuery wrapAll(FullJQuery jq);
+
+	public FullJQuery wrapInner(DOMElement element);
+
+	public FullJQuery wrapInner(String selector);
+
+	public FullJQuery wrapInner(FullJQuery jq);
 
 	/************* traversing ***************/
 	public FullJQuery andSelf();
