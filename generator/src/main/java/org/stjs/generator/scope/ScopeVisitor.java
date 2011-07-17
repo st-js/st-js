@@ -20,14 +20,16 @@ import japa.parser.ast.stmt.ForeachStmt;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
+import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.JavascriptKeywords;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.handlers.utils.PreConditions;
 
 /**
- * This class visits the code's tree to determine the scope of each name. The problem is that a f
+ * This class visits the code's tree to determine the scope of each name.
  * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  * 
@@ -40,22 +42,43 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 	 */
 	private final ClassLoader classLoader;
 
-	public ScopeVisitor(File inputFile, ClassLoader classLoader) {
+	private final Collection<String> allowedPackages;
+
+	public ScopeVisitor(File inputFile, ClassLoader classLoader, Collection<String> allowedPackages) {
 		super();
 		this.classLoader = classLoader;
 		this.inputFile = inputFile;
+		this.allowedPackages = allowedPackages;
 	}
 
 	@Override
 	public void visit(CompilationUnit n, NameScope currentScope) {
 		ImportScope scope = new ImportScope(inputFile, currentScope, n.getPackage() != null ? n.getPackage().getName()
-				.getName() : null, classLoader);
+				.toString() : null, classLoader);
 		if (n.getImports() != null) {
 			for (ImportDeclaration importDecl : n.getImports()) {
-				scope.addImport(importDecl.getName().getName(), importDecl.isStatic(), importDecl.isAsterisk());
+				checkImport(importDecl);
+				scope.addImport(importDecl.getName().toString(), importDecl.isStatic(), importDecl.isAsterisk());
 			}
 		}
 		super.visit(n, scope);
+	}
+
+	/**
+	 * throws an exception if none of the allowedPackages is found as parent package of the given declaration
+	 * 
+	 * @param importDecl
+	 */
+	private void checkImport(ImportDeclaration importDecl) throws JavascriptGenerationException {
+		String importName = importDecl.getName().toString();
+		for (String allowedPackage : allowedPackages) {
+			if (importName.startsWith(allowedPackage)) {
+				return;
+			}
+		}
+		throw new JavascriptGenerationException(inputFile, new SourcePosition(importDecl.getBeginLine(),
+				importDecl.getBeginColumn()), "The import declaration:" + importName
+				+ " is not part of the allowed packages");
 	}
 
 	@Override

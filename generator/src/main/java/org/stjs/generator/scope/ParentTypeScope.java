@@ -44,7 +44,10 @@ public class ParentTypeScope extends NameScope {
 		}
 		Method method = getAccesibleMethod(parentClass, name);
 		if (method != null) {
-			return new QualifiedName<NameType.MethodName>(TypeScope.THIS_SCOPE, name, this);
+			if (TypeScope.isInCurrentTypeScope(this, currentScope)) {
+				return new QualifiedName<MethodName>(TypeScope.THIS_SCOPE, name, this);
+			}
+			return new QualifiedName<MethodName>(TypeScope.OUTER_SCOPE, name, this);
 		}
 		if (getParent() != null) {
 			return getParent().resolveMethod(pos, name, currentScope);
@@ -77,9 +80,12 @@ public class ParentTypeScope extends NameScope {
 		if (parentClass == null) {
 			parentClass = getImportScope(pos).resolveClass(pos, parentClassName);
 		}
-		Field method = getAccesibleField(parentClass, name);
-		if (method != null) {
-			return new QualifiedName<NameType.IdentifierName>(TypeScope.THIS_SCOPE, name, this);
+		Field field = getAccesibleField(parentClass, name);
+		if (field != null) {
+			if (TypeScope.isInCurrentTypeScope(this, currentScope)) {
+				return new QualifiedName<IdentifierName>(TypeScope.THIS_SCOPE, name, this);
+			}
+			return new QualifiedName<IdentifierName>(TypeScope.OUTER_SCOPE, name, this);
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(pos, name, currentScope);

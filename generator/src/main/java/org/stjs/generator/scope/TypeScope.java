@@ -22,7 +22,7 @@ public class TypeScope extends NameScope {
 
 	public static final String THIS_SCOPE = "this";
 
-	private static final String OUTER_SCOPE = "outer";
+	public static final String OUTER_SCOPE = "outer";
 
 	private static final String STATIC_SCOPE = null;
 
@@ -35,26 +35,35 @@ public class TypeScope extends NameScope {
 		super(inputFile, name, parent);
 	}
 
-	private boolean isInCurrentTypeScope(NameScope scope) {
+	/**
+	 * 
+	 * @param scope
+	 * @return true if the given scope is in the current TypeScope, and false if is in some outer type
+	 */
+	public static boolean isInCurrentTypeScope(NameScope currentScope, NameScope scope) {
 		if (scope == null) {
 			return true;
 		}
-		if (scope == this) {
+		if (scope == currentScope) {
 			return true;
 		}
 		if (scope instanceof TypeScope) {
+			if (currentScope instanceof ParentTypeScope && scope.getParent() == currentScope) {
+				// this is the case for calls from a type to its parent type
+				return true;
+			}
 			return false;
 		}
 		if (scope.getParent() == null) {
 			return false;
 		}
-		return isInCurrentTypeScope(scope.getParent());
+		return isInCurrentTypeScope(currentScope, scope.getParent());
 	}
 
 	@Override
 	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
 		if (instanceMethods.contains(name)) {
-			if (isInCurrentTypeScope(currentScope)) {
+			if (isInCurrentTypeScope(this, currentScope)) {
 				return new QualifiedName<MethodName>(THIS_SCOPE, name, this);
 			}
 			return new QualifiedName<MethodName>(OUTER_SCOPE, name, this);
@@ -71,7 +80,7 @@ public class TypeScope extends NameScope {
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
 		if (instanceFields.contains(name)) {
-			if (isInCurrentTypeScope(currentScope)) {
+			if (isInCurrentTypeScope(this, currentScope)) {
 				return new QualifiedName<IdentifierName>(THIS_SCOPE, name, this);
 			}
 			return new QualifiedName<IdentifierName>(OUTER_SCOPE, name, this);

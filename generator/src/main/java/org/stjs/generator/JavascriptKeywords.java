@@ -15,6 +15,9 @@ public class JavascriptKeywords {
 	private static final Set<String> keywords = new HashSet<String>();
 	static {
 		keywords.add("var");
+		keywords.add("outer");
+		keywords.add("function");
+		// keywords.add("self");
 	}
 
 	public static void checkIdentifier(File inputFile, SourcePosition pos, String name) {

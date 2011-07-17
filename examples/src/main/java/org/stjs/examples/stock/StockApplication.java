@@ -1,14 +1,9 @@
 package org.stjs.examples.stock;
 
 import static org.stjs.javascript.Global.$;
-import static org.stjs.javascript.Global.$array;
-import static org.stjs.javascript.Global.$map;
-import static org.stjs.javascript.Global.alert;
 import static org.stjs.javascript.Global.eval;
 import static org.stjs.javascript.JSNumberAdapter.toFixed;
 
-import org.stjs.javascript.Array;
-import org.stjs.javascript.Map;
 import org.stjs.javascript.jquery.AjaxParams;
 import org.stjs.javascript.jquery.Event;
 import org.stjs.javascript.jquery.EventHandler;
@@ -17,18 +12,7 @@ import org.stjs.javascript.jquery.SuccessListener;
 public class StockApplication {
 	public void init() {
 		final StockApplication that = this;
-		Array<Double> values = $array();
-		Map<Integer> maps = $map();
 
-		for (int x : values) {
-			alert(values.$get(x));
-			values.$set(x, 2.0);
-		}
-
-		for (String key : maps) {
-			alert(maps.$get(key));
-			maps.$put(key, 2);
-		}
 		// add stock
 		$("#addStock").click(new EventHandler() {
 			@Override

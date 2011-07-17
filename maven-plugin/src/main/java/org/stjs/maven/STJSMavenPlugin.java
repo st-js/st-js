@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -17,7 +18,9 @@ import org.codehaus.plexus.compiler.util.scan.SourceInclusionScanner;
 import org.codehaus.plexus.compiler.util.scan.StaleSourceScanner;
 import org.codehaus.plexus.compiler.util.scan.mapping.SourceMapping;
 import org.codehaus.plexus.compiler.util.scan.mapping.SuffixMapping;
+import org.codehaus.plexus.util.DirectoryScanner;
 import org.stjs.generator.Generator;
+import org.stjs.generator.GeneratorConfigurationBuilder;
 
 /**
  * This is the Maven plugin that launches the Javascript generator. The plugin needs a list of packages containing the
@@ -45,6 +48,14 @@ public class STJSMavenPlugin extends AbstractMojo {
 	 * @readonly
 	 */
 	private List<String> compileSourceRoots;
+
+	/**
+	 * The list of packages that can be referenced from the classes that will be processed by the generator
+	 * 
+	 * @parameter
+	 * @readonly
+	 */
+	private List<String> allowedPackages;
 
 	/**
 	 * <p>
@@ -96,9 +107,21 @@ public class STJSMavenPlugin extends AbstractMojo {
 		ClassLoader builtProjectClassLoader = getBuiltProjectClassLoader();
 		Generator generator = new Generator();
 		SourceMapping mapping = new SuffixMapping(".java", ".js");
-		List<File> sources = new ArrayList<File>();
+		GeneratorConfigurationBuilder configBuilder = new GeneratorConfigurationBuilder();
+		configBuilder.allowedPackage("org.stjs.javascript");
+		if (allowedPackages != null) {
+			configBuilder.allowedPackages(allowedPackages);
+		}
+		// scan all the packages
 		for (String sourceRoot : compileSourceRoots) {
 			File sourceDir = new File(sourceRoot);
+			configBuilder.allowedPackages(accumulatePackages(sourceDir));
+		}
+
+		// scan the modified sources
+		for (String sourceRoot : compileSourceRoots) {
+			File sourceDir = new File(sourceRoot);
+			List<File> sources = new ArrayList<File>();
 			sources = accumulateSources(sourceDir);
 			for (File source : sources) {
 				try {
@@ -112,7 +135,7 @@ public class STJSMavenPlugin extends AbstractMojo {
 					}
 					generator.generateJavascript(builtProjectClassLoader,
 							getClassForSource(builtProjectClassLoader, source.getPath()), absoluteSource,
-							absoluteTarget);
+							absoluteTarget, configBuilder.build());
 				} catch (InclusionScanException e) {
 					throw new MojoExecutionException("Cannot scan the source directory:" + e, e);
 				} catch (ClassNotFoundException e) {
@@ -131,6 +154,35 @@ public class STJSMavenPlugin extends AbstractMojo {
 		// remove ending .java and replace / by .
 		String className = sourcePath.substring(0, sourcePath.length() - 5).replace(File.separatorChar, '.');
 		return builtProjectClassLoader.loadClass(className);
+	}
+
+	/**
+	 * @return the list of Java source files to processed (those which are older than the corresponding Javascript
+	 *         file). The returned files are relative to the given source directory.
+	 */
+	private Collection<String> accumulatePackages(File sourceDir) throws MojoExecutionException {
+		final Collection<String> result = new HashSet<String>();
+		if (sourceDir == null) {
+			return result;
+		}
+
+		DirectoryScanner ds = new DirectoryScanner();
+		ds.setFollowSymlinks(true);
+		ds.addDefaultExcludes();
+		ds.setBasedir(sourceDir);
+		ds.setIncludes(new String[] { "**/*.java" });
+		ds.scan();
+		for (String fileName : ds.getIncludedFiles()) {
+			File file = new File(fileName);
+			result.add(file.getParent().replace(File.separatorChar, '.'));
+		}
+
+		/*
+		 * // Trim root path from file paths for (File file : staleFiles) { String filePath = file.getPath(); String
+		 * basePath = sourceDir.getAbsoluteFile().toString(); result.add(new File(filePath.substring(basePath.length() +
+		 * 1))); }
+		 */
+		return result;
 	}
 
 	/**

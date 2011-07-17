@@ -55,7 +55,7 @@ public class ImportScope extends NameScope {
 
 	private String findImport(Collection<String> imports, String name) {
 		for (String imp : imports) {
-			if (name.equals(imp) || name.endsWith("." + name)) {
+			if (name.equals(imp) || imp.endsWith("." + name)) {
 				return imp;
 			}
 		}

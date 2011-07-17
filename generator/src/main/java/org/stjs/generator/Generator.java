@@ -102,7 +102,7 @@ public class Generator {
 	}
 
 	public void generateJavascript(ClassLoader builtProjectClassLoader, Class<?> inputClass, File inputFile,
-			File outputFile) throws JavascriptGenerationException {
+			File outputFile, GeneratorConfiguration configuration) throws JavascriptGenerationException {
 		InputStream in;
 		try {
 			in = new FileInputStream(inputFile);
@@ -119,11 +119,14 @@ public class Generator {
 			// parse the file
 			cu = JavaParser.parse(in);
 
-			// resolve first the fields and the methods
-			ScopeVisitor scopes = new ScopeVisitor(inputFile, Thread.currentThread().getContextClassLoader());
-			NameScope rootScope = new FullyQualifiedScope(inputFile);
+			// read the scope of all declared variables and methods
+			ScopeVisitor scopes = new ScopeVisitor(inputFile, builtProjectClassLoader,
+					configuration.getAllowedPackages());
+			NameScope rootScope = new FullyQualifiedScope(inputFile, builtProjectClassLoader);
 			scopes.visit(cu, rootScope);
-			NameResolverVisitor resolver = new NameResolverVisitor(rootScope);
+
+			// resolve all the calls to methods and variables
+			NameResolverVisitor resolver = new NameResolverVisitor(rootScope, configuration.getAllowedPackages());
 			resolver.visit(cu, new NameScopeWalker(rootScope));
 
 			System.out.println("----------------------------");

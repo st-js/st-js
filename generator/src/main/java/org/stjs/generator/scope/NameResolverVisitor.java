@@ -5,19 +5,21 @@ import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
 import japa.parser.ast.body.EnumDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
+import japa.parser.ast.expr.FieldAccessExpr;
 import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.ObjectCreationExpr;
-import japa.parser.ast.expr.QualifiedNameExpr;
 import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.stmt.CatchClause;
 import japa.parser.ast.stmt.ForStmt;
 import japa.parser.ast.stmt.ForeachStmt;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
@@ -34,9 +36,11 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 	private final Map<SourcePosition, QualifiedName<IdentifierName>> resolvedIdentifiers = new LinkedHashMap<SourcePosition, QualifiedName<IdentifierName>>();
 
 	private final NameScope rootScope;
+	private final Collection<String> allowedPackages;
 
-	public NameResolverVisitor(NameScope rootScope) {
+	public NameResolverVisitor(NameScope rootScope, Collection<String> allowedPackages) {
 		this.rootScope = rootScope;
+		this.allowedPackages = allowedPackages;
 	}
 
 	public NameScope getRootScope() {
@@ -100,7 +104,6 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 
 	@Override
 	public void visit(EnumDeclaration n, NameScopeWalker currentScope) {
-		// TODO Auto-generated method stub
 		super.visit(n, currentScope);
 	}
 
@@ -122,6 +125,13 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 			SourcePosition pos = new SourcePosition(n.getBeginLine(), n.getBeginColumn());
 			QualifiedName<MethodName> qname = currentScope.getScope().resolveMethod(pos, n.getName());
 			if (qname != null) {
+				if (TypeScope.OUTER_SCOPE.equals(qname.getScopeName())) {
+					throw new JavascriptGenerationException(
+							currentScope.getScope().getInputFile(),
+							pos,
+							"In Javascript you cannot call methods from the outer type. "
+									+ "You should define a variable var that=this outside your function definition and call the methods on this object");
+				}
 				resolvedMethods.put(pos, qname);
 			}
 		}
@@ -129,9 +139,44 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 	}
 
 	@Override
-	public void visit(QualifiedNameExpr n, NameScopeWalker arg) {
-		System.out.println("Q:" + n.getQualifier().getName() + "!!" + n.getName());
-		super.visit(n, arg);
+	public void visit(FieldAccessExpr n, NameScopeWalker currentScope) {
+		SourcePosition pos = new SourcePosition(n.getBeginLine(), n.getBeginColumn());
+		// try to figure out if it's variable.field or Package.Class.field
+		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(pos, getFirstScope(n));
+		if (qname == null) {
+			checkImport(n, currentScope);
+			qname = currentScope.getScope().resolveIdentifier(pos, n.toString());
+		}
+		if (qname != null) {
+			resolvedIdentifiers.put(pos, qname);
+		}
+	}
+
+	private String getFirstScope(FieldAccessExpr n) {
+		if (n.getScope() instanceof FieldAccessExpr) {
+			return getFirstScope((FieldAccessExpr) n.getScope());
+		}
+		return n.getScope().toString();
+	}
+
+	/**
+	 * throws an exception if none of the allowedPackages is found as parent package of the given declaration
+	 * 
+	 * @param importDecl
+	 */
+	private void checkImport(FieldAccessExpr n, NameScopeWalker currentScope) throws JavascriptGenerationException {
+		String importName = n.getScope().toString();
+		if (importName.equals("this")) {
+			return;
+		}
+		for (String allowedPackage : allowedPackages) {
+			if (importName.startsWith(allowedPackage)) {
+				return;
+			}
+		}
+		throw new JavascriptGenerationException(currentScope.getScope().getInputFile(), new SourcePosition(
+				n.getBeginLine(), n.getBeginColumn()), "The qualified name:" + importName
+				+ " is not part of the allowed packages");
 	}
 
 	@Override
@@ -139,6 +184,13 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		SourcePosition pos = new SourcePosition(n.getBeginLine(), n.getBeginColumn());
 		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(pos, n.getName());
 		if (qname != null) {
+			if (TypeScope.OUTER_SCOPE.equals(qname.getScopeName())) {
+				throw new JavascriptGenerationException(
+						currentScope.getScope().getInputFile(),
+						pos,
+						"In Javascript you cannot call fields from the outer type. "
+								+ "You should define a variable var that=this outside your function definition and call the fields on this object");
+			}
 			resolvedIdentifiers.put(pos, qname);
 		}
 		super.visit(n, currentScope);
