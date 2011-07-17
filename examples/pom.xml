@@ -36,9 +36,9 @@
 				<groupId>org.stjs</groupId>
 				<artifactId>maven-plugin</artifactId>
 				<version>1.0.0-SNAPSHOT</version>
-				<executions>	
+				<executions>
 					<execution>
-						<phase>compile</phase>
+						<phase>process-classes</phase>
 						<goals>
 							<goal>generate</goal>
 						</goals>
@@ -48,7 +48,9 @@
 		</plugins>
 		<pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+					<!-- 
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -69,16 +71,42 @@
 											<goal>generate</goal>
 										</goals>
 									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
+
 								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
-				</plugin>
+				</plugin> -->
+
 			</plugins>
 		</pluginManagement>
 	</build>
-	
+	<profiles>
+		<profile>
+			<id>m2e</id>
+			<activation>
+				<property>
+					<name>m2e.version</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.maven.ide.eclipse</groupId>
+						<artifactId>lifecycle-mapping</artifactId>
+						<version>0.10.0</version>
+						<configuration>
+							<mappingId>customizable</mappingId>
+							<configurators>
+								<configurator id='org.maven.ide.eclipse.jdt.javaConfigurator' />
+							</configurators>
+							<mojoExecutions>
+								<mojoExecution>org.stjs:maven-plugin::</mojoExecution>
+							</mojoExecutions>
+						</configuration>
+					</plugin>
+				</plugins>				
+			</build>
+		</profile>
+	</profiles>
 </project>

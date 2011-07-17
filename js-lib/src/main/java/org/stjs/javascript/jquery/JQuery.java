@@ -136,7 +136,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public int index(String selector);
 
-	public int index(FullJQuery jq);
+	public int index(JQuery<?> jq);
 
 	public int index(DOMElement element);
 
@@ -340,25 +340,25 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 	/************* manipulation ***************/
 	public FullJQuery after(String selector);
 
-	public FullJQuery after(FullJQuery jq);
+	public FullJQuery after(JQuery<?> jq);
 
 	public FullJQuery after(DOMElement element);
 
 	public FullJQuery append(Object content);
 
-	public FullJQuery append(FullJQuery jq);
+	public FullJQuery append(JQuery<?> jq);
 
 	public FullJQuery append(DOMElement element);
 
 	public FullJQuery appendTo(String selector);
 
-	public FullJQuery appendTo(FullJQuery jq);
+	public FullJQuery appendTo(JQuery<?> jq);
 
 	public FullJQuery appendTo(DOMElement element);
 
 	public FullJQuery before(String selector);
 
-	public FullJQuery before(FullJQuery jq);
+	public FullJQuery before(JQuery<?> jq);
 
 	public FullJQuery before(DOMElement element);
 
@@ -372,25 +372,25 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery insertAfter(String selector);
 
-	public FullJQuery insertAfter(FullJQuery jq);
+	public FullJQuery insertAfter(JQuery<?> jq);
 
 	public FullJQuery insertAfter(DOMElement element);
 
 	public FullJQuery insertBefore(String selector);
 
-	public FullJQuery insertBefore(FullJQuery jq);
+	public FullJQuery insertBefore(JQuery<?> jq);
 
 	public FullJQuery insertBefore(DOMElement element);
 
 	public FullJQuery prepend(String selector);
 
-	public FullJQuery prepend(FullJQuery jq);
+	public FullJQuery prepend(JQuery<?> jq);
 
 	public FullJQuery prepend(DOMElement element);
 
 	public FullJQuery prependTo(String selector);
 
-	public FullJQuery prependTo(FullJQuery jq);
+	public FullJQuery prependTo(JQuery<?> jq);
 
 	public FullJQuery prependTo(DOMElement element);
 
@@ -404,7 +404,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery replaceWith(String selector);
 
-	public FullJQuery replaceWith(FullJQuery jq);
+	public FullJQuery replaceWith(JQuery<?> jq);
 
 	public FullJQuery text(String txt);
 
@@ -416,19 +416,19 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery wrap(String selector);
 
-	public FullJQuery wrap(FullJQuery jq);
+	public FullJQuery wrap(JQuery<?> jq);
 
 	public FullJQuery wrapAll(DOMElement element);
 
 	public FullJQuery wrapAll(String selector);
 
-	public FullJQuery wrapAll(FullJQuery jq);
+	public FullJQuery wrapAll(JQuery<?> jq);
 
 	public FullJQuery wrapInner(DOMElement element);
 
 	public FullJQuery wrapInner(String selector);
 
-	public FullJQuery wrapInner(FullJQuery jq);
+	public FullJQuery wrapInner(JQuery<?> jq);
 
 	/************* traversing ***************/
 	public FullJQuery andSelf();
@@ -439,7 +439,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery closest(String selector);
 
-	public FullJQuery closest(FullJQuery jq);
+	public FullJQuery closest(JQuery<?> jq);
 
 	public FullJQuery closest(DOMElement element);
 
@@ -453,13 +453,13 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery filter(String selector);
 
-	public FullJQuery filter(FullJQuery jq);
+	public FullJQuery filter(JQuery<?> jq);
 
 	public FullJQuery filter(DOMElement element);
 
 	public FullJQuery find(String selector);
 
-	public FullJQuery find(FullJQuery jq);
+	public FullJQuery find(JQuery<?> jq);
 
 	public FullJQuery find(DOMElement element);
 
@@ -471,7 +471,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery is(String selector);
 
-	public FullJQuery is(FullJQuery jq);
+	public FullJQuery is(JQuery<?> jq);
 
 	public FullJQuery is(DOMElement element);
 
@@ -487,13 +487,13 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery nextUntil(String selector);
 
-	public FullJQuery nextUntil(FullJQuery jq);
+	public FullJQuery nextUntil(JQuery<?> jq);
 
 	public FullJQuery nextUntil(DOMElement element);
 
 	public FullJQuery not(String selector);
 
-	public FullJQuery not(FullJQuery jq);
+	public FullJQuery not(JQuery<?> jq);
 
 	public FullJQuery parent();
 
@@ -505,7 +505,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery parentsUntil(String selector);
 
-	public FullJQuery parentsUntil(FullJQuery jq);
+	public FullJQuery parentsUntil(JQuery<?> jq);
 
 	public FullJQuery parentsUntil(DOMElement element);
 
@@ -519,7 +519,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery prevUntil(String selector);
 
-	public FullJQuery prevUntil(FullJQuery jq);
+	public FullJQuery prevUntil(JQuery<?> jq);
 
 	public FullJQuery prevUntil(DOMElement element);
 

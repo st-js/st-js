@@ -1,5 +1,6 @@
 package org.stjs.generator.handlers;
 
+import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.MethodCallExpr;
 
 import java.util.HashMap;
@@ -65,8 +66,16 @@ public class SpecialMethodHandlers {
 					GenerationContext context) {
 
 				currentHandler.getPrinter().print("[");
-				// TODO -> add constructor args here n.getArgs().get(0).accept(currentHandler.getRuleVisitor(),
-				// context);
+				if (n.getArgs() != null) {
+					boolean first = true;
+					for (Expression arg : n.getArgs()) {
+						if (!first) {
+							currentHandler.getPrinter().print(", ");
+						}
+						arg.accept(currentHandler.getRuleVisitor(), context);
+						first = false;
+					}
+				}
 				currentHandler.getPrinter().print("]");
 				return true;
 			}

@@ -28,7 +28,7 @@ import org.stjs.generator.GeneratorConfigurationBuilder;
  * in a configured target folder.
  * 
  * @goal generate
- * @phase compile
+ * @phase process-classes
  * @requiresDependencyResolution runtime
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
