@@ -12,4 +12,5 @@ public class ButtonOptions<FullJQuery extends JQuery<?>> {
 	public String label;
 
 	public UIEventHandler<ButtonUI<FullJQuery>> create;
+
 }

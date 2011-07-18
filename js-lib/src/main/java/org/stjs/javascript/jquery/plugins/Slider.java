@@ -1,10 +1,17 @@
 package org.stjs.javascript.jquery.plugins;
 
-public interface Slider {
-	public void slider(String string, String string2, double p);
+import org.stjs.javascript.jquery.JQuery;
 
-	public String slider(String string, String string2);
+public interface Slider<FullJQuery extends JQuery<?>> {
+	public FullJQuery slider();
 
-	public void slider(SliderOptions sliderOptions);
+	public FullJQuery slider(SliderOptions<FullJQuery> options);
 
+	public FullJQuery slider(String methodName);
+
+	public Object slider(String option, String optionName);
+
+	public FullJQuery slider(String option, String optionName, Object value);
+
+	public FullJQuery slider(String option, DraggableOptions<FullJQuery> options);
 }
