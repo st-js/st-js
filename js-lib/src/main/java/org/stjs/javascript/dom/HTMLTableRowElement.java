@@ -4,7 +4,7 @@ abstract public class HTMLTableRowElement extends HTMLElement {
 	public String VAlign;
 	public String align;
 	public String bgColor;
-	public HTMLCollection cells;
+	public HTMLCollection<HTMLTableCellElement> cells;
 	public String ch;
 	public String chOff;
 	public int rowIndex;

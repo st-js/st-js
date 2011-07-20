@@ -1,11 +1,13 @@
 package org.stjs.javascript.dom;
 
-import org.w3c.dom.Node;
-
-abstract public class HTMLCollection {
+abstract public class HTMLCollection<T extends Node> {
 	public int length;
 
-	abstract public Node namedItem(String arg0);
+	abstract public T namedItem(String name);
 
-	abstract public Node item(int arg0);
+	abstract public T $get(String name);
+
+	abstract public T item(int index);
+
+	abstract public T $get(int index);
 }

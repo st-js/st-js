@@ -11,6 +11,11 @@ public class Global {
 
 	public static Object undefined;
 
+	public static Window window;
+
+	// do not add this one too
+	// public static Window self;
+
 	/**
 	 * jquery constructors
 	 */
@@ -116,4 +121,5 @@ public class Global {
 	public static String unescape(String uri) {
 		return null;
 	}
+
 }

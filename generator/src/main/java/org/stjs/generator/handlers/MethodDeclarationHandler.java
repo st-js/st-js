@@ -27,12 +27,18 @@ public class MethodDeclarationHandler extends DefaultHandler {
 
 		getPrinter().print("(");
 		if (n.getParameters() != null) {
+			boolean first = true;
 			for (Iterator<Parameter> i = n.getParameters().iterator(); i.hasNext();) {
 				Parameter p = i.next();
+				// don't display the special THIS parameter
+				if (GeneratorConstants.SPECIAL_THIS.equals(p.getId().getName())) {
+					continue;
+				}
 				p.accept(getRuleVisitor(), arg);
-				if (i.hasNext()) {
+				if (!first) {
 					getPrinter().print(", ");
 				}
+				first = false;
 			}
 		}
 		getPrinter().print(")");

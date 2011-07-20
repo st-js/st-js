@@ -142,8 +142,8 @@ public class STJSMavenPlugin extends AbstractMojo {
 					throw new MojoExecutionException("Cannot find corresponding class for [" + source.getPath() + "]:"
 							+ e, e);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					getLog().error(e.toString());
+					throw new MojoExecutionException("Error generating javascript:" + e, e);
 				}
 			}
 		}

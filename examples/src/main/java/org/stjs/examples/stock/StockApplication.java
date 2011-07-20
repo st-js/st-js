@@ -7,6 +7,7 @@ import static org.stjs.javascript.JSNumberAdapter.toFixed;
 
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;
+import org.stjs.javascript.dom.HTMLElement;
 import org.stjs.javascript.jquery.AjaxParams;
 import org.stjs.javascript.jquery.Event;
 import org.stjs.javascript.jquery.EventHandler;
@@ -18,14 +19,14 @@ public class StockApplication {
 
 	public void init() {
 		final StockApplication that = this;
-
 		// add stock
 		$("#form").submit(new EventHandler() {
 			@Override
-			public boolean onEvent(Event ev) {
+			public boolean onEvent(Event ev, final HTMLElement THIS) {
 				that.updateStock($("#newStock").val(), new SuccessListener() {
 					@Override
 					public void onSuccess(Object data) {
+						String xid = THIS.id;
 						StockData stockData = (StockData) data;
 						$(that.generateRow(stockData)).appendTo("table tbody");
 						that.stocks.push(stockData.stock);
@@ -38,11 +39,12 @@ public class StockApplication {
 		// the remove stock listener
 		$(".removeStock").live("click", new EventHandler() {
 			@Override
-			public boolean onEvent(Event ev) {
-				JQuery<?> $tr = $(this).parents("tr");
+			public boolean onEvent(Event ev, final HTMLElement THIS) {
+				JQuery<?> $tr = $(THIS).parents("tr");
 				int index = $tr.parent().find("tr").index($tr);
 				that.stocks.splice(index);
 				$tr.remove();
+
 				return false;
 			}
 		});

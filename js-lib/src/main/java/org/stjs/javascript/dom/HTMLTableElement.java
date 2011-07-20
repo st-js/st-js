@@ -1,7 +1,7 @@
 package org.stjs.javascript.dom;
 
 abstract public class HTMLTableElement extends HTMLElement {
-	public HTMLCollection TBodies;
+	public HTMLCollection<HTMLTableSectionElement> TBodies;
 	public HTMLTableSectionElement TFoot;
 	public HTMLTableSectionElement THead;
 	public String align;
@@ -11,7 +11,7 @@ abstract public class HTMLTableElement extends HTMLElement {
 	public String cellPadding;
 	public String cellSpacing;
 	public String frame;
-	public HTMLCollection rows;
+	public HTMLCollection<HTMLTableRowElement> rows;
 	public String rules;
 	public String summary;
 	public String width;

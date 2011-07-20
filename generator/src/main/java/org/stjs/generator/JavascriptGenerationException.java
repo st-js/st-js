@@ -45,7 +45,7 @@ public class JavascriptGenerationException extends RuntimeException {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(super.toString());
-		sb.append("(").append(inputFile);
+		sb.append("(").append(inputFile.getName());
 		if (sourcePosition != null) {
 			sb.append(":").append(sourcePosition.getLine());
 		}

@@ -6,7 +6,7 @@ abstract public class HTMLSelectElement extends HTMLElement {
 	public int length;
 	public boolean multiple;
 	public String name;
-	public HTMLCollection options;
+	public HTMLCollection<HTMLOptionElement> options;
 	public int selectedIndex;
 	public int size;
 	public int tabIndex;

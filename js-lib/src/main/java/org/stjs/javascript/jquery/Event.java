@@ -1,12 +1,14 @@
 package org.stjs.javascript.jquery;
 
+import org.stjs.javascript.dom.HTMLElement;
+
 /**
  * jquery event
  */
 abstract public class Event {
-	public DOMElement target;
-	public DOMElement relatedTarget;
-	public DOMElement currentTarget;
+	public HTMLElement target;
+	public HTMLElement relatedTarget;
+	public HTMLElement currentTarget;
 	public int pageX;
 	public int pageY;
 	public int which;

@@ -44,6 +44,10 @@ public class NameResolverHandler extends DefaultHandler {
 
 	@Override
 	public void visit(NameExpr n, GenerationContext context) {
+		if (GeneratorConstants.SPECIAL_THIS.equals(n.getName())) {
+			getPrinter().print("this");
+			return;
+		}
 		SourcePosition pos = new SourcePosition(n.getBeginLine(), n.getBeginColumn());
 		QualifiedName<IdentifierName> qname = context.resolveIdentifier(pos);
 		if (qname != null && TypeScope.THIS_SCOPE.equals(qname.getScopeName())) {
