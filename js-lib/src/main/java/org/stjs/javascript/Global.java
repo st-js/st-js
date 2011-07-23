@@ -1,11 +1,7 @@
 package org.stjs.javascript;
 
-import org.stjs.javascript.jquery.GlobalJQuery;
-import org.stjs.javascript.jquery.JQueryAndPlugins;
 
 public class Global {
-	public static GlobalJQuery $;
-
 	public static Number Infinity;
 	public static Number NaN;
 
@@ -15,19 +11,6 @@ public class Global {
 
 	// do not add this one too
 	// public static Window self;
-
-	/**
-	 * jquery constructors
-	 */
-	public static JQueryAndPlugins $(String path) {
-		// return new JQuery(path);
-		return null;
-	}
-
-	public static JQueryAndPlugins $(Object path) {
-		// return new JQuery(path);
-		return null;
-	}
 
 	public static <T> T eval(String expr) {
 		return null;
