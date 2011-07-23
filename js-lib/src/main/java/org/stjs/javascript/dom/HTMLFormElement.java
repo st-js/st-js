@@ -3,7 +3,7 @@ package org.stjs.javascript.dom;
 abstract public class HTMLFormElement extends HTMLElement {
 	public String acceptCharset;
 	public String action;
-	public HTMLCollection elements;
+	public HTMLCollection<HTMLInputElement> elements;
 	public String enctype;
 	public int length;
 	public String method;
