@@ -1,9 +1,9 @@
 package org.stjs.examples.stock;
 
-import static org.stjs.javascript.Global.$;
 import static org.stjs.javascript.Global.$array;
 import static org.stjs.javascript.Global.setInterval;
 import static org.stjs.javascript.JSNumberAdapter.toFixed;
+import static org.stjs.javascript.jquery.GlobalJQuery.$;
 
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;

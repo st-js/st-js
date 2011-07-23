@@ -23,9 +23,18 @@
 	</properties>
 
 	<dependencies>
+		<!-- for the java libraries -->
 		<dependency>
 			<groupId>org.stjs</groupId>
 			<artifactId>js-lib</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<!-- for the javascript files -->
+		<dependency>
+			<groupId>org.stjs</groupId>
+			<artifactId>js-lib</artifactId>
+			<type>war</type>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
@@ -50,33 +59,12 @@
 			<plugins>
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
 					only. It has no influence on the Maven build itself. -->
-					<!-- 
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.stjs</groupId>
-										<artifactId>
-											maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.0.0-SNAPSHOT,)
-										</versionRange>
-										<goals>
-											<goal>generate</goal>
-										</goals>
-									</pluginExecutionFilter>
-
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin> -->
+				<!-- <plugin> <groupId>org.eclipse.m2e</groupId> <artifactId>lifecycle-mapping</artifactId> 
+					<version>1.0.0</version> <configuration> <lifecycleMappingMetadata> <pluginExecutions> 
+					<pluginExecution> <pluginExecutionFilter> <groupId>org.stjs</groupId> <artifactId> 
+					maven-plugin </artifactId> <versionRange> [1.0.0-SNAPSHOT,) </versionRange> 
+					<goals> <goal>generate</goal> </goals> </pluginExecutionFilter> </pluginExecution> 
+					</pluginExecutions> </lifecycleMappingMetadata> </configuration> </plugin> -->
 
 			</plugins>
 		</pluginManagement>
@@ -105,7 +93,7 @@
 							</mojoExecutions>
 						</configuration>
 					</plugin>
-				</plugins>				
+				</plugins>
 			</build>
 		</profile>
 	</profiles>
