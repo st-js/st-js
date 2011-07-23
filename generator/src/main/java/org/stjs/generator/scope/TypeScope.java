@@ -26,10 +26,13 @@ public class TypeScope extends NameScope {
 
 	private static final String STATIC_SCOPE = null;
 
+	private static final String TYPE_SCOPE = null;
+
 	private final Set<String> staticFields = new HashSet<String>();
 	private final Set<String> staticMethods = new HashSet<String>();
 	private final Set<String> instanceFields = new HashSet<String>();
 	private final Set<String> instanceMethods = new HashSet<String>();
+	private final Set<String> innerTypes = new HashSet<String>();
 
 	public TypeScope(File inputFile, String name, NameScope parent) {
 		super(inputFile, name, parent);
@@ -88,6 +91,9 @@ public class TypeScope extends NameScope {
 		if (staticFields.contains(name)) {
 			return new QualifiedName<IdentifierName>(STATIC_SCOPE, name, this);
 		}
+		if (innerTypes.contains(name)) {
+			return new QualifiedName<IdentifierName>(TYPE_SCOPE, name, this);
+		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(pos, name, currentScope);
 		}
@@ -108,6 +114,10 @@ public class TypeScope extends NameScope {
 
 	public void addInstanceMethod(String name) {
 		instanceMethods.add(name);
+	}
+
+	public void addInnerType(String name) {
+		innerTypes.add(name);
 	}
 
 	@Override

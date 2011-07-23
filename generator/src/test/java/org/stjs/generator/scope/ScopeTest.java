@@ -13,30 +13,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.XMLWriter;
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
-import org.stjs.generator.handlers.XmlVisitor;
 
 public class ScopeTest {
-
-	void dumpXML(CompilationUnit cu) throws IOException {
-		// create the DOM
-		Document dom = DocumentHelper.createDocument();
-		Element root = dom.addElement("root");
-
-		new XmlVisitor().visit(cu, root);
-
-		// print
-		// Pretty print the document to System.out
-		OutputFormat format = OutputFormat.createPrettyPrint();
-		XMLWriter writer = new XMLWriter(System.out, format);
-		writer.write(dom);
-	}
 
 	private NameResolverVisitor getNameResolver(String clazz) throws ParseException, IOException {
 		return getNameResolver(clazz, Collections.<String> emptyList());

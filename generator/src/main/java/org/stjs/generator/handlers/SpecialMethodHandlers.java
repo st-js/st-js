@@ -93,6 +93,21 @@ public class SpecialMethodHandlers {
 				return true;
 			}
 		});
+
+		// equals -> ==
+		methodHandlers.put("equals", new SpecialMethodHandler() {
+			@Override
+			public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+					GenerationContext context) {
+				if (n.getArgs() == null || n.getArgs().size() != 1) {
+					return false;
+				}
+				printScope(currentHandler, n, qname, context, false);
+				currentHandler.getPrinter().print(" == ");
+				n.getArgs().get(0).accept(currentHandler.getRuleVisitor(), context);
+				return true;
+			}
+		});
 	}
 
 	private void printScope(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
@@ -113,15 +128,16 @@ public class SpecialMethodHandlers {
 
 	public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 			GenerationContext context) {
-		if (n.getName().length() <= SPECIAL_PREFIX.length() || !n.getName().startsWith(SPECIAL_PREFIX)) {
-			return false;
-		}
+
 		SpecialMethodHandler handler = methodHandlers.get(n.getName());
 		if (handler != null) {
 			handler.handle(currentHandler, n, qname, context);
 			return true;
 		}
 
+		if (n.getName().length() <= SPECIAL_PREFIX.length() || !n.getName().startsWith(SPECIAL_PREFIX)) {
+			return false;
+		}
 		// just transform it in property -> with parameter is an assignment, without a parameter is a simple access.
 		// with more parameters -> just skip it
 		if (n.getArgs() != null && n.getArgs().size() > 1) {

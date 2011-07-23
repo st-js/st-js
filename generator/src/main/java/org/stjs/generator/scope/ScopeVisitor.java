@@ -10,6 +10,7 @@ import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.body.ModifierSet;
 import japa.parser.ast.body.Parameter;
+import japa.parser.ast.body.TypeDeclaration;
 import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.expr.ObjectCreationExpr;
 import japa.parser.ast.expr.VariableDeclarationExpr;
@@ -160,7 +161,9 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 				} else {
 					typeScope.addInstanceMethod(method.getName());
 				}
-
+			} else if (member instanceof TypeDeclaration) {
+				TypeDeclaration type = (TypeDeclaration) member;
+				typeScope.addInnerType(type.getName());
 			}
 		}
 		return typeScope;

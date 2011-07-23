@@ -13,6 +13,7 @@ import java.io.InputStream;
 
 import org.stjs.generator.handlers.ClassOrInterfaceDeclarationHandler;
 import org.stjs.generator.handlers.DefaultHandler;
+import org.stjs.generator.handlers.EnumHandler;
 import org.stjs.generator.handlers.FieldDeclarationHandler;
 import org.stjs.generator.handlers.InlineFunctionHandler;
 import org.stjs.generator.handlers.InlineObjectHandler;
@@ -61,6 +62,8 @@ public class Generator {
 				ruleVisitor, false)));
 		ruleVisitor.addRule(rule("Class/Interface Declaration", "//ClassOrInterfaceDeclaration", 100,
 				new ClassOrInterfaceDeclarationHandler(ruleVisitor)));
+
+		ruleVisitor.addRule(rule("Enum Declaration", "//EnumDeclaration", 100, new EnumHandler(ruleVisitor)));
 
 		// field declaration
 		ruleVisitor.addRule(rule("Field", "//FieldDeclaration", 100, new FieldDeclarationHandler(ruleVisitor)));
@@ -119,6 +122,8 @@ public class Generator {
 			// parse the file
 			cu = JavaParser.parse(in);
 
+			// ASTUtils.dumpXML(cu);
+
 			// read the scope of all declared variables and methods
 			ScopeVisitor scopes = new ScopeVisitor(inputFile, builtProjectClassLoader,
 					configuration.getAllowedPackages());
@@ -147,7 +152,6 @@ public class Generator {
 				in.close();
 			} catch (IOException e) {
 				// silent
-				e.printStackTrace();
 			}
 		}
 	}
