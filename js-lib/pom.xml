@@ -5,10 +5,10 @@
 
 	<groupId>org.stjs</groupId>
 	<artifactId>js-lib</artifactId>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 	<name>Strongly-typed Javascript:Javascript Library</name>
 
-   <parent>
+	<parent>
 		<groupId>org.stjs</groupId>
 		<artifactId>parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
@@ -26,4 +26,21 @@
 
 	</dependencies>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>make-a-jar</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
