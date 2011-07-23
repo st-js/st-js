@@ -15,26 +15,26 @@ import org.stjs.javascript.jquery.plugins.Sortable;
 import org.stjs.javascript.jquery.plugins.Tabs;
 
 /**
- * In the JQuery model, the plugins add methods to the jquery object. This interface inherits from all the needed
- * plugins.
+ * In the JQuery model, the plugins add methods to the jquery object. FullJQueryhis interface inherits from all the
+ * needed plugins.
  * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  * 
  */
-public interface JQueryAndPlugins extends JQuery<JQueryAndPlugins>, //
-		Accordion<JQueryAndPlugins>,//
-		AutoComplete<JQueryAndPlugins>,//
-		Button<JQueryAndPlugins>,//
-		DatePicker<JQueryAndPlugins>,//
-		Dialog<JQueryAndPlugins>,//
-		Draggable<JQueryAndPlugins>,//
-		Droppable<JQueryAndPlugins>,//
-		Progressbar<JQueryAndPlugins>,//
-		Resizable<JQueryAndPlugins>,//
-		Selectable<JQueryAndPlugins>,//
-		Slider<JQueryAndPlugins>,//
-		Sortable<JQueryAndPlugins>,//
-		Tabs<JQueryAndPlugins>//
+public interface JQueryAndPlugins<FullJQuery extends JQueryAndPlugins<?>> extends JQuery<FullJQuery>, //
+		Accordion<FullJQuery>,//
+		AutoComplete<FullJQuery>,//
+		Button<FullJQuery>,//
+		DatePicker<FullJQuery>,//
+		Dialog<FullJQuery>,//
+		Draggable<FullJQuery>,//
+		Droppable<FullJQuery>,//
+		Progressbar<FullJQuery>,//
+		Resizable<FullJQuery>,//
+		Selectable<FullJQuery>,//
+		Slider<FullJQuery>,//
+		Sortable<FullJQuery>,//
+		Tabs<FullJQuery>//
 {
 
 }
