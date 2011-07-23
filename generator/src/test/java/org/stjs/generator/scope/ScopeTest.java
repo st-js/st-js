@@ -125,4 +125,14 @@ public class ScopeTest {
 	}
 
 	// TODO the same for methods with Declaration2
+	@Test
+	public void testMethodsSameName() throws ParseException, IOException {
+		try {
+			getNameResolver("test/SameNameMethods.java", Collections.singleton("java.text"));
+			fail("Expected " + JavascriptGenerationException.class);
+		} catch (JavascriptGenerationException ex) {
+			assertEquals(8, ex.getSourcePosition().getLine());
+			assertEquals(9, ex.getSourcePosition().getColumn());
+		}
+	}
 }

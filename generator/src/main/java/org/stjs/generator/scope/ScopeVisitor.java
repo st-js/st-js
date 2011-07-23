@@ -141,25 +141,26 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 	private NameScope visitTypeDeclaration(String name, List<BodyDeclaration> declarations, NameScope currentScope) {
 		TypeScope typeScope = new TypeScope(inputFile, name, currentScope);
 		for (BodyDeclaration member : declarations) {
+
 			if (member instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) member;
 				for (VariableDeclarator var : field.getVariables()) {
-					JavascriptKeywords.checkIdentifier(inputFile,
-							new SourcePosition(var.getBeginLine(), var.getBeginColumn()), var.getId().getName());
+					SourcePosition sourcePosition = new SourcePosition(var.getBeginLine(), var.getBeginColumn());
+					JavascriptKeywords.checkIdentifier(inputFile, sourcePosition, var.getId().getName());
 					if (ModifierSet.isStatic(field.getModifiers())) {
-						typeScope.addStaticField(var.getId().getName());
+						typeScope.addStaticField(var.getId().getName(), sourcePosition);
 					} else {
-						typeScope.addInstanceField(var.getId().getName());
+						typeScope.addInstanceField(var.getId().getName(), sourcePosition);
 					}
 				}
 			} else if (member instanceof MethodDeclaration) {
 				MethodDeclaration method = (MethodDeclaration) member;
-				JavascriptKeywords.checkMethod(inputFile,
-						new SourcePosition(method.getBeginLine(), method.getBeginColumn()), method.getName());
+				SourcePosition sourcePosition = new SourcePosition(method.getBeginLine(), method.getBeginColumn());
+				JavascriptKeywords.checkMethod(inputFile, sourcePosition, method.getName());
 				if (ModifierSet.isStatic(method.getModifiers())) {
-					typeScope.addStaticMethod(method.getName());
+					typeScope.addStaticMethod(method.getName(), sourcePosition);
 				} else {
-					typeScope.addInstanceMethod(method.getName());
+					typeScope.addInstanceMethod(method.getName(), sourcePosition);
 				}
 			} else if (member instanceof TypeDeclaration) {
 				TypeDeclaration type = (TypeDeclaration) member;

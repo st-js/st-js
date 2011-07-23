@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.handlers.utils.Function;
 import org.stjs.generator.scope.NameType.IdentifierName;
@@ -100,20 +101,28 @@ public class TypeScope extends NameScope {
 		return null;
 	}
 
-	public void addStaticField(String name) {
+	public void addStaticField(String name, SourcePosition sourcePosition) {
 		staticFields.add(name);
 	}
 
-	public void addStaticMethod(String name) {
-		staticMethods.add(name);
+	public void addStaticMethod(String name, SourcePosition sourcePosition) {
+		if (!staticMethods.add(name)) {
+			throw new JavascriptGenerationException(getInputFile(), sourcePosition,
+					"The type contains already a method called [" + name
+							+ "] with a different signature. Javascript cannot distinguish methods with the same name");
+		}
 	}
 
-	public void addInstanceField(String name) {
+	public void addInstanceField(String name, SourcePosition sourcePosition) {
 		instanceFields.add(name);
 	}
 
-	public void addInstanceMethod(String name) {
-		instanceMethods.add(name);
+	public void addInstanceMethod(String name, SourcePosition sourcePosition) {
+		if (!instanceMethods.add(name)) {
+			throw new JavascriptGenerationException(getInputFile(), sourcePosition,
+					"The type contains already a method called [" + name
+							+ "] with a different signature. Javascript cannot distinguish methods with the same name");
+		}
 	}
 
 	public void addInnerType(String name) {
