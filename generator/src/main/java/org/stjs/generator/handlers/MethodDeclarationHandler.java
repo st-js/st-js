@@ -34,10 +34,10 @@ public class MethodDeclarationHandler extends DefaultHandler {
 				if (GeneratorConstants.SPECIAL_THIS.equals(p.getId().getName())) {
 					continue;
 				}
-				p.accept(getRuleVisitor(), arg);
 				if (!first) {
 					getPrinter().print(", ");
 				}
+				p.accept(getRuleVisitor(), arg);
 				first = false;
 			}
 		}

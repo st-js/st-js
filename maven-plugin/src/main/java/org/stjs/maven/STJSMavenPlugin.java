@@ -90,6 +90,7 @@ public class STJSMavenPlugin extends AbstractMojo {
 
 	private ClassLoader getBuiltProjectClassLoader() throws MojoExecutionException {
 		try {
+			@SuppressWarnings("unchecked")
 			List<String> runtimeClasspathElements = project.getRuntimeClasspathElements();
 			URL[] runtimeUrls = new URL[runtimeClasspathElements.size()];
 			for (int i = 0; i < runtimeClasspathElements.size(); i++) {
@@ -189,6 +190,7 @@ public class STJSMavenPlugin extends AbstractMojo {
 	 * @return the list of Java source files to processed (those which are older than the corresponding Javascript
 	 *         file). The returned files are relative to the given source directory.
 	 */
+	@SuppressWarnings("unchecked")
 	private List<File> accumulateSources(File sourceDir) throws MojoExecutionException {
 		final List<File> result = new ArrayList<File>();
 		if (sourceDir == null) {
