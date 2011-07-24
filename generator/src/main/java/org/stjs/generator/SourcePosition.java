@@ -1,5 +1,7 @@
 package org.stjs.generator;
 
+import japa.parser.ast.Node;
+
 /**
  * This class indicated a position in a source file (line, column) where the given identifier starts.
  * 
@@ -13,6 +15,10 @@ public class SourcePosition {
 	public SourcePosition(int beginLine, int beginColumn) {
 		this.line = beginLine;
 		this.column = beginColumn;
+	}
+
+	public SourcePosition(Node node) {
+		this(node.getBeginLine(), node.getBeginColumn());
 	}
 
 	public int getLine() {

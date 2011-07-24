@@ -3,10 +3,13 @@
 <script src="${pageContext.request.contextPath}/js/stjs.js"" type="text/javascript"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/generated-js/org/stjs/examples/stock/StockApplication.js"" type="text/javascript"></script>
+<script src="${pageContext.request.contextPath}/generated-js/org/stjs/examples/stock/ExtendedStockApplication.js"" type="text/javascript"></script>
 
 <script language="javascript">
 onload=function(){
-	StockApplication.init();
+	new StockApplication("check constructor").init();
+	StockApplication.test2();
+	new ExtendedStockApplication("check constructor").test3("abc");
 }
 </script>
 </head>
@@ -25,5 +28,8 @@ onload=function(){
 <input type="text" id="newStock"><button id="addStock" type="submit">Add</button>
 <div>Last time: <span id="timestamp"></span></div>
 </form>
+<span id="test1"></span>
+<span id="test2"></span>
+<span id="test3"></span>
 </body>
 </html>

@@ -77,9 +77,8 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 				return;
 			}
 		}
-		throw new JavascriptGenerationException(inputFile, new SourcePosition(importDecl.getBeginLine(),
-				importDecl.getBeginColumn()), "The import declaration:" + importName
-				+ " is not part of the allowed packages");
+		throw new JavascriptGenerationException(inputFile, new SourcePosition(importDecl), "The import declaration:"
+				+ importName + " is not part of the allowed packages");
 	}
 
 	@Override
@@ -93,8 +92,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 		if (n.getVars() != null) {
 			VariableScope varScope = (VariableScope) currentScope;
 			for (VariableDeclarator var : n.getVars()) {
-				JavascriptKeywords.checkIdentifier(inputFile,
-						new SourcePosition(var.getBeginLine(), var.getBeginColumn()), var.getId().getName());
+				JavascriptKeywords.checkIdentifier(inputFile, new SourcePosition(var), var.getId().getName());
 				varScope.addVariable(var.getId().getName());
 			}
 		}
@@ -104,8 +102,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 
 	@Override
 	public void visit(CatchClause n, NameScope currentScope) {
-		JavascriptKeywords.checkIdentifier(inputFile, new SourcePosition(n.getBeginLine(), n.getBeginColumn()), n
-				.getExcept().getId().getName());
+		JavascriptKeywords.checkIdentifier(inputFile, new SourcePosition(n), n.getExcept().getId().getName());
 		super.visit(n, new ParameterScope(inputFile, "catch-" + n.getBeginLine(), currentScope, n.getExcept().getId()
 				.getName()));
 	}
@@ -115,8 +112,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 		ParameterScope scope = new ParameterScope(inputFile, "param-" + n.getBeginLine(), currentScope);
 		if (n.getParameters() != null) {
 			for (Parameter p : n.getParameters()) {
-				JavascriptKeywords.checkIdentifier(inputFile, new SourcePosition(p.getBeginLine(), p.getBeginColumn()),
-						p.getId().getName());
+				JavascriptKeywords.checkIdentifier(inputFile, new SourcePosition(p), p.getId().getName());
 				scope.addParameter(p.getId().getName());
 			}
 		}
@@ -145,7 +141,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 			if (member instanceof FieldDeclaration) {
 				FieldDeclaration field = (FieldDeclaration) member;
 				for (VariableDeclarator var : field.getVariables()) {
-					SourcePosition sourcePosition = new SourcePosition(var.getBeginLine(), var.getBeginColumn());
+					SourcePosition sourcePosition = new SourcePosition(var);
 					JavascriptKeywords.checkIdentifier(inputFile, sourcePosition, var.getId().getName());
 					if (ModifierSet.isStatic(field.getModifiers())) {
 						typeScope.addStaticField(var.getId().getName(), sourcePosition);
@@ -155,7 +151,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 				}
 			} else if (member instanceof MethodDeclaration) {
 				MethodDeclaration method = (MethodDeclaration) member;
-				SourcePosition sourcePosition = new SourcePosition(method.getBeginLine(), method.getBeginColumn());
+				SourcePosition sourcePosition = new SourcePosition(method);
 				JavascriptKeywords.checkMethod(inputFile, sourcePosition, method.getName());
 				if (ModifierSet.isStatic(method.getModifiers())) {
 					typeScope.addStaticMethod(method.getName(), sourcePosition);
@@ -182,8 +178,10 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 	@Override
 	public void visit(ConstructorDeclaration n, NameScope currentScope) {
 		ParameterScope paramScope = new ParameterScope(inputFile, "constructor-" + n.getBeginLine(), currentScope);
-		for (Parameter p : n.getParameters()) {
-			paramScope.addParameter(p.getId().getName());
+		if (n.getParameters() != null) {
+			for (Parameter p : n.getParameters()) {
+				paramScope.addParameter(p.getId().getName());
+			}
 		}
 		super.visit(n, paramScope);
 	}

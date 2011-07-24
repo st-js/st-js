@@ -6,4 +6,7 @@ public class ParentDeclaration1 {
 	protected int parentProtected;
 	int parentPackage;
 	public int parentPublic;
+
+	public void method(String param1) {
+	}
 }

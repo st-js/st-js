@@ -17,6 +17,10 @@ import org.stjs.javascript.jquery.SuccessListener;
 public class StockApplication {
 	private Array<String> stocks = $array();
 
+	public StockApplication(String test) {
+		$("#test1").text(test);
+	}
+
 	public void init() {
 		final StockApplication that = this;
 		// add stock
@@ -26,7 +30,6 @@ public class StockApplication {
 				that.updateStock($("#newStock").val(), new SuccessListener() {
 					@Override
 					public void onSuccess(Object data) {
-						String xid = THIS.id;
 						StockData stockData = (StockData) data;
 						$(that.generateRow(stockData)).appendTo("table tbody");
 						that.stocks.push(stockData.stock);
@@ -100,4 +103,11 @@ public class StockApplication {
 		return tr;
 	}
 
+	public static void test2() {
+		$("#test2").text("check static");
+	}
+
+	public void test3(String n) {
+		$("#test3").text(n);
+	}
 }

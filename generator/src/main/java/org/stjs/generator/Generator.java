@@ -58,8 +58,12 @@ public class Generator {
 
 		ruleVisitor
 				.addRule(rule("Method", "//MethodDeclaration", 100, new MethodDeclarationHandler(ruleVisitor, false)));
+		ruleVisitor.addRule(rule("Constrctor", "//ConstructorDeclaration", 100, new MethodDeclarationHandler(
+				ruleVisitor, true)));
 		ruleVisitor.addRule(rule("Method Params", "//MethodDeclaration/Parameter", 100, new MethodDeclarationHandler(
 				ruleVisitor, false)));
+		ruleVisitor.addRule(rule("Method Params", "//ConstructorDeclaration/Parameter", 100,
+				new MethodDeclarationHandler(ruleVisitor, false)));
 		ruleVisitor.addRule(rule("Class/Interface Declaration", "//ClassOrInterfaceDeclaration", 100,
 				new ClassOrInterfaceDeclarationHandler(ruleVisitor)));
 
@@ -99,6 +103,8 @@ public class Generator {
 		ruleVisitor.addRule(rule("Identifiers", "//NameExpr", 100, new NameResolverHandler(ruleVisitor)));
 
 		ruleVisitor.addRule(rule("Method calls", "//MethodCallExpr", 100, new NameResolverHandler(ruleVisitor)));
+		ruleVisitor.addRule(rule("Constructor Calls", "//ExplicitConstructorInvocationStmt", 100,
+				new NameResolverHandler(ruleVisitor)));
 
 		// loops
 		ruleVisitor.addRule(rule("For Each", "//ForeachStmt", 100, new LoopHandler(ruleVisitor)));

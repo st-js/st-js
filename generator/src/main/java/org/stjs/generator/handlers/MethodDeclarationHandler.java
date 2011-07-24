@@ -1,9 +1,12 @@
 package org.stjs.generator.handlers;
 
+import japa.parser.ast.body.ConstructorDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.body.Parameter;
+import japa.parser.ast.stmt.BlockStmt;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.stjs.generator.GenerationContext;
 
@@ -15,20 +18,19 @@ public class MethodDeclarationHandler extends DefaultHandler {
 		this.anonymous = anonymous;
 	}
 
-	@Override
-	public void visit(MethodDeclaration n, GenerationContext arg) {
+	private void printMethod(String name, List<Parameter> parameters, BlockStmt body, GenerationContext arg) {
 		getPrinter().print(" ");
 		if (anonymous) {
 			getPrinter().print("function");
 		} else {
-			getPrinter().print(n.getName());
+			getPrinter().print(name);
 			getPrinter().print(": function");
 		}
 
 		getPrinter().print("(");
-		if (n.getParameters() != null) {
+		if (parameters != null) {
 			boolean first = true;
-			for (Iterator<Parameter> i = n.getParameters().iterator(); i.hasNext();) {
+			for (Iterator<Parameter> i = parameters.iterator(); i.hasNext();) {
 				Parameter p = i.next();
 				// don't display the special THIS parameter
 				if (GeneratorConstants.SPECIAL_THIS.equals(p.getId().getName())) {
@@ -43,12 +45,22 @@ public class MethodDeclarationHandler extends DefaultHandler {
 		}
 		getPrinter().print(")");
 		// skip throws
-		if (n.getBody() == null) {
+		if (body == null) {
 			getPrinter().print(";");
 		} else {
 			getPrinter().print(" ");
-			n.getBody().accept(getRuleVisitor(), arg);
+			body.accept(getRuleVisitor(), arg);
 		}
+	}
+
+	@Override
+	public void visit(MethodDeclaration n, GenerationContext arg) {
+		printMethod(n.getName(), n.getParameters(), n.getBody(), arg);
+	}
+
+	@Override
+	public void visit(ConstructorDeclaration n, GenerationContext arg) {
+		printMethod(n.getName(), n.getParameters(), n.getBlock(), arg);
 	}
 
 	@Override

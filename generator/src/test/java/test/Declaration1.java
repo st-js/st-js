@@ -27,4 +27,5 @@ public class Declaration1 extends ParentDeclaration1 {
 		};
 		int exp6 = parentPrivate + parentProtected + parentPackage + parentPublic;
 	}
+
 }

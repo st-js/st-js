@@ -112,6 +112,7 @@ public class SpecialMethodHandlers {
 
 	private void printScope(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 			GenerationContext context, boolean withDot) {
+		// TODO -> handle super
 		if (qname != null && TypeScope.THIS_SCOPE.equals(qname.getScope())) {
 			currentHandler.getPrinter().print("this");
 			if (withDot) {

@@ -122,7 +122,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 	public void visit(MethodCallExpr n, NameScopeWalker currentScope) {
 		if (n.getScope() == null) {
 			// only for methods without a scope
-			SourcePosition pos = new SourcePosition(n.getBeginLine(), n.getBeginColumn());
+			SourcePosition pos = new SourcePosition(n);
 			QualifiedName<MethodName> qname = currentScope.getScope().resolveMethod(pos, n.getName());
 			if (qname != null) {
 				if (TypeScope.OUTER_SCOPE.equals(qname.getScopeName())) {
@@ -140,7 +140,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 
 	@Override
 	public void visit(FieldAccessExpr n, NameScopeWalker currentScope) {
-		SourcePosition pos = new SourcePosition(n.getBeginLine(), n.getBeginColumn());
+		SourcePosition pos = new SourcePosition(n);
 		// try to figure out if it's variable.field or Package.Class.field
 		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(pos, getFirstScope(n));
 		if (qname == null) {
@@ -174,14 +174,13 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 				return;
 			}
 		}
-		throw new JavascriptGenerationException(currentScope.getScope().getInputFile(), new SourcePosition(
-				n.getBeginLine(), n.getBeginColumn()), "The qualified name:" + importName
-				+ " is not part of the allowed packages");
+		throw new JavascriptGenerationException(currentScope.getScope().getInputFile(), new SourcePosition(n),
+				"The qualified name:" + importName + " is not part of the allowed packages");
 	}
 
 	@Override
 	public void visit(NameExpr n, NameScopeWalker currentScope) {
-		SourcePosition pos = new SourcePosition(n.getBeginLine(), n.getBeginColumn());
+		SourcePosition pos = new SourcePosition(n);
 		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(pos, n.getName());
 		if (qname != null) {
 			if (TypeScope.OUTER_SCOPE.equals(qname.getScopeName())) {
