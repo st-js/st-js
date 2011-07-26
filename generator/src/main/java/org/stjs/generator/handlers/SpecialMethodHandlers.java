@@ -22,6 +22,9 @@ public class SpecialMethodHandlers {
 
 	private Map<String, SpecialMethodHandler> methodHandlers = new HashMap<String, SpecialMethodHandler>();
 
+	private final String[] adapterNames = { "org.stjs.javascript.JSNumberAdapter",
+			"org.stjs.javascript.JSStringAdapter" };
+
 	public SpecialMethodHandlers() {
 		// array.$get(x) -> array[x]
 		methodHandlers.put("$get", new SpecialMethodHandler() {
@@ -136,6 +139,15 @@ public class SpecialMethodHandlers {
 			return true;
 		}
 
+		if (qname != null && qname.getScopeName() != null && n.getArgs() != null && n.getArgs().size() > 0) {
+			for (String adapterName : adapterNames) {
+				if (qname.getScopeName().startsWith(adapterName)) {
+					adapterMethod(currentHandler, n, qname, context);
+					return true;
+				}
+			}
+		}
+
 		if (n.getName().length() <= SPECIAL_PREFIX.length() || !n.getName().startsWith(SPECIAL_PREFIX)) {
 			return false;
 		}
@@ -144,7 +156,48 @@ public class SpecialMethodHandlers {
 		if (n.getArgs() != null && n.getArgs().size() > 1) {
 			return false;
 		}
+		methodToProperty(currentHandler, n, qname, context);
+		return true;
+	}
 
+	/**
+	 * converts a toFixed(x, 2) => x.toFixed(2)
+	 * 
+	 * @param currentHandler
+	 * @param n
+	 * @param qname
+	 * @param context
+	 */
+	private void adapterMethod(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+			GenerationContext context) {
+		n.getArgs().get(0).accept(currentHandler.getRuleVisitor(), context);
+		// TODO may add paranthesis here
+		currentHandler.getPrinter().print(".");
+		currentHandler.getPrinter().print(n.getName());
+		currentHandler.getPrinter().print("(");
+		boolean first = true;
+		for (int i = 1; i < n.getArgs().size(); ++i) {
+			Expression arg = n.getArgs().get(i);
+			if (!first) {
+				currentHandler.getPrinter().print(", ");
+			}
+			arg.accept(currentHandler.getRuleVisitor(), context);
+			first = false;
+		}
+		currentHandler.getPrinter().print(")");
+	}
+
+	/**
+	 * $method() => $method and <br>
+	 * $method(x) => $method = x
+	 * 
+	 * @param currentHandler
+	 * @param n
+	 * @param qname
+	 * @param context
+	 */
+	private void methodToProperty(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+			GenerationContext context) {
 		printScope(currentHandler, n, qname, context, true);
 		if (n.getArgs() == null || n.getArgs().size() == 0) {
 			currentHandler.getPrinter().print(n.getName().substring(1));
@@ -153,7 +206,6 @@ public class SpecialMethodHandlers {
 			currentHandler.getPrinter().print(" = ");
 			n.getArgs().get(0).accept(currentHandler.getRuleVisitor(), context);
 		}
-		return true;
 	}
 
 	private interface SpecialMethodHandler {
