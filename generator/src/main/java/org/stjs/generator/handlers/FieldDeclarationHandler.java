@@ -24,10 +24,10 @@ public class FieldDeclarationHandler extends DefaultHandler {
 	public void visit(VariableDeclarator n, GenerationContext arg) {
 		n.getId().accept(getRuleVisitor(), arg);
 		if (n.getInit() != null) {
-			getPrinter().print(":  ");
+			getPrinter().print(" = ");
 			n.getInit().accept(getRuleVisitor(), arg);
 		} else {
-			getPrinter().print(": null");
+			getPrinter().print(" = null");
 		}
 	}
 

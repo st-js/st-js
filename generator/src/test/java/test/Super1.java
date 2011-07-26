@@ -1,13 +1,13 @@
 package test;
 
-public class Super1 extends ParentDeclaration1 {
+public class Super1 extends Base1 {
 	public Super1() {
-		super();
+		super("abc");
 	}
 
 	@Override
-	public void method(String param1) {
-		super.method(param1);
+	public String method(String param1) {
+		return super.method(param1);
 	}
 
 }

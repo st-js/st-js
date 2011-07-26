@@ -19,12 +19,11 @@ public class MethodDeclarationHandler extends DefaultHandler {
 	}
 
 	private void printMethod(String name, List<Parameter> parameters, BlockStmt body, GenerationContext arg) {
-		getPrinter().print(" ");
 		if (anonymous) {
 			getPrinter().print("function");
 		} else {
 			getPrinter().print(name);
-			getPrinter().print(": function");
+			getPrinter().print(" = function");
 		}
 
 		getPrinter().print("(");

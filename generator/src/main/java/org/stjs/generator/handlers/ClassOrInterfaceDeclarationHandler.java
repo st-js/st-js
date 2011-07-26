@@ -29,22 +29,20 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 		return 0;
 	}
 
-	private void printMembers(List<BodyDeclaration> members, GenerationContext arg, boolean staticFields) {
-		boolean first = true;
+	private void printMembers(String className, List<BodyDeclaration> members, GenerationContext arg) {
 		for (int i = 0; i < members.size(); ++i) {
 			BodyDeclaration member = members.get(i);
 			if (member instanceof ConstructorDeclaration) {
 				continue;
 			}
-			int memberModifiers = getModifiers(member);
-			if (ModifierSet.isStatic(memberModifiers) != staticFields) {
-				continue;
-			}
-			if (!first) {
-				getPrinter().print(",");
-			}
-			first = false;
 			getPrinter().printLn();
+			getPrinter().printLn();
+			int memberModifiers = getModifiers(member);
+			getPrinter().print(className);
+			if (!ModifierSet.isStatic(memberModifiers)) {
+				getPrinter().print(".prototype");
+			}
+			getPrinter().print(".");
 			member.accept(getRuleVisitor(), arg);
 		}
 	}
@@ -67,34 +65,22 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 	@Override
 	public void visit(ClassOrInterfaceDeclaration n, GenerationContext arg) {
 		// TODO how to handle interfaces !?
-		getPrinter().print(n.getName());
+		getPrinter().print(n.getName() + " = ");
 
-		getPrinter().print("= stjs.define(");
-		if (n.getExtends() != null && n.getExtends().size() > 0) {
-			getPrinter().print(n.getExtends().get(0).getName());
-		} else {
-			getPrinter().print("null");
-		}
-		getPrinter().printLn(",");
 		if (n.getMembers() != null) {
-			getPrinter().indent();
-			getPrinter().printLn(" // constructor");
 			ConstructorDeclaration constr = getConstructor(n.getMembers(), arg);
 			if (constr != null) {
 				constr.accept(getRuleVisitor(), arg);
 			} else {
 				getPrinter().printLn("function(){}");
 			}
-			getPrinter().printLn(", {");
-			getPrinter().printLn("// instance methods and fields");
-			printMembers(n.getMembers(), arg, false);
-			getPrinter().printLn("},{ ");
-			getPrinter().printLn("// static methods and fields");
-			printMembers(n.getMembers(), arg, true);
-			getPrinter().printLn("}");
-			getPrinter().unindent();
+
+			if (n.getExtends() != null && n.getExtends().size() > 0) {
+				getPrinter().printLn();
+				getPrinter().printLn("stjs.extend(" + n.getName() + ", " + n.getExtends().get(0).getName() + ");");
+			}
+			printMembers(n.getName(), n.getMembers(), arg);
 		}
-		getPrinter().printLn(");");
 	}
 
 }
