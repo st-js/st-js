@@ -1,6 +1,7 @@
 package org.stjs.generator.scope;
 
 import japa.parser.ast.CompilationUnit;
+import japa.parser.ast.Node;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
 import japa.parser.ast.body.EnumDeclaration;
@@ -13,16 +14,20 @@ import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.stmt.CatchClause;
 import japa.parser.ast.stmt.ForStmt;
 import japa.parser.ast.stmt.ForeachStmt;
+import japa.parser.ast.type.ClassOrInterfaceType;
+import japa.parser.ast.type.PrimitiveType;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
+import org.stjs.generator.scope.NameType.TypeName;
 
 /**
  * This visitor goes through the AST and resolves all the found identifiers using the {@link NameScopeWalker} previously
@@ -38,9 +43,13 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 	private final NameScope rootScope;
 	private final Collection<String> allowedPackages;
 
-	public NameResolverVisitor(NameScope rootScope, Collection<String> allowedPackages) {
+	private final Set<String> allowedJavaLangClasses;
+
+	public NameResolverVisitor(NameScope rootScope, Collection<String> allowedPackages,
+			Set<String> allowedJavaLangClasses) {
 		this.rootScope = rootScope;
 		this.allowedPackages = allowedPackages;
+		this.allowedJavaLangClasses = allowedJavaLangClasses;
 	}
 
 	public NameScope getRootScope() {
@@ -144,7 +153,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		// try to figure out if it's variable.field or Package.Class.field
 		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(pos, getFirstScope(n));
 		if (qname == null) {
-			checkImport(n, currentScope);
+			checkImport(n, n.getScope().toString(), currentScope);
 			qname = currentScope.getScope().resolveIdentifier(pos, n.toString());
 		}
 		if (qname != null) {
@@ -164,14 +173,21 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 	 * 
 	 * @param importDecl
 	 */
-	private void checkImport(FieldAccessExpr n, NameScopeWalker currentScope) throws JavascriptGenerationException {
-		String importName = n.getScope().toString();
+	private void checkImport(Node n, String importName, NameScopeWalker currentScope)
+			throws JavascriptGenerationException {
 		if (importName.equals("this")) {
 			return;
 		}
-		for (String allowedPackage : allowedPackages) {
-			if (importName.startsWith(allowedPackage)) {
+		if (importName.startsWith("java.lang.")) {
+			String checkClass = importName.substring("java.lang.".length());
+			if (allowedJavaLangClasses.contains(checkClass)) {
 				return;
+			}
+		} else {
+			for (String allowedPackage : allowedPackages) {
+				if (importName.startsWith(allowedPackage)) {
+					return;
+				}
 			}
 		}
 		throw new JavascriptGenerationException(currentScope.getScope().getInputFile(), new SourcePosition(n),
@@ -195,4 +211,27 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		super.visit(n, currentScope);
 	}
 
+	@Override
+	public void visit(ClassOrInterfaceType n, NameScopeWalker currentScope) {
+		SourcePosition pos = new SourcePosition(n);
+		StringBuilder fullName = new StringBuilder(n.getName());
+		for (ClassOrInterfaceType t = n.getScope(); t != null; t = t.getScope()) {
+			fullName.insert(0, t.getName() + ".");
+		}
+		if (n.getScope() == null) {
+			// not fully-specified classes
+			QualifiedName<TypeName> qname = currentScope.getScope().resolveType(pos, n.getName());
+			if (qname != null) {
+				fullName = new StringBuilder(qname.getName());
+			}
+		}
+		checkImport(n, fullName.toString(), currentScope);
+
+		super.visit(n, currentScope);
+	}
+
+	@Override
+	public void visit(PrimitiveType n, NameScopeWalker currentScope) {
+		super.visit(n, currentScope);
+	}
 }

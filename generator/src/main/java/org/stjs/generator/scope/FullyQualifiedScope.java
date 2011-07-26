@@ -7,6 +7,7 @@ import java.util.Map;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
+import org.stjs.generator.scope.NameType.TypeName;
 
 /**
  * This scope tries to resolve only fully qualified names by looking in the classpath for the corresponding type.
@@ -76,6 +77,16 @@ public class FullyQualifiedScope extends NameScope {
 			resolvedClasses.put(className, NOT_FOUND_CLASS);
 			return null;
 		}
+	}
+
+	@Override
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
+		Class<?> clazz = resolveClass(name);
+		if (clazz != null) {
+			return new QualifiedName<NameType.TypeName>(null, clazz.getName(), this);
+		}
+		System.out.println("NOT found type:" + name);
+		return null;
 	}
 
 }

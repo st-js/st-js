@@ -1,12 +1,15 @@
 package org.stjs.generator;
 
 import java.util.Collection;
+import java.util.Set;
 
 public class GeneratorConfiguration {
 	private final Collection<String> allowedPackages;
+	private final Set<String> allowedJavaLangClasses;
 
-	GeneratorConfiguration(Collection<String> allowedPackages) {
+	GeneratorConfiguration(Collection<String> allowedPackages, Set<String> allowedJavaLangClasses) {
 		this.allowedPackages = allowedPackages;
+		this.allowedJavaLangClasses = allowedJavaLangClasses;
 	}
 
 	/**
@@ -16,6 +19,10 @@ public class GeneratorConfiguration {
 	 */
 	public Collection<String> getAllowedPackages() {
 		return allowedPackages;
+	}
+
+	public Set<String> getAllowedJavaLangClasses() {
+		return allowedJavaLangClasses;
 	}
 
 }

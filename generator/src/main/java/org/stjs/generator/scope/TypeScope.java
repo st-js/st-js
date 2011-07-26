@@ -12,6 +12,7 @@ import org.stjs.generator.SourcePosition;
 import org.stjs.generator.handlers.utils.Function;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
+import org.stjs.generator.scope.NameType.TypeName;
 
 /**
  * This scope is for a class definition. It contains the name of the fields and methods
@@ -146,6 +147,14 @@ public class TypeScope extends NameScope {
 	@Override
 	public Set<QualifiedName<MethodName>> getOwnMethods() {
 		return transform(union(staticMethods, instanceMethods), new ToQualifiedName<MethodName>());
+	}
+
+	@Override
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
+		if (getParent() != null) {
+			return getParent().resolveType(pos, name, currentScope);
+		}
+		return null;
 	}
 
 	@Override

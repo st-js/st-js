@@ -137,7 +137,8 @@ public class Generator {
 			scopes.visit(cu, rootScope);
 
 			// resolve all the calls to methods and variables
-			NameResolverVisitor resolver = new NameResolverVisitor(rootScope, configuration.getAllowedPackages());
+			NameResolverVisitor resolver = new NameResolverVisitor(rootScope, configuration.getAllowedPackages(),
+					configuration.getAllowedJavaLangClasses());
 			resolver.visit(cu, new NameScopeWalker(rootScope));
 
 			System.out.println("----------------------------");

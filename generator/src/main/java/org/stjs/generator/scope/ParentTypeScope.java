@@ -9,6 +9,7 @@ import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
+import org.stjs.generator.scope.NameType.TypeName;
 
 /**
  * This scope is for fields and methods inherited from a parent type.
@@ -113,6 +114,14 @@ public class ParentTypeScope extends NameScope {
 
 		if (parentClass.getSuperclass() != null) {
 			return getAccesibleField(parentClass.getSuperclass(), name);
+		}
+		return null;
+	}
+
+	@Override
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
+		if (getParent() != null) {
+			return getParent().resolveType(pos, name, currentScope);
 		}
 		return null;
 	}

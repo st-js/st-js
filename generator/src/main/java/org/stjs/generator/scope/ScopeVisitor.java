@@ -2,6 +2,7 @@ package org.stjs.generator.scope;
 
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
+import japa.parser.ast.Node;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
@@ -50,6 +51,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 		this.classLoader = classLoader;
 		this.inputFile = inputFile;
 		this.allowedPackages = allowedPackages;
+
 	}
 
 	@Override
@@ -58,7 +60,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 				.toString() : null, classLoader);
 		if (n.getImports() != null) {
 			for (ImportDeclaration importDecl : n.getImports()) {
-				checkImport(importDecl);
+				checkImport(importDecl, importDecl.getName().toString());
 				scope.addImport(importDecl.getName().toString(), importDecl.isStatic(), importDecl.isAsterisk());
 			}
 		}
@@ -70,14 +72,13 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 	 * 
 	 * @param importDecl
 	 */
-	private void checkImport(ImportDeclaration importDecl) throws JavascriptGenerationException {
-		String importName = importDecl.getName().toString();
+	private void checkImport(Node n, String importName) throws JavascriptGenerationException {
 		for (String allowedPackage : allowedPackages) {
 			if (importName.startsWith(allowedPackage)) {
 				return;
 			}
 		}
-		throw new JavascriptGenerationException(inputFile, new SourcePosition(importDecl), "The import declaration:"
+		throw new JavascriptGenerationException(inputFile, new SourcePosition(n), "The import declaration:"
 				+ importName + " is not part of the allowed packages");
 	}
 

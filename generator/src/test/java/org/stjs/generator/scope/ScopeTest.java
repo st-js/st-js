@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
@@ -29,13 +30,19 @@ public class ScopeTest {
 		cu = JavaParser.parse(Thread.currentThread().getContextClassLoader().getResourceAsStream(clazz));
 		Collection<String> packages = new HashSet<String>(allowedPackages);
 		packages.add("test");
+		packages.add("java.lang");
+		Set<String> javaLangClasses = new HashSet<String>();
+		javaLangClasses.add("String");
+		javaLangClasses.add("Number");
+		javaLangClasses.add("Runnable");
+		javaLangClasses.add("Object");
 		ScopeVisitor scopes = new ScopeVisitor(new File(clazz), Thread.currentThread().getContextClassLoader(),
 				packages);
 		NameScope rootScope = new FullyQualifiedScope(new File(clazz), Thread.currentThread().getContextClassLoader());
 		scopes.visit(cu, rootScope);
 		// rootScope.dump("");
 
-		NameResolverVisitor resolver = new NameResolverVisitor(rootScope, packages);
+		NameResolverVisitor resolver = new NameResolverVisitor(rootScope, packages, javaLangClasses);
 		resolver.visit(cu, new NameScopeWalker(rootScope));
 
 		// dumpXML(cu);
@@ -114,13 +121,57 @@ public class ScopeTest {
 	}
 
 	@Test
-	public void testIllegalImport() throws ParseException, IOException {
+	public void testIllegalImport1() throws ParseException, IOException {
 		try {
-			getNameResolver("test/CheckPackages.java", Collections.singleton("java.text"));
+			getNameResolver("test/CheckPackages1.java", Collections.singleton("java.text"));
 			fail("Expected " + JavascriptGenerationException.class);
 		} catch (JavascriptGenerationException ex) {
 			assertEquals(4, ex.getSourcePosition().getLine());
 			assertEquals(1, ex.getSourcePosition().getColumn());
+		}
+	}
+
+	@Test
+	public void testIllegalImport2() throws ParseException, IOException {
+		try {
+			getNameResolver("test/CheckPackages2.java", Collections.singleton("java.text"));
+			fail("Expected " + JavascriptGenerationException.class);
+		} catch (JavascriptGenerationException ex) {
+			assertEquals(9, ex.getSourcePosition().getLine());
+			assertEquals(17, ex.getSourcePosition().getColumn());
+		}
+	}
+
+	@Test
+	public void testIllegalImport3() throws ParseException, IOException {
+		try {
+			getNameResolver("test/CheckPackages3.java", Collections.singleton("java.text"));
+			fail("Expected " + JavascriptGenerationException.class);
+		} catch (JavascriptGenerationException ex) {
+			assertEquals(6, ex.getSourcePosition().getLine());
+			assertEquals(28, ex.getSourcePosition().getColumn());
+		}
+	}
+
+	@Test
+	public void testIllegalImport4() throws ParseException, IOException {
+		try {
+			getNameResolver("test/CheckPackages4.java", Collections.singleton("java.text"));
+			fail("Expected " + JavascriptGenerationException.class);
+		} catch (JavascriptGenerationException ex) {
+			assertEquals(6, ex.getSourcePosition().getLine());
+			assertEquals(32, ex.getSourcePosition().getColumn());
+		}
+	}
+
+	@Test
+	public void testIllegalImport5() throws ParseException, IOException {
+		try {
+			getNameResolver("test/CheckPackages5.java", Collections.singleton("java.text"));
+			fail("Expected " + JavascriptGenerationException.class);
+		} catch (JavascriptGenerationException ex) {
+			assertEquals(6, ex.getSourcePosition().getLine());
+			assertEquals(32, ex.getSourcePosition().getColumn());
 		}
 	}
 

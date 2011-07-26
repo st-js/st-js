@@ -12,6 +12,7 @@ import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
+import org.stjs.generator.scope.NameType.TypeName;
 
 /**
  * This scope tries to solve the methods inside the static imports and the identifiers (that can be the name of a class)
@@ -120,6 +121,18 @@ public class ImportScope extends NameScope {
 	}
 
 	@Override
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
+		Class<?> clazz = resolveClass(pos, name);
+		if (clazz != null) {
+			return new QualifiedName<NameType.TypeName>(null, clazz.getName(), this);
+		}
+		if (getParent() != null) {
+			return getParent().resolveType(pos, name, currentScope);
+		}
+		return null;
+	}
+
+	@Override
 	public String toString() {
 		return "ImportScope [getChildren()=" + getChildren() + "]";
 	}
@@ -158,14 +171,15 @@ public class ImportScope extends NameScope {
 
 		// 3. scan all the exact imports (TODO order may be important between star and not star!!)
 		for (String imp : exactImports) {
-			try {
-				if (imp.endsWith("." + className)) {
+			if (imp.endsWith("." + className)) {
+				try {
 					resolvedClass = classLoader.loadClass(imp);
-				}
-				resolvedClasses.put(className, resolvedClass);
-				return resolvedClass;
-			} catch (ClassNotFoundException e) {
 
+					resolvedClasses.put(className, resolvedClass);
+					return resolvedClass;
+				} catch (ClassNotFoundException e) {
+
+				}
 			}
 		}
 		// 4. scan all the star imports (TODO order may be important between star and not star!!)
@@ -177,6 +191,15 @@ public class ImportScope extends NameScope {
 			} catch (ClassNotFoundException e) {
 
 			}
+		}
+
+		// 5. try java.lang
+		try {
+			resolvedClass = classLoader.loadClass("java.lang." + className);
+			resolvedClasses.put(className, resolvedClass);
+			return resolvedClass;
+		} catch (ClassNotFoundException e) {
+			// next
 		}
 		throw new JavascriptGenerationException(getInputFile(), pos, "Cannot load class:" + className);
 	}

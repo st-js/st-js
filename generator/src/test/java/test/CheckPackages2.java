@@ -1,13 +1,11 @@
 package test;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
 
-public class CheckPackages {
+public class CheckPackages2 {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		DecimalFormat fmt = new DecimalFormat();
-		List<String> list = new ArrayList<String>();
+		java.util.List<String> list = null;
 	}
 }

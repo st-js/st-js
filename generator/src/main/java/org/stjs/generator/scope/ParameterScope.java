@@ -7,6 +7,7 @@ import java.util.Set;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
+import org.stjs.generator.scope.NameType.TypeName;
 
 /**
  * This scope is for the a method's parameters.
@@ -45,6 +46,7 @@ public class ParameterScope extends NameScope {
 
 	@Override
 	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
+
 		if (getParent() != null) {
 			return getParent().resolveMethod(pos, name, currentScope);
 		}
@@ -54,5 +56,13 @@ public class ParameterScope extends NameScope {
 	@Override
 	public String toString() {
 		return "ParameterScope [parameters=" + parameters + ", getChildren()=" + getChildren() + "]";
+	}
+
+	@Override
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
+		if (getParent() != null) {
+			return getParent().resolveType(pos, name, currentScope);
+		}
+		return null;
 	}
 }
