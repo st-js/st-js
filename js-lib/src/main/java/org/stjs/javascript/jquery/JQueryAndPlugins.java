@@ -18,7 +18,7 @@ package org.stjs.javascript.jquery;
 import org.stjs.javascript.jquery.plugins.Accordion;
 import org.stjs.javascript.jquery.plugins.AutoComplete;
 import org.stjs.javascript.jquery.plugins.Button;
-import org.stjs.javascript.jquery.plugins.DatePicker;
+import org.stjs.javascript.jquery.plugins.Datepicker;
 import org.stjs.javascript.jquery.plugins.Dialog;
 import org.stjs.javascript.jquery.plugins.Draggable;
 import org.stjs.javascript.jquery.plugins.Droppable;
@@ -40,7 +40,7 @@ public interface JQueryAndPlugins<FullJQuery extends JQueryAndPlugins<?>> extend
 		Accordion<FullJQuery>,//
 		AutoComplete<FullJQuery>,//
 		Button<FullJQuery>,//
-		DatePicker<FullJQuery>,//
+		Datepicker<FullJQuery>,//
 		Dialog<FullJQuery>,//
 		Draggable<FullJQuery>,//
 		Droppable<FullJQuery>,//
