@@ -33,6 +33,8 @@ import org.stjs.generator.GeneratorConfigurationBuilder;
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class STJSMavenPlugin extends AbstractMojo {
+	private static final String AUTO_ROOT_PACKAGE = "auto";
+
 	/**
 	 * @parameter expression="${project}"
 	 * @required
@@ -88,6 +90,17 @@ public class STJSMavenPlugin extends AbstractMojo {
 	 */
 	private int staleMillis;
 
+	/**
+	 * 
+	 * @return the part of the packages for which the folder will not be generated. For example if the value is
+	 *         org.stjs.javascript, for all the classes in the org.stjsjavascript package the javascript files will be
+	 *         generated directly in the {@link #generatedSourcesDirectory}. If the value is "auto", it will be used the
+	 *         longest package without at least class. If the value is empty (or null) the full packages structure is
+	 *         generated
+	 * @parameter
+	 */
+	private String rootPackage = null;
+
 	private ClassLoader getBuiltProjectClassLoader() throws MojoExecutionException {
 		try {
 			@SuppressWarnings("unchecked")
@@ -103,6 +116,13 @@ public class STJSMavenPlugin extends AbstractMojo {
 		}
 	}
 
+	private String getRelativeTarget(String targetRootPath, String sourcePath) {
+		if (sourcePath.startsWith(targetRootPath)) {
+			return sourcePath.substring(targetRootPath.length());
+		}
+		return sourcePath;
+	}
+
 	public void execute() throws MojoExecutionException {
 		getLog().info("Generating javascript files");
 		ClassLoader builtProjectClassLoader = getBuiltProjectClassLoader();
@@ -113,11 +133,27 @@ public class STJSMavenPlugin extends AbstractMojo {
 		if (allowedPackages != null) {
 			configBuilder.allowedPackages(allowedPackages);
 		}
+
+		String targetRootPackage = rootPackage;
+		boolean autoRootPackage = AUTO_ROOT_PACKAGE.equals(targetRootPackage);
+
 		// scan all the packages
 		for (String sourceRoot : compileSourceRoots) {
 			File sourceDir = new File(sourceRoot);
-			configBuilder.allowedPackages(accumulatePackages(sourceDir));
+			Collection<String> packages = accumulatePackages(sourceDir);
+			configBuilder.allowedPackages(packages);
+			if (autoRootPackage) {
+				for (String pack : packages) {
+					if (targetRootPackage.equals(AUTO_ROOT_PACKAGE)) {
+						targetRootPackage = pack;
+					} else {
+						targetRootPackage = maximumCommonPackage(targetRootPackage, pack);
+					}
+				}
+			}
 		}
+
+		String targetRootPath = targetRootPackage != null ? targetRootPackage.replace('.', File.separatorChar) : "";
 
 		// scan the modified sources
 		for (String sourceRoot : compileSourceRoots) {
@@ -127,8 +163,9 @@ public class STJSMavenPlugin extends AbstractMojo {
 			for (File source : sources) {
 				try {
 					File absoluteSource = new File(sourceDir, source.getPath());
-					File absoluteTarget = (File) mapping.getTargetFiles(generatedSourcesDirectory, source.getPath())
-							.iterator().next();
+					File absoluteTarget = (File) mapping
+							.getTargetFiles(generatedSourcesDirectory,
+									getRelativeTarget(targetRootPath, source.getPath())).iterator().next();
 					getLog().info("Generating " + absoluteTarget);
 					if (!absoluteTarget.getParentFile().exists() && !absoluteTarget.getParentFile().mkdirs()) {
 						getLog().error("Cannot create output directory:" + absoluteTarget.getParentFile());
@@ -148,6 +185,26 @@ public class STJSMavenPlugin extends AbstractMojo {
 				}
 			}
 		}
+	}
+
+	private String maximumCommonPackage(String p1, String p2) {
+		String[] items1 = p1.split("\\.");
+		String[] items2 = p2.split("\\.");
+		int common = -1;
+		for (int i = 0; i < items1.length && i < items2.length; ++i) {
+			if (!items1[i].equals(items2[i])) {
+				break;
+			}
+			common = i;
+		}
+		StringBuilder commonPackage = new StringBuilder();
+		for (int i = 0; i < common; ++i) {
+			if (i > 0) {
+				commonPackage.append('.');
+			}
+			commonPackage.append(items1[i]);
+		}
+		return commonPackage.toString();
 	}
 
 	private Class<?> getClassForSource(ClassLoader builtProjectClassLoader, String sourcePath)

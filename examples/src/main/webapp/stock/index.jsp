@@ -1,9 +1,9 @@
 <html>
 <head>
-<script src="${pageContext.request.contextPath}/js/stjs.js"" type="text/javascript"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.js" type="text/javascript"></script>
-<script src="${pageContext.request.contextPath}/generated-js/org/stjs/examples/stock/StockApplication.js"" type="text/javascript"></script>
-<script src="${pageContext.request.contextPath}/generated-js/org/stjs/examples/stock/ExtendedStockApplication.js"" type="text/javascript"></script>
+<script src="${pageContext.request.contextPath}/js/stjs.js" type="text/javascript"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.js" type="text/javascript"></script>
+<script src="${pageContext.request.contextPath}/generated-js/StockApplication.js" type="text/javascript"></script>
+<script src="${pageContext.request.contextPath}/generated-js/ExtendedStockApplication.js" type="text/javascript"></script>
 
 <script language="javascript">
 onload=function(){

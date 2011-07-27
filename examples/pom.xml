@@ -53,6 +53,9 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<rootPackage>auto</rootPackage>
+				</configuration>
 			</plugin>
 		</plugins>
 		<pluginManagement>

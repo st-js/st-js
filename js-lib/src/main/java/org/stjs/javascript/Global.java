@@ -1,6 +1,5 @@
 package org.stjs.javascript;
 
-
 public class Global {
 	public static Number Infinity;
 	public static Number NaN;
@@ -39,7 +38,12 @@ public class Global {
 		return 0;
 	}
 
-	public static <T> T nvl(T value, T valueIfNull) {
+	/**
+	 * this is the equivalent of x || y || z in javascript
+	 * 
+	 * @return
+	 */
+	public static <T> T $or(T value, T... otherValues) {
 		return value;
 	}
 
@@ -70,6 +74,26 @@ public class Global {
 	}
 
 	public static <V> Map<V> $map() {
+		return null;
+	}
+
+	public static <V> Map<V> $map(String k1, V v1) {
+		return null;
+	}
+
+	public static <V> Map<V> $map(String k1, V v1, String k2, V v2) {
+		return null;
+	}
+
+	public static <V> Map<V> $map(String k1, V v1, String k2, V v2, String k3, V v3) {
+		return null;
+	}
+
+	public static <V> Map<V> $map(String k1, V v1, String k2, V v2, String k3, V v3, String k4, V v4) {
+		return null;
+	}
+
+	public static <V> Map<V> $map(String k1, V v1, String k2, V v2, String k3, V v3, String k4, V v4, String k5, V v5) {
 		return null;
 	}
 

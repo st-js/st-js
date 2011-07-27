@@ -90,9 +90,39 @@ public class SpecialMethodHandlers {
 					GenerationContext context) {
 
 				currentHandler.getPrinter().print("{");
-				// TODO -> add constructor args here n.getArgs().get(0).accept(currentHandler.getRuleVisitor(),
-				// context);
+				if (n.getArgs() != null) {
+					boolean first = true;
+					for (int i = 0; i < n.getArgs().size(); i += 2) {
+						if (!first) {
+							currentHandler.getPrinter().print(", ");
+						}
+						n.getArgs().get(i).accept(currentHandler.getRuleVisitor(), context);
+						currentHandler.getPrinter().print(": ");
+						n.getArgs().get(i + 1).accept(currentHandler.getRuleVisitor(), context);
+						first = false;
+					}
+				}
 				currentHandler.getPrinter().print("}");
+				return true;
+			}
+		});
+
+		// $or(x, y, z) -> (x || y || z)
+		methodHandlers.put("$or", new SpecialMethodHandler() {
+			@Override
+			public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+					GenerationContext context) {
+				if (n.getArgs() == null || n.getArgs().size() < 2) {
+					// not exactly what it was expected
+					return false;
+				}
+				currentHandler.getPrinter().print("(");
+				n.getArgs().get(0).accept(currentHandler.getRuleVisitor(), context);
+				for (int i = 1; i < n.getArgs().size(); ++i) {
+					currentHandler.getPrinter().print(" || ");
+					n.getArgs().get(i).accept(currentHandler.getRuleVisitor(), context);
+				}
+				currentHandler.getPrinter().print(")");
 				return true;
 			}
 		});
