@@ -4,7 +4,6 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
@@ -42,6 +41,9 @@ public class ParentTypeScope extends NameScope {
 	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
 		if (parentClass == null) {
 			parentClass = getImportScope(pos).resolveClass(pos, parentClassName);
+			if (parentClass == null){
+        throw new JavascriptGenerationException(getInputFile(), pos, "Cannot load class:" + parentClassName);
+      }
 		}
 		Method method = getAccesibleMethod(parentClass, name);
 		if (method != null) {
@@ -80,6 +82,9 @@ public class ParentTypeScope extends NameScope {
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
 		if (parentClass == null) {
 			parentClass = getImportScope(pos).resolveClass(pos, parentClassName);
+			if (parentClass == null){
+			  throw new JavascriptGenerationException(getInputFile(), pos, "Cannot load class:" + parentClassName);
+			}
 		}
 		Field field = getAccesibleField(parentClass, name);
 		if (field != null) {

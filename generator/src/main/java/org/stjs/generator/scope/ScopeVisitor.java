@@ -1,5 +1,6 @@
 package org.stjs.generator.scope;
 
+import static org.stjs.generator.scope.JavaTypeName.anonymous;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.Node;
@@ -20,11 +21,9 @@ import japa.parser.ast.stmt.CatchClause;
 import japa.parser.ast.stmt.ForStmt;
 import japa.parser.ast.stmt.ForeachStmt;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
-
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
-
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.JavascriptKeywords;
 import org.stjs.generator.SourcePosition;
@@ -130,13 +129,13 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 		}
 
 		if (n.getMembers() != null) {
-			classScope = visitTypeDeclaration("type-" + n.getName(), n.getMembers(), classScope);
+			classScope = visitTypeDeclaration("type-" + n.getName(), n.getMembers(), classScope, new JavaTypeName(n.getName()));
 		}
 		super.visit(n, classScope);
 	}
 
-	private NameScope visitTypeDeclaration(String name, List<BodyDeclaration> declarations, NameScope currentScope) {
-		TypeScope typeScope = new TypeScope(inputFile, name, currentScope);
+	private NameScope visitTypeDeclaration(String name, List<BodyDeclaration> declarations, NameScope currentScope, JavaTypeName declaredTypeName) {
+		TypeScope typeScope = new TypeScope(inputFile, name, declaredTypeName, currentScope);
 		for (BodyDeclaration member : declarations) {
 
 			if (member instanceof FieldDeclaration) {
@@ -171,7 +170,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 	public void visit(ObjectCreationExpr n, NameScope currentScope) {
 		NameScope newScope = currentScope;
 		if (n.getAnonymousClassBody() != null) {
-			newScope = visitTypeDeclaration("anonymous-" + n.getBeginLine(), n.getAnonymousClassBody(), currentScope);
+			newScope = visitTypeDeclaration("anonymous-" + n.getBeginLine(), n.getAnonymousClassBody(), currentScope, anonymous());
 		}
 		super.visit(n, newScope);
 	}

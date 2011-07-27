@@ -3,9 +3,8 @@ package org.stjs.generator;
 import static junit.framework.Assert.assertEquals;
 import japa.parser.ast.Node;
 import japa.parser.ast.visitor.VoidVisitor;
-
 import java.io.File;
-
+import org.stjs.generator.GenerationContextFactory.PartialGenerationContext;
 import org.stjs.generator.handlers.RuleBasedVisitor;
 
 public class GeneratedScriptTester {
@@ -25,11 +24,15 @@ public class GeneratedScriptTester {
 	}
 
 	public void assertGenerateString(String expected, Node node) {
+    assertGenerateString(expected, node, new GenerationContext(new File("test.java")));
+  }
+	
+	public void assertGenerateString(String expected, Node node, GenerationContext context) {
 		try {
 			RuleBasedVisitor visitor = new RuleBasedVisitor();
 			VoidVisitor<GenerationContext> handler = handlerClass.getConstructor(RuleBasedVisitor.class).newInstance(
 					visitor);
-			node.accept(handler, new GenerationContext(new File("test.java")));
+			node.accept(handler, context);
 			String got = visitor.getPrinter().toString();
 			if (trimAllWhiteSpaces) {
 				got = got.replaceAll("\\s", "");
@@ -39,5 +42,10 @@ public class GeneratedScriptTester {
 			throw new RuntimeException(e);
 		}
 	}
+
+  public void assertGenerateString(String expected, Node node,
+      PartialGenerationContext context) {
+    assertGenerateString(expected, node, context.build());    
+  }
 
 }

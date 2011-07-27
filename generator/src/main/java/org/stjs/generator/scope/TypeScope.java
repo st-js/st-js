@@ -2,11 +2,9 @@ package org.stjs.generator.scope;
 
 import static org.stjs.generator.handlers.utils.Sets.transform;
 import static org.stjs.generator.handlers.utils.Sets.union;
-
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.handlers.utils.Function;
@@ -26,7 +24,7 @@ public class TypeScope extends NameScope {
 
 	public static final String OUTER_SCOPE = "outer";
 
-	private static final String STATIC_SCOPE = null;
+	public static final String STATIC_SCOPE = "static";
 
 	private static final String TYPE_SCOPE = null;
 
@@ -35,9 +33,12 @@ public class TypeScope extends NameScope {
 	private final Set<String> instanceFields = new HashSet<String>();
 	private final Set<String> instanceMethods = new HashSet<String>();
 	private final Set<String> innerTypes = new HashSet<String>();
+	
+	private final JavaTypeName declaredTypeName;
 
-	public TypeScope(File inputFile, String name, NameScope parent) {
+	public TypeScope(File inputFile, String name, JavaTypeName declaredTypeName, NameScope parent) {
 		super(inputFile, name, parent);
+		this.declaredTypeName = declaredTypeName;
 	}
 
 	/**
@@ -162,5 +163,9 @@ public class TypeScope extends NameScope {
 		return "TypeScope [staticFields=" + staticFields + ", staticMethods=" + staticMethods + ", instanceFields="
 				+ instanceFields + ", instanceMethods=" + instanceMethods + ", getChildren()=" + getChildren() + "]";
 	}
+
+  public JavaTypeName getDeclaredTypeName() {
+    return declaredTypeName;
+  }
 
 }

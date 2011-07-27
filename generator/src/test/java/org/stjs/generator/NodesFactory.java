@@ -7,10 +7,10 @@ import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.body.VariableDeclaratorId;
 import japa.parser.ast.expr.Expression;
+import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.type.Type;
 import japa.parser.ast.visitor.GenericVisitor;
 import japa.parser.ast.visitor.VoidVisitor;
-
 import org.stjs.generator.handlers.RuleBasedVisitor;
 import org.stjs.generator.handlers.utils.Lists;
 
@@ -49,6 +49,10 @@ public class NodesFactory {
 	
 	public static PartialFieldDeclaration newFieldDeclaration() {
 		return new PartialFieldDeclaration();
+	}
+	
+	public static NameExpr nameExpr(String name) {
+	  return new NameExpr(name);
 	}
 	
 	public static class PartialFieldDeclaration implements PartialObjectBuilder<FieldDeclaration> {
@@ -102,6 +106,8 @@ public class NodesFactory {
 		T build();
 	}
 	
+	
+	
 	public static BodyDeclaration bodyDeclarator(final String fakeBody) {
 		return new BodyDeclaration() {
 			
@@ -137,6 +143,8 @@ public class NodesFactory {
 			}
 		});
 	}
+	
+	
 	
 	private static void castAndPrint(VoidVisitor<?> visitor, String string) {
 		((RuleBasedVisitor)visitor).getPrinter().print(string);

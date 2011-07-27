@@ -1,18 +1,16 @@
 package org.stjs.generator;
 
 import japa.parser.ParseException;
-
 import java.io.File;
 import java.io.IOException;
-
-import org.junit.Ignore;
+import org.junit.Test;
 import org.stjs.generator.node.js.NodeJSExecutor;
 import org.stjs.generator.node.js.NodeJSExecutor.ExecutionResult;
-
 import test.Declaration1;
 
-@Ignore
 public class GeneratorTest {
+  
+  @Test 
 	public void testGenerator() throws ParseException, IOException {
 		generate("src/test/java/test/Declaration1.java", Declaration1.class);
 	}

@@ -17,12 +17,10 @@ import japa.parser.ast.stmt.ForeachStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.PrimitiveType;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
-
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
@@ -40,6 +38,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 	private final Map<SourcePosition, QualifiedName<MethodName>> resolvedMethods = new LinkedHashMap<SourcePosition, QualifiedName<MethodName>>();
 	private final Map<SourcePosition, QualifiedName<IdentifierName>> resolvedIdentifiers = new LinkedHashMap<SourcePosition, QualifiedName<IdentifierName>>();
 
+	
 	private final NameScope rootScope;
 	private final Collection<String> allowedPackages;
 
@@ -152,6 +151,13 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		SourcePosition pos = new SourcePosition(n);
 		// try to figure out if it's variable.field or Package.Class.field
 		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(pos, getFirstScope(n));
+		if (qname == null) {
+		  QualifiedName<TypeName> resolvedType = currentScope.getScope().resolveType(pos, getFirstScope(n));
+		  if (resolvedType != null) {
+		    // no need to persist it
+		    return;
+		  }
+		}
 		if (qname == null) {
 			checkImport(n, n.getScope().toString(), currentScope);
 			qname = currentScope.getScope().resolveIdentifier(pos, n.toString());

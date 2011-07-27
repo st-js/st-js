@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-
-import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
@@ -126,9 +124,6 @@ public class ImportScope extends NameScope {
 		if (clazz != null) {
 			return new QualifiedName<NameType.TypeName>(null, clazz.getName(), this);
 		}
-		if (getParent() != null) {
-			return getParent().resolveType(pos, name, currentScope);
-		}
 		return null;
 	}
 
@@ -201,6 +196,6 @@ public class ImportScope extends NameScope {
 		} catch (ClassNotFoundException e) {
 			// next
 		}
-		throw new JavascriptGenerationException(getInputFile(), pos, "Cannot load class:" + className);
+		return null;
 	}
 }

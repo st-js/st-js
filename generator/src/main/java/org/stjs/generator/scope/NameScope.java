@@ -2,12 +2,10 @@ package org.stjs.generator.scope;
 
 import static java.util.Collections.emptySet;
 import static org.stjs.generator.handlers.utils.Sets.union;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;

@@ -6,10 +6,8 @@ import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.QualifiedNameExpr;
 import japa.parser.ast.expr.SuperExpr;
 import japa.parser.ast.stmt.ExplicitConstructorInvocationStmt;
-
 import java.util.Iterator;
 import java.util.List;
-
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
@@ -66,9 +64,19 @@ public class NameResolverHandler extends DefaultHandler {
 		}
 		SourcePosition pos = new SourcePosition(n);
 		QualifiedName<IdentifierName> qname = context.resolveIdentifier(pos);
-		if (qname != null && TypeScope.THIS_SCOPE.equals(qname.getScopeName())) {
-			getPrinter().print("this.");
-		}
+		if (qname != null) {
+		  if (TypeScope.THIS_SCOPE.equals(qname.getScopeName())) {
+		    getPrinter().print("this.");
+		  } else if (TypeScope.STATIC_SCOPE.equals(qname.getScopeName())) {
+		    // TODO : is is true? if so, use visitor pattern (or similar) and do not cast
+		    TypeScope scope = (TypeScope) qname.getScope();
+		    if (scope.getDeclaredTypeName().isAnonymous()) {
+		      throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+		          "Cannot generate static field access for anonymous class"); // I think that this is not possible in Java (static field in anonymous class)
+		    }
+		    getPrinter().print(scope.getDeclaredTypeName().getName().getOrThrow()+".");
+		 }
+		} 
 		getPrinter().print(n.getName());
 	}
 
