@@ -18,20 +18,19 @@ package org.stjs.generator;
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-
 import org.stjs.generator.handlers.ClassOrInterfaceDeclarationHandler;
 import org.stjs.generator.handlers.DefaultHandler;
 import org.stjs.generator.handlers.EnumHandler;
 import org.stjs.generator.handlers.FieldDeclarationHandler;
 import org.stjs.generator.handlers.InlineFunctionHandler;
 import org.stjs.generator.handlers.InlineObjectHandler;
+import org.stjs.generator.handlers.LiteralExpressionHandler;
 import org.stjs.generator.handlers.LoopHandler;
 import org.stjs.generator.handlers.MethodDeclarationHandler;
 import org.stjs.generator.handlers.NameResolverHandler;
@@ -116,6 +115,8 @@ public class Generator {
 
 		// names
 		ruleVisitor.addRule(rule("Identifiers", "//NameExpr", 100, new NameResolverHandler(ruleVisitor)));
+		ruleVisitor.addRule(rule("Identifiers", "//IntegerLiteralExpr", 100, new LiteralExpressionHandler(ruleVisitor)));
+    ruleVisitor.addRule(rule("Identifiers", "//LongLiteralExpr", 100, new LiteralExpressionHandler(ruleVisitor)));
 
 		ruleVisitor.addRule(rule("Method calls", "//MethodCallExpr", 100, new NameResolverHandler(ruleVisitor)));
 		ruleVisitor.addRule(rule("Constructor Calls", "//ExplicitConstructorInvocationStmt", 100,

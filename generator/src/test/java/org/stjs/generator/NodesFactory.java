@@ -15,6 +15,8 @@
  */
 package org.stjs.generator;
 
+import static java.util.Arrays.asList;
+import static org.stjs.generator.handlers.utils.Lists.transform;
 import static org.stjs.generator.handlers.utils.PreConditions.checkState;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
@@ -22,11 +24,13 @@ import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.body.VariableDeclaratorId;
 import japa.parser.ast.expr.Expression;
+import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.type.Type;
 import japa.parser.ast.visitor.GenericVisitor;
 import japa.parser.ast.visitor.VoidVisitor;
 import org.stjs.generator.handlers.RuleBasedVisitor;
+import org.stjs.generator.handlers.utils.Function;
 import org.stjs.generator.handlers.utils.Lists;
 
 public class NodesFactory {
@@ -164,4 +168,14 @@ public class NodesFactory {
 	private static void castAndPrint(VoidVisitor<?> visitor, String string) {
 		((RuleBasedVisitor)visitor).getPrinter().print(string);
 	}
+
+  public static MethodCallExpr methodCallExpr(String methodName, String... arguments) {
+    return new MethodCallExpr(null, methodName, 
+        transform(asList(arguments), new Function<String, Expression>() {
+          @Override
+          public Expression apply(String input) {
+            return new NameExpr(input);
+          }
+        }));
+  }
 }
