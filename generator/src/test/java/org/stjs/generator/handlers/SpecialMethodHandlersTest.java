@@ -1,11 +1,11 @@
 package org.stjs.generator.handlers;
 
 import static org.junit.Assert.assertEquals;
+import static org.stjs.generator.NodesFactory.methodCallExpr;
 import japa.parser.ast.expr.NameExpr;
 import org.junit.Test;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.NameScopeStub;
-import org.stjs.generator.NodesFactory;
 import org.stjs.generator.handlers.SpecialMethodHandlers.$InvokeHandler;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.QualifiedName;
@@ -25,7 +25,7 @@ public class SpecialMethodHandlersTest {
       public void visit(NameExpr n, GenerationContext context) {
         getPrinter().print(n.getName());
       }
-    }, NodesFactory.methodCallExpr("$invoke", "x", "y"), qualifiedName, null);
+    }, methodCallExpr("$invoke", "x", "y"), qualifiedName, new GenerationContext(null));
     assertEquals("(x, y)",visitor.getPrinter().toString());
   }
 }

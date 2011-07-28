@@ -18,7 +18,6 @@ package org.stjs.generator.scope;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
@@ -45,8 +44,6 @@ public class FullyQualifiedScope extends NameScope {
 
 	@Override
 	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
-		System.out.println("NOT found:" + name);
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -74,7 +71,6 @@ public class FullyQualifiedScope extends NameScope {
 		if (clazz != null) {
 			return new QualifiedName<NameType.IdentifierName>(className, fieldName, this);
 		}
-		System.out.println("NOT found:" + name);
 		return null;
 	}
 
@@ -100,7 +96,6 @@ public class FullyQualifiedScope extends NameScope {
 		if (clazz != null) {
 			return new QualifiedName<NameType.TypeName>(null, clazz.getName(), this);
 		}
-		System.out.println("NOT found type:" + name);
 		return null;
 	}
 

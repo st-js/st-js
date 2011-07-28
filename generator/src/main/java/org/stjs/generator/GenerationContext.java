@@ -15,10 +15,8 @@
  */
 package org.stjs.generator;
 
+import japa.parser.ast.Node;
 import java.io.File;
-import java.util.Collections;
-import java.util.Map;
-
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.QualifiedName;
@@ -31,31 +29,22 @@ import org.stjs.generator.scope.QualifiedName;
  * 
  */
 public class GenerationContext {
-	private final Map<SourcePosition, QualifiedName<MethodName>> resolvedMethods;
-	private final Map<SourcePosition, QualifiedName<IdentifierName>> resolvedIdentifiers;
 
 	private boolean skipHandlers = false;
 
 	private final File inputFile;
 
-	public GenerationContext(File inputFile, Map<SourcePosition, QualifiedName<MethodName>> resolvedMethods,
-			Map<SourcePosition, QualifiedName<IdentifierName>> resolvedIdentifiers) {
-		this.resolvedMethods = resolvedMethods;
-		this.resolvedIdentifiers = resolvedIdentifiers;
+	public GenerationContext(File inputFile) {
 		this.inputFile = inputFile;
 	}
 
-	public GenerationContext(File inputFile) {
-		this(inputFile, Collections.<SourcePosition, QualifiedName<MethodName>> emptyMap(), Collections
-				.<SourcePosition, QualifiedName<IdentifierName>> emptyMap());
+
+	public QualifiedName<MethodName> resolveMethod(Node node) {
+		return (QualifiedName<MethodName>) node.getData();
 	}
 
-	public QualifiedName<MethodName> resolveMethod(SourcePosition pos) {
-		return resolvedMethods.get(pos);
-	}
-
-	public QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos) {
-		return resolvedIdentifiers.get(pos);
+	public QualifiedName<IdentifierName> resolveIdentifier(Node node) {
+	  return (QualifiedName<IdentifierName>) node.getData();
 	}
 
 	public GenerationContext skipHandlers() {

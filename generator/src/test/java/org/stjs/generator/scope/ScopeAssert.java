@@ -17,27 +17,28 @@ package org.stjs.generator.scope;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import japa.parser.ast.CompilationUnit;
+import japa.parser.ast.expr.NameExpr;
+import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.Assert;
-
-import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 
 public class ScopeAssert {
 	private static final int MY_TAB_CONFIG = 4;
 
-	private final NameResolverVisitor resolver;
+	private CompilationUnit compilationUnit;
 
 	private QualifiedName<IdentifierName> qname;
 
 	private int line = -1;
 	private int column = -1;
 
-	private ScopeAssert(NameResolverVisitor resolver) {
-		this.resolver = resolver;
+	private ScopeAssert(CompilationUnit compilationUnit) {
+		this.compilationUnit = compilationUnit;
 	}
 
-	public static ScopeAssert assertScope(NameResolverVisitor resolver) {
-		return new ScopeAssert(resolver);
+	public static ScopeAssert assertScope(CompilationUnit compilationUnit) {
+		return new ScopeAssert(compilationUnit);
 	}
 
 	public ScopeAssert line(int line) {
@@ -61,7 +62,17 @@ public class ScopeAssert {
 
 	private void resolve() {
 		if (column >= 0 && line >= 0) {
-			qname = resolver.getResolvedIdentifiers().get(new SourcePosition(line, column));
+			final AtomicReference<QualifiedName<IdentifierName>> qNamePointer 
+			= new AtomicReference<QualifiedName<IdentifierName>>();
+			new VoidVisitorAdapter<Object>() {
+			  @Override
+        public void visit(NameExpr n, Object arg) {
+			     if (n.getBeginLine() == line && n.getBeginColumn() == column) {
+			       qNamePointer.set((QualifiedName<IdentifierName>) n.getData());
+			     }
+			  }
+			}.visit(compilationUnit, null);
+		  qname = qNamePointer.get();
 		}
 	}
 

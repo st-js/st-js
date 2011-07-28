@@ -159,7 +159,7 @@ public class Generator {
 
 			System.out.println("----------------------------");
 			ruleVisitor.generate(cu,
-					new GenerationContext(inputFile, resolver.getResolvedMethods(), resolver.getResolvedIdentifiers()));
+					new GenerationContext(inputFile));
 
 			System.out.println("----------------------------");
 			FileWriter writer = new FileWriter(outputFile);

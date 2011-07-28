@@ -43,8 +43,7 @@ public class NameResolverHandler extends DefaultHandler {
 		QualifiedName<MethodName> qname = null;
 		if (n.getScope() == null) {
 			// only for methods without a scope
-			SourcePosition pos = new SourcePosition(n);
-			qname = context.resolveMethod(pos);
+			qname = context.resolveMethod(n);
 		}
 
 		if (!specialMethodHandlers.handle(this, n, qname, context)) {
@@ -85,8 +84,7 @@ public class NameResolverHandler extends DefaultHandler {
 			getPrinter().print("this");
 			return;
 		}
-		SourcePosition pos = new SourcePosition(n);
-		QualifiedName<IdentifierName> qname = context.resolveIdentifier(pos);
+		QualifiedName<IdentifierName> qname = context.resolveIdentifier(n);
 		if (qname != null) {
 		  if (TypeScope.THIS_SCOPE.equals(qname.getScopeName())) {
 		    getPrinter().print("this.");

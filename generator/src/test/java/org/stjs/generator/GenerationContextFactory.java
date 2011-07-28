@@ -1,5 +1,6 @@
 package org.stjs.generator;
 
+import japa.parser.ast.Node;
 import java.util.HashMap;
 import java.util.Map;
 import org.stjs.generator.scope.NameType.IdentifierName;
@@ -10,17 +11,23 @@ public class GenerationContextFactory {
   public static PartialGenerationContext context() {
     return new PartialGenerationContext();
   }
+  
   public static class PartialGenerationContext {
     
-    private Map<SourcePosition, QualifiedName<IdentifierName>> identifiers = new HashMap<SourcePosition, QualifiedName<IdentifierName>>();
+    private final Map<Node, QualifiedName<IdentifierName>> identifiers = new HashMap<Node, QualifiedName<IdentifierName>>();
     
-    public PartialGenerationContext withIdentifier(QualifiedName<IdentifierName> identifier) {
-      identifiers.put(new SourcePosition(0,0), identifier);
+    public PartialGenerationContext withIdentifier(Node Node, QualifiedName<IdentifierName> identifier) {
+      identifiers.put(Node, identifier);
       return this;
-    }
+    } 
   
     public GenerationContext build() {
-      return new GenerationContext(null, null, identifiers);
+      return new GenerationContext(null) {
+        @Override
+        public QualifiedName<IdentifierName> resolveIdentifier(Node node) {
+          return identifiers.get(node);
+        }
+      };
     }
   }
 }

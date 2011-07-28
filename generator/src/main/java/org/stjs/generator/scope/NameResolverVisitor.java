@@ -33,8 +33,6 @@ import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.PrimitiveType;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
@@ -50,10 +48,7 @@ import org.stjs.generator.scope.NameType.TypeName;
  * 
  */
 public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
-	private final Map<SourcePosition, QualifiedName<MethodName>> resolvedMethods = new LinkedHashMap<SourcePosition, QualifiedName<MethodName>>();
-	private final Map<SourcePosition, QualifiedName<IdentifierName>> resolvedIdentifiers = new LinkedHashMap<SourcePosition, QualifiedName<IdentifierName>>();
 
-	
 	private final NameScope rootScope;
 	private final Collection<String> allowedPackages;
 
@@ -70,13 +65,6 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		return rootScope;
 	}
 
-	public Map<SourcePosition, QualifiedName<MethodName>> getResolvedMethods() {
-		return resolvedMethods;
-	}
-
-	public Map<SourcePosition, QualifiedName<IdentifierName>> getResolvedIdentifiers() {
-		return resolvedIdentifiers;
-	}
 
 	@Override
 	public void visit(CompilationUnit n, NameScopeWalker currentScope) {
@@ -155,7 +143,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 							"In Javascript you cannot call methods from the outer type. "
 									+ "You should define a variable var that=this outside your function definition and call the methods on this object");
 				}
-				resolvedMethods.put(pos, qname);
+				n.setData(qname);
 			}
 		}
 		super.visit(n, currentScope);
@@ -178,7 +166,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 			qname = currentScope.getScope().resolveIdentifier(pos, n.toString());
 		}
 		if (qname != null) {
-			resolvedIdentifiers.put(pos, qname);
+			n.setData(qname);
 		}
 	}
 
@@ -227,7 +215,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 						"In Javascript you cannot call fields from the outer type. "
 								+ "You should define a variable var that=this outside your function definition and call the fields on this object");
 			}
-			resolvedIdentifiers.put(pos, qname);
+			n.setData(qname);
 		}
 		super.visit(n, currentScope);
 	}
