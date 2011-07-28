@@ -102,7 +102,6 @@ import japa.parser.ast.type.Type;
 import japa.parser.ast.type.VoidType;
 import japa.parser.ast.type.WildcardType;
 import japa.parser.ast.visitor.VoidVisitor;
-
 import java.util.Iterator;
 import java.util.List;
 
@@ -259,18 +258,22 @@ public class DumpVisitor<T> implements VoidVisitor<T> {
 	}
 
 	private void printArguments(List<Expression> args, T arg) {
-		printer.print("(");
+		printArguments(this, printer, args, arg);
+	}
+
+  public static <T> void printArguments(VoidVisitor<T> handler, SourcePrinter printer, List<Expression> args, T arg) {
+    printer.print("(");
 		if (args != null) {
 			for (Iterator<Expression> i = args.iterator(); i.hasNext();) {
 				Expression e = i.next();
-				e.accept(this, arg);
+				e.accept(handler, arg);
 				if (i.hasNext()) {
 					printer.print(", ");
 				}
 			}
 		}
 		printer.print(")");
-	}
+  }
 
 	private void printJavadoc(JavadocComment javadoc, T arg) {
 		if (javadoc != null) {

@@ -58,7 +58,15 @@ public class NameResolverHandler extends DefaultHandler {
 				printArguments(n.getArgs(), context);
 				getPrinter().print(")");
 				return;
-			}
+			} else if (qname != null && TypeScope.STATIC_SCOPE.equals(qname.getScopeName())) {
+        // TODO : use visitor pattern (or similar) and do not cast
+        TypeScope scope = (TypeScope) qname.getScope();
+        if (scope.getDeclaredTypeName().isAnonymous()) {
+          throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+              "Cannot generate static field access for anonymous class"); // I think that this is not possible in Java (static field in anonymous class)
+        }
+        getPrinter().print(scope.getDeclaredTypeName().getName().getOrThrow()+".");
+     }
 
 			n.accept(getRuleVisitor(), context.skipHandlers());
 		}
@@ -83,7 +91,7 @@ public class NameResolverHandler extends DefaultHandler {
 		  if (TypeScope.THIS_SCOPE.equals(qname.getScopeName())) {
 		    getPrinter().print("this.");
 		  } else if (TypeScope.STATIC_SCOPE.equals(qname.getScopeName())) {
-		    // TODO : is is true? if so, use visitor pattern (or similar) and do not cast
+		    // TODO : use visitor pattern (or similar) and do not cast
 		    TypeScope scope = (TypeScope) qname.getScope();
 		    if (scope.getDeclaredTypeName().isAnonymous()) {
 		      throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),

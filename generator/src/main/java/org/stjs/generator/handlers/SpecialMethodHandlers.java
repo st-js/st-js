@@ -15,12 +15,11 @@
  */
 package org.stjs.generator.handlers;
 
+import static org.stjs.generator.handlers.DumpVisitor.printArguments;
 import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.MethodCallExpr;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.QualifiedName;
@@ -156,9 +155,11 @@ public class SpecialMethodHandlers {
 				return true;
 			}
 		});
+		
+		methodHandlers.put("$invoke", new $InvokeHandler());
 	}
 
-	private void printScope(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+	private static void printScope(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 			GenerationContext context, boolean withDot) {
 		// TODO -> handle super
 		if (qname != null && TypeScope.THIS_SCOPE.equals(qname.getScope())) {
@@ -187,7 +188,7 @@ public class SpecialMethodHandlers {
 		if (qname != null && qname.getScopeName() != null && n.getArgs() != null && n.getArgs().size() > 0) {
 			for (String adapterName : adapterNames) {
 				if (qname.getScopeName().startsWith(adapterName)) {
-					adapterMethod(currentHandler, n, qname, context);
+				  adapterMethod(currentHandler, n, qname, context);
 					return true;
 				}
 			}
@@ -215,7 +216,11 @@ public class SpecialMethodHandlers {
 	 */
 	private void adapterMethod(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 			GenerationContext context) {
-		n.getArgs().get(0).accept(currentHandler.getRuleVisitor(), context);
+		Expression arg0 = n.getArgs().get(0);
+		// TODO : use parenthesis only if the expression is complex
+		currentHandler.getPrinter().print("(");
+	  arg0.accept(currentHandler.getRuleVisitor(), context);
+	  currentHandler.getPrinter().print(")");
 		// TODO may add paranthesis here
 		currentHandler.getPrinter().print(".");
 		currentHandler.getPrinter().print(n.getName());
@@ -253,7 +258,18 @@ public class SpecialMethodHandlers {
 		}
 	}
 
-	private interface SpecialMethodHandler {
+	static final class $InvokeHandler implements SpecialMethodHandler {
+    @Override
+    public boolean handle(DefaultHandler currentHandler, MethodCallExpr n,
+        QualifiedName<MethodName> qname, GenerationContext context) {
+        printScope(currentHandler, n, qname, context, false);
+        // skip methodname
+        printArguments(currentHandler.getRuleVisitor(), currentHandler.getPrinter(), n.getArgs(), context);
+      return true; 
+    }
+  }
+
+  private interface SpecialMethodHandler {
 		public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 				GenerationContext context);
 	}
