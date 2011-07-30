@@ -15,14 +15,11 @@
  */
 package org.stjs.generator.scope;
 
-import static org.stjs.generator.handlers.utils.Sets.transform;
-import static org.stjs.generator.handlers.utils.Sets.union;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
-import org.stjs.generator.handlers.utils.Function;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.NameType.TypeName;
@@ -35,21 +32,15 @@ import org.stjs.generator.scope.NameType.TypeName;
  */
 public class TypeScope extends NameScope {
 
-	public static final String THIS_SCOPE = "this";
-
-	public static final String OUTER_SCOPE = "outer";
-
-	public static final String STATIC_SCOPE = "static";
-
-	private static final String TYPE_SCOPE = null;
-
 	private final Set<String> staticFields = new HashSet<String>();
 	private final Set<String> staticMethods = new HashSet<String>();
+	private final Set<String> staticInnerTypes = new HashSet<String>();
 	private final Set<String> instanceFields = new HashSet<String>();
 	private final Set<String> instanceMethods = new HashSet<String>();
-	private final Set<String> innerTypes = new HashSet<String>();
+	private final Set<String> instanceInnerTypes = new HashSet<String>();
 	
 	private final JavaTypeName declaredTypeName;
+
 
 	public TypeScope(File inputFile, String name, JavaTypeName declaredTypeName, NameScope parent) {
 		super(inputFile, name, parent);
@@ -83,14 +74,18 @@ public class TypeScope extends NameScope {
 
 	@Override
 	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
+	  String declaringClassName = declaredTypeName.getFullyQualifiedString().getOrNull();
 		if (instanceMethods.contains(name)) {
 			if (isInCurrentTypeScope(this, currentScope)) {
-				return new QualifiedName<MethodName>(THIS_SCOPE, name, this);
+        return new QualifiedName<MethodName>(declaringClassName, name, this, false);
 			}
-			return new QualifiedName<MethodName>(OUTER_SCOPE, name, this);
+			return QualifiedName.<MethodName>outerScope(declaringClassName, name, this, false);
 		}
 		if (staticMethods.contains(name)) {
-			return new QualifiedName<MethodName>(STATIC_SCOPE, name, this);
+			 if (isInCurrentTypeScope(this, currentScope)) {
+        return new QualifiedName<MethodName>(declaringClassName, name, this, true);
+      }
+      return QualifiedName.<MethodName>outerScope(declaringClassName, name, this, true);
 		}
 		if (getParent() != null) {
 			return getParent().resolveMethod(pos, name, currentScope);
@@ -100,18 +95,30 @@ public class TypeScope extends NameScope {
 
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
-		if (instanceFields.contains(name)) {
+	  // TODO avoid duplicated code with resolveMethod
+	  String declaringClassName = declaredTypeName.getFullyQualifiedString().getOrNull();
+	  if (instanceFields.contains(name)) {
 			if (isInCurrentTypeScope(this, currentScope)) {
-				return new QualifiedName<IdentifierName>(THIS_SCOPE, name, this);
+				return new QualifiedName<IdentifierName>(declaringClassName, name, this, false);
 			}
-			return new QualifiedName<IdentifierName>(OUTER_SCOPE, name, this);
+			return QualifiedName.<IdentifierName>outerScope(declaringClassName, name, this, false);
 		}
 		if (staticFields.contains(name)) {
-			return new QualifiedName<IdentifierName>(STATIC_SCOPE, name, this);
+		  if (isInCurrentTypeScope(this, currentScope)) {
+        return new QualifiedName<IdentifierName>(declaringClassName, name, this, true);
+      }
+      return QualifiedName.<IdentifierName>outerScope(declaringClassName, name, this, true);
 		}
-		if (innerTypes.contains(name)) {
-			return new QualifiedName<IdentifierName>(TYPE_SCOPE, name, this);
-		}
+		
+// TODO : there might be a collision between field names and inner types names. I don't
+// understand why we resolve types as identifiers?
+		
+		//		if (instanceInnerTypes.contains(name)) {
+//		  return new QualifiedName<IdentifierName>(TYPE_SCOPE, name, this, true);
+//		}
+//		if (staticInnerTypes.contains(name)) {
+//			return new QualifiedName<IdentifierName>(TYPE_SCOPE, name, this, true);
+//		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(pos, name, currentScope);
 		}
@@ -142,28 +149,14 @@ public class TypeScope extends NameScope {
 		}
 	}
 
-	public void addInnerType(String name) {
-		innerTypes.add(name);
-	}
+  public void addstaticInnerType(String name) {
+    staticInnerTypes.add(name);
+  }
 
-	@Override
-	public Set<QualifiedName<IdentifierName>> getOwnIdentifiers() {
-		return transform(union(staticFields, instanceFields), new ToQualifiedName<IdentifierName>());
-	}
+  public void addInstanceInnerType(String name) {
+    instanceInnerTypes.add(name);
+  }
 
-	private class ToQualifiedName<T extends NameType> implements Function<String, QualifiedName<T>> {
-
-		@Override
-		public QualifiedName<T> apply(String name) {
-			return new QualifiedName<T>(null, name, TypeScope.this);
-		}
-
-	}
-
-	@Override
-	public Set<QualifiedName<MethodName>> getOwnMethods() {
-		return transform(union(staticMethods, instanceMethods), new ToQualifiedName<MethodName>());
-	}
 
 	@Override
 	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
@@ -181,6 +174,16 @@ public class TypeScope extends NameScope {
 
   public JavaTypeName getDeclaredTypeName() {
     return declaredTypeName;
+  }
+
+  @Override
+  public <T> T visit(NameScopeVisitor<T> visitor) {
+    return visitor.caseTypeScope(this);
+  }
+  
+  @Override
+  public void visit(VoidNameScopeVisitor visitor) {
+    visitor.caseTypeScope(this);
   }
 
 }

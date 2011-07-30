@@ -21,6 +21,6 @@ public class NameResolverHandlerTest {
     assertGenerateString("MyClass.MY_CONSTANT",
       node,
       context()
-      .withIdentifier(node, new QualifiedName<IdentifierName>(TypeScope.STATIC_SCOPE, "MY_CONSTANT", scope)));
+      .withIdentifier(node, new QualifiedName<IdentifierName>(null /*TypeScope.STATIC_SCOPE*/, "MY_CONSTANT", scope, true)));
   }
 }

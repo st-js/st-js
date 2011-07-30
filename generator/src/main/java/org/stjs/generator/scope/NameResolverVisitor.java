@@ -136,18 +136,23 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 			SourcePosition pos = new SourcePosition(n);
 			QualifiedName<MethodName> qname = currentScope.getScope().resolveMethod(pos, n.getName());
 			if (qname != null) {
-				if (TypeScope.OUTER_SCOPE.equals(qname.getScopeName())) {
-					throw new JavascriptGenerationException(
-							currentScope.getScope().getInputFile(),
-							pos,
-							"In Javascript you cannot call methods from the outer type. "
-									+ "You should define a variable var that=this outside your function definition and call the methods on this object");
-				}
+				checkNonStaticAccessToOuterScope(currentScope, pos, qname);
 				n.setData(qname);
 			}
 		}
 		super.visit(n, currentScope);
 	}
+
+  private void checkNonStaticAccessToOuterScope(NameScopeWalker currentScope, SourcePosition pos,
+      QualifiedName<?> qname) {
+    if (qname.isAccessingOuterScope() && !qname.isStatic()) {
+    	throw new JavascriptGenerationException(
+    			currentScope.getScope().getInputFile(),
+    			pos,
+    			"In Javascript you cannot call methods or fields from the outer type. "
+    					+ "You should define a variable var that=this outside your function definition and call the methods on this object");
+    }
+  }
 
 	@Override
 	public void visit(FieldAccessExpr n, NameScopeWalker currentScope) {
@@ -208,13 +213,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		SourcePosition pos = new SourcePosition(n);
 		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(pos, n.getName());
 		if (qname != null) {
-			if (TypeScope.OUTER_SCOPE.equals(qname.getScopeName())) {
-				throw new JavascriptGenerationException(
-						currentScope.getScope().getInputFile(),
-						pos,
-						"In Javascript you cannot call fields from the outer type. "
-								+ "You should define a variable var that=this outside your function definition and call the fields on this object");
-			}
+			checkNonStaticAccessToOuterScope(currentScope, pos, qname);
 			n.setData(qname);
 		}
 		super.visit(n, currentScope);

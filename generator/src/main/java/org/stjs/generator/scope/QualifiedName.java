@@ -15,18 +15,25 @@
  */
 package org.stjs.generator.scope;
 
-import org.stjs.generator.handlers.utils.PreConditions;
+import static org.stjs.generator.handlers.utils.PreConditions.checkNotNull;
 
 public class QualifiedName<T extends NameType> {
 	private final String scopeName;
 	private final String name;
 	private final NameScope scope;
+	private final boolean isStatic; // use an int to encode modifiers a la java.lang.reflect?
+	private final boolean accessingOuterScope;
 
-	public QualifiedName(String scopeName, String name, NameScope scope) {
+	public QualifiedName(String scopeName, String name, NameScope scope, boolean isStatic) {
+	  this(scopeName, name, scope, isStatic, false);
+	}
+	
+	public QualifiedName(String scopeName, String name, NameScope scope, boolean isStatic, boolean accessingOuterScope) {
 		this.scopeName = scopeName;
 		this.name = name;
-		this.scope = scope;
-		PreConditions.checkNotNull(scope);
+		this.scope = checkNotNull(scope);
+		this.isStatic = isStatic;
+		this.accessingOuterScope = accessingOuterScope;
 	}
 
 	/**
@@ -62,5 +69,17 @@ public class QualifiedName<T extends NameType> {
 		s.append("[" + scope.getPath() + "]");
 		return s.toString();
 	}
+
+  public boolean isStatic() {
+    return isStatic;
+  }
+
+  public boolean isAccessingOuterScope() {
+    return accessingOuterScope;
+  }
+
+  public static <T extends NameType> QualifiedName<T> outerScope(String scopeName, String name, NameScope scope, boolean isStatic) {
+    return new QualifiedName<T>(scopeName, name, scope, isStatic, true);
+  }
 
 }

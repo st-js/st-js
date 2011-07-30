@@ -15,7 +15,6 @@
  */
 package org.stjs.generator.scope;
 
-import static org.stjs.generator.scope.JavaTypeName.anonymous;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.Node;
@@ -144,13 +143,39 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 		}
 
 		if (n.getMembers() != null) {
-			classScope = visitTypeDeclaration("type-" + n.getName(), n.getMembers(), classScope, new JavaTypeName(n.getName()));
+			classScope = visitTypeDeclaration("type-" + n.getName(), n.getMembers(), classScope, getTypeName(n, n.getName(), currentScope));
+		} else {
+		  classScope = new TypeScope(inputFile, "type-" + n.getName(), getTypeName(n, n.getName(), currentScope), classScope);
 		}
+		n.setData(classScope);
 		super.visit(n, classScope);
 	}
 
+	 private JavaTypeName getTypeName(Node n, String name, NameScope currentScope) {
+	   NameScope scopeIt = currentScope; 
+	   do {
+	      JavaTypeName enclosingClassName = scopeIt.visit( new NameScope.EmptyNameScopeVisitor<JavaTypeName>(null) {
+	        @Override
+	        public JavaTypeName caseParentTypeScope(ParentTypeScope parentTypeScope) {
+	          return parentTypeScope.getDeclaredTypeScope().getDeclaredTypeName();
+	        }
+	        @Override
+	        public JavaTypeName caseTypeScope(TypeScope typeScope) {
+	          return typeScope.getDeclaredTypeName();
+	        }
+	      });
+	      if (enclosingClassName != null) {
+	        return new JavaTypeName(name, enclosingClassName);
+	      }
+	      scopeIt = scopeIt.getParent();
+	    } while (scopeIt != null);
+	    // no enclosing class
+	    return new JavaTypeName(name);
+	  }
+	 
+
 	private NameScope visitTypeDeclaration(String name, List<BodyDeclaration> declarations, NameScope currentScope, JavaTypeName declaredTypeName) {
-		TypeScope typeScope = new TypeScope(inputFile, name, declaredTypeName, currentScope);
+	  TypeScope typeScope = new TypeScope(inputFile, name, declaredTypeName, currentScope);
 		for (BodyDeclaration member : declarations) {
 
 			if (member instanceof FieldDeclaration) {
@@ -175,7 +200,11 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 				}
 			} else if (member instanceof TypeDeclaration) {
 				TypeDeclaration type = (TypeDeclaration) member;
-				typeScope.addInnerType(type.getName());
+				if (ModifierSet.isStatic(type.getModifiers())) {
+				  typeScope.addstaticInnerType(type.getName());
+				} else {
+				  typeScope.addInstanceInnerType(type.getName());
+				}
 			}
 		}
 		return typeScope;
@@ -185,7 +214,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 	public void visit(ObjectCreationExpr n, NameScope currentScope) {
 		NameScope newScope = currentScope;
 		if (n.getAnonymousClassBody() != null) {
-			newScope = visitTypeDeclaration("anonymous-" + n.getBeginLine(), n.getAnonymousClassBody(), currentScope, anonymous());
+			newScope = visitTypeDeclaration("anonymous-" + n.getBeginLine(), n.getAnonymousClassBody(), currentScope, getTypeName(n, null, currentScope));
 		}
 		super.visit(n, newScope);
 	}

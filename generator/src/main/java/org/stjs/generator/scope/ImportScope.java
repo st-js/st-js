@@ -15,6 +15,7 @@
  */
 package org.stjs.generator.scope;
 
+import static japa.parser.ast.body.ModifierSet.isStatic;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -81,7 +82,7 @@ public class ImportScope extends NameScope {
 		String imp = findImport(staticExactImports, name);
 		if (imp != null) {
 			// TODO check it's a method and not a field
-			return new QualifiedName<NameType.MethodName>(imp, name, this);
+			return new QualifiedName<NameType.MethodName>(imp, name, this, true);
 		}
 
 		for (String staticImport : this.staticStarImports) {
@@ -89,7 +90,7 @@ public class ImportScope extends NameScope {
 				Class<?> clazz = classLoader.loadClass(staticImport);
 				for (Method m : clazz.getMethods()) {
 					if (m.getName().equals(name)) {
-						return new QualifiedName<NameType.MethodName>(imp, name, this);
+						return new QualifiedName<NameType.MethodName>(imp, name, this, true);
 					}
 				}
 			} catch (Exception e) {
@@ -108,14 +109,14 @@ public class ImportScope extends NameScope {
 		String imp = findImport(staticExactImports, name);
 		if (imp != null) {
 			// TODO check it's a field and not a method
-			return new QualifiedName<NameType.IdentifierName>(imp, name, this);
+			return new QualifiedName<NameType.IdentifierName>(imp, name, this, true);
 		}
 
 		for (String staticImport : this.staticStarImports) {
 			try {
 				Class<?> clazz = classLoader.loadClass(staticImport);
 				if (clazz.getField(name) != null) {
-					return new QualifiedName<NameType.IdentifierName>(imp, name, this);
+					return new QualifiedName<NameType.IdentifierName>(imp, name, this, true);
 				}
 			} catch (Exception e) {
 				// not found
@@ -137,7 +138,7 @@ public class ImportScope extends NameScope {
 	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
 		Class<?> clazz = resolveClass(pos, name);
 		if (clazz != null) {
-			return new QualifiedName<NameType.TypeName>(null, clazz.getName(), this);
+			return new QualifiedName<NameType.TypeName>(null, clazz.getName(), this, isStatic(clazz.getModifiers()));
 		}
 		return null;
 	}
@@ -188,7 +189,7 @@ public class ImportScope extends NameScope {
 					resolvedClasses.put(className, resolvedClass);
 					return resolvedClass;
 				} catch (ClassNotFoundException e) {
-
+				  //ignore
 				}
 			}
 		}
@@ -199,7 +200,7 @@ public class ImportScope extends NameScope {
 				resolvedClasses.put(className, resolvedClass);
 				return resolvedClass;
 			} catch (ClassNotFoundException e) {
-
+			  //ignore
 			}
 		}
 
@@ -213,4 +214,14 @@ public class ImportScope extends NameScope {
 		}
 		return null;
 	}
+
+  @Override
+  public <T> T visit(NameScopeVisitor<T> visitor) {
+    return visitor.caseImportScope(this);
+  }
+  
+  @Override
+  public void visit(VoidNameScopeVisitor visitor) {
+    visitor.caseImportScope(this);
+  }
 }

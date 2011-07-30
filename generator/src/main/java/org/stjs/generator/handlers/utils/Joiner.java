@@ -17,49 +17,105 @@ package org.stjs.generator.handlers.utils;
 
 import static org.stjs.generator.handlers.utils.PreConditions.checkNotNull;
 import japa.parser.ast.Node;
-
+import java.io.IOException;
 import java.util.Iterator;
-
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.handlers.RuleBasedVisitor;
 
-public class Joiner {
+public class Joiner<T> {
 
-	private final String separator;
-	private final RuleBasedVisitor visitor;
+  private final String separator;
+  private final Function<T, ?> function;
+  private Appendable printer;
 
-	private Joiner(String separator, RuleBasedVisitor visitor) {
-		this.visitor = checkNotNull(visitor);
-		this.separator = checkNotNull(separator);
-	}
+  private Joiner(String separator, Function<T, ?> function, Appendable printer) {
+    this.function = function;
+    this.separator = separator;
+    this.printer = printer ;
+  }
 
-	public void join(Iterable<? extends Node> nodes, GenerationContext arg) {
-		if (nodes != null) {
-			Iterator<? extends Node> iterator = nodes.iterator();
-			if (iterator.hasNext()) {
-				iterator.next().accept(visitor, arg);
-				while (iterator.hasNext()) {
-					visitor.getPrinter().print(separator);
-					iterator.next().accept(visitor, arg);
-				}
-			}
-		}
-	}
+  public String join(Iterable<? extends T> nodes) {
+    try {
+      if (nodes != null) {
+        if (printer == null) {
+          printer = new StringBuilder();
+        }
+        Iterator<? extends T> iterator = nodes.iterator();
+        if (iterator.hasNext()) {
+          Object obj = function.apply(iterator.next());
+          if (obj != null && obj instanceof String) {
+            printer.append((String)obj);
+          }
+          while (iterator.hasNext()) {
+            printer.append(separator);
+            obj = function.apply(iterator.next());
+            if (obj != null && obj instanceof String) {
+              printer.append((String)obj);
+            }
+          }
+        }
+        return printer.toString();
+      }
 
-	public static JoinerBuilder joiner(RuleBasedVisitor visitor) {
-		return new JoinerBuilder(visitor);
-	}
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    return null;
+  }
+  
+  public static <T> JoinerBuilder2<T> joiner(Function<T, ?> function) {
+    return new JoinerBuilder2<T>(function);
+  }
 
-	public static class JoinerBuilder {
-		private final RuleBasedVisitor visitor;
+  public static JoinerBuilder joiner(RuleBasedVisitor visitor, GenerationContext context) {
+    return new JoinerBuilder(visitor, context);
+  }
 
-		public JoinerBuilder(RuleBasedVisitor visitor) {
-			this.visitor = checkNotNull(visitor);
-		}
+  public static class JoinerBuilder2<T> {
+    private final Function<T, ?> function;
+    
+    private JoinerBuilder2(Function<T, ?> function) {
+      this.function = checkNotNull(function);
+    }
+    
+    public Joiner<T> on(String separator) {
+      return new Joiner<T>(separator, function, null);
+    }
+    
+  }
+  public static class JoinerBuilder {
+    private final RuleBasedVisitor visitor;
+    private final GenerationContext context;
 
-		public Joiner on(String separator) {
-			return new Joiner(separator, visitor);
-		}
-	}
+    public JoinerBuilder(RuleBasedVisitor visitor, GenerationContext context) {
+      this.context = checkNotNull(context);
+      this.visitor = checkNotNull(visitor);
+    }
+
+    public <T extends Node> Joiner<T> on(String separator) {
+      return new Joiner<T>(separator,
+          new Function<T, Boolean>() {
+            @Override
+            public Boolean apply(T input) {
+              input.accept(visitor, context);
+              return false;
+            }},
+          new Appendable() {
+            @Override
+            public Appendable append(CharSequence csq, int start, int end) throws IOException {
+              throw new UnsupportedOperationException();
+            }
+            @Override
+            public Appendable append(char c) throws IOException {
+              throw new UnsupportedOperationException();
+            }
+            @Override
+            public Appendable append(CharSequence csq) throws IOException {
+              visitor.getPrinter().print((String)csq);
+              return this;
+            }
+          });
+    }
+  }
 
 }

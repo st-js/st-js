@@ -20,7 +20,6 @@ import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.PrimitiveType;
-
 import org.stjs.generator.GenerationContext;
 
 public class FieldDeclarationHandler extends DefaultHandler {
@@ -32,7 +31,7 @@ public class FieldDeclarationHandler extends DefaultHandler {
 	@Override
 	public void visit(FieldDeclaration n, GenerationContext arg) {
 		n.getType().accept(getRuleVisitor(), arg);
-		joiner(getRuleVisitor()).on(", ").join(n.getVariables(), arg);
+		joiner(getRuleVisitor(), arg).on(", ").join(n.getVariables());
 	}
 
 	@Override

@@ -18,7 +18,6 @@ package org.stjs.generator.scope;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
@@ -46,7 +45,7 @@ public class VariableScope extends NameScope {
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
 		if (variables.contains(name)) {
-			return new QualifiedName<IdentifierName>(VARIABLE_SCOPE_NAME, name, this);
+			return new QualifiedName<IdentifierName>(VARIABLE_SCOPE_NAME, name, this, false);
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(pos, name, currentScope);
@@ -74,4 +73,14 @@ public class VariableScope extends NameScope {
 	public String toString() {
 		return "VariableScope [variables=" + variables + ", getChildren()=" + getChildren() + "]";
 	}
+
+  @Override
+  public <T> T visit(NameScopeVisitor<T> visitor) {
+    return visitor.caseVariableScope(this);
+  }
+  
+  @Override
+  public void visit(VoidNameScopeVisitor visitor) {
+    visitor.caseVariableScope(this);
+  }
 }

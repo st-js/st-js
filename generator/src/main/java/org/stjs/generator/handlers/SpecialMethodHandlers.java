@@ -23,7 +23,6 @@ import java.util.Map;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.QualifiedName;
-import org.stjs.generator.scope.TypeScope;
 
 /**
  * this is a handler to handle special method names (those starting with $).
@@ -102,20 +101,29 @@ public class SpecialMethodHandlers {
 			@Override
 			public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 					GenerationContext context) {
-
+				if (n.getArgs().size()>1) {
+          currentHandler.getPrinter().printLn();
+          currentHandler.getPrinter().indent();
+				}
 				currentHandler.getPrinter().print("{");
 				if (n.getArgs() != null) {
 					boolean first = true;
 					for (int i = 0; i < n.getArgs().size(); i += 2) {
 						if (!first) {
 							currentHandler.getPrinter().print(", ");
+	            currentHandler.getPrinter().printLn();
 						}
+						// TODO : is it safe to unsescape string that are object litteral keys?
 						n.getArgs().get(i).accept(currentHandler.getRuleVisitor(), context);
 						currentHandler.getPrinter().print(": ");
 						n.getArgs().get(i + 1).accept(currentHandler.getRuleVisitor(), context);
 						first = false;
 					}
 				}
+        if (n.getArgs().size()>1) {
+          currentHandler.getPrinter().unindent();
+        }
+
 				currentHandler.getPrinter().print("}");
 				return true;
 			}
@@ -162,7 +170,7 @@ public class SpecialMethodHandlers {
 	private static void printScope(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 			GenerationContext context, boolean withDot) {
 		// TODO -> handle super
-		if (qname != null && TypeScope.THIS_SCOPE.equals(qname.getScope())) {
+		if (qname != null && !qname.isStatic() && qname.getScope() != null && qname.getScope().isThisScope()) {
 			currentHandler.getPrinter().print("this");
 			if (withDot) {
 				currentHandler.getPrinter().print(".");

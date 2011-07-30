@@ -16,12 +16,12 @@
 package org.stjs.generator.handlers.utils;
 
 import static org.stjs.generator.handlers.utils.PreConditions.checkState;
-
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Lists {
@@ -75,15 +75,19 @@ public class Lists {
 		};
 	}
 	
-	public static <T> List<T> newArrayList() {
+	public static <T> ArrayList<T> newArrayList() {
 		return new ArrayList<T>();
 	}
 	
-	public static <T> List<T> newArrayList(T... elems) {
+	public static <T> ArrayList<T> newArrayList(T... elems) {
 		return new ArrayList<T>(Arrays.asList(elems));
 	}
 	
-	public static <T> List<T> newArrayList(Collection<T> collection) {
+	public static <T> ArrayList<T> newArrayList(Collection<T> collection) {
 		return new ArrayList<T>(collection);
 	}
+
+  public static <T> LinkedList<T> newLinkedList() {
+    return new LinkedList<T>();
+  }
 }

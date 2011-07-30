@@ -31,8 +31,7 @@ import org.stjs.generator.scope.NameType.TypeName;
  */
 public class FullyQualifiedScope extends NameScope {
 	// special marker for classes not found - to not search again with the same name
-	private static final Class<?> NOT_FOUND_CLASS = new Object() {
-	}.getClass();
+	private static final Class<?> NOT_FOUND_CLASS = new Object() {/*class*/}.getClass();
 
 	private final Map<String, Class<?>> resolvedClasses = new HashMap<String, Class<?>>();
 	private final ClassLoader classLoader;
@@ -69,7 +68,7 @@ public class FullyQualifiedScope extends NameScope {
 		String fieldName = getFieldName(name);
 		Class<?> clazz = resolveClass(className);
 		if (clazz != null) {
-			return new QualifiedName<NameType.IdentifierName>(className, fieldName, this);
+			return new QualifiedName<NameType.IdentifierName>(className, fieldName, this, true);
 		}
 		return null;
 	}
@@ -94,9 +93,19 @@ public class FullyQualifiedScope extends NameScope {
 	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
 		Class<?> clazz = resolveClass(name);
 		if (clazz != null) {
-			return new QualifiedName<NameType.TypeName>(null, clazz.getName(), this);
+			return new QualifiedName<NameType.TypeName>(null, clazz.getName(), this, true);
 		}
 		return null;
 	}
+
+  @Override
+  public <T> T visit(NameScopeVisitor<T> visitor) {
+    return visitor.caseFullyQualifiedScope(this);
+  }
+  
+  @Override
+  public void visit(VoidNameScopeVisitor visitor) {
+    visitor.caseFullyQualifiedScope(this);
+  }
 
 }

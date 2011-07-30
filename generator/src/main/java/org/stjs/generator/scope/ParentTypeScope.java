@@ -15,6 +15,8 @@
  */
 package org.stjs.generator.scope;
 
+import static japa.parser.ast.body.ModifierSet.isStatic;
+import static org.stjs.generator.handlers.utils.Lists.getOnlyElement;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -60,12 +62,15 @@ public class ParentTypeScope extends NameScope {
         throw new JavascriptGenerationException(getInputFile(), pos, "Cannot load class:" + parentClassName);
       }
 		}
+		
+		String declaredClassName = getDeclaredTypeScope().getDeclaredTypeName().getFullyQualifiedString().getOrNull();
 		Method method = getAccesibleMethod(parentClass, name);
 		if (method != null) {
-			if (TypeScope.isInCurrentTypeScope(this, currentScope)) {
-				return new QualifiedName<MethodName>(TypeScope.THIS_SCOPE, name, this);
+			boolean isStatic = isStatic(method.getModifiers());
+		  if (TypeScope.isInCurrentTypeScope(this, currentScope)) {
+				return new QualifiedName<MethodName>(declaredClassName, name, this, isStatic);
 			}
-			return new QualifiedName<MethodName>(TypeScope.OUTER_SCOPE, name, this);
+			return QualifiedName.<MethodName>outerScope(declaredClassName, name, this, isStatic);
 		}
 		if (getParent() != null) {
 			return getParent().resolveMethod(pos, name, currentScope);
@@ -83,6 +88,8 @@ public class ParentTypeScope extends NameScope {
 	 */
 	private Method getAccesibleMethod(Class<?> parentClass, String name) {
 		for (Method m : parentClass.getDeclaredMethods()) {
+		  // TODO : this works only under the assumption that method names are unique (which is not true in java)
+		  // Is that assumption checked before calling this method?
 			if (m.getName().equals(name) && !Modifier.isPrivate(m.getModifiers())) {
 				return m;
 			}
@@ -103,10 +110,12 @@ public class ParentTypeScope extends NameScope {
 		}
 		Field field = getAccesibleField(parentClass, name);
 		if (field != null) {
+		  String declaredClassName = getDeclaredTypeScope().getDeclaredTypeName().getFullyQualifiedString().getOrNull();
+		  boolean isStatic = isStatic(field.getModifiers());
 			if (TypeScope.isInCurrentTypeScope(this, currentScope)) {
-				return new QualifiedName<IdentifierName>(TypeScope.THIS_SCOPE, name, this);
+				return new QualifiedName<IdentifierName>(declaredClassName, name, this, isStatic);
 			}
-			return new QualifiedName<IdentifierName>(TypeScope.OUTER_SCOPE, name, this);
+			return QualifiedName.<IdentifierName>outerScope(declaredClassName, name, this, isStatic);
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(pos, name, currentScope);
@@ -150,4 +159,18 @@ public class ParentTypeScope extends NameScope {
 	public String toString() {
 		return "ParentTypeScope [className=" + parentClass.getName() + ", getChildren()=" + getChildren() + "]";
 	}
+
+  @Override
+  public <T> T visit(NameScopeVisitor<T> visitor) {
+    return visitor.caseParentTypeScope(this);
+  }
+  
+  @Override
+  public void visit(VoidNameScopeVisitor visitor) {
+    visitor.caseParentTypeScope(this);
+  }
+
+  public TypeScope getDeclaredTypeScope() {
+   return (TypeScope) getOnlyElement(getChildren());
+  }
 }

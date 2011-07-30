@@ -15,12 +15,9 @@
  */
 package org.stjs.generator.scope;
 
-import static java.util.Collections.emptySet;
-import static org.stjs.generator.handlers.utils.Sets.union;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
@@ -95,28 +92,6 @@ abstract public class NameScope {
 
 	abstract protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope);
 
-	Set<QualifiedName<MethodName>> getOwnMethods() {
-		return emptySet();
-	}
-
-	Set<QualifiedName<IdentifierName>> getOwnIdentifiers() {
-		return emptySet();
-	}
-
-	public Set<QualifiedName<MethodName>> getMethods() {
-		if (parent != null) {
-			return union(parent.getMethods(), getOwnMethods());
-		}
-		return getOwnMethods();
-	}
-
-	public Set<QualifiedName<IdentifierName>> getIdentifiers() {
-		if (parent != null) {
-			return union(parent.getIdentifiers(), getOwnIdentifiers());
-		}
-		return getOwnIdentifiers();
-	}
-
 	public NameScope getParent() {
 		return parent;
 	}
@@ -136,5 +111,131 @@ abstract public class NameScope {
 			child.dump(indent + "  ");
 		}
 	}
+
+	public abstract <T> T visit(NameScopeVisitor<T> visitor);
+	public abstract void visit(VoidNameScopeVisitor visitor);
+  
+  public static interface NameScopeVisitor<T> {
+
+    T caseFullyQualifiedScope(FullyQualifiedScope fullyQualifiedScope);
+
+    T caseVariableScope(VariableScope variableScope);
+
+    T caseImportScope(ImportScope importScope);
+
+    T caseParameterScope(ParameterScope parameterScope);
+
+    T caseParentTypeScope(ParentTypeScope parentTypeScope);
+
+    T caseTypeScope(TypeScope typeScope);
+    
+  }
+  
+  public static interface VoidNameScopeVisitor {
+
+    void caseFullyQualifiedScope(FullyQualifiedScope fullyQualifiedScope);
+
+    void caseVariableScope(VariableScope variableScope);
+
+    void caseImportScope(ImportScope importScope);
+
+    void caseParameterScope(ParameterScope parameterScope);
+
+    void caseParentTypeScope(ParentTypeScope parentTypeScope);
+
+    void caseTypeScope(TypeScope typeScope);
+    
+  }
+  
+  public static class EmptyVoidNameScopeVisitor implements VoidNameScopeVisitor {
+
+    private final boolean complainAtRuntimeIfMethodCalled;
+    
+    public EmptyVoidNameScopeVisitor(boolean complainAtRuntimeIfMethodCalled) {
+      this.complainAtRuntimeIfMethodCalled = complainAtRuntimeIfMethodCalled;
+    }
+    private void maybeComplain() {
+      if (complainAtRuntimeIfMethodCalled) {
+        throw new UnsupportedOperationException();
+      }
+    }    
+    @Override
+    public void caseFullyQualifiedScope(FullyQualifiedScope fullyQualifiedScope) {
+      maybeComplain();
+    }
+    @Override
+    public void caseVariableScope(VariableScope variableScope) {
+      maybeComplain();
+    }
+    @Override
+    public void caseImportScope(ImportScope importScope) {
+      maybeComplain();
+    }
+    @Override
+    public void caseParameterScope(ParameterScope parameterScope) {
+      maybeComplain();
+    }
+    @Override
+    public void caseParentTypeScope(ParentTypeScope parentTypeScope) {
+      maybeComplain();
+    }
+    @Override
+    public void caseTypeScope(TypeScope typeScope) {
+      maybeComplain();
+    }
+  }
+  
+  public static class EmptyNameScopeVisitor<T> implements NameScopeVisitor<T> {
+
+    private final T value;
+    
+    public EmptyNameScopeVisitor(T value) {
+      this.value = value;
+    }
+    
+    @Override
+    public T caseFullyQualifiedScope(FullyQualifiedScope fullyQualifiedScope) {
+      return value;
+    }
+
+    @Override
+    public T caseVariableScope(VariableScope variableScope) {
+      return value;
+    }
+
+    @Override
+    public T caseImportScope(ImportScope importScope) {
+      return value;
+    }
+
+    @Override
+    public T caseParameterScope(ParameterScope parameterScope) {
+      return value;
+    }
+
+    @Override
+    public T caseParentTypeScope(ParentTypeScope parentTypeScope) {
+      return value;
+    }
+
+    @Override
+    public T caseTypeScope(TypeScope typeScope) {
+      return value;
+    }
+    
+  }
+
+  public boolean isThisScope() {
+    return visit(new EmptyNameScopeVisitor<Boolean>(false){
+       @Override
+      public Boolean caseTypeScope(TypeScope typeScope) {
+         return true;
+       }
+      @Override
+      public Boolean caseParentTypeScope(ParentTypeScope parentTypeScope) {
+        return true;
+      }
+     });
+  }
 
 }

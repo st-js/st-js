@@ -23,7 +23,7 @@ public class Enums1 {
 	public void main() {
 		String s = "x";
 		if (s.equals("y")) {
-
+		  //test
 		}
 		Value x = Value.value1;
 		switch (x) {

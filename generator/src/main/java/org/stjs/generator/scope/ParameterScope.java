@@ -18,7 +18,6 @@ package org.stjs.generator.scope;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
@@ -51,7 +50,9 @@ public class ParameterScope extends NameScope {
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
 		if (parameters.contains(name)) {
-			return new QualifiedName<IdentifierName>(PARAMETER_SCOPE_NAME, name, this);
+		  // TODO : by definition, a parameter scope does not define static identifiers.
+		  // it is stupid that we pass both this and false
+			return new QualifiedName<IdentifierName>(PARAMETER_SCOPE_NAME, name, this, false);
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(pos, name, currentScope);
@@ -80,4 +81,15 @@ public class ParameterScope extends NameScope {
 		}
 		return null;
 	}
+
+  @Override
+  public <T> T visit(NameScopeVisitor<T> visitor) {
+    return visitor.caseParameterScope(this);
+  }
+  
+  @Override
+  public void visit(VoidNameScopeVisitor visitor) {
+    visitor.caseParameterScope(this);
+  }
+
 }
