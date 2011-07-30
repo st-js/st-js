@@ -78,6 +78,8 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery show(Object duration);
 
+  public FullJQuery show(Object duration, Runnable complete);
+
 	public FullJQuery show(Object duration, String easing, Runnable complete);
 
 	public FullJQuery queue(String queueName);
@@ -329,7 +331,9 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery toggle(EventHandler handlerIn, EventHandler handlerOut);
 
-	public FullJQuery trigger(String eventType, Map<String> extraParams);
+	public FullJQuery trigger(String eventType);
+
+  public FullJQuery trigger(String eventType, Map<String> extraParams);
 
 	public FullJQuery trigger(Event event);
 
@@ -423,6 +427,8 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 	public FullJQuery replaceWith(JQuery<?> jq);
 
 	public FullJQuery text(String txt);
+	
+	public FullJQuery text(int txt);
 
 	public String text();
 
@@ -485,11 +491,11 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery has(HTMLElement element);
 
-	public FullJQuery is(String selector);
+	public boolean is(String selector);
 
-	public FullJQuery is(JQuery<?> jq);
+	public boolean is(JQuery<?> jq);
 
-	public FullJQuery is(HTMLElement element);
+	public boolean is(HTMLElement element);
 
 	public FullJQuery last();
 
