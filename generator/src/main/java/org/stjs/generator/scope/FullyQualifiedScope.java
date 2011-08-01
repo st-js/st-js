@@ -21,7 +21,7 @@ import java.util.Map;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
-import org.stjs.generator.scope.NameType.TypeName;
+import org.stjs.generator.scope.QualifiedName.NameTypes;
 
 /**
  * This scope tries to resolve only fully qualified names by looking in the classpath for the corresponding type.
@@ -68,7 +68,7 @@ public class FullyQualifiedScope extends NameScope {
 		String fieldName = getFieldName(name);
 		Class<?> clazz = resolveClass(className);
 		if (clazz != null) {
-			return new QualifiedName<NameType.IdentifierName>(className, fieldName, this, true);
+			return new QualifiedName<NameType.IdentifierName>(className, fieldName, this, true, NameTypes.FIELD);
 		}
 		return null;
 	}
@@ -90,10 +90,10 @@ public class FullyQualifiedScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
+	protected TypeQualifiedName resolveType(SourcePosition pos, String name, NameScope currentScope) {
 		Class<?> clazz = resolveClass(name);
 		if (clazz != null) {
-			return new QualifiedName<NameType.TypeName>(null, clazz.getName(), this, true);
+			return new TypeQualifiedName(null, this, true, clazz.getPackage());
 		}
 		return null;
 	}

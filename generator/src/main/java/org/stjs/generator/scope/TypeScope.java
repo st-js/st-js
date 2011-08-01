@@ -22,7 +22,7 @@ import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
-import org.stjs.generator.scope.NameType.TypeName;
+import org.stjs.generator.scope.QualifiedName.NameTypes;
 
 /**
  * This scope is for a class definition. It contains the name of the fields and methods
@@ -77,15 +77,15 @@ public class TypeScope extends NameScope {
 	  String declaringClassName = declaredTypeName.getFullyQualifiedString().getOrNull();
 		if (instanceMethods.contains(name)) {
 			if (isInCurrentTypeScope(this, currentScope)) {
-        return new QualifiedName<MethodName>(declaringClassName, name, this, false);
+        return new QualifiedName<MethodName>(declaringClassName, name, this, false, NameTypes.METHOD);
 			}
-			return QualifiedName.<MethodName>outerScope(declaringClassName, name, this, false);
+			return QualifiedName.<MethodName>outerScope(declaringClassName, name, this, false, NameTypes.METHOD);
 		}
 		if (staticMethods.contains(name)) {
 			 if (isInCurrentTypeScope(this, currentScope)) {
-        return new QualifiedName<MethodName>(declaringClassName, name, this, true);
+        return new QualifiedName<MethodName>(declaringClassName, name, this, true, NameTypes.METHOD);
       }
-      return QualifiedName.<MethodName>outerScope(declaringClassName, name, this, true);
+      return QualifiedName.<MethodName>outerScope(declaringClassName, name, this, true, NameTypes.METHOD);
 		}
 		if (getParent() != null) {
 			return getParent().resolveMethod(pos, name, currentScope);
@@ -95,34 +95,34 @@ public class TypeScope extends NameScope {
 
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
-	  // TODO avoid duplicated code with resolveMethod
 	  String declaringClassName = declaredTypeName.getFullyQualifiedString().getOrNull();
+	  boolean accessingOuterScope = !isInCurrentTypeScope(this, currentScope);
+    NameTypes type = null;
+    boolean isStatic;
+    
 	  if (instanceFields.contains(name)) {
-			if (isInCurrentTypeScope(this, currentScope)) {
-				return new QualifiedName<IdentifierName>(declaringClassName, name, this, false);
-			}
-			return QualifiedName.<IdentifierName>outerScope(declaringClassName, name, this, false);
-		}
-		if (staticFields.contains(name)) {
-		  if (isInCurrentTypeScope(this, currentScope)) {
-        return new QualifiedName<IdentifierName>(declaringClassName, name, this, true);
-      }
-      return QualifiedName.<IdentifierName>outerScope(declaringClassName, name, this, true);
-		}
-		
-// TODO : there might be a collision between field names and inner types names. I don't
-// understand why we resolve types as identifiers?
-		
-		//		if (instanceInnerTypes.contains(name)) {
-//		  return new QualifiedName<IdentifierName>(TYPE_SCOPE, name, this, true);
-//		}
-//		if (staticInnerTypes.contains(name)) {
-//			return new QualifiedName<IdentifierName>(TYPE_SCOPE, name, this, true);
-//		}
-		if (getParent() != null) {
-			return getParent().resolveIdentifier(pos, name, currentScope);
-		}
-		return null;
+			type = NameTypes.FIELD;
+			isStatic = false;
+		} else if (staticFields.contains(name)) {
+		  type = NameTypes.FIELD;
+		  isStatic = true;
+	  } else if (instanceInnerTypes.contains(name)) {
+	    // TODO It is not correct to return and Identifier Name, since this is a class.
+	    // but we need to differentiate nameExpressions on classes and variables then
+      type = NameTypes.CLASS;
+      isStatic = false;
+    } else if (staticInnerTypes.contains(name)) {
+      // TODO It is not correct to return and Identifier Name, since this is a class.
+      // but we need to differentiate nameExpressions on classes and variables then
+	    type = NameTypes.CLASS;
+      isStatic = true;
+	  } else {
+	    if (getParent() != null) {
+	      return getParent().resolveIdentifier(pos, name, currentScope);
+	    }
+	    return null;
+	  }
+	  return new QualifiedName<IdentifierName>(declaringClassName, name, this, isStatic, accessingOuterScope, type);
 	}
 
 	public void addStaticField(String name, SourcePosition sourcePosition) {
@@ -159,12 +159,24 @@ public class TypeScope extends NameScope {
 
 
 	@Override
-	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
-		if (getParent() != null) {
+	protected TypeQualifiedName resolveType(SourcePosition pos, String name, NameScope currentScope) {
+		// TODO : do not check strings, but qualified names. Becaue OuterClass.InnerClass is === to InnerClass
+	  if (staticInnerTypes.contains(name)) {
+	    return createInnerTypeQualifiedName(pos, name, true);
+		}
+	  if (instanceInnerTypes.contains(name)) {
+	    return createInnerTypeQualifiedName(pos, name, false);
+	  }
+	  if (getParent() != null) {
 			return getParent().resolveType(pos, name, currentScope);
 		}
 		return null;
 	}
+
+  private TypeQualifiedName createInnerTypeQualifiedName(SourcePosition pos, String name, boolean isStatic) {
+    TypeQualifiedName enclosingClass = super.resolveType(pos, declaredTypeName.getFullyQualifiedString().getOrThrow());
+    return new TypeQualifiedName(declaredTypeName.getSimpleName().getOrNull(), this, isStatic, enclosingClass.getPackage());
+  }
 
 	@Override
 	public String toString() {

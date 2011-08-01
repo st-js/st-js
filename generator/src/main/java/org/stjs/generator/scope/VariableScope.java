@@ -21,7 +21,7 @@ import java.util.Set;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
-import org.stjs.generator.scope.NameType.TypeName;
+import org.stjs.generator.scope.QualifiedName.NameTypes;
 
 /**
  * This scope is for the variables defined within a block
@@ -45,7 +45,7 @@ public class VariableScope extends NameScope {
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
 		if (variables.contains(name)) {
-			return new QualifiedName<IdentifierName>(VARIABLE_SCOPE_NAME, name, this, false);
+			return new QualifiedName<IdentifierName>(VARIABLE_SCOPE_NAME, name, this, false, NameTypes.VARIABLE);
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(pos, name, currentScope);
@@ -62,7 +62,7 @@ public class VariableScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
+	protected TypeQualifiedName resolveType(SourcePosition pos, String name, NameScope currentScope) {
 		if (getParent() != null) {
 			return getParent().resolveType(pos, name, currentScope);
 		}

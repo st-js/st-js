@@ -21,7 +21,7 @@ import java.util.Set;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
-import org.stjs.generator.scope.NameType.TypeName;
+import org.stjs.generator.scope.QualifiedName.NameTypes;
 
 /**
  * This scope is for the a method's parameters.
@@ -50,9 +50,7 @@ public class ParameterScope extends NameScope {
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
 		if (parameters.contains(name)) {
-		  // TODO : by definition, a parameter scope does not define static identifiers.
-		  // it is stupid that we pass both this and false
-			return new QualifiedName<IdentifierName>(PARAMETER_SCOPE_NAME, name, this, false);
+			return new QualifiedName<IdentifierName>(PARAMETER_SCOPE_NAME, name, this, false, NameTypes.VARIABLE);
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(pos, name, currentScope);
@@ -75,7 +73,7 @@ public class ParameterScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
+	protected TypeQualifiedName resolveType(SourcePosition pos, String name, NameScope currentScope) {
 		if (getParent() != null) {
 			return getParent().resolveType(pos, name, currentScope);
 		}

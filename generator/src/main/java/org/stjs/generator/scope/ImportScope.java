@@ -26,7 +26,7 @@ import java.util.Set;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
-import org.stjs.generator.scope.NameType.TypeName;
+import org.stjs.generator.scope.QualifiedName.NameTypes;
 
 /**
  * This scope tries to solve the methods inside the static imports and the identifiers (that can be the name of a class)
@@ -82,7 +82,7 @@ public class ImportScope extends NameScope {
 		String imp = findImport(staticExactImports, name);
 		if (imp != null) {
 			// TODO check it's a method and not a field
-			return new QualifiedName<NameType.MethodName>(imp, name, this, true);
+			return new QualifiedName<NameType.MethodName>(imp, name, this, true, NameTypes.METHOD);
 		}
 
 		for (String staticImport : this.staticStarImports) {
@@ -90,7 +90,7 @@ public class ImportScope extends NameScope {
 				Class<?> clazz = classLoader.loadClass(staticImport);
 				for (Method m : clazz.getMethods()) {
 					if (m.getName().equals(name)) {
-						return new QualifiedName<NameType.MethodName>(imp, name, this, true);
+						return new QualifiedName<NameType.MethodName>(imp, name, this, true, NameTypes.METHOD);
 					}
 				}
 			} catch (Exception e) {
@@ -109,14 +109,14 @@ public class ImportScope extends NameScope {
 		String imp = findImport(staticExactImports, name);
 		if (imp != null) {
 			// TODO check it's a field and not a method
-			return new QualifiedName<NameType.IdentifierName>(imp, name, this, true);
+			return new QualifiedName<NameType.IdentifierName>(imp, name, this, true, NameTypes.FIELD);
 		}
 
 		for (String staticImport : this.staticStarImports) {
 			try {
 				Class<?> clazz = classLoader.loadClass(staticImport);
 				if (clazz.getField(name) != null) {
-					return new QualifiedName<NameType.IdentifierName>(imp, name, this, true);
+					return new QualifiedName<NameType.IdentifierName>(imp, name, this, true, NameTypes.FIELD);
 				}
 			} catch (Exception e) {
 				// not found
@@ -135,10 +135,10 @@ public class ImportScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
+	protected TypeQualifiedName resolveType(SourcePosition pos, String name, NameScope currentScope) {
 		Class<?> clazz = resolveClass(pos, name);
 		if (clazz != null) {
-			return new QualifiedName<NameType.TypeName>(null, clazz.getName(), this, isStatic(clazz.getModifiers()));
+			return new TypeQualifiedName(null, this, isStatic(clazz.getModifiers()), clazz.getPackage());
 		}
 		return null;
 	}

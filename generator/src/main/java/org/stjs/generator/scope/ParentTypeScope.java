@@ -25,7 +25,7 @@ import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
-import org.stjs.generator.scope.NameType.TypeName;
+import org.stjs.generator.scope.QualifiedName.NameTypes;
 
 /**
  * This scope is for fields and methods inherited from a parent type.
@@ -68,9 +68,9 @@ public class ParentTypeScope extends NameScope {
 		if (method != null) {
 			boolean isStatic = isStatic(method.getModifiers());
 		  if (TypeScope.isInCurrentTypeScope(this, currentScope)) {
-				return new QualifiedName<MethodName>(declaredClassName, name, this, isStatic);
+				return new QualifiedName<MethodName>(declaredClassName, name, this, isStatic, NameTypes.METHOD);
 			}
-			return QualifiedName.<MethodName>outerScope(declaredClassName, name, this, isStatic);
+			return QualifiedName.<MethodName>outerScope(declaredClassName, name, this, isStatic, NameTypes.METHOD);
 		}
 		if (getParent() != null) {
 			return getParent().resolveMethod(pos, name, currentScope);
@@ -113,9 +113,9 @@ public class ParentTypeScope extends NameScope {
 		  String declaredClassName = getDeclaredTypeScope().getDeclaredTypeName().getFullyQualifiedString().getOrNull();
 		  boolean isStatic = isStatic(field.getModifiers());
 			if (TypeScope.isInCurrentTypeScope(this, currentScope)) {
-				return new QualifiedName<IdentifierName>(declaredClassName, name, this, isStatic);
+				return new QualifiedName<IdentifierName>(declaredClassName, name, this, isStatic, NameTypes.FIELD);
 			}
-			return QualifiedName.<IdentifierName>outerScope(declaredClassName, name, this, isStatic);
+			return QualifiedName.<IdentifierName>outerScope(declaredClassName, name, this, isStatic, NameTypes.FIELD);
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(pos, name, currentScope);
@@ -148,7 +148,7 @@ public class ParentTypeScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
+	protected TypeQualifiedName resolveType(SourcePosition pos, String name, NameScope currentScope) {
 		if (getParent() != null) {
 			return getParent().resolveType(pos, name, currentScope);
 		}

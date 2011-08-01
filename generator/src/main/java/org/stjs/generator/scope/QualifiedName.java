@@ -23,17 +23,26 @@ public class QualifiedName<T extends NameType> {
 	private final NameScope scope;
 	private final boolean isStatic; // use an int to encode modifiers a la java.lang.reflect?
 	private final boolean accessingOuterScope;
+	private final NameTypes type;
+	
+	public enum NameTypes {
+	  METHOD,
+	  FIELD,
+	  VARIABLE,
+	  CLASS
+	}
 
-	public QualifiedName(String scopeName, String name, NameScope scope, boolean isStatic) {
-	  this(scopeName, name, scope, isStatic, false);
+	public QualifiedName(String scopeName, String name, NameScope scope, boolean isStatic, NameTypes type) {
+	  this(scopeName, name, scope, isStatic, false, type);
 	}
 	
-	public QualifiedName(String scopeName, String name, NameScope scope, boolean isStatic, boolean accessingOuterScope) {
+	public QualifiedName(String scopeName, String name, NameScope scope, boolean isStatic, boolean accessingOuterScope, NameTypes type) {
 		this.scopeName = scopeName;
 		this.name = name;
 		this.scope = checkNotNull(scope);
 		this.isStatic = isStatic;
 		this.accessingOuterScope = accessingOuterScope;
+		this.type = type;
 	}
 
 	/**
@@ -78,8 +87,12 @@ public class QualifiedName<T extends NameType> {
     return accessingOuterScope;
   }
 
-  public static <T extends NameType> QualifiedName<T> outerScope(String scopeName, String name, NameScope scope, boolean isStatic) {
-    return new QualifiedName<T>(scopeName, name, scope, isStatic, true);
+  public static <T extends NameType> QualifiedName<T> outerScope(String scopeName, String name, NameScope scope, boolean isStatic, NameTypes type) {
+    return new QualifiedName<T>(scopeName, name, scope, isStatic, true, type);
+  }
+
+  public NameTypes getType() {
+    return type;
   }
 
 }

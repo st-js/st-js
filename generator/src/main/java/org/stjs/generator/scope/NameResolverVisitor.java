@@ -218,20 +218,23 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		}
 		super.visit(n, currentScope);
 	}
+	
 
 	@Override
 	public void visit(ClassOrInterfaceType n, NameScopeWalker currentScope) {
 		SourcePosition pos = new SourcePosition(n);
 		StringBuilder fullName = new StringBuilder(n.getName());
-		for (ClassOrInterfaceType t = n.getScope(); t != null; t = t.getScope()) {
-			fullName.insert(0, t.getName() + ".");
-		}
 		if (n.getScope() == null) {
 			// not fully-specified classes
-			QualifiedName<TypeName> qname = currentScope.getScope().resolveType(pos, n.getName());
+		  TypeQualifiedName qname = currentScope.getScope().resolveType(pos, n.getName());
 			if (qname != null) {
-				fullName = new StringBuilder(qname.getName());
+			    fullName = new StringBuilder(qname.getPackage().getName()+"."+n.getName());			    
 			}
+			n.setData(qname);
+		} else {
+		  for (ClassOrInterfaceType t = n.getScope(); t != null; t = t.getScope()) {
+	      fullName.insert(0, t.getName() + ".");
+	    }
 		}
 		checkImport(n, fullName.toString(), currentScope);
 

@@ -21,7 +21,6 @@ import java.util.List;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
-import org.stjs.generator.scope.NameType.TypeName;
 
 /**
  * This class contains all the names defined in a given scope. If a name is search in the given scope and is not found
@@ -75,7 +74,7 @@ abstract public class NameScope {
 		return resolveIdentifier(pos, name, this);
 	}
 
-	public QualifiedName<TypeName> resolveType(SourcePosition pos, String name) {
+	public TypeQualifiedName resolveType(SourcePosition pos, String name) {
 		return resolveType(pos, name, this);
 	}
 
@@ -90,7 +89,7 @@ abstract public class NameScope {
 	abstract protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name,
 			NameScope currentScope);
 
-	abstract protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope);
+	abstract protected TypeQualifiedName resolveType(SourcePosition pos, String name, NameScope currentScope);
 
 	public NameScope getParent() {
 		return parent;
