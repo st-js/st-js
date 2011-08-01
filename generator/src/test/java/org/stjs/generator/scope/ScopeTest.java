@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.scope.QualifiedName.NameTypes;
 
 public class ScopeTest {
 
@@ -80,6 +81,21 @@ public class ScopeTest {
     assertScope(cu).line(32).column(20, 2).assertName("param")
     .assertScopePath("root.import.parent-ParentDeclaration1.type-Declaration1.param-30");
   }
+  
+  @Test
+  public void fieldVsInnerClass() throws ParseException, IOException {
+    String fileName = "test/FieldsVsInnerClass.java";
+    CompilationUnit cu =  compilationUnit(fileName);
+    resolveName2(cu, fileName);
+    assertScope(cu).line(13).column(5, 0).assertName("MyInnerClass")
+    .assertScopePath("root.import.type-FieldsVsInnerClass")
+    .assertType(NameTypes.FIELD);
+    
+    assertScope(cu).line(14).column(5, 0).assertName("MyInnerClass2")
+    .assertScopePath("root.import.type-FieldsVsInnerClass")
+    .assertType(NameTypes.CLASS);
+  }
+  
 
 
 	@Test

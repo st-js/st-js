@@ -17,11 +17,13 @@ package org.stjs.generator.scope;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.expr.NameExpr;
 import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.Assert;
 import org.stjs.generator.scope.NameType.IdentifierName;
+import org.stjs.generator.scope.QualifiedName.NameTypes;
 
 public class ScopeAssert {
 	private static final int MY_TAB_CONFIG = 4;
@@ -92,4 +94,8 @@ public class ScopeAssert {
 		Assert.assertNull(qname);
 		return this;
 	}
+
+  public void assertType(NameTypes type) {
+    assertSame(type, qname.getType());
+  }
 }

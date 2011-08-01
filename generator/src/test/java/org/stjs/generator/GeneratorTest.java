@@ -27,7 +27,7 @@ public class GeneratorTest {
   
   @Test 
 	public void testGenerator() throws ParseException, IOException {
-		generate("src/test/java/test/ClassWithInnerClass.java", Declaration1.class);
+		generate("src/test/java/test/AssetAllocation.java", Declaration1.class);
 	}
 
 	private void generate(String sourceFile, Class<?> clazz) throws ParseException, IOException {
@@ -36,7 +36,10 @@ public class GeneratorTest {
 		NodeJSExecutor executor = new NodeJSExecutor();
 		File outputFile = new File("target/x.js");
 		generator.generateJavascript(Thread.currentThread().getContextClassLoader(), clazz, new File(sourceFile),
-				outputFile, new GeneratorConfigurationBuilder().allowedPackage(clazz.getPackage().getName()).build());
+				outputFile, new GeneratorConfigurationBuilder().
+				allowedPackage(clazz.getPackage().getName()).
+				allowedPackage("org.stjs.javascript")
+				.build());
 		ExecutionResult execution = executor.run(outputFile);
 		System.out.println(execution.toString());
 	}

@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.stjs.generator.scope.JavaTypeName;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.QualifiedName;
+import org.stjs.generator.scope.QualifiedName.NameTypes;
 import org.stjs.generator.scope.TypeScope;
 
 
@@ -21,6 +22,6 @@ public class NameResolverHandlerTest {
     assertGenerateString("MyClass.MY_CONSTANT",
       node,
       context()
-      .withIdentifier(node, new QualifiedName<IdentifierName>(null /*TypeScope.STATIC_SCOPE*/, "MY_CONSTANT", scope, true)));
+      .withIdentifier(node, new QualifiedName<IdentifierName>(null /*TypeScope.STATIC_SCOPE*/, "MY_CONSTANT", scope, true, NameTypes.CLASS)));
   }
 }
