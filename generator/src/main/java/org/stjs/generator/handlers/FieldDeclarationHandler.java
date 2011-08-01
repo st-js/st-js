@@ -38,11 +38,13 @@ public class FieldDeclarationHandler extends DefaultHandler {
 	public void visit(VariableDeclarator n, GenerationContext arg) {
 		n.getId().accept(getRuleVisitor(), arg);
 		if (n.getInit() != null) {
-			getPrinter().print(" = ");
+			printer.print(" = ");
 			n.getInit().accept(getRuleVisitor(), arg);
 		} else {
-			getPrinter().print(" = null");
+			printer.print(" = null");
 		}
+		printer.print(";");
+
 	}
 
 	@Override

@@ -31,19 +31,19 @@ public class VariableDeclarationHandler extends DefaultHandler {
 
 	@Override
 	public void visit(VariableDeclaratorId n, GenerationContext arg) {
-		getPrinter().print(n.getName());
+		printer.print(n.getName());
 	}
 
 	@Override
 	public void visit(VariableDeclarationExpr n, GenerationContext arg) {
 		n.getType().accept(getRuleVisitor(), arg);
-		getPrinter().print(" ");
+		printer.print(" ");
 
 		for (Iterator<VariableDeclarator> i = n.getVars().iterator(); i.hasNext();) {
 			VariableDeclarator v = i.next();
 			v.accept(getRuleVisitor(), arg);
 			if (i.hasNext()) {
-				getPrinter().print(", ");
+				printer.print(", ");
 			}
 		}
 	}

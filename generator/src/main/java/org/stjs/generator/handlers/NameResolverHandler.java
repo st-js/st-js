@@ -21,6 +21,7 @@ import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.QualifiedNameExpr;
 import japa.parser.ast.stmt.ExplicitConstructorInvocationStmt;
+import japa.parser.ast.type.ClassOrInterfaceType;
 import java.util.Iterator;
 import java.util.List;
 import org.stjs.generator.GenerationContext;
@@ -48,7 +49,6 @@ public class NameResolverHandler extends DefaultHandler {
 			// only for methods without a scope
 			qname = context.resolveMethod(n);
 		}
-
 		if (!specialMethodHandlers.handle(this, n, qname, context)) {
 		  if (qname != null && qname.getScope() != null) {
   		  if (qname.isStatic()) {
@@ -58,17 +58,17 @@ public class NameResolverHandler extends DefaultHandler {
     		    @Override
     		    public void caseTypeScope(TypeScope typeScope) {
     		      // Non static reference to current enclosing type.
-    		      getPrinter().print("this.");
+    		      printer.print("this.");
     		    }
     		    @Override
     		    public void caseParentTypeScope(ParentTypeScope parentTypeScope) {
     		      // Non static reference to parent type
-    		      getPrinter().print("this._super(\"" + n.getName() + "\"");
+    		      printer.print("this._super(\"" + n.getName() + "\"");
               if (n.getArgs() != null && n.getArgs().size() > 0) {
-                getPrinter().print(", ");
+                printer.print(", ");
               }
               printArguments(n.getArgs(), context);
-              getPrinter().print(")");
+              printer.print(")");
     		    }
     		  });
   		  }
@@ -87,7 +87,7 @@ public class NameResolverHandler extends DefaultHandler {
           throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
               "Cannot generate static field access for anonymous class"); // I think that this is not possible in Java (static field in anonymous class)
         }
-        getPrinter().print(scope.getDeclaredTypeName().getFullyQualifiedString().getOrThrow()+".");
+        printer.print(scope.getDeclaredTypeName().getFullyQualifiedString().getOrThrow()+".");
       }
       @Override
       public void caseParentTypeScope(ParentTypeScope parentTypeScope) {
@@ -102,17 +102,30 @@ public class NameResolverHandler extends DefaultHandler {
     });
   }
 
+  @Override
+  public void visit(ClassOrInterfaceType n, GenerationContext context) {
+    if (n.getScope() != null) {
+      n.getScope().accept(this, context);
+      printer.print(".");
+    }
+    QualifiedName<IdentifierName> qname = context.resolveIdentifier(n);
+    if (qname != null && qname.getScope() != null && qname.isStatic()) {
+      printStaticFieldOrMethodAccessPrefix(n, context, qname);
+    } 
+    printer.print(n.getName());
+  }
+  
 	@Override
 	public void visit(QualifiedNameExpr n, GenerationContext context) {
 		n.getQualifier().accept(getRuleVisitor(), context);
-		getPrinter().print(".");
-		getPrinter().print(n.getName());
+		printer.print(".");
+		printer.print(n.getName());
 	}
 
 	@Override
 	public void visit(NameExpr n, GenerationContext context) {
 		if (GeneratorConstants.SPECIAL_THIS.equals(n.getName())) {
-			getPrinter().print("this");
+			printer.print("this");
 			return;
 		}
 		QualifiedName<IdentifierName> qname = context.resolveIdentifier(n);
@@ -123,7 +136,7 @@ public class NameResolverHandler extends DefaultHandler {
   		  qname.getScope().visit(new NameScope.EmptyVoidNameScopeVisitor(false) {
   		    @Override
   		    public void caseTypeScope(TypeScope typeScope) {
-  	        getPrinter().print("this.");
+  	        printer.print("this.");
   		    }
   		    @Override
   		    public void caseParentTypeScope(ParentTypeScope parentTypeScope) {
@@ -133,7 +146,7 @@ public class NameResolverHandler extends DefaultHandler {
   		  });
 		  }
 		} 
-		getPrinter().print(n.getName());
+		printer.print(n.getName());
 	}
 
 	private void printArguments(List<Expression> args, GenerationContext context) {
@@ -142,7 +155,7 @@ public class NameResolverHandler extends DefaultHandler {
 				Expression e = i.next();
 				e.accept(getRuleVisitor(), context);
 				if (i.hasNext()) {
-					getPrinter().print(", ");
+					printer.print(", ");
 				}
 			}
 		}
@@ -156,12 +169,12 @@ public class NameResolverHandler extends DefaultHandler {
 					"Only one constructor is allowed");
 		}
 
-		getPrinter().print("this._super(null");
+		printer.print("this._super(null");
 		if (n.getArgs() != null && n.getArgs().size() > 0) {
-			getPrinter().print(", ");
+			printer.print(", ");
 		}
 		printArguments(n.getArgs(), context);
-		getPrinter().print(");");
+		printer.print(");");
 	}
 
 	// @Override

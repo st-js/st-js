@@ -16,23 +16,21 @@
 package org.stjs.generator.handlers;
 
 import japa.parser.ast.visitor.VoidVisitorAdapter;
-
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.handlers.DumpVisitor.SourcePrinter;
 
 public abstract class DefaultHandler extends VoidVisitorAdapter<GenerationContext> {
 	private final RuleBasedVisitor ruleVisitor;
 
+	protected final SourcePrinter printer;
+	
 	public DefaultHandler(RuleBasedVisitor ruleVisitor) {
 		this.ruleVisitor = ruleVisitor;
+		printer = ruleVisitor.getPrinter();
 	}
 
 	public RuleBasedVisitor getRuleVisitor() {
 		return ruleVisitor;
-	}
-
-	public SourcePrinter getPrinter() {
-		return ruleVisitor.getPrinter();
 	}
 
 }

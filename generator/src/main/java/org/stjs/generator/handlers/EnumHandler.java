@@ -30,27 +30,27 @@ public class EnumHandler extends DefaultHandler {
 
 	@Override
 	public void visit(EnumDeclaration n, GenerationContext arg) {
-		getPrinter().print(n.getName());
+		printer.print(n.getName());
 
 		// TODO implements not considered
-		getPrinter().print(" = ");
-		getPrinter().printLn(" {");
-		getPrinter().indent();
+		printer.print(" = ");
+		printer.printLn(" {");
+		printer.indent();
 		if (n.getEntries() != null) {
 			for (Iterator<EnumConstantDeclaration> i = n.getEntries().iterator(); i.hasNext();) {
 				EnumConstantDeclaration e = i.next();
-				getPrinter().print(e.getName());
-				getPrinter().print(" : \"");
-				getPrinter().print(e.getName());
-				getPrinter().print("\"");
+				printer.print(e.getName());
+				printer.print(" : \"");
+				printer.print(e.getName());
+				printer.print("\"");
 				if (i.hasNext()) {
-					getPrinter().printLn(", ");
+					printer.printLn(", ");
 				}
 			}
 		}
 		// TODO members not considered
-		getPrinter().printLn("");
-		getPrinter().unindent();
-		getPrinter().print("}");
+		printer.printLn("");
+		printer.unindent();
+		printer.print("}");
 	}
 }

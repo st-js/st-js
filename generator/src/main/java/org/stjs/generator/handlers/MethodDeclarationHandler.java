@@ -35,13 +35,13 @@ public class MethodDeclarationHandler extends DefaultHandler {
 
 	private void printMethod(String name, List<Parameter> parameters, BlockStmt body, GenerationContext arg) {
 		if (anonymous) {
-			getPrinter().print("function");
+			printer.print("function");
 		} else {
-			getPrinter().print(name);
-			getPrinter().print(" = function");
+			printer.print(name);
+			printer.print(" = function");
 		}
 
-		getPrinter().print("(");
+		printer.print("(");
 		if (parameters != null) {
 			boolean first = true;
 			for (Iterator<Parameter> i = parameters.iterator(); i.hasNext();) {
@@ -51,18 +51,18 @@ public class MethodDeclarationHandler extends DefaultHandler {
 					continue;
 				}
 				if (!first) {
-					getPrinter().print(", ");
+					printer.print(", ");
 				}
 				p.accept(getRuleVisitor(), arg);
 				first = false;
 			}
 		}
-		getPrinter().print(")");
+		printer.print(")");
 		// skip throws
 		if (body == null) {
-			getPrinter().print(";");
+			printer.print(";");
 		} else {
-			getPrinter().print(" ");
+			printer.print(" ");
 			body.accept(getRuleVisitor(), arg);
 		}
 	}

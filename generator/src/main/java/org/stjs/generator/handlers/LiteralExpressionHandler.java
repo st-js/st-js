@@ -25,6 +25,6 @@ public class LiteralExpressionHandler extends DefaultHandler {
     // java has some more syntax to declare integers :
     // 0x0, 0b0, (java7) 1_000_000
     // TODO : convert it to plain numbers for javascript
-    getPrinter().print(n.getValue());
+    printer.print(n.getValue());
   }
 }

@@ -51,20 +51,20 @@ public class InlineObjectHandler extends DefaultHandler {
 
 	@Override
 	public void visit(BlockStmt n, GenerationContext arg) {
-		getPrinter().printLn("{");
+		printer.printLn("{");
 		if (n.getStmts() != null) {
-			getPrinter().indent();
+			printer.indent();
 			for (int i = 0; i < n.getStmts().size(); ++i) {
 				Statement s = n.getStmts().get(i);
 				s.accept(getRuleVisitor(), arg);
 				if ((i < n.getStmts().size() - 1) && (n.getStmts().size() > 1)) {
-					getPrinter().print(",");
+					printer.print(",");
 				}
-				getPrinter().printLn();
+				printer.printLn();
 			}
-			getPrinter().unindent();
+			printer.unindent();
 		}
-		getPrinter().print("}");
+		printer.print("}");
 	}
 
 	@Override
@@ -75,16 +75,16 @@ public class InlineObjectHandler extends DefaultHandler {
 	@Override
 	public void visit(AssignExpr n, GenerationContext arg) {
 		n.getTarget().accept(getRuleVisitor(), arg);
-		getPrinter().print(" ");
+		printer.print(" ");
 		switch (n.getOperator()) {
 		case assign:
-			getPrinter().print(":");
+			printer.print(":");
 			break;
 		default:
 			// TODO - what here!?
 			break;
 		}
-		getPrinter().print(" ");
+		printer.print(" ");
 		n.getValue().accept(getRuleVisitor(), arg);
 	}
 }

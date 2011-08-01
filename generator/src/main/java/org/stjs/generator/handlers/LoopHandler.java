@@ -26,11 +26,11 @@ public class LoopHandler extends DefaultHandler {
 
 	@Override
 	public void visit(ForeachStmt n, GenerationContext arg) {
-		getPrinter().print("for (");
+		printer.print("for (");
 		n.getVariable().accept(getRuleVisitor(), arg);
-		getPrinter().print(" in ");
+		printer.print(" in ");
 		n.getIterable().accept(getRuleVisitor(), arg);
-		getPrinter().print(") ");
+		printer.print(") ");
 		n.getBody().accept(getRuleVisitor(), arg);
 	}
 

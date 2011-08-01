@@ -48,9 +48,9 @@ public class SpecialMethodHandlers {
 					return false;
 				}
 				printScope(currentHandler, n, qname, context, false);
-				currentHandler.getPrinter().print("[");
+				currentHandler.printer.print("[");
 				n.getArgs().get(0).accept(currentHandler.getRuleVisitor(), context);
-				currentHandler.getPrinter().print("]");
+				currentHandler.printer.print("]");
 				return true;
 			}
 		});
@@ -64,10 +64,10 @@ public class SpecialMethodHandlers {
 					return false;
 				}
 				printScope(currentHandler, n, qname, context, false);
-				currentHandler.getPrinter().print("[");
+				currentHandler.printer.print("[");
 				n.getArgs().get(0).accept(currentHandler.getRuleVisitor(), context);
-				currentHandler.getPrinter().print("]");
-				currentHandler.getPrinter().print(" = ");
+				currentHandler.printer.print("]");
+				currentHandler.printer.print(" = ");
 				n.getArgs().get(1).accept(currentHandler.getRuleVisitor(), context);
 				return true;
 			}
@@ -81,18 +81,18 @@ public class SpecialMethodHandlers {
 			public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 					GenerationContext context) {
 
-				currentHandler.getPrinter().print("[");
+				currentHandler.printer.print("[");
 				if (n.getArgs() != null) {
 					boolean first = true;
 					for (Expression arg : n.getArgs()) {
 						if (!first) {
-							currentHandler.getPrinter().print(", ");
+							currentHandler.printer.print(", ");
 						}
 						arg.accept(currentHandler.getRuleVisitor(), context);
 						first = false;
 					}
 				}
-				currentHandler.getPrinter().print("]");
+				currentHandler.printer.print("]");
 				return true;
 			}
 		});
@@ -101,30 +101,30 @@ public class SpecialMethodHandlers {
 			@Override
 			public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 					GenerationContext context) {
-				if (n.getArgs().size()>1) {
-          currentHandler.getPrinter().printLn();
-          currentHandler.getPrinter().indent();
+				if (n.getArgs() != null && n.getArgs().size()>1) {
+          currentHandler.printer.printLn();
+          currentHandler.printer.indent();
 				}
-				currentHandler.getPrinter().print("{");
+				currentHandler.printer.print("{");
 				if (n.getArgs() != null) {
 					boolean first = true;
 					for (int i = 0; i < n.getArgs().size(); i += 2) {
 						if (!first) {
-							currentHandler.getPrinter().print(", ");
-	            currentHandler.getPrinter().printLn();
+							currentHandler.printer.print(", ");
+	            currentHandler.printer.printLn();
 						}
 						// TODO : is it safe to unsescape string that are object litteral keys?
 						n.getArgs().get(i).accept(currentHandler.getRuleVisitor(), context);
-						currentHandler.getPrinter().print(": ");
+						currentHandler.printer.print(": ");
 						n.getArgs().get(i + 1).accept(currentHandler.getRuleVisitor(), context);
 						first = false;
 					}
 				}
-        if (n.getArgs().size()>1) {
-          currentHandler.getPrinter().unindent();
+        if (n.getArgs() != null && n.getArgs().size()>1) {
+          currentHandler.printer.unindent();
         }
 
-				currentHandler.getPrinter().print("}");
+				currentHandler.printer.print("}");
 				return true;
 			}
 		});
@@ -138,13 +138,13 @@ public class SpecialMethodHandlers {
 					// not exactly what it was expected
 					return false;
 				}
-				currentHandler.getPrinter().print("(");
+				currentHandler.printer.print("(");
 				n.getArgs().get(0).accept(currentHandler.getRuleVisitor(), context);
 				for (int i = 1; i < n.getArgs().size(); ++i) {
-					currentHandler.getPrinter().print(" || ");
+					currentHandler.printer.print(" || ");
 					n.getArgs().get(i).accept(currentHandler.getRuleVisitor(), context);
 				}
-				currentHandler.getPrinter().print(")");
+				currentHandler.printer.print(")");
 				return true;
 			}
 		});
@@ -158,7 +158,7 @@ public class SpecialMethodHandlers {
 					return false;
 				}
 				printScope(currentHandler, n, qname, context, false);
-				currentHandler.getPrinter().print(" == ");
+				currentHandler.printer.print(" == ");
 				n.getArgs().get(0).accept(currentHandler.getRuleVisitor(), context);
 				return true;
 			}
@@ -171,14 +171,14 @@ public class SpecialMethodHandlers {
 			GenerationContext context, boolean withDot) {
 		// TODO -> handle super
 		if (qname != null && !qname.isStatic() && qname.getScope() != null && qname.getScope().isThisScope()) {
-			currentHandler.getPrinter().print("this");
+			currentHandler.printer.print("this");
 			if (withDot) {
-				currentHandler.getPrinter().print(".");
+				currentHandler.printer.print(".");
 			}
 		} else if (n.getScope() != null) {
 			n.getScope().accept(currentHandler.getRuleVisitor(), context);
 			if (withDot) {
-				currentHandler.getPrinter().print(".");
+				currentHandler.printer.print(".");
 			}
 		}
 
@@ -195,7 +195,10 @@ public class SpecialMethodHandlers {
 
 		if (qname != null && qname.getScopeName() != null && n.getArgs() != null && n.getArgs().size() > 0) {
 			for (String adapterName : adapterNames) {
-				if (qname.getScopeName().startsWith(adapterName)) {
+				System.out.println("scopeName "+qname.getScopeName());
+				System.out.println(adapterName);
+				System.out.println(qname.getScopeName().startsWith(adapterName));
+			  if (qname.getScopeName().startsWith(adapterName)) {
 				  adapterMethod(currentHandler, n, qname, context);
 					return true;
 				}
@@ -226,23 +229,23 @@ public class SpecialMethodHandlers {
 			GenerationContext context) {
 		Expression arg0 = n.getArgs().get(0);
 		// TODO : use parenthesis only if the expression is complex
-		currentHandler.getPrinter().print("(");
+		currentHandler.printer.print("(");
 	  arg0.accept(currentHandler.getRuleVisitor(), context);
-	  currentHandler.getPrinter().print(")");
+	  currentHandler.printer.print(")");
 		// TODO may add paranthesis here
-		currentHandler.getPrinter().print(".");
-		currentHandler.getPrinter().print(n.getName());
-		currentHandler.getPrinter().print("(");
+		currentHandler.printer.print(".");
+		currentHandler.printer.print(n.getName());
+		currentHandler.printer.print("(");
 		boolean first = true;
 		for (int i = 1; i < n.getArgs().size(); ++i) {
 			Expression arg = n.getArgs().get(i);
 			if (!first) {
-				currentHandler.getPrinter().print(", ");
+				currentHandler.printer.print(", ");
 			}
 			arg.accept(currentHandler.getRuleVisitor(), context);
 			first = false;
 		}
-		currentHandler.getPrinter().print(")");
+		currentHandler.printer.print(")");
 	}
 
 	/**
@@ -258,10 +261,10 @@ public class SpecialMethodHandlers {
 			GenerationContext context) {
 		printScope(currentHandler, n, qname, context, true);
 		if (n.getArgs() == null || n.getArgs().size() == 0) {
-			currentHandler.getPrinter().print(n.getName().substring(1));
+			currentHandler.printer.print(n.getName().substring(1));
 		} else {
-			currentHandler.getPrinter().print(n.getName().substring(1));
-			currentHandler.getPrinter().print(" = ");
+			currentHandler.printer.print(n.getName().substring(1));
+			currentHandler.printer.print(" = ");
 			n.getArgs().get(0).accept(currentHandler.getRuleVisitor(), context);
 		}
 	}
@@ -272,7 +275,7 @@ public class SpecialMethodHandlers {
         QualifiedName<MethodName> qname, GenerationContext context) {
         printScope(currentHandler, n, qname, context, false);
         // skip methodname
-        printArguments(currentHandler.getRuleVisitor(), currentHandler.getPrinter(), n.getArgs(), context);
+        printArguments(currentHandler.getRuleVisitor(), currentHandler.printer, n.getArgs(), context);
       return true; 
     }
   }

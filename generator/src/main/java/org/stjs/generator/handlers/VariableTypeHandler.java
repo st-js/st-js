@@ -28,11 +28,11 @@ public class VariableTypeHandler extends DefaultHandler {
 
 	@Override
 	public void visit(ClassOrInterfaceType n, GenerationContext arg) {
-		getPrinter().print("var");
+		printer.print("var");
 	}
 
 	@Override
 	public void visit(PrimitiveType n, GenerationContext arg) {
-		getPrinter().print("var");
+		printer.print("var");
 	}
 }

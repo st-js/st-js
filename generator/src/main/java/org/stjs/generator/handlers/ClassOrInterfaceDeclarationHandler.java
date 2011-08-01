@@ -56,8 +56,8 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 			if (member instanceof ConstructorDeclaration) {
 				continue;
 			}
-			getPrinter().printLn();
-			getPrinter().printLn();
+			printer.printLn();
+			printer.printLn();
 			int memberModifiers = getModifiers(member); 
 			TypeScope typeScope = (TypeScope) n.getData();
 			JavaTypeName declaredClassName = typeScope.getDeclaredTypeName();
@@ -66,14 +66,14 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 			  if (fullyQualifiedString.isEmpty()) {
 			    throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n), "definition of static members of anonymous classes is not supported");
 			  }
-        getPrinter().print(fullyQualifiedString.getOrThrow());
+        printer.print(fullyQualifiedString.getOrThrow());
 			} else {
-			  getPrinter().print(n.getName());
+			  printer.print(n.getName());
 			}
 			if (!isStatic(memberModifiers)) {
-			  getPrinter().print(".prototype");
+			  printer.print(".prototype");
 			}
-			getPrinter().print(".");
+			printer.print(".");
 			member.accept(getRuleVisitor(), context);
 		}
 	}
@@ -95,18 +95,18 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 
 	@Override
 	public void visit(final ClassOrInterfaceDeclaration n, final GenerationContext arg) {
-	  getPrinter().print(n.getName() +" = ");
+	  printer.print(n.getName() +" = ");
 		if (n.getMembers() != null) {
 			ConstructorDeclaration constr = getConstructor(n.getMembers(), arg);
 			if (constr != null) {
 				constr.accept(getRuleVisitor(), arg);
 			} else {
-				getPrinter().printLn("function(){}");
+				printer.printLn("function(){}");
 			}
 
 			if (n.getExtends() != null && n.getExtends().size() > 0) {
-				getPrinter().printLn();
-				getPrinter().printLn("stjs.extend(" + n.getName() + ", " + n.getExtends().get(0).getName() + ");");
+				printer.printLn();
+				printer.printLn("stjs.extend(" + n.getName() + ", " + n.getExtends().get(0).getName() + ");");
 			}
 			printMembers(n, arg);
 		}
