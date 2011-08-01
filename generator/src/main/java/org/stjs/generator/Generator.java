@@ -114,13 +114,16 @@ public class Generator {
 				new InlineObjectHandler(ruleVisitor)));
 
 		// names
-		ruleVisitor.addRule(rule("Identifiers", "//NameExpr", 100, new NameResolverHandler(ruleVisitor)));
+		NameResolverHandler nameResolveHandler = new NameResolverHandler(ruleVisitor);
+    ruleVisitor.addRule(rule("Identifiers", "//NameExpr", 100, nameResolveHandler));
+		ruleVisitor.addRule(rule("Identifiers", "//ClassOrInterfaceType", 100, nameResolveHandler));
+		
 		ruleVisitor.addRule(rule("Identifiers", "//IntegerLiteralExpr", 100, new LiteralExpressionHandler(ruleVisitor)));
     ruleVisitor.addRule(rule("Identifiers", "//LongLiteralExpr", 100, new LiteralExpressionHandler(ruleVisitor)));
 
-		ruleVisitor.addRule(rule("Method calls", "//MethodCallExpr", 100, new NameResolverHandler(ruleVisitor)));
+		ruleVisitor.addRule(rule("Method calls", "//MethodCallExpr", 100, nameResolveHandler));
 		ruleVisitor.addRule(rule("Constructor Calls", "//ExplicitConstructorInvocationStmt", 100,
-				new NameResolverHandler(ruleVisitor)));
+				nameResolveHandler));
 
 		// loops
 		ruleVisitor.addRule(rule("For Each", "//ForeachStmt", 100, new LoopHandler(ruleVisitor)));
