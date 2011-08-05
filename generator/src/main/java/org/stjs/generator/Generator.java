@@ -15,6 +15,7 @@
  */
 package org.stjs.generator;
 
+import static java.util.Collections.singletonList;
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
@@ -24,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import org.stjs.generator.handlers.ClassOrInterfaceDeclarationHandler;
 import org.stjs.generator.handlers.DefaultHandler;
 import org.stjs.generator.handlers.EnumHandler;
@@ -45,10 +47,11 @@ import org.stjs.generator.scope.NameScopeWalker;
 import org.stjs.generator.scope.ScopeVisitor;
 
 public class Generator {
-
-	private static MatchingRule rule(String name, String xpath, int priority, DefaultHandler handler) {
+  
+  private static MatchingRule rule(String name, String xpath, int priority, DefaultHandler handler) {
 		return (new MatchingRule(name, xpath, new NodeHandlerWithPriority(handler, priority)));
 	}
+	
 
 	private void rules(RuleBasedVisitor ruleVisitor) {
 		// to skip
@@ -129,56 +132,73 @@ public class Generator {
 		ruleVisitor.addRule(rule("For Each", "//ForeachStmt", 100, new LoopHandler(ruleVisitor)));
 	}
 
+  public void generateJavascript(ClassLoader builtProjectClassLoader, List<File> inputFiles,
+        File outputFile, GeneratorConfiguration configuration) throws JavascriptGenerationException {
+    FileWriter writer;
+    try {
+      writer = new FileWriter(outputFile);
+
+      for (File inputFile : inputFiles) {
+        InputStream in;
+        try {
+          in = new FileInputStream(inputFile);
+        } catch (FileNotFoundException e) {
+          throw new JavascriptGenerationException(inputFile, null, e);
+        }
+
+        RuleBasedVisitor ruleVisitor = new RuleBasedVisitor();
+
+        rules(ruleVisitor);
+
+        try {
+          CompilationUnit cu = null;
+          // parse the file
+          cu = JavaParser.parse(in);
+
+          // ASTUtils.dumpXML(cu);
+
+          // read the scope of all declared variables and methods
+          ScopeVisitor scopes = new ScopeVisitor(inputFile, builtProjectClassLoader,
+              configuration.getAllowedPackages());
+          NameScope rootScope = new FullyQualifiedScope(inputFile, builtProjectClassLoader);
+          scopes.visit(cu, rootScope);
+
+          // resolve all the calls to methods and variables
+          NameResolverVisitor resolver = new NameResolverVisitor(rootScope,
+              configuration.getAllowedPackages(),
+              configuration.getAllowedJavaLangClasses());
+          resolver.visit(cu, new NameScopeWalker(rootScope));
+
+          System.out.println("----------------------------");
+          ruleVisitor.generate(cu,
+              new GenerationContext(inputFile));
+
+          System.out.println("----------------------------");
+
+          writer.write(ruleVisitor.getSource());
+          writer.flush();
+          
+        } catch (ParseException e) {
+          throw new JavascriptGenerationException(inputFile, null, e);
+        } catch (IOException e) {
+          throw new JavascriptGenerationException(inputFile, null, e);
+        } finally {
+          try {
+            in.close();
+          } catch (IOException e) {
+            // silent
+          }
+        }
+      }
+      writer.close();
+    } catch (IOException e1) {
+      throw new RuntimeException("Could not open output file "+outputFile);
+    } finally {
+    }
+  }
+
 	public void generateJavascript(ClassLoader builtProjectClassLoader, Class<?> inputClass, File inputFile,
 			File outputFile, GeneratorConfiguration configuration) throws JavascriptGenerationException {
-		InputStream in;
-		try {
-			in = new FileInputStream(inputFile);
-		} catch (FileNotFoundException e) {
-			throw new JavascriptGenerationException(inputFile, null, e);
-		}
-
-		RuleBasedVisitor ruleVisitor = new RuleBasedVisitor();
-
-		rules(ruleVisitor);
-
-		try {
-			CompilationUnit cu = null;
-			// parse the file
-			cu = JavaParser.parse(in);
-
-			// ASTUtils.dumpXML(cu);
-
-			// read the scope of all declared variables and methods
-			ScopeVisitor scopes = new ScopeVisitor(inputFile, builtProjectClassLoader,
-					configuration.getAllowedPackages());
-			NameScope rootScope = new FullyQualifiedScope(inputFile, builtProjectClassLoader);
-			scopes.visit(cu, rootScope);
-
-			// resolve all the calls to methods and variables
-			NameResolverVisitor resolver = new NameResolverVisitor(rootScope, configuration.getAllowedPackages(),
-					configuration.getAllowedJavaLangClasses());
-			resolver.visit(cu, new NameScopeWalker(rootScope));
-
-			System.out.println("----------------------------");
-			ruleVisitor.generate(cu,
-					new GenerationContext(inputFile));
-
-			System.out.println("----------------------------");
-			FileWriter writer = new FileWriter(outputFile);
-			writer.write(ruleVisitor.getSource());
-			writer.flush();
-			writer.close();
-		} catch (ParseException e) {
-			throw new JavascriptGenerationException(inputFile, null, e);
-		} catch (IOException e) {
-			throw new JavascriptGenerationException(inputFile, null, e);
-		} finally {
-			try {
-				in.close();
-			} catch (IOException e) {
-				// silent
-			}
-		}
+	  generateJavascript(builtProjectClassLoader, singletonList(inputFile), outputFile, configuration);
 	}
 }

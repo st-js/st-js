@@ -31,6 +31,7 @@ public class ScopeAssert {
 	private CompilationUnit compilationUnit;
 
 	private QualifiedName<IdentifierName> qname;
+	private String nodeName;
 
 	private int line = -1;
 	private int column = -1;
@@ -66,21 +67,26 @@ public class ScopeAssert {
 		if (column >= 0 && line >= 0) {
 			final AtomicReference<QualifiedName<IdentifierName>> qNamePointer 
 			= new AtomicReference<QualifiedName<IdentifierName>>();
+			final AtomicReference<String> nodeNameP 
+      = new AtomicReference<String>();
 			new VoidVisitorAdapter<Object>() {
-			  @Override
+			  @SuppressWarnings("unchecked")
+        @Override
         public void visit(NameExpr n, Object arg) {
 			     if (n.getBeginLine() == line && n.getBeginColumn() == column) {
 			       qNamePointer.set((QualifiedName<IdentifierName>) n.getData());
+			       nodeNameP.set(n.getName());
 			     }
 			  }
 			}.visit(compilationUnit, null);
 		  qname = qNamePointer.get();
+		  nodeName = nodeNameP.get();
 		}
 	}
 
 	public ScopeAssert assertName(String name) {
 		assertNotNull(qname);
-		assertEquals(name, qname.getName());
+		assertEquals(name, nodeName);
 		return this;
 	}
 

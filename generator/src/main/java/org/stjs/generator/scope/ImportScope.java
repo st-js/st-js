@@ -16,7 +16,11 @@
 package org.stjs.generator.scope;
 
 import static japa.parser.ast.body.ModifierSet.isStatic;
+import static org.stjs.generator.handlers.utils.Option.none;
+import static org.stjs.generator.scope.path.QualifiedPath.withField;
 import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,9 +28,14 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import org.stjs.generator.SourcePosition;
+import org.stjs.generator.handlers.utils.Option;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
+import org.stjs.generator.scope.NameType.TypeName;
 import org.stjs.generator.scope.QualifiedName.NameTypes;
+import org.stjs.generator.scope.path.QualifiedPath;
+import org.stjs.generator.scope.path.QualifiedPath.QualifiedFieldPath;
+import org.stjs.generator.scope.path.QualifiedPath.QualifiedMethodPath;
 
 /**
  * This scope tries to solve the methods inside the static imports and the identifiers (that can be the name of a class)
@@ -79,23 +88,29 @@ public class ImportScope extends NameScope {
 
 	@Override
 	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
-		String imp = findImport(staticExactImports, name);
+	  String imp = findImport(staticExactImports, name);
 		if (imp != null) {
-			// TODO check it's a method and not a field
-			return new QualifiedName<NameType.MethodName>(imp, name, this, true, NameTypes.METHOD);
+		  Option<QualifiedName<MethodName>> qName = findMethodFromClassLoader(QualifiedPath.withMethod(imp));
+      if (qName.isDefined()) {
+        return qName.getOrThrow();
+      }
 		}
+		
 
 		for (String staticImport : this.staticStarImports) {
-			try {
-				Class<?> clazz = classLoader.loadClass(staticImport);
-				for (Method m : clazz.getMethods()) {
-					if (m.getName().equals(name)) {
-						return new QualifiedName<NameType.MethodName>(imp, name, this, true, NameTypes.METHOD);
-					}
-				}
-			} catch (Exception e) {
-				// not found
+			Option<QualifiedName<MethodName>> qName = findMethodFromClassLoader(QualifiedPath.withMethod(staticImport));
+			if (qName.isDefined()) {
+			  return qName.getOrThrow();
 			}
+		}
+		
+		QualifiedName<IdentifierName> receiverField = resolveIdentifier(pos, QualifiedPath.beforeFirstDot(name));
+		if (receiverField != null) {
+		  // the expression can be field.subfield.subfield.
+		  // unless we want to do the full resolution, let's return something basic here and assume fields and method exist
+		  boolean isStatic = false; // it is a non static method class (on a static field!)
+		  return new QualifiedName<NameType.MethodName>(this, isStatic, false, NameTypes.METHOD, receiverField.getDefinitionPoint().getOrNull(), receiverField.isGlobal());
+		  
 		}
 
 		if (getParent() != null) {
@@ -103,20 +118,43 @@ public class ImportScope extends NameScope {
 		}
 		return null;
 	}
+	
+	private Option<QualifiedName<MethodName>> findMethodFromClassLoader(QualifiedMethodPath path) {
+	  try {
+      Class<?> clazz = classLoader.loadClass(path.getClassQualifiedName());
+      for (Method m : clazz.getDeclaredMethods()) {
+        if (m.getName().equals(path.getMethodName())) {
+          return Option.some(new QualifiedName<NameType.MethodName>(this, true, false, NameTypes.METHOD, new JavaTypeName(path), isGlobal(clazz)));
+        }
+      }
+    } catch (Exception e) {
+      // not found
+    }
+    return none();
+	}
 
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
 		String imp = findImport(staticExactImports, name);
 		if (imp != null) {
-			// TODO check it's a field and not a method
-			return new QualifiedName<NameType.IdentifierName>(imp, name, this, true, NameTypes.FIELD);
+		  QualifiedFieldPath path = withField(imp);
+		  try {
+        Class<?> clazz = classLoader.loadClass(path.getClassQualifiedName());
+        Field field = clazz.getDeclaredField(path.getFieldName());
+        if (field != null) {
+          return new QualifiedName<NameType.IdentifierName>(this, true, false, NameTypes.FIELD, new JavaTypeName(path), isGlobal(clazz));
+        }
+      } catch (Exception e) {
+        // not found
+      }
 		}
 
 		for (String staticImport : this.staticStarImports) {
 			try {
 				Class<?> clazz = classLoader.loadClass(staticImport);
-				if (clazz.getField(name) != null) {
-					return new QualifiedName<NameType.IdentifierName>(imp, name, this, true, NameTypes.FIELD);
+				Field field = clazz.getField(name);
+        if (field != null) {
+					return new QualifiedName<NameType.IdentifierName>(this, true, false, NameTypes.FIELD, new JavaTypeName(clazz), isGlobal(clazz));
 				}
 			} catch (Exception e) {
 				// not found
@@ -134,11 +172,21 @@ public class ImportScope extends NameScope {
 		return null;
 	}
 
+  private boolean isGlobal(Class<?> clazz) {
+    // TODO : cache?
+    for (Annotation annote : clazz.getAnnotations()) {
+      if (annote.annotationType().getName().equals("org.stjs.javascript.GlobalScope")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 	@Override
-	protected TypeQualifiedName resolveType(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
 		Class<?> clazz = resolveClass(pos, name);
 		if (clazz != null) {
-			return new TypeQualifiedName(null, this, isStatic(clazz.getModifiers()), clazz.getPackage());
+			return new QualifiedName<TypeName>(this, isStatic(clazz.getModifiers()), NameTypes.CLASS, new JavaTypeName(clazz));
 		}
 		return null;
 	}
@@ -176,7 +224,7 @@ public class ImportScope extends NameScope {
 				resolvedClasses.put(className, resolvedClass);
 				return resolvedClass;
 			} catch (ClassNotFoundException e) {
-
+			  // ignore
 			}
 		}
 

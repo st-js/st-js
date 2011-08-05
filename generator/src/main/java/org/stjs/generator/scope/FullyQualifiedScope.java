@@ -16,12 +16,18 @@
 package org.stjs.generator.scope;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
+import org.stjs.generator.scope.NameType.TypeName;
 import org.stjs.generator.scope.QualifiedName.NameTypes;
+import org.stjs.generator.scope.path.QualifiedPath;
+import org.stjs.generator.scope.path.QualifiedPath.QualifiedFieldPath;
+import org.stjs.generator.scope.path.QualifiedPath.QualifiedMethodPath;
 
 /**
  * This scope tries to resolve only fully qualified names by looking in the classpath for the corresponding type.
@@ -41,34 +47,40 @@ public class FullyQualifiedScope extends NameScope {
 		this.classLoader = classLoader;
 	}
 
-	@Override
-	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
-		return null;
-	}
-
-	private String getClassName(String field) {
-		int pos = field.lastIndexOf('.');
-		if (pos >= 0) {
-			return field.substring(0, pos);
-		}
-		return field;
-	}
-
-	private String getFieldName(String field) {
-		int pos = field.lastIndexOf('.');
-		if (pos >= 0) {
-			return field.substring(pos + 1);
-		}
-		return field;
-	}
+  @Override
+  protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name,
+      NameScope currentScope) {
+    if (name.contains(".")) {
+      QualifiedMethodPath path = QualifiedPath.withMethod(name);
+      Class<?> clazz = resolveClass(path.getClassQualifiedName());
+      if (clazz != null) {
+        for (Method method : clazz.getDeclaredMethods()) {
+          if (method.getName().equals(path.getMethodName())) {
+            return new QualifiedName<NameType.MethodName>(this, true, NameTypes.METHOD, new JavaTypeName(clazz));
+          }
+        }
+      }
+    }
+    return null;
+  }
 
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
-		String className = getClassName(name);
-		String fieldName = getFieldName(name);
-		Class<?> clazz = resolveClass(className);
-		if (clazz != null) {
-			return new QualifiedName<NameType.IdentifierName>(className, fieldName, this, true, NameTypes.FIELD);
+		QualifiedFieldPath path = QualifiedPath.withField(name);
+		String className = path.getClassQualifiedName();
+		if (className != null) {
+  		Class<?> clazz = resolveClass(className);
+  		if (clazz != null) {
+  		  Field field;
+        try {
+          field = clazz.getDeclaredField(path.getFieldName());
+          if (field != null) {
+            return new QualifiedName<NameType.IdentifierName>(this, true, NameTypes.FIELD, new JavaTypeName(clazz));
+          }
+        } catch (Exception e) {
+          // not found
+        }
+  		}
 		}
 		return null;
 	}
@@ -90,10 +102,10 @@ public class FullyQualifiedScope extends NameScope {
 	}
 
 	@Override
-	protected TypeQualifiedName resolveType(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
 		Class<?> clazz = resolveClass(name);
 		if (clazz != null) {
-			return new TypeQualifiedName(null, this, true, clazz.getPackage());
+			return new QualifiedName<TypeName>(this, true, NameTypes.CLASS, new JavaTypeName(clazz));
 		}
 		return null;
 	}

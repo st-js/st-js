@@ -18,28 +18,31 @@ package org.stjs.generator;
 import japa.parser.ParseException;
 import java.io.File;
 import java.io.IOException;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.node.js.NodeJSExecutor;
 import org.stjs.generator.node.js.NodeJSExecutor.ExecutionResult;
-import test.Declaration1;
+import test.DeclarationWithOuter1;
 
+@Ignore
 public class GeneratorTest {
   
   @Test 
 	public void testGenerator() throws ParseException, IOException {
-		generate("src/test/java/test/AssetAllocation.java", Declaration1.class);
+		generate("src/test/java/test/DeclarationWithOuter1.java", DeclarationWithOuter1.class);
 	}
 
 	private void generate(String sourceFile, Class<?> clazz) throws ParseException, IOException {
 
 		Generator generator = new Generator();
-		NodeJSExecutor executor = new NodeJSExecutor();
 		File outputFile = new File("target/x.js");
 		generator.generateJavascript(Thread.currentThread().getContextClassLoader(), clazz, new File(sourceFile),
 				outputFile, new GeneratorConfigurationBuilder().
 				allowedPackage(clazz.getPackage().getName()).
-				allowedPackage("org.stjs.javascript")
+				allowedPackage("org.stjs.javascript").
+				allowedPackage("org.w3c.dom.html")
 				.build());
+		NodeJSExecutor executor = new NodeJSExecutor();
 		ExecutionResult execution = executor.run(outputFile);
 		System.out.println(execution.toString());
 	}

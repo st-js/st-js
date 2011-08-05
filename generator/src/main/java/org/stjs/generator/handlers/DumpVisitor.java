@@ -257,7 +257,7 @@ public class DumpVisitor<T> implements VoidVisitor<T> {
 		}
 	}
 
-	private void printArguments(List<Expression> args, T arg) {
+	void printArguments(List<Expression> args, T arg) {
 		printArguments(this, printer, args, arg);
 	}
 

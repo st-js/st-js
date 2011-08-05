@@ -22,6 +22,7 @@ import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
+import org.stjs.generator.scope.NameType.TypeName;
 import org.stjs.generator.scope.QualifiedName.NameTypes;
 
 /**
@@ -74,18 +75,17 @@ public class TypeScope extends NameScope {
 
 	@Override
 	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
-	  String declaringClassName = declaredTypeName.getFullyQualifiedString().getOrNull();
 		if (instanceMethods.contains(name)) {
 			if (isInCurrentTypeScope(this, currentScope)) {
-        return new QualifiedName<MethodName>(declaringClassName, name, this, false, NameTypes.METHOD);
+        return new QualifiedName<MethodName>(this, false, NameTypes.METHOD, getDeclaredTypeName());
 			}
-			return QualifiedName.<MethodName>outerScope(declaringClassName, name, this, false, NameTypes.METHOD);
+			return QualifiedName.<MethodName>outerScope(this, false, NameTypes.METHOD, getDeclaredTypeName());
 		}
 		if (staticMethods.contains(name)) {
 			 if (isInCurrentTypeScope(this, currentScope)) {
-        return new QualifiedName<MethodName>(declaringClassName, name, this, true, NameTypes.METHOD);
+        return new QualifiedName<MethodName>(this, true, NameTypes.METHOD, getDeclaredTypeName());
       }
-      return QualifiedName.<MethodName>outerScope(declaringClassName, name, this, true, NameTypes.METHOD);
+      return QualifiedName.<MethodName>outerScope(this, true, NameTypes.METHOD, getDeclaredTypeName());
 		}
 		if (getParent() != null) {
 			return getParent().resolveMethod(pos, name, currentScope);
@@ -95,7 +95,6 @@ public class TypeScope extends NameScope {
 
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
-	  String declaringClassName = declaredTypeName.getFullyQualifiedString().getOrNull();
 	  boolean accessingOuterScope = !isInCurrentTypeScope(this, currentScope);
     NameTypes type = null;
     boolean isStatic;
@@ -122,7 +121,7 @@ public class TypeScope extends NameScope {
 	    }
 	    return null;
 	  }
-	  return new QualifiedName<IdentifierName>(declaringClassName, name, this, isStatic, accessingOuterScope, type);
+	  return new QualifiedName<IdentifierName>(this, isStatic, accessingOuterScope, type, getDeclaredTypeName());
 	}
 
 	public void addStaticField(String name, SourcePosition sourcePosition) {
@@ -159,7 +158,7 @@ public class TypeScope extends NameScope {
 
 
 	@Override
-	protected TypeQualifiedName resolveType(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
 		// TODO : do not check strings, but qualified names. Becaue OuterClass.InnerClass is === to InnerClass
 	  if (staticInnerTypes.contains(name)) {
 	    return createInnerTypeQualifiedName(pos, name, true);
@@ -173,9 +172,8 @@ public class TypeScope extends NameScope {
 		return null;
 	}
 
-  private TypeQualifiedName createInnerTypeQualifiedName(SourcePosition pos, String name, boolean isStatic) {
-    TypeQualifiedName enclosingClass = super.resolveType(pos, declaredTypeName.getFullyQualifiedString().getOrThrow());
-    return new TypeQualifiedName(declaredTypeName.getSimpleName().getOrNull(), this, isStatic, enclosingClass.getPackage());
+  private QualifiedName<TypeName> createInnerTypeQualifiedName(SourcePosition pos, String name, boolean isStatic) {
+    return new QualifiedName<TypeName>(this, isStatic, NameTypes.INNER_CLASS, declaredTypeName);
   }
 
 	@Override

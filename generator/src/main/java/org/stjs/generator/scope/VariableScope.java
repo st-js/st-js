@@ -21,7 +21,9 @@ import java.util.Set;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
+import org.stjs.generator.scope.NameType.TypeName;
 import org.stjs.generator.scope.QualifiedName.NameTypes;
+import org.stjs.generator.scope.path.QualifiedPath;
 
 /**
  * This scope is for the variables defined within a block
@@ -30,7 +32,6 @@ import org.stjs.generator.scope.QualifiedName.NameTypes;
  * 
  */
 public class VariableScope extends NameScope {
-	private static final String VARIABLE_SCOPE_NAME = null;
 
 	private final Set<String> variables = new HashSet<String>();
 
@@ -45,7 +46,7 @@ public class VariableScope extends NameScope {
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
 		if (variables.contains(name)) {
-			return new QualifiedName<IdentifierName>(VARIABLE_SCOPE_NAME, name, this, false, NameTypes.VARIABLE);
+			return new QualifiedName<IdentifierName>(this, false, NameTypes.VARIABLE);
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(pos, name, currentScope);
@@ -55,6 +56,14 @@ public class VariableScope extends NameScope {
 
 	@Override
 	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
+	  if (name.contains(".")) {
+	    String receiverOrStaticClass = QualifiedPath.beforeFirstDot(name);
+	    // it is ok to check even without knowing if the receiver is a class or a variable
+	    // since variables have precedence if there is a collision
+	    if (variables.contains(receiverOrStaticClass)) {
+	      return new QualifiedName<NameType.MethodName>(this, false, NameTypes.VARIABLE);
+	    }
+	  }
 		if (getParent() != null) {
 			return getParent().resolveMethod(pos, name, currentScope);
 		}
@@ -62,7 +71,7 @@ public class VariableScope extends NameScope {
 	}
 
 	@Override
-	protected TypeQualifiedName resolveType(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
 		if (getParent() != null) {
 			return getParent().resolveType(pos, name, currentScope);
 		}

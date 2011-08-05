@@ -39,11 +39,15 @@ public class GenerationContext {
 	}
 
 
-	public QualifiedName<MethodName> resolveMethod(Node node) {
+	@SuppressWarnings("unchecked")
+  public QualifiedName<MethodName> resolveMethod(Node node) {
+	  // TODO : why not resolving here? what's the point of having an other pass? 
 		return (QualifiedName<MethodName>) node.getData();
 	}
 
-	public QualifiedName<IdentifierName> resolveIdentifier(Node node) {
+	@SuppressWarnings("unchecked")
+  public QualifiedName<IdentifierName> resolveIdentifier(Node node) {
+	   // TODO : why not resolving here? what's the point of having an other pass?
 	  return (QualifiedName<IdentifierName>) node.getData();
 	}
 

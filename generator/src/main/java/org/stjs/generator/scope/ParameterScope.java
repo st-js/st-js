@@ -21,6 +21,7 @@ import java.util.Set;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
+import org.stjs.generator.scope.NameType.TypeName;
 import org.stjs.generator.scope.QualifiedName.NameTypes;
 
 /**
@@ -30,7 +31,6 @@ import org.stjs.generator.scope.QualifiedName.NameTypes;
  * 
  */
 public class ParameterScope extends NameScope {
-	private static final String PARAMETER_SCOPE_NAME = null;
 
 	private final Set<String> parameters = new HashSet<String>();
 
@@ -50,7 +50,7 @@ public class ParameterScope extends NameScope {
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
 		if (parameters.contains(name)) {
-			return new QualifiedName<IdentifierName>(PARAMETER_SCOPE_NAME, name, this, false, NameTypes.VARIABLE);
+			return new QualifiedName<IdentifierName>(this, false, NameTypes.VARIABLE);
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(pos, name, currentScope);
@@ -73,7 +73,7 @@ public class ParameterScope extends NameScope {
 	}
 
 	@Override
-	protected TypeQualifiedName resolveType(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
 		if (getParent() != null) {
 			return getParent().resolveType(pos, name, currentScope);
 		}

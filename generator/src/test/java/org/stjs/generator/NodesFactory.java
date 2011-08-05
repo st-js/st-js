@@ -24,6 +24,7 @@ import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.body.VariableDeclaratorId;
 import japa.parser.ast.expr.Expression;
+import japa.parser.ast.expr.FieldAccessExpr;
 import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.type.Type;
@@ -170,12 +171,20 @@ public class NodesFactory {
 	}
 
   public static MethodCallExpr methodCallExpr(String methodName, String... arguments) {
-    return new MethodCallExpr(null, methodName, 
+    return methodCallExpr(methodName, null, arguments);
+  }
+  
+  public static MethodCallExpr methodCallExpr(String methodName, Expression scope, String... arguments) {
+    return new MethodCallExpr(scope, methodName, 
         transform(asList(arguments), new Function<String, Expression>() {
           @Override
           public Expression apply(String input) {
             return new NameExpr(input);
           }
         }));
+  }
+
+  public static FieldAccessExpr fieldAccess(String instance, String field) {
+   return new FieldAccessExpr(nameExpr(instance), field);
   }
 }

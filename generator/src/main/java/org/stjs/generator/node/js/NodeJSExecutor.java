@@ -60,11 +60,12 @@ public class NodeJSExecutor {
 		try {
 			Process p = Runtime.getRuntime().exec(
 					new String[] { nodeJS, srcFile.getAbsolutePath() });
+			int exitValue = p.waitFor();
 			return new ExecutionResult(
 					readStream(p.getInputStream()),
 					readStream(p.getErrorStream()),
-					p.exitValue());
-		} catch (IOException e) {
+					exitValue);
+		} catch (Exception e) {
 			// TODO : this is not really going to be working on all OS!
 			if (e.getMessage().contains("Cannot run program")) {
 				String errMsg = "Please install node.js to use this feature https://github.com/joyent/node/wiki/Installation";

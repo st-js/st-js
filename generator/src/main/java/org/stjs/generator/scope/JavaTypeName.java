@@ -1,6 +1,10 @@
 package org.stjs.generator.scope;
 
+import static org.stjs.generator.handlers.utils.Option.some;
+import static org.stjs.generator.scope.path.QualifiedPath.join;
+import static org.stjs.generator.scope.path.QualifiedPath.withClass;
 import org.stjs.generator.handlers.utils.Option;
+import org.stjs.generator.scope.path.QualifiedPath;
 
 /**
  * Java types name, with support for inner classes.
@@ -11,45 +15,46 @@ import org.stjs.generator.handlers.utils.Option;
  * None -> Some<InnerClass> -> Some<SuperClass> 
  * 
  */
+// TODO : we are already using the class loader most of the time to resolve identifiers
+// why do generalize that and get rid of this class (use java.lang.Class instead)
 public class JavaTypeName {
 
-  private final Option<String> simpleName;
-  private final Option<JavaTypeName> enclosingTypeName;
   
-  public JavaTypeName(String simpleName, JavaTypeName enclosingTypeName) {
-   this.simpleName  = Option.of(simpleName);
-   this.enclosingTypeName = Option.of(enclosingTypeName);
+  private final Option<QualifiedPath> classPath;
+  private final Option<QualifiedPath> enclosingTypePath;
+  
+  public JavaTypeName(QualifiedPath classPath, QualifiedPath enclosingTypePath) {
+   this.classPath  = Option.of(classPath);
+   this.enclosingTypePath = Option.of(enclosingTypePath);
   }
   
-  public JavaTypeName(String simpleName) {
-    this.simpleName  = Option.of(simpleName);
-    this.enclosingTypeName = Option.none();
+  public JavaTypeName(Class<?> clazz) {
+    this(withClass(clazz), withClass(clazz.getDeclaringClass()));
+  }
+  
+  public JavaTypeName(QualifiedPath classPath) {
+    this.classPath  = Option.of(classPath);
+    this.enclosingTypePath = Option.none();
    }
 
   public Option<String> getSimpleName() {
-    return simpleName;
+    return classPath.isDefined() ? some(classPath.getOrThrow().getClassSimpleName()) : Option.<String>none();
   }
   
   public boolean isAnonymous() {
-    return getSimpleName().isEmpty();
+    return classPath.isEmpty();
   }
 
-  public Option<String> getFullyQualifiedString() {
+  
+  public Option<String> getFullName(boolean useQualifiedNames) {
     if (isAnonymous()) {
       return Option.none();
     }
-    if (enclosingTypeName.isEmpty()) {
-      return simpleName;
+    if (enclosingTypePath.isEmpty()) {
+       return Option.some(classPath.getOrThrow().getClassName(useQualifiedNames));
     }
-    Option<String> enclosingQualifiedName = enclosingTypeName.getOrThrow().getFullyQualifiedString();
-    if (enclosingQualifiedName.isEmpty()) {
-      return Option.none();
-    }
-    return Option.some(
-        enclosingQualifiedName.getOrThrow() + 
-        "." + 
-        simpleName.getOrThrow());
+    String enclosingQualifiedName = enclosingTypePath.getOrThrow().getClassName(useQualifiedNames);
+    return Option.some(join(enclosingQualifiedName, classPath.getOrThrow().getClassName(useQualifiedNames)));
   }
-  
   
 }

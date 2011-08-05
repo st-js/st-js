@@ -27,7 +27,7 @@ import java.util.List;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
-import org.stjs.generator.scope.ImportScope;
+import org.stjs.generator.scope.JavaTypeName;
 import org.stjs.generator.scope.NameScope;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
@@ -44,62 +44,50 @@ public class NameResolverHandler extends DefaultHandler {
 
 	@Override
 	public void visit(final MethodCallExpr n, final GenerationContext context) {
-		QualifiedName<MethodName> qname = null;
-		if (n.getScope() == null) {
-			// only for methods without a scope
-			qname = context.resolveMethod(n);
-		}
+		QualifiedName<MethodName> qname = context.resolveMethod(n);
 		if (!specialMethodHandlers.handle(this, n, qname, context)) {
-		  if (qname != null && qname.getScope() != null) {
+		  if (qname != null) {
   		  if (qname.isStatic()) {
   		    printStaticFieldOrMethodAccessPrefix(n, context, qname);
+  	      printer.print(n.getName());
+  	      printArguments(n.getArgs(), context, true);
+  	      return;
   		  } else {
-  		    qname.getScope().visit(new NameScope.EmptyVoidNameScopeVisitor(false) {
-    		    @Override
-    		    public void caseTypeScope(TypeScope typeScope) {
-    		      // Non static reference to current enclosing type.
-    		      printer.print("this.");
+  		    if (qname.getScope() != null) {
+    		    qname.getScope().visit(new NameScope.EmptyVoidNameScopeVisitor(false) {
+      		    @Override
+      		    public void caseTypeScope(TypeScope typeScope) {
+      		      // Non static reference to current enclosing type.
+      		      printer.print("this.");
+      		    }
+      		    @Override
+      		    public void caseParentTypeScope(ParentTypeScope parentTypeScope) {
+      		      // Non static reference to parent type
+      		      printer.print("this._super(\"" + n.getName() + "\"");
+                if (n.getArgs() != null && n.getArgs().size() > 0) {
+                  printer.print(", ");
+                }
+                printArguments(n.getArgs(), context, false);
+                printer.print(")");
+      		    }
+      		  });
     		    }
-    		    @Override
-    		    public void caseParentTypeScope(ParentTypeScope parentTypeScope) {
-    		      // Non static reference to parent type
-    		      printer.print("this._super(\"" + n.getName() + "\"");
-              if (n.getArgs() != null && n.getArgs().size() > 0) {
-                printer.print(", ");
-              }
-              printArguments(n.getArgs(), context);
-              printer.print(")");
-    		    }
-    		  });
   		  }
 		  }
-
-			n.accept(getRuleVisitor(), context.skipHandlers());
+		  n.accept(getRuleVisitor(), context.skipHandlers());
 		}
 	}
 
   private void printStaticFieldOrMethodAccessPrefix(final Node n,
-      final GenerationContext context, QualifiedName<?> qname) {
-    qname.getScope().visit(new NameScope.EmptyVoidNameScopeVisitor(true) {
-      @Override
-      public void caseTypeScope(TypeScope scope) {
-        if (scope.getDeclaredTypeName().isAnonymous()) {
-          throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
-              "Cannot generate static field access for anonymous class"); // I think that this is not possible in Java (static field in anonymous class)
-        }
-        printer.print(scope.getDeclaredTypeName().getFullyQualifiedString().getOrThrow()+".");
+      final GenerationContext context, final QualifiedName<?> qname) {
+    if (!qname.isGlobal()) {
+      JavaTypeName definitionPoint = qname.getDefinitionPoint().getOrThrow();
+      if (definitionPoint.isAnonymous()) {
+        throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+            "Cannot generate static field access for anonymous class"); // I think that this is not possible in Java (static field in anonymous class)
       }
-      @Override
-      public void caseParentTypeScope(ParentTypeScope parentTypeScope) {
-        caseTypeScope(parentTypeScope.getDeclaredTypeScope());
-      }
-      @Override
-      public void caseImportScope(ImportScope importScope) {
-        // TODO : deal with static method calls in external files
-        // need to differentiate between global scope libraries (use native keyword?) that must not be prefixed
-        // and actual static calls that need to be prefixed
-      }
-    });
+      printer.print(definitionPoint.getFullName(false).getOrThrow()+".");
+    }
   }
 
   @Override
@@ -146,11 +134,15 @@ public class NameResolverHandler extends DefaultHandler {
   		  });
 		  }
 		} 
+		
 		printer.print(n.getName());
 	}
 
-	private void printArguments(List<Expression> args, GenerationContext context) {
-		if (args != null) {
+	private void printArguments(List<Expression> args, GenerationContext context, boolean withParents) {
+		if (withParents) {
+		  printer.print("(");
+		}
+	  if (args != null) {
 			for (Iterator<Expression> i = args.iterator(); i.hasNext();) {
 				Expression e = i.next();
 				e.accept(getRuleVisitor(), context);
@@ -159,6 +151,9 @@ public class NameResolverHandler extends DefaultHandler {
 				}
 			}
 		}
+	  if (withParents) {
+      printer.print(")");
+    }
 	}
 
 	@Override
@@ -173,7 +168,7 @@ public class NameResolverHandler extends DefaultHandler {
 		if (n.getArgs() != null && n.getArgs().size() > 0) {
 			printer.print(", ");
 		}
-		printArguments(n.getArgs(), context);
+		printArguments(n.getArgs(), context, false);
 		printer.print(");");
 	}
 

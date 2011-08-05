@@ -15,12 +15,14 @@
  */
 package org.stjs.generator.scope;
 
+import static org.stjs.generator.scope.QualifiedName.NameTypes.INNER_CLASS;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.Node;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
 import japa.parser.ast.body.EnumDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
+import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.FieldAccessExpr;
 import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
@@ -31,6 +33,7 @@ import japa.parser.ast.stmt.ForStmt;
 import japa.parser.ast.stmt.ForeachStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.PrimitiveType;
+import japa.parser.ast.visitor.GenericVisitorAdapter;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
 import java.util.Collection;
 import java.util.Set;
@@ -128,20 +131,41 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		super.visit(n, currentScope.nextChild());
 	}
 
-	/*------ method having to resolve identifiers ---------*/
-	@Override
-	public void visit(MethodCallExpr n, NameScopeWalker currentScope) {
-		if (n.getScope() == null) {
-			// only for methods without a scope
-			SourcePosition pos = new SourcePosition(n);
-			QualifiedName<MethodName> qname = currentScope.getScope().resolveMethod(pos, n.getName());
-			if (qname != null) {
-				checkNonStaticAccessToOuterScope(currentScope, pos, qname);
-				n.setData(qname);
-			}
-		}
-		super.visit(n, currentScope);
+	private String nodeNameWithScope(Expression node) {
+	  return node.accept(new GenericVisitorAdapter<String, String>() {
+      @Override
+      public String visit(FieldAccessExpr parentExpr, String arg) {
+        if (parentExpr.getScope() != null) {
+          String parentName = nodeNameWithScope(parentExpr.getScope());
+          if (parentName != null) {
+            return parentName+"."+parentExpr.getField();
+          }
+        }
+        return parentExpr.getField();
+      }
+      @Override
+      public String visit(NameExpr n, String arg) {
+        return n.getName();
+      }
+    }, null);
 	}
+	/*------ method having to resolve identifiers ---------*/
+  @Override
+  public void visit(MethodCallExpr n, NameScopeWalker currentScope) {
+    String name = n.getName();
+    if (n.getScope() != null) {
+      name = nodeNameWithScope(n.getScope()) +"."+name;
+    }
+    // only for methods without a scope
+    SourcePosition pos = new SourcePosition(n);
+    QualifiedName<MethodName> qname = currentScope.getScope().resolveMethod(pos, name);
+    if (qname != null) {
+      checkNonStaticAccessToOuterScope(currentScope, pos, qname);
+      n.setData(qname);
+    }
+
+    super.visit(n, currentScope);
+  }
 
   private void checkNonStaticAccessToOuterScope(NameScopeWalker currentScope, SourcePosition pos,
       QualifiedName<?> qname) {
@@ -182,31 +206,38 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		return n.getScope().toString();
 	}
 
-	/**
-	 * throws an exception if none of the allowedPackages is found as parent package of the given declaration
-	 * 
-	 * @param importDecl
-	 */
-	private void checkImport(Node n, String importName, NameScopeWalker currentScope)
-			throws JavascriptGenerationException {
-		if (importName.equals("this")) {
-			return;
-		}
-		if (importName.startsWith("java.lang.")) {
-			String checkClass = importName.substring("java.lang.".length());
-			if (allowedJavaLangClasses.contains(checkClass)) {
-				return;
-			}
-		} else {
-			for (String allowedPackage : allowedPackages) {
-				if (importName.startsWith(allowedPackage)) {
-					return;
-				}
-			}
-		}
-		throw new JavascriptGenerationException(currentScope.getScope().getInputFile(), new SourcePosition(n),
-				"The qualified name:" + importName + " is not part of the allowed packages");
-	}
+  /**
+   * throws an exception if none of the allowedPackages is found as parent
+   * package of the given declaration
+   * 
+   * @param importDecl
+   */
+  private void checkImport(Node n, String importName, NameScopeWalker currentScope)
+      throws JavascriptGenerationException {
+    if (importName.equals("this")) {
+      return;
+    }
+    if (importName.startsWith("java.lang.")) {
+      String checkClass = importName.substring("java.lang.".length());
+      if (allowedJavaLangClasses.contains(checkClass)) {
+        return;
+      }
+    } else {
+      for (String allowedPackage : allowedPackages) {
+        if (importName.startsWith(allowedPackage)) {
+          return;
+        }
+      }
+    }
+    try {
+      throw new JavascriptGenerationException(currentScope.getScope().getInputFile(),
+          new SourcePosition(n),
+          "The qualified name:" + importName + " is not part of the allowed packages");
+    } catch (JavascriptGenerationException e) {
+      // e.printStackTrace();
+      throw e;
+    }
+  }
 
 	@Override
 	public void visit(NameExpr n, NameScopeWalker currentScope) {
@@ -226,11 +257,16 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		StringBuilder fullName = new StringBuilder(n.getName());
 		if (n.getScope() == null) {
 			// not fully-specified classes
-		  TypeQualifiedName qname = currentScope.getScope().resolveType(pos, n.getName());
+		  QualifiedName<TypeName> qname = currentScope.getScope().resolveType(pos, n.getName());
 			if (qname != null) {
-			    fullName = new StringBuilder(qname.getPackage().getName()+"."+n.getName());			    
+			    fullName = new StringBuilder(qname.getDefinitionPoint().getOrThrow().getFullName(true).getOrThrow());			    
+			    n.setData(qname);
+			    if (qname.getType() == INNER_CLASS) {
+			      // no need to check for imports
+			      super.visit(n, currentScope);
+			      return;
+			    }
 			}
-			n.setData(qname);
 		} else {
 		  for (ClassOrInterfaceType t = n.getScope(); t != null; t = t.getScope()) {
 	      fullName.insert(0, t.getName() + ".");

@@ -15,6 +15,7 @@
  */
 package org.stjs.generator.scope;
 
+import static org.stjs.generator.scope.path.QualifiedPath.withClassName;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.Node;
@@ -152,6 +153,8 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 	}
 
 	 private JavaTypeName getTypeName(Node n, String name, NameScope currentScope) {
+	   // TODO : if we really want to use the class loader, load the class and avoid
+	   // trying to guess things here!
 	   NameScope scopeIt = currentScope; 
 	   do {
 	      JavaTypeName enclosingClassName = scopeIt.visit( new NameScope.EmptyNameScopeVisitor<JavaTypeName>(null) {
@@ -165,12 +168,12 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 	        }
 	      });
 	      if (enclosingClassName != null) {
-	        return new JavaTypeName(name, enclosingClassName);
+	        return new JavaTypeName(withClassName(name), withClassName(enclosingClassName.getFullName(true).getOrThrow()));
 	      }
 	      scopeIt = scopeIt.getParent();
 	    } while (scopeIt != null);
 	    // no enclosing class
-	    return new JavaTypeName(name);
+	    return new JavaTypeName(withClassName(name));
 	  }
 	 
 

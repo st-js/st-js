@@ -21,6 +21,7 @@ import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
 import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
+import japa.parser.ast.body.ModifierSet;
 import java.util.List;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptGenerationException;
@@ -51,18 +52,20 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 	
 	private void printMembers(ClassOrInterfaceDeclaration n, GenerationContext context) {
 	  List<BodyDeclaration> members = n.getMembers();
-		for (int i = 0; i < members.size(); ++i) {
-			BodyDeclaration member = members.get(i);
+		for (BodyDeclaration member : members) {
 			if (member instanceof ConstructorDeclaration) {
 				continue;
 			}
 			printer.printLn();
 			printer.printLn();
 			int memberModifiers = getModifiers(member); 
+			if (ModifierSet.isAbstract(memberModifiers) || ModifierSet.isNative(memberModifiers)) {
+			  continue;
+			}
 			TypeScope typeScope = (TypeScope) n.getData();
 			JavaTypeName declaredClassName = typeScope.getDeclaredTypeName();
 			if (isStatic(n.getModifiers())) {
-			  Option<String> fullyQualifiedString = declaredClassName.getFullyQualifiedString();
+			  Option<String> fullyQualifiedString = declaredClassName.getFullName(false);
 			  if (fullyQualifiedString.isEmpty()) {
 			    throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n), "definition of static members of anonymous classes is not supported");
 			  }
@@ -95,6 +98,9 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 
 	@Override
 	public void visit(final ClassOrInterfaceDeclaration n, final GenerationContext arg) {
+	  if (n.isInterface()) {
+	    return;
+	  }
 	  printer.print(n.getName() +" = ");
 		if (n.getMembers() != null) {
 			ConstructorDeclaration constr = getConstructor(n.getMembers(), arg);

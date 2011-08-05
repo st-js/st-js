@@ -16,48 +16,47 @@
 package org.stjs.generator.scope;
 
 import static org.stjs.generator.handlers.utils.PreConditions.checkNotNull;
+import static org.stjs.generator.handlers.utils.PreConditions.checkState;
+import org.stjs.generator.handlers.utils.Option;
 
 public class QualifiedName<T extends NameType> {
-	private final String scopeName;
-	private final String name;
 	private final NameScope scope;
 	private final boolean isStatic; // use an int to encode modifiers a la java.lang.reflect?
 	private final boolean accessingOuterScope;
 	private final NameTypes type;
+	private final Option<JavaTypeName> definitionPoint; // Local variables and parameters don't have definition points
+	private final boolean isGlobalScope;
 	
 	public enum NameTypes {
 	  METHOD,
 	  FIELD,
 	  VARIABLE,
-	  CLASS
+	  CLASS, INNER_CLASS
 	}
 
-	public QualifiedName(String scopeName, String name, NameScope scope, boolean isStatic, NameTypes type) {
-	  this(scopeName, name, scope, isStatic, false, type);
+	public QualifiedName(NameScope scope, boolean isStatic, NameTypes type) {
+	  this(scope, isStatic, type,null);
 	}
 	
-	public QualifiedName(String scopeName, String name, NameScope scope, boolean isStatic, boolean accessingOuterScope, NameTypes type) {
-		this.scopeName = scopeName;
-		this.name = name;
+	public QualifiedName(NameScope scope, boolean isStatic, NameTypes type, JavaTypeName definitionPoint) {
+	  this(scope, isStatic, false, type, definitionPoint);
+	}
+	
+	public QualifiedName(NameScope scope, boolean isStatic, boolean accessingOuterScope, NameTypes type, JavaTypeName definitionPoint) {
+	  this(scope, isStatic, accessingOuterScope, type, definitionPoint, false);
+	}
+	
+	public QualifiedName(NameScope scope, boolean isStatic, boolean accessingOuterScope, NameTypes type, JavaTypeName definitionPoint, boolean isGlobalScope) {
 		this.scope = checkNotNull(scope);
 		this.isStatic = isStatic;
 		this.accessingOuterScope = accessingOuterScope;
 		this.type = type;
+		this.definitionPoint = Option.of(definitionPoint);
+		this.isGlobalScope = isGlobalScope;
+		checkState(this.definitionPoint.isDefined() == (type != NameTypes.VARIABLE), "Methods, fields and classes must have a definition point");
+		
 	}
 
-	/**
-	 * the scope name can be null for parameters and variables, can be "this" for immediate fields, FullClass.this for
-	 * references to outer class FullClass for static references.
-	 * 
-	 * @return
-	 */
-	public String getScopeName() {
-		return scopeName;
-	}
-
-	public String getName() {
-		return name;
-	}
 
 	/**
 	 * This is the name scope in which the name was found
@@ -71,10 +70,12 @@ public class QualifiedName<T extends NameType> {
 	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder();
-		if (scopeName != null) {
-			s.append(scopeName).append(".");
+		if (definitionPoint.isDefined()) {
+			Option<String> fullyQualifiedString = definitionPoint.getOrThrow().getFullName(true);
+      if (fullyQualifiedString.isDefined()) {
+        s.append(fullyQualifiedString.getOrThrow()).append(".");
+      }
 		}
-		s.append(name);
 		s.append("[" + scope.getPath() + "]");
 		return s.toString();
 	}
@@ -87,12 +88,24 @@ public class QualifiedName<T extends NameType> {
     return accessingOuterScope;
   }
 
-  public static <T extends NameType> QualifiedName<T> outerScope(String scopeName, String name, NameScope scope, boolean isStatic, NameTypes type) {
-    return new QualifiedName<T>(scopeName, name, scope, isStatic, true, type);
+  public static <T extends NameType> QualifiedName<T> outerScope(NameScope scope, boolean isStatic, NameTypes type, JavaTypeName definitionPoint) {
+    return new QualifiedName<T>(scope, isStatic, true, type, definitionPoint);
   }
 
   public NameTypes getType() {
     return type;
+  }
+
+  /**
+   * Indicates that a variable, field or method can be accessed through the global scope
+   * @return
+   */
+  public boolean isGlobal() {
+    return isGlobalScope;
+  }
+
+  public Option<JavaTypeName> getDefinitionPoint() {
+    return definitionPoint;
   }
 
 }

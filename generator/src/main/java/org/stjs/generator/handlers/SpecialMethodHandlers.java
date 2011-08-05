@@ -21,6 +21,7 @@ import japa.parser.ast.expr.MethodCallExpr;
 import java.util.HashMap;
 import java.util.Map;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.handlers.utils.Option;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.QualifiedName;
 
@@ -193,15 +194,15 @@ public class SpecialMethodHandlers {
 			return true;
 		}
 
-		if (qname != null && qname.getScopeName() != null && n.getArgs() != null && n.getArgs().size() > 0) {
+		if (qname != null && qname.getDefinitionPoint().isDefined() && n.getArgs() != null && n.getArgs().size() > 0) {
 			for (String adapterName : adapterNames) {
-				System.out.println("scopeName "+qname.getScopeName());
-				System.out.println(adapterName);
-				System.out.println(qname.getScopeName().startsWith(adapterName));
-			  if (qname.getScopeName().startsWith(adapterName)) {
-				  adapterMethod(currentHandler, n, qname, context);
-					return true;
-				}
+			  Option<String> fullyQualifiedString = qname.getDefinitionPoint().getOrThrow().getFullName(true);
+			  if (fullyQualifiedString.isDefined()) {
+          if (fullyQualifiedString.getOrThrow().startsWith(adapterName)) {
+            adapterMethod(currentHandler, n, qname, context);
+          	return true;
+          }
+        }
 			}
 		}
 

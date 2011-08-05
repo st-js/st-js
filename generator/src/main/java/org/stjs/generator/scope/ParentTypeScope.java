@@ -25,6 +25,7 @@ import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
+import org.stjs.generator.scope.NameType.TypeName;
 import org.stjs.generator.scope.QualifiedName.NameTypes;
 
 /**
@@ -63,14 +64,14 @@ public class ParentTypeScope extends NameScope {
       }
 		}
 		
-		String declaredClassName = getDeclaredTypeScope().getDeclaredTypeName().getFullyQualifiedString().getOrNull();
+		String declaredClassName = getDeclaredTypeScope().getDeclaredTypeName().getFullName(false).getOrNull();
 		Method method = getAccesibleMethod(parentClass, name);
 		if (method != null) {
 			boolean isStatic = isStatic(method.getModifiers());
 		  if (TypeScope.isInCurrentTypeScope(this, currentScope)) {
-				return new QualifiedName<MethodName>(declaredClassName, name, this, isStatic, NameTypes.METHOD);
+				return new QualifiedName<MethodName>(this, isStatic, NameTypes.METHOD, getDeclaredTypeScope().getDeclaredTypeName());
 			}
-			return QualifiedName.<MethodName>outerScope(declaredClassName, name, this, isStatic, NameTypes.METHOD);
+			return QualifiedName.<MethodName>outerScope(this, isStatic, NameTypes.METHOD, getDeclaredTypeScope().getDeclaredTypeName());
 		}
 		if (getParent() != null) {
 			return getParent().resolveMethod(pos, name, currentScope);
@@ -110,12 +111,11 @@ public class ParentTypeScope extends NameScope {
 		}
 		Field field = getAccesibleField(parentClass, name);
 		if (field != null) {
-		  String declaredClassName = getDeclaredTypeScope().getDeclaredTypeName().getFullyQualifiedString().getOrNull();
 		  boolean isStatic = isStatic(field.getModifiers());
 			if (TypeScope.isInCurrentTypeScope(this, currentScope)) {
-				return new QualifiedName<IdentifierName>(declaredClassName, name, this, isStatic, NameTypes.FIELD);
+				return new QualifiedName<IdentifierName>(this, isStatic, NameTypes.FIELD, getDeclaredTypeScope().getDeclaredTypeName());
 			}
-			return QualifiedName.<IdentifierName>outerScope(declaredClassName, name, this, isStatic, NameTypes.FIELD);
+			return QualifiedName.<IdentifierName>outerScope(this, isStatic, NameTypes.FIELD, getDeclaredTypeScope().getDeclaredTypeName());
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(pos, name, currentScope);
@@ -148,7 +148,7 @@ public class ParentTypeScope extends NameScope {
 	}
 
 	@Override
-	protected TypeQualifiedName resolveType(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
 		if (getParent() != null) {
 			return getParent().resolveType(pos, name, currentScope);
 		}
