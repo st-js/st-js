@@ -19,6 +19,8 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import japa.parser.ast.CompilationUnit;
+import japa.parser.ast.expr.Expression;
+import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
 import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.Assert;
@@ -71,12 +73,21 @@ public class ScopeAssert {
       = new AtomicReference<String>();
 			new VoidVisitorAdapter<Object>() {
 			  @SuppressWarnings("unchecked")
+			  private void matchOnName(final AtomicReference<QualifiedName<IdentifierName>> qNamePointer,
+			      final AtomicReference<String> nodeNameP, Expression n, String name) {
+			    if (n.getBeginLine() == line && n.getBeginColumn() == column) {
+			      qNamePointer.set((QualifiedName<IdentifierName>) n.getData());
+			      nodeNameP.set(name);
+			    }
+			  }
         @Override
         public void visit(NameExpr n, Object arg) {
-			     if (n.getBeginLine() == line && n.getBeginColumn() == column) {
-			       qNamePointer.set((QualifiedName<IdentifierName>) n.getData());
-			       nodeNameP.set(n.getName());
-			     }
+			    matchOnName(qNamePointer, nodeNameP, n, n.getName());
+			  }
+			  @Override
+			  public void visit(MethodCallExpr n, Object arg) {
+			    System.out.println(n.getName()+":"+n.getData()+" "+n.getBeginLine()+" "+n.getBeginColumn());
+			    matchOnName(qNamePointer, nodeNameP, n, n.getName());
 			  }
 			}.visit(compilationUnit, null);
 		  qname = qNamePointer.get();

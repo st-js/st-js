@@ -30,14 +30,15 @@ import java.util.Set;
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.scope.QualifiedName.NameTypes;
+import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
 
 public class ScopeTest {
 
-  private NameResolverVisitor resolveName2(CompilationUnit cu, String clazz ) throws ParseException, IOException  {
+  static NameResolverVisitor resolveName2(CompilationUnit cu, String clazz ) throws ParseException, IOException  {
     return resolveName2(cu, clazz, Collections.<String>emptyList());
   }
   
-  private NameResolverVisitor resolveName2(CompilationUnit cu, String clazz, Collection<String> packages)
+  static NameResolverVisitor resolveName2(CompilationUnit cu, String clazz, Collection<String> packages)
 	      throws ParseException, IOException {
 	    
 	    packages = new HashSet<String>(packages);
@@ -50,8 +51,10 @@ public class ScopeTest {
 	    javaLangClasses.add("Object");
 	    ScopeVisitor scopes = new ScopeVisitor(new File(clazz), Thread.currentThread().getContextClassLoader(),
 	        packages);
-	    NameScope rootScope = new FullyQualifiedScope(new File(clazz), Thread.currentThread().getContextClassLoader());
-	    scopes.visit(cu, rootScope);
+    NameScope rootScope = new FullyQualifiedScope(new File(clazz), new ClassLoaderWrapper(Thread
+        .currentThread()
+          .getContextClassLoader()));
+    scopes.visit(cu, rootScope);
 
 	    NameResolverVisitor resolver = new NameResolverVisitor(rootScope, packages, javaLangClasses);
 	    resolver.visit(cu, new NameScopeWalker(rootScope));
@@ -59,7 +62,7 @@ public class ScopeTest {
 	    return resolver;
 	  }
 
-	  private CompilationUnit compilationUnit(String fileName) throws ParseException {
+	  static CompilationUnit compilationUnit(String fileName) throws ParseException {
 	    return JavaParser.parse(Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName));
 	  }
 
@@ -215,7 +218,7 @@ public class ScopeTest {
 		  resolveName("test/CheckPackages5.java", Collections.singleton("java.text"));
 			fail("Expected " + JavascriptGenerationException.class);
 		} catch (JavascriptGenerationException ex) {
-			assertEquals(21, ex.getSourcePosition().getLine());
+			assertEquals(26, ex.getSourcePosition().getLine());
 			assertEquals(32, ex.getSourcePosition().getColumn());
 		}
 	}
