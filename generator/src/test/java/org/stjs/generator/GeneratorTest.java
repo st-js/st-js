@@ -18,18 +18,17 @@ package org.stjs.generator;
 import japa.parser.ParseException;
 import java.io.File;
 import java.io.IOException;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.node.js.NodeJSExecutor;
 import org.stjs.generator.node.js.NodeJSExecutor.ExecutionResult;
-import test.DeclarationWithOuter1;
+import test.innerclasses.ClassUsingInnerClass;
 
-@Ignore
+
 public class GeneratorTest {
   
   @Test 
 	public void testGenerator() throws ParseException, IOException {
-		generate("src/test/java/test/DeclarationWithOuter1.java", DeclarationWithOuter1.class);
+		generate("src/test/java/test/innerclasses/ClassUsingInnerClass.java", ClassUsingInnerClass.class);
 	}
 
 	private void generate(String sourceFile, Class<?> clazz) throws ParseException, IOException {

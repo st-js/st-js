@@ -1,6 +1,8 @@
 package org.stjs.generator.scope.path;
 
-
+import org.stjs.generator.handlers.utils.Option;
+import org.stjs.generator.scope.ClassResolver;
+import org.stjs.generator.scope.classloader.ClassWrapper;
 
 public class QualifiedPath {
 
@@ -15,6 +17,10 @@ public class QualifiedPath {
   
   public String getClassSimpleName() {
     return clazz;
+  }
+  
+  public String getOuterClassQualifiedName() {
+    return packag != null ? join(packag, clazz) : clazz;
   }
   
   public String getClassQualifiedName() {
@@ -36,21 +42,41 @@ public class QualifiedPath {
   }
   
   public static class QualifiedMethodPath extends QualifiedPath {
-    private String method;
+    private final String method;
+    private final String innerClassesName;
 
-    public QualifiedMethodPath(String packag, String clazz, String method) {
+    public QualifiedMethodPath(String packag, String clazz, String innerClassesName, String methodName) {
       super(packag, clazz);
-      this.method = method;
+      this.innerClassesName = innerClassesName;
+      this.method = methodName;
     }
     
     public String getMethodName() {
       return method;
     }
-
-    public String getFullName() {
-     return join(getClassQualifiedName(),method);
+    
+    @Override
+    public String getClassSimpleName() {
+      if (innerClassesName != null) {
+        return join(super.getClassSimpleName(), innerClassesName);
+      }
+      return super.getClassSimpleName();
     }
+    
+    @Override
+    public String getClassQualifiedName() {
+      if (innerClassesName != null) {
+        return join(super.getClassQualifiedName(), innerClassesName);
+      }
+      return super.getClassQualifiedName();
+    }
+
+    public String getInnerClassesName() {
+      return innerClassesName;
+    }
+
   }
+ 
   
   public static String join(String str1, String str2) {
     return str1+"."+str2;
@@ -89,11 +115,32 @@ public class QualifiedPath {
     return null;
   }
   
-  public static QualifiedMethodPath withMethod(String path) {
+  public static QualifiedMethodPath withMethod(String path, ClassResolver scope) {
+    /*
+     * The JLS states in section 7.1:
+     * 
+     * "A package may not contain a type declaration and a subpackage of the
+     * same name, or a compile-time error results.
+     * 
+     * This implies that an expression such as :
+     * 
+     * a.b.c() may refer to class b within package a, or innerclass b within class a,
+     * but not both.
+     */
     String methodName = afterLastDot(path);
-    String className = afterLastDot(beforeLastDot(path));
-    String packageName = beforeLastDot(beforeLastDot(path));
-    return new QualifiedMethodPath(packageName, className, methodName);
+    String classAndPackage = beforeLastDot(path);
+    String classAndPackageCandidate = classAndPackage;
+    String innerClassesName = null;
+    do {
+        if (scope.resolveClass(classAndPackageCandidate).isDefined()) {
+          String className = afterLastDot(classAndPackageCandidate);
+          String packageName = beforeLastDot(classAndPackageCandidate);
+          return new QualifiedMethodPath(packageName, className, innerClassesName, methodName);
+        }
+        innerClassesName = afterLastDot(classAndPackageCandidate);
+        classAndPackageCandidate = beforeLastDot(classAndPackageCandidate);
+      } while (classAndPackageCandidate != null);
+    return null;
   }
 
   public static QualifiedFieldPath withField(String path) {
@@ -103,12 +150,17 @@ public class QualifiedPath {
     return new QualifiedFieldPath(packageName, className, fieldName);
   }
 
-  public static QualifiedPath withClass(Class<?> clazz) {
-    if (clazz == null) {
-      return null;
+  public static QualifiedPath withClass(Option<ClassWrapper> maybeClass) {
+    for (ClassWrapper clazz : maybeClass) {
+      return withClass(clazz);
     }
-    return new QualifiedPath(clazz.getPackage().getName(), clazz.getSimpleName());
+    return null;
   }
+
+  public static QualifiedPath withClass(ClassWrapper clazz) {
+    return new QualifiedPath(clazz.getPackageName(), clazz.getSimpleName());
+  }
+  
 
   public static QualifiedPath withClassName(String name) {
     String className = afterLastDot(name);
