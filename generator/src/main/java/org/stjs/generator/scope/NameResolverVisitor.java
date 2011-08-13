@@ -15,6 +15,7 @@
  */
 package org.stjs.generator.scope;
 
+import static org.stjs.generator.scope.QualifiedName.NameTypes.GENERIC_TYPE;
 import static org.stjs.generator.scope.QualifiedName.NameTypes.INNER_CLASS;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.Node;
@@ -259,13 +260,14 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 			// not fully-specified classes
 		  QualifiedName<TypeName> qname = currentScope.getScope().resolveType(pos, n.getName());
 			if (qname != null) {
-			    fullName = new StringBuilder(qname.getDefinitionPoint().getOrThrow().getFullName(true).getOrThrow());			    
+			    
 			    n.setData(qname);
-			    if (qname.getType() == INNER_CLASS) {
+			    if (qname.getType() == GENERIC_TYPE || qname.getType() == INNER_CLASS) {
 			      // no need to check for imports
 			      super.visit(n, currentScope);
 			      return;
 			    }
+			    fullName = new StringBuilder(qname.getDefinitionPoint().getOrThrow().getFullName(true).getOrThrow());			    
 			}
 		} else {
 		  for (ClassOrInterfaceType t = n.getScope(); t != null; t = t.getScope()) {

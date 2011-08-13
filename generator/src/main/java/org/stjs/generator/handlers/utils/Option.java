@@ -1,8 +1,9 @@
 package org.stjs.generator.handlers.utils;
 
 import static java.lang.String.format;
+import java.util.Iterator;
 
-public abstract class Option<T> {
+public abstract class Option<T> implements Iterable<T>{
 
   /** The singleton representing none.
    */
@@ -56,6 +57,26 @@ public abstract class Option<T> {
     @Override
     public String toString() {
       return "Option.None";
+    }
+
+    @Override
+    public Iterator<Object> iterator() {
+      return new Iterator<Object>() {
+
+        @Override
+        public boolean hasNext() {
+          return false;
+        }
+
+        @Override
+        public Object next() {
+          throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void remove() {
+          throw new UnsupportedOperationException();
+        }};
     }
 
   };
@@ -125,6 +146,30 @@ public abstract class Option<T> {
     @Override
     public String toString() {
       return format("Option.Some(%s)", u);
+    }
+    
+    @Override
+    public Iterator<U> iterator() {
+      return new Iterator<U>() {
+        private boolean produce = true;
+        @Override
+        public boolean hasNext() {
+          return produce;
+        }
+
+        @Override
+        public U next() {
+          if (produce) {
+            produce = false;
+            return u;
+          }
+          throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void remove() {
+          throw new UnsupportedOperationException();
+        }};
     }
 
   }

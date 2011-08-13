@@ -31,7 +31,9 @@ public class QualifiedName<T extends NameType> {
 	  METHOD,
 	  FIELD,
 	  VARIABLE,
-	  CLASS, INNER_CLASS
+	  CLASS,
+	  GENERIC_TYPE,
+	  INNER_CLASS
 	}
 
 	public QualifiedName(NameScope scope, boolean isStatic, NameTypes type) {
@@ -53,7 +55,7 @@ public class QualifiedName<T extends NameType> {
 		this.type = type;
 		this.definitionPoint = Option.of(definitionPoint);
 		this.isGlobalScope = isGlobalScope;
-		checkState(this.definitionPoint.isDefined() == (type != NameTypes.VARIABLE), "Methods, fields and classes must have a definition point");
+		checkState(this.definitionPoint.isDefined() == (type != NameTypes.VARIABLE && type != NameTypes.GENERIC_TYPE), "Methods, fields and classes must have a definition point");
 		
 	}
 

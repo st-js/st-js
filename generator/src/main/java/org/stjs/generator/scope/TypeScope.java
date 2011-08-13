@@ -39,6 +39,7 @@ public class TypeScope extends NameScope {
 	private final Set<String> instanceFields = new HashSet<String>();
 	private final Set<String> instanceMethods = new HashSet<String>();
 	private final Set<String> instanceInnerTypes = new HashSet<String>();
+	private final Set<String> typeParameters = new HashSet<String>();
 	
 	private final JavaTypeName declaredTypeName;
 
@@ -155,7 +156,10 @@ public class TypeScope extends NameScope {
   public void addInstanceInnerType(String name) {
     instanceInnerTypes.add(name);
   }
-
+  
+  public void addTypeParameter(String typeParameter) {
+    typeParameters.add(typeParameter);
+  }
 
 	@Override
 	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
@@ -165,6 +169,9 @@ public class TypeScope extends NameScope {
 		}
 	  if (instanceInnerTypes.contains(name)) {
 	    return createInnerTypeQualifiedName(pos, name, false);
+	  }
+	  if (typeParameters.contains(name)) {
+	    return new QualifiedName<TypeName>(this, false, NameTypes.GENERIC_TYPE);
 	  }
 	  if (getParent() != null) {
 			return getParent().resolveType(pos, name, currentScope);

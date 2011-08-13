@@ -20,7 +20,6 @@ import static org.stjs.generator.handlers.utils.Option.none;
 import static org.stjs.generator.scope.path.QualifiedPath.withField;
 import java.io.File;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,6 +32,8 @@ import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.NameType.TypeName;
 import org.stjs.generator.scope.QualifiedName.NameTypes;
+import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
+import org.stjs.generator.scope.classloader.ClassWrapper;
 import org.stjs.generator.scope.path.QualifiedPath;
 import org.stjs.generator.scope.path.QualifiedPath.QualifiedFieldPath;
 import org.stjs.generator.scope.path.QualifiedPath.QualifiedMethodPath;
@@ -44,9 +45,9 @@ import org.stjs.generator.scope.path.QualifiedPath.QualifiedMethodPath;
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  * 
  */
-public class ImportScope extends NameScope {
-	private final Map<String, Class<?>> resolvedClasses = new HashMap<String, Class<?>>();
-	private final ClassLoader classLoader;
+public class ImportScope extends NameScope implements ClassResolver {
+	private final Map<String, ClassWrapper> resolvedClasses = new HashMap<String, ClassWrapper>();
+	private final ClassLoaderWrapper classLoader;
 
 	private String currentPackage;
 	private Set<String> exactImports = new LinkedHashSet<String>();
@@ -54,7 +55,7 @@ public class ImportScope extends NameScope {
 	private Set<String> starImports = new LinkedHashSet<String>();
 	private Set<String> staticStarImports = new LinkedHashSet<String>();
 
-	public ImportScope(File inputFile, NameScope parent, String currentPackage, ClassLoader classLoader) {
+	public ImportScope(File inputFile, NameScope parent, String currentPackage, ClassLoaderWrapper classLoader) {
 		super(inputFile, "import", parent);
 		this.currentPackage = currentPackage;
 		this.classLoader = classLoader;
@@ -90,7 +91,7 @@ public class ImportScope extends NameScope {
 	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
 	  String imp = findImport(staticExactImports, name);
 		if (imp != null) {
-		  Option<QualifiedName<MethodName>> qName = findMethodFromClassLoader(QualifiedPath.withMethod(imp));
+		  Option<QualifiedName<MethodName>> qName = findMethodFromClassLoader(QualifiedPath.withMethod(imp, this));
       if (qName.isDefined()) {
         return qName.getOrThrow();
       }
@@ -98,19 +99,21 @@ public class ImportScope extends NameScope {
 		
 
 		for (String staticImport : this.staticStarImports) {
-			Option<QualifiedName<MethodName>> qName = findMethodFromClassLoader(QualifiedPath.withMethod(staticImport));
+			Option<QualifiedName<MethodName>> qName = findMethodFromClassLoader(QualifiedPath.withMethod(staticImport, this));
 			if (qName.isDefined()) {
 			  return qName.getOrThrow();
 			}
 		}
 		
-		QualifiedName<IdentifierName> receiverField = resolveIdentifier(pos, QualifiedPath.beforeFirstDot(name));
-		if (receiverField != null) {
-		  // the expression can be field.subfield.subfield.
-		  // unless we want to do the full resolution, let's return something basic here and assume fields and method exist
-		  boolean isStatic = false; // it is a non static method class (on a static field!)
-		  return new QualifiedName<NameType.MethodName>(this, isStatic, false, NameTypes.METHOD, receiverField.getDefinitionPoint().getOrNull(), receiverField.isGlobal());
-		  
+		String maybeReceiverClass = QualifiedPath.beforeFirstDot(name);
+		if (maybeReceiverClass != null) {
+      QualifiedName<IdentifierName> receiverField = resolveIdentifier(pos, maybeReceiverClass);
+  		if (receiverField != null) {
+  		  // the expression can be field.subfield.subfield.
+  		  // unless we want to do the full resolution, let's return something basic here and assume fields and method exist
+  		  boolean isStatic = false; // it is a non static method class (on a static field!)
+  		  return new QualifiedName<NameType.MethodName>(this, isStatic, false, NameTypes.METHOD, receiverField.getDefinitionPoint().getOrNull(), receiverField.isGlobal());
+  		}
 		}
 
 		if (getParent() != null) {
@@ -119,47 +122,40 @@ public class ImportScope extends NameScope {
 		return null;
 	}
 	
-	private Option<QualifiedName<MethodName>> findMethodFromClassLoader(QualifiedMethodPath path) {
-	  try {
-      Class<?> clazz = classLoader.loadClass(path.getClassQualifiedName());
+  private Option<QualifiedName<MethodName>> findMethodFromClassLoader(QualifiedMethodPath path) {
+    for (ClassWrapper clazz : classLoader.loadClass(path)) {
       for (Method m : clazz.getDeclaredMethods()) {
         if (m.getName().equals(path.getMethodName())) {
-          return Option.some(new QualifiedName<NameType.MethodName>(this, true, false, NameTypes.METHOD, new JavaTypeName(path), isGlobal(clazz)));
+          return Option.some(new QualifiedName<NameType.MethodName>(this, true, false,
+              NameTypes.METHOD, new JavaTypeName(path), isGlobal(clazz)));
         }
       }
-    } catch (Exception e) {
-      // not found
     }
     return none();
-	}
+  }
 
-	@Override
-	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
-		String imp = findImport(staticExactImports, name);
-		if (imp != null) {
-		  QualifiedFieldPath path = withField(imp);
-		  try {
-        Class<?> clazz = classLoader.loadClass(path.getClassQualifiedName());
-        Field field = clazz.getDeclaredField(path.getFieldName());
-        if (field != null) {
-          return new QualifiedName<NameType.IdentifierName>(this, true, false, NameTypes.FIELD, new JavaTypeName(path), isGlobal(clazz));
+  @Override
+  protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name,
+      NameScope currentScope) {
+    String imp = findImport(staticExactImports, name);
+    if (imp != null) {
+      QualifiedFieldPath path = withField(imp);
+      for (ClassWrapper clazz : classLoader.loadClass(path.getClassQualifiedName())) {
+        if (clazz.hasDeclaredField(path.getFieldName())) {
+          return new QualifiedName<NameType.IdentifierName>(this, true, false, NameTypes.FIELD,
+                new JavaTypeName(path), isGlobal(clazz));
         }
-      } catch (Exception e) {
-        // not found
       }
-		}
+    }
 
-		for (String staticImport : this.staticStarImports) {
-			try {
-				Class<?> clazz = classLoader.loadClass(staticImport);
-				Field field = clazz.getField(name);
-        if (field != null) {
-					return new QualifiedName<NameType.IdentifierName>(this, true, false, NameTypes.FIELD, new JavaTypeName(clazz), isGlobal(clazz));
-				}
-			} catch (Exception e) {
-				// not found
-			}
-		}
+    for (String staticImport : this.staticStarImports) {
+      for (ClassWrapper clazz : classLoader.loadClass(staticImport)) {
+        if (clazz.hasDeclaredField(name)) {
+          return new QualifiedName<NameType.IdentifierName>(this, true, false, NameTypes.FIELD,
+                new JavaTypeName(clazz), isGlobal(clazz));
+        }
+      }
+    }
 
 		// XXX: don't do anything more as it means it's a class - shall i resolve types as well!?
 		// search for classes in the classpath for the star paths
@@ -172,7 +168,7 @@ public class ImportScope extends NameScope {
 		return null;
 	}
 
-  private boolean isGlobal(Class<?> clazz) {
+  private boolean isGlobal(ClassWrapper clazz) {
     // TODO : cache?
     for (Annotation annote : clazz.getAnnotations()) {
       if (annote.annotationType().getName().equals("org.stjs.javascript.GlobalScope")) {
@@ -184,8 +180,7 @@ public class ImportScope extends NameScope {
 
 	@Override
 	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
-		Class<?> clazz = resolveClass(pos, name);
-		if (clazz != null) {
+		for (ClassWrapper clazz : resolveClass(name)) {
 			return new QualifiedName<TypeName>(this, isStatic(clazz.getModifiers()), NameTypes.CLASS, new JavaTypeName(clazz));
 		}
 		return null;
@@ -202,65 +197,51 @@ public class ImportScope extends NameScope {
 	 * @param parentClassName
 	 * @return
 	 */
-	public Class<?> resolveClass(SourcePosition pos, String className) {
-		Class<?> resolvedClass = resolvedClasses.get(className);
-		if (resolvedClass != null) {
-			return resolvedClass;
+	public Option<ClassWrapper> resolveClass(String className) {
+		{
+		  ClassWrapper resolvedClass = resolvedClasses.get(className);
+  		if (resolvedClass != null) {
+  			return Option.some(resolvedClass);
+  		}
 		}
 
 		// 1. try first full qualified
-		try {
-			resolvedClass = classLoader.loadClass(className);
-			resolvedClasses.put(className, resolvedClass);
-			return resolvedClass;
-		} catch (ClassNotFoundException e) {
-			// next
-		}
+    for (ClassWrapper resolvedClass : classLoader.loadClass(className)) {
+      resolvedClasses.put(className, resolvedClass);
+      return Option.some(resolvedClass);
+    }
 
 		// 2. try in the current package
 		if (currentPackage != null && currentPackage.length() > 0) {
-			try {
-				resolvedClass = classLoader.loadClass(currentPackage + "." + className);
-				resolvedClasses.put(className, resolvedClass);
-				return resolvedClass;
-			} catch (ClassNotFoundException e) {
-			  // ignore
-			}
+			  for (ClassWrapper resolvedClass : classLoader.loadClass(currentPackage + "." + className)){
+			    resolvedClasses.put(className, resolvedClass);
+			    return Option.some(resolvedClass);
+			  }
 		}
 
 		// 3. scan all the exact imports (TODO order may be important between star and not star!!)
 		for (String imp : exactImports) {
 			if (imp.endsWith("." + className)) {
-				try {
-					resolvedClass = classLoader.loadClass(imp);
-
+			  for (ClassWrapper resolvedClass : classLoader.loadClass(imp)){
 					resolvedClasses.put(className, resolvedClass);
-					return resolvedClass;
-				} catch (ClassNotFoundException e) {
-				  //ignore
+					return Option.some(resolvedClass);
 				}
 			}
 		}
 		// 4. scan all the star imports (TODO order may be important between star and not star!!)
-		for (String imp : starImports) {
-			try {
-				resolvedClass = classLoader.loadClass(imp + "." + className);
-				resolvedClasses.put(className, resolvedClass);
-				return resolvedClass;
-			} catch (ClassNotFoundException e) {
-			  //ignore
-			}
-		}
+    for (String imp : starImports) {
+      for (ClassWrapper resolvedClass : classLoader.loadClass(imp + "." + className)) {
+        resolvedClasses.put(className, resolvedClass);
+        return Option.some(resolvedClass);
+      }
+    }
 
 		// 5. try java.lang
-		try {
-			resolvedClass = classLoader.loadClass("java.lang." + className);
+	  for (ClassWrapper resolvedClass :  classLoader.loadClass("java.lang." + className)) {
 			resolvedClasses.put(className, resolvedClass);
-			return resolvedClass;
-		} catch (ClassNotFoundException e) {
-			// next
-		}
-		return null;
+			return Option.some(resolvedClass);
+		} 
+		return Option.none();
 	}
 
   @Override

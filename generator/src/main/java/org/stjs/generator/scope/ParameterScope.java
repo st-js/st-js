@@ -33,6 +33,7 @@ import org.stjs.generator.scope.QualifiedName.NameTypes;
 public class ParameterScope extends NameScope {
 
 	private final Set<String> parameters = new HashSet<String>();
+	private final Set<String> typeParameters = new HashSet<String>();
 
 	public ParameterScope(File inputFile, String name, NameScope parent) {
 		super(inputFile, name, parent);
@@ -43,9 +44,13 @@ public class ParameterScope extends NameScope {
 		parameters.add(parameter);
 	}
 
-	public void addParameter(String parameter) {
-		parameters.add(parameter);
-	}
+  public void addParameter(String parameter) {
+    parameters.add(parameter);
+  }
+
+  public void addTypeParameter(String typeParameter) {
+    typeParameters.add(typeParameter);
+  }
 
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
@@ -74,7 +79,10 @@ public class ParameterScope extends NameScope {
 
 	@Override
 	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
-		if (getParent() != null) {
+		if (typeParameters.contains(name)) {
+		  return new QualifiedName<TypeName>(this, false, NameTypes.CLASS);
+		}
+	  if (getParent() != null) {
 			return getParent().resolveType(pos, name, currentScope);
 		}
 		return null;

@@ -16,15 +16,17 @@
 package org.stjs.generator.scope;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import org.stjs.generator.SourcePosition;
+import org.stjs.generator.handlers.utils.Option;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.NameType.TypeName;
 import org.stjs.generator.scope.QualifiedName.NameTypes;
+import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
+import org.stjs.generator.scope.classloader.ClassWrapper;
 import org.stjs.generator.scope.path.QualifiedPath;
 import org.stjs.generator.scope.path.QualifiedPath.QualifiedFieldPath;
 import org.stjs.generator.scope.path.QualifiedPath.QualifiedMethodPath;
@@ -35,14 +37,12 @@ import org.stjs.generator.scope.path.QualifiedPath.QualifiedMethodPath;
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  * 
  */
-public class FullyQualifiedScope extends NameScope {
-	// special marker for classes not found - to not search again with the same name
-	private static final Class<?> NOT_FOUND_CLASS = new Object() {/*class*/}.getClass();
+public class FullyQualifiedScope extends NameScope implements ClassResolver {
+	// TODO : Use MapMaker for caching
+	private final Map<String, Option<ClassWrapper>> resolvedClasses = new HashMap<String, Option<ClassWrapper>>();
+	private final ClassLoaderWrapper classLoader;
 
-	private final Map<String, Class<?>> resolvedClasses = new HashMap<String, Class<?>>();
-	private final ClassLoader classLoader;
-
-	public FullyQualifiedScope(File inputFile, ClassLoader classLoader) {
+	public FullyQualifiedScope(File inputFile, ClassLoaderWrapper classLoader) {
 		super(inputFile, "root", null);
 		this.classLoader = classLoader;
 	}
@@ -51,12 +51,14 @@ public class FullyQualifiedScope extends NameScope {
   protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name,
       NameScope currentScope) {
     if (name.contains(".")) {
-      QualifiedMethodPath path = QualifiedPath.withMethod(name);
-      Class<?> clazz = resolveClass(path.getClassQualifiedName());
-      if (clazz != null) {
-        for (Method method : clazz.getDeclaredMethods()) {
-          if (method.getName().equals(path.getMethodName())) {
-            return new QualifiedName<NameType.MethodName>(this, true, NameTypes.METHOD, new JavaTypeName(clazz));
+      QualifiedMethodPath path = QualifiedPath.withMethod(name, this);
+      if (path != null) {
+        for (ClassWrapper clazz : resolveClass(path.getClassQualifiedName())) {
+          for (Method method : clazz.getDeclaredMethods()) {
+            if (method.getName().equals(path.getMethodName())) {
+              return new QualifiedName<NameType.MethodName>(this, true, NameTypes.METHOD,
+                  new JavaTypeName(clazz));
+            }
           }
         }
       }
@@ -64,47 +66,38 @@ public class FullyQualifiedScope extends NameScope {
     return null;
   }
 
-	@Override
-	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
-		QualifiedFieldPath path = QualifiedPath.withField(name);
-		String className = path.getClassQualifiedName();
-		if (className != null) {
-  		Class<?> clazz = resolveClass(className);
-  		if (clazz != null) {
-  		  Field field;
-        try {
-          field = clazz.getDeclaredField(path.getFieldName());
-          if (field != null) {
-            return new QualifiedName<NameType.IdentifierName>(this, true, NameTypes.FIELD, new JavaTypeName(clazz));
-          }
-        } catch (Exception e) {
-          // not found
+  @Override
+  protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name,
+      NameScope currentScope) {
+    QualifiedFieldPath path = QualifiedPath.withField(name);
+    String className = path.getClassQualifiedName();
+    if (className != null) {
+      for (ClassWrapper clazz : resolveClass(className)) {
+        if (clazz.hasDeclaredField(path.getFieldName())) {
+          return new QualifiedName<NameType.IdentifierName>(this, true, NameTypes.FIELD,
+              new JavaTypeName(clazz));
         }
-  		}
-		}
-		return null;
-	}
+      }
+    }
+    return null;
+  }
 
-	private Class<?> resolveClass(String className) {
-		Class<?> resolvedClass = resolvedClasses.get(className);
-		if (resolvedClass != null) {
-			return resolvedClass != NOT_FOUND_CLASS ? resolvedClass : null;
-		}
-		try {
-			resolvedClass = classLoader.loadClass(className);
-			resolvedClasses.put(className, resolvedClass);
-			return resolvedClass;
-		} catch (ClassNotFoundException e) {
-			// next
-			resolvedClasses.put(className, NOT_FOUND_CLASS);
-			return null;
-		}
-	}
+  @Override
+  public Option<ClassWrapper> resolveClass(String className) {
+    {
+      Option<ClassWrapper> resolvedClass = resolvedClasses.get(className);
+      if (resolvedClass != null) {
+        return resolvedClass;
+      }
+    }
+    Option<ClassWrapper> resolvedClass = classLoader.loadClass(className);
+    resolvedClasses.put(className, resolvedClass);
+    return resolvedClass;
+  }
 
 	@Override
 	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
-		Class<?> clazz = resolveClass(name);
-		if (clazz != null) {
+	  for (ClassWrapper clazz : resolveClass(name)){
 			return new QualifiedName<TypeName>(this, true, NameTypes.CLASS, new JavaTypeName(clazz));
 		}
 		return null;

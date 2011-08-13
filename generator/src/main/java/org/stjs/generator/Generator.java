@@ -45,6 +45,7 @@ import org.stjs.generator.scope.NameResolverVisitor;
 import org.stjs.generator.scope.NameScope;
 import org.stjs.generator.scope.NameScopeWalker;
 import org.stjs.generator.scope.ScopeVisitor;
+import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
 
 public class Generator {
   
@@ -160,7 +161,7 @@ public class Generator {
           // read the scope of all declared variables and methods
           ScopeVisitor scopes = new ScopeVisitor(inputFile, builtProjectClassLoader,
               configuration.getAllowedPackages());
-          NameScope rootScope = new FullyQualifiedScope(inputFile, builtProjectClassLoader);
+          NameScope rootScope = new FullyQualifiedScope(inputFile, new ClassLoaderWrapper(builtProjectClassLoader));
           scopes.visit(cu, rootScope);
 
           // resolve all the calls to methods and variables

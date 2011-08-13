@@ -4,6 +4,7 @@ import static org.stjs.generator.handlers.utils.Option.some;
 import static org.stjs.generator.scope.path.QualifiedPath.join;
 import static org.stjs.generator.scope.path.QualifiedPath.withClass;
 import org.stjs.generator.handlers.utils.Option;
+import org.stjs.generator.scope.classloader.ClassWrapper;
 import org.stjs.generator.scope.path.QualifiedPath;
 
 /**
@@ -17,6 +18,9 @@ import org.stjs.generator.scope.path.QualifiedPath;
  */
 // TODO : we are already using the class loader most of the time to resolve identifiers
 // why do generalize that and get rid of this class (use java.lang.Class instead)
+// QualifiedPath already knows how to deal with inner classes.
+// There is logic duplication now (inner class in compilation unit are not treated the same way as inner classes
+// out of compilation unit)
 public class JavaTypeName {
 
   
@@ -28,7 +32,7 @@ public class JavaTypeName {
    this.enclosingTypePath = Option.of(enclosingTypePath);
   }
   
-  public JavaTypeName(Class<?> clazz) {
+  public JavaTypeName(ClassWrapper clazz) {
     this(withClass(clazz), withClass(clazz.getDeclaringClass()));
   }
   

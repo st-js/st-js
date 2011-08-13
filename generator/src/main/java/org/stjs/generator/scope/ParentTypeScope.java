@@ -27,6 +27,7 @@ import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.NameType.TypeName;
 import org.stjs.generator.scope.QualifiedName.NameTypes;
+import org.stjs.generator.scope.classloader.ClassWrapper;
 
 /**
  * This scope is for fields and methods inherited from a parent type.
@@ -35,7 +36,7 @@ import org.stjs.generator.scope.QualifiedName.NameTypes;
  * 
  */
 public class ParentTypeScope extends NameScope {
-	private Class<?> parentClass;
+	private ClassWrapper parentClass;
 	private final String parentClassName;
 
 	public ParentTypeScope(File inputFile, NameScope parent, String parentClassName) {
@@ -57,14 +58,14 @@ public class ParentTypeScope extends NameScope {
 
 	@Override
 	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
-		if (parentClass == null) {
-			parentClass = getImportScope(pos).resolveClass(pos, parentClassName);
-			if (parentClass == null){
-        throw new JavascriptGenerationException(getInputFile(), pos, "Cannot load class:" + parentClassName);
-      }
-		}
-		
-		String declaredClassName = getDeclaredTypeScope().getDeclaredTypeName().getFullName(false).getOrNull();
+    if (parentClass == null) {
+      parentClass = getImportScope(pos).
+          resolveClass(parentClassName).
+          getOrThrow(
+              new JavascriptGenerationException(getInputFile(), pos,
+                  "Cannot load class:" + parentClassName));
+    }
+
 		Method method = getAccesibleMethod(parentClass, name);
 		if (method != null) {
 			boolean isStatic = isStatic(method.getModifiers());
@@ -87,7 +88,7 @@ public class ParentTypeScope extends NameScope {
 	 * @param name
 	 * @return
 	 */
-	private Method getAccesibleMethod(Class<?> parentClass, String name) {
+	private Method getAccesibleMethod(ClassWrapper parentClass, String name) {
 		for (Method m : parentClass.getDeclaredMethods()) {
 		  // TODO : this works only under the assumption that method names are unique (which is not true in java)
 		  // Is that assumption checked before calling this method?
@@ -95,20 +96,19 @@ public class ParentTypeScope extends NameScope {
 				return m;
 			}
 		}
-		if (parentClass.getSuperclass() != null) {
-			return getAccesibleMethod(parentClass.getSuperclass(), name);
-		}
+		for (ClassWrapper parentClass2 : parentClass.getSuperclass()) {
+			return getAccesibleMethod(parentClass2, name);
+		} 
 		return null;
 	}
 
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
-		if (parentClass == null) {
-			parentClass = getImportScope(pos).resolveClass(pos, parentClassName);
-			if (parentClass == null){
-			  throw new JavascriptGenerationException(getInputFile(), pos, "Cannot load class:" + parentClassName);
-			}
-		}
+    if (parentClass == null) {
+      parentClass = getImportScope(pos).resolveClass(parentClassName).getOrThrow(
+          new JavascriptGenerationException(getInputFile(), pos, "Cannot load class:"
+              + parentClassName));
+    }
 		Field field = getAccesibleField(parentClass, name);
 		if (field != null) {
 		  boolean isStatic = isStatic(field.getModifiers());
@@ -127,25 +127,22 @@ public class ParentTypeScope extends NameScope {
 	 * looks for a method with a given name (no full method signature given) in the given class the can be safely
 	 * accessed from a child class
 	 * 
-	 * @param parentClass2
+	 * @param parentClass
 	 * @param name
 	 * @return
 	 */
-	private Field getAccesibleField(Class<?> parentClass, String name) {
-		try {
-			Field f = parentClass.getDeclaredField(name);
-			if (!Modifier.isPrivate(f.getModifiers())) {
-				return f;
-			}
-		} catch (Exception e) {
-			// do nothing - search further on
-		}
+  private Field getAccesibleField(ClassWrapper parentClass, String name) {
+    for (Field f : parentClass.getDeclaredField(name)) {
+      if (!Modifier.isPrivate(f.getModifiers())) {
+        return f;
+      }
+    }
 
-		if (parentClass.getSuperclass() != null) {
-			return getAccesibleField(parentClass.getSuperclass(), name);
-		}
-		return null;
-	}
+    for (ClassWrapper parentClass2 : parentClass.getSuperclass()) {
+      return getAccesibleField(parentClass2, name);
+    }
+    return null;
+  }
 
 	@Override
 	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {

@@ -19,6 +19,7 @@ import static org.stjs.generator.scope.path.QualifiedPath.withClassName;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.Node;
+import japa.parser.ast.TypeParameter;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
@@ -43,6 +44,7 @@ import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.JavascriptKeywords;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.handlers.utils.PreConditions;
+import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
 
 /**
  * This class visits the code's tree to determine the scope of each name.
@@ -71,7 +73,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 	@Override
 	public void visit(CompilationUnit n, NameScope currentScope) {
 		ImportScope scope = new ImportScope(inputFile, currentScope, n.getPackage() != null ? n.getPackage().getName()
-				.toString() : null, classLoader);
+				.toString() : null, new ClassLoaderWrapper(classLoader));
 		if (n.getImports() != null) {
 			for (ImportDeclaration importDecl : n.getImports()) {
 				checkImport(importDecl, importDecl.getName().toString());
@@ -131,6 +133,12 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 				scope.addParameter(p.getId().getName());
 			}
 		}
+		if (n.getTypeParameters() != null) {
+		  for (TypeParameter p : n.getTypeParameters()) {
+		    JavascriptKeywords.checkIdentifier(inputFile, new SourcePosition(p), p.getName());
+        scope.addTypeParameter(p.getName());
+		  }
+		}
 		super.visit(n, scope);
 	}
 
@@ -144,7 +152,14 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 		}
 
 		if (n.getMembers() != null) {
-			classScope = visitTypeDeclaration("type-" + n.getName(), n.getMembers(), classScope, getTypeName(n, n.getName(), currentScope));
+			TypeScope typeScope =  visitTypeDeclaration("type-" + n.getName(), n.getMembers(), classScope, getTypeName(n, n.getName(), currentScope));
+		  classScope = typeScope;
+      if (n.getTypeParameters() != null) {
+        for (TypeParameter p : n.getTypeParameters()) {
+          JavascriptKeywords.checkIdentifier(inputFile, new SourcePosition(p), p.getName());
+          typeScope.addTypeParameter(p.getName());
+        }
+      }
 		} else {
 		  classScope = new TypeScope(inputFile, "type-" + n.getName(), getTypeName(n, n.getName(), currentScope), classScope);
 		}
@@ -177,7 +192,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 	  }
 	 
 
-	private NameScope visitTypeDeclaration(String name, List<BodyDeclaration> declarations, NameScope currentScope, JavaTypeName declaredTypeName) {
+	private TypeScope visitTypeDeclaration(String name, List<BodyDeclaration> declarations, NameScope currentScope, JavaTypeName declaredTypeName) {
 	  TypeScope typeScope = new TypeScope(inputFile, name, declaredTypeName, currentScope);
 		for (BodyDeclaration member : declarations) {
 
