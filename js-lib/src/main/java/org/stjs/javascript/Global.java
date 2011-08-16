@@ -15,6 +15,7 @@
  */
 package org.stjs.javascript;
 
+@GlobalScope
 public class Global {
 	public static Number Infinity;
 	public static Number NaN;

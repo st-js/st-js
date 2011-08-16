@@ -15,8 +15,12 @@
  */
 package org.stjs.javascript.jquery;
 
+import org.stjs.javascript.GlobalScope;
+
+
+@GlobalScope
 abstract public class GlobalJQuery {
-	public static GlobalJQuery $;
+  public static GlobalJQuery $;
 
 	/**
 	 * jquery constructors
