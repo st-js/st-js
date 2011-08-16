@@ -33,7 +33,7 @@ public class StockApplication {
 	private Array<String> stocks = $array();
 
 	public StockApplication(String test) {
-		$("#test1").text(test);
+		$("#test1y").text(test);
 	}
 
 	public void init() {
@@ -41,7 +41,7 @@ public class StockApplication {
 		// add stock
 		$("#form").submit(new EventHandler() {
 			@Override
-			public boolean onEvent(Event ev, final HTMLElement THIS) {
+			public void onEvent(Event ev, final HTMLElement THIS) {
 				that.updateStock($("#newStock").val(), new SuccessListener() {
 					@Override
 					public void onSuccess(Object data) {
@@ -50,20 +50,19 @@ public class StockApplication {
 						that.stocks.push(stockData.stock);
 					}
 				});
-				return false;
+
 			}
 		});
 
 		// the remove stock listener
 		$(".removeStock").live("click", new EventHandler() {
 			@Override
-			public boolean onEvent(Event ev, final HTMLElement THIS) {
+			public void onEvent(Event ev, final HTMLElement THIS) {
 				JQuery<?> $tr = $(THIS).parents("tr");
 				int index = $tr.parent().find("tr").index($tr);
 				that.stocks.splice(index);
 				$tr.remove();
 
-				return false;
 			}
 		});
 

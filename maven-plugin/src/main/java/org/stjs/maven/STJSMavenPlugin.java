@@ -131,18 +131,11 @@ public class STJSMavenPlugin extends AbstractMojo {
 		}
 	}
 
-	private String getRelativeTarget(String targetRootPath, String sourcePath) {
-		if (sourcePath.startsWith(targetRootPath)) {
-			return sourcePath.substring(targetRootPath.length());
-		}
-		return sourcePath;
-	}
-
 	public void execute() throws MojoExecutionException {
 		getLog().info("Generating javascript files");
 		ClassLoader builtProjectClassLoader = getBuiltProjectClassLoader();
 		Generator generator = new Generator();
-		SourceMapping mapping = new SuffixMapping(".java", ".js");
+
 		GeneratorConfigurationBuilder configBuilder = new GeneratorConfigurationBuilder();
 		configBuilder.allowedPackage("org.stjs.javascript");
 		if (allowedPackages != null) {
@@ -174,13 +167,14 @@ public class STJSMavenPlugin extends AbstractMojo {
 		for (String sourceRoot : compileSourceRoots) {
 			File sourceDir = new File(sourceRoot);
 			List<File> sources = new ArrayList<File>();
-			sources = accumulateSources(sourceDir);
+			SourceMapping mapping = targetRootPackage != null ? new SuffixMappingWithCompressedTarget(targetRootPath,
+					".java", ".js") : new SuffixMapping(".java", ".js");
+			sources = accumulateSources(sourceDir, mapping);
 			for (File source : sources) {
 				try {
 					File absoluteSource = new File(sourceDir, source.getPath());
-					File absoluteTarget = (File) mapping
-							.getTargetFiles(generatedSourcesDirectory,
-									getRelativeTarget(targetRootPath, source.getPath())).iterator().next();
+					File absoluteTarget = (File) mapping.getTargetFiles(generatedSourcesDirectory, source.getPath())
+							.iterator().next();
 					getLog().info("Generating " + absoluteTarget);
 					if (!absoluteTarget.getParentFile().exists() && !absoluteTarget.getParentFile().mkdirs()) {
 						getLog().error("Cannot create output directory:" + absoluteTarget.getParentFile());
@@ -263,13 +257,12 @@ public class STJSMavenPlugin extends AbstractMojo {
 	 *         file). The returned files are relative to the given source directory.
 	 */
 	@SuppressWarnings("unchecked")
-	private List<File> accumulateSources(File sourceDir) throws MojoExecutionException {
+	private List<File> accumulateSources(File sourceDir, SourceMapping mapping) throws MojoExecutionException {
 		final List<File> result = new ArrayList<File>();
 		if (sourceDir == null) {
 			return result;
 		}
 		SourceInclusionScanner scanner = getSourceInclusionScanner(staleMillis);
-		SourceMapping mapping = new SuffixMapping(".java", ".js");
 
 		scanner.addSourceMapping(mapping);
 
