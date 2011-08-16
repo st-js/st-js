@@ -183,6 +183,15 @@ public class STJSMavenPlugin extends AbstractMojo {
 					generator.generateJavascript(builtProjectClassLoader,
 							getClassForSource(builtProjectClassLoader, source.getPath()), absoluteSource,
 							absoluteTarget, configBuilder.build());
+					
+					/*NodeJSExecutor executor = new NodeJSExecutor();
+				    ExecutionResult execution = executor.run(absoluteTarget);
+				    if (execution.getExitValue() == 0) {
+				      getLog().info("NodeJS execution sucessfull");			      
+				    } else {
+				      getLog().error("Error in NodeJS execution "+execution.getStdOut()+execution.getStdErr());
+				    }*/
+				    
 				} catch (InclusionScanException e) {
 					throw new MojoExecutionException("Cannot scan the source directory:" + e, e);
 				} catch (ClassNotFoundException e) {
