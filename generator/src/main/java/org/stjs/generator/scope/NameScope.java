@@ -113,129 +113,138 @@ abstract public class NameScope {
 	}
 
 	public abstract <T> T visit(NameScopeVisitor<T> visitor);
+
 	public abstract void visit(VoidNameScopeVisitor visitor);
-  
-  public static interface NameScopeVisitor<T> {
 
-    T caseFullyQualifiedScope(FullyQualifiedScope fullyQualifiedScope);
+	public static interface NameScopeVisitor<T> {
 
-    T caseVariableScope(VariableScope variableScope);
+		T caseFullyQualifiedScope(FullyQualifiedScope fullyQualifiedScope);
 
-    T caseImportScope(ImportScope importScope);
+		T caseVariableScope(VariableScope variableScope);
 
-    T caseParameterScope(ParameterScope parameterScope);
+		T caseImportScope(ImportScope importScope);
 
-    T caseParentTypeScope(ParentTypeScope parentTypeScope);
+		T caseParameterScope(ParameterScope parameterScope);
 
-    T caseTypeScope(TypeScope typeScope);
-    
-  }
-  
-  public static interface VoidNameScopeVisitor {
+		T caseParentTypeScope(ParentTypeScope parentTypeScope);
 
-    void caseFullyQualifiedScope(FullyQualifiedScope fullyQualifiedScope);
+		T caseTypeScope(TypeScope typeScope);
 
-    void caseVariableScope(VariableScope variableScope);
+	}
 
-    void caseImportScope(ImportScope importScope);
+	public static interface VoidNameScopeVisitor {
 
-    void caseParameterScope(ParameterScope parameterScope);
+		void caseFullyQualifiedScope(FullyQualifiedScope fullyQualifiedScope);
 
-    void caseParentTypeScope(ParentTypeScope parentTypeScope);
+		void caseVariableScope(VariableScope variableScope);
 
-    void caseTypeScope(TypeScope typeScope);
-    
-  }
-  
-  public static class EmptyVoidNameScopeVisitor implements VoidNameScopeVisitor {
+		void caseImportScope(ImportScope importScope);
 
-    private final boolean complainAtRuntimeIfMethodCalled;
-    
-    public EmptyVoidNameScopeVisitor(boolean complainAtRuntimeIfMethodCalled) {
-      this.complainAtRuntimeIfMethodCalled = complainAtRuntimeIfMethodCalled;
-    }
-    private void maybeComplain() {
-      if (complainAtRuntimeIfMethodCalled) {
-        throw new UnsupportedOperationException();
-      }
-    }    
-    @Override
-    public void caseFullyQualifiedScope(FullyQualifiedScope fullyQualifiedScope) {
-      maybeComplain();
-    }
-    @Override
-    public void caseVariableScope(VariableScope variableScope) {
-      maybeComplain();
-    }
-    @Override
-    public void caseImportScope(ImportScope importScope) {
-      maybeComplain();
-    }
-    @Override
-    public void caseParameterScope(ParameterScope parameterScope) {
-      maybeComplain();
-    }
-    @Override
-    public void caseParentTypeScope(ParentTypeScope parentTypeScope) {
-      maybeComplain();
-    }
-    @Override
-    public void caseTypeScope(TypeScope typeScope) {
-      maybeComplain();
-    }
-  }
-  
-  public static class EmptyNameScopeVisitor<T> implements NameScopeVisitor<T> {
+		void caseParameterScope(ParameterScope parameterScope);
 
-    private final T value;
-    
-    public EmptyNameScopeVisitor(T value) {
-      this.value = value;
-    }
-    
-    @Override
-    public T caseFullyQualifiedScope(FullyQualifiedScope fullyQualifiedScope) {
-      return value;
-    }
+		void caseParentTypeScope(ParentTypeScope parentTypeScope);
 
-    @Override
-    public T caseVariableScope(VariableScope variableScope) {
-      return value;
-    }
+		void caseTypeScope(TypeScope typeScope);
 
-    @Override
-    public T caseImportScope(ImportScope importScope) {
-      return value;
-    }
+	}
 
-    @Override
-    public T caseParameterScope(ParameterScope parameterScope) {
-      return value;
-    }
+	public static class EmptyVoidNameScopeVisitor implements VoidNameScopeVisitor {
 
-    @Override
-    public T caseParentTypeScope(ParentTypeScope parentTypeScope) {
-      return value;
-    }
+		private final boolean complainAtRuntimeIfMethodCalled;
 
-    @Override
-    public T caseTypeScope(TypeScope typeScope) {
-      return value;
-    }
-    
-  }
+		public EmptyVoidNameScopeVisitor(boolean complainAtRuntimeIfMethodCalled) {
+			this.complainAtRuntimeIfMethodCalled = complainAtRuntimeIfMethodCalled;
+		}
 
-  public boolean isThisScope() {
-    return visit(new EmptyNameScopeVisitor<Boolean>(false){
-       @Override
-      public Boolean caseTypeScope(TypeScope typeScope) {
-         return true;
-       }
-      @Override
-      public Boolean caseParentTypeScope(ParentTypeScope parentTypeScope) {
-        return true;
-      }
-     });
-  }
+		private void maybeComplain() {
+			if (complainAtRuntimeIfMethodCalled) {
+				throw new UnsupportedOperationException();
+			}
+		}
+
+		@Override
+		public void caseFullyQualifiedScope(FullyQualifiedScope fullyQualifiedScope) {
+			maybeComplain();
+		}
+
+		@Override
+		public void caseVariableScope(VariableScope variableScope) {
+			maybeComplain();
+		}
+
+		@Override
+		public void caseImportScope(ImportScope importScope) {
+			maybeComplain();
+		}
+
+		@Override
+		public void caseParameterScope(ParameterScope parameterScope) {
+			maybeComplain();
+		}
+
+		@Override
+		public void caseParentTypeScope(ParentTypeScope parentTypeScope) {
+			maybeComplain();
+		}
+
+		@Override
+		public void caseTypeScope(TypeScope typeScope) {
+			maybeComplain();
+		}
+	}
+
+	public static class EmptyNameScopeVisitor<T> implements NameScopeVisitor<T> {
+
+		private final T value;
+
+		public EmptyNameScopeVisitor(T value) {
+			this.value = value;
+		}
+
+		@Override
+		public T caseFullyQualifiedScope(FullyQualifiedScope fullyQualifiedScope) {
+			return value;
+		}
+
+		@Override
+		public T caseVariableScope(VariableScope variableScope) {
+			return value;
+		}
+
+		@Override
+		public T caseImportScope(ImportScope importScope) {
+			return value;
+		}
+
+		@Override
+		public T caseParameterScope(ParameterScope parameterScope) {
+			return value;
+		}
+
+		@Override
+		public T caseParentTypeScope(ParentTypeScope parentTypeScope) {
+			return value;
+		}
+
+		@Override
+		public T caseTypeScope(TypeScope typeScope) {
+			return value;
+		}
+
+	}
+
+	public boolean isThisScope() {
+		return visit(new EmptyNameScopeVisitor<Boolean>(false) {
+			@Override
+			public Boolean caseTypeScope(TypeScope typeScope) {
+				return true;
+			}
+
+			@Override
+			public Boolean caseParentTypeScope(ParentTypeScope parentTypeScope) {
+				return true;
+			}
+		});
+	}
 
 }

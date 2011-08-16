@@ -39,9 +39,9 @@ public class GeneratedScriptTester {
 	}
 
 	public void assertGenerateString(String expected, Node node) {
-    assertGenerateString(expected, node, new GenerationContext(new File("test.java")));
-  }
-	
+		assertGenerateString(expected, node, new GenerationContext(new File("test.java")));
+	}
+
 	public void assertGenerateString(String expected, Node node, GenerationContext context) {
 		try {
 			RuleBasedVisitor visitor = new RuleBasedVisitor();
@@ -58,9 +58,8 @@ public class GeneratedScriptTester {
 		}
 	}
 
-  public void assertGenerateString(String expected, Node node,
-      PartialGenerationContext context) {
-    assertGenerateString(expected, node, context.build());    
-  }
+	public void assertGenerateString(String expected, Node node, PartialGenerationContext context) {
+		assertGenerateString(expected, node, context.build());
+	}
 
 }

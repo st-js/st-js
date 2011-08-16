@@ -47,70 +47,68 @@ public class FullyQualifiedScope extends NameScope implements ClassResolver {
 		this.classLoader = classLoader;
 	}
 
-  @Override
-  protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name,
-      NameScope currentScope) {
-    if (name.contains(".")) {
-      QualifiedMethodPath path = QualifiedPath.withMethod(name, this);
-      if (path != null) {
-        for (ClassWrapper clazz : resolveClass(path.getClassQualifiedName())) {
-          for (Method method : clazz.getDeclaredMethods()) {
-            if (method.getName().equals(path.getMethodName())) {
-              return new QualifiedName<NameType.MethodName>(this, true, NameTypes.METHOD,
-                  new JavaTypeName(clazz));
-            }
-          }
-        }
-      }
-    }
-    return null;
-  }
+	@Override
+	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
+		if (name.contains(".")) {
+			QualifiedMethodPath path = QualifiedPath.withMethod(name, this);
+			if (path != null) {
+				for (ClassWrapper clazz : resolveClass(path.getClassQualifiedName())) {
+					for (Method method : clazz.getDeclaredMethods()) {
+						if (method.getName().equals(path.getMethodName())) {
+							return new QualifiedName<NameType.MethodName>(this, true, NameTypes.METHOD,
+									new JavaTypeName(clazz));
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
 
-  @Override
-  protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name,
-      NameScope currentScope) {
-    QualifiedFieldPath path = QualifiedPath.withField(name);
-    String className = path.getClassQualifiedName();
-    if (className != null) {
-      for (ClassWrapper clazz : resolveClass(className)) {
-        if (clazz.hasDeclaredField(path.getFieldName())) {
-          return new QualifiedName<NameType.IdentifierName>(this, true, NameTypes.FIELD,
-              new JavaTypeName(clazz));
-        }
-      }
-    }
-    return null;
-  }
+	@Override
+	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
+		QualifiedFieldPath path = QualifiedPath.withField(name);
+		String className = path.getClassQualifiedName();
+		if (className != null) {
+			for (ClassWrapper clazz : resolveClass(className)) {
+				if (clazz.hasDeclaredField(path.getFieldName())) {
+					return new QualifiedName<NameType.IdentifierName>(this, true, NameTypes.FIELD, new JavaTypeName(
+							clazz));
+				}
+			}
+		}
+		return null;
+	}
 
-  @Override
-  public Option<ClassWrapper> resolveClass(String className) {
-    {
-      Option<ClassWrapper> resolvedClass = resolvedClasses.get(className);
-      if (resolvedClass != null) {
-        return resolvedClass;
-      }
-    }
-    Option<ClassWrapper> resolvedClass = classLoader.loadClass(className);
-    resolvedClasses.put(className, resolvedClass);
-    return resolvedClass;
-  }
+	@Override
+	public Option<ClassWrapper> resolveClass(String className) {
+		{
+			Option<ClassWrapper> resolvedClass = resolvedClasses.get(className);
+			if (resolvedClass != null) {
+				return resolvedClass;
+			}
+		}
+		Option<ClassWrapper> resolvedClass = classLoader.loadClass(className);
+		resolvedClasses.put(className, resolvedClass);
+		return resolvedClass;
+	}
 
 	@Override
 	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
-	  for (ClassWrapper clazz : resolveClass(name)){
+		for (ClassWrapper clazz : resolveClass(name)) {
 			return new QualifiedName<TypeName>(this, true, NameTypes.CLASS, new JavaTypeName(clazz));
 		}
 		return null;
 	}
 
-  @Override
-  public <T> T visit(NameScopeVisitor<T> visitor) {
-    return visitor.caseFullyQualifiedScope(this);
-  }
-  
-  @Override
-  public void visit(VoidNameScopeVisitor visitor) {
-    visitor.caseFullyQualifiedScope(this);
-  }
+	@Override
+	public <T> T visit(NameScopeVisitor<T> visitor) {
+		return visitor.caseFullyQualifiedScope(this);
+	}
+
+	@Override
+	public void visit(VoidNameScopeVisitor visitor) {
+		visitor.caseFullyQualifiedScope(this);
+	}
 
 }

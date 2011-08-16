@@ -23,7 +23,7 @@ public abstract class DefaultHandler extends VoidVisitorAdapter<GenerationContex
 	private final RuleBasedVisitor ruleVisitor;
 
 	protected final SourcePrinter printer;
-	
+
 	public DefaultHandler(RuleBasedVisitor ruleVisitor) {
 		this.ruleVisitor = ruleVisitor;
 		printer = ruleVisitor.getPrinter();

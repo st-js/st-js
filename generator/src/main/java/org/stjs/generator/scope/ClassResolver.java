@@ -5,6 +5,6 @@ import org.stjs.generator.scope.classloader.ClassWrapper;
 
 public interface ClassResolver {
 
-  Option<ClassWrapper> resolveClass(String className);
+	Option<ClassWrapper> resolveClass(String className);
 
 }

@@ -56,14 +56,14 @@ public class VariableScope extends NameScope {
 
 	@Override
 	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
-	  if (name.contains(".")) {
-	    String receiverOrStaticClass = QualifiedPath.beforeFirstDot(name);
-	    // it is ok to check even without knowing if the receiver is a class or a variable
-	    // since variables have precedence if there is a collision
-	    if (variables.contains(receiverOrStaticClass)) {
-	      return new QualifiedName<NameType.MethodName>(this, false, NameTypes.VARIABLE);
-	    }
-	  }
+		if (name.contains(".")) {
+			String receiverOrStaticClass = QualifiedPath.beforeFirstDot(name);
+			// it is ok to check even without knowing if the receiver is a class or a variable
+			// since variables have precedence if there is a collision
+			if (variables.contains(receiverOrStaticClass)) {
+				return new QualifiedName<NameType.MethodName>(this, false, NameTypes.VARIABLE);
+			}
+		}
 		if (getParent() != null) {
 			return getParent().resolveMethod(pos, name, currentScope);
 		}
@@ -83,13 +83,13 @@ public class VariableScope extends NameScope {
 		return "VariableScope [variables=" + variables + ", getChildren()=" + getChildren() + "]";
 	}
 
-  @Override
-  public <T> T visit(NameScopeVisitor<T> visitor) {
-    return visitor.caseVariableScope(this);
-  }
-  
-  @Override
-  public void visit(VoidNameScopeVisitor visitor) {
-    visitor.caseVariableScope(this);
-  }
+	@Override
+	public <T> T visit(NameScopeVisitor<T> visitor) {
+		return visitor.caseVariableScope(this);
+	}
+
+	@Override
+	public void visit(VoidNameScopeVisitor visitor) {
+		visitor.caseVariableScope(this);
+	}
 }

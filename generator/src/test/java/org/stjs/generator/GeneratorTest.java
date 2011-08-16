@@ -23,10 +23,9 @@ import org.stjs.generator.node.js.NodeJSExecutor;
 import org.stjs.generator.node.js.NodeJSExecutor.ExecutionResult;
 import test.innerclasses.ClassUsingInnerClass;
 
-
 public class GeneratorTest {
-  
-  @Test 
+
+	@Test
 	public void testGenerator() throws ParseException, IOException {
 		generate("src/test/java/test/innerclasses/ClassUsingInnerClass.java", ClassUsingInnerClass.class);
 	}
@@ -36,11 +35,8 @@ public class GeneratorTest {
 		Generator generator = new Generator();
 		File outputFile = new File("target/x.js");
 		generator.generateJavascript(Thread.currentThread().getContextClassLoader(), clazz, new File(sourceFile),
-				outputFile, new GeneratorConfigurationBuilder().
-				allowedPackage(clazz.getPackage().getName()).
-				allowedPackage("org.stjs.javascript").
-				allowedPackage("org.w3c.dom.html")
-				.build());
+				outputFile, new GeneratorConfigurationBuilder().allowedPackage(clazz.getPackage().getName())
+						.allowedPackage("org.stjs.javascript").allowedPackage("org.w3c.dom.html").build());
 		NodeJSExecutor executor = new NodeJSExecutor();
 		ExecutionResult execution = executor.run(outputFile);
 		System.out.println(execution.toString());

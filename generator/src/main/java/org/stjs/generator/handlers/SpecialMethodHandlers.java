@@ -102,9 +102,9 @@ public class SpecialMethodHandlers {
 			@Override
 			public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 					GenerationContext context) {
-				if (n.getArgs() != null && n.getArgs().size()>1) {
-          currentHandler.printer.printLn();
-          currentHandler.printer.indent();
+				if (n.getArgs() != null && n.getArgs().size() > 1) {
+					currentHandler.printer.printLn();
+					currentHandler.printer.indent();
 				}
 				currentHandler.printer.print("{");
 				if (n.getArgs() != null) {
@@ -112,7 +112,7 @@ public class SpecialMethodHandlers {
 					for (int i = 0; i < n.getArgs().size(); i += 2) {
 						if (!first) {
 							currentHandler.printer.print(", ");
-	            currentHandler.printer.printLn();
+							currentHandler.printer.printLn();
 						}
 						// TODO : is it safe to unsescape string that are object litteral keys?
 						n.getArgs().get(i).accept(currentHandler.getRuleVisitor(), context);
@@ -121,9 +121,9 @@ public class SpecialMethodHandlers {
 						first = false;
 					}
 				}
-        if (n.getArgs() != null && n.getArgs().size()>1) {
-          currentHandler.printer.unindent();
-        }
+				if (n.getArgs() != null && n.getArgs().size() > 1) {
+					currentHandler.printer.unindent();
+				}
 
 				currentHandler.printer.print("}");
 				return true;
@@ -164,7 +164,7 @@ public class SpecialMethodHandlers {
 				return true;
 			}
 		});
-		
+
 		methodHandlers.put("$invoke", new $InvokeHandler());
 	}
 
@@ -196,13 +196,13 @@ public class SpecialMethodHandlers {
 
 		if (qname != null && qname.getDefinitionPoint().isDefined() && n.getArgs() != null && n.getArgs().size() > 0) {
 			for (String adapterName : adapterNames) {
-			  Option<String> fullyQualifiedString = qname.getDefinitionPoint().getOrThrow().getFullName(true);
-			  if (fullyQualifiedString.isDefined()) {
-          if (fullyQualifiedString.getOrThrow().startsWith(adapterName)) {
-            adapterMethod(currentHandler, n, qname, context);
-          	return true;
-          }
-        }
+				Option<String> fullyQualifiedString = qname.getDefinitionPoint().getOrThrow().getFullName(true);
+				if (fullyQualifiedString.isDefined()) {
+					if (fullyQualifiedString.getOrThrow().startsWith(adapterName)) {
+						adapterMethod(currentHandler, n, qname, context);
+						return true;
+					}
+				}
 			}
 		}
 
@@ -231,8 +231,8 @@ public class SpecialMethodHandlers {
 		Expression arg0 = n.getArgs().get(0);
 		// TODO : use parenthesis only if the expression is complex
 		currentHandler.printer.print("(");
-	  arg0.accept(currentHandler.getRuleVisitor(), context);
-	  currentHandler.printer.print(")");
+		arg0.accept(currentHandler.getRuleVisitor(), context);
+		currentHandler.printer.print(")");
 		// TODO may add paranthesis here
 		currentHandler.printer.print(".");
 		currentHandler.printer.print(n.getName());
@@ -271,17 +271,17 @@ public class SpecialMethodHandlers {
 	}
 
 	static final class $InvokeHandler implements SpecialMethodHandler {
-    @Override
-    public boolean handle(DefaultHandler currentHandler, MethodCallExpr n,
-        QualifiedName<MethodName> qname, GenerationContext context) {
-        printScope(currentHandler, n, qname, context, false);
-        // skip methodname
-        printArguments(currentHandler.getRuleVisitor(), currentHandler.printer, n.getArgs(), context);
-      return true; 
-    }
-  }
+		@Override
+		public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+				GenerationContext context) {
+			printScope(currentHandler, n, qname, context, false);
+			// skip methodname
+			printArguments(currentHandler.getRuleVisitor(), currentHandler.printer, n.getArgs(), context);
+			return true;
+		}
+	}
 
-  private interface SpecialMethodHandler {
+	private interface SpecialMethodHandler {
 		public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 				GenerationContext context);
 	}

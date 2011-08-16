@@ -23,6 +23,6 @@ public class ParentDeclaration1 {
 	public int parentPublic;
 
 	public void method(String param1) {
-	// empty
+		// empty
 	}
 }

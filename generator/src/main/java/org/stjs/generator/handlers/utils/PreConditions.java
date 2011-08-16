@@ -24,11 +24,11 @@ public class PreConditions {
 			throw new IllegalArgumentException(format(message, args));
 		}
 	}
-	
+
 	public static <T> T checkNotNull(T obj) {
 		return checkNotNull(obj, "");
 	}
-	
+
 	public static <T> T checkNotNull(T obj, String message, Object... args) {
 		if (obj == null) {
 			throw new NullPointerException(format(message, args));

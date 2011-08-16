@@ -8,12 +8,10 @@ import org.stjs.generator.scope.classloader.ClassWrapper;
 import org.stjs.generator.scope.path.QualifiedPath;
 
 /**
- * Java types name, with support for inner classes.
- * Option.None represents anonymous classes, Option.some named classes.
- * For instance SuperClass.InnerClass$1
- * will be a chain of
+ * Java types name, with support for inner classes. Option.None represents anonymous classes, Option.some named classes.
+ * For instance SuperClass.InnerClass$1 will be a chain of
  * 
- * None -> Some<InnerClass> -> Some<SuperClass> 
+ * None -> Some<InnerClass> -> Some<SuperClass>
  * 
  */
 // TODO : we are already using the class loader most of the time to resolve identifiers
@@ -23,42 +21,40 @@ import org.stjs.generator.scope.path.QualifiedPath;
 // out of compilation unit)
 public class JavaTypeName {
 
-  
-  private final Option<QualifiedPath> classPath;
-  private final Option<QualifiedPath> enclosingTypePath;
-  
-  public JavaTypeName(QualifiedPath classPath, QualifiedPath enclosingTypePath) {
-   this.classPath  = Option.of(classPath);
-   this.enclosingTypePath = Option.of(enclosingTypePath);
-  }
-  
-  public JavaTypeName(ClassWrapper clazz) {
-    this(withClass(clazz), withClass(clazz.getDeclaringClass()));
-  }
-  
-  public JavaTypeName(QualifiedPath classPath) {
-    this.classPath  = Option.of(classPath);
-    this.enclosingTypePath = Option.none();
-   }
+	private final Option<QualifiedPath> classPath;
+	private final Option<QualifiedPath> enclosingTypePath;
 
-  public Option<String> getSimpleName() {
-    return classPath.isDefined() ? some(classPath.getOrThrow().getClassSimpleName()) : Option.<String>none();
-  }
-  
-  public boolean isAnonymous() {
-    return classPath.isEmpty();
-  }
+	public JavaTypeName(QualifiedPath classPath, QualifiedPath enclosingTypePath) {
+		this.classPath = Option.of(classPath);
+		this.enclosingTypePath = Option.of(enclosingTypePath);
+	}
 
-  
-  public Option<String> getFullName(boolean useQualifiedNames) {
-    if (isAnonymous()) {
-      return Option.none();
-    }
-    if (enclosingTypePath.isEmpty()) {
-       return Option.some(classPath.getOrThrow().getClassName(useQualifiedNames));
-    }
-    String enclosingQualifiedName = enclosingTypePath.getOrThrow().getClassName(useQualifiedNames);
-    return Option.some(join(enclosingQualifiedName, classPath.getOrThrow().getClassName(useQualifiedNames)));
-  }
-  
+	public JavaTypeName(ClassWrapper clazz) {
+		this(withClass(clazz), withClass(clazz.getDeclaringClass()));
+	}
+
+	public JavaTypeName(QualifiedPath classPath) {
+		this.classPath = Option.of(classPath);
+		this.enclosingTypePath = Option.none();
+	}
+
+	public Option<String> getSimpleName() {
+		return classPath.isDefined() ? some(classPath.getOrThrow().getClassSimpleName()) : Option.<String> none();
+	}
+
+	public boolean isAnonymous() {
+		return classPath.isEmpty();
+	}
+
+	public Option<String> getFullName(boolean useQualifiedNames) {
+		if (isAnonymous()) {
+			return Option.none();
+		}
+		if (enclosingTypePath.isEmpty()) {
+			return Option.some(classPath.getOrThrow().getClassName(useQualifiedNames));
+		}
+		String enclosingQualifiedName = enclosingTypePath.getOrThrow().getClassName(useQualifiedNames);
+		return Option.some(join(enclosingQualifiedName, classPath.getOrThrow().getClassName(useQualifiedNames)));
+	}
+
 }

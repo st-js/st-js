@@ -15,7 +15,6 @@
  */
 package test;
 
-
 @SuppressWarnings("unused")
 public class DeclarationWithOuter1 extends ParentDeclaration1 {
 	int type = 3;

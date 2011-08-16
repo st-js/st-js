@@ -67,31 +67,32 @@ public class ScopeAssert {
 
 	private void resolve() {
 		if (column >= 0 && line >= 0) {
-			final AtomicReference<QualifiedName<IdentifierName>> qNamePointer 
-			= new AtomicReference<QualifiedName<IdentifierName>>();
-			final AtomicReference<String> nodeNameP 
-      = new AtomicReference<String>();
+			final AtomicReference<QualifiedName<IdentifierName>> qNamePointer = new AtomicReference<QualifiedName<IdentifierName>>();
+			final AtomicReference<String> nodeNameP = new AtomicReference<String>();
 			new VoidVisitorAdapter<Object>() {
-			  @SuppressWarnings("unchecked")
-			  private void matchOnName(final AtomicReference<QualifiedName<IdentifierName>> qNamePointer,
-			      final AtomicReference<String> nodeNameP, Expression n, String name) {
-			    if (n.getBeginLine() == line && n.getBeginColumn() == column) {
-			      qNamePointer.set((QualifiedName<IdentifierName>) n.getData());
-			      nodeNameP.set(name);
-			    }
-			  }
-        @Override
-        public void visit(NameExpr n, Object arg) {
-			    matchOnName(qNamePointer, nodeNameP, n, n.getName());
-			  }
-			  @Override
-			  public void visit(MethodCallExpr n, Object arg) {
-			    System.out.println(n.getName()+":"+n.getData()+" "+n.getBeginLine()+" "+n.getBeginColumn());
-			    matchOnName(qNamePointer, nodeNameP, n, n.getName());
-			  }
+				@SuppressWarnings("unchecked")
+				private void matchOnName(final AtomicReference<QualifiedName<IdentifierName>> qNamePointer,
+						final AtomicReference<String> nodeNameP, Expression n, String name) {
+					if (n.getBeginLine() == line && n.getBeginColumn() == column) {
+						qNamePointer.set((QualifiedName<IdentifierName>) n.getData());
+						nodeNameP.set(name);
+					}
+				}
+
+				@Override
+				public void visit(NameExpr n, Object arg) {
+					matchOnName(qNamePointer, nodeNameP, n, n.getName());
+				}
+
+				@Override
+				public void visit(MethodCallExpr n, Object arg) {
+					System.out.println(n.getName() + ":" + n.getData() + " " + n.getBeginLine() + " "
+							+ n.getBeginColumn());
+					matchOnName(qNamePointer, nodeNameP, n, n.getName());
+				}
 			}.visit(compilationUnit, null);
-		  qname = qNamePointer.get();
-		  nodeName = nodeNameP.get();
+			qname = qNamePointer.get();
+			nodeName = nodeNameP.get();
 		}
 	}
 
@@ -112,7 +113,7 @@ public class ScopeAssert {
 		return this;
 	}
 
-  public void assertType(NameTypes type) {
-    assertSame(type, qname.getType());
-  }
+	public void assertType(NameTypes type) {
+		assertSame(type, qname.getType());
+	}
 }

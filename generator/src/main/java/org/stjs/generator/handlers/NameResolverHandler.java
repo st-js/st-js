@@ -46,63 +46,66 @@ public class NameResolverHandler extends DefaultHandler {
 	public void visit(final MethodCallExpr n, final GenerationContext context) {
 		QualifiedName<MethodName> qname = context.resolveMethod(n);
 		if (!specialMethodHandlers.handle(this, n, qname, context)) {
-		  if (qname != null) {
-  		  if (qname.isStatic()) {
-  		    printStaticFieldOrMethodAccessPrefix(n, context, qname);
-  	      printer.print(n.getName());
-  	      printArguments(n.getArgs(), context, true);
-  	      return;
-  		  } else {
-  		    if (qname.getScope() != null) {
-    		    qname.getScope().visit(new NameScope.EmptyVoidNameScopeVisitor(false) {
-      		    @Override
-      		    public void caseTypeScope(TypeScope typeScope) {
-      		      // Non static reference to current enclosing type.
-      		      printer.print("this.");
-      		    }
-      		    @Override
-      		    public void caseParentTypeScope(ParentTypeScope parentTypeScope) {
-      		      // Non static reference to parent type
-      		      printer.print("this._super(\"" + n.getName() + "\"");
-                if (n.getArgs() != null && n.getArgs().size() > 0) {
-                  printer.print(", ");
-                }
-                printArguments(n.getArgs(), context, false);
-                printer.print(")");
-      		    }
-      		  });
-    		    }
-  		  }
-		  }
-		  n.accept(getRuleVisitor(), context.skipHandlers());
+			if (qname != null) {
+				if (qname.isStatic()) {
+					printStaticFieldOrMethodAccessPrefix(n, context, qname);
+					printer.print(n.getName());
+					printArguments(n.getArgs(), context, true);
+					return;
+				} else {
+					if (qname.getScope() != null) {
+						qname.getScope().visit(new NameScope.EmptyVoidNameScopeVisitor(false) {
+							@Override
+							public void caseTypeScope(TypeScope typeScope) {
+								// Non static reference to current enclosing type.
+								printer.print("this.");
+							}
+
+							@Override
+							public void caseParentTypeScope(ParentTypeScope parentTypeScope) {
+								// Non static reference to parent type
+								printer.print("this._super(\"" + n.getName() + "\"");
+								if (n.getArgs() != null && n.getArgs().size() > 0) {
+									printer.print(", ");
+								}
+								printArguments(n.getArgs(), context, false);
+								printer.print(")");
+							}
+						});
+					}
+				}
+			}
+			n.accept(getRuleVisitor(), context.skipHandlers());
 		}
 	}
 
-  private void printStaticFieldOrMethodAccessPrefix(final Node n,
-      final GenerationContext context, final QualifiedName<?> qname) {
-    if (!qname.isGlobal()) {
-      JavaTypeName definitionPoint = qname.getDefinitionPoint().getOrThrow();
-      if (definitionPoint.isAnonymous()) {
-        throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
-            "Cannot generate static field access for anonymous class"); // I think that this is not possible in Java (static field in anonymous class)
-      }
-      printer.print(definitionPoint.getFullName(false).getOrThrow()+".");
-    }
-  }
+	private void printStaticFieldOrMethodAccessPrefix(final Node n, final GenerationContext context,
+			final QualifiedName<?> qname) {
+		if (!qname.isGlobal()) {
+			JavaTypeName definitionPoint = qname.getDefinitionPoint().getOrThrow();
+			if (definitionPoint.isAnonymous()) {
+				throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+						"Cannot generate static field access for anonymous class"); // I think that this is not possible
+																					// in Java (static field in
+																					// anonymous class)
+			}
+			printer.print(definitionPoint.getFullName(false).getOrThrow() + ".");
+		}
+	}
 
-  @Override
-  public void visit(ClassOrInterfaceType n, GenerationContext context) {
-    if (n.getScope() != null) {
-      n.getScope().accept(this, context);
-      printer.print(".");
-    }
-    QualifiedName<IdentifierName> qname = context.resolveIdentifier(n);
-    if (qname != null && qname.getScope() != null && qname.isStatic()) {
-      printStaticFieldOrMethodAccessPrefix(n, context, qname);
-    } 
-    printer.print(n.getName());
-  }
-  
+	@Override
+	public void visit(ClassOrInterfaceType n, GenerationContext context) {
+		if (n.getScope() != null) {
+			n.getScope().accept(this, context);
+			printer.print(".");
+		}
+		QualifiedName<IdentifierName> qname = context.resolveIdentifier(n);
+		if (qname != null && qname.getScope() != null && qname.isStatic()) {
+			printStaticFieldOrMethodAccessPrefix(n, context, qname);
+		}
+		printer.print(n.getName());
+	}
+
 	@Override
 	public void visit(QualifiedNameExpr n, GenerationContext context) {
 		n.getQualifier().accept(getRuleVisitor(), context);
@@ -118,31 +121,32 @@ public class NameResolverHandler extends DefaultHandler {
 		}
 		QualifiedName<IdentifierName> qname = context.resolveIdentifier(n);
 		if (qname != null) {
-		  if (qname.isStatic()) {
-		    printStaticFieldOrMethodAccessPrefix(n, context, qname);
-		  } else {
-  		  qname.getScope().visit(new NameScope.EmptyVoidNameScopeVisitor(false) {
-  		    @Override
-  		    public void caseTypeScope(TypeScope typeScope) {
-  	        printer.print("this.");
-  		    }
-  		    @Override
-  		    public void caseParentTypeScope(ParentTypeScope parentTypeScope) {
-  		      // TODO : do we need to use a pointer to the super class the same it is done for mehtods Alex?
-  		      // Test it
-  		    }
-  		  });
-		  }
-		} 
-		
+			if (qname.isStatic()) {
+				printStaticFieldOrMethodAccessPrefix(n, context, qname);
+			} else {
+				qname.getScope().visit(new NameScope.EmptyVoidNameScopeVisitor(false) {
+					@Override
+					public void caseTypeScope(TypeScope typeScope) {
+						printer.print("this.");
+					}
+
+					@Override
+					public void caseParentTypeScope(ParentTypeScope parentTypeScope) {
+						// TODO : do we need to use a pointer to the super class the same it is done for mehtods Alex?
+						// Test it
+					}
+				});
+			}
+		}
+
 		printer.print(n.getName());
 	}
 
 	private void printArguments(List<Expression> args, GenerationContext context, boolean withParents) {
 		if (withParents) {
-		  printer.print("(");
+			printer.print("(");
 		}
-	  if (args != null) {
+		if (args != null) {
 			for (Iterator<Expression> i = args.iterator(); i.hasNext();) {
 				Expression e = i.next();
 				e.accept(getRuleVisitor(), context);
@@ -151,9 +155,9 @@ public class NameResolverHandler extends DefaultHandler {
 				}
 			}
 		}
-	  if (withParents) {
-      printer.print(")");
-    }
+		if (withParents) {
+			printer.print(")");
+		}
 	}
 
 	@Override

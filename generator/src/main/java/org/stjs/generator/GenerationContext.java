@@ -38,17 +38,16 @@ public class GenerationContext {
 		this.inputFile = inputFile;
 	}
 
-
 	@SuppressWarnings("unchecked")
-  public QualifiedName<MethodName> resolveMethod(Node node) {
-	  // TODO : why not resolving here? what's the point of having an other pass? 
+	public QualifiedName<MethodName> resolveMethod(Node node) {
+		// TODO : why not resolving here? what's the point of having an other pass?
 		return (QualifiedName<MethodName>) node.getData();
 	}
 
 	@SuppressWarnings("unchecked")
-  public QualifiedName<IdentifierName> resolveIdentifier(Node node) {
-	   // TODO : why not resolving here? what's the point of having an other pass?
-	  return (QualifiedName<IdentifierName>) node.getData();
+	public QualifiedName<IdentifierName> resolveIdentifier(Node node) {
+		// TODO : why not resolving here? what's the point of having an other pass?
+		return (QualifiedName<IdentifierName>) node.getData();
 	}
 
 	public GenerationContext skipHandlers() {

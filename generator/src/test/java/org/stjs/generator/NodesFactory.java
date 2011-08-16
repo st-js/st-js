@@ -40,60 +40,60 @@ public class NodesFactory {
 		return new PartialClassOrInterfaceDeclaration();
 	}
 
-	
 	public static class PartialClassOrInterfaceDeclaration implements PartialObjectBuilder<ClassOrInterfaceDeclaration> {
-		
+
 		private final ClassOrInterfaceDeclaration declaration = new ClassOrInterfaceDeclaration();
-		
-		private PartialClassOrInterfaceDeclaration() {}
-		
+
+		private PartialClassOrInterfaceDeclaration() {
+		}
+
 		public PartialClassOrInterfaceDeclaration withName(String name) {
 			declaration.setName(name);
 			return this;
 		}
-		 
+
 		public PartialClassOrInterfaceDeclaration addBodyDeclaration(BodyDeclaration bodyDeclaration) {
 			if (declaration.getMembers() == null) {
-				declaration.setMembers(Lists.<BodyDeclaration>newArrayList());
+				declaration.setMembers(Lists.<BodyDeclaration> newArrayList());
 			}
 			declaration.getMembers().add(bodyDeclaration);
 			return this;
 		}
-		
+
 		@Override
 		public ClassOrInterfaceDeclaration build() {
 			return declaration;
 		}
-		
+
 	}
-	
+
 	public static PartialFieldDeclaration newFieldDeclaration() {
 		return new PartialFieldDeclaration();
 	}
-	
+
 	public static NameExpr nameExpr(String name) {
-	  return new NameExpr(name);
+		return new NameExpr(name);
 	}
-	
+
 	public static class PartialFieldDeclaration implements PartialObjectBuilder<FieldDeclaration> {
-		
+
 		private final FieldDeclaration field;
-		
+
 		private PartialFieldDeclaration() {
 			field = new FieldDeclaration();
-			field.setVariables(Lists.<VariableDeclarator>newArrayList());
+			field.setVariables(Lists.<VariableDeclarator> newArrayList());
 		}
 
 		public PartialFieldDeclaration withType(japa.parser.ast.type.Type type) {
 			field.setType(type);
 			return this;
 		}
-		
+
 		public PartialFieldDeclaration withVariable(VariableDeclarator variable) {
 			field.getVariables().add(variable);
 			return this;
 		}
-		
+
 		public PartialFieldDeclaration withVariable(String variable) {
 			field.getVariables().add(variableDeclarator(variable));
 			return this;
@@ -103,12 +103,12 @@ public class NodesFactory {
 		public FieldDeclaration build() {
 			if (field.getType() == null) {
 				field.setType(new Type() {
-					
+
 					@Override
 					public <A> void accept(VoidVisitor<A> v, A arg) {
 						castAndPrint(v, "var ");
 					}
-					
+
 					@Override
 					public <R, A> R accept(GenericVisitor<R, A> v, A arg) {
 						throw new IllegalStateException("should not be called");
@@ -121,70 +121,65 @@ public class NodesFactory {
 		}
 
 	}
-	
+
 	private static interface PartialObjectBuilder<T> {
 		T build();
 	}
-	
-	
-	
+
 	public static BodyDeclaration bodyDeclarator(final String fakeBody) {
 		return new BodyDeclaration() {
-			
+
 			@Override
 			public <R, A> R accept(GenericVisitor<R, A> v, A arg) {
 				throw new AssertionError("Should not call accept");
 			}
-	
+
 			@Override
 			public <A> void accept(VoidVisitor<A> v, A arg) {
 				castAndPrint(v, fakeBody);
 			}
 		};
-		
+
 	}
 
 	public static VariableDeclarator variableDeclarator(String name) {
 		return new VariableDeclarator(new VariableDeclaratorId(name));
 	}
-	
+
 	public static VariableDeclarator variableDeclarator(final String name, final String initializer) {
 		return new VariableDeclarator(new VariableDeclaratorId(name), new Expression() {
-			
+
 			@Override
 			public <A> void accept(VoidVisitor<A> v, A arg) {
 				castAndPrint(v, initializer);
-				
+
 			}
-			
+
 			@Override
 			public <R, A> R accept(GenericVisitor<R, A> v, A arg) {
 				throw new AssertionError("Should not call accept");
 			}
 		});
 	}
-	
-	
-	
+
 	private static void castAndPrint(VoidVisitor<?> visitor, String string) {
-		((RuleBasedVisitor)visitor).getPrinter().print(string);
+		((RuleBasedVisitor) visitor).getPrinter().print(string);
 	}
 
-  public static MethodCallExpr methodCallExpr(String methodName, String... arguments) {
-    return methodCallExpr(methodName, null, arguments);
-  }
-  
-  public static MethodCallExpr methodCallExpr(String methodName, Expression scope, String... arguments) {
-    return new MethodCallExpr(scope, methodName, 
-        transform(asList(arguments), new Function<String, Expression>() {
-          @Override
-          public Expression apply(String input) {
-            return new NameExpr(input);
-          }
-        }));
-  }
+	public static MethodCallExpr methodCallExpr(String methodName, String... arguments) {
+		return methodCallExpr(methodName, null, arguments);
+	}
 
-  public static FieldAccessExpr fieldAccess(String instance, String field) {
-   return new FieldAccessExpr(nameExpr(instance), field);
-  }
+	public static MethodCallExpr methodCallExpr(String methodName, Expression scope, String... arguments) {
+		return new MethodCallExpr(scope, methodName, transform(asList(arguments), new Function<String, Expression>() {
+			@Override
+			public Expression apply(String input) {
+				return new NameExpr(input);
+			}
+		}));
+	}
+
+	public static FieldAccessExpr fieldAccess(String instance, String field) {
+		return new FieldAccessExpr(nameExpr(instance), field);
+	}
 }

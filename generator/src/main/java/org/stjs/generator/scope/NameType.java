@@ -17,15 +17,15 @@ package org.stjs.generator.scope;
 
 public interface NameType {
 
-  public interface IdentifierName extends NameType {
-    // Type declaration
-  }
+	public interface IdentifierName extends NameType {
+		// Type declaration
+	}
 
-  public interface MethodName extends NameType {
-    // Type declaration
-  }
+	public interface MethodName extends NameType {
+		// Type declaration
+	}
 
-  public interface TypeName extends NameType {
-    // Type declaration
-  }
+	public interface TypeName extends NameType {
+		// Type declaration
+	}
 }

@@ -40,9 +40,8 @@ public class TypeScope extends NameScope {
 	private final Set<String> instanceMethods = new HashSet<String>();
 	private final Set<String> instanceInnerTypes = new HashSet<String>();
 	private final Set<String> typeParameters = new HashSet<String>();
-	
-	private final JavaTypeName declaredTypeName;
 
+	private final JavaTypeName declaredTypeName;
 
 	public TypeScope(File inputFile, String name, JavaTypeName declaredTypeName, NameScope parent) {
 		super(inputFile, name, parent);
@@ -78,15 +77,15 @@ public class TypeScope extends NameScope {
 	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
 		if (instanceMethods.contains(name)) {
 			if (isInCurrentTypeScope(this, currentScope)) {
-        return new QualifiedName<MethodName>(this, false, NameTypes.METHOD, getDeclaredTypeName());
+				return new QualifiedName<MethodName>(this, false, NameTypes.METHOD, getDeclaredTypeName());
 			}
-			return QualifiedName.<MethodName>outerScope(this, false, NameTypes.METHOD, getDeclaredTypeName());
+			return QualifiedName.<MethodName> outerScope(this, false, NameTypes.METHOD, getDeclaredTypeName());
 		}
 		if (staticMethods.contains(name)) {
-			 if (isInCurrentTypeScope(this, currentScope)) {
-        return new QualifiedName<MethodName>(this, true, NameTypes.METHOD, getDeclaredTypeName());
-      }
-      return QualifiedName.<MethodName>outerScope(this, true, NameTypes.METHOD, getDeclaredTypeName());
+			if (isInCurrentTypeScope(this, currentScope)) {
+				return new QualifiedName<MethodName>(this, true, NameTypes.METHOD, getDeclaredTypeName());
+			}
+			return QualifiedName.<MethodName> outerScope(this, true, NameTypes.METHOD, getDeclaredTypeName());
 		}
 		if (getParent() != null) {
 			return getParent().resolveMethod(pos, name, currentScope);
@@ -96,33 +95,33 @@ public class TypeScope extends NameScope {
 
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
-	  boolean accessingOuterScope = !isInCurrentTypeScope(this, currentScope);
-    NameTypes type = null;
-    boolean isStatic;
-    
-	  if (instanceFields.contains(name)) {
+		boolean accessingOuterScope = !isInCurrentTypeScope(this, currentScope);
+		NameTypes type = null;
+		boolean isStatic;
+
+		if (instanceFields.contains(name)) {
 			type = NameTypes.FIELD;
 			isStatic = false;
 		} else if (staticFields.contains(name)) {
-		  type = NameTypes.FIELD;
-		  isStatic = true;
-	  } else if (instanceInnerTypes.contains(name)) {
-	    // TODO It is not correct to return and Identifier Name, since this is a class.
-	    // but we need to differentiate nameExpressions on classes and variables then
-      type = NameTypes.CLASS;
-      isStatic = false;
-    } else if (staticInnerTypes.contains(name)) {
-      // TODO It is not correct to return and Identifier Name, since this is a class.
-      // but we need to differentiate nameExpressions on classes and variables then
-	    type = NameTypes.CLASS;
-      isStatic = true;
-	  } else {
-	    if (getParent() != null) {
-	      return getParent().resolveIdentifier(pos, name, currentScope);
-	    }
-	    return null;
-	  }
-	  return new QualifiedName<IdentifierName>(this, isStatic, accessingOuterScope, type, getDeclaredTypeName());
+			type = NameTypes.FIELD;
+			isStatic = true;
+		} else if (instanceInnerTypes.contains(name)) {
+			// TODO It is not correct to return and Identifier Name, since this is a class.
+			// but we need to differentiate nameExpressions on classes and variables then
+			type = NameTypes.CLASS;
+			isStatic = false;
+		} else if (staticInnerTypes.contains(name)) {
+			// TODO It is not correct to return and Identifier Name, since this is a class.
+			// but we need to differentiate nameExpressions on classes and variables then
+			type = NameTypes.CLASS;
+			isStatic = true;
+		} else {
+			if (getParent() != null) {
+				return getParent().resolveIdentifier(pos, name, currentScope);
+			}
+			return null;
+		}
+		return new QualifiedName<IdentifierName>(this, isStatic, accessingOuterScope, type, getDeclaredTypeName());
 	}
 
 	public void addStaticField(String name, SourcePosition sourcePosition) {
@@ -149,39 +148,39 @@ public class TypeScope extends NameScope {
 		}
 	}
 
-  public void addstaticInnerType(String name) {
-    staticInnerTypes.add(name);
-  }
+	public void addstaticInnerType(String name) {
+		staticInnerTypes.add(name);
+	}
 
-  public void addInstanceInnerType(String name) {
-    instanceInnerTypes.add(name);
-  }
-  
-  public void addTypeParameter(String typeParameter) {
-    typeParameters.add(typeParameter);
-  }
+	public void addInstanceInnerType(String name) {
+		instanceInnerTypes.add(name);
+	}
+
+	public void addTypeParameter(String typeParameter) {
+		typeParameters.add(typeParameter);
+	}
 
 	@Override
 	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
 		// TODO : do not check strings, but qualified names. Becaue OuterClass.InnerClass is === to InnerClass
-	  if (staticInnerTypes.contains(name)) {
-	    return createInnerTypeQualifiedName(pos, name, true);
+		if (staticInnerTypes.contains(name)) {
+			return createInnerTypeQualifiedName(pos, name, true);
 		}
-	  if (instanceInnerTypes.contains(name)) {
-	    return createInnerTypeQualifiedName(pos, name, false);
-	  }
-	  if (typeParameters.contains(name)) {
-	    return new QualifiedName<TypeName>(this, false, NameTypes.GENERIC_TYPE);
-	  }
-	  if (getParent() != null) {
+		if (instanceInnerTypes.contains(name)) {
+			return createInnerTypeQualifiedName(pos, name, false);
+		}
+		if (typeParameters.contains(name)) {
+			return new QualifiedName<TypeName>(this, false, NameTypes.GENERIC_TYPE);
+		}
+		if (getParent() != null) {
 			return getParent().resolveType(pos, name, currentScope);
 		}
 		return null;
 	}
 
-  private QualifiedName<TypeName> createInnerTypeQualifiedName(SourcePosition pos, String name, boolean isStatic) {
-    return new QualifiedName<TypeName>(this, isStatic, NameTypes.INNER_CLASS, declaredTypeName);
-  }
+	private QualifiedName<TypeName> createInnerTypeQualifiedName(SourcePosition pos, String name, boolean isStatic) {
+		return new QualifiedName<TypeName>(this, isStatic, NameTypes.INNER_CLASS, declaredTypeName);
+	}
 
 	@Override
 	public String toString() {
@@ -189,18 +188,18 @@ public class TypeScope extends NameScope {
 				+ instanceFields + ", instanceMethods=" + instanceMethods + ", getChildren()=" + getChildren() + "]";
 	}
 
-  public JavaTypeName getDeclaredTypeName() {
-    return declaredTypeName;
-  }
+	public JavaTypeName getDeclaredTypeName() {
+		return declaredTypeName;
+	}
 
-  @Override
-  public <T> T visit(NameScopeVisitor<T> visitor) {
-    return visitor.caseTypeScope(this);
-  }
-  
-  @Override
-  public void visit(VoidNameScopeVisitor visitor) {
-    visitor.caseTypeScope(this);
-  }
+	@Override
+	public <T> T visit(NameScopeVisitor<T> visitor) {
+		return visitor.caseTypeScope(this);
+	}
+
+	@Override
+	public void visit(VoidNameScopeVisitor visitor) {
+		visitor.caseTypeScope(this);
+	}
 
 }

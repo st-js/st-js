@@ -13,22 +13,21 @@ import org.stjs.generator.scope.QualifiedName.NameTypes;
 import org.stjs.generator.scope.VariableScope;
 import org.stjs.generator.scope.classloader.ClassWrapper;
 
-
 public class SpecialMethodHandlersTest {
 
-  
-  @Test
-  public void invokeHandlerTest() throws Exception {
-    // myFunction.$invoke(x,y)
-    $InvokeHandler handler = new SpecialMethodHandlers.$InvokeHandler();
-    RuleBasedVisitor visitor = new RuleBasedVisitor();
-    QualifiedName<MethodName> qualifiedName = new QualifiedName<MethodName>(new VariableScope(null, null, null), false, NameTypes.METHOD, new JavaTypeName((ClassWrapper)null));
-    handler.handle(new DefaultHandler(visitor) {
-      @Override
-      public void visit(NameExpr n, GenerationContext context) {
-        printer.print(n.getName());
-      }
-    }, methodCallExpr("$invoke", "x", "y"), qualifiedName, new GenerationContext(null));
-    assertEquals("(x, y)",visitor.getPrinter().toString());
-  }
+	@Test
+	public void invokeHandlerTest() throws Exception {
+		// myFunction.$invoke(x,y)
+		$InvokeHandler handler = new SpecialMethodHandlers.$InvokeHandler();
+		RuleBasedVisitor visitor = new RuleBasedVisitor();
+		QualifiedName<MethodName> qualifiedName = new QualifiedName<MethodName>(new VariableScope(null, null, null),
+				false, NameTypes.METHOD, new JavaTypeName((ClassWrapper) null));
+		handler.handle(new DefaultHandler(visitor) {
+			@Override
+			public void visit(NameExpr n, GenerationContext context) {
+				printer.print(n.getName());
+			}
+		}, methodCallExpr("$invoke", "x", "y"), qualifiedName, new GenerationContext(null));
+		assertEquals("(x, y)", visitor.getPrinter().toString());
+	}
 }

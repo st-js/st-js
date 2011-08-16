@@ -26,11 +26,10 @@ import java.util.List;
 
 public class Lists {
 
-
 	public static <T> T getOnlyElement(Iterable<T> elems) {
 		if (elems instanceof List<?>) {
 			List<T> list = (List<T>) elems;
-			checkState(list.size()==1,  "elems must contain exactly one element");
+			checkState(list.size() == 1, "elems must contain exactly one element");
 			return list.get(0);
 		}
 		Iterator<T> iterator = elems.iterator();
@@ -39,9 +38,8 @@ public class Lists {
 		checkState(!iterator.hasNext(), "elems must contain exactly one element");
 		return obj;
 	}
-	
-	public static <T,U> List<U> transform(final List<T> list,
-			final Function<? super T, ? extends U> function) {
+
+	public static <T, U> List<U> transform(final List<T> list, final Function<? super T, ? extends U> function) {
 		return new AbstractList<U>() {
 
 			@Override
@@ -56,8 +54,7 @@ public class Lists {
 		};
 	}
 
-	public static <T> List<T> union(final List<T> list1,
-			final List<T> list2) {
+	public static <T> List<T> union(final List<T> list1, final List<T> list2) {
 		return new AbstractList<T>() {
 
 			@Override
@@ -65,7 +62,7 @@ public class Lists {
 				if (i < list1.size()) {
 					return list1.get(i);
 				}
-				return list2.get(i-list1.size());
+				return list2.get(i - list1.size());
 			}
 
 			@Override
@@ -74,20 +71,20 @@ public class Lists {
 			}
 		};
 	}
-	
+
 	public static <T> ArrayList<T> newArrayList() {
 		return new ArrayList<T>();
 	}
-	
+
 	public static <T> ArrayList<T> newArrayList(T... elems) {
 		return new ArrayList<T>(Arrays.asList(elems));
 	}
-	
+
 	public static <T> ArrayList<T> newArrayList(Collection<T> collection) {
 		return new ArrayList<T>(collection);
 	}
 
-  public static <T> LinkedList<T> newLinkedList() {
-    return new LinkedList<T>();
-  }
+	public static <T> LinkedList<T> newLinkedList() {
+		return new LinkedList<T>();
+	}
 }

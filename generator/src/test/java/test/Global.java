@@ -15,7 +15,6 @@
  */
 package test;
 
-
 @GlobalScope
 public class Global {
 	public static Number Infinity;
@@ -24,12 +23,9 @@ public class Global {
 	public static Object undefined;
 
 	public static Window window;
-	
-	public static void  Do() {
-	  
+
+	public static void Do() {
+
 	}
-
-
-	
 
 }

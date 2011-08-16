@@ -109,14 +109,16 @@ public class XmlVisitor extends VoidVisitorAdapter<Element> implements VoidVisit
 
 		String methodName = method.getName();
 
-		return ((Integer.TYPE == method.getReturnType()) || (Boolean.TYPE == method.getReturnType()) || (String.class == method.getReturnType()))
+		return ((Integer.TYPE == method.getReturnType()) || (Boolean.TYPE == method.getReturnType()) || (String.class == method
+				.getReturnType()))
 				&& (method.getParameterTypes().length == 0)
 				&& (Void.TYPE != method.getReturnType())
 				&& !methodName.startsWith("jjt")
 				&& !methodName.equals("toString")
 				&& !methodName.equals("getScope")
 				&& !methodName.equals("getClass")
-				&& !methodName.equals("getTypeNameNode") && !methodName.equals("getImportedNameNode") && !methodName.equals("hashCode");
+				&& !methodName.equals("getTypeNameNode")
+				&& !methodName.equals("getImportedNameNode") && !methodName.equals("hashCode");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -130,8 +132,7 @@ public class XmlVisitor extends VoidVisitorAdapter<Element> implements VoidVisit
 					Object value = method.invoke(n);
 
 					elem.addAttribute(propertyName(method.getName()), value != null ? value.toString() : "");
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}

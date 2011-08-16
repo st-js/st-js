@@ -5,9 +5,7 @@ import test.innerclasses.ClassDeclaringInnerClass.InnerClass;
 
 public class ClassUsingInnerClass {
 
-  static int method() {
-    return ClassDeclaringInnerClass.InnerClass.doSth()+
-           InnerClass.doSth()+
-           doSth();
-  }
+	static int method() {
+		return ClassDeclaringInnerClass.InnerClass.doSth() + InnerClass.doSth() + doSth();
+	}
 }

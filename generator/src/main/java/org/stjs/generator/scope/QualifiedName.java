@@ -26,39 +26,36 @@ public class QualifiedName<T extends NameType> {
 	private final NameTypes type;
 	private final Option<JavaTypeName> definitionPoint; // Local variables and parameters don't have definition points
 	private final boolean isGlobalScope;
-	
+
 	public enum NameTypes {
-	  METHOD,
-	  FIELD,
-	  VARIABLE,
-	  CLASS,
-	  GENERIC_TYPE,
-	  INNER_CLASS
+		METHOD, FIELD, VARIABLE, CLASS, GENERIC_TYPE, INNER_CLASS
 	}
 
 	public QualifiedName(NameScope scope, boolean isStatic, NameTypes type) {
-	  this(scope, isStatic, type,null);
+		this(scope, isStatic, type, null);
 	}
-	
+
 	public QualifiedName(NameScope scope, boolean isStatic, NameTypes type, JavaTypeName definitionPoint) {
-	  this(scope, isStatic, false, type, definitionPoint);
+		this(scope, isStatic, false, type, definitionPoint);
 	}
-	
-	public QualifiedName(NameScope scope, boolean isStatic, boolean accessingOuterScope, NameTypes type, JavaTypeName definitionPoint) {
-	  this(scope, isStatic, accessingOuterScope, type, definitionPoint, false);
+
+	public QualifiedName(NameScope scope, boolean isStatic, boolean accessingOuterScope, NameTypes type,
+			JavaTypeName definitionPoint) {
+		this(scope, isStatic, accessingOuterScope, type, definitionPoint, false);
 	}
-	
-	public QualifiedName(NameScope scope, boolean isStatic, boolean accessingOuterScope, NameTypes type, JavaTypeName definitionPoint, boolean isGlobalScope) {
+
+	public QualifiedName(NameScope scope, boolean isStatic, boolean accessingOuterScope, NameTypes type,
+			JavaTypeName definitionPoint, boolean isGlobalScope) {
 		this.scope = checkNotNull(scope);
 		this.isStatic = isStatic;
 		this.accessingOuterScope = accessingOuterScope;
 		this.type = type;
 		this.definitionPoint = Option.of(definitionPoint);
 		this.isGlobalScope = isGlobalScope;
-		checkState(this.definitionPoint.isDefined() == (type != NameTypes.VARIABLE && type != NameTypes.GENERIC_TYPE), "Methods, fields and classes must have a definition point");
-		
-	}
+		checkState(this.definitionPoint.isDefined() == (type != NameTypes.VARIABLE && type != NameTypes.GENERIC_TYPE),
+				"Methods, fields and classes must have a definition point");
 
+	}
 
 	/**
 	 * This is the name scope in which the name was found
@@ -74,40 +71,42 @@ public class QualifiedName<T extends NameType> {
 		StringBuilder s = new StringBuilder();
 		if (definitionPoint.isDefined()) {
 			Option<String> fullyQualifiedString = definitionPoint.getOrThrow().getFullName(true);
-      if (fullyQualifiedString.isDefined()) {
-        s.append(fullyQualifiedString.getOrThrow()).append(".");
-      }
+			if (fullyQualifiedString.isDefined()) {
+				s.append(fullyQualifiedString.getOrThrow()).append(".");
+			}
 		}
 		s.append("[" + scope.getPath() + "]");
 		return s.toString();
 	}
 
-  public boolean isStatic() {
-    return isStatic;
-  }
+	public boolean isStatic() {
+		return isStatic;
+	}
 
-  public boolean isAccessingOuterScope() {
-    return accessingOuterScope;
-  }
+	public boolean isAccessingOuterScope() {
+		return accessingOuterScope;
+	}
 
-  public static <T extends NameType> QualifiedName<T> outerScope(NameScope scope, boolean isStatic, NameTypes type, JavaTypeName definitionPoint) {
-    return new QualifiedName<T>(scope, isStatic, true, type, definitionPoint);
-  }
+	public static <T extends NameType> QualifiedName<T> outerScope(NameScope scope, boolean isStatic, NameTypes type,
+			JavaTypeName definitionPoint) {
+		return new QualifiedName<T>(scope, isStatic, true, type, definitionPoint);
+	}
 
-  public NameTypes getType() {
-    return type;
-  }
+	public NameTypes getType() {
+		return type;
+	}
 
-  /**
-   * Indicates that a variable, field or method can be accessed through the global scope
-   * @return
-   */
-  public boolean isGlobal() {
-    return isGlobalScope;
-  }
+	/**
+	 * Indicates that a variable, field or method can be accessed through the global scope
+	 * 
+	 * @return
+	 */
+	public boolean isGlobal() {
+		return isGlobalScope;
+	}
 
-  public Option<JavaTypeName> getDefinitionPoint() {
-    return definitionPoint;
-  }
+	public Option<JavaTypeName> getDefinitionPoint() {
+		return definitionPoint;
+	}
 
 }

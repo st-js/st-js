@@ -163,1107 +163,1107 @@ public class RuleBasedVisitor extends DumpVisitor<GenerationContext> {
 	@Override
 	public void visit(CompilationUnit n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(PackageDeclaration n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ImportDeclaration n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(TypeParameter n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(LineComment n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(BlockComment n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ClassOrInterfaceDeclaration n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(EnumDeclaration n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(EmptyTypeDeclaration n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(EnumConstantDeclaration n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(AnnotationDeclaration n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(AnnotationMemberDeclaration n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(FieldDeclaration n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(VariableDeclarator n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(VariableDeclaratorId n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ConstructorDeclaration n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(MethodDeclaration n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(Parameter n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(EmptyMemberDeclaration n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(InitializerDeclaration n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(JavadocComment n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ClassOrInterfaceType n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(PrimitiveType n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ReferenceType n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(VoidType n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(WildcardType n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ArrayAccessExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ArrayCreationExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ArrayInitializerExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(AssignExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(BinaryExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(CastExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ClassExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ConditionalExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(EnclosedExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(FieldAccessExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(InstanceOfExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(StringLiteralExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(IntegerLiteralExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(LongLiteralExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(IntegerLiteralMinValueExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(LongLiteralMinValueExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(CharLiteralExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(DoubleLiteralExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(BooleanLiteralExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(NullLiteralExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(MethodCallExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(NameExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ObjectCreationExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(QualifiedNameExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ThisExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(SuperExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(UnaryExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(VariableDeclarationExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(MarkerAnnotationExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(SingleMemberAnnotationExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(NormalAnnotationExpr n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(MemberValuePair n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ExplicitConstructorInvocationStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(TypeDeclarationStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(AssertStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(BlockStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(LabeledStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(EmptyStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ExpressionStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(SwitchStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(SwitchEntryStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(BreakStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ReturnStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(IfStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(WhileStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ContinueStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(DoStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ForeachStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ForStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(ThrowStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(SynchronizedStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(TryStmt n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 	@Override
 	public void visit(CatchClause n, GenerationContext context) {
 		VoidVisitor<GenerationContext> visitor = getVisitor(n, context);
-		try{
-if (visitor != null) {
-			visitor.visit(n, context);
-		} else {
-			super.visit(n, context);
+		try {
+			if (visitor != null) {
+				visitor.visit(n, context);
+			} else {
+				super.visit(n, context);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-}catch (Exception e){
-e.printStackTrace();
-}
 	}
 
 }

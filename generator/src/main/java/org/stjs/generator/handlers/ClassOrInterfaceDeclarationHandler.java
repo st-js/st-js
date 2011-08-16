@@ -37,44 +37,45 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 	}
 
 	private int getModifiers(BodyDeclaration member) {
-		
-	  if (member instanceof FieldDeclaration) {
+
+		if (member instanceof FieldDeclaration) {
 			return ((FieldDeclaration) member).getModifiers();
 		}
 		if (member instanceof MethodDeclaration) {
 			return ((MethodDeclaration) member).getModifiers();
 		}
 		if (member instanceof ClassOrInterfaceDeclaration) {
-		  return ((ClassOrInterfaceDeclaration)member).getModifiers();
+			return ((ClassOrInterfaceDeclaration) member).getModifiers();
 		}
 		throw new UnsupportedOperationException("Expected field, method or class");
 	}
-	
+
 	private void printMembers(ClassOrInterfaceDeclaration n, GenerationContext context) {
-	  List<BodyDeclaration> members = n.getMembers();
+		List<BodyDeclaration> members = n.getMembers();
 		for (BodyDeclaration member : members) {
 			if (member instanceof ConstructorDeclaration) {
 				continue;
 			}
 			printer.printLn();
 			printer.printLn();
-			int memberModifiers = getModifiers(member); 
+			int memberModifiers = getModifiers(member);
 			if (ModifierSet.isAbstract(memberModifiers) || ModifierSet.isNative(memberModifiers)) {
-			  continue;
+				continue;
 			}
 			TypeScope typeScope = (TypeScope) n.getData();
 			JavaTypeName declaredClassName = typeScope.getDeclaredTypeName();
 			if (isStatic(n.getModifiers())) {
-			  Option<String> fullyQualifiedString = declaredClassName.getFullName(false);
-			  if (fullyQualifiedString.isEmpty()) {
-			    throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n), "definition of static members of anonymous classes is not supported");
-			  }
-        printer.print(fullyQualifiedString.getOrThrow());
+				Option<String> fullyQualifiedString = declaredClassName.getFullName(false);
+				if (fullyQualifiedString.isEmpty()) {
+					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+							"definition of static members of anonymous classes is not supported");
+				}
+				printer.print(fullyQualifiedString.getOrThrow());
 			} else {
-			  printer.print(n.getName());
+				printer.print(n.getName());
 			}
 			if (!isStatic(memberModifiers)) {
-			  printer.print(".prototype");
+				printer.print(".prototype");
 			}
 			printer.print(".");
 			member.accept(getRuleVisitor(), context);
@@ -98,10 +99,10 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 
 	@Override
 	public void visit(final ClassOrInterfaceDeclaration n, final GenerationContext arg) {
-	  if (n.isInterface()) {
-	    return;
-	  }
-	  printer.print(n.getName() +" = ");
+		if (n.isInterface()) {
+			return;
+		}
+		printer.print(n.getName() + " = ");
 		if (n.getMembers() != null) {
 			ConstructorDeclaration constr = getConstructor(n.getMembers(), arg);
 			if (constr != null) {

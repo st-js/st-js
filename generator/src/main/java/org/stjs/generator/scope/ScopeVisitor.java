@@ -134,10 +134,10 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 			}
 		}
 		if (n.getTypeParameters() != null) {
-		  for (TypeParameter p : n.getTypeParameters()) {
-		    JavascriptKeywords.checkIdentifier(inputFile, new SourcePosition(p), p.getName());
-        scope.addTypeParameter(p.getName());
-		  }
+			for (TypeParameter p : n.getTypeParameters()) {
+				JavascriptKeywords.checkIdentifier(inputFile, new SourcePosition(p), p.getName());
+				scope.addTypeParameter(p.getName());
+			}
 		}
 		super.visit(n, scope);
 	}
@@ -152,48 +152,52 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 		}
 
 		if (n.getMembers() != null) {
-			TypeScope typeScope =  visitTypeDeclaration("type-" + n.getName(), n.getMembers(), classScope, getTypeName(n, n.getName(), currentScope));
-		  classScope = typeScope;
-      if (n.getTypeParameters() != null) {
-        for (TypeParameter p : n.getTypeParameters()) {
-          JavascriptKeywords.checkIdentifier(inputFile, new SourcePosition(p), p.getName());
-          typeScope.addTypeParameter(p.getName());
-        }
-      }
+			TypeScope typeScope = visitTypeDeclaration("type-" + n.getName(), n.getMembers(), classScope,
+					getTypeName(n, n.getName(), currentScope));
+			classScope = typeScope;
+			if (n.getTypeParameters() != null) {
+				for (TypeParameter p : n.getTypeParameters()) {
+					JavascriptKeywords.checkIdentifier(inputFile, new SourcePosition(p), p.getName());
+					typeScope.addTypeParameter(p.getName());
+				}
+			}
 		} else {
-		  classScope = new TypeScope(inputFile, "type-" + n.getName(), getTypeName(n, n.getName(), currentScope), classScope);
+			classScope = new TypeScope(inputFile, "type-" + n.getName(), getTypeName(n, n.getName(), currentScope),
+					classScope);
 		}
 		n.setData(classScope);
 		super.visit(n, classScope);
 	}
 
-	 private JavaTypeName getTypeName(Node n, String name, NameScope currentScope) {
-	   // TODO : if we really want to use the class loader, load the class and avoid
-	   // trying to guess things here!
-	   NameScope scopeIt = currentScope; 
-	   do {
-	      JavaTypeName enclosingClassName = scopeIt.visit( new NameScope.EmptyNameScopeVisitor<JavaTypeName>(null) {
-	        @Override
-	        public JavaTypeName caseParentTypeScope(ParentTypeScope parentTypeScope) {
-	          return parentTypeScope.getDeclaredTypeScope().getDeclaredTypeName();
-	        }
-	        @Override
-	        public JavaTypeName caseTypeScope(TypeScope typeScope) {
-	          return typeScope.getDeclaredTypeName();
-	        }
-	      });
-	      if (enclosingClassName != null) {
-	        return new JavaTypeName(withClassName(name), withClassName(enclosingClassName.getFullName(true).getOrThrow()));
-	      }
-	      scopeIt = scopeIt.getParent();
-	    } while (scopeIt != null);
-	    // no enclosing class
-	    return new JavaTypeName(withClassName(name));
-	  }
-	 
+	private JavaTypeName getTypeName(Node n, String name, NameScope currentScope) {
+		// TODO : if we really want to use the class loader, load the class and avoid
+		// trying to guess things here!
+		NameScope scopeIt = currentScope;
+		do {
+			JavaTypeName enclosingClassName = scopeIt.visit(new NameScope.EmptyNameScopeVisitor<JavaTypeName>(null) {
+				@Override
+				public JavaTypeName caseParentTypeScope(ParentTypeScope parentTypeScope) {
+					return parentTypeScope.getDeclaredTypeScope().getDeclaredTypeName();
+				}
 
-	private TypeScope visitTypeDeclaration(String name, List<BodyDeclaration> declarations, NameScope currentScope, JavaTypeName declaredTypeName) {
-	  TypeScope typeScope = new TypeScope(inputFile, name, declaredTypeName, currentScope);
+				@Override
+				public JavaTypeName caseTypeScope(TypeScope typeScope) {
+					return typeScope.getDeclaredTypeName();
+				}
+			});
+			if (enclosingClassName != null) {
+				return new JavaTypeName(withClassName(name), withClassName(enclosingClassName.getFullName(true)
+						.getOrThrow()));
+			}
+			scopeIt = scopeIt.getParent();
+		} while (scopeIt != null);
+		// no enclosing class
+		return new JavaTypeName(withClassName(name));
+	}
+
+	private TypeScope visitTypeDeclaration(String name, List<BodyDeclaration> declarations, NameScope currentScope,
+			JavaTypeName declaredTypeName) {
+		TypeScope typeScope = new TypeScope(inputFile, name, declaredTypeName, currentScope);
 		for (BodyDeclaration member : declarations) {
 
 			if (member instanceof FieldDeclaration) {
@@ -219,9 +223,9 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 			} else if (member instanceof TypeDeclaration) {
 				TypeDeclaration type = (TypeDeclaration) member;
 				if (ModifierSet.isStatic(type.getModifiers())) {
-				  typeScope.addstaticInnerType(type.getName());
+					typeScope.addstaticInnerType(type.getName());
 				} else {
-				  typeScope.addInstanceInnerType(type.getName());
+					typeScope.addInstanceInnerType(type.getName());
 				}
 			}
 		}
@@ -232,7 +236,8 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 	public void visit(ObjectCreationExpr n, NameScope currentScope) {
 		NameScope newScope = currentScope;
 		if (n.getAnonymousClassBody() != null) {
-			newScope = visitTypeDeclaration("anonymous-" + n.getBeginLine(), n.getAnonymousClassBody(), currentScope, getTypeName(n, null, currentScope));
+			newScope = visitTypeDeclaration("anonymous-" + n.getBeginLine(), n.getAnonymousClassBody(), currentScope,
+					getTypeName(n, null, currentScope));
 		}
 		super.visit(n, newScope);
 	}

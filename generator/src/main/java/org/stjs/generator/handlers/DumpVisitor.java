@@ -261,8 +261,8 @@ public class DumpVisitor<T> implements VoidVisitor<T> {
 		printArguments(this, printer, args, arg);
 	}
 
-  public static <T> void printArguments(VoidVisitor<T> handler, SourcePrinter printer, List<Expression> args, T arg) {
-    printer.print("(");
+	public static <T> void printArguments(VoidVisitor<T> handler, SourcePrinter printer, List<Expression> args, T arg) {
+		printer.print("(");
 		if (args != null) {
 			for (Iterator<Expression> i = args.iterator(); i.hasNext();) {
 				Expression e = i.next();
@@ -273,7 +273,7 @@ public class DumpVisitor<T> implements VoidVisitor<T> {
 			}
 		}
 		printer.print(")");
-  }
+	}
 
 	private void printJavadoc(JavadocComment javadoc, T arg) {
 		if (javadoc != null) {

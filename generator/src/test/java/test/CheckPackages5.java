@@ -16,10 +16,10 @@
 package test;
 
 public class CheckPackages5 {
-  
-  static interface MapFunction<T, U> {
-    U map(String key, T val);
-  }
+
+	static interface MapFunction<T, U> {
+		U map(String key, T val);
+	}
 
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {

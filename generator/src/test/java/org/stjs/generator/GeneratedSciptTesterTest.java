@@ -23,12 +23,9 @@ import org.stjs.generator.handlers.ClassOrInterfaceDeclarationHandler;
 
 public class GeneratedSciptTesterTest {
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void shouldThrowAnAssertionError() throws Exception {
-		handlerTester(ClassOrInterfaceDeclarationHandler.class, false)
-		.assertGenerateString("XXX",
-				newClassOrIntefarceDeclaration()
-						.withName("functionName")
-						.build());
+		handlerTester(ClassOrInterfaceDeclarationHandler.class, false).assertGenerateString("XXX",
+				newClassOrIntefarceDeclaration().withName("functionName").build());
 	}
 }

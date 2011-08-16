@@ -44,13 +44,13 @@ public class ParameterScope extends NameScope {
 		parameters.add(parameter);
 	}
 
-  public void addParameter(String parameter) {
-    parameters.add(parameter);
-  }
+	public void addParameter(String parameter) {
+		parameters.add(parameter);
+	}
 
-  public void addTypeParameter(String typeParameter) {
-    typeParameters.add(typeParameter);
-  }
+	public void addTypeParameter(String typeParameter) {
+		typeParameters.add(typeParameter);
+	}
 
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
@@ -80,22 +80,22 @@ public class ParameterScope extends NameScope {
 	@Override
 	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
 		if (typeParameters.contains(name)) {
-		  return new QualifiedName<TypeName>(this, false, NameTypes.CLASS);
+			return new QualifiedName<TypeName>(this, false, NameTypes.CLASS);
 		}
-	  if (getParent() != null) {
+		if (getParent() != null) {
 			return getParent().resolveType(pos, name, currentScope);
 		}
 		return null;
 	}
 
-  @Override
-  public <T> T visit(NameScopeVisitor<T> visitor) {
-    return visitor.caseParameterScope(this);
-  }
-  
-  @Override
-  public void visit(VoidNameScopeVisitor visitor) {
-    visitor.caseParameterScope(this);
-  }
+	@Override
+	public <T> T visit(NameScopeVisitor<T> visitor) {
+		return visitor.caseParameterScope(this);
+	}
+
+	@Override
+	public void visit(VoidNameScopeVisitor visitor) {
+		visitor.caseParameterScope(this);
+	}
 
 }

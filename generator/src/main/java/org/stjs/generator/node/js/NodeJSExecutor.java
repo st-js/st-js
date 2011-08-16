@@ -28,7 +28,7 @@ public class NodeJSExecutor {
 		private final String stdOut;
 		private final String stdErr;
 		private final int exitValue;
-		
+
 		public ExecutionResult(String stdOut, String stdErr, int exitValue) {
 			this.stdOut = stdOut;
 			this.stdErr = stdErr;
@@ -46,7 +46,7 @@ public class NodeJSExecutor {
 		public int getExitValue() {
 			return exitValue;
 		}
-		
+
 		@Override
 		public String toString() {
 			if (stdOut.isEmpty() && stdErr.isEmpty()) {
@@ -55,16 +55,12 @@ public class NodeJSExecutor {
 			return String.format("exitValue : %s\nstdout : %s\nstderr :%s", exitValue, stdOut, stdErr);
 		}
 	}
-	
+
 	public ExecutionResult run(File srcFile) {
 		try {
-			Process p = Runtime.getRuntime().exec(
-					new String[] { nodeJS, srcFile.getAbsolutePath() });
+			Process p = Runtime.getRuntime().exec(new String[] { nodeJS, srcFile.getAbsolutePath() });
 			int exitValue = p.waitFor();
-			return new ExecutionResult(
-					readStream(p.getInputStream()),
-					readStream(p.getErrorStream()),
-					exitValue);
+			return new ExecutionResult(readStream(p.getInputStream()), readStream(p.getErrorStream()), exitValue);
 		} catch (Exception e) {
 			// TODO : this is not really going to be working on all OS!
 			if (e.getMessage().contains("Cannot run program")) {
@@ -75,7 +71,7 @@ public class NodeJSExecutor {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	private String readStream(InputStream errStream) throws IOException {
 		StringBuilder builder = new StringBuilder();
 		BufferedReader in = new BufferedReader(new InputStreamReader(errStream));

@@ -2,7 +2,7 @@ package test;
 
 public class ClassDefiningStaticMethod {
 
-  static int doSth() {
-    return 1;
-  }
+	static int doSth() {
+		return 1;
+	}
 }
