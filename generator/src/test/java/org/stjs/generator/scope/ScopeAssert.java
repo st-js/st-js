@@ -22,8 +22,11 @@ import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
+
 import java.util.concurrent.atomic.AtomicReference;
+
 import junit.framework.Assert;
+
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.QualifiedName.NameTypes;
 
@@ -53,7 +56,8 @@ public class ScopeAssert {
 	}
 
 	/**
-	 * The AST parser uses a 8-space tab when calculating the column. translate it to a 4-space tab
+	 * The AST parser uses a 8-space tab when calculating the column. translate
+	 * it to a 4-space tab
 	 * 
 	 * @param columnInEditor
 	 * @param tabs
@@ -71,10 +75,14 @@ public class ScopeAssert {
 			final AtomicReference<String> nodeNameP = new AtomicReference<String>();
 			new VoidVisitorAdapter<Object>() {
 				@SuppressWarnings("unchecked")
-				private void matchOnName(final AtomicReference<QualifiedName<IdentifierName>> qNamePointer,
-						final AtomicReference<String> nodeNameP, Expression n, String name) {
-					if (n.getBeginLine() == line && n.getBeginColumn() == column) {
-						qNamePointer.set((QualifiedName<IdentifierName>) n.getData());
+				private void matchOnName(
+						final AtomicReference<QualifiedName<IdentifierName>> qNamePointer,
+						final AtomicReference<String> nodeNameP, Expression n,
+						String name) {
+					if (n.getBeginLine() == line
+							&& n.getBeginColumn() == column) {
+						qNamePointer.set((QualifiedName<IdentifierName>) n
+								.getData());
 						nodeNameP.set(name);
 					}
 				}
@@ -86,8 +94,6 @@ public class ScopeAssert {
 
 				@Override
 				public void visit(MethodCallExpr n, Object arg) {
-					System.out.println(n.getName() + ":" + n.getData() + " " + n.getBeginLine() + " "
-							+ n.getBeginColumn());
 					matchOnName(qNamePointer, nodeNameP, n, n.getName());
 				}
 			}.visit(compilationUnit, null);

@@ -22,7 +22,9 @@ import japa.parser.ast.body.ConstructorDeclaration;
 import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.body.ModifierSet;
+
 import java.util.List;
+
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
@@ -47,10 +49,12 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 		if (member instanceof ClassOrInterfaceDeclaration) {
 			return ((ClassOrInterfaceDeclaration) member).getModifiers();
 		}
-		throw new UnsupportedOperationException("Expected field, method or class");
+		throw new UnsupportedOperationException(
+				"Expected field, method or class");
 	}
 
-	private void printMembers(ClassOrInterfaceDeclaration n, GenerationContext context) {
+	private void printMembers(ClassOrInterfaceDeclaration n,
+			GenerationContext context) {
 		List<BodyDeclaration> members = n.getMembers();
 		for (BodyDeclaration member : members) {
 			if (member instanceof ConstructorDeclaration) {
@@ -59,15 +63,18 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 			printer.printLn();
 			printer.printLn();
 			int memberModifiers = getModifiers(member);
-			if (ModifierSet.isAbstract(memberModifiers) || ModifierSet.isNative(memberModifiers)) {
+			if (ModifierSet.isAbstract(memberModifiers)
+					|| ModifierSet.isNative(memberModifiers)) {
 				continue;
 			}
 			TypeScope typeScope = (TypeScope) n.getData();
 			JavaTypeName declaredClassName = typeScope.getDeclaredTypeName();
 			if (isStatic(n.getModifiers())) {
-				Option<String> fullyQualifiedString = declaredClassName.getFullName(false);
+				Option<String> fullyQualifiedString = declaredClassName
+						.getFullName(false);
 				if (fullyQualifiedString.isEmpty()) {
-					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+					throw new JavascriptGenerationException(
+							context.getInputFile(), new SourcePosition(n),
 							"definition of static members of anonymous classes is not supported");
 				}
 				printer.print(fullyQualifiedString.getOrThrow());
@@ -82,12 +89,14 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 		}
 	}
 
-	private ConstructorDeclaration getConstructor(List<BodyDeclaration> members, GenerationContext arg) {
+	private ConstructorDeclaration getConstructor(
+			List<BodyDeclaration> members, GenerationContext arg) {
 		ConstructorDeclaration constr = null;
 		for (BodyDeclaration member : members) {
 			if (member instanceof ConstructorDeclaration) {
 				if (constr != null) {
-					throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(member),
+					throw new JavascriptGenerationException(arg.getInputFile(),
+							new SourcePosition(member),
 							"Only maximum one constructor is allowed");
 				} else {
 					constr = (ConstructorDeclaration) member;
@@ -98,7 +107,8 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 	}
 
 	@Override
-	public void visit(final ClassOrInterfaceDeclaration n, final GenerationContext arg) {
+	public void visit(final ClassOrInterfaceDeclaration n,
+			final GenerationContext arg) {
 		if (n.isInterface()) {
 			return;
 		}
@@ -113,7 +123,8 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 
 			if (n.getExtends() != null && n.getExtends().size() > 0) {
 				printer.printLn();
-				printer.printLn("stjs.extend(" + n.getName() + ", " + n.getExtends().get(0).getName() + ");");
+				printer.printLn("stjs.extend(" + n.getName() + ", "
+						+ n.getExtends().get(0).getName() + ");");
 			}
 			printMembers(n, arg);
 		}
