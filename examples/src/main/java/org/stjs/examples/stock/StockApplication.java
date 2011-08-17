@@ -33,7 +33,7 @@ public class StockApplication {
 	private Array<String> stocks = $array();
 
 	public StockApplication(String test) {
-		$("#test1y").text(test);
+		$("#test1").text(test);
 	}
 
 	public void init() {
