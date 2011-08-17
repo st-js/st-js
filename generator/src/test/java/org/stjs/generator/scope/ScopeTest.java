@@ -21,12 +21,14 @@ import static org.stjs.generator.scope.ScopeAssert.assertScope;
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.scope.QualifiedName.NameTypes;
@@ -118,7 +120,7 @@ public class ScopeTest {
 			resolveName("test/DeclarationWithOuter1.java");
 			fail("Expected " + JavascriptGenerationException.class);
 		} catch (JavascriptGenerationException ex) {
-			assertEquals(30, ex.getSourcePosition().getLine());
+			assertEquals(29, ex.getSourcePosition().getLine());
 			assertEquals(44, ex.getSourcePosition().getColumn());
 		}
 	}
