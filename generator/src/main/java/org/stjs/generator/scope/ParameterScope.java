@@ -53,21 +53,21 @@ public class ParameterScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		if (parameters.contains(name)) {
 			return new QualifiedName<IdentifierName>(this, false, NameTypes.VARIABLE);
 		}
 		if (getParent() != null) {
-			return getParent().resolveIdentifier(pos, name, currentScope);
+			return getParent().resolveIdentifier(pos, name, currentScope, visitor);
 		}
 		return null;
 	}
 
 	@Override
-	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 
 		if (getParent() != null) {
-			return getParent().resolveMethod(pos, name, currentScope);
+			return getParent().resolveMethod(pos, name, currentScope, visitor);
 		}
 		return null;
 	}
@@ -78,12 +78,12 @@ public class ParameterScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		if (typeParameters.contains(name)) {
 			return new QualifiedName<TypeName>(this, false, NameTypes.CLASS);
 		}
 		if (getParent() != null) {
-			return getParent().resolveType(pos, name, currentScope);
+			return getParent().resolveType(pos, name, currentScope, visitor);
 		}
 		return null;
 	}

@@ -2,6 +2,7 @@ package org.stjs.generator.scope.path;
 
 import org.stjs.generator.handlers.utils.Option;
 import org.stjs.generator.scope.ClassResolver;
+import org.stjs.generator.scope.NameResolverVisitor;
 import org.stjs.generator.scope.classloader.ClassWrapper;
 
 public class QualifiedPath {
@@ -115,7 +116,7 @@ public class QualifiedPath {
 	}
 
 	public static QualifiedMethodPath withMethod(String path,
-			ClassResolver scope) {
+			ClassResolver scope, NameResolverVisitor visitor) {
 		/*
 		 * The JLS states in section 7.1:
 		 * 
@@ -132,7 +133,7 @@ public class QualifiedPath {
 		String classAndPackageCandidate = classAndPackage;
 		String innerClassesName = null;
 		do {
-			if (scope.resolveClass(classAndPackageCandidate).isDefined()) {
+			if (scope.resolveClass(classAndPackageCandidate, visitor).isDefined()) {
 				String className = afterLastDot(classAndPackageCandidate);
 				String packageName = beforeLastDot(classAndPackageCandidate);
 				return new QualifiedMethodPath(packageName, className,

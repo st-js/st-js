@@ -36,10 +36,13 @@ import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.PrimitiveType;
 import japa.parser.ast.visitor.GenericVisitorAdapter;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
+
 import java.util.Collection;
 import java.util.Set;
+
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
+import org.stjs.generator.handlers.utils.Sets;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.NameType.TypeName;
@@ -55,6 +58,8 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 
 	private final NameScope rootScope;
 	private final Collection<String> allowedPackages;
+	private final Set<String> resolvedImports;
+
 
 	private final Set<String> allowedJavaLangClasses;
 
@@ -63,6 +68,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		this.rootScope = rootScope;
 		this.allowedPackages = allowedPackages;
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
+		this.resolvedImports = Sets.newHashSet();
 	}
 
 	public NameScope getRootScope() {
@@ -160,7 +166,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		}
 		// only for methods without a scope
 		SourcePosition pos = new SourcePosition(n);
-		QualifiedName<MethodName> qname = currentScope.getScope().resolveMethod(pos, name);
+		QualifiedName<MethodName> qname = currentScope.getScope().resolveMethod(pos, name, this);
 		if (qname != null) {
 			checkNonStaticAccessToOuterScope(currentScope, pos, qname);
 			n.setData(qname);
@@ -184,9 +190,9 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 	public void visit(FieldAccessExpr n, NameScopeWalker currentScope) {
 		SourcePosition pos = new SourcePosition(n);
 		// try to figure out if it's variable.field or Package.Class.field
-		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(pos, getFirstScope(n));
+		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(pos, getFirstScope(n), this);
 		if (qname == null) {
-			QualifiedName<TypeName> resolvedType = currentScope.getScope().resolveType(pos, getFirstScope(n));
+			QualifiedName<TypeName> resolvedType = currentScope.getScope().resolveType(pos, getFirstScope(n), this);
 			if (resolvedType != null) {
 				// no need to persist it
 				return;
@@ -194,7 +200,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		}
 		if (qname == null) {
 			checkImport(n, n.getScope().toString(), currentScope);
-			qname = currentScope.getScope().resolveIdentifier(pos, n.toString());
+			qname = currentScope.getScope().resolveIdentifier(pos, n.toString(), this);
 		}
 		if (qname != null) {
 			n.setData(qname);
@@ -242,7 +248,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 	@Override
 	public void visit(NameExpr n, NameScopeWalker currentScope) {
 		SourcePosition pos = new SourcePosition(n);
-		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(pos, n.getName());
+		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(pos, n.getName(), this);
 		if (qname != null) {
 			checkNonStaticAccessToOuterScope(currentScope, pos, qname);
 			n.setData(qname);
@@ -256,7 +262,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		StringBuilder fullName = new StringBuilder(n.getName());
 		if (n.getScope() == null) {
 			// not fully-specified classes
-			QualifiedName<TypeName> qname = currentScope.getScope().resolveType(pos, n.getName());
+			QualifiedName<TypeName> qname = currentScope.getScope().resolveType(pos, n.getName(), this);
 			if (qname != null) {
 
 				n.setData(qname);
@@ -280,5 +286,9 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 	@Override
 	public void visit(PrimitiveType n, NameScopeWalker currentScope) {
 		super.visit(n, currentScope);
+	}
+
+	public Set<String> getResolvedImports() {
+		return resolvedImports;
 	}
 }

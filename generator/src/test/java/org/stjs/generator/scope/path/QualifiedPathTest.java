@@ -3,10 +3,13 @@ package org.stjs.generator.scope.path;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.Test;
 import org.stjs.generator.handlers.utils.Option;
 import org.stjs.generator.scope.ClassResolver;
+import org.stjs.generator.scope.NameResolverVisitor;
 import org.stjs.generator.scope.classloader.ClassWrapper;
 import org.stjs.generator.scope.path.QualifiedPath.QualifiedMethodPath;
 
@@ -16,13 +19,13 @@ public class QualifiedPathTest {
 	public void resolvesSimpleCase() {
 		QualifiedMethodPath path = QualifiedPath.withMethod("MyClass.myMethod", new ClassResolver() {
 			@Override
-			public Option<ClassWrapper> resolveClass(String name) {
+			public Option<ClassWrapper> resolveClass(String name, NameResolverVisitor visitor) {
 				if ("MyClass".equals(name)) {
 					return Option.some(new ClassWrapper(null));
 				}
 				throw new AssertionError("not expected call");
 			}
-		});
+		}, null);
 		assertEquals("MyClass", path.getClassName(true));
 		assertEquals("myMethod", path.getMethodName());
 	}
@@ -31,10 +34,10 @@ public class QualifiedPathTest {
 	public void returnsNullPathIfItDoesNotExist() {
 		QualifiedMethodPath path = QualifiedPath.withMethod("MyClass.myMethod", new ClassResolver() {
 			@Override
-			public Option<ClassWrapper> resolveClass(String name) {
+			public Option<ClassWrapper> resolveClass(String name, NameResolverVisitor visitor) {
 				return Option.none();
 			}
-		});
+		}, null);
 		assertNull(path);
 	}
 
@@ -42,13 +45,13 @@ public class QualifiedPathTest {
 	public void resolvesWithPackage() {
 		QualifiedMethodPath path = QualifiedPath.withMethod("MyPackage.MyClass.myMethod", new ClassResolver() {
 			@Override
-			public Option<ClassWrapper> resolveClass(String name) {
+			public Option<ClassWrapper> resolveClass(String name, NameResolverVisitor visitor) {
 				if ("MyPackage.MyClass".equals(name)) {
 					return Option.some(new ClassWrapper(null));
 				}
 				return Option.none();
 			}
-		});
+		}, null);
 		assertEquals("MyPackage.MyClass", path.getClassName(true));
 		assertEquals("myMethod", path.getMethodName());
 	}
@@ -59,7 +62,7 @@ public class QualifiedPathTest {
 		QualifiedMethodPath path = QualifiedPath.withMethod("MyPackage.MyClass.MyInnerClass.myMethod",
 				new ClassResolver() {
 					@Override
-					public Option<ClassWrapper> resolveClass(String name) {
+					public Option<ClassWrapper> resolveClass(String name, NameResolverVisitor visitor) {
 						if ("MyPackage.MyClass".equals(name)) {
 							return Option.some(new ClassWrapper(null));
 						}
@@ -68,7 +71,7 @@ public class QualifiedPathTest {
 						}
 						return Option.none();
 					}
-				});
+				}, null);
 		assertTrue(hasTriedOuterClass.get());
 		assertEquals("MyPackage.MyClass.MyInnerClass", path.getClassName(true));
 		assertEquals("MyInnerClass", path.getInnerClassesName());

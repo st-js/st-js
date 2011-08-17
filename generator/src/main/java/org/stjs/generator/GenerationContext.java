@@ -16,7 +16,9 @@
 package org.stjs.generator;
 
 import japa.parser.ast.Node;
+
 import java.io.File;
+
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.QualifiedName;
@@ -33,6 +35,7 @@ public class GenerationContext {
 	private boolean skipHandlers = false;
 
 	private final File inputFile;
+	
 
 	public GenerationContext(File inputFile) {
 		this.inputFile = inputFile;

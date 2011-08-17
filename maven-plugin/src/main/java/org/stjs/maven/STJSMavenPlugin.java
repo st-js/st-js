@@ -180,8 +180,7 @@ public class STJSMavenPlugin extends AbstractMojo {
 						getLog().error("Cannot create output directory:" + absoluteTarget.getParentFile());
 						continue;
 					}
-					generator.generateJavascript(builtProjectClassLoader,
-							getClassForSource(builtProjectClassLoader, source.getPath()), absoluteSource,
+					generator.generateJavascript(builtProjectClassLoader, absoluteSource,
 							absoluteTarget, configBuilder.build());
 					
 					/*NodeJSExecutor executor = new NodeJSExecutor();
@@ -194,9 +193,6 @@ public class STJSMavenPlugin extends AbstractMojo {
 				    
 				} catch (InclusionScanException e) {
 					throw new MojoExecutionException("Cannot scan the source directory:" + e, e);
-				} catch (ClassNotFoundException e) {
-					throw new MojoExecutionException("Cannot find corresponding class for [" + source.getPath() + "]:"
-							+ e, e);
 				} catch (Exception e) {
 					getLog().error(e.toString());
 					throw new MojoExecutionException("Error generating javascript:" + e, e);

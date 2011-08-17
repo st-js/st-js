@@ -18,6 +18,7 @@ package org.stjs.generator.scope;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
@@ -67,30 +68,31 @@ abstract public class NameScope {
 		return name;
 	}
 
-	public QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name) {
-		return resolveMethod(pos, name, this);
+	public QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameResolverVisitor visitor) {
+		return resolveMethod(pos, name, this, visitor);
 	}
 
-	public QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name) {
-		return resolveIdentifier(pos, name, this);
+	public QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameResolverVisitor visitor) {
+		return resolveIdentifier(pos, name, this, visitor);
 	}
 
-	public QualifiedName<TypeName> resolveType(SourcePosition pos, String name) {
-		return resolveType(pos, name, this);
+	public QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameResolverVisitor visitor) {
+		return resolveType(pos, name, this, visitor);
 	}
 
 	/**
 	 * The subclasses should implement it.
-	 * 
 	 * @param name
+	 * @param visitor TODO
+	 * 
 	 * @return
 	 */
-	abstract protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope);
+	abstract protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor);
 
 	abstract protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name,
-			NameScope currentScope);
+			NameScope currentScope, NameResolverVisitor visitor);
 
-	abstract protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope);
+	abstract protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor);
 
 	public NameScope getParent() {
 		return parent;

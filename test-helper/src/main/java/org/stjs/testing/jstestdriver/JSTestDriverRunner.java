@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.LogManager;
+
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
@@ -15,6 +16,7 @@ import org.junit.runners.model.Statement;
 import org.kohsuke.args4j.CmdLineException;
 import org.stjs.testing.GeneratorWrapper;
 import org.stjs.testing.SourceFiles;
+
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Guice;
@@ -70,8 +72,8 @@ public class JSTestDriverRunner extends BlockJUnit4ClassRunner {
                 SourceFiles sourceFileAnnote = getTestClass().getJavaClass().getAnnotation(SourceFiles.class);
                 File srcFile = new GeneratorWrapper().generateCode(
                     getTestClass(),
-                    method,
-                    getSourceFiles(sourceFileAnnote));
+                    method);
+                
                   return Collections.singleton(new FileInfo(srcFile.getAbsolutePath(), System
                       .currentTimeMillis(), -1L, false, false, null, srcFile.getName()));
                 } catch (IOException e) {

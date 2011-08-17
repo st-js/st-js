@@ -44,18 +44,18 @@ public class VariableScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		if (variables.contains(name)) {
 			return new QualifiedName<IdentifierName>(this, false, NameTypes.VARIABLE);
 		}
 		if (getParent() != null) {
-			return getParent().resolveIdentifier(pos, name, currentScope);
+			return getParent().resolveIdentifier(pos, name, currentScope, visitor);
 		}
 		return null;
 	}
 
 	@Override
-	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		if (name.contains(".")) {
 			String receiverOrStaticClass = QualifiedPath.beforeFirstDot(name);
 			// it is ok to check even without knowing if the receiver is a class or a variable
@@ -65,15 +65,15 @@ public class VariableScope extends NameScope {
 			}
 		}
 		if (getParent() != null) {
-			return getParent().resolveMethod(pos, name, currentScope);
+			return getParent().resolveMethod(pos, name, currentScope, visitor);
 		}
 		return null;
 	}
 
 	@Override
-	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		if (getParent() != null) {
-			return getParent().resolveType(pos, name, currentScope);
+			return getParent().resolveType(pos, name, currentScope, visitor);
 		}
 		return null;
 	}

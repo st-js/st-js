@@ -18,6 +18,7 @@ package org.stjs.generator.scope;
 import static japa.parser.ast.body.ModifierSet.isStatic;
 import static org.stjs.generator.handlers.utils.Option.none;
 import static org.stjs.generator.scope.path.QualifiedPath.withField;
+
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.handlers.utils.Option;
 import org.stjs.generator.scope.NameType.IdentifierName;
@@ -88,38 +90,43 @@ public class ImportScope extends NameScope implements ClassResolver {
 	}
 
 	@Override
-	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		String imp = findImport(staticExactImports, name);
 		if (imp != null) {
-			Option<QualifiedName<MethodName>> qName = findMethodFromClassLoader(QualifiedPath.withMethod(imp, this));
+			QualifiedMethodPath path = QualifiedPath.withMethod(imp, this, visitor);
+			Option<QualifiedName<MethodName>> qName = findMethodFromClassLoader(path);
 			if (qName.isDefined()) {
+				visitor.getResolvedImports().add(path.getClassQualifiedName());
 				return qName.getOrThrow();
 			}
 		}
 
 		for (String staticImport : this.staticStarImports) {
-			Option<QualifiedName<MethodName>> qName = findMethodFromClassLoader(QualifiedPath.withMethod(staticImport,
-					this));
+			QualifiedMethodPath path = QualifiedPath.withMethod(staticImport,
+					this, visitor);
+			Option<QualifiedName<MethodName>> qName = findMethodFromClassLoader(path);
 			if (qName.isDefined()) {
+				visitor.getResolvedImports().add(path.getClassQualifiedName());
 				return qName.getOrThrow();
 			}
 		}
 
 		String maybeReceiverClass = QualifiedPath.beforeFirstDot(name);
 		if (maybeReceiverClass != null) {
-			QualifiedName<IdentifierName> receiverField = resolveIdentifier(pos, maybeReceiverClass);
+			QualifiedName<IdentifierName> receiverField = resolveIdentifier(pos, maybeReceiverClass, this, visitor);
 			if (receiverField != null) {
 				// the expression can be field.subfield.subfield.
 				// unless we want to do the full resolution, let's return something basic here and assume fields and
 				// method exist
 				boolean isStatic = false; // it is a non static method class (on a static field!)
+				visitor.getResolvedImports().add(maybeReceiverClass);
 				return new QualifiedName<NameType.MethodName>(this, isStatic, false, NameTypes.METHOD, receiverField
 						.getDefinitionPoint().getOrNull(), receiverField.isGlobal());
 			}
 		}
 
 		if (getParent() != null) {
-			return getParent().resolveMethod(pos, name, currentScope);
+			return getParent().resolveMethod(pos, name, currentScope, visitor);
 		}
 		return null;
 	}
@@ -137,7 +144,7 @@ public class ImportScope extends NameScope implements ClassResolver {
 	}
 
 	@Override
-	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		String imp = findImport(staticExactImports, name);
 		if (imp != null) {
 			QualifiedFieldPath path = withField(imp);
@@ -164,7 +171,7 @@ public class ImportScope extends NameScope implements ClassResolver {
 		// search in java.lang
 
 		if (getParent() != null) {
-			return getParent().resolveIdentifier(pos, name, currentScope);
+			return getParent().resolveIdentifier(pos, name, currentScope, visitor);
 		}
 		return null;
 	}
@@ -180,8 +187,9 @@ public class ImportScope extends NameScope implements ClassResolver {
 	}
 
 	@Override
-	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
-		for (ClassWrapper clazz : resolveClass(name)) {
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
+		for (ClassWrapper clazz : resolveClass(name, visitor)) {
+
 			return new QualifiedName<TypeName>(this, isStatic(clazz.getModifiers()), NameTypes.CLASS, new JavaTypeName(
 					clazz));
 		}
@@ -199,7 +207,7 @@ public class ImportScope extends NameScope implements ClassResolver {
 	 * @param parentClassName
 	 * @return
 	 */
-	public Option<ClassWrapper> resolveClass(String className) {
+	public Option<ClassWrapper> resolveClass(String className, NameResolverVisitor visitor) {
 		{
 			ClassWrapper resolvedClass = resolvedClasses.get(className);
 			if (resolvedClass != null) {
@@ -210,6 +218,7 @@ public class ImportScope extends NameScope implements ClassResolver {
 		// 1. try first full qualified
 		for (ClassWrapper resolvedClass : classLoader.loadClass(className)) {
 			resolvedClasses.put(className, resolvedClass);
+			visitor.getResolvedImports().add(resolvedClass.getName());
 			return Option.some(resolvedClass);
 		}
 
@@ -217,6 +226,7 @@ public class ImportScope extends NameScope implements ClassResolver {
 		if (currentPackage != null && currentPackage.length() > 0) {
 			for (ClassWrapper resolvedClass : classLoader.loadClass(currentPackage + "." + className)) {
 				resolvedClasses.put(className, resolvedClass);
+				visitor.getResolvedImports().add(resolvedClass.getName());
 				return Option.some(resolvedClass);
 			}
 		}
@@ -226,6 +236,7 @@ public class ImportScope extends NameScope implements ClassResolver {
 			if (imp.endsWith("." + className)) {
 				for (ClassWrapper resolvedClass : classLoader.loadClass(imp)) {
 					resolvedClasses.put(className, resolvedClass);
+					visitor.getResolvedImports().add(resolvedClass.getName());
 					return Option.some(resolvedClass);
 				}
 			}
@@ -234,6 +245,7 @@ public class ImportScope extends NameScope implements ClassResolver {
 		for (String imp : starImports) {
 			for (ClassWrapper resolvedClass : classLoader.loadClass(imp + "." + className)) {
 				resolvedClasses.put(className, resolvedClass);
+				visitor.getResolvedImports().add(resolvedClass.getName());
 				return Option.some(resolvedClass);
 			}
 		}
@@ -241,6 +253,7 @@ public class ImportScope extends NameScope implements ClassResolver {
 		// 5. try java.lang
 		for (ClassWrapper resolvedClass : classLoader.loadClass("java.lang." + className)) {
 			resolvedClasses.put(className, resolvedClass);
+			visitor.getResolvedImports().add(resolvedClass.getName());
 			return Option.some(resolvedClass);
 		}
 		return Option.none();

@@ -34,7 +34,7 @@ public class GeneratorTest {
 
 		Generator generator = new Generator();
 		File outputFile = new File("target/x.js");
-		generator.generateJavascript(Thread.currentThread().getContextClassLoader(), clazz, new File(sourceFile),
+		generator.generateJavascript(Thread.currentThread().getContextClassLoader(), new File(sourceFile),
 				outputFile, new GeneratorConfigurationBuilder().allowedPackage(clazz.getPackage().getName())
 						.allowedPackage("org.stjs.javascript").allowedPackage("org.w3c.dom.html").build());
 		NodeJSExecutor executor = new NodeJSExecutor();

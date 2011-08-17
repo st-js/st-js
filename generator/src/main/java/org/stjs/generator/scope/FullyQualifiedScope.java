@@ -19,6 +19,7 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.handlers.utils.Option;
 import org.stjs.generator.scope.NameType.IdentifierName;
@@ -48,11 +49,11 @@ public class FullyQualifiedScope extends NameScope implements ClassResolver {
 	}
 
 	@Override
-	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		if (name.contains(".")) {
-			QualifiedMethodPath path = QualifiedPath.withMethod(name, this);
+			QualifiedMethodPath path = QualifiedPath.withMethod(name, this, visitor);
 			if (path != null) {
-				for (ClassWrapper clazz : resolveClass(path.getClassQualifiedName())) {
+				for (ClassWrapper clazz : resolveClass(path.getClassQualifiedName(), visitor)) {
 					for (Method method : clazz.getDeclaredMethods()) {
 						if (method.getName().equals(path.getMethodName())) {
 							return new QualifiedName<NameType.MethodName>(this, true, NameTypes.METHOD,
@@ -66,11 +67,11 @@ public class FullyQualifiedScope extends NameScope implements ClassResolver {
 	}
 
 	@Override
-	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		QualifiedFieldPath path = QualifiedPath.withField(name);
 		String className = path.getClassQualifiedName();
 		if (className != null) {
-			for (ClassWrapper clazz : resolveClass(className)) {
+			for (ClassWrapper clazz : resolveClass(className, visitor)) {
 				if (clazz.hasDeclaredField(path.getFieldName())) {
 					return new QualifiedName<NameType.IdentifierName>(this, true, NameTypes.FIELD, new JavaTypeName(
 							clazz));
@@ -81,7 +82,7 @@ public class FullyQualifiedScope extends NameScope implements ClassResolver {
 	}
 
 	@Override
-	public Option<ClassWrapper> resolveClass(String className) {
+	public Option<ClassWrapper> resolveClass(String className, NameResolverVisitor visitor) {
 		{
 			Option<ClassWrapper> resolvedClass = resolvedClasses.get(className);
 			if (resolvedClass != null) {
@@ -90,12 +91,15 @@ public class FullyQualifiedScope extends NameScope implements ClassResolver {
 		}
 		Option<ClassWrapper> resolvedClass = classLoader.loadClass(className);
 		resolvedClasses.put(className, resolvedClass);
+		for (ClassWrapper resolvedClassE : resolvedClass) {
+			visitor.getResolvedImports().add(resolvedClassE.getName());
+		}
 		return resolvedClass;
 	}
 
 	@Override
-	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
-		for (ClassWrapper clazz : resolveClass(name)) {
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
+		for (ClassWrapper clazz : resolveClass(name, visitor)) {
 			return new QualifiedName<TypeName>(this, true, NameTypes.CLASS, new JavaTypeName(clazz));
 		}
 		return null;

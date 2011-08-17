@@ -74,7 +74,7 @@ public class TypeScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		if (instanceMethods.contains(name)) {
 			if (isInCurrentTypeScope(this, currentScope)) {
 				return new QualifiedName<MethodName>(this, false, NameTypes.METHOD, getDeclaredTypeName());
@@ -88,13 +88,13 @@ public class TypeScope extends NameScope {
 			return QualifiedName.<MethodName> outerScope(this, true, NameTypes.METHOD, getDeclaredTypeName());
 		}
 		if (getParent() != null) {
-			return getParent().resolveMethod(pos, name, currentScope);
+			return getParent().resolveMethod(pos, name, currentScope, visitor);
 		}
 		return null;
 	}
 
 	@Override
-	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		boolean accessingOuterScope = !isInCurrentTypeScope(this, currentScope);
 		NameTypes type = null;
 		boolean isStatic;
@@ -117,7 +117,7 @@ public class TypeScope extends NameScope {
 			isStatic = true;
 		} else {
 			if (getParent() != null) {
-				return getParent().resolveIdentifier(pos, name, currentScope);
+				return getParent().resolveIdentifier(pos, name, currentScope, visitor);
 			}
 			return null;
 		}
@@ -161,7 +161,7 @@ public class TypeScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		// TODO : do not check strings, but qualified names. Becaue OuterClass.InnerClass is === to InnerClass
 		if (staticInnerTypes.contains(name)) {
 			return createInnerTypeQualifiedName(pos, name, true);
@@ -173,7 +173,7 @@ public class TypeScope extends NameScope {
 			return new QualifiedName<TypeName>(this, false, NameTypes.GENERIC_TYPE);
 		}
 		if (getParent() != null) {
-			return getParent().resolveType(pos, name, currentScope);
+			return getParent().resolveType(pos, name, currentScope, visitor);
 		}
 		return null;
 	}

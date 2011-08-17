@@ -17,10 +17,12 @@ package org.stjs.generator.scope;
 
 import static japa.parser.ast.body.ModifierSet.isStatic;
 import static org.stjs.generator.handlers.utils.Lists.getOnlyElement;
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
@@ -57,9 +59,9 @@ public class ParentTypeScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		if (parentClass == null) {
-			parentClass = getImportScope(pos).resolveClass(parentClassName).getOrThrow(
+			parentClass = getImportScope(pos).resolveClass(parentClassName, visitor).getOrThrow(
 					new JavascriptGenerationException(getInputFile(), pos, "Cannot load class:" + parentClassName));
 		}
 
@@ -74,7 +76,7 @@ public class ParentTypeScope extends NameScope {
 					.getDeclaredTypeName());
 		}
 		if (getParent() != null) {
-			return getParent().resolveMethod(pos, name, currentScope);
+			return getParent().resolveMethod(pos, name, currentScope, visitor);
 		}
 		return null;
 	}
@@ -102,9 +104,9 @@ public class ParentTypeScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		if (parentClass == null) {
-			parentClass = getImportScope(pos).resolveClass(parentClassName).getOrThrow(
+			parentClass = getImportScope(pos).resolveClass(parentClassName, visitor).getOrThrow(
 					new JavascriptGenerationException(getInputFile(), pos, "Cannot load class:" + parentClassName));
 		}
 		Field field = getAccesibleField(parentClass, name);
@@ -118,7 +120,7 @@ public class ParentTypeScope extends NameScope {
 					.getDeclaredTypeName());
 		}
 		if (getParent() != null) {
-			return getParent().resolveIdentifier(pos, name, currentScope);
+			return getParent().resolveIdentifier(pos, name, currentScope, visitor);
 		}
 		return null;
 	}
@@ -145,9 +147,9 @@ public class ParentTypeScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope) {
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		if (getParent() != null) {
-			return getParent().resolveType(pos, name, currentScope);
+			return getParent().resolveType(pos, name, currentScope, visitor);
 		}
 		return null;
 	}
