@@ -84,15 +84,14 @@ public class ScopeTest {
 				.assertScopePath("root.import.parent-ParentDeclaration1.type-Declaration1.param-30");
 	}
 
-	@Test
 	public void fieldVsInnerClass() throws ParseException, IOException {
 		String fileName = "test/FieldsVsInnerClass.java";
 		CompilationUnit cu = compilationUnit(fileName);
 		resolveName2(cu, fileName);
-		assertScope(cu).line(13).column(5, 0).assertName("MyInnerClass")
+		assertScope(cu).line(13).column(9, 2).assertName("MyInnerClass")
 				.assertScopePath("root.import.type-FieldsVsInnerClass").assertType(NameTypes.FIELD);
 
-		assertScope(cu).line(14).column(5, 0).assertName("MyInnerClass2")
+		assertScope(cu).line(14).column(9, 2).assertName("MyInnerClass2")
 				.assertScopePath("root.import.type-FieldsVsInnerClass").assertType(NameTypes.CLASS);
 	}
 

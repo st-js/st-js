@@ -13,12 +13,19 @@
 		<module>generator</module>
 		<module>js-lib</module>
 		<module>maven-plugin</module>
-		<module>test-helper</module>
+		<!-- <module>test-helper</module> -->
 		<module>examples</module>
 	</modules>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<!-- Maven extensions versions -->
+		<wagon-webdav.version>1.0-beta-2</wagon-webdav.version>
+		<wagon-scm.version>1.0-beta-6</wagon-scm.version>
+		<maven-scm-manager-plexus.version>1.1</maven-scm-manager-plexus.version>
+		<maven-scm-provider-svnexe.version>1.1</maven-scm-provider-svnexe.version>
+
 	</properties>
 
 
@@ -43,6 +50,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
+
 	</build>
 
 	<pluginRepositories>
@@ -58,4 +66,28 @@
 			</releases>
 		</pluginRepository>
 	</pluginRepositories>
+
+	<scm>
+		<connection>scm:svn:https://st-js.svn.sourceforge.net/svnroot/st-js/trunk</connection>
+		<developerConnection>scm:svn:https://st-js.svn.sourceforge.net/svnroot/st-js/trunk</developerConnection>
+		<url>http://st-js.svn.sourceforge.net/viewvc/st-js</url>
+	</scm>
+
+	<distributionManagement>
+
+		<repository>
+			<id>st-js.server</id>
+			<name>SVN Sourceforge Release Repository</name>
+			<uniqueVersion>false</uniqueVersion>
+			<url>sftp://frs.sourceforge.net:/home/project-web/st-js/htdocs/repository/releases</url>
+		</repository>
+
+		<snapshotRepository>
+			<id>st-js.server</id>
+			<name>SVN Sourceforge Snapshot Repository</name>
+			<uniqueVersion>false</uniqueVersion>
+			<url>sftp://frs.sourceforge.net:/home/project-web/st-js/htdocs/repository/snapshots</url>			
+		</snapshotRepository>
+
+	</distributionManagement>
 </project>
