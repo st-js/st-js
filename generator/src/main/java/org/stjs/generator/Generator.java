@@ -15,6 +15,8 @@
  */
 package org.stjs.generator;
 
+import static org.stjs.generator.handlers.utils.Lists.append;
+import static org.stjs.generator.handlers.utils.Lists.newArrayList;
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
@@ -25,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Set;
 
 import org.stjs.generator.handlers.ClassOrInterfaceDeclarationHandler;
@@ -41,12 +44,14 @@ import org.stjs.generator.handlers.RuleBasedVisitor;
 import org.stjs.generator.handlers.SkipHandler;
 import org.stjs.generator.handlers.VariableDeclarationHandler;
 import org.stjs.generator.handlers.VariableTypeHandler;
+import org.stjs.generator.handlers.utils.Lists;
 import org.stjs.generator.scope.FullyQualifiedScope;
 import org.stjs.generator.scope.NameResolverVisitor;
 import org.stjs.generator.scope.NameScope;
 import org.stjs.generator.scope.NameScopeWalker;
 import org.stjs.generator.scope.ScopeVisitor;
 import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
+import org.stjs.generator.scope.path.QualifiedPath;
 
 public class Generator {
 
@@ -182,10 +187,10 @@ public class Generator {
 			GeneratorConfiguration configuration, boolean append)
 			throws JavascriptGenerationException {
 		FileWriter writer = null;
+		InputStream in = null;
 		try {
 			writer = new FileWriter(outputFile, append);
 
-			InputStream in;
 			try {
 				in = new FileInputStream(inputFile);
 			} catch (FileNotFoundException e) {
@@ -200,51 +205,51 @@ public class Generator {
 			NameScope rootScope = new FullyQualifiedScope(inputFile,
 					new ClassLoaderWrapper(builtProjectClassLoader));
 
+			CompilationUnit cu = null;
+			// parse the file
+			cu = JavaParser.parse(in);
+
 			// resolve all the calls to methods and variables
-			NameResolverVisitor resolver = new NameResolverVisitor(
-					rootScope, configuration.getAllowedPackages(),
-					configuration.getAllowedJavaLangClasses());
-			try {
-
-				CompilationUnit cu = null;
-				// parse the file
-				cu = JavaParser.parse(in);
-
-				// ASTUtils.dumpXML(cu);
-
-				// read the scope of all declared variables and methods
-				ScopeVisitor scopes = new ScopeVisitor(inputFile,
-						builtProjectClassLoader,
-						configuration.getAllowedPackages());
-				
-				scopes.visit(cu, rootScope);
-				
-				resolver.visit(cu, new NameScopeWalker(rootScope));
-
-				System.out.println("----------------------------");
-				ruleVisitor.generate(cu, context);
-
-				System.out.println("----------------------------");
-
-				writer.write(ruleVisitor.getSource());
-				writer.flush();
-			} catch (ParseException e) {
-				throw new JavascriptGenerationException(inputFile, null, e);
-			} catch (IOException e) {
-				throw new JavascriptGenerationException(inputFile, null, e);
-			} finally {
-				try {
-					in.close();
-				} catch (IOException e) {
-					// silent
-				}
+			Collection<String> allowedPackages = configuration
+					.getAllowedPackages();
+			if (cu.getPackage() != null
+					&& !cu.getPackage().getName().toString().isEmpty()) {
+				allowedPackages = append(newArrayList(allowedPackages), cu
+						.getPackage().getName().toString());
 			}
+			NameResolverVisitor resolver = new NameResolverVisitor(rootScope,
+					allowedPackages, configuration.getAllowedJavaLangClasses());
+
+			// ASTUtils.dumpXML(cu);
+
+			// read the scope of all declared variables and methods
+			ScopeVisitor scopes = new ScopeVisitor(inputFile,
+					builtProjectClassLoader, allowedPackages);
+
+			scopes.visit(cu, rootScope);
+
+			resolver.visit(cu, new NameScopeWalker(rootScope));
+
+			System.out.println("----------------------------");
+			ruleVisitor.generate(cu, context);
+
+			System.out.println("----------------------------");
+
+			writer.write(ruleVisitor.getSource());
+			writer.flush();
 			writer.close();
 			return resolver.getResolvedImports();
 		} catch (IOException e1) {
 			throw new RuntimeException("Could not open output file "
 					+ outputFile);
+		} catch (ParseException e) {
+			throw new RuntimeException(e);
 		} finally {
+			try {
+				in.close();
+			} catch (IOException e) {
+				// silent
+			}
 		}
 	}
 

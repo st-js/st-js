@@ -20,6 +20,7 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -86,5 +87,10 @@ public class Lists {
 
 	public static <T> LinkedList<T> newLinkedList() {
 		return new LinkedList<T>();
+	}
+
+	public static <T> List<T> append(List<T> coll,
+			T appendee) {
+		return union(coll, Collections.singletonList(appendee));
 	}
 }
