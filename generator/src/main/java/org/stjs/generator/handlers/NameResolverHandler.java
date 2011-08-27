@@ -45,7 +45,7 @@ public class NameResolverHandler extends DefaultHandler {
 	@Override
 	public void visit(final MethodCallExpr n, final GenerationContext context) {
 		QualifiedName<MethodName> qname = context.resolveMethod(n);
-		if (!specialMethodHandlers.handle(this, n, qname, context)) {
+		if (!specialMethodHandlers.handleMethodCall(this, n, qname, context)) {
 			if (qname != null) {
 				if (qname.isStatic()) {
 					printStaticFieldOrMethodAccessPrefix(n, context, qname);

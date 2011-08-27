@@ -17,26 +17,51 @@ package org.stjs.generator.handlers;
 
 import static org.stjs.generator.GeneratedScriptTester.handlerTester;
 import static org.stjs.generator.NodesFactory.bodyDeclarator;
+import static org.stjs.generator.NodesFactory.methodDeclaration;
 import static org.stjs.generator.NodesFactory.newClassOrIntefarceDeclaration;
+import static org.stjs.generator.NodesFactory.parameter;
+import static org.stjs.generator.scope.path.QualifiedPath.withClassName;
+import japa.parser.ast.body.MethodDeclaration;
+import japa.parser.ast.type.ClassOrInterfaceType;
+import japa.parser.ast.type.ReferenceType;
+import japa.parser.ast.type.VoidType;
 
-import org.junit.Ignore;
 import org.junit.Test;
+import org.stjs.generator.scope.JavaTypeName;
+import org.stjs.generator.scope.TypeScope;
+import org.stjs.generator.scope.path.QualifiedPath;
 
-@Ignore
 public class ClassOrInterfaceDeclarationHandlerTest {
 
 	@Test
 	public void shouldPrintNameWithMembers() throws Exception {
 		handlerTester(ClassOrInterfaceDeclarationHandler.class, true).assertGenerateString(
-				"functionName={arg1,arg2};",
-				newClassOrIntefarceDeclaration().withName("functionName").addBodyDeclaration(bodyDeclarator("arg1"))
-						.addBodyDeclaration(bodyDeclarator("arg2")).build());
+				"functionName=function(){}functionName.prototype.body1;functionName.prototype.body2;",
+				newClassOrIntefarceDeclaration().withName("functionName").addBodyDeclaration(bodyDeclarator("body1;"))
+						.addBodyDeclaration(bodyDeclarator("body2;")).build());
 	}
 
 	@Test
 	public void shouldHandleFunctionWiNoBody() throws Exception {
-		handlerTester(ClassOrInterfaceDeclarationHandler.class, true).assertGenerateString("functionName={};",
+		handlerTester(ClassOrInterfaceDeclarationHandler.class, true).assertGenerateString("functionName=function(){}",
 				newClassOrIntefarceDeclaration().withName("functionName").build());
+	}
+	
+	@Test
+	public void shouldAddMethodCallForMainMethods() throws Exception {
+		ReferenceType paramType = new ReferenceType(new ClassOrInterfaceType(
+				"String"), 1);
+		handlerTester(ClassOrInterfaceDeclarationHandler.class, true)
+			.doNotPropagateInnerNodesVisits()
+			.assertGenerateString(
+					"main=function(){}main.MyClass.main();",
+						newClassOrIntefarceDeclaration()
+						.withName("main")
+						.addBodyDeclaration(
+							methodDeclaration("main",new VoidType(),parameter("args", paramType)))
+						.withData(new TypeScope(null, null, new JavaTypeName(withClassName("MyClass")), null))
+						.build())
+			.assertVisitorCount(MethodDeclaration.class,1);
 	}
 
 }

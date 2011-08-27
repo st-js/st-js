@@ -18,21 +18,32 @@ package org.stjs.generator;
 import static java.util.Arrays.asList;
 import static org.stjs.generator.handlers.utils.Lists.transform;
 import static org.stjs.generator.handlers.utils.PreConditions.checkState;
+
+import java.util.Arrays;
+import java.util.Collections;
+
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.FieldDeclaration;
+import japa.parser.ast.body.MethodDeclaration;
+import japa.parser.ast.body.ModifierSet;
+import japa.parser.ast.body.Parameter;
 import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.body.VariableDeclaratorId;
 import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.FieldAccessExpr;
 import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.type.ReferenceType;
 import japa.parser.ast.type.Type;
 import japa.parser.ast.visitor.GenericVisitor;
 import japa.parser.ast.visitor.VoidVisitor;
+
+import org.stjs.generator.NodesFactory.PartialClassOrInterfaceDeclaration;
 import org.stjs.generator.handlers.RuleBasedVisitor;
 import org.stjs.generator.handlers.utils.Function;
 import org.stjs.generator.handlers.utils.Lists;
+import org.stjs.generator.scope.TypeScope;
 
 public class NodesFactory {
 
@@ -62,7 +73,15 @@ public class NodesFactory {
 
 		@Override
 		public ClassOrInterfaceDeclaration build() {
+			if (declaration.getMembers() == null) {
+				declaration.setMembers(Collections.<BodyDeclaration>emptyList());
+			}
 			return declaration;
+		}
+
+		public PartialClassOrInterfaceDeclaration withData(Object data) {
+			declaration.setData(data);
+			return this;
 		}
 
 	}
@@ -131,7 +150,7 @@ public class NodesFactory {
 
 			@Override
 			public <R, A> R accept(GenericVisitor<R, A> v, A arg) {
-				throw new AssertionError("Should not call accept");
+				return v.visit(new FieldDeclaration(), arg);
 			}
 
 			@Override
@@ -140,6 +159,10 @@ public class NodesFactory {
 			}
 		};
 
+	}
+	
+	public static MethodDeclaration methodDeclaration(String methodName, Type type, Parameter... parameters) {
+		return new MethodDeclaration(ModifierSet.STATIC, type, methodName, Arrays.asList(parameters));
 	}
 
 	public static VariableDeclarator variableDeclarator(String name) {
@@ -181,5 +204,9 @@ public class NodesFactory {
 
 	public static FieldAccessExpr fieldAccess(String instance, String field) {
 		return new FieldAccessExpr(nameExpr(instance), field);
+	}
+
+	public static Parameter parameter(String name, ReferenceType type) {
+		return new Parameter(type, new VariableDeclaratorId(name));
 	}
 }

@@ -27,7 +27,6 @@ import org.stjs.generator.node.js.NodeJSExecutor.ExecutionResult;
 
 import test.innerclasses.ClassUsingInnerClass;
 
-@Ignore
 public class GeneratorTest {
 
 	@Test

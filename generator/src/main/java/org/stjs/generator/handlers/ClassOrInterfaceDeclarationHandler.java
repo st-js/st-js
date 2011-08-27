@@ -22,6 +22,10 @@ import japa.parser.ast.body.ConstructorDeclaration;
 import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.body.ModifierSet;
+import japa.parser.ast.body.Parameter;
+import japa.parser.ast.type.ClassOrInterfaceType;
+import japa.parser.ast.type.ReferenceType;
+import japa.parser.ast.visitor.GenericVisitorAdapter;
 
 import java.util.List;
 
@@ -39,18 +43,20 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 	}
 
 	private int getModifiers(BodyDeclaration member) {
-
-		if (member instanceof FieldDeclaration) {
-			return ((FieldDeclaration) member).getModifiers();
-		}
-		if (member instanceof MethodDeclaration) {
-			return ((MethodDeclaration) member).getModifiers();
-		}
-		if (member instanceof ClassOrInterfaceDeclaration) {
-			return ((ClassOrInterfaceDeclaration) member).getModifiers();
-		}
-		throw new UnsupportedOperationException(
-				"Expected field, method or class");
+		return member.accept(new GenericVisitorAdapter<Integer, Object>() {
+			@Override
+			public Integer visit(FieldDeclaration member, Object n) {
+				return member.getModifiers();
+			}
+			@Override
+			public Integer visit(MethodDeclaration member, Object n) {
+				return member.getModifiers();
+			}
+			@Override
+			public Integer visit(ClassOrInterfaceDeclaration member, Object n) {
+				return member.getModifiers();
+			}
+		}, null);
 	}
 
 	private void printMembers(ClassOrInterfaceDeclaration n,
@@ -67,17 +73,8 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 					|| ModifierSet.isNative(memberModifiers)) {
 				continue;
 			}
-			TypeScope typeScope = (TypeScope) n.getData();
-			JavaTypeName declaredClassName = typeScope.getDeclaredTypeName();
 			if (isStatic(n.getModifiers())) {
-				Option<String> fullyQualifiedString = declaredClassName
-						.getFullName(false);
-				if (fullyQualifiedString.isEmpty()) {
-					throw new JavascriptGenerationException(
-							context.getInputFile(), new SourcePosition(n),
-							"definition of static members of anonymous classes is not supported");
-				}
-				printer.print(fullyQualifiedString.getOrThrow());
+				printStaticMembersPrefix(n, context);
 			} else {
 				printer.print(n.getName());
 			}
@@ -87,6 +84,20 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 			printer.print(".");
 			member.accept(getRuleVisitor(), context);
 		}
+	}
+
+	private void printStaticMembersPrefix(ClassOrInterfaceDeclaration n,
+			GenerationContext context) {
+		TypeScope typeScope = (TypeScope) n.getData();
+		JavaTypeName declaredClassName = typeScope.getDeclaredTypeName();
+		Option<String> fullyQualifiedString = declaredClassName
+				.getFullName(false);
+		if (fullyQualifiedString.isEmpty()) {
+			throw new JavascriptGenerationException(
+					context.getInputFile(), new SourcePosition(n),
+					"definition of static members of anonymous classes is not supported");
+		}
+		printer.print(fullyQualifiedString.getOrThrow());
 	}
 
 	private ConstructorDeclaration getConstructor(
@@ -127,7 +138,43 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 						+ n.getExtends().get(0).getName() + ");");
 			}
 			printMembers(n, arg);
+			printMainMethodCall(n, arg);
 		}
+	}
+
+	private void printMainMethodCall(ClassOrInterfaceDeclaration n,
+			GenerationContext context) {
+		List<BodyDeclaration> members = n.getMembers();
+		for (BodyDeclaration member : members) {
+			if (member instanceof MethodDeclaration) {
+				MethodDeclaration methodDeclaration = (MethodDeclaration) member;
+				if (isMainMethod(methodDeclaration)) {
+					printer.printLn();
+					printStaticMembersPrefix(n, context);
+					printer.print(".main();");
+				}
+			}
+		}
+	}
+
+	private boolean isMainMethod(MethodDeclaration methodDeclaration) {
+		boolean isMainMethod = false;
+		if (isStatic(methodDeclaration.getModifiers()) && "main".equals(methodDeclaration.getName())) {
+			List<Parameter> parameters = methodDeclaration.getParameters();
+			if (parameters != null && parameters.size() == 1) {
+				Parameter parameter = parameters.get(0);
+				if (parameter.getType() instanceof ReferenceType) {
+					ReferenceType refType = (ReferenceType) parameter.getType();
+					if (refType.getArrayCount() == 1 && refType.getType() instanceof ClassOrInterfaceType) {
+						String typeName = ((ClassOrInterfaceType)refType.getType()).getName();
+						if ("String".equals(typeName) || "java.lang.String".equals(typeName)) {
+							isMainMethod = true;
+						}
+					}
+				}
+			}
+		}
+		return isMainMethod;
 	}
 
 }

@@ -185,7 +185,7 @@ public class SpecialMethodHandlers {
 
 	}
 
-	public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+	public boolean handleMethodCall(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 			GenerationContext context) {
 
 		SpecialMethodHandler handler = methodHandlers.get(n.getName());
