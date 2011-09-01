@@ -35,14 +35,14 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery ajaxSuccess(AjaxHandler handler);
 
-	public FullJQuery load(String url, Map<String> data, AjaxHandler handler);
+	public FullJQuery load(String url, Map<String, String> data, AjaxHandler handler);
 
 	/************* effects ***************/
-	public FullJQuery animate(Map<String> properties);
+	public FullJQuery animate(Map<String, String> properties);
 
-	public FullJQuery animate(Map<String> properties, Object duration, String easing, Runnable complete);
+	public FullJQuery animate(Map<String, String> properties, Object duration, String easing, Runnable complete);
 
-	public FullJQuery animate(Map<String> properties, AnimateOptions options);
+	public FullJQuery animate(Map<String, String> properties, AnimateOptions options);
 
 	public FullJQuery clearQueue(String queueName);
 
@@ -78,7 +78,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery show(Object duration);
 
-  public FullJQuery show(Object duration, Runnable complete);
+	public FullJQuery show(Object duration, Runnable complete);
 
 	public FullJQuery show(Object duration, String easing, Runnable complete);
 
@@ -169,7 +169,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery css(String propertyName, Object value);
 
-	public FullJQuery css(Map<Object> propertyMap);
+	public FullJQuery css(Map<String, Object> propertyMap);
 
 	public int height();
 
@@ -208,7 +208,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery data(String key, Object value);
 
-	public FullJQuery data(Map<Object> map);
+	public FullJQuery data(Map<String, Object> map);
 
 	public FullJQuery removeData(String key);
 
@@ -217,9 +217,9 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 	/************* events ***************/
 	public FullJQuery bind(String eventType, EventHandler handler);
 
-	public FullJQuery bind(String eventType, Map<Object> eventData, EventHandler handler);
+	public FullJQuery bind(String eventType, Map<String, Object> eventData, EventHandler handler);
 
-	public FullJQuery bind(Map<EventHandler> handlers);
+	public FullJQuery bind(Map<String, EventHandler> handlers);
 
 	public FullJQuery blur(EventHandler handler);
 
@@ -239,15 +239,15 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery delegate(String selector, String eventType, EventHandler handler);
 
-	public FullJQuery delegate(String selector, String eventType, Map<Object> eventData, EventHandler handler);
+	public FullJQuery delegate(String selector, String eventType, Map<String, Object> eventData, EventHandler handler);
 
-	public FullJQuery delegate(String selector, Map<EventHandler> handlers);
+	public FullJQuery delegate(String selector, Map<String, EventHandler> handlers);
 
 	public FullJQuery die();
 
 	public FullJQuery die(String eventType);
 
-	public FullJQuery die(Map<EventHandler> handlers);
+	public FullJQuery die(Map<String, EventHandler> handlers);
 
 	public FullJQuery error(EventHandler handler);
 
@@ -273,9 +273,9 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery live(String eventType, EventHandler handler);
 
-	public FullJQuery live(String eventType, Map<Object> eventData, EventHandler handler);
+	public FullJQuery live(String eventType, Map<String, Object> eventData, EventHandler handler);
 
-	public FullJQuery live(Map<EventHandler> handlers);
+	public FullJQuery live(Map<String, EventHandler> handlers);
 
 	public FullJQuery load(EventHandler handler);
 
@@ -309,7 +309,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery one(String eventType, EventHandler handler);
 
-	public FullJQuery one(String eventType, Map<Object> eventData, EventHandler handler);
+	public FullJQuery one(String eventType, Map<String, Object> eventData, EventHandler handler);
 
 	public FullJQuery ready(EventHandler handler);
 
@@ -333,11 +333,11 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery trigger(String eventType);
 
-  public FullJQuery trigger(String eventType, Map<String> extraParams);
+	public FullJQuery trigger(String eventType, Map<String, String> extraParams);
 
 	public FullJQuery trigger(Event event);
 
-	public FullJQuery triggerHandler(String eventType, Map<String> extraParams);
+	public FullJQuery triggerHandler(String eventType, Map<String, String> extraParams);
 
 	public FullJQuery unbind();
 
@@ -351,9 +351,9 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery undelegate(String selector, String eventType, EventHandler handler);
 
-	public FullJQuery undelegate(String selector, String eventType, Map<Object> eventData, EventHandler handler);
+	public FullJQuery undelegate(String selector, String eventType, Map<String, Object> eventData, EventHandler handler);
 
-	public FullJQuery undelegate(String selector, Map<EventHandler> handlers);
+	public FullJQuery undelegate(String selector, Map<String, EventHandler> handlers);
 
 	public FullJQuery unload(EventHandler handler);
 
@@ -427,7 +427,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 	public FullJQuery replaceWith(JQuery<?> jq);
 
 	public FullJQuery text(String txt);
-	
+
 	public FullJQuery text(int txt);
 
 	public String text();

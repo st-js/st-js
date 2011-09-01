@@ -89,27 +89,27 @@ public class Global {
 		return null;
 	}
 
-	public static <V> Map<V> $map() {
+	public static <K, V> Map<K, V> $map() {
 		return null;
 	}
 
-	public static <V> Map<V> $map(String k1, V v1) {
+	public static <K, V> Map<K, V> $map(K k1, V v1) {
 		return null;
 	}
 
-	public static <V> Map<V> $map(String k1, V v1, String k2, V v2) {
+	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2) {
 		return null;
 	}
 
-	public static <V> Map<V> $map(String k1, V v1, String k2, V v2, String k3, V v3) {
+	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3) {
 		return null;
 	}
 
-	public static <V> Map<V> $map(String k1, V v1, String k2, V v2, String k3, V v3, String k4, V v4) {
+	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
 		return null;
 	}
 
-	public static <V> Map<V> $map(String k1, V v1, String k2, V v2, String k3, V v3, String k4, V v4, String k5, V v5) {
+	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {
 		return null;
 	}
 

@@ -30,13 +30,6 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<!-- for the javascript files -->
-		<dependency>
-			<groupId>org.stjs</groupId>
-			<artifactId>js-lib</artifactId>
-			<type>war</type>
-			<version>${project.version}</version>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -120,6 +113,6 @@
 					</plugin>
 				</plugins>
 			</build>
-		</profile>		
+		</profile>
 	</profiles>
 </project>

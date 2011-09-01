@@ -16,16 +16,19 @@
 package org.stjs.javascript;
 
 /**
- * This interface represents a normal object in javascript (that acts as a map). The key is always a String. The value may be typed. The
- * iteration is done on the keys to have the javascript equivalent of <br>
+ * This interface represents a normal object in javascript (that acts as a map). The key can be any object type. But be
+ * aware that in Javascript the check is done using the <b>toString</b> method!. So it's mandatory to define the
+ * toString method when you use a complex type.The iteration is done on the keys to have the javascript equivalent of <br>
+ * 
  * <b>for(var key in map)</b> <br>
- * The methods are prefixed with $ to let the generator know that is should generate braket access instead, i.e <br>
+ * The methods are prefixed with $ to let the generator know that is should generate bracket access instead, i.e <br>
  * map.$get(key) => map[key] <br>
  * map.$put(key, value) => map[key]=value
+ * 
  * @author acraciun
  */
-public interface Map<V> extends Iterable<String> {
-	public V $get(String key);
+public interface Map<K, V> extends Iterable<K> {
+	public V $get(K key);
 
-	public void $put(String key, V value);
+	public void $put(K key, V value);
 }

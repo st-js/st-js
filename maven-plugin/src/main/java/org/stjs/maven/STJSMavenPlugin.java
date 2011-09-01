@@ -180,17 +180,16 @@ public class STJSMavenPlugin extends AbstractMojo {
 						getLog().error("Cannot create output directory:" + absoluteTarget.getParentFile());
 						continue;
 					}
-					generator.generateJavascript(builtProjectClassLoader, absoluteSource,
-							absoluteTarget, configBuilder.build());
-					
-					/*NodeJSExecutor executor = new NodeJSExecutor();
-				    ExecutionResult execution = executor.run(absoluteTarget);
-				    if (execution.getExitValue() == 0) {
-				      getLog().info("NodeJS execution sucessfull");			      
-				    } else {
-				      getLog().error("Error in NodeJS execution "+execution.getStdOut()+execution.getStdErr());
-				    }*/
-				    
+					generator.generateJavascript(builtProjectClassLoader, absoluteSource, absoluteTarget,
+							configBuilder.build());
+
+					/*
+					 * NodeJSExecutor executor = new NodeJSExecutor(); ExecutionResult execution =
+					 * executor.run(absoluteTarget); if (execution.getExitValue() == 0) {
+					 * getLog().info("NodeJS execution sucessfull"); } else {
+					 * getLog().error("Error in NodeJS execution "+execution.getStdOut()+execution.getStdErr()); }
+					 */
+
 				} catch (InclusionScanException e) {
 					throw new MojoExecutionException("Cannot scan the source directory:" + e, e);
 				} catch (Exception e) {
@@ -199,6 +198,9 @@ public class STJSMavenPlugin extends AbstractMojo {
 				}
 			}
 		}
+
+		// copy the javascript support
+		generator.copyJavascriptSupport(generatedSourcesDirectory);
 	}
 
 	private String maximumCommonPackage(String p1, String p2) {

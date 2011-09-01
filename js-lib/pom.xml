@@ -3,9 +3,8 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.stjs</groupId>
 	<artifactId>js-lib</artifactId>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>Strongly-typed Javascript:Javascript Library</name>
 
 	<parent>

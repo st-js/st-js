@@ -102,7 +102,7 @@ public class DatePickerOptions<FullJQuery extends JQuery<?>> {
 
 	public String showOn = "focus";
 
-	public Map<Object> showOptions;// = {}
+	public Map<String, Object> showOptions;// = {}
 
 	public boolean showOtherMonths = false;
 
