@@ -15,6 +15,21 @@
  */
 package org.stjs.javascript.jquery;
 
-public interface SuccessListener {
-	public void onSuccess(Object data);
+import org.stjs.javascript.Array;
+import org.stjs.javascript.JsFunction;
+
+public abstract class SuccessListener implements JsFunction<Void> {
+	public abstract void onSuccess(Object data);
+	@Override
+	public Void $invoke(Object... args) {
+		return null;
+	}
+	@Override
+	public Void apply(Object receiver, Array<?> args) {
+		return null;
+	}
+	@Override
+	public Void call(Object receiver, Object... args) {
+		return null;
+	}
 }

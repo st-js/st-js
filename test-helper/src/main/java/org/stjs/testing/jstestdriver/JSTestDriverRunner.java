@@ -15,6 +15,7 @@ import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 import org.kohsuke.args4j.CmdLineException;
 import org.stjs.testing.GeneratorWrapper;
+import org.stjs.testing.HTMLFixture;
 import org.stjs.testing.SourceFiles;
 
 import com.google.common.collect.Lists;
@@ -64,18 +65,21 @@ public class JSTestDriverRunner extends BlockJUnit4ClassRunner {
           List<Module> pluginModules = pluginLoader.load(cmdLinePlugins);
           List<Module> initializeModules = Lists.newLinkedList(pluginModules);
 
-          Configuration userConfig = cmdLineFlags.getConfigurationSource().parse(cmdLineFlags.getBasePath(), new YamlParser());
+          final Configuration userConfig = cmdLineFlags.getConfigurationSource().parse(cmdLineFlags.getBasePath(), new YamlParser());
+         
           Configuration configuration = new DelegatingConfiguration(userConfig) {
             @Override
             public Set<FileInfo> getFilesList() {
               try {
+            	  Set<FileInfo> filesList = userConfig.getFilesList();
                 SourceFiles sourceFileAnnote = getTestClass().getJavaClass().getAnnotation(SourceFiles.class);
                 File srcFile = new GeneratorWrapper().generateCode(
                     getTestClass(),
                     method);
                 
-                  return Collections.singleton(new FileInfo(srcFile.getAbsolutePath(), System
-                      .currentTimeMillis(), -1L, false, false, null, srcFile.getName()));
+                filesList.add(new FileInfo(srcFile.getAbsolutePath(), System
+                        .currentTimeMillis(), -1L, false, false, null, srcFile.getName()));
+                 return filesList;
                 } catch (IOException e) {
                 throw new RuntimeException(e);
               } catch (AssertionError e) {
@@ -110,6 +114,7 @@ public class JSTestDriverRunner extends BlockJUnit4ClassRunner {
                * }
                * 
                */
+              final HTMLFixture htmlFixture = getTestClass().getJavaClass().getAnnotation(HTMLFixture.class);
               try {
                 File outputFile = File.createTempFile(getTestClass().getJavaClass().getName()+"_js_test_driver_adapter", ".js");
                 FileWriter writer = new FileWriter(outputFile);
@@ -121,8 +126,11 @@ public class JSTestDriverRunner extends BlockJUnit4ClassRunner {
                 final String jsObjectName = testedClassName+"Adapter";
                 final String methodName = "test"+method.getName();
                 writer.append(jsObjectName+" = TestCase('"+jsObjectName+"');\n"+
-                    jsObjectName+".prototype."+methodName+"= function() {" +
-                    "new "+testedClassName+"()."+method.getName()+"();};");
+                    jsObjectName+".prototype."+methodName+"= function() {");
+                if (htmlFixture != null) {
+                	writer.append("\n/*:DOC +="+htmlFixture.value()+"*/\n");
+                }
+                writer.append("new "+testedClassName+"()."+method.getName()+"();};");
                 writer.flush();
                 writer.close();
                 // TODO : WTF is the FileIno used for?

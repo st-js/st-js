@@ -21,8 +21,9 @@ public abstract class EvtHandler implements EventHandler{
   HTMLElement THIS;
   public abstract void onEvent(Event ev);
 	@Override
-  public void onEvent(Event ev, HTMLElement THIS) {
+  public boolean onEvent(Event ev, HTMLElement THIS) {
 	  this.THIS = THIS;
 	  onEvent(ev);
+	  return false;
 	}
 }

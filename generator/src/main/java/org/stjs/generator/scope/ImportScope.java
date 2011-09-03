@@ -119,7 +119,10 @@ public class ImportScope extends NameScope implements ClassResolver {
 				// unless we want to do the full resolution, let's return something basic here and assume fields and
 				// method exist
 				boolean isStatic = false; // it is a non static method class (on a static field!)
-				visitor.getResolvedImports().add(maybeReceiverClass);
+				for (ClassWrapper loadedClass : classLoader.loadClass(maybeReceiverClass)) {
+					visitor.getResolvedImports().add(loadedClass.getName());
+				}
+				
 				return new QualifiedName<NameType.MethodName>(this, isStatic, false, NameTypes.METHOD, receiverField
 						.getDefinitionPoint().getOrNull(), receiverField.isGlobal());
 			}

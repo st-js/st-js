@@ -27,11 +27,11 @@ import org.stjs.generator.node.js.NodeJSExecutor.ExecutionResult;
 
 import test.innerclasses.ClassUsingInnerClass;
 
-public class GeneratorTest {
+public class GeneratorDebugHelper {
 
 	@Test
 	public void testGenerator() throws ParseException, IOException {
-		generate("src/test/java/test/innerclasses/ClassUsingInnerClass.java", ClassUsingInnerClass.class);
+		generate("src/test/java/org/stjs/examples/stock/StockApplication.java", ClassUsingInnerClass.class);
 	}
 
 	private void generate(String sourceFile, Class<?> clazz) throws ParseException, IOException {

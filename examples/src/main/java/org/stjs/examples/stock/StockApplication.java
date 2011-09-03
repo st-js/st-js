@@ -16,24 +16,37 @@
 package org.stjs.examples.stock;
 
 import static org.stjs.javascript.Global.$array;
+import static org.stjs.javascript.Global.parseFloat;
 import static org.stjs.javascript.Global.setInterval;
+import static org.stjs.javascript.Global.window;
 import static org.stjs.javascript.JSNumberAdapter.toFixed;
 import static org.stjs.javascript.jquery.GlobalJQuery.$;
 
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;
 import org.stjs.javascript.dom.HTMLElement;
-import org.stjs.javascript.jquery.AjaxParams;
 import org.stjs.javascript.jquery.Event;
 import org.stjs.javascript.jquery.EventHandler;
+import org.stjs.javascript.jquery.EvtHandler;
 import org.stjs.javascript.jquery.JQuery;
 import org.stjs.javascript.jquery.SuccessListener;
 
 public class StockApplication {
 	private Array<String> stocks = $array();
-
-	public StockApplication(String test) {
-		$("#test1").text(test);
+	private QuoteProvider quoteProvider;
+	
+	public StockApplication(QuoteProvider quoteProvider) {
+		this.quoteProvider = quoteProvider;
+	}
+	
+	public static void main(String[] args) {
+		$(window).ready(new EvtHandler() {
+			
+			@Override
+			public void onEvent(Event ev) {
+				new StockApplication(new YahooQuoteProvider()).init();
+			}
+		});
 	}
 
 	public void init() {
@@ -41,15 +54,17 @@ public class StockApplication {
 		// add stock
 		$("#form").submit(new EventHandler() {
 			@Override
-			public void onEvent(Event ev, final HTMLElement THIS) {
-				that.updateStock($("#newStock").val(), new SuccessListener() {
+			public boolean onEvent(Event ev, final HTMLElement THIS) {
+				that.quoteProvider.updateStock($("#newStock").val(), new SuccessListener() {
 					@Override
 					public void onSuccess(Object data) {
-						StockData stockData = (StockData) data;
-						$(that.generateRow(stockData)).appendTo("table tbody");
-						that.stocks.push(stockData.stock);
+						Response response = (Response) data;
+						Quote quote = response.query.results.quote;
+						$(that.generateRow(quote)).appendTo("table tbody");
+						that.stocks.push(quote.symbol);
 					}
 				});
+				return false;
 
 			}
 		});
@@ -57,12 +72,12 @@ public class StockApplication {
 		// the remove stock listener
 		$(".removeStock").live("click", new EventHandler() {
 			@Override
-			public void onEvent(Event ev, final HTMLElement THIS) {
+			public boolean onEvent(Event ev, final HTMLElement THIS) {
 				JQuery<?> $tr = $(THIS).parents("tr");
 				int index = $tr.parent().find("tr").index($tr);
 				that.stocks.splice(index);
 				$tr.remove();
-
+				return false;
 			}
 		});
 
@@ -71,15 +86,20 @@ public class StockApplication {
 			@Override
 			public void run() {
 				for (int i : that.stocks) {
-					that.updateStock(that.stocks.$get(i), new SuccessListener() {
-						@Override
-						public void onSuccess(Object data) {
-							StockData stockData = (StockData) data;
-							$("table tbody tr:nth(" + that.getRowForStock(stockData.stock) + ")").replaceWith(
-									that.generateRow(stockData));
-							$("#timestamp").text(new Date().toString());
-						}
-					});
+					that.quoteProvider.updateStock(that.stocks.$get(i),
+							new SuccessListener() {
+								@Override
+								public void onSuccess(Object data) {
+									Response response = (Response) data;
+									Quote quote = response.query.results.quote;
+									$(
+											"table tbody tr:nth("
+													+ that.getRowForStock(quote.symbol)
+													+ ")").replaceWith(
+											that.generateRow(quote));
+									$("#timestamp").text(new Date().toString());
+								}
+							});
 				}
 			}
 		}, 5000);
@@ -94,24 +114,18 @@ public class StockApplication {
 		return -1;
 	}
 
-	private void updateStock(final Object stock, final SuccessListener listener) {
-		$.ajax(new AjaxParams() {
-			{
-				url = "/stjs/stock/stock.jsp?stock=" + stock;
-				dataType = "json";
-				success = listener;
-			}
-		});
-	}
 
-	private String generateRow(StockData stockData) {
+	private String generateRow(Quote quote) {
+		double last = parseFloat(quote.LastTradePriceOnly);
+		double close = parseFloat(quote.PreviousClose);
 		String tr = "<tr>";
-		tr += "<td>" + stockData.stock + "</td>";
-		String color = stockData.last >= stockData.close ? "red" : "green";
-		tr += "<td style='color:" + color + "'>" + toFixed(stockData.last, 2) + "</td>";
-		double change = (stockData.last - stockData.close);
-		double changePercent = change / stockData.close;
-		tr += "<td style='color:" + color + "'>" + toFixed(change, 2) + "(" + toFixed(changePercent, 2) + "%)</td>";
+		tr += "<td>" + quote.symbol + "</td>";
+		String color = last >= close ? "red" : "green";
+		tr += "<td style='color:" + color + "'>" + toFixed(last, 2) + "</td>";
+		double change = (last - close);
+		double changePercent = change / close;
+		tr += "<td style='color:" + color + "'>" + toFixed(change, 2) + "("
+				+ toFixed(changePercent, 2) + "%)</td>";
 		tr += "<td><button class='removeStock'>Remove</button></td>";
 		tr += "</tr>";
 		return tr;
@@ -124,4 +138,23 @@ public class StockApplication {
 	public void test3(String n) {
 		$("#test3").text(n);
 	}
+
+	static class Response {
+		Query query;
+	}
+
+	static class Query {
+		Results results;
+	}
+
+	static class Results {
+		Quote quote;
+	}
+
+	static class Quote {
+		String LastTradePriceOnly;
+		String PreviousClose;
+		String symbol;
+	}
+
 }
