@@ -44,11 +44,11 @@ import org.stjs.generator.handlers.RuleBasedVisitor;
 import org.stjs.generator.handlers.SkipHandler;
 import org.stjs.generator.handlers.VariableDeclarationHandler;
 import org.stjs.generator.handlers.VariableTypeHandler;
+import org.stjs.generator.scope.DeclarationVisitor;
 import org.stjs.generator.scope.FullyQualifiedScope;
 import org.stjs.generator.scope.NameResolverVisitor;
 import org.stjs.generator.scope.NameScope;
 import org.stjs.generator.scope.NameScopeWalker;
-import org.stjs.generator.scope.ScopeVisitor;
 import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
 
 import com.google.common.io.Files;
@@ -175,15 +175,16 @@ public class Generator {
 			if (cu.getPackage() != null && !cu.getPackage().getName().toString().isEmpty()) {
 				allowedPackages = append(newArrayList(allowedPackages), cu.getPackage().getName().toString());
 			}
-			NameResolverVisitor resolver = new NameResolverVisitor(rootScope, allowedPackages,
-					configuration.getAllowedJavaLangClasses());
 
 			// ASTUtils.dumpXML(cu);
 
 			// read the scope of all declared variables and methods
-			ScopeVisitor scopes = new ScopeVisitor(inputFile, builtProjectClassLoader, allowedPackages);
-
+			DeclarationVisitor scopes = new DeclarationVisitor(inputFile, builtProjectClassLoader, allowedPackages);
 			scopes.visit(cu, rootScope);
+			// rootScope.dump(" ");
+
+			NameResolverVisitor resolver = new NameResolverVisitor(rootScope, allowedPackages,
+					configuration.getAllowedJavaLangClasses());
 
 			resolver.visit(cu, new NameScopeWalker(rootScope));
 
@@ -202,7 +203,9 @@ public class Generator {
 			throw new RuntimeException(e);
 		} finally {
 			try {
-				in.close();
+				if (in != null) {
+					in.close();
+				}
 			} catch (IOException e) {
 				// silent
 			}

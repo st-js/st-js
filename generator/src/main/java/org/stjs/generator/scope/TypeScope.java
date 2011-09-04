@@ -18,12 +18,14 @@ package org.stjs.generator.scope;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.NameType.TypeName;
 import org.stjs.generator.scope.QualifiedName.NameTypes;
+import org.stjs.generator.scope.path.QualifiedPath;
 
 /**
  * This scope is for a class definition. It contains the name of the fields and methods
@@ -32,7 +34,7 @@ import org.stjs.generator.scope.QualifiedName.NameTypes;
  * 
  */
 public class TypeScope extends NameScope {
-
+	private static final String SUPER = "super";
 	private final Set<String> staticFields = new HashSet<String>();
 	private final Set<String> staticMethods = new HashSet<String>();
 	private final Set<String> staticInnerTypes = new HashSet<String>();
@@ -74,7 +76,18 @@ public class TypeScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
+	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String fullName, NameScope currentScope,
+			NameResolverVisitor visitor) {
+		String name = QualifiedPath.afterLastDot(fullName);
+		String scopePath = QualifiedPath.beforeLastDot(fullName);
+
+		if (SUPER.equals(scopePath) && isInCurrentTypeScope(this, currentScope)) {// go directly to the parent
+			if (getParent() != null) {
+				return getParent().resolveMethod(pos, name, currentScope, visitor);
+			}
+			return null;
+		}
+
 		if (instanceMethods.contains(name)) {
 			if (isInCurrentTypeScope(this, currentScope)) {
 				return new QualifiedName<MethodName>(this, false, NameTypes.METHOD, getDeclaredTypeName());
@@ -94,7 +107,8 @@ public class TypeScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope,
+			NameResolverVisitor visitor) {
 		boolean accessingOuterScope = !isInCurrentTypeScope(this, currentScope);
 		NameTypes type = null;
 		boolean isStatic;
@@ -161,7 +175,8 @@ public class TypeScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope,
+			NameResolverVisitor visitor) {
 		// TODO : do not check strings, but qualified names. Becaue OuterClass.InnerClass is === to InnerClass
 		if (staticInnerTypes.contains(name)) {
 			return createInnerTypeQualifiedName(pos, name, true);

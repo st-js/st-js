@@ -13,9 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.stjs.generator;
 
 import java.io.File;
+
+import org.stjs.generator.Generator;
+import org.stjs.generator.GeneratorConfigurationBuilder;
 
 public class MyGenerator {
 	public static void main(String[] args) {
@@ -26,7 +28,7 @@ public class MyGenerator {
 
 		gen.generateJavascript(Thread.currentThread().getContextClassLoader(), new File(
 				"src/main/java/org/stjs/examples/stock/StockApplication.java"), new File("target/Declaration1.js"),
-				new GeneratorConfigurationBuilder().allowedPackage("test").build());
+				new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript").build());
 
 		// gen.generateJavascript(Thread.currentThread().getContextClassLoader(), new File(
 		// "src/test/java/test/Base1.java"), new File("target/Base1.js"), new GeneratorConfigurationBuilder()

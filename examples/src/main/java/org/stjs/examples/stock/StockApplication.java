@@ -34,17 +34,17 @@ import org.stjs.javascript.jquery.SuccessListener;
 public class StockApplication {
 	private Array<String> stocks = $array();
 	private QuoteProvider quoteProvider;
-	
+
 	public StockApplication(QuoteProvider quoteProvider) {
 		this.quoteProvider = quoteProvider;
 	}
-	
+
 	public static void main(String[] args) {
 		$(window).ready(new EvtHandler() {
-			
 			@Override
 			public void onEvent(Event ev) {
-				new StockApplication(new YahooQuoteProvider()).init();
+				StockApplication a = new StockApplication(new YahooQuoteProvider());
+				a.init();
 			}
 		});
 	}
@@ -86,20 +86,16 @@ public class StockApplication {
 			@Override
 			public void run() {
 				for (int i : that.stocks) {
-					that.quoteProvider.updateStock(that.stocks.$get(i),
-							new SuccessListener() {
-								@Override
-								public void onSuccess(Object data) {
-									Response response = (Response) data;
-									Quote quote = response.query.results.quote;
-									$(
-											"table tbody tr:nth("
-													+ that.getRowForStock(quote.symbol)
-													+ ")").replaceWith(
-											that.generateRow(quote));
-									$("#timestamp").text(new Date().toString());
-								}
-							});
+					that.quoteProvider.updateStock(that.stocks.$get(i), new SuccessListener() {
+						@Override
+						public void onSuccess(Object data) {
+							Response response = (Response) data;
+							Quote quote = response.query.results.quote;
+							$("table tbody tr:nth(" + that.getRowForStock(quote.symbol) + ")").replaceWith(
+									that.generateRow(quote));
+							$("#timestamp").text(new Date().toString());
+						}
+					});
 				}
 			}
 		}, 5000);
@@ -114,7 +110,6 @@ public class StockApplication {
 		return -1;
 	}
 
-
 	private String generateRow(Quote quote) {
 		double last = parseFloat(quote.LastTradePriceOnly);
 		double close = parseFloat(quote.PreviousClose);
@@ -124,8 +119,7 @@ public class StockApplication {
 		tr += "<td style='color:" + color + "'>" + toFixed(last, 2) + "</td>";
 		double change = (last - close);
 		double changePercent = change / close;
-		tr += "<td style='color:" + color + "'>" + toFixed(change, 2) + "("
-				+ toFixed(changePercent, 2) + "%)</td>";
+		tr += "<td style='color:" + color + "'>" + toFixed(change, 2) + "(" + toFixed(changePercent, 2) + "%)</td>";
 		tr += "<td><button class='removeStock'>Remove</button></td>";
 		tr += "</tr>";
 		return tr;

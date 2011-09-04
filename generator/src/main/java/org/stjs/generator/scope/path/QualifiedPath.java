@@ -45,8 +45,7 @@ public class QualifiedPath {
 		private final String method;
 		private final String innerClassesName;
 
-		public QualifiedMethodPath(String packag, String clazz,
-				String innerClassesName, String methodName) {
+		public QualifiedMethodPath(String packag, String clazz, String innerClassesName, String methodName) {
 			super(packag, clazz);
 			this.innerClassesName = innerClassesName;
 			this.method = methodName;
@@ -93,6 +92,17 @@ public class QualifiedPath {
 		return str;
 	}
 
+	public static String afterFirstDot(String str) {
+		if (str == null) {
+			return null;
+		}
+		int firstIndex = str.indexOf(".");
+		if (firstIndex >= 0) {
+			return str.substring(firstIndex + 1);
+		}
+		return str;
+	}
+
 	public static String beforeLastDot(String str) {
 		if (str == null) {
 			return null;
@@ -115,18 +125,16 @@ public class QualifiedPath {
 		return null;
 	}
 
-	public static QualifiedMethodPath withMethod(String path,
-			ClassResolver scope, NameResolverVisitor visitor) {
+	public static QualifiedMethodPath withMethod(String path, ClassResolver scope, NameResolverVisitor visitor) {
 		/*
 		 * The JLS states in section 7.1:
 		 * 
-		 * "A package may not contain a type declaration and a subpackage of the
-		 * same name, or a compile-time error results.
+		 * "A package may not contain a type declaration and a subpackage of the same name, or a compile-time error
+		 * results.
 		 * 
 		 * This implies that an expression such as :
 		 * 
-		 * a.b.c() may refer to class b within package a, or innerclass b within
-		 * class a, but not both.
+		 * a.b.c() may refer to class b within package a, or innerclass b within class a, but not both.
 		 */
 		String methodName = afterLastDot(path);
 		String classAndPackage = beforeLastDot(path);
@@ -136,8 +144,7 @@ public class QualifiedPath {
 			if (scope.resolveClass(classAndPackageCandidate, visitor).isDefined()) {
 				String className = afterLastDot(classAndPackageCandidate);
 				String packageName = beforeLastDot(classAndPackageCandidate);
-				return new QualifiedMethodPath(packageName, className,
-						innerClassesName, methodName);
+				return new QualifiedMethodPath(packageName, className, innerClassesName, methodName);
 			}
 			innerClassesName = afterLastDot(classAndPackageCandidate);
 			classAndPackageCandidate = beforeLastDot(classAndPackageCandidate);
@@ -161,8 +168,7 @@ public class QualifiedPath {
 
 	public static QualifiedPath withClass(ClassWrapper clazz) {
 		if (clazz != null) {
-			return new QualifiedPath(clazz.getPackageName(),
-					clazz.getSimpleName());
+			return new QualifiedPath(clazz.getPackageName(), clazz.getSimpleName());
 		}
 		return null;
 	}
@@ -174,8 +180,7 @@ public class QualifiedPath {
 	}
 
 	public String getClassName(boolean useQualifiedNames) {
-		return useQualifiedNames ? getClassQualifiedName()
-				: getClassSimpleName();
+		return useQualifiedNames ? getClassQualifiedName() : getClassSimpleName();
 	}
 
 }

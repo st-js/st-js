@@ -28,6 +28,7 @@ import japa.parser.ast.expr.FieldAccessExpr;
 import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.ObjectCreationExpr;
+import japa.parser.ast.expr.SuperExpr;
 import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.stmt.CatchClause;
 import japa.parser.ast.stmt.ForStmt;
@@ -59,7 +60,6 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 	private final NameScope rootScope;
 	private final Collection<String> allowedPackages;
 	private final Set<String> resolvedImports;
-
 
 	private final Set<String> allowedJavaLangClasses;
 
@@ -151,6 +151,11 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 			}
 
 			@Override
+			public String visit(SuperExpr n, String arg) {
+				return "super";
+			}
+
+			@Override
 			public String visit(NameExpr n, String arg) {
 				return n.getName();
 			}
@@ -168,7 +173,11 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		SourcePosition pos = new SourcePosition(n);
 		QualifiedName<MethodName> qname = currentScope.getScope().resolveMethod(pos, name, this);
 		if (qname != null) {
-			checkNonStaticAccessToOuterScope(currentScope, pos, qname);
+			// TODO Alex: This is not correct as accessOuterScope is set even for variable.method (where variable is of
+			// the outer type)!
+			if (n.getScope() == null) {
+				checkNonStaticAccessToOuterScope(currentScope, pos, qname);
+			}
 			n.setData(qname);
 		}
 
@@ -192,12 +201,14 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		// try to figure out if it's variable.field or Package.Class.field
 		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(pos, getFirstScope(n), this);
 		if (qname == null) {
+			// not found - so it's rather Package.Class.field
 			QualifiedName<TypeName> resolvedType = currentScope.getScope().resolveType(pos, getFirstScope(n), this);
 			if (resolvedType != null) {
 				// no need to persist it
 				return;
 			}
 		}
+
 		if (qname == null) {
 			checkImport(n, n.getScope().toString(), currentScope);
 			qname = currentScope.getScope().resolveIdentifier(pos, n.toString(), this);
@@ -266,24 +277,30 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 	public void visit(ClassOrInterfaceType n, NameScopeWalker currentScope) {
 		SourcePosition pos = new SourcePosition(n);
 		StringBuilder fullName = new StringBuilder(n.getName());
-		if (n.getScope() == null) {
-			// not fully-specified classes
-			QualifiedName<TypeName> qname = currentScope.getScope().resolveType(pos, n.getName(), this);
-			if (qname != null) {
-
-				n.setData(qname);
-				if (qname.getType() == GENERIC_TYPE || qname.getType() == INNER_CLASS) {
-					// no need to check for imports
-					super.visit(n, currentScope);
-					return;
-				}
-				fullName = new StringBuilder(qname.getDefinitionPoint().getOrThrow().getFullName(true).getOrThrow());
-			}
-		} else {
-			for (ClassOrInterfaceType t = n.getScope(); t != null; t = t.getScope()) {
-				fullName.insert(0, t.getName() + ".");
-			}
+		for (ClassOrInterfaceType t = n.getScope(); t != null; t = t.getScope()) {
+			fullName.insert(0, t.getName() + ".");
 		}
+
+		// if (n.getScope() == null) {
+		// not fully-specified classes
+		QualifiedName<TypeName> qname = currentScope.getScope().resolveType(pos, fullName.toString(), this);
+		if (qname != null) {
+
+			n.setData(qname);
+			if (qname.getType() == GENERIC_TYPE || qname.getType() == INNER_CLASS) {
+				// no need to check for imports
+				super.visit(n, currentScope);
+				return;
+			}
+			fullName = new StringBuilder(qname.getDefinitionPoint().getOrThrow().getFullName(true).getOrThrow());
+		}
+		// }
+
+		// else {
+		// for (ClassOrInterfaceType t = n.getScope(); t != null; t = t.getScope()) {
+		// fullName.insert(0, t.getName() + ".");
+		// }
+		// }
 		checkImport(n, fullName.toString(), currentScope);
 
 		super.visit(n, currentScope);

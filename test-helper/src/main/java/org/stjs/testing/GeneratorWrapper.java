@@ -16,13 +16,12 @@ import com.google.common.collect.Sets;
 
 public class GeneratorWrapper {
 
-	public File generateCode(final TestClass testClass,
-			final FrameworkMethod method) throws IOException, AssertionError {
+	public File generateCode(final TestClass testClass, final FrameworkMethod method) throws IOException,
+			AssertionError {
 		Generator generator = new Generator();
 		File outputFile = File.createTempFile(testClass.getName(), ".js");
 		outputFile.deleteOnExit();
-		Pattern exceptions = Pattern
-				.compile("java\\.lang.*|org\\.stjs\\.testing.*|org\\.junit.*|junit.*");
+		Pattern exceptions = Pattern.compile("java\\.lang.*|org\\.stjs\\.testing.*|org\\.junit.*|junit.*");
 		try {
 			Set<String> newImports = Sets.newHashSet();
 			newImports.add(testClass.getJavaClass().getName());
@@ -33,18 +32,19 @@ public class GeneratorWrapper {
 				Iterator<String> iterator = newImports.iterator();
 				String nextFile = iterator.next();
 				iterator.remove();
-				File maybeTestFile = new File("src/test/java/"
-						+ nextFile.replaceAll("\\.", "/") + ".java");
+				File maybeTestFile = new File("src/test/java/" + nextFile.replaceAll("\\.", "/") + ".java");
 				File src;
-				if (nextFile.startsWith("org.stjs.testing")
-						|| nextFile.startsWith("org.stjs.javascript")) {
+				if (nextFile.startsWith("org.stjs.testing") || nextFile.startsWith("org.stjs.javascript")) {
+					continue;
+				}
+				if (nextFile.contains("$")) {
+					// this is an inner class
 					continue;
 				}
 				if (maybeTestFile.exists()) {
 					src = maybeTestFile;
 				} else {
-					File maybeAppFile = new File("src/main/java/"
-							+ nextFile.replaceAll("\\.", "/") + ".java");
+					File maybeAppFile = new File("src/main/java/" + nextFile.replaceAll("\\.", "/") + ".java");
 					if (maybeAppFile.exists()) {
 						src = maybeAppFile;
 					} else {
@@ -54,23 +54,16 @@ public class GeneratorWrapper {
 										+ ". Currently only src/test/java and src/main/java naming schemes are supported. Note that all classes must be defined in the same module as the unit test");
 					}
 				}
-				Set<String> iterationResolvedImports = generator
-						.generateJavascript(
-								Thread.currentThread().getContextClassLoader(),
-								src,
-								outputFile,
-								new GeneratorConfigurationBuilder()
-										.allowedPackage(
-												testClass.getJavaClass()
-														.getPackage().getName())
-										.allowedPackage("org.stjs.javascript")
-										.allowedPackage("org.w3c.dom.html")
-										.allowedPackage("org.junit.Test")
-										.allowedPackage("org.junit.runner")
-										.allowedPackage("org.stjs.testing")
-										.allowedPackage(
-												"junit.framework.Assert")
-										.build(), true);
+				Set<String> iterationResolvedImports = generator.generateJavascript(
+						Thread.currentThread().getContextClassLoader(),
+						src,
+						outputFile,
+						new GeneratorConfigurationBuilder()
+								.allowedPackage(testClass.getJavaClass().getPackage().getName())
+								.allowedPackage("org.stjs.javascript").allowedPackage("org.w3c.dom.html")
+								.allowedPackage("org.junit.Test").allowedPackage("org.junit.runner")
+								.allowedPackage("org.stjs.testing").allowedPackage("junit.framework.Assert").build(),
+						true);
 				for (String iterationResolvedImport : iterationResolvedImports) {
 
 					if (!exceptions.matcher(iterationResolvedImport).matches()

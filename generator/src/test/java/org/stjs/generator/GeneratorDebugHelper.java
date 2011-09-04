@@ -20,10 +20,9 @@ import japa.parser.ParseException;
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.Ignore;
 import org.junit.Test;
-import org.stjs.generator.node.js.NodeJSExecutor;
-import org.stjs.generator.node.js.NodeJSExecutor.ExecutionResult;
+import org.stjs.generator.executor.ExecutionResult;
+import org.stjs.generator.executor.RhinoExecutor;
 
 import test.innerclasses.ClassUsingInnerClass;
 
@@ -31,7 +30,7 @@ public class GeneratorDebugHelper {
 
 	@Test
 	public void testGenerator() throws ParseException, IOException {
-		generate("src/test/java/org/stjs/examples/stock/StockApplication.java", ClassUsingInnerClass.class);
+		generate("src/test/java/test/ParentDeclaration1.java", ClassUsingInnerClass.class);
 	}
 
 	private void generate(String sourceFile, Class<?> clazz) throws ParseException, IOException {
@@ -44,7 +43,8 @@ public class GeneratorDebugHelper {
 				outputFile,
 				new GeneratorConfigurationBuilder().allowedPackage(clazz.getPackage().getName())
 						.allowedPackage("org.stjs.javascript").allowedPackage("org.w3c.dom.html").build());
-		NodeJSExecutor executor = new NodeJSExecutor();
+		// NodeJSExecutor executor = new NodeJSExecutor();
+		RhinoExecutor executor = new RhinoExecutor();
 		ExecutionResult execution = executor.run(outputFile);
 		System.out.println(execution.toString());
 	}

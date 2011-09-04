@@ -13,7 +13,7 @@
 		<module>generator</module>
 		<module>js-lib</module>
 		<module>maven-plugin</module>
-		<!-- <module>test-helper</module> -->
+		<module>test-helper</module>
 		<module>examples</module>
 	</modules>
 
@@ -86,7 +86,7 @@
 			<id>st-js.server</id>
 			<name>SVN Sourceforge Snapshot Repository</name>
 			<uniqueVersion>false</uniqueVersion>
-			<url>sftp://frs.sourceforge.net:/home/project-web/st-js/htdocs/repository/snapshots</url>			
+			<url>sftp://frs.sourceforge.net:/home/project-web/st-js/htdocs/repository/snapshots</url>
 		</snapshotRepository>
 
 	</distributionManagement>

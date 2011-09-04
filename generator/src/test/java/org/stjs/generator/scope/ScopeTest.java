@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.scope.QualifiedName.NameTypes;
@@ -51,8 +52,8 @@ public class ScopeTest {
 		javaLangClasses.add("Number");
 		javaLangClasses.add("Runnable");
 		javaLangClasses.add("Object");
-		ScopeVisitor scopes = new ScopeVisitor(new File(clazz), Thread.currentThread().getContextClassLoader(),
-				packages);
+		DeclarationVisitor scopes = new DeclarationVisitor(new File(clazz), Thread.currentThread()
+				.getContextClassLoader(), packages);
 		NameScope rootScope = new FullyQualifiedScope(new File(clazz), new ClassLoaderWrapper(Thread.currentThread()
 				.getContextClassLoader()));
 		scopes.visit(cu, rootScope);
@@ -135,31 +136,39 @@ public class ScopeTest {
 		}
 	}
 
-	// @Test
-	// public void testScopeParent() throws ParseException, IOException {
-	// NameResolverVisitor resolver = getNameResolver("test/Declaration1.java");
-	// // 27:int exp6 = parentPrivate + parentProtected + parentPackage + parentPublic;
-	// // parentPrivate resolves to the import not the private field
-	// assertScope(resolver).line(28).column(20, 2).assertName("parentPrivate").assertScopePath("root.import");
-	// assertScope(resolver).line(28).column(36, 2).assertName("parentProtected")
-	// .assertScopePath("root.import.parent-ParentDeclaration1");
-	// assertScope(resolver).line(28).column(54, 2).assertName("parentPackage")
-	// .assertScopePath("root.import.parent-ParentDeclaration1");
-	// assertScope(resolver).line(28).column(70, 2).assertName("parentPublic")
-	// .assertScopePath("root.import.parent-ParentDeclaration1");
-	// }
-	//
-	// @Test
-	// public void testScopeImport() throws ParseException, IOException {
-	// NameResolverVisitor resolver = getNameResolver("test/Declaration1.java");
-	// assertScope(resolver).line(17).column(54, 2).assertName("stat").assertScopePath("root.import");
-	// }
-	//
-	// @Test
-	// public void testScopeFull() throws ParseException, IOException {
-	// NameResolverVisitor resolver = getNameResolver("test/Declaration1.java");
-	// assertScope(resolver).line(18).column(20, 2).assertName("full").assertScopePath("root");
-	// }
+	@Test
+	public void testScopeParent() throws ParseException, IOException {
+		String fileName = "test/Declaration1.java";
+		CompilationUnit cu = compilationUnit(fileName);
+		resolveName2(cu, fileName);
+
+		// 27:int exp6 = parentPrivate + parentProtected + parentPackage + parentPublic;
+		// parentPrivate resolves to the import not the private field
+		assertScope(cu).line(43).column(20, 2).assertName("parentPrivate").assertScopePath("root.import");
+		assertScope(cu).line(43).column(36, 2).assertName("parentProtected")
+				.assertScopePath("root.import.parent-ParentDeclaration1");
+		assertScope(cu).line(43).column(54, 2).assertName("parentPackage")
+				.assertScopePath("root.import.parent-ParentDeclaration1");
+		assertScope(cu).line(43).column(70, 2).assertName("parentPublic")
+				.assertScopePath("root.import.parent-ParentDeclaration1");
+	}
+
+	@Test
+	public void testScopeImport() throws ParseException, IOException {
+		String fileName = "test/Declaration1.java";
+		CompilationUnit cu = compilationUnit(fileName);
+		resolveName2(cu, fileName);
+		assertScope(cu).line(32).column(54, 2).assertName("stat").assertScopePath("root.import");
+	}
+
+	@Ignore
+	public void testScopeFull() throws ParseException, IOException {
+		String fileName = "test/Check1.java";
+		CompilationUnit cu = compilationUnit(fileName);
+		resolveName2(cu, fileName);
+		// assertScope(cu).line(33).column(20, 2).assertName("full").assertScopePath("root");
+		assertScope(cu).line(5).column(20, 2).assertName("full").assertScopePath("root");
+	}
 
 	@Test
 	public void testIllegalImport1() throws ParseException, IOException {

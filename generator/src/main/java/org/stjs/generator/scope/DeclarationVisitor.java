@@ -37,9 +37,11 @@ import japa.parser.ast.stmt.CatchClause;
 import japa.parser.ast.stmt.ForStmt;
 import japa.parser.ast.stmt.ForeachStmt;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
+
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.JavascriptKeywords;
 import org.stjs.generator.SourcePosition;
@@ -47,12 +49,12 @@ import org.stjs.generator.handlers.utils.PreConditions;
 import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
 
 /**
- * This class visits the code's tree to determine the scope of each name.
+ * This class visits the code's tree and gathers the declarations found in each scope.
  * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  * 
  */
-public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
+public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 
 	private final File inputFile;
 	/**
@@ -62,7 +64,7 @@ public class ScopeVisitor extends VoidVisitorAdapter<NameScope> {
 
 	private final Collection<String> allowedPackages;
 
-	public ScopeVisitor(File inputFile, ClassLoader classLoader, Collection<String> allowedPackages) {
+	public DeclarationVisitor(File inputFile, ClassLoader classLoader, Collection<String> allowedPackages) {
 		super();
 		this.classLoader = classLoader;
 		this.inputFile = inputFile;

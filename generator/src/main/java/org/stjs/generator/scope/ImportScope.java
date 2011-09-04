@@ -90,7 +90,8 @@ public class ImportScope extends NameScope implements ClassResolver {
 	}
 
 	@Override
-	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
+	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope,
+			NameResolverVisitor visitor) {
 		String imp = findImport(staticExactImports, name);
 		if (imp != null) {
 			QualifiedMethodPath path = QualifiedPath.withMethod(imp, this, visitor);
@@ -102,8 +103,7 @@ public class ImportScope extends NameScope implements ClassResolver {
 		}
 
 		for (String staticImport : this.staticStarImports) {
-			QualifiedMethodPath path = QualifiedPath.withMethod(staticImport,
-					this, visitor);
+			QualifiedMethodPath path = QualifiedPath.withMethod(staticImport, this, visitor);
 			Option<QualifiedName<MethodName>> qName = findMethodFromClassLoader(path);
 			if (qName.isDefined()) {
 				visitor.getResolvedImports().add(path.getClassQualifiedName());
@@ -122,7 +122,7 @@ public class ImportScope extends NameScope implements ClassResolver {
 				for (ClassWrapper loadedClass : classLoader.loadClass(maybeReceiverClass)) {
 					visitor.getResolvedImports().add(loadedClass.getName());
 				}
-				
+
 				return new QualifiedName<NameType.MethodName>(this, isStatic, false, NameTypes.METHOD, receiverField
 						.getDefinitionPoint().getOrNull(), receiverField.isGlobal());
 			}
@@ -147,7 +147,8 @@ public class ImportScope extends NameScope implements ClassResolver {
 	}
 
 	@Override
-	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope,
+			NameResolverVisitor visitor) {
 		String imp = findImport(staticExactImports, name);
 		if (imp != null) {
 			QualifiedFieldPath path = withField(imp);
@@ -190,7 +191,8 @@ public class ImportScope extends NameScope implements ClassResolver {
 	}
 
 	@Override
-	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope,
+			NameResolverVisitor visitor) {
 		for (ClassWrapper clazz : resolveClass(name, visitor)) {
 
 			return new QualifiedName<TypeName>(this, isStatic(clazz.getModifiers()), NameTypes.CLASS, new JavaTypeName(
@@ -212,6 +214,7 @@ public class ImportScope extends NameScope implements ClassResolver {
 	 */
 	public Option<ClassWrapper> resolveClass(String className, NameResolverVisitor visitor) {
 		{
+			// check in cache
 			ClassWrapper resolvedClass = resolvedClasses.get(className);
 			if (resolvedClass != null) {
 				return Option.some(resolvedClass);
@@ -223,6 +226,18 @@ public class ImportScope extends NameScope implements ClassResolver {
 			resolvedClasses.put(className, resolvedClass);
 			visitor.getResolvedImports().add(resolvedClass.getName());
 			return Option.some(resolvedClass);
+		}
+
+		if (className.contains(".")) {
+			// it's rather Class.InnerClass so the replace "." with "$"
+			String parentClassName = QualifiedPath.beforeFirstDot(className);
+			Option<ClassWrapper> parentClass = resolveClass(parentClassName, visitor);
+			if (parentClass.isEmpty()) {
+				return Option.none();
+			}
+			String searchedClassName = parentClass.getOrThrow().getName() + "$"
+					+ QualifiedPath.afterFirstDot(className).replace('.', '$');
+			return resolveClass(searchedClassName, visitor);
 		}
 
 		// 2. try in the current package

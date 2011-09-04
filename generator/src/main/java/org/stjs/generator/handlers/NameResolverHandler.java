@@ -22,8 +22,10 @@ import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.QualifiedNameExpr;
 import japa.parser.ast.stmt.ExplicitConstructorInvocationStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
+
 import java.util.Iterator;
 import java.util.List;
+
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
@@ -54,15 +56,16 @@ public class NameResolverHandler extends DefaultHandler {
 					return;
 				} else {
 					if (qname.getScope() != null) {
-						qname.getScope().visit(new NameScope.EmptyVoidNameScopeVisitor(false) {
+						Boolean stopVisit = qname.getScope().visit(new NameScope.EmptyNameScopeVisitor<Boolean>(false) {
 							@Override
-							public void caseTypeScope(TypeScope typeScope) {
+							public Boolean caseTypeScope(TypeScope typeScope) {
 								// Non static reference to current enclosing type.
 								printer.print("this.");
+								return false;
 							}
 
 							@Override
-							public void caseParentTypeScope(ParentTypeScope parentTypeScope) {
+							public Boolean caseParentTypeScope(ParentTypeScope parentTypeScope) {
 								// Non static reference to parent type
 								printer.print("this._super(\"" + n.getName() + "\"");
 								if (n.getArgs() != null && n.getArgs().size() > 0) {
@@ -70,8 +73,12 @@ public class NameResolverHandler extends DefaultHandler {
 								}
 								printArguments(n.getArgs(), context, false);
 								printer.print(")");
+								return true;
 							}
 						});
+						if (stopVisit) {
+							return;
+						}
 					}
 				}
 			}
@@ -177,9 +184,9 @@ public class NameResolverHandler extends DefaultHandler {
 	}
 
 	// @Override
-	// public void visit(SuperExpr n, T arg) {
+	// public void visit(SuperExpr n, GenerationContext context) {
 	// if (n.getClassExpr() != null) {
-	// n.getClassExpr().accept(this, arg);
+	// n.getClassExpr().accept(this, context);
 	// printer.print(".");
 	// }
 	// printer.print("super");
