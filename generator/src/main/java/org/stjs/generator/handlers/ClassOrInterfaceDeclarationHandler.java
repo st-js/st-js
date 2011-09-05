@@ -32,9 +32,9 @@ import java.util.List;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
-import org.stjs.generator.handlers.utils.Option;
 import org.stjs.generator.scope.JavaTypeName;
 import org.stjs.generator.scope.TypeScope;
+import org.stjs.generator.utils.Option;
 
 public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 
@@ -48,10 +48,12 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 			public Integer visit(FieldDeclaration member, Object n) {
 				return member.getModifiers();
 			}
+
 			@Override
 			public Integer visit(MethodDeclaration member, Object n) {
 				return member.getModifiers();
 			}
+
 			@Override
 			public Integer visit(ClassOrInterfaceDeclaration member, Object n) {
 				return member.getModifiers();
@@ -59,8 +61,7 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 		}, null);
 	}
 
-	private void printMembers(ClassOrInterfaceDeclaration n,
-			GenerationContext context) {
+	private void printMembers(ClassOrInterfaceDeclaration n, GenerationContext context) {
 		List<BodyDeclaration> members = n.getMembers();
 		for (BodyDeclaration member : members) {
 			if (member instanceof ConstructorDeclaration) {
@@ -69,8 +70,7 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 			printer.printLn();
 			printer.printLn();
 			int memberModifiers = getModifiers(member);
-			if (ModifierSet.isAbstract(memberModifiers)
-					|| ModifierSet.isNative(memberModifiers)) {
+			if (ModifierSet.isAbstract(memberModifiers) || ModifierSet.isNative(memberModifiers)) {
 				continue;
 			}
 			if (isStatic(n.getModifiers())) {
@@ -86,28 +86,23 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 		}
 	}
 
-	private void printStaticMembersPrefix(ClassOrInterfaceDeclaration n,
-			GenerationContext context) {
+	private void printStaticMembersPrefix(ClassOrInterfaceDeclaration n, GenerationContext context) {
 		TypeScope typeScope = (TypeScope) n.getData();
 		JavaTypeName declaredClassName = typeScope.getDeclaredTypeName();
-		Option<String> fullyQualifiedString = declaredClassName
-				.getFullName(false);
+		Option<String> fullyQualifiedString = declaredClassName.getFullName(false);
 		if (fullyQualifiedString.isEmpty()) {
-			throw new JavascriptGenerationException(
-					context.getInputFile(), new SourcePosition(n),
+			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 					"definition of static members of anonymous classes is not supported");
 		}
 		printer.print(fullyQualifiedString.getOrThrow());
 	}
 
-	private ConstructorDeclaration getConstructor(
-			List<BodyDeclaration> members, GenerationContext arg) {
+	private ConstructorDeclaration getConstructor(List<BodyDeclaration> members, GenerationContext arg) {
 		ConstructorDeclaration constr = null;
 		for (BodyDeclaration member : members) {
 			if (member instanceof ConstructorDeclaration) {
 				if (constr != null) {
-					throw new JavascriptGenerationException(arg.getInputFile(),
-							new SourcePosition(member),
+					throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(member),
 							"Only maximum one constructor is allowed");
 				} else {
 					constr = (ConstructorDeclaration) member;
@@ -118,8 +113,7 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 	}
 
 	@Override
-	public void visit(final ClassOrInterfaceDeclaration n,
-			final GenerationContext arg) {
+	public void visit(final ClassOrInterfaceDeclaration n, final GenerationContext arg) {
 		if (n.isInterface()) {
 			return;
 		}
@@ -134,16 +128,14 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 
 			if (n.getExtends() != null && n.getExtends().size() > 0) {
 				printer.printLn();
-				printer.printLn("stjs.extend(" + n.getName() + ", "
-						+ n.getExtends().get(0).getName() + ");");
+				printer.printLn("stjs.extend(" + n.getName() + ", " + n.getExtends().get(0).getName() + ");");
 			}
 			printMembers(n, arg);
 			printMainMethodCall(n, arg);
 		}
 	}
 
-	private void printMainMethodCall(ClassOrInterfaceDeclaration n,
-			GenerationContext context) {
+	private void printMainMethodCall(ClassOrInterfaceDeclaration n, GenerationContext context) {
 		List<BodyDeclaration> members = n.getMembers();
 		for (BodyDeclaration member : members) {
 			if (member instanceof MethodDeclaration) {
@@ -166,7 +158,7 @@ public class ClassOrInterfaceDeclarationHandler extends DefaultHandler {
 				if (parameter.getType() instanceof ReferenceType) {
 					ReferenceType refType = (ReferenceType) parameter.getType();
 					if (refType.getArrayCount() == 1 && refType.getType() instanceof ClassOrInterfaceType) {
-						String typeName = ((ClassOrInterfaceType)refType.getType()).getName();
+						String typeName = ((ClassOrInterfaceType) refType.getType()).getName();
 						if ("String".equals(typeName) || "java.lang.String".equals(typeName)) {
 							isMainMethod = true;
 						}

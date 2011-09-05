@@ -16,7 +16,6 @@
 package org.stjs.generator.scope;
 
 import static japa.parser.ast.body.ModifierSet.isStatic;
-import static org.stjs.generator.handlers.utils.Option.none;
 import static org.stjs.generator.scope.path.QualifiedPath.withField;
 
 import java.io.File;
@@ -29,7 +28,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.stjs.generator.SourcePosition;
-import org.stjs.generator.handlers.utils.Option;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.NameType.TypeName;
@@ -39,6 +37,7 @@ import org.stjs.generator.scope.classloader.ClassWrapper;
 import org.stjs.generator.scope.path.QualifiedPath;
 import org.stjs.generator.scope.path.QualifiedPath.QualifiedFieldPath;
 import org.stjs.generator.scope.path.QualifiedPath.QualifiedMethodPath;
+import org.stjs.generator.utils.Option;
 
 /**
  * This scope tries to solve the methods inside the static imports and the identifiers (that can be the name of a class)
@@ -143,7 +142,7 @@ public class ImportScope extends NameScope implements ClassResolver {
 				}
 			}
 		}
-		return none();
+		return Option.none();
 	}
 
 	@Override

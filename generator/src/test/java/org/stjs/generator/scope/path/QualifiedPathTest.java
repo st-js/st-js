@@ -7,11 +7,11 @@ import static org.junit.Assert.assertTrue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
-import org.stjs.generator.handlers.utils.Option;
 import org.stjs.generator.scope.ClassResolver;
 import org.stjs.generator.scope.NameResolverVisitor;
 import org.stjs.generator.scope.classloader.ClassWrapper;
 import org.stjs.generator.scope.path.QualifiedPath.QualifiedMethodPath;
+import org.stjs.generator.utils.Option;
 
 public class QualifiedPathTest {
 

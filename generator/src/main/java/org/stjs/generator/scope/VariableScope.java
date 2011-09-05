@@ -18,6 +18,7 @@ package org.stjs.generator.scope;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;

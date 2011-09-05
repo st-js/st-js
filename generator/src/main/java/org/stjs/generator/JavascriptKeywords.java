@@ -32,6 +32,7 @@ public class JavascriptKeywords {
 		keywords.add("var");
 		keywords.add("outer");
 		keywords.add("function");
+		keywords.add("prototype");
 		// keywords.add("self");
 	}
 

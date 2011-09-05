@@ -1,11 +1,11 @@
 package org.stjs.generator.scope;
 
-import static org.stjs.generator.handlers.utils.Option.some;
 import static org.stjs.generator.scope.path.QualifiedPath.join;
 import static org.stjs.generator.scope.path.QualifiedPath.withClass;
-import org.stjs.generator.handlers.utils.Option;
+
 import org.stjs.generator.scope.classloader.ClassWrapper;
 import org.stjs.generator.scope.path.QualifiedPath;
+import org.stjs.generator.utils.Option;
 
 /**
  * Java types name, with support for inner classes. Option.None represents anonymous classes, Option.some named classes.
@@ -39,7 +39,8 @@ public class JavaTypeName {
 	}
 
 	public Option<String> getSimpleName() {
-		return classPath.isDefined() ? some(classPath.getOrThrow().getClassSimpleName()) : Option.<String> none();
+		return classPath.isDefined() ? Option.some(classPath.getOrThrow().getClassSimpleName()) : Option
+				.<String> none();
 	}
 
 	public boolean isAnonymous() {

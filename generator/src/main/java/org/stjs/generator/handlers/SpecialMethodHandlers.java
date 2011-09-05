@@ -18,12 +18,14 @@ package org.stjs.generator.handlers;
 import static org.stjs.generator.handlers.DumpVisitor.printArguments;
 import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.MethodCallExpr;
+
 import java.util.HashMap;
 import java.util.Map;
+
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.handlers.utils.Option;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.QualifiedName;
+import org.stjs.generator.utils.Option;
 
 /**
  * this is a handler to handle special method names (those starting with $).

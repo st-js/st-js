@@ -3,7 +3,8 @@ package org.stjs.generator.scope.classloader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import org.stjs.generator.handlers.utils.Option;
+
+import org.stjs.generator.utils.Option;
 
 public class ClassWrapper {
 

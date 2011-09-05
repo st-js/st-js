@@ -15,8 +15,7 @@
  */
 package org.stjs.generator;
 
-import static org.stjs.generator.handlers.utils.Lists.append;
-import static org.stjs.generator.handlers.utils.Lists.newArrayList;
+import static org.stjs.generator.utils.Lists.append;
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
@@ -51,6 +50,7 @@ import org.stjs.generator.scope.NameScope;
 import org.stjs.generator.scope.NameScopeWalker;
 import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
 
@@ -173,7 +173,7 @@ public class Generator {
 			// resolve all the calls to methods and variables
 			Collection<String> allowedPackages = configuration.getAllowedPackages();
 			if (cu.getPackage() != null && !cu.getPackage().getName().toString().isEmpty()) {
-				allowedPackages = append(newArrayList(allowedPackages), cu.getPackage().getName().toString());
+				allowedPackages = append(Lists.newArrayList(allowedPackages), cu.getPackage().getName().toString());
 			}
 
 			// ASTUtils.dumpXML(cu);

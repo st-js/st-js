@@ -1,7 +1,7 @@
 package org.stjs.generator.scope;
 
-import org.stjs.generator.handlers.utils.Option;
 import org.stjs.generator.scope.classloader.ClassWrapper;
+import org.stjs.generator.utils.Option;
 
 public interface ClassResolver {
 

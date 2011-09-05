@@ -16,7 +16,7 @@
 package org.stjs.generator.scope;
 
 import static japa.parser.ast.body.ModifierSet.isStatic;
-import static org.stjs.generator.handlers.utils.Lists.getOnlyElement;
+import static org.stjs.generator.utils.Lists.getOnlyElement;
 
 import java.io.File;
 import java.lang.reflect.Field;

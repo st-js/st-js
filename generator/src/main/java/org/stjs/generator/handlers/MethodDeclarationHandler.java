@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 
 public class MethodDeclarationHandler extends DefaultHandler {
 	private final boolean anonymous;

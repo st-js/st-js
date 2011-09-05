@@ -15,11 +15,12 @@
  */
 package org.stjs.generator.handlers;
 
-import static org.stjs.generator.handlers.utils.Joiner.joiner;
+import static org.stjs.generator.utils.Joiner.joiner;
 import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.PrimitiveType;
+
 import org.stjs.generator.GenerationContext;
 
 public class FieldDeclarationHandler extends DefaultHandler {

@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.scope.QualifiedName.NameTypes;
@@ -161,7 +160,7 @@ public class ScopeTest {
 		assertScope(cu).line(32).column(54, 2).assertName("stat").assertScopePath("root.import");
 	}
 
-	@Ignore
+	@Test
 	public void testScopeFull() throws ParseException, IOException {
 		String fileName = "test/Check1.java";
 		CompilationUnit cu = compilationUnit(fileName);

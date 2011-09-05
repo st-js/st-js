@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.stjs.generator.SourcePosition;
-import org.stjs.generator.handlers.utils.Option;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.NameType.TypeName;
@@ -31,6 +30,7 @@ import org.stjs.generator.scope.classloader.ClassWrapper;
 import org.stjs.generator.scope.path.QualifiedPath;
 import org.stjs.generator.scope.path.QualifiedPath.QualifiedFieldPath;
 import org.stjs.generator.scope.path.QualifiedPath.QualifiedMethodPath;
+import org.stjs.generator.utils.Option;
 
 /**
  * This scope tries to resolve only fully qualified names by looking in the classpath for the corresponding type.
@@ -49,7 +49,8 @@ public class FullyQualifiedScope extends NameScope implements ClassResolver {
 	}
 
 	@Override
-	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
+	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope,
+			NameResolverVisitor visitor) {
 		if (name.contains(".")) {
 			QualifiedMethodPath path = QualifiedPath.withMethod(name, this, visitor);
 			if (path != null) {
@@ -67,7 +68,8 @@ public class FullyQualifiedScope extends NameScope implements ClassResolver {
 	}
 
 	@Override
-	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope,
+			NameResolverVisitor visitor) {
 		QualifiedFieldPath path = QualifiedPath.withField(name);
 		String className = path.getClassQualifiedName();
 		if (className != null) {
@@ -98,7 +100,8 @@ public class FullyQualifiedScope extends NameScope implements ClassResolver {
 	}
 
 	@Override
-	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope,
+			NameResolverVisitor visitor) {
 		for (ClassWrapper clazz : resolveClass(name, visitor)) {
 			return new QualifiedName<TypeName>(this, true, NameTypes.CLASS, new JavaTypeName(clazz));
 		}

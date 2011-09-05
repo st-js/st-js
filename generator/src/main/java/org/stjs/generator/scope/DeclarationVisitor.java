@@ -45,8 +45,8 @@ import java.util.List;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.JavascriptKeywords;
 import org.stjs.generator.SourcePosition;
-import org.stjs.generator.handlers.utils.PreConditions;
 import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
+import org.stjs.generator.utils.PreConditions;
 
 /**
  * This class visits the code's tree and gathers the declarations found in each scope.

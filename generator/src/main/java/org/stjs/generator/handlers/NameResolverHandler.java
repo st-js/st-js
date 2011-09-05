@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.JavaTypeName;

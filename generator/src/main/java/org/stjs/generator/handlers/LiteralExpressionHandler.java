@@ -3,6 +3,7 @@ package org.stjs.generator.handlers;
 import japa.parser.ast.expr.IntegerLiteralExpr;
 import japa.parser.ast.expr.LongLiteralExpr;
 import japa.parser.ast.expr.StringLiteralExpr;
+
 import org.stjs.generator.GenerationContext;
 
 public class LiteralExpressionHandler extends DefaultHandler {

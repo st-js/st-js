@@ -15,9 +15,10 @@
  */
 package org.stjs.generator.scope;
 
-import static org.stjs.generator.handlers.utils.PreConditions.checkNotNull;
-import static org.stjs.generator.handlers.utils.PreConditions.checkState;
-import org.stjs.generator.handlers.utils.Option;
+import static org.stjs.generator.utils.PreConditions.checkNotNull;
+import static org.stjs.generator.utils.PreConditions.checkState;
+
+import org.stjs.generator.utils.Option;
 
 public class QualifiedName<T extends NameType> {
 	private final NameScope scope;

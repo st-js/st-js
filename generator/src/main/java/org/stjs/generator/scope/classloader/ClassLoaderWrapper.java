@@ -1,7 +1,7 @@
 package org.stjs.generator.scope.classloader;
 
-import org.stjs.generator.handlers.utils.Option;
 import org.stjs.generator.scope.path.QualifiedPath.QualifiedMethodPath;
+import org.stjs.generator.utils.Option;
 
 public class ClassLoaderWrapper {
 

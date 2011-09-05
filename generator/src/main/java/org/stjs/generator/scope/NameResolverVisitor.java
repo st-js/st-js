@@ -43,10 +43,11 @@ import java.util.Set;
 
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
-import org.stjs.generator.handlers.utils.Sets;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.NameType.TypeName;
+
+import com.google.common.collect.Sets;
 
 /**
  * This visitor goes through the AST and resolves all the found identifiers using the {@link NameScopeWalker} previously

@@ -16,6 +16,7 @@
 package org.stjs.generator.handlers;
 
 import japa.parser.ast.visitor.VoidVisitorAdapter;
+
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.handlers.DumpVisitor.SourcePrinter;
 
