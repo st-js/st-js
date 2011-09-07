@@ -8,6 +8,7 @@ import test.generator.names.Names1;
 import test.generator.names.Names2;
 import test.generator.names.Names3;
 import test.generator.names.Names4;
+import test.generator.names.Names5;
 
 public class NamesGeneratorTest {
 	@Test
@@ -28,5 +29,11 @@ public class NamesGeneratorTest {
 	@Test
 	public void testCallGenericMethod() {
 		assertCodeContains(Names4.class, "Names4.genericMethod(2)");
+	}
+
+	@Test
+	public void testSpecialThis() {
+		// the special parameter THIS should be transformed in this
+		assertCodeContains(Names5.class, "return this.field");
 	}
 }

@@ -9,6 +9,8 @@ import test.generator.methods.Methods2;
 import test.generator.methods.Methods3;
 import test.generator.methods.Methods4;
 import test.generator.methods.Methods5;
+import test.generator.methods.Methods6;
+import test.generator.methods.Methods7;
 
 public class MethodsGeneratorTest {
 	@Test
@@ -36,5 +38,16 @@ public class MethodsGeneratorTest {
 	public void testMainMethod() {
 		// should generate the call to the main method
 		assertCodeContains(Methods5.class, "Methods5.main();");
+	}
+
+	@Test
+	public void testConstructor() {
+		assertCodeContains(Methods6.class, "Methods6=function(arg){");
+	}
+
+	@Test
+	public void testSpecialThis() {
+		// the special parameter THIS should not be added
+		assertCodeContains(Methods7.class, "Methods7.prototype.method=function(arg2){");
 	}
 }

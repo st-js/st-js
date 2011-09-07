@@ -48,4 +48,21 @@ public class GeneratorTestHelper {
 		assertTrue("[" + snippet + "] not in \n" + code, cleanCode.contains(cleanSnippet));
 		// TODO nice display error
 	}
+
+	public static void assertCodeDoesNotContain(Class<?> clazz, String snippet) {
+		assertCodeDoesNotContain(generate(clazz), snippet);
+	}
+
+	/**
+	 * checks if the searched snippet is not found inside the given code. The whitespaces are not taken into account
+	 * 
+	 * @param code
+	 * @param search
+	 */
+	public static void assertCodeDoesNotContain(String code, String snippet) {
+		String cleanCode = code.replaceAll("\\s+", "");
+		String cleanSnippet = snippet.replaceAll("\\s+", "");
+		assertTrue("[" + snippet + "] in \n" + code, !cleanCode.contains(cleanSnippet));
+		// TODO nice display error
+	}
 }
