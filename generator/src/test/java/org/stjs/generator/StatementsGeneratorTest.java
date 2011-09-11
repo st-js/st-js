@@ -8,6 +8,8 @@ import test.generator.statements.Statements1;
 import test.generator.statements.Statements2;
 import test.generator.statements.Statements3;
 import test.generator.statements.Statements4;
+import test.generator.statements.Statements5;
+import test.generator.statements.Statements6;
 
 public class StatementsGeneratorTest {
 	@Test
@@ -31,6 +33,16 @@ public class StatementsGeneratorTest {
 		assertCodeContains(Statements4.class, "switch(i)");
 		assertCodeContains(Statements4.class, "case 1: break;");
 		assertCodeContains(Statements4.class, "default: break");
+	}
+
+	@Test
+	public void testArray1() {
+		assertCodeContains(Statements5.class, "x = [1,2,3]");
+	}
+
+	@Test
+	public void testArray2() {
+		assertCodeContains(Statements6.class, "method([1,2,3])");
 	}
 
 }

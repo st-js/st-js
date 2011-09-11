@@ -1,6 +1,7 @@
 package org.stjs.generator;
 
 import static org.stjs.generator.GeneratorTestHelper.assertCodeContains;
+import static org.stjs.generator.GeneratorTestHelper.generate;
 
 import org.junit.Test;
 
@@ -13,10 +14,10 @@ public class InlineObjectsGeneratorTest {
 		assertCodeContains(InlineObjects1.class, "o = {a:1, b:\"x\"}");
 	}
 
-	@Test
+	@Test(expected = JavascriptGenerationException.class)
 	public void testInlineObjectAndOtherStatements() {
-		// the other statement should be put outside (TODO !?)
-		assertCodeContains(InlineObjects2.class, "o = {a:1, b:\"x\"}");
+		// other statements cannot be put inside the initializing blocks
+		generate(InlineObjects2.class);
 	}
 
 }

@@ -19,12 +19,12 @@ public class EnumGeneratorTest {
 
 	@Test
 	public void testEnumReference() {
-		assertCodeContains(Enums2.class, "Enums2.a");
+		assertCodeContains(Enums2.class, "Enums2.Value.a");
 	}
 
 	@Test
 	public void testSwitchEnums() {
-		assertCodeContains(Enums3.class, "Enums1 = {a:\"a\", b:\"b\", c:\"c\"}");
+		assertCodeContains(Enums3.class, "xxx");
 	}
 
 	@Test

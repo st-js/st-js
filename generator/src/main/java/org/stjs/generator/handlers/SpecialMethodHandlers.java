@@ -15,7 +15,6 @@
  */
 package org.stjs.generator.handlers;
 
-import static org.stjs.generator.handlers.DumpVisitor.printArguments;
 import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.MethodCallExpr;
 
@@ -45,14 +44,14 @@ public class SpecialMethodHandlers {
 		// array.$get(x) -> array[x]
 		methodHandlers.put("$get", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+			public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 					GenerationContext context) {
 				if (n.getArgs() == null || n.getArgs().size() != 1) {
 					return false;
 				}
 				printScope(currentHandler, n, qname, context, false);
 				currentHandler.printer.print("[");
-				n.getArgs().get(0).accept(currentHandler.getRuleVisitor(), context);
+				n.getArgs().get(0).accept(currentHandler, context);
 				currentHandler.printer.print("]");
 				return true;
 			}
@@ -61,17 +60,17 @@ public class SpecialMethodHandlers {
 		// array.$set(index, value) -> array[index] = value
 		methodHandlers.put("$set", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+			public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 					GenerationContext context) {
 				if (n.getArgs() == null || n.getArgs().size() != 2) {
 					return false;
 				}
 				printScope(currentHandler, n, qname, context, false);
 				currentHandler.printer.print("[");
-				n.getArgs().get(0).accept(currentHandler.getRuleVisitor(), context);
+				n.getArgs().get(0).accept(currentHandler, context);
 				currentHandler.printer.print("]");
 				currentHandler.printer.print(" = ");
-				n.getArgs().get(1).accept(currentHandler.getRuleVisitor(), context);
+				n.getArgs().get(1).accept(currentHandler, context);
 				return true;
 			}
 		});
@@ -81,7 +80,7 @@ public class SpecialMethodHandlers {
 		// $array() -> []
 		methodHandlers.put("$array", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+			public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 					GenerationContext context) {
 
 				currentHandler.printer.print("[");
@@ -91,7 +90,7 @@ public class SpecialMethodHandlers {
 						if (!first) {
 							currentHandler.printer.print(", ");
 						}
-						arg.accept(currentHandler.getRuleVisitor(), context);
+						arg.accept(currentHandler, context);
 						first = false;
 					}
 				}
@@ -102,7 +101,7 @@ public class SpecialMethodHandlers {
 		// $map() -> {}
 		methodHandlers.put("$map", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+			public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 					GenerationContext context) {
 				if (n.getArgs() != null && n.getArgs().size() > 1) {
 					currentHandler.printer.printLn();
@@ -117,9 +116,9 @@ public class SpecialMethodHandlers {
 							currentHandler.printer.printLn();
 						}
 						// TODO : is it safe to unsescape string that are object litteral keys?
-						n.getArgs().get(i).accept(currentHandler.getRuleVisitor(), context);
+						n.getArgs().get(i).accept(currentHandler, context);
 						currentHandler.printer.print(": ");
-						n.getArgs().get(i + 1).accept(currentHandler.getRuleVisitor(), context);
+						n.getArgs().get(i + 1).accept(currentHandler, context);
 						first = false;
 					}
 				}
@@ -135,17 +134,17 @@ public class SpecialMethodHandlers {
 		// $or(x, y, z) -> (x || y || z)
 		methodHandlers.put("$or", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+			public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 					GenerationContext context) {
 				if (n.getArgs() == null || n.getArgs().size() < 2) {
 					// not exactly what it was expected
 					return false;
 				}
 				currentHandler.printer.print("(");
-				n.getArgs().get(0).accept(currentHandler.getRuleVisitor(), context);
+				n.getArgs().get(0).accept(currentHandler, context);
 				for (int i = 1; i < n.getArgs().size(); ++i) {
 					currentHandler.printer.print(" || ");
-					n.getArgs().get(i).accept(currentHandler.getRuleVisitor(), context);
+					n.getArgs().get(i).accept(currentHandler, context);
 				}
 				currentHandler.printer.print(")");
 				return true;
@@ -155,14 +154,14 @@ public class SpecialMethodHandlers {
 		// equals -> ==
 		methodHandlers.put("equals", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+			public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 					GenerationContext context) {
 				if (n.getArgs() == null || n.getArgs().size() != 1) {
 					return false;
 				}
 				printScope(currentHandler, n, qname, context, false);
 				currentHandler.printer.print(" == ");
-				n.getArgs().get(0).accept(currentHandler.getRuleVisitor(), context);
+				n.getArgs().get(0).accept(currentHandler, context);
 				return true;
 			}
 		});
@@ -170,7 +169,7 @@ public class SpecialMethodHandlers {
 		methodHandlers.put("$invoke", new $InvokeHandler());
 	}
 
-	private static void printScope(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+	private static void printScope(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 			GenerationContext context, boolean withDot) {
 		// TODO -> handle super
 		if (qname != null && !qname.isStatic() && qname.getScope() != null && qname.getScope().isThisScope()) {
@@ -179,7 +178,7 @@ public class SpecialMethodHandlers {
 				currentHandler.printer.print(".");
 			}
 		} else if (n.getScope() != null) {
-			n.getScope().accept(currentHandler.getRuleVisitor(), context);
+			n.getScope().accept(currentHandler, context);
 			if (withDot) {
 				currentHandler.printer.print(".");
 			}
@@ -187,7 +186,7 @@ public class SpecialMethodHandlers {
 
 	}
 
-	public boolean handleMethodCall(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+	public boolean handleMethodCall(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 			GenerationContext context) {
 
 		SpecialMethodHandler handler = methodHandlers.get(n.getName());
@@ -228,12 +227,12 @@ public class SpecialMethodHandlers {
 	 * @param qname
 	 * @param context
 	 */
-	private void adapterMethod(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+	private void adapterMethod(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 			GenerationContext context) {
 		Expression arg0 = n.getArgs().get(0);
 		// TODO : use parenthesis only if the expression is complex
 		currentHandler.printer.print("(");
-		arg0.accept(currentHandler.getRuleVisitor(), context);
+		arg0.accept(currentHandler, context);
 		currentHandler.printer.print(")");
 		// TODO may add paranthesis here
 		currentHandler.printer.print(".");
@@ -245,7 +244,7 @@ public class SpecialMethodHandlers {
 			if (!first) {
 				currentHandler.printer.print(", ");
 			}
-			arg.accept(currentHandler.getRuleVisitor(), context);
+			arg.accept(currentHandler, context);
 			first = false;
 		}
 		currentHandler.printer.print(")");
@@ -260,7 +259,7 @@ public class SpecialMethodHandlers {
 	 * @param qname
 	 * @param context
 	 */
-	private void methodToProperty(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+	private void methodToProperty(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 			GenerationContext context) {
 		printScope(currentHandler, n, qname, context, true);
 		if (n.getArgs() == null || n.getArgs().size() == 0) {
@@ -268,23 +267,23 @@ public class SpecialMethodHandlers {
 		} else {
 			currentHandler.printer.print(n.getName().substring(1));
 			currentHandler.printer.print(" = ");
-			n.getArgs().get(0).accept(currentHandler.getRuleVisitor(), context);
+			n.getArgs().get(0).accept(currentHandler, context);
 		}
 	}
 
 	static final class $InvokeHandler implements SpecialMethodHandler {
 		@Override
-		public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+		public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 				GenerationContext context) {
 			printScope(currentHandler, n, qname, context, false);
 			// skip methodname
-			printArguments(currentHandler.getRuleVisitor(), currentHandler.printer, n.getArgs(), context);
+			currentHandler.printArguments(n.getArgs(), context);
 			return true;
 		}
 	}
 
 	private interface SpecialMethodHandler {
-		public boolean handle(DefaultHandler currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+		public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 				GenerationContext context);
 	}
 }

@@ -256,9 +256,12 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 	}
 
 	@Override
-	public void visit(EnumDeclaration n, NameScope arg) {
-		// TODO Auto-generated method stub
-		super.visit(n, arg);
+	public void visit(EnumDeclaration n, NameScope currentScope) {
+		TypeScope classScope = new TypeScope(inputFile, "type-" + n.getName(),
+				getTypeName(n, n.getName(), currentScope), currentScope);
+
+		n.setData(classScope);
+		super.visit(n, classScope);
 	}
 
 	@Override

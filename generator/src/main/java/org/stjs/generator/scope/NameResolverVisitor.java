@@ -125,7 +125,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 
 	@Override
 	public void visit(EnumDeclaration n, NameScopeWalker currentScope) {
-		super.visit(n, currentScope);
+		super.visit(n, currentScope.nextChild());
 	}
 
 	@Override

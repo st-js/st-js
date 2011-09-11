@@ -16,6 +16,7 @@
 package org.stjs.generator;
 
 import japa.parser.ast.Node;
+import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 
 import java.io.File;
 
@@ -35,7 +36,10 @@ public class GenerationContext {
 	private boolean skipHandlers = false;
 
 	private final File inputFile;
-	
+
+	private ClassOrInterfaceDeclaration currentType = null;
+
+	private boolean inlineObjectCreation = false;
 
 	public GenerationContext(File inputFile) {
 		this.inputFile = inputFile;
@@ -69,6 +73,32 @@ public class GenerationContext {
 
 	public File getInputFile() {
 		return inputFile;
+	}
+
+	public ClassOrInterfaceDeclaration setCurrentType(ClassOrInterfaceDeclaration n) {
+		ClassOrInterfaceDeclaration prevType = this.currentType;
+		currentType = n;
+		return prevType;
+	}
+
+	public ClassOrInterfaceDeclaration getCurrentType() {
+		return currentType;
+	}
+
+	public boolean isInlineObjectCreation() {
+		return inlineObjectCreation;
+	}
+
+	/**
+	 * set true if inside an inline object initialization
+	 * 
+	 * @param inlineObjectCreation
+	 * @return
+	 */
+	public boolean setInlineObjectCreation(boolean inlineObjectCreation) {
+		boolean prev = this.inlineObjectCreation;
+		this.inlineObjectCreation = inlineObjectCreation;
+		return prev;
 	}
 
 }
