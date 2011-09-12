@@ -18,11 +18,13 @@ public class InnerClassScopeTest {
 		CompilationUnit cu = compilationUnit(fileName);
 		ScopeTest.resolveName2(cu, fileName);
 
-		assertScope(cu).line(9).column(24, 0).assertName("doSth").assertScopePath("root.import")
-				.assertType(NameTypes.METHOD);
+		// Alex: the "scoped" method should not be resolved
+		// assertScope(cu).line(9).column(24, 0).assertName("doSth").assertScopePath("root.import")
+		// .assertType(NameTypes.METHOD);
 
-		assertScope(cu).line(9).column(70, 0).assertName("doSth").assertScopePath("root.import")
-				.assertType(NameTypes.METHOD);
+		// Alex: the "scoped" method should not be resolved
+		// assertScope(cu).line(9).column(70, 0).assertName("doSth").assertScopePath("root.import")
+		// .assertType(NameTypes.METHOD);
 
 		assertScope(cu).line(9).column(91, 0).assertName("doSth").assertScopePath("root.import")
 				.assertType(NameTypes.METHOD);

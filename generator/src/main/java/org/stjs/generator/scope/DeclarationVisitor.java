@@ -23,6 +23,7 @@ import japa.parser.ast.TypeParameter;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
+import japa.parser.ast.body.EnumConstantDeclaration;
 import japa.parser.ast.body.EnumDeclaration;
 import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
@@ -225,7 +226,10 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 			} else if (member instanceof TypeDeclaration) {
 				TypeDeclaration type = (TypeDeclaration) member;
 				if (ModifierSet.isStatic(type.getModifiers())) {
-					typeScope.addstaticInnerType(type.getName());
+					typeScope.addStaticInnerType(type.getName());
+				} else if (type instanceof EnumDeclaration) {
+					// treat enums as static types
+					typeScope.addStaticInnerType(type.getName());
 				} else {
 					typeScope.addInstanceInnerType(type.getName());
 				}
@@ -240,6 +244,7 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 		if (n.getAnonymousClassBody() != null) {
 			newScope = visitTypeDeclaration("anonymous-" + n.getBeginLine(), n.getAnonymousClassBody(), currentScope,
 					getTypeName(n, null, currentScope));
+			n.setData(newScope);
 		}
 		super.visit(n, newScope);
 	}
@@ -260,6 +265,11 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 		TypeScope classScope = new TypeScope(inputFile, "type-" + n.getName(),
 				getTypeName(n, n.getName(), currentScope), currentScope);
 
+		if (n.getEntries() != null) {
+			for (EnumConstantDeclaration enumConstant : n.getEntries()) {
+				classScope.addStaticField(enumConstant.getName(), new SourcePosition(enumConstant));
+			}
+		}
 		n.setData(classScope);
 		super.visit(n, classScope);
 	}

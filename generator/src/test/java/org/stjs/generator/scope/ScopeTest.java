@@ -162,11 +162,11 @@ public class ScopeTest {
 
 	@Test
 	public void testScopeFull() throws ParseException, IOException {
-		String fileName = "test/Check1.java";
+		String fileName = "test/Declaration1.java";
 		CompilationUnit cu = compilationUnit(fileName);
 		resolveName2(cu, fileName);
-		// assertScope(cu).line(33).column(20, 2).assertName("full").assertScopePath("root");
-		assertScope(cu).line(5).column(20, 2).assertName("full").assertScopePath("root");
+		assertScope(cu).line(33).column(20, 2).assertName("full").assertScopePath("root");
+		// assertScope(cu).line(5).column(20, 2).assertName("full").assertScopePath("root");
 	}
 
 	@Test

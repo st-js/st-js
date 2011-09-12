@@ -78,7 +78,7 @@ stjs.extend=function( _constructor,  _super){
 	function I(){};
 	I.prototype	= _super.prototype;
 	_constructor.prototype	= new I;
-	
+
 	// this prototype accepts zero or more arguments
 	// if the first argument is a nullable value (undefined, false, 0, "", null)
 	// this function will call directly the constructor
@@ -94,16 +94,16 @@ stjs.extend=function( _constructor,  _super){
 		// this is because inside super method we would like to be able
 		// to use again the magic _super with parent constructor or method as well
 		result		= (name ? _super.prototype[name] : _super).apply(this, Array.prototype.slice.call(arguments, 1));
-		
+
 		// after constructor or parent method execution
 		// we have to set the original super to be able
 		// to call this method another time
 		this._super	= _rem;
-		
+
 		// operation result
 		return	result;
 	};
-		
+
 	//copy static properties
 	// assign every method from proto instance
 	for(key in _super)
@@ -111,6 +111,32 @@ stjs.extend=function( _constructor,  _super){
 	// remember the correct constructor
 	_constructor.prototype.constructor	= _constructor;
 
-	// build package and assign	
+	// build package and assign
 	return	_constructor;
 };
+
+stjs.enumEntry=function(idx, name){
+	this._name = name;
+	this._ordinal = idx;
+}
+
+stjs.enumEntry.prototype.name=function(){
+	return this._name;
+}
+stjs.enumEntry.prototype.ordinal=function(){
+	return this._ordinal;
+}
+stjs.enumEntry.prototype.toString=function(){
+	return this._name;
+}
+
+stjs.enumeration=function(args){
+	var e = {};
+	e._values = [];
+	for(var i = 0; i < arguments.length; ++i){
+		e[arguments[i]] = new stjs.enumEntry(i, arguments[i]);
+		e._values[i] = e[arguments[i]];
+	}
+	e.values = function(){return this._values};
+	return e;
+}

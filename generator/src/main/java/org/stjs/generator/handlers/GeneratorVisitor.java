@@ -228,13 +228,11 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		printStaticMembersPrefix(n, arg);
 		// TxODO implements not considered
 		printer.print(" = ");
-		printer.printLn(" {");
+		printer.printLn(" stjs.enumeration(");
 		printer.indent();
 		if (n.getEntries() != null) {
 			for (Iterator<EnumConstantDeclaration> i = n.getEntries().iterator(); i.hasNext();) {
 				EnumConstantDeclaration e = i.next();
-				printer.print(e.getName());
-				printer.print(" : ");
 				printer.printStringLiteral(e.getName());
 				if (i.hasNext()) {
 					printer.printLn(", ");
@@ -244,7 +242,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		// TxODO members not considered
 		printer.printLn("");
 		printer.unindent();
-		printer.print("}");
+		printer.print(");");
 	}
 
 	@Override
@@ -497,6 +495,16 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		return null;
 	}
 
+	private ClassOrInterfaceDeclaration buildClassDeclaration(String className, String extendsFrom,
+			List<BodyDeclaration> members, List<Expression> constructorArgs) {
+		ClassOrInterfaceDeclaration decl = new ClassOrInterfaceDeclaration();
+		decl.setName(className);
+		decl.setExtends(Collections.singletonList(new ClassOrInterfaceType(extendsFrom)));
+		decl.setMembers(members);
+		// TODO add constructor if needed to call the super with the constructorArgs
+		return decl;
+	}
+
 	@Override
 	public void visit(ObjectCreationExpr n, GenerationContext arg) {
 		InitializerDeclaration block = getInitializerDeclaration(n);
@@ -511,23 +519,29 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		if (n.getAnonymousClassBody() != null && n.getAnonymousClassBody().size() >= 1) {
 			// special construction for inline function definition
 			MethodDeclaration method = getMethodDeclaration(n);
-			if (method == null) {
-				// TxODO error here
+			if (method != null) {
+				printMethod(method.getName(), method.getParameters(), method.getModifiers(), method.getBody(), arg,
+						true);
 				return;
 			}
-			printMethod(method.getName(), method.getParameters(), method.getModifiers(), method.getBody(), arg, true);
+			// special construction to handle the inline body
+			// build a special type called _InlineType to handle this
+			printer.printLn("(function(){");
+			ClassOrInterfaceDeclaration inlineFakeClass = buildClassDeclaration(GeneratorConstants.SPECIAL_INLINE_TYPE,
+					n.getType().getName(), n.getAnonymousClassBody(), n.getArgs());
+			inlineFakeClass.setData(n.getData());
+			inlineFakeClass.accept(this, arg);
+
+			printer.printLn("");
+			printer.print("return new ").print(GeneratorConstants.SPECIAL_INLINE_TYPE);
+			printArguments(n.getArgs(), arg);
+			printer.printLn(";");
+			printer.print("})()");
 			return;
 		}
 
-		if (n.getScope() != null) {
-			n.getScope().accept(this, arg);
-			printer.print(".");
-		}
-
 		printer.print("new ");
-
 		n.getType().accept(this, arg);
-
 		printArguments(n.getArgs(), arg);
 
 	}
@@ -573,7 +587,11 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 			return;
 		}
 		// printer.print(n.getName() + " = ");
-		printStaticMembersPrefix(n, arg);
+		if (GeneratorConstants.SPECIAL_INLINE_TYPE.equals(n.getName())) {
+			printer.print("var ").print(n.getName());
+		} else {
+			printStaticMembersPrefix(n, arg);
+		}
 		printer.print(" = ");
 		if (n.getMembers() != null) {
 			ClassOrInterfaceDeclaration prevType = arg.setCurrentType(n);
@@ -588,20 +606,18 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 				printer.printLn();
 				printer.printLn("stjs.extend(" + n.getName() + ", " + n.getExtends().get(0).getName() + ");");
 			}
-			printMembers(n, arg);
+			printMembers(n.getMembers(), arg);
 			printMainMethodCall(n, arg);
 			arg.setCurrentType(prevType);
 		}
 
 	}
 
-	private void printMembers(ClassOrInterfaceDeclaration n, GenerationContext context) {
-		List<BodyDeclaration> members = n.getMembers();
+	private void printMembers(List<BodyDeclaration> members, GenerationContext context) {
 		for (BodyDeclaration member : members) {
 			if (member instanceof ConstructorDeclaration) {
 				continue;
 			}
-			printer.printLn();
 			printer.printLn();
 			member.accept(this, context);
 		}
@@ -933,7 +949,6 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(FieldAccessExpr n, GenerationContext arg) {
-
 		n.getScope().accept(this, arg);
 		printer.print(".");
 		printer.print(n.getField());
@@ -971,6 +986,8 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 						if (stopVisit) {
 							return;
 						}
+						printer.print(n.getName());
+						printArguments(n.getArgs(), arg);
 					}
 				}
 			} else {
@@ -1114,9 +1131,14 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 					"Only one constructor is allowed");
 		}
 
-		printer.print("this._super");
-		printArguments(Collections.singleton("null"), n.getArgs(), Collections.<String> emptyList(), arg);
-		printer.print(";");
+		ClassOrInterfaceDeclaration currentTypeDecl = arg.getCurrentType();
+		PreConditions.checkNotNull(currentTypeDecl);
+		if (currentTypeDecl.getExtends() != null && currentTypeDecl.getExtends().size() > 0) {
+			// avoid useless call to super() when the super class is Object
+			printer.print("this._super");
+			printArguments(Collections.singleton("null"), n.getArgs(), Collections.<String> emptyList(), arg);
+			printer.print(";");
+		}
 	}
 
 	@Override

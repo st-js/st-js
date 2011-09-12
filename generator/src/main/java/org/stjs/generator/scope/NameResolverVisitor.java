@@ -23,19 +23,16 @@ import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
 import japa.parser.ast.body.EnumDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
-import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.FieldAccessExpr;
 import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.ObjectCreationExpr;
-import japa.parser.ast.expr.SuperExpr;
 import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.stmt.CatchClause;
 import japa.parser.ast.stmt.ForStmt;
 import japa.parser.ast.stmt.ForeachStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.PrimitiveType;
-import japa.parser.ast.visitor.GenericVisitorAdapter;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
 
 import java.util.Collection;
@@ -138,47 +135,31 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		super.visit(n, currentScope.nextChild());
 	}
 
-	private String nodeNameWithScope(Expression node) {
-		return node.accept(new GenericVisitorAdapter<String, String>() {
-			@Override
-			public String visit(FieldAccessExpr parentExpr, String arg) {
-				if (parentExpr.getScope() != null) {
-					String parentName = nodeNameWithScope(parentExpr.getScope());
-					if (parentName != null) {
-						return parentName + "." + parentExpr.getField();
-					}
-				}
-				return parentExpr.getField();
-			}
-
-			@Override
-			public String visit(SuperExpr n, String arg) {
-				return "super";
-			}
-
-			@Override
-			public String visit(NameExpr n, String arg) {
-				return n.getName();
-			}
-		}, null);
-	}
+	/*
+	 * private String nodeNameWithScope(Expression node) { return node.accept(new GenericVisitorAdapter<String,
+	 * String>() {
+	 * 
+	 * @Override public String visit(FieldAccessExpr parentExpr, String arg) { if (parentExpr.getScope() != null) {
+	 * String parentName = nodeNameWithScope(parentExpr.getScope()); if (parentName != null) { return parentName + "." +
+	 * parentExpr.getField(); } } return parentExpr.getField(); }
+	 * 
+	 * @Override public String visit(SuperExpr n, String arg) { return "super"; }
+	 * 
+	 * @Override public String visit(NameExpr n, String arg) { return n.getName(); } }, null); }
+	 */
 
 	/*------ method having to resolve identifiers ---------*/
 	@Override
 	public void visit(MethodCallExpr n, NameScopeWalker currentScope) {
 		String name = n.getName();
 		if (n.getScope() != null) {
-			name = nodeNameWithScope(n.getScope()) + "." + name;
+			name = n.getScope() + "." + name;
 		}
 		// only for methods without a scope
 		SourcePosition pos = new SourcePosition(n);
 		QualifiedName<MethodName> qname = currentScope.getScope().resolveMethod(pos, name, this);
 		if (qname != null) {
-			// TODO Alex: This is not correct as accessOuterScope is set even for variable.method (where variable is of
-			// the outer type)!
-			if (n.getScope() == null) {
-				checkNonStaticAccessToOuterScope(currentScope, pos, qname);
-			}
+			checkNonStaticAccessToOuterScope(currentScope, pos, qname);
 			n.setData(qname);
 		}
 
@@ -198,25 +179,23 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 
 	@Override
 	public void visit(FieldAccessExpr n, NameScopeWalker currentScope) {
+		String name = n.getScope() + "." + n.getField();
 		SourcePosition pos = new SourcePosition(n);
-		// try to figure out if it's variable.field or Package.Class.field
-		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(pos, getFirstScope(n), this);
-		if (qname == null) {
-			// not found - so it's rather Package.Class.field
-			QualifiedName<TypeName> resolvedType = currentScope.getScope().resolveType(pos, getFirstScope(n), this);
-			if (resolvedType != null) {
-				// no need to persist it
-				return;
-			}
-		}
-
-		if (qname == null) {
-			checkImport(n, n.getScope().toString(), currentScope);
-			qname = currentScope.getScope().resolveIdentifier(pos, n.toString(), this);
-		}
+		/*
+		 * // try to figure out if it's variable.field or Package.Class.field QualifiedName<IdentifierName> qname =
+		 * currentScope.getScope().resolveIdentifier(pos, getFirstScope(n), this); if (qname == null) { // not found -
+		 * so it's rather Package.Class.field QualifiedName<TypeName> resolvedType =
+		 * currentScope.getScope().resolveType(pos, getFirstScope(n), this); if (resolvedType != null) { // no need to
+		 * persist it return; } }
+		 * 
+		 * if (qname == null) { checkImport(n, n.getScope().toString(), currentScope); qname =
+		 * currentScope.getScope().resolveIdentifier(pos, n.toString(), this); }
+		 */
+		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(pos, name, this);
 		if (qname != null) {
 			n.setData(qname);
 		}
+		super.visit(n, currentScope);
 	}
 
 	private String getFirstScope(FieldAccessExpr n) {

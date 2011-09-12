@@ -20,6 +20,7 @@ import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.expr.Expression;
+import japa.parser.ast.expr.FieldAccessExpr;
 import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
 
@@ -56,8 +57,7 @@ public class ScopeAssert {
 	}
 
 	/**
-	 * The AST parser uses a 8-space tab when calculating the column. translate
-	 * it to a 4-space tab
+	 * The AST parser uses a 8-space tab when calculating the column. translate it to a 4-space tab
 	 * 
 	 * @param columnInEditor
 	 * @param tabs
@@ -75,14 +75,10 @@ public class ScopeAssert {
 			final AtomicReference<String> nodeNameP = new AtomicReference<String>();
 			new VoidVisitorAdapter<Object>() {
 				@SuppressWarnings("unchecked")
-				private void matchOnName(
-						final AtomicReference<QualifiedName<IdentifierName>> qNamePointer,
-						final AtomicReference<String> nodeNameP, Expression n,
-						String name) {
-					if (n.getBeginLine() == line
-							&& n.getBeginColumn() == column) {
-						qNamePointer.set((QualifiedName<IdentifierName>) n
-								.getData());
+				private void matchOnName(final AtomicReference<QualifiedName<IdentifierName>> qNamePointer,
+						final AtomicReference<String> nodeNameP, Expression n, String name) {
+					if (n.getBeginLine() == line && n.getBeginColumn() == column) {
+						qNamePointer.set((QualifiedName<IdentifierName>) n.getData());
 						nodeNameP.set(name);
 					}
 				}
@@ -90,6 +86,11 @@ public class ScopeAssert {
 				@Override
 				public void visit(NameExpr n, Object arg) {
 					matchOnName(qNamePointer, nodeNameP, n, n.getName());
+				}
+
+				@Override
+				public void visit(FieldAccessExpr n, Object arg) {
+					matchOnName(qNamePointer, nodeNameP, n, n.getField());
 				}
 
 				@Override

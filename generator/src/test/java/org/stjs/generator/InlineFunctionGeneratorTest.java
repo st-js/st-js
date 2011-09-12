@@ -17,14 +17,16 @@ public class InlineFunctionGeneratorTest {
 
 	@Test
 	public void testInterfaceAndParam() {
-		// this should not generate an inline function (TODO -> what should it do!?)
-		assertCodeContains(InlineFunctions2.class, "xmethod(function(arg){arg=arg+1;})");
+		assertCodeContains(InlineFunctions2.class, "stjs.extend(_InlineType, FunctionInterface);");
+		assertCodeContains(InlineFunctions2.class, "_InlineType.prototype.test = 2; "
+				+ "_InlineType.prototype.run=function(arg){arg=arg+1;}");
 	}
 
 	@Test
 	public void testInterfaceTwoMethods() {
-		// this should not generate an inline function (TODO -> what should it do!?)
-		assertCodeContains(InlineFunctions3.class, "xmethod(function(arg){arg=arg+1;})");
+		assertCodeContains(InlineFunctions3.class, "stjs.extend(_InlineType, FunctionInterface2);");
+		assertCodeContains(InlineFunctions3.class, "_InlineType.prototype.run=function(arg){arg=arg+1;}"
+				+ " _InlineType.prototype.run2=function(arg2){arg2=arg2+1;}");
 	}
 
 	@Test

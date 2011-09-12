@@ -18,5 +18,10 @@ package org.stjs.generator;
 public class GeneratorConstants {
 	public static final String SPECIAL_THIS = "THIS";
 
+	/**
+	 * this is the type to be used when defining an inline type
+	 */
+	public static final String SPECIAL_INLINE_TYPE = "_InlineType";
+
 	public static final String SUPER = "super";
 }

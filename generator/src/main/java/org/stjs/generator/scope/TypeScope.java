@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
@@ -34,7 +35,6 @@ import org.stjs.generator.scope.path.QualifiedPath;
  * 
  */
 public class TypeScope extends NameScope {
-	private static final String SUPER = "super";
 	private final Set<String> staticFields = new HashSet<String>();
 	private final Set<String> staticMethods = new HashSet<String>();
 	private final Set<String> staticInnerTypes = new HashSet<String>();
@@ -81,9 +81,11 @@ public class TypeScope extends NameScope {
 		String name = QualifiedPath.afterLastDot(fullName);
 		String scopePath = QualifiedPath.beforeLastDot(fullName);
 
-		if (SUPER.equals(scopePath) && isInCurrentTypeScope(this, currentScope)) {// go directly to the parent
+		// if (SUPER.equals(scopePath) && isInCurrentTypeScope(this, currentScope)) {// go directly to the parent
+		if (scopePath != null && !scopePath.isEmpty()) {
 			if (getParent() != null) {
-				return getParent().resolveMethod(pos, name, currentScope, visitor);
+				return getParent().resolveMethod(pos, GeneratorConstants.SUPER.equals(scopePath) ? name : fullName,
+						currentScope, visitor);
 			}
 			return null;
 		}
@@ -101,15 +103,26 @@ public class TypeScope extends NameScope {
 			return QualifiedName.<MethodName> outerScope(this, true, NameTypes.METHOD, getDeclaredTypeName());
 		}
 		if (getParent() != null) {
-			return getParent().resolveMethod(pos, name, currentScope, visitor);
+			return getParent().resolveMethod(pos, fullName, currentScope, visitor);
 		}
 		return null;
 	}
 
 	@Override
-	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope,
-			NameResolverVisitor visitor) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String fullName,
+			NameScope currentScope, NameResolverVisitor visitor) {
 		boolean accessingOuterScope = !isInCurrentTypeScope(this, currentScope);
+		String name = QualifiedPath.afterLastDot(fullName);
+		String scopePath = QualifiedPath.beforeLastDot(fullName);
+
+		// if (SUPER.equals(scopePath) && isInCurrentTypeScope(this, currentScope)) {// go directly to the parent
+		if (scopePath != null && !scopePath.isEmpty()) {
+			if (getParent() != null) {
+				return getParent().resolveIdentifier(pos, GeneratorConstants.SUPER.equals(scopePath) ? name : fullName,
+						currentScope, visitor);
+			}
+			return null;
+		}
 		NameTypes type = null;
 		boolean isStatic;
 
@@ -162,7 +175,7 @@ public class TypeScope extends NameScope {
 		}
 	}
 
-	public void addstaticInnerType(String name) {
+	public void addStaticInnerType(String name) {
 		staticInnerTypes.add(name);
 	}
 

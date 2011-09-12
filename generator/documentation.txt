@@ -1,0 +1,8 @@
+Name, Field and Method resolution
+
+The goals of resolution are:
+1) to be able to prefix all instance methods with "this." - if not done already
+2) to be able to prefix all instance fields with "this." - if not done already
+3) check access of the outer scope
+4) put full path name for static access to methods
+5) put full path name for static access to fields

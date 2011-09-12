@@ -9,6 +9,10 @@ import test.generator.names.Names2;
 import test.generator.names.Names3;
 import test.generator.names.Names4;
 import test.generator.names.Names5;
+import test.generator.names.Names6;
+import test.generator.names.Names7;
+import test.generator.names.Names8;
+import test.generator.names.Names9;
 
 public class NamesGeneratorTest {
 	@Test
@@ -23,7 +27,7 @@ public class NamesGeneratorTest {
 
 	@Test
 	public void shouldDelegateToDefaultBehaviorIfQNameIsNotFound() {
-		assertCodeContains(Names3.class, "Names3.field1.method()");
+		assertCodeContains(Names3.class, "Names3.field.method()");
 	}
 
 	@Test
@@ -35,5 +39,25 @@ public class NamesGeneratorTest {
 	public void testSpecialThis() {
 		// the special parameter THIS should be transformed in this
 		assertCodeContains(Names5.class, "return this.field");
+	}
+
+	@Test
+	public void testScopeTwoMethods() {
+		assertCodeContains(Names6.class, "Names6.field.get().method()");
+	}
+
+	@Test
+	public void testStaticMethodWithClass() {
+		assertCodeContains(Names7.class, "Names7.staticMethod()");
+	}
+
+	@Test
+	public void testStaticMethodWithClassAndPackage() {
+		assertCodeContains(Names8.class, "Names8.staticMethod()");
+	}
+
+	@Test
+	public void teestStaticMethodInnerClass() {
+		assertCodeContains(Names9.class, "Names9.Inner.staticMethod()");
 	}
 }
