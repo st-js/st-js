@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import junit.framework.Assert;
 
+import org.stjs.generator.ASTNodeData;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.QualifiedName.NameTypes;
 
@@ -78,7 +79,8 @@ public class ScopeAssert {
 				private void matchOnName(final AtomicReference<QualifiedName<IdentifierName>> qNamePointer,
 						final AtomicReference<String> nodeNameP, Expression n, String name) {
 					if (n.getBeginLine() == line && n.getBeginColumn() == column) {
-						qNamePointer.set((QualifiedName<IdentifierName>) n.getData());
+						qNamePointer
+								.set((QualifiedName<IdentifierName>) ((ASTNodeData) n.getData()).getQualifiedName());
 						nodeNameP.set(name);
 					}
 				}

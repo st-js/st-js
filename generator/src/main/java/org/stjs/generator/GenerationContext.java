@@ -39,8 +39,6 @@ public class GenerationContext {
 
 	private ClassOrInterfaceDeclaration currentType = null;
 
-	private boolean inlineObjectCreation = false;
-
 	public GenerationContext(File inputFile) {
 		this.inputFile = inputFile;
 	}
@@ -48,13 +46,13 @@ public class GenerationContext {
 	@SuppressWarnings("unchecked")
 	public QualifiedName<MethodName> resolveMethod(Node node) {
 		// TODO : why not resolving here? what's the point of having an other pass?
-		return (QualifiedName<MethodName>) node.getData();
+		return (QualifiedName<MethodName>) ((ASTNodeData) node.getData()).getQualifiedName();
 	}
 
 	@SuppressWarnings("unchecked")
 	public QualifiedName<IdentifierName> resolveIdentifier(Node node) {
 		// TODO : why not resolving here? what's the point of having an other pass?
-		return (QualifiedName<IdentifierName>) node.getData();
+		return (QualifiedName<IdentifierName>) ((ASTNodeData) node.getData()).getQualifiedName();
 	}
 
 	public GenerationContext skipHandlers() {
@@ -83,22 +81,6 @@ public class GenerationContext {
 
 	public ClassOrInterfaceDeclaration getCurrentType() {
 		return currentType;
-	}
-
-	public boolean isInlineObjectCreation() {
-		return inlineObjectCreation;
-	}
-
-	/**
-	 * set true if inside an inline object initialization
-	 * 
-	 * @param inlineObjectCreation
-	 * @return
-	 */
-	public boolean setInlineObjectCreation(boolean inlineObjectCreation) {
-		boolean prev = this.inlineObjectCreation;
-		this.inlineObjectCreation = inlineObjectCreation;
-		return prev;
 	}
 
 }

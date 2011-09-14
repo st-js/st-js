@@ -1,3 +1,18 @@
+/**
+ *  Copyright 2011 Alexandru Craciun, Eyal Kaspi
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package org.stjs.generator.handlers;
 
 import static japa.parser.ast.body.ModifierSet.isStatic;
@@ -93,6 +108,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.stjs.generator.ASTNodeData;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.JavascriptGenerationException;
@@ -510,9 +526,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		InitializerDeclaration block = getInitializerDeclaration(n);
 		if (block != null) {
 			// special construction for object initialization new Object(){{x = 1; y = 2; }};
-			boolean prev = arg.setInlineObjectCreation(true);
 			block.getBlock().accept(this, arg);
-			arg.setInlineObjectCreation(prev);
 			return;
 		}
 
@@ -639,7 +653,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	private void printStaticMembersPrefix(TypeDeclaration n, GenerationContext context) {
-		TypeScope typeScope = (TypeScope) n.getData();
+		TypeScope typeScope = ((ASTNodeData) n.getData()).getTypeScope();
 		JavaTypeName declaredClassName = typeScope.getDeclaredTypeName();
 		Option<String> fullyQualifiedString = declaredClassName.getFullName(false);
 		if (fullyQualifiedString.isEmpty()) {
@@ -773,9 +787,60 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		printer.print("]");
 	}
 
+	private Node parent(Node n) {
+		return ((ASTNodeData) n.getData()).getParent();
+	}
+
+	private Node parent(Node n, int upLevel) {
+		Node p = n;
+		for (int i = 0; i < upLevel && p != null; ++i) {
+			p = parent(p);
+		}
+		return p;
+	}
+
+	private Node checkParent(Node n, Class<?> clazz) {
+		Node parent = parent(n);
+		if (parent == null) {
+			return null;
+		}
+		return (clazz.isAssignableFrom(parent.getClass())) ? parent : null;
+	}
+
+	/**
+	 * TODO - this can be done more generically
+	 * 
+	 * @param n
+	 * @return true if the node is a direct child following the path:
+	 *         //ObjectCreationExpr/InitializerDeclaration/BlockStmt/Child
+	 */
+	private boolean isInlineObjectCreationChild(Node n, int upLevel) {
+		return isInlineObjectCreationBlock(parent(n, upLevel));
+
+	}
+
+	/**
+	 * 
+	 * @param n
+	 * @return true if the node is a block statement //ObjectCreationExpr/InitializerDeclaration/BlockStmt
+	 */
+	private boolean isInlineObjectCreationBlock(Node n) {
+		if (!(n instanceof BlockStmt)) {
+			return false;
+		}
+		Node p = null;
+		if ((p = checkParent(n, InitializerDeclaration.class)) == null) {
+			return false;
+		}
+		if ((p = checkParent(p, ObjectCreationExpr.class)) == null) {
+			return false;
+		}
+		return true;
+	}
+
 	@Override
 	public void visit(AssignExpr n, GenerationContext arg) {
-		if (arg.isInlineObjectCreation()) {
+		if (isInlineObjectCreationChild(n, 2)) {
 			n.getTarget().accept(this, arg);
 			printer.print(" ");
 			switch (n.getOperator()) {
@@ -1169,11 +1234,11 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 			printer.indent();
 			for (int i = 0; i < n.getStmts().size(); ++i) {
 				Statement s = n.getStmts().get(i);
-				if (arg.isInlineObjectCreation()) {
+				if (isInlineObjectCreationChild(s, 1)) {
 					checkAssignStatement(s, arg);
 				}
 				s.accept(this, arg);
-				if (arg.isInlineObjectCreation() && (i < n.getStmts().size() - 1) && (n.getStmts().size() > 1)) {
+				if (isInlineObjectCreationChild(s, 1) && (i < n.getStmts().size() - 1) && (n.getStmts().size() > 1)) {
 					printer.print(",");
 				}
 				printer.printLn();
@@ -1199,7 +1264,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(ExpressionStmt n, GenerationContext arg) {
 		n.getExpression().accept(this, arg);
-		if (!arg.isInlineObjectCreation()) {
+		if (!isInlineObjectCreationChild(n, 1)) {
 			printer.print(";");
 		}
 	}

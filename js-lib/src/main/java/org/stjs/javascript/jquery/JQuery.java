@@ -267,9 +267,13 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery keydown();
 
+	public FullJQuery keypress();
+
 	public FullJQuery keypress(EventHandler handler);
 
 	public FullJQuery keyup();
+
+	public FullJQuery keyup(EventHandler handler);
 
 	public FullJQuery live(String eventType, EventHandler handler);
 
@@ -426,9 +430,11 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery replaceWith(JQuery<?> jq);
 
+	public String serialize();
+
 	public FullJQuery text(String txt);
 
-	public FullJQuery text(int txt);
+	public FullJQuery text(Number txt);
 
 	public String text();
 

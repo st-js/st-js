@@ -31,6 +31,7 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.handlers.SetParentVisitor;
 import org.stjs.generator.scope.QualifiedName.NameTypes;
 import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
 
@@ -43,6 +44,7 @@ public class ScopeTest {
 	static NameResolverVisitor resolveName2(CompilationUnit cu, String clazz, Collection<String> packages)
 			throws ParseException, IOException {
 
+		cu.accept(new SetParentVisitor(), null);
 		packages = new HashSet<String>(packages);
 		packages.add("test");
 		packages.add("java.lang");

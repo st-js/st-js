@@ -38,6 +38,7 @@ import japa.parser.ast.visitor.VoidVisitorAdapter;
 import java.util.Collection;
 import java.util.Set;
 
+import org.stjs.generator.ASTNodeData;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
@@ -160,7 +161,8 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		QualifiedName<MethodName> qname = currentScope.getScope().resolveMethod(pos, name, this);
 		if (qname != null) {
 			checkNonStaticAccessToOuterScope(currentScope, pos, qname);
-			n.setData(qname);
+
+			((ASTNodeData) n.getData()).setQualifiedName(qname);
 		}
 
 		super.visit(n, currentScope);
@@ -193,7 +195,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		 */
 		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(pos, name, this);
 		if (qname != null) {
-			n.setData(qname);
+			((ASTNodeData) n.getData()).setQualifiedName(qname);
 		}
 		super.visit(n, currentScope);
 	}
@@ -248,7 +250,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		QualifiedName<IdentifierName> qname = currentScope.getScope().resolveIdentifier(pos, n.getName(), this);
 		if (qname != null) {
 			checkNonStaticAccessToOuterScope(currentScope, pos, qname);
-			n.setData(qname);
+			((ASTNodeData) n.getData()).setQualifiedName(qname);
 		}
 		super.visit(n, currentScope);
 	}
@@ -266,7 +268,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		QualifiedName<TypeName> qname = currentScope.getScope().resolveType(pos, fullName.toString(), this);
 		if (qname != null) {
 
-			n.setData(qname);
+			((ASTNodeData) n.getData()).setQualifiedName(qname);
 			if (qname.getType() == GENERIC_TYPE || qname.getType() == INNER_CLASS) {
 				// no need to check for imports
 				super.visit(n, currentScope);

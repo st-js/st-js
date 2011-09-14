@@ -11,6 +11,7 @@ import test.generator.methods.Methods4;
 import test.generator.methods.Methods5;
 import test.generator.methods.Methods6;
 import test.generator.methods.Methods7;
+import test.generator.methods.Methods8;
 
 public class MethodsGeneratorTest {
 	@Test
@@ -49,5 +50,11 @@ public class MethodsGeneratorTest {
 	public void testSpecialThis() {
 		// the special parameter THIS should not be added
 		assertCodeContains(Methods7.class, "Methods7.prototype.method=function(arg2){");
+	}
+
+	@Test
+	public void testAdapter() {
+		// the special parameter THIS should not be added
+		assertCodeContains(Methods8.class, "(10).toFixed(2)");
 	}
 }

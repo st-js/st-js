@@ -36,14 +36,8 @@
 		</repository>
 
 		<repository>
-			<id>releases</id>
-			<url>https://javaparser.googlecode.com/svn/maven2</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
+			<id>javaparser-releases</id>
+			<url>http://javaparser.googlecode.com/svn/maven2</url>
 		</repository>
 	</repositories>
 
@@ -84,6 +78,13 @@
 			<groupId>org.mozilla</groupId>
 			<artifactId>rhino</artifactId>
 			<version>1.7R3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>dom4j</groupId>
+			<artifactId>dom4j</artifactId>
+			<version>1.6.1</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

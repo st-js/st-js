@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import test.generator.inlineObjects.InlineObjects1;
 import test.generator.inlineObjects.InlineObjects2;
+import test.generator.inlineObjects.InlineObjects3;
 
 public class InlineObjectsGeneratorTest {
 	@Test
@@ -18,6 +19,12 @@ public class InlineObjectsGeneratorTest {
 	public void testInlineObjectAndOtherStatements() {
 		// other statements cannot be put inside the initializing blocks
 		generate(InlineObjects2.class);
+	}
+
+	@Test
+	public void testStatementsInsideInlineFunctions() {
+		// make sure the prop:value syntax doesn't go further
+		assertCodeContains(InlineObjects3.class, "x=2");
 	}
 
 }

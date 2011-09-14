@@ -43,6 +43,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
+import org.stjs.generator.ASTNodeData;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.JavascriptKeywords;
 import org.stjs.generator.SourcePosition;
@@ -168,7 +169,9 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 			classScope = new TypeScope(inputFile, "type-" + n.getName(), getTypeName(n, n.getName(), currentScope),
 					classScope);
 		}
-		n.setData(classScope);
+		if (classScope instanceof TypeScope) {
+			((ASTNodeData) n.getData()).setTypeScope((TypeScope) classScope);
+		}
 		super.visit(n, classScope);
 	}
 
@@ -244,7 +247,7 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 		if (n.getAnonymousClassBody() != null) {
 			newScope = visitTypeDeclaration("anonymous-" + n.getBeginLine(), n.getAnonymousClassBody(), currentScope,
 					getTypeName(n, null, currentScope));
-			n.setData(newScope);
+			((ASTNodeData) n.getData()).setTypeScope((TypeScope) newScope);
 		}
 		super.visit(n, newScope);
 	}
@@ -270,7 +273,7 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 				classScope.addStaticField(enumConstant.getName(), new SourcePosition(enumConstant));
 			}
 		}
-		n.setData(classScope);
+		((ASTNodeData) n.getData()).setTypeScope(classScope);
 		super.visit(n, classScope);
 	}
 

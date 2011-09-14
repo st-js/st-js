@@ -98,403 +98,563 @@ import japa.parser.ast.type.WildcardType;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
 
 public class ForEachNodeVisitor<V> extends VoidVisitorAdapter<V> {
-	protected V process(Node node, V arg) {
-		return arg;
+	protected void before(Node node, V arg) {
+	}
+
+	protected void after(Node node, V arg) {
 	}
 
 	@Override
 	public void visit(AnnotationDeclaration n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(AnnotationMemberDeclaration n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ArrayAccessExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ArrayCreationExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ArrayInitializerExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(AssertStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(AssignExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(BinaryExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(BlockComment n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(BlockStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(BooleanLiteralExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(BreakStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(CastExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(CatchClause n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(CharLiteralExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ClassExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ClassOrInterfaceDeclaration n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ClassOrInterfaceType n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(CompilationUnit n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ConditionalExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ConstructorDeclaration n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ContinueStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(DoStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(DoubleLiteralExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(EmptyMemberDeclaration n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(EmptyStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(EmptyTypeDeclaration n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(EnclosedExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(EnumConstantDeclaration n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(EnumDeclaration n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ExplicitConstructorInvocationStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ExpressionStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(FieldAccessExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(FieldDeclaration n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ForeachStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ForStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(IfStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ImportDeclaration n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(InitializerDeclaration n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(InstanceOfExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(IntegerLiteralExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(IntegerLiteralMinValueExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(JavadocComment n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(LabeledStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(LineComment n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(LongLiteralExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(LongLiteralMinValueExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(MarkerAnnotationExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(MemberValuePair n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(MethodCallExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(MethodDeclaration n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(NameExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(NormalAnnotationExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(NullLiteralExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ObjectCreationExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(PackageDeclaration n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(Parameter n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(PrimitiveType n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(QualifiedNameExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ReferenceType n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ReturnStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(SingleMemberAnnotationExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(StringLiteralExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(SuperExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(SwitchEntryStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(SwitchStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(SynchronizedStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ThisExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(ThrowStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(TryStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(TypeDeclarationStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(TypeParameter n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(UnaryExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(VariableDeclarationExpr n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(VariableDeclarator n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(VariableDeclaratorId n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(VoidType n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(WhileStmt n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 	@Override
 	public void visit(WildcardType n, V arg) {
-		super.visit(n, process(n, arg));
+		before(n, arg);
+		super.visit(n, arg);
+		after(n, arg);
 	}
 
 }

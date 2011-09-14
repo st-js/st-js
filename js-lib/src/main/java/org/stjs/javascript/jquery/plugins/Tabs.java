@@ -26,7 +26,13 @@ public interface Tabs<FullJQuery extends JQuery<?>> {
 
 	public Object tabs(String option, String optionName);
 
+	public FullJQuery tabs(String methodName, int index);
+
 	public FullJQuery tabs(String option, String optionName, Object value);
+
+	public Object tabs(String option, String optionName, Object value, int index);
+
+	public FullJQuery tabs(String option, int index, String url);
 
 	public FullJQuery tabs(String option, DraggableOptions<FullJQuery> options);
 }

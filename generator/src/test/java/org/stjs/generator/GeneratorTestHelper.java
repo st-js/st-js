@@ -22,7 +22,8 @@ public class GeneratorTestHelper {
 		String path = clazz.getName().replace('.', File.separatorChar);
 		path = "src/test/java/" + path + ".java";
 		gen.generateJavascript(Thread.currentThread().getContextClassLoader(), new File(path), new File(TMP_FILE),
-				new GeneratorConfigurationBuilder().allowedPackage("test").build());
+				new GeneratorConfigurationBuilder().allowedPackage("test").allowedPackage("org.stjs.javascript")
+						.build());
 
 		try {
 			return Files.toString(new File(TMP_FILE), Charset.defaultCharset());

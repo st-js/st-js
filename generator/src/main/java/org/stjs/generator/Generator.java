@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.stjs.generator.handlers.GeneratorVisitor;
+import org.stjs.generator.handlers.SetParentVisitor;
 import org.stjs.generator.scope.DeclarationVisitor;
 import org.stjs.generator.scope.FullyQualifiedScope;
 import org.stjs.generator.scope.NameResolverVisitor;
@@ -73,6 +74,9 @@ public class Generator {
 			CompilationUnit cu = null;
 			// parse the file
 			cu = JavaParser.parse(in);
+
+			// set the parent of each node
+			cu.accept(new SetParentVisitor(), context);
 
 			// resolve all the calls to methods and variables
 			Collection<String> allowedPackages = configuration.getAllowedPackages();

@@ -15,13 +15,13 @@
  */
 package org.stjs.javascript.jquery;
 
-import org.stjs.javascript.jquery.plugins.Accordion;
 import org.stjs.javascript.jquery.plugins.AutoComplete;
 import org.stjs.javascript.jquery.plugins.Button;
 import org.stjs.javascript.jquery.plugins.Datepicker;
 import org.stjs.javascript.jquery.plugins.Dialog;
 import org.stjs.javascript.jquery.plugins.Draggable;
 import org.stjs.javascript.jquery.plugins.Droppable;
+import org.stjs.javascript.jquery.plugins.JQueryUI;
 import org.stjs.javascript.jquery.plugins.Progressbar;
 import org.stjs.javascript.jquery.plugins.Resizable;
 import org.stjs.javascript.jquery.plugins.Selectable;
@@ -37,7 +37,7 @@ import org.stjs.javascript.jquery.plugins.Tabs;
  * 
  */
 public interface JQueryAndPlugins<FullJQuery extends JQueryAndPlugins<?>> extends JQuery<FullJQuery>, //
-		Accordion<FullJQuery>,//
+		JQueryUI<FullJQuery>,// Accordion<FullJQuery>,//
 		AutoComplete<FullJQuery>,//
 		Button<FullJQuery>,//
 		Datepicker<FullJQuery>,//

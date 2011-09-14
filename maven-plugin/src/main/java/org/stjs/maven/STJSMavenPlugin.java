@@ -62,7 +62,6 @@ public class STJSMavenPlugin extends AbstractMojo {
 	 * 
 	 * @parameter default-value="${project.compileSourceRoots}"
 	 * @required
-	 * @readonly
 	 */
 	private List<String> compileSourceRoots;
 
@@ -70,7 +69,6 @@ public class STJSMavenPlugin extends AbstractMojo {
 	 * The list of packages that can be referenced from the classes that will be processed by the generator
 	 * 
 	 * @parameter
-	 * @readonly
 	 */
 	private List<String> allowedPackages;
 
