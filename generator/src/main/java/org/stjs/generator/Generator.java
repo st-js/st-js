@@ -143,7 +143,7 @@ public class Generator {
 				}
 			}, outputFile);
 		} catch (IOException e) {
-			throw new RuntimeException("Could not copy the " + STJS_FILE + " file to the folder " + folder);
+			throw new RuntimeException("Could not copy the " + STJS_FILE + " file to the folder " + folder, e);
 		}
 	}
 

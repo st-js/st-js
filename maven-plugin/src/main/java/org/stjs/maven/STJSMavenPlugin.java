@@ -161,6 +161,7 @@ public class STJSMavenPlugin extends AbstractMojo {
 
 		String targetRootPath = targetRootPackage != null ? targetRootPackage.replace('.', File.separatorChar) : "";
 
+		boolean atLeastOneFileGenerated = false;
 		// scan the modified sources
 		for (String sourceRoot : compileSourceRoots) {
 			File sourceDir = new File(sourceRoot);
@@ -180,6 +181,7 @@ public class STJSMavenPlugin extends AbstractMojo {
 					}
 					generator.generateJavascript(builtProjectClassLoader, absoluteSource, absoluteTarget,
 							configBuilder.build());
+					atLeastOneFileGenerated = true;
 
 					/*
 					 * NodeJSExecutor executor = new NodeJSExecutor(); ExecutionResult execution =
@@ -197,8 +199,10 @@ public class STJSMavenPlugin extends AbstractMojo {
 			}
 		}
 
-		// copy the javascript support
-		generator.copyJavascriptSupport(generatedSourcesDirectory);
+		if (atLeastOneFileGenerated) {
+			// copy the javascript support
+			generator.copyJavascriptSupport(generatedSourcesDirectory);
+		}
 	}
 
 	private String maximumCommonPackage(String p1, String p2) {
