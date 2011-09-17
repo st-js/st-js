@@ -77,6 +77,23 @@ public class SpecialMethodHandlers {
 		// map.$put(index, value) -> map[index] = value
 		methodHandlers.put("$put", methodHandlers.get("$set"));
 
+		// map.$delete(key) -> delete map[key]
+		methodHandlers.put("$delete", new SpecialMethodHandler() {
+			@Override
+			public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+					GenerationContext context) {
+				if (n.getArgs() == null || n.getArgs().size() != 1) {
+					return false;
+				}
+				currentHandler.printer.print("delete ");
+				printScope(currentHandler, n, qname, context, false);
+				currentHandler.printer.print("[");
+				n.getArgs().get(0).accept(currentHandler, context);
+				currentHandler.printer.print("]");
+				return true;
+			}
+		});
+
 		// $array() -> []
 		methodHandlers.put("$array", new SpecialMethodHandler() {
 			@Override

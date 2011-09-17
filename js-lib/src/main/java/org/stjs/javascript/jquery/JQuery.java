@@ -18,6 +18,7 @@ package org.stjs.javascript.jquery;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Map;
 import org.stjs.javascript.dom.HTMLElement;
+import org.stjs.javascript.functions.Callback2;
 
 /**
  * jquery interface for all jquery method + all used plugins in a web app. it can be mocked easily for testing purposes.
@@ -43,6 +44,8 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 	public FullJQuery animate(Map<String, String> properties, Object duration, String easing, Runnable complete);
 
 	public FullJQuery animate(Map<String, String> properties, AnimateOptions options);
+
+	public FullJQuery animate(Map<String, String> properties, Object duration);
 
 	public FullJQuery clearQueue(String queueName);
 
@@ -432,9 +435,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public String serialize();
 
-	public FullJQuery text(String txt);
-
-	public FullJQuery text(Number txt);
+	public FullJQuery text(Object txt);
 
 	public String text();
 
@@ -473,7 +474,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery contents();
 
-	public FullJQuery each(ElementIterationFunction function);
+	public FullJQuery each(Callback2<Integer, HTMLElement> function);
 
 	public FullJQuery end();
 

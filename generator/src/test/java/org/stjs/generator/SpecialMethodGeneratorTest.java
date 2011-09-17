@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import test.generator.specialMethods.SpecialMethod1;
 import test.generator.specialMethods.SpecialMethod10;
+import test.generator.specialMethods.SpecialMethod11;
 import test.generator.specialMethods.SpecialMethod2;
 import test.generator.specialMethods.SpecialMethod3;
 import test.generator.specialMethods.SpecialMethod4;
@@ -75,5 +76,11 @@ public class SpecialMethodGeneratorTest {
 	public void testSpecialEquals() {
 		// x.equals(y) -> x == y
 		assertCodeContains(SpecialMethod10.class, "x == 2");
+	}
+
+	@Test
+	public void testSpecialDelete() {
+		// x.$delete(key) -> delete x[key]
+		assertCodeContains(SpecialMethod11.class, "delete this[\"key\"]");
 	}
 }

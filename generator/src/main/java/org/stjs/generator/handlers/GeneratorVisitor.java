@@ -380,16 +380,14 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		PreConditions.checkNotNull(arg.getCurrentType());
 
 		// skip type
-		for (Iterator<VariableDeclarator> i = n.getVariables().iterator(); i.hasNext();) {
-			VariableDeclarator v = i.next();
+		for (VariableDeclarator v : n.getVariables()) {
 			// i need prefix here!!
+			printStaticMembersPrefix(arg.getCurrentType(), arg);
 			if (!isStatic(n.getModifiers())) {
-				printer.print(arg.getCurrentType().getName());
-				printer.print(".prototype.");
-			} else {
-				printStaticMembersPrefix(arg.getCurrentType(), arg);
-				printer.print(".");
+				printer.print(".prototype");
 			}
+			printer.print(".");
+
 			printVariableDeclarator(v, arg, true);
 			printer.print(";");
 		}
@@ -411,10 +409,8 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		if (anonymous) {
 			printer.print("function");
 		} else {
-			if (isStatic(modifiers)) {
-				printStaticMembersPrefix(arg.getCurrentType(), arg);
-			} else {
-				printer.print(arg.getCurrentType().getName());
+			printStaticMembersPrefix(arg.getCurrentType(), arg);
+			if (!isStatic(modifiers)) {
 				printer.print(".prototype");
 			}
 			printer.print(".");
@@ -425,8 +421,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		printer.print("(");
 		if (parameters != null) {
 			boolean first = true;
-			for (Iterator<Parameter> i = parameters.iterator(); i.hasNext();) {
-				Parameter p = i.next();
+			for (Parameter p : parameters) {
 				// don't display the special THIS parameter
 				if (GeneratorConstants.SPECIAL_THIS.equals(p.getId().getName())) {
 					continue;
@@ -602,10 +597,10 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		}
 		// printer.print(n.getName() + " = ");
 		if (GeneratorConstants.SPECIAL_INLINE_TYPE.equals(n.getName())) {
-			printer.print("var ").print(n.getName());
-		} else {
-			printStaticMembersPrefix(n, arg);
+			printer.print("var ");
 		}
+		printStaticMembersPrefix(n, arg);
+
 		printer.print(" = ");
 		if (n.getMembers() != null) {
 			ClassOrInterfaceDeclaration prevType = arg.setCurrentType(n);
@@ -618,7 +613,12 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 			if (n.getExtends() != null && n.getExtends().size() > 0) {
 				printer.printLn();
-				printer.printLn("stjs.extend(" + n.getName() + ", " + n.getExtends().get(0).getName() + ");");
+				printer.print("stjs.extend(");
+
+				printStaticMembersPrefix(n, arg);
+
+				// TODO extends should also be with full qualifier
+				printer.printLn(", " + n.getExtends().get(0).getName() + ");");
 			}
 			printMembers(n.getMembers(), arg);
 			printMainMethodCall(n, arg);
@@ -653,6 +653,10 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	private void printStaticMembersPrefix(TypeDeclaration n, GenerationContext context) {
+		if (GeneratorConstants.SPECIAL_INLINE_TYPE.equals(n.getName())) {
+			printer.print(n.getName());
+			return;
+		}
 		TypeScope typeScope = ((ASTNodeData) n.getData()).getTypeScope();
 		JavaTypeName declaredClassName = typeScope.getDeclaredTypeName();
 		Option<String> fullyQualifiedString = declaredClassName.getFullName(false);
@@ -1031,7 +1035,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 					return;
 				} else {
 					if (qname.getScope() != null) {
-						Boolean stopVisit = qname.getScope().visit(new NameScope.EmptyNameScopeVisitor<Boolean>(false) {
+						Boolean stopVisit = qname.getScope().visit(new NameScope.EmptyNameScopeVisitor<Boolean>(null) {
 							@Override
 							public Boolean caseTypeScope(TypeScope typeScope) {
 								// Non static reference to current enclosing type.
@@ -1048,8 +1052,14 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 								return true;
 							}
 						});
-						if (stopVisit) {
+						if (Boolean.TRUE.equals(stopVisit)) {
 							return;
+						}
+						if (stopVisit == null) {
+							if (n.getScope() != null) {
+								n.getScope().accept(this, arg);
+								printer.print(".");
+							}
 						}
 						printer.print(n.getName());
 						printArguments(n.getArgs(), arg);

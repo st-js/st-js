@@ -15,6 +15,8 @@
  */
 package org.stjs.javascript;
 
+import org.stjs.javascript.functions.Callback1;
+
 /**
  * This interface represents an array from Javascript.The value may be typed. The iteration is done on the indexes to have the javascript
  * equivalent of <br>
@@ -64,4 +66,6 @@ public interface Array<V> extends Iterable<Integer> {
 	public void sort(SortFunction<V> function);
 
 	public int unshift(V... values);
+
+	public void forEach(Callback1<V> callback);
 }

@@ -15,12 +15,14 @@
  */
 package org.stjs.javascript.jquery;
 
+import org.stjs.javascript.Array;
 import org.stjs.javascript.GlobalScope;
-
+import org.stjs.javascript.functions.Callback2;
+import org.stjs.javascript.functions.Function2;
 
 @GlobalScope
 abstract public class GlobalJQuery {
-  public static GlobalJQuery $;
+	public static GlobalJQuery $;
 
 	/**
 	 * jquery constructors
@@ -36,4 +38,10 @@ abstract public class GlobalJQuery {
 	abstract public void ajax(AjaxParams params);
 
 	abstract public void get(String url, Object params, SuccessListener successListener, String mode);
+
+	abstract public <C, E, R> Array<R> map(C collection, Function2<E, Integer, R> callback);
+
+	abstract public <T> int inArray(T element, Array<T> registeredListeners);
+
+	abstract public <C, E> void each(C collection, Callback2<Integer, E> elementIterationFunction);
 }

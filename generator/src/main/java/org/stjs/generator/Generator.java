@@ -64,10 +64,6 @@ public class Generator {
 				throw new JavascriptGenerationException(inputFile, null, e);
 			}
 
-			// RuleBasedVisitor ruleVisitor = new RuleBasedVisitor();
-			//
-			// rules(ruleVisitor);
-
 			GenerationContext context = new GenerationContext(inputFile);
 			NameScope rootScope = new FullyQualifiedScope(inputFile, new ClassLoaderWrapper(builtProjectClassLoader));
 
@@ -96,13 +92,8 @@ public class Generator {
 
 			resolver.visit(cu, new NameScopeWalker(rootScope));
 
-			System.out.println("----------------------------");
-			// ruleVisitor.generate(cu, context);
-
 			GeneratorVisitor generatorVisitor = new GeneratorVisitor();
 			generatorVisitor.visit(cu, context);
-
-			System.out.println("----------------------------");
 
 			writer.write(generatorVisitor.getGeneratedSource());
 			writer.flush();

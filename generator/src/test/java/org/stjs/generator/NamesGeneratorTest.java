@@ -5,6 +5,7 @@ import static org.stjs.generator.GeneratorTestHelper.assertCodeContains;
 import org.junit.Test;
 
 import test.generator.names.Names1;
+import test.generator.names.Names10;
 import test.generator.names.Names2;
 import test.generator.names.Names3;
 import test.generator.names.Names4;
@@ -57,7 +58,12 @@ public class NamesGeneratorTest {
 	}
 
 	@Test
-	public void teestStaticMethodInnerClass() {
+	public void testStaticMethodInnerClass() {
 		assertCodeContains(Names9.class, "Names9.Inner.staticMethod()");
+	}
+
+	@Test
+	public void testThatInInner() {
+		assertCodeContains(Names10.class, "that.method()");
 	}
 }
