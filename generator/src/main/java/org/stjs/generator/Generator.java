@@ -74,7 +74,6 @@ public class Generator {
 			// set the parent of each node
 			cu.accept(new SetParentVisitor(), context);
 
-			// resolve all the calls to methods and variables
 			Collection<String> allowedPackages = configuration.getAllowedPackages();
 			if (cu.getPackage() != null && !cu.getPackage().getName().toString().isEmpty()) {
 				allowedPackages = append(Lists.newArrayList(allowedPackages), cu.getPackage().getName().toString());
@@ -82,17 +81,19 @@ public class Generator {
 
 			// ASTUtils.dumpXML(cu);
 
-			// read the scope of all declared variables and methods
+			// 1. read the scope of all declared variables and methods
 			DeclarationVisitor scopes = new DeclarationVisitor(inputFile, builtProjectClassLoader, allowedPackages);
 			scopes.visit(cu, rootScope);
 			// rootScope.dump(" ");
 
+			// 2. resolve all the calls to methods and variables
 			NameResolverVisitor resolver = new NameResolverVisitor(rootScope, allowedPackages,
 					configuration.getAllowedJavaLangClasses());
 
 			resolver.visit(cu, new NameScopeWalker(rootScope));
 
-			GeneratorVisitor generatorVisitor = new GeneratorVisitor();
+			// 3. generate the javascript code
+			GeneratorVisitor generatorVisitor = new GeneratorVisitor(configuration.isGenerateMainMethodCall());
 			generatorVisitor.visit(cu, context);
 
 			writer.write(generatorVisitor.getGeneratedSource());

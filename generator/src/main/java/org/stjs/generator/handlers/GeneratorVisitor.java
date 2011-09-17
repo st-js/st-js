@@ -134,7 +134,12 @@ import org.stjs.generator.utils.PreConditions;
 public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 	private SpecialMethodHandlers specialMethodHandlers = new SpecialMethodHandlers();
 
+	private final boolean generateMainMethodCall;
 	JavascriptWriter printer = new JavascriptWriter();
+
+	public GeneratorVisitor(boolean generateMainMethodCall) {
+		this.generateMainMethodCall = generateMainMethodCall;
+	}
 
 	public String getGeneratedSource() {
 		return printer.getSource();
@@ -668,6 +673,9 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	private void printMainMethodCall(ClassOrInterfaceDeclaration n, GenerationContext context) {
+		if (!generateMainMethodCall) {
+			return;
+		}
 		List<BodyDeclaration> members = n.getMembers();
 		for (BodyDeclaration member : members) {
 			if (member instanceof MethodDeclaration) {

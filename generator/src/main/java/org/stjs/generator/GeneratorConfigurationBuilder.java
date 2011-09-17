@@ -28,6 +28,7 @@ import java.util.Set;
 public class GeneratorConfigurationBuilder {
 	private Collection<String> allowedPackages = new HashSet<String>();
 	private Set<String> allowedJavaLangClasses = new HashSet<String>();
+	private boolean generateMainMethodCall = true;
 
 	public GeneratorConfigurationBuilder allowedPackage(String packageName) {
 		allowedPackages.add(packageName);
@@ -64,7 +65,12 @@ public class GeneratorConfigurationBuilder {
 		allowedJavaLangClasses.add("Byte");
 
 		allowedPackages.add("java.lang");
-		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses);
+		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, generateMainMethodCall);
+	}
+
+	public GeneratorConfigurationBuilder generateMainMethodCall(boolean b) {
+		generateMainMethodCall = b;
+		return this;
 	}
 
 }

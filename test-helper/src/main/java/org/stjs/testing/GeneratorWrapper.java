@@ -54,11 +54,15 @@ public class GeneratorWrapper {
 										+ ". Currently only src/test/java and src/main/java naming schemes are supported. Note that all classes must be defined in the same module as the unit test");
 					}
 				}
+				System.out.println("Added generated class :" + src);
+
 				Set<String> iterationResolvedImports = generator.generateJavascript(
 						Thread.currentThread().getContextClassLoader(),
 						src,
 						outputFile,
 						new GeneratorConfigurationBuilder()
+								.generateMainMethodCall(false)
+								// do not generate the "main" method call
 								.allowedPackage(testClass.getJavaClass().getPackage().getName())
 								.allowedPackage("org.stjs.javascript").allowedPackage("org.w3c.dom.html")
 								.allowedPackage("org.junit.Test").allowedPackage("org.junit.runner")
@@ -77,6 +81,8 @@ public class GeneratorWrapper {
 			e.printStackTrace();
 			throw new AssertionError(e.getMessage());
 		}
+		// Files.copy(outputFile, System.out);
+		// System.out.flush();
 		return outputFile;
 	}
 }

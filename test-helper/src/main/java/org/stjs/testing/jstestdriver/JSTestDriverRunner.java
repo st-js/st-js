@@ -1,9 +1,10 @@
 package org.stjs.testing.jstestdriver;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -16,7 +17,6 @@ import org.junit.runners.model.Statement;
 import org.kohsuke.args4j.CmdLineException;
 import org.stjs.testing.GeneratorWrapper;
 import org.stjs.testing.HTMLFixture;
-import org.stjs.testing.SourceFiles;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;
@@ -28,6 +28,8 @@ import com.google.jstestdriver.ActionRunner;
 import com.google.jstestdriver.Args4jFlagsParser;
 import com.google.jstestdriver.FailureException;
 import com.google.jstestdriver.FileInfo;
+import com.google.jstestdriver.HttpServer;
+import com.google.jstestdriver.JsTestDriver;
 import com.google.jstestdriver.Plugin;
 import com.google.jstestdriver.PluginLoader;
 import com.google.jstestdriver.config.CmdFlags;
@@ -41,6 +43,8 @@ import com.google.jstestdriver.guice.TestResultPrintingModule;
 import com.google.jstestdriver.hooks.PluginInitializer;
 
 public class JSTestDriverRunner extends BlockJUnit4ClassRunner {
+
+	private static final String EMPTY_BROWSER_LIST = "[]";
 
 	public JSTestDriverRunner(Class<?> klass) throws InitializationError {
 		super(klass);
@@ -68,12 +72,15 @@ public class JSTestDriverRunner extends BlockJUnit4ClassRunner {
 					final Configuration userConfig = cmdLineFlags.getConfigurationSource().parse(
 							cmdLineFlags.getBasePath(), new YamlParser());
 
+					checkServerStarted();
+
 					Configuration configuration = new DelegatingConfiguration(userConfig) {
 						@Override
 						public Set<FileInfo> getFilesList() {
 							try {
 								Set<FileInfo> filesList = userConfig.getFilesList();
 								File srcFile = new GeneratorWrapper().generateCode(getTestClass(), method);
+								System.out.println("Added source file:" + srcFile);
 
 								filesList.add(new FileInfo(srcFile.getAbsolutePath(), System.currentTimeMillis(), -1L,
 										false, false, null, srcFile.getName()));
@@ -175,16 +182,66 @@ public class JSTestDriverRunner extends BlockJUnit4ClassRunner {
 		};
 	}
 
-	private List<File> getSourceFiles(SourceFiles sourceFileAnnote) {
-		if (sourceFileAnnote != null) {
-			List<File> files = new ArrayList<File>();
-			for (String sourceFileName : sourceFileAnnote.files()) {
-				files.add(new File(sourceFileName));
+	private boolean checkDone = false;
+
+	private void checkServerStarted() {
+		if (checkDone) {
+			return;
+		}
+		try {
+			// TODO take this from a config file, let the users config the address
+			URL jsServerURL = new URL("http://localhost:9876");
+			if (jsServerURL.getHost().equals("localhost")) {
+				HttpServer server = new HttpServer();
+				if (ping(server, jsServerURL)) {
+					return;
+				}
+
+				System.out.println("Starting JS Test Driver server ...");
+				String[] args = { "--port", "9876", "--verbose" };
+				JsTestDriver.main(args);
+				System.out.println("Server started");
+
+				// wait for any previously open browser to connect
+				Thread.sleep(500);
+				if (checkConnectedBrowsers(server, jsServerURL).equals(EMPTY_BROWSER_LIST)) {
+					if (Desktop.isDesktopSupported()) {
+						System.out.println("Capturing the default browser ...");
+						Desktop.getDesktop().browse(new URL(jsServerURL, "/capture").toURI());
+						for (int i = 0; i < 10; ++i) {
+							Thread.sleep(500);
+							String browserList = checkConnectedBrowsers(server, jsServerURL);
+							if (!browserList.equals(EMPTY_BROWSER_LIST)) {
+								System.out.println("Captured browsers:" + browserList);
+								return;
+							}
+						}
+						System.out.println("Unable to capture a browser");
+					}
+				}
 			}
-			return files;
-		} else {
-			return Collections.singletonList(new File("src/test/java/"
-					+ getTestClass().getJavaClass().getName().replaceAll("\\.", "/") + ".java"));
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			checkDone = true;
+		}
+	}
+
+	private String checkConnectedBrowsers(HttpServer server, URL url) {
+		try {
+			String response = server.fetch(new URL(url, "/cmd?listBrowsers").toString());
+			return response;
+		} catch (Exception e) {
+			return EMPTY_BROWSER_LIST;
+		}
+	}
+
+	private boolean ping(HttpServer server, URL url) {
+		try {
+			server.fetch(url.toString());
+			return true;
+		} catch (Exception e) {
+			return false;
 		}
 	}
 }
