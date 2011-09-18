@@ -16,6 +16,8 @@
 package org.stjs.generator.handlers;
 
 public class JavascriptWriter {
+	private static final String NUMERIC_LITERAL_ENDING = "[lLdD]$";
+
 	private int level = 0;
 
 	private boolean indented = false;
@@ -41,6 +43,13 @@ public class JavascriptWriter {
 	public JavascriptWriter printLiteral(String value) {
 		//
 		print(value);
+		return this;
+	}
+
+	public JavascriptWriter printNumberLiteral(String value) {
+
+		// remove and ending type coercion. i.e 123L -> 123
+		print(value.replaceAll(NUMERIC_LITERAL_ENDING, ""));
 		return this;
 	}
 

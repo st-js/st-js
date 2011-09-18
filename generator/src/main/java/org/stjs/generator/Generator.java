@@ -20,14 +20,19 @@ import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.stjs.generator.handlers.GeneratorVisitor;
 import org.stjs.generator.handlers.SetParentVisitor;
@@ -39,18 +44,43 @@ import org.stjs.generator.scope.NameScopeWalker;
 import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
 
+/**
+ * This class parses a Java source file, launches several visitors and finally generate the corresponding Javascript.
+ * 
+ * @author acraciun
+ * 
+ */
 public class Generator {
 
 	private static final String STJS_FILE = "stjs.js";
 
+	/**
+	 * 
+	 * @param builtProjectClassLoader
+	 * @param inputFile
+	 * @param outputFile
+	 * @param configuration
+	 * @return the list of imports needed by the generated class
+	 */
 	public Set<String> generateJavascript(ClassLoader builtProjectClassLoader, File inputFile, File outputFile,
-			GeneratorConfiguration configuration) {
+			GeneratorConfiguration configuration) throws JavascriptGenerationException {
 		return generateJavascript(builtProjectClassLoader, inputFile, outputFile, configuration, false);
 	}
 
+	/**
+	 * 
+	 * @param builtProjectClassLoader
+	 * @param inputFile
+	 * @param outputFile
+	 * @param configuration
+	 * @param append
+	 * @return the list of imports needed by the generated class
+	 * @throws JavascriptGenerationException
+	 */
 	public Set<String> generateJavascript(ClassLoader builtProjectClassLoader, File inputFile, File outputFile,
 			GeneratorConfiguration configuration, boolean append) throws JavascriptGenerationException {
 		FileWriter writer = null;
@@ -97,8 +127,7 @@ public class Generator {
 			generatorVisitor.visit(cu, context);
 
 			writer.write(generatorVisitor.getGeneratedSource());
-			writer.flush();
-			writer.close();
+
 			return resolver.getResolvedImports();
 		} catch (IOException e1) {
 			throw new RuntimeException("Could not open output file " + outputFile);
@@ -112,6 +141,15 @@ public class Generator {
 			} catch (IOException e) {
 				// silent
 			}
+
+			try {
+				if (writer != null) {
+					writer.close();
+				}
+			} catch (IOException e) {
+				// silent
+			}
+
 		}
 	}
 
@@ -139,4 +177,115 @@ public class Generator {
 		}
 	}
 
+	/**
+	 * 
+	 * @param builtProjectClassLoader
+	 * @param inputFile
+	 * @param outputFile
+	 * @param configuration
+	 * @throws JavascriptGenerationException
+	 */
+	public void generateJavascriptWithImports(ClassLoader builtProjectClassLoader, File inputFile, File outputFile,
+			GeneratorConfiguration configuration) throws JavascriptGenerationException {
+		Generator generator = new Generator();
+
+		int generatedFiles = 0;
+		Pattern exceptions = Pattern.compile("java\\.lang.*|org\\.stjs\\.testing.*|org\\.junit.*|junit.*");
+		try {
+			Set<String> newImports = Sets.newHashSet();
+
+			File src = inputFile;
+			Set<String> convertedClasses = Sets.newHashSet();
+
+			do {
+				if (src == null) {
+					Iterator<String> iterator = newImports.iterator();
+					String nextImport = iterator.next();
+					iterator.remove();
+
+					if (nextImport.startsWith("org.stjs.testing") || nextImport.startsWith("org.stjs.javascript")) {
+						continue;
+					}
+					if (nextImport.contains("$")) {
+						// this is an inner class
+						continue;
+					}
+
+					File maybeTestFile = new File("src/test/java/" + nextImport.replaceAll("\\.", "/") + ".java");
+
+					if (maybeTestFile.exists()) {
+						src = maybeTestFile;
+					} else {
+						File maybeAppFile = new File("src/main/java/" + nextImport.replaceAll("\\.", "/") + ".java");
+						if (maybeAppFile.exists()) {
+							src = maybeAppFile;
+						} else {
+							throw new IllegalStateException(
+									"Unable to locate the source file for type "
+											+ nextImport
+											+ ". Currently only src/test/java and src/main/java naming schemes are supported. Note that all classes must be defined in the same module as the unit test");
+						}
+					}
+				}
+
+				File tmpOutputFile = new File(outputFile.getPath() + "." + generatedFiles);
+				generatedFiles++;
+
+				Set<String> iterationResolvedImports = generator.generateJavascript(Thread.currentThread()
+						.getContextClassLoader(), src, tmpOutputFile, configuration, true);
+				src = null;// set it to null to search a new import
+
+				for (String iterationResolvedImport : iterationResolvedImports) {
+					if (!exceptions.matcher(iterationResolvedImport).matches()
+							&& convertedClasses.add(iterationResolvedImport)) {
+						newImports.add(iterationResolvedImport);
+					}
+				}
+			} while (!newImports.isEmpty());
+
+		} catch (JavascriptGenerationException e) {
+			e.printStackTrace();
+			throw new AssertionError(e.getMessage());
+		} finally {
+			cleanupOutputFiles(outputFile, generatedFiles);
+		}
+
+		// try {
+		// Files.copy(outputFile, System.out);
+		// } catch (IOException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		// System.out.flush();
+
+	}
+
+	/**
+	 * copy all the generated file in the output file in reverse order and then delete them
+	 * 
+	 * @param outputFile
+	 * @param generatedFiles
+	 */
+	private void cleanupOutputFiles(File outputFile, int generatedFiles) {
+		OutputStream out = null;
+		try {
+			out = new BufferedOutputStream(new FileOutputStream(outputFile));
+			for (int n = generatedFiles - 1; n >= 0; --n) {
+				File tmpFile = new File(outputFile.getPath() + "." + n);
+				Files.copy(tmpFile, out);
+				tmpFile.delete();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (out != null) {
+					out.close();
+				}
+			} catch (IOException e) {
+				// silent
+			}
+		}
+
+	}
 }

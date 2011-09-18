@@ -1,7 +1,7 @@
 package org.stjs.generator;
 
-import static org.stjs.generator.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.GeneratorTestHelper.assertCodeDoesNotContain;
+import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
+import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
 
 import org.junit.Test;
 

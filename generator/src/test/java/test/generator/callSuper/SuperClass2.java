@@ -1,10 +1,10 @@
 package test.generator.callSuper;
 
-public class SuperClass {
+public class SuperClass2 {
 	public String instanceField;
 	public static String staticField;
 
-	public SuperClass() {
+	public SuperClass2(String arg) {
 		//
 	}
 

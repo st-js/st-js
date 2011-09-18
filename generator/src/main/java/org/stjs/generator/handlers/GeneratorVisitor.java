@@ -208,12 +208,12 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(IntegerLiteralExpr n, GenerationContext context) {
-		print(n);
+		printer.printNumberLiteral(n.getValue());
 	}
 
 	@Override
 	public void visit(LongLiteralExpr n, GenerationContext context) {
-		print(n);
+		printer.printNumberLiteral(n.getValue());
 	}
 
 	@Override
@@ -228,7 +228,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(DoubleLiteralExpr n, GenerationContext arg) {
-		print(n);
+		printer.printNumberLiteral(n.getValue());
 	}
 
 	@Override
@@ -441,7 +441,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		printer.print(")");
 		// skip throws
 		if (body == null) {
-			printer.print(";");
+			printer.print("{};");
 		} else {
 			printer.print(" ");
 			body.accept(this, arg);
@@ -597,9 +597,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(ClassOrInterfaceDeclaration n, GenerationContext arg) {
-		if (n.isInterface()) {
-			return;
-		}
+
 		// printer.print(n.getName() + " = ");
 		if (GeneratorConstants.SPECIAL_INLINE_TYPE.equals(n.getName())) {
 			printer.print("var ");

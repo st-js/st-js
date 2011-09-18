@@ -27,21 +27,30 @@ import org.mozilla.javascript.Scriptable;
 public class RhinoExecutor {
 	public ExecutionResult run(File srcFile) {
 		Context cx = Context.enter();
+		FileReader input = null;
 		try {
+			input = new FileReader(srcFile);
 			Scriptable scope = cx.initStandardObjects();
 			cx.evaluateReader(scope, new InputStreamReader(Thread.currentThread().getContextClassLoader()
 					.getResourceAsStream("stjs.js")), "stjs.js", 1, null);
-			Object result = cx.evaluateReader(scope, new FileReader(srcFile), srcFile.getAbsolutePath(), 1, null);
+			Object result = cx.evaluateReader(scope, input, srcFile.getAbsolutePath(), 1, null);
 			return new ExecutionResult(Context.toString(result), null, 0);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
+			try {
+				if (input != null) {
+					input.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
 			Context.exit();
 		}
 		return null;
 	}
+
 }

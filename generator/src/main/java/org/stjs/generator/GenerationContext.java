@@ -33,8 +33,6 @@ import org.stjs.generator.scope.QualifiedName;
  */
 public class GenerationContext {
 
-	private boolean skipHandlers = false;
-
 	private final File inputFile;
 
 	private ClassOrInterfaceDeclaration currentType = null;
@@ -53,20 +51,6 @@ public class GenerationContext {
 	public QualifiedName<IdentifierName> resolveIdentifier(Node node) {
 		// TODO : why not resolving here? what's the point of having an other pass?
 		return (QualifiedName<IdentifierName>) ((ASTNodeData) node.getData()).getQualifiedName();
-	}
-
-	public GenerationContext skipHandlers() {
-		skipHandlers = true;
-		return this;
-	}
-
-	public GenerationContext checkHandlers() {
-		skipHandlers = false;
-		return this;
-	}
-
-	public boolean isSkipHandlers() {
-		return skipHandlers;
 	}
 
 	public File getInputFile() {

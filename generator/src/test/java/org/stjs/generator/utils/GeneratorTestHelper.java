@@ -1,10 +1,14 @@
-package org.stjs.generator;
+package org.stjs.generator.utils;
 
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+
+import org.stjs.generator.Generator;
+import org.stjs.generator.GeneratorConfigurationBuilder;
+import org.stjs.generator.executor.RhinoExecutor;
 
 import com.google.common.io.Files;
 
@@ -19,14 +23,24 @@ public class GeneratorTestHelper {
 	public static String generate(Class<?> clazz) {
 		Generator gen = new Generator();
 
+		File file = new File(TMP_FILE);
 		String path = clazz.getName().replace('.', File.separatorChar);
 		path = "src/test/java/" + path + ".java";
-		gen.generateJavascript(Thread.currentThread().getContextClassLoader(), new File(path), new File(TMP_FILE),
+		gen.generateJavascript(Thread.currentThread().getContextClassLoader(), new File(path), file,
 				new GeneratorConfigurationBuilder().allowedPackage("test").allowedPackage("org.stjs.javascript")
 						.build());
 
 		try {
-			return Files.toString(new File(TMP_FILE), Charset.defaultCharset());
+			String content = Files.toString(file, Charset.defaultCharset());
+			// now generate the remaining imports
+			file.delete();
+			gen.generateJavascriptWithImports(Thread.currentThread().getContextClassLoader(), new File(path), file,
+					new GeneratorConfigurationBuilder()
+							//
+							.generateMainMethodCall(false).allowedPackage("test").allowedPackage("org.stjs.javascript")
+							.build());
+			new RhinoExecutor().run(file);
+			return content;
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
