@@ -203,11 +203,11 @@ public class JSTestDriverRunner extends BlockJUnit4ClassRunner {
 				System.out.println("Server started");
 
 				// wait for any previously open browser to connect
-				Thread.sleep(500);
+				Thread.sleep(1000);
 				if (checkConnectedBrowsers(server, jsServerURL).equals(EMPTY_BROWSER_LIST)) {
 					if (Desktop.isDesktopSupported()) {
 						System.out.println("Capturing the default browser ...");
-						Desktop.getDesktop().browse(new URL(jsServerURL, "/capture").toURI());
+						Desktop.getDesktop().browse(new URL(jsServerURL, "/capture?id=100&timeout=10").toURI());
 						for (int i = 0; i < 10; ++i) {
 							Thread.sleep(500);
 							String browserList = checkConnectedBrowsers(server, jsServerURL);
