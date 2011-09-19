@@ -2,14 +2,19 @@ package org.stjs.generator.utils;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import org.mozilla.javascript.EvaluatorException;
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.executor.RhinoExecutor;
 
+import com.google.common.base.Strings;
 import com.google.common.io.Files;
 
 public class GeneratorTestHelper {
@@ -44,6 +49,10 @@ public class GeneratorTestHelper {
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
+		} catch (EvaluatorException ex) {
+			// display the generated code in case of exception
+			displayWithLines(file);
+			throw ex;
 		}
 	}
 
@@ -79,5 +88,32 @@ public class GeneratorTestHelper {
 		String cleanSnippet = snippet.replaceAll("\\s+", "");
 		assertTrue("[" + snippet + "] in \n" + code, !cleanCode.contains(cleanSnippet));
 		// TODO nice display error
+	}
+
+	private static void displayWithLines(File file) {
+		BufferedReader in = null;
+		try {
+			in = new BufferedReader(new FileReader(file));
+			int lineNo = 1;
+			String line = null;
+			while ((line = in.readLine()) != null) {
+				System.out.print(Strings.padEnd(lineNo + "", 5, ' '));
+				System.out.println(line);
+				lineNo++;
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (in != null) {
+					in.close();
+				}
+			} catch (IOException e) {
+				// silent
+			}
+
+		}
 	}
 }

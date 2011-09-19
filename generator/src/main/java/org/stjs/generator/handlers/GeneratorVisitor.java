@@ -17,6 +17,7 @@ package org.stjs.generator.handlers;
 
 import static japa.parser.ast.body.ModifierSet.isStatic;
 import japa.parser.ast.BlockComment;
+import japa.parser.ast.Comment;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.LineComment;
@@ -107,6 +108,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.stjs.generator.ASTNodeData;
 import org.stjs.generator.GenerationContext;
@@ -132,12 +134,17 @@ import org.stjs.generator.utils.PreConditions;
  * 
  */
 public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
-	private SpecialMethodHandlers specialMethodHandlers = new SpecialMethodHandlers();
+	private final SpecialMethodHandlers specialMethodHandlers;
 
 	private final boolean generateMainMethodCall;
 	JavascriptWriter printer = new JavascriptWriter();
 
-	public GeneratorVisitor(boolean generateMainMethodCall) {
+	private List<Comment> comments;
+
+	private int currentComment = 0;
+
+	public GeneratorVisitor(boolean generateMainMethodCall, Set<String> adapterClassNames) {
+		specialMethodHandlers = new SpecialMethodHandlers(adapterClassNames);
 		this.generateMainMethodCall = generateMainMethodCall;
 	}
 
@@ -147,6 +154,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(CompilationUnit n, GenerationContext arg) {
+		comments = n.getComments();
 		if (n.getTypes() != null) {
 			for (Iterator<TypeDeclaration> i = n.getTypes().iterator(); i.hasNext();) {
 				i.next().accept(this, arg);
@@ -223,7 +231,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(CharLiteralExpr n, GenerationContext arg) {
-		print(n);
+		printer.printCharLiteral(n.getValue());
 	}
 
 	@Override
@@ -245,6 +253,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(EnumDeclaration n, GenerationContext arg) {
+		printComments(n, arg);
 		// printer.print(n.getName());
 		printStaticMembersPrefix(n, arg);
 		// TxODO implements not considered
@@ -401,6 +410,22 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 	private void printJavadoc(JavadocComment javadoc, GenerationContext arg) {
 		if (javadoc != null) {
 			javadoc.accept(this, arg);
+		}
+	}
+
+	private void printComments(Node n, GenerationContext arg) {
+		if (comments == null) {
+			return;
+		}
+		// the problem is that the comments are all attached to the root node
+		// so this method will display all the comments before the given node.
+		while (currentComment < comments.size()) {
+			if (comments.get(currentComment).getBeginLine() < n.getBeginLine()) {
+				comments.get(currentComment).accept(this, arg);
+			} else {
+				break;
+			}
+			currentComment++;
 		}
 	}
 
@@ -568,11 +593,13 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(MethodDeclaration n, GenerationContext arg) {
+		printComments(n, arg);
 		printMethod(n.getName(), n.getParameters(), n.getModifiers(), n.getBody(), arg, false);
 	}
 
 	@Override
 	public void visit(ConstructorDeclaration n, GenerationContext arg) {
+		printComments(n, arg);
 		printMethod(n.getName(), n.getParameters(), n.getModifiers(), n.getBlock(), arg, true);
 	}
 
@@ -585,7 +612,12 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(LineComment n, GenerationContext arg) {
 		printer.print("//");
-		printer.printLn(n.getContent());
+		if (n.getContent().endsWith("\n")) {
+			// remove trailing enter and printLn
+			// to keep indentation
+			printer.printLn(n.getContent().substring(0, n.getContent().length() - 1));
+		}
+
 	}
 
 	@Override
@@ -597,7 +629,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(ClassOrInterfaceDeclaration n, GenerationContext arg) {
-
+		printComments(n, arg);
 		// printer.print(n.getName() + " = ");
 		if (GeneratorConstants.SPECIAL_INLINE_TYPE.equals(n.getName())) {
 			printer.print("var ");
@@ -1250,6 +1282,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 			printer.indent();
 			for (int i = 0; i < n.getStmts().size(); ++i) {
 				Statement s = n.getStmts().get(i);
+				printComments(s, arg);
 				if (isInlineObjectCreationChild(s, 1)) {
 					checkAssignStatement(s, arg);
 				}

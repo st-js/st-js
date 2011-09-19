@@ -16,7 +16,7 @@
 package org.stjs.generator.handlers;
 
 public class JavascriptWriter {
-	private static final String NUMERIC_LITERAL_ENDING = "[lLdD]$";
+	private static final String NUMERIC_LITERAL_ENDING = "[a-zA-Z]$";
 
 	private int level = 0;
 
@@ -57,6 +57,13 @@ public class JavascriptWriter {
 		print("\"");
 		print(value);
 		print("\"");
+		return this;
+	}
+
+	public JavascriptWriter printCharLiteral(String value) {
+		print("'");
+		print(value);
+		print("'");
 		return this;
 	}
 

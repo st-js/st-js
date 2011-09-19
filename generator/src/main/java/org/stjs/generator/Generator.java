@@ -123,7 +123,8 @@ public class Generator {
 			resolver.visit(cu, new NameScopeWalker(rootScope));
 
 			// 3. generate the javascript code
-			GeneratorVisitor generatorVisitor = new GeneratorVisitor(configuration.isGenerateMainMethodCall());
+			GeneratorVisitor generatorVisitor = new GeneratorVisitor(configuration.isGenerateMainMethodCall(),
+					configuration.getAdapterClassNames());
 			generatorVisitor.visit(cu, context);
 
 			writer.write(generatorVisitor.getGeneratedSource());

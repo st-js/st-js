@@ -54,6 +54,10 @@ public class Global {
 		return 0;
 	}
 
+	public static String typeof(Object obj) {
+		return "";
+	}
+
 	/**
 	 * this is the equivalent of x || y || z in javascript
 	 * 
@@ -110,6 +114,11 @@ public class Global {
 	}
 
 	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {
+		return null;
+	}
+
+	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6,
+			Object... morePairs) {
 		return null;
 	}
 

@@ -22,11 +22,13 @@ public class GeneratorConfiguration {
 	private final Collection<String> allowedPackages;
 	private final Set<String> allowedJavaLangClasses;
 	private final boolean generateMainMethodCall;
+	private final Set<String> adapterClassNames;
 
 	GeneratorConfiguration(Collection<String> allowedPackages, Set<String> allowedJavaLangClasses,
-			boolean generateMainMethodCall) {
+			Set<String> adapterClassNames, boolean generateMainMethodCall) {
 		this.allowedPackages = allowedPackages;
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
+		this.adapterClassNames = adapterClassNames;
 		this.generateMainMethodCall = generateMainMethodCall;
 	}
 
@@ -41,6 +43,17 @@ public class GeneratorConfiguration {
 
 	public Set<String> getAllowedJavaLangClasses() {
 		return allowedJavaLangClasses;
+	}
+
+	/**
+	 * 
+	 * @return the set of classes that contain static methods that are applied to Javascript basic types (number,
+	 *         string, object). These methods are normally part of the javascript types but they are not present in the
+	 *         Java counterpart. In the javascript generated code the method will be applied to the first parameter. Ex:
+	 *         JSNumberAdapter.toFixed(n, 10) generates n.toFixed(10)
+	 */
+	public Set<String> getAdapterClassNames() {
+		return adapterClassNames;
 	}
 
 	/**

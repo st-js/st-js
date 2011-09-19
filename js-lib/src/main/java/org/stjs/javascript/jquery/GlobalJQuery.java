@@ -17,6 +17,7 @@ package org.stjs.javascript.jquery;
 
 import org.stjs.javascript.Array;
 import org.stjs.javascript.GlobalScope;
+import org.stjs.javascript.Map;
 import org.stjs.javascript.functions.Callback2;
 import org.stjs.javascript.functions.Function2;
 
@@ -43,5 +44,10 @@ abstract public class GlobalJQuery {
 
 	abstract public <T> int inArray(T element, Array<T> registeredListeners);
 
-	abstract public <C, E> void each(C collection, Callback2<Integer, E> elementIterationFunction);
+	abstract public <E> void each(Array<E> collection, Callback2<Integer, E> elementIterationFunction);
+
+	abstract public <K, V> void each(Map<K, V> collection, Callback2<K, V> elementIterationFunction);
+
+	abstract public String trim(String obj);
+
 }

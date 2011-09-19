@@ -67,4 +67,12 @@ public class JSStringAdapter {
 	public static String sup(String applyTo) {
 		return "";
 	}
+
+	public static Array<String> match(String applyTo, RegExp re) {
+		return null;
+	}
+
+	public static String replace(String applyTo, RegExp re, String repl) {
+		return null;
+	}
 }

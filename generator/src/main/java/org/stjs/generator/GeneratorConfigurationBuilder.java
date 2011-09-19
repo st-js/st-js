@@ -28,6 +28,7 @@ import java.util.Set;
 public class GeneratorConfigurationBuilder {
 	private Collection<String> allowedPackages = new HashSet<String>();
 	private Set<String> allowedJavaLangClasses = new HashSet<String>();
+	private Set<String> adapterClassNames = new HashSet<String>();
 	private boolean generateMainMethodCall = true;
 
 	public GeneratorConfigurationBuilder allowedPackage(String packageName) {
@@ -64,8 +65,17 @@ public class GeneratorConfigurationBuilder {
 		allowedJavaLangClasses.add("Character");
 		allowedJavaLangClasses.add("Byte");
 
+		allowedJavaLangClasses.add("Exception");
+		allowedJavaLangClasses.add("RuntimeException");
+
 		allowedPackages.add("java.lang");
-		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, generateMainMethodCall);
+
+		adapterClassNames.add("org.stjs.javascript.JSNumberAdapter");
+		adapterClassNames.add("org.stjs.javascript.JSStringAdapter");
+		adapterClassNames.add("org.stjs.javascript.JSObjectAdapter");
+
+		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, adapterClassNames,
+				generateMainMethodCall);
 	}
 
 	public GeneratorConfigurationBuilder generateMainMethodCall(boolean b) {

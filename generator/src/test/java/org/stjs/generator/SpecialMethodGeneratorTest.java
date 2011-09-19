@@ -7,6 +7,7 @@ import org.junit.Test;
 import test.generator.specialMethods.SpecialMethod1;
 import test.generator.specialMethods.SpecialMethod10;
 import test.generator.specialMethods.SpecialMethod11;
+import test.generator.specialMethods.SpecialMethod12;
 import test.generator.specialMethods.SpecialMethod2;
 import test.generator.specialMethods.SpecialMethod3;
 import test.generator.specialMethods.SpecialMethod4;
@@ -82,5 +83,11 @@ public class SpecialMethodGeneratorTest {
 	public void testSpecialDelete() {
 		// x.$delete(key) -> delete x[key]
 		assertCodeContains(SpecialMethod11.class, "delete this[\"key\"]");
+	}
+
+	@Test
+	public void testSpecialGetObject() {
+		// $get(x,y) -> x[y]
+		assertCodeContains(SpecialMethod12.class, "(obj)[\"a\"]");
 	}
 }

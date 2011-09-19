@@ -19,6 +19,7 @@ import org.stjs.javascript.Array;
 import org.stjs.javascript.Map;
 import org.stjs.javascript.dom.HTMLElement;
 import org.stjs.javascript.functions.Callback2;
+import org.stjs.javascript.utils.NameValue;
 
 /**
  * jquery interface for all jquery method + all used plugins in a web app. it can be mocked easily for testing purposes.
@@ -434,6 +435,8 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 	public FullJQuery replaceWith(JQuery<?> jq);
 
 	public String serialize();
+
+	public Array<NameValue> serializeArray();
 
 	public FullJQuery text(Object txt);
 

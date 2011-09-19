@@ -10,6 +10,9 @@ import test.generator.statements.Statements3;
 import test.generator.statements.Statements4;
 import test.generator.statements.Statements5;
 import test.generator.statements.Statements6;
+import test.generator.statements.Statements7;
+import test.generator.statements.Statements8;
+import test.generator.statements.Statements9;
 
 public class StatementsGeneratorTest {
 	@Test
@@ -45,4 +48,19 @@ public class StatementsGeneratorTest {
 		assertCodeContains(Statements6.class, "method([1,2,3])");
 	}
 
+	@Test
+	public void testLineComment() {
+		assertCodeContains(Statements7.class, "//line comment");
+	}
+
+	@Test
+	public void testBlockComment() {
+		assertCodeContains(Statements8.class, "/* * block comment */");
+	}
+
+	@Test
+	public void testLiterals() {
+		// "abc", "\"", "'", 'a', '\'', 1D, 2f, 1l);
+		assertCodeContains(Statements9.class, "\"abc\", \"\\\"\", \"'\", 'a', '\\'', 1, 2, 1");
+	}
 }

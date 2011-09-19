@@ -20,6 +20,7 @@ import japa.parser.ast.expr.MethodCallExpr;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.scope.NameType.MethodName;
@@ -37,40 +38,55 @@ public class SpecialMethodHandlers {
 
 	private Map<String, SpecialMethodHandler> methodHandlers = new HashMap<String, SpecialMethodHandler>();
 
-	private final String[] adapterNames = { "org.stjs.javascript.JSNumberAdapter",
-			"org.stjs.javascript.JSStringAdapter" };
+	private final Set<String> adapterNames;
 
-	public SpecialMethodHandlers() {
-		// array.$get(x) -> array[x]
+	public SpecialMethodHandlers(Set<String> adapterClassNames) {
+		this.adapterNames = adapterClassNames;
+		// array.$get(x) -> array[x], or $get(obj, prop) -> obj[prop]
 		methodHandlers.put("$get", new SpecialMethodHandler() {
 			@Override
 			public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 					GenerationContext context) {
-				if (n.getArgs() == null || n.getArgs().size() != 1) {
+				if (n.getArgs() == null || n.getArgs().size() < 1 || n.getArgs().size() > 2) {
 					return false;
 				}
-				printScope(currentHandler, n, qname, context, false);
+				int arg = 0;
+				if (n.getArgs().size() == 1) {
+					printScope(currentHandler, n, qname, context, false);
+				} else {
+					currentHandler.printer.print("(");
+					n.getArgs().get(arg++).accept(currentHandler, context);
+					currentHandler.printer.print(")");
+				}
+
 				currentHandler.printer.print("[");
-				n.getArgs().get(0).accept(currentHandler, context);
+				n.getArgs().get(arg++).accept(currentHandler, context);
 				currentHandler.printer.print("]");
 				return true;
 			}
 		});
 
-		// array.$set(index, value) -> array[index] = value
+		// array.$set(index, value) -> array[index] = value, or $set(obj, prop, value) -> obj[prop]=value
 		methodHandlers.put("$set", new SpecialMethodHandler() {
 			@Override
 			public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
 					GenerationContext context) {
-				if (n.getArgs() == null || n.getArgs().size() != 2) {
+				if (n.getArgs() == null || n.getArgs().size() < 2 || n.getArgs().size() > 3) {
 					return false;
 				}
-				printScope(currentHandler, n, qname, context, false);
+				int arg = 0;
+				if (n.getArgs().size() == 2) {
+					printScope(currentHandler, n, qname, context, false);
+				} else {
+					currentHandler.printer.print("(");
+					n.getArgs().get(arg++).accept(currentHandler, context);
+					currentHandler.printer.print(")");
+				}
 				currentHandler.printer.print("[");
-				n.getArgs().get(0).accept(currentHandler, context);
+				n.getArgs().get(arg++).accept(currentHandler, context);
 				currentHandler.printer.print("]");
 				currentHandler.printer.print(" = ");
-				n.getArgs().get(1).accept(currentHandler, context);
+				n.getArgs().get(arg++).accept(currentHandler, context);
 				return true;
 			}
 		});
@@ -208,8 +224,9 @@ public class SpecialMethodHandlers {
 
 		SpecialMethodHandler handler = methodHandlers.get(n.getName());
 		if (handler != null) {
-			handler.handle(currentHandler, n, qname, context);
-			return true;
+			if (handler.handle(currentHandler, n, qname, context)) {
+				return true;
+			}
 		}
 
 		if (qname != null && qname.getDefinitionPoint().isDefined() && n.getArgs() != null && n.getArgs().size() > 0) {
