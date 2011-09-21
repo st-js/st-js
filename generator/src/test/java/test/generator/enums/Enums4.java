@@ -1,5 +1,6 @@
 package test.generator.enums;
 
+
 public enum Enums4 {
 	a(1), b(2), c(3);
 
@@ -12,5 +13,5 @@ public enum Enums4 {
 	public int getValue() {
 		return value;
 	}
-
+	
 }

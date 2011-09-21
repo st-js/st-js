@@ -53,8 +53,11 @@ public class QualifiedName<T extends NameType> {
 		this.type = type;
 		this.definitionPoint = Option.of(definitionPoint);
 		this.isGlobalScope = isGlobalScope;
-		checkState(this.definitionPoint.isDefined() == (type != NameTypes.VARIABLE && type != NameTypes.GENERIC_TYPE),
-				"Methods, fields and classes must have a definition point");
+		if (!this.definitionPoint.isDefined()) {
+			// variable may or may not be resolved
+			checkState(type == NameTypes.VARIABLE || type == NameTypes.GENERIC_TYPE,
+			"Methods, fields and classes must have a definition point");
+		}
 
 	}
 

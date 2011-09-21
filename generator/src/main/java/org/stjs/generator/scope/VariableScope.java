@@ -15,9 +15,11 @@
  */
 package org.stjs.generator.scope;
 
+import japa.parser.ast.type.Type;
+
 import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
@@ -34,19 +36,40 @@ import org.stjs.generator.scope.path.QualifiedPath;
  */
 public class VariableScope extends NameScope {
 
-	private final Set<String> variables = new HashSet<String>();
+	private final Map<String, Type> variables = new HashMap<String, Type>();
 
 	public VariableScope(File inputFile, String name, NameScope parent) {
 		super(inputFile, name, parent);
 	}
 
-	public void addVariable(String var) {
-		variables.add(var);
+	public void addVariable(Type type, String var) {
+		variables.put(var, type);
 	}
 
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
-		if (variables.contains(name)) {
+		if (variables.containsKey(name)) {
+			Type type = variables.get(name);
+			QualifiedName<TypeName> resolvedType = super.resolveType(pos, type.toString(), visitor);
+			if (resolvedType != null) {
+				// TODO : this should be done in other scopes too (for parameters, fields, ....)
+				// this is not at all specific to variables
+				if (resolvedType.getType() == NameTypes.INNER_CLASS && resolvedType.getDefinitionPoint().isDefined()) {
+					
+					// TODO: Something is broken in the data type here.
+					// we're using the definition point of the member to build a fake definition point...
+					// since the type has already been resolved, the following code is pointless.
+					// the QualifiedName itself should be smart enough
+					// JavaTypeName should really be deleted.
+					for (JavaTypeName enclosingNameType : resolvedType.getDefinitionPoint()) {
+						QualifiedPath qualifiedPath = enclosingNameType.getClassPath().getOrThrow();
+						JavaTypeName javaTypeName = new JavaTypeName(QualifiedPath.withClassName(type.toString()), qualifiedPath);
+						return new QualifiedName<IdentifierName>(this, false, NameTypes.VARIABLE, javaTypeName);
+					}
+				} else {
+					return new QualifiedName<IdentifierName>(this, false, NameTypes.VARIABLE, resolvedType.getDefinitionPoint().getOrNull());
+				}
+			}
 			return new QualifiedName<IdentifierName>(this, false, NameTypes.VARIABLE);
 		}
 		if (getParent() != null) {
@@ -61,7 +84,7 @@ public class VariableScope extends NameScope {
 			String receiverOrStaticClass = QualifiedPath.beforeFirstDot(name);
 			// it is ok to check even without knowing if the receiver is a class or a variable
 			// since variables have precedence if there is a collision
-			if (variables.contains(receiverOrStaticClass)) {
+			if (variables.containsKey(receiverOrStaticClass)) {
 				return new QualifiedName<NameType.MethodName>(this, false, NameTypes.VARIABLE);
 			}
 		}

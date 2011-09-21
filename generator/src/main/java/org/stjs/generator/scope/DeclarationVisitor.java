@@ -114,7 +114,7 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 			VariableScope varScope = (VariableScope) currentScope;
 			for (VariableDeclarator var : n.getVars()) {
 				JavascriptKeywords.checkIdentifier(inputFile, new SourcePosition(var), var.getId().getName());
-				varScope.addVariable(var.getId().getName());
+				varScope.addVariable(n.getType(), var.getId().getName());
 			}
 		}
 

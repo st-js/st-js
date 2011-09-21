@@ -58,4 +58,8 @@ public class JavaTypeName {
 		return Option.some(join(enclosingQualifiedName, classPath.getOrThrow().getClassName(useQualifiedNames)));
 	}
 
+	public Option<QualifiedPath> getClassPath() {
+		return classPath;
+	}
+
 }

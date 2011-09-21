@@ -31,6 +31,7 @@ import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.stmt.CatchClause;
 import japa.parser.ast.stmt.ForStmt;
 import japa.parser.ast.stmt.ForeachStmt;
+import japa.parser.ast.stmt.SwitchStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.PrimitiveType;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
@@ -114,6 +115,10 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 			nextScope = currentScope.nextChild();
 		}
 		super.visit(n, nextScope);
+	}
+	
+	public void visit(SwitchStmt n, NameScopeWalker currentScope) {
+		super.visit(n, currentScope);
 	}
 
 	@Override

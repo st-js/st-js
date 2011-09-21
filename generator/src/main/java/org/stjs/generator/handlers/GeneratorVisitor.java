@@ -1338,6 +1338,10 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 	public void visit(SwitchEntryStmt n, GenerationContext arg) {
 		if (n.getLabel() != null) {
 			printer.print("case ");
+			for (JavaTypeName enumType : getSwitchEntryEnumClassIfExists(n)) {
+				printer.print(enumType.getFullName(false).getOrThrow());
+				printer.print(".");
+			}
 			n.getLabel().accept(this, arg);
 			printer.print(":");
 		} else {
@@ -1352,7 +1356,22 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 			}
 		}
 		printer.unindent();
-
+	}
+	
+	private Option<JavaTypeName> getSwitchEntryEnumClassIfExists(SwitchEntryStmt n) {
+		ASTNodeData nodeData = (ASTNodeData) n.getData();
+		SwitchStmt switchStatement = (SwitchStmt) nodeData.getParent();
+		ASTNodeData selectorData = (ASTNodeData) switchStatement.getSelector().getData();
+		QualifiedName<?> qualifiedName = selectorData.getQualifiedName();
+		if (qualifiedName != null) {
+			for (JavaTypeName type : qualifiedName.getDefinitionPoint()) {
+				//TODO if (type.isEnum()?) 
+				return qualifiedName.getDefinitionPoint();
+			}
+		}
+		// TODO : switch on native types
+		// TODO : not resolved, add generation error (still need to 
+		return Option.none();
 	}
 
 	@Override
