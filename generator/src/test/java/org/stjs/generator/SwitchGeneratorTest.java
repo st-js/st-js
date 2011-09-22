@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import test.generator.enums.Enums3;
 import test.generator.enums.Enums4Switch;
+import test.generator.enums.Enums7;
 import test.generator.switches.NativeTypeSwith;
 
 public class SwitchGeneratorTest {
@@ -19,7 +20,12 @@ public class SwitchGeneratorTest {
 	public void testSwitchEnums() {
 		assertCodeContains(Enums4Switch.class, "case Enums4.a");
 	}
-	
+
+	@Test
+	public void testSwitchEnumsFromParam() {
+		assertCodeContains(Enums7.class, "case Enums4.a");
+	}
+
 	@Test
 	public void testSwitchInteger() {
 		assertCodeContains(NativeTypeSwith.class, "case 1");

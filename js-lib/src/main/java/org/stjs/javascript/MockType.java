@@ -21,12 +21,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation is used to mark a global scope type. This means that all its static methods and fields will be called without prefixing it
- * with the name of the type. It is useful to define glabal objects that are defined by external libraries.
+ * This annotation is used to mark types that part of a mock library (like the jquery one). There are in this library classes that do not
+ * correspond to real types in the javascript library counterpart. So the constructor of these type should be replaced with a anonymous object
+ * constructor in javascript: {}
  * @author acraciun
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface GlobalScope {
+public @interface MockType {//
 
 }

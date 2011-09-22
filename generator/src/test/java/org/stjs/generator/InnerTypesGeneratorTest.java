@@ -1,6 +1,7 @@
 package org.stjs.generator;
 
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
+import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
 
@@ -9,6 +10,7 @@ import test.generator.innerTypes.InnerTypes2;
 import test.generator.innerTypes.InnerTypes3;
 import test.generator.innerTypes.InnerTypes4;
 import test.generator.innerTypes.InnerTypes5;
+import test.generator.innerTypes.InnerTypes6;
 
 public class InnerTypesGeneratorTest {
 	@Test
@@ -39,4 +41,8 @@ public class InnerTypesGeneratorTest {
 		assertCodeContains(InnerTypes5.class, "stjs.extend(InnerTypes5.InnerType, MySuperClass);");
 	}
 
+	@Test(expected = JavascriptGenerationException.class)
+	public void testCallToQualifiedOuterType() {
+		generate(InnerTypes6.class);
+	}
 }

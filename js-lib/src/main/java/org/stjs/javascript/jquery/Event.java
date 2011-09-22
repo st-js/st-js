@@ -21,24 +21,50 @@ import org.stjs.javascript.dom.HTMLElement;
  * jquery event
  */
 abstract public class Event {
+	public boolean attrChange;
+	public String attrName;
+	public boolean bubbles;
+	public Object button;
+	public boolean cancelable;
+	public int charCode;
+	public int clientX;
+	public int clientY;
+	public Object detail;
+	public Object eventPhase;
+	public HTMLElement fromElement;
+	public Object handler;
+	public int keyCode;
+	public int layerX;
+	public int layerY;
+	public Object newValue;
+	public int offsetX;
+	public int offsetY;
+	public HTMLElement originalTarget;
+	public Object prevValue;
+	public HTMLElement relatedNode;
+	public int screenX;
+	public int screenY;
+	public HTMLElement srcElement;
+	public HTMLElement toElement;
+	public Object view;
+	public int wheelDelta;
+
 	public HTMLElement target;
 	public HTMLElement relatedTarget;
 	public HTMLElement currentTarget;
 	public int pageX;
 	public int pageY;
 	public int which;
-	public String metaKey;
+	public boolean metaKey;
+	public boolean shiftKey;
+	public boolean altKey;
+	public boolean ctrlKey;
+
 	public Object data;
 	public String namespace;
 	public Object result;
 	public long timeStamp;
 	public String type;
-
-	public boolean altKey;
-	public int keyCode;
-	public HTMLElement srcElement;
-	public boolean ctrlKey;
-	public boolean returnValue;
 
 	abstract public boolean isDefaultPrevented();
 

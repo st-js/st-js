@@ -52,9 +52,7 @@ import org.stjs.generator.utils.PreConditions;
 
 /**
  * This class visits the code's tree and gathers the declarations found in each scope.
- * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
- * 
  */
 public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 
@@ -76,8 +74,9 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 
 	@Override
 	public void visit(CompilationUnit n, NameScope currentScope) {
-		ImportScope scope = new ImportScope(inputFile, currentScope, n.getPackage() != null ? n.getPackage().getName()
-				.toString() : null, new ClassLoaderWrapper(classLoader));
+		ImportScope scope =
+				new ImportScope(inputFile, currentScope, n.getPackage() != null ? n.getPackage().getName().toString() : null,
+						new ClassLoaderWrapper(classLoader));
 		if (n.getImports() != null) {
 			for (ImportDeclaration importDecl : n.getImports()) {
 				checkImport(importDecl, importDecl.getName().toString());
@@ -89,7 +88,6 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 
 	/**
 	 * throws an exception if none of the allowedPackages is found as parent package of the given declaration
-	 * 
 	 * @param importDecl
 	 */
 	private void checkImport(Node n, String importName) throws JavascriptGenerationException {
@@ -98,8 +96,8 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 				return;
 			}
 		}
-		throw new JavascriptGenerationException(inputFile, new SourcePosition(n), "The import declaration:"
-				+ importName + " is not part of the allowed packages");
+		throw new JavascriptGenerationException(inputFile, new SourcePosition(n), "The import declaration:" + importName
+				+ " is not part of the allowed packages");
 	}
 
 	@Override
@@ -124,8 +122,8 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 	@Override
 	public void visit(CatchClause n, NameScope currentScope) {
 		JavascriptKeywords.checkIdentifier(inputFile, new SourcePosition(n), n.getExcept().getId().getName());
-		super.visit(n, new ParameterScope(inputFile, "catch-" + n.getBeginLine(), currentScope, n.getExcept().getId()
-				.getName()));
+		super.visit(n, new ParameterScope(inputFile, "catch-" + n.getBeginLine(), currentScope, n.getExcept().getId().getName(), n.getExcept()
+				.getType()));
 	}
 
 	@Override
@@ -134,7 +132,7 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 		if (n.getParameters() != null) {
 			for (Parameter p : n.getParameters()) {
 				JavascriptKeywords.checkIdentifier(inputFile, new SourcePosition(p), p.getId().getName());
-				scope.addParameter(p.getId().getName());
+				scope.addParameter(p.getId().getName(), p.getType());
 			}
 		}
 		if (n.getTypeParameters() != null) {
@@ -149,15 +147,15 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 	@Override
 	public void visit(ClassOrInterfaceDeclaration n, NameScope currentScope) {
 		NameScope classScope = currentScope;
-		if (n.getExtends() != null && n.getExtends().size() > 0 && !n.isInterface()) {
+		if ((n.getExtends() != null) && (n.getExtends().size() > 0) && !n.isInterface()) {
 			String parentClassName = n.getExtends().get(0).getName();
 
 			classScope = new ParentTypeScope(inputFile, classScope, parentClassName);
 		}
 
 		if (n.getMembers() != null) {
-			TypeScope typeScope = visitTypeDeclaration("type-" + n.getName(), n.getMembers(), classScope,
-					getTypeName(n, n.getName(), currentScope));
+			TypeScope typeScope =
+					visitTypeDeclaration("type-" + n.getName(), n.getMembers(), classScope, getTypeName(n, n.getName(), currentScope));
 			classScope = typeScope;
 			if (n.getTypeParameters() != null) {
 				for (TypeParameter p : n.getTypeParameters()) {
@@ -166,8 +164,7 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 				}
 			}
 		} else {
-			classScope = new TypeScope(inputFile, "type-" + n.getName(), getTypeName(n, n.getName(), currentScope),
-					classScope);
+			classScope = new TypeScope(inputFile, "type-" + n.getName(), getTypeName(n, n.getName(), currentScope), classScope);
 		}
 		if (classScope instanceof TypeScope) {
 			((ASTNodeData) n.getData()).setTypeScope((TypeScope) classScope);
@@ -192,17 +189,16 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 				}
 			});
 			if (enclosingClassName != null) {
-				return new JavaTypeName(withClassName(name), withClassName(enclosingClassName.getFullName(true)
-						.getOrThrow()));
+				return new JavaTypeName(withClassName(name), withClassName(enclosingClassName.getFullName(true).getOrThrow()));
 			}
 			scopeIt = scopeIt.getParent();
-		} while (scopeIt != null);
+		}
+		while (scopeIt != null);
 		// no enclosing class
 		return new JavaTypeName(withClassName(name));
 	}
 
-	private TypeScope visitTypeDeclaration(String name, List<BodyDeclaration> declarations, NameScope currentScope,
-			JavaTypeName declaredTypeName) {
+	private TypeScope visitTypeDeclaration(String name, List<BodyDeclaration> declarations, NameScope currentScope, JavaTypeName declaredTypeName) {
 		TypeScope typeScope = new TypeScope(inputFile, name, declaredTypeName, currentScope);
 		for (BodyDeclaration member : declarations) {
 
@@ -245,8 +241,9 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 	public void visit(ObjectCreationExpr n, NameScope currentScope) {
 		NameScope newScope = currentScope;
 		if (n.getAnonymousClassBody() != null) {
-			newScope = visitTypeDeclaration("anonymous-" + n.getBeginLine(), n.getAnonymousClassBody(), currentScope,
-					getTypeName(n, null, currentScope));
+			newScope =
+					visitTypeDeclaration("anonymous-" + n.getBeginLine(), n.getAnonymousClassBody(), currentScope,
+							getTypeName(n, null, currentScope));
 			((ASTNodeData) n.getData()).setTypeScope((TypeScope) newScope);
 		}
 		super.visit(n, newScope);
@@ -257,7 +254,7 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 		ParameterScope paramScope = new ParameterScope(inputFile, "constructor-" + n.getBeginLine(), currentScope);
 		if (n.getParameters() != null) {
 			for (Parameter p : n.getParameters()) {
-				paramScope.addParameter(p.getId().getName());
+				paramScope.addParameter(p.getId().getName(), p.getType());
 			}
 		}
 		super.visit(n, paramScope);
@@ -265,8 +262,7 @@ public class DeclarationVisitor extends VoidVisitorAdapter<NameScope> {
 
 	@Override
 	public void visit(EnumDeclaration n, NameScope currentScope) {
-		TypeScope classScope = new TypeScope(inputFile, "type-" + n.getName(),
-				getTypeName(n, n.getName(), currentScope), currentScope);
+		TypeScope classScope = new TypeScope(inputFile, "type-" + n.getName(), getTypeName(n, n.getName(), currentScope), currentScope);
 
 		if (n.getEntries() != null) {
 			for (EnumConstantDeclaration enumConstant : n.getEntries()) {

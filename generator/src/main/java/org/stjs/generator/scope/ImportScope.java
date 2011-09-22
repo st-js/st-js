@@ -40,11 +40,9 @@ import org.stjs.generator.scope.path.QualifiedPath.QualifiedMethodPath;
 import org.stjs.generator.utils.Option;
 
 /**
- * This scope tries to solve the methods inside the static imports and the identifiers (that can be the name of a class)
- * in the imports, the current package and the default packages.
- * 
+ * This scope tries to solve the methods inside the static imports and the identifiers (that can be the name of a class) in the imports, the
+ * current package and the default packages.
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
- * 
  */
 public class ImportScope extends NameScope implements ClassResolver {
 	private final Map<String, ClassWrapper> resolvedClasses = new HashMap<String, ClassWrapper>();
@@ -89,8 +87,7 @@ public class ImportScope extends NameScope implements ClassResolver {
 	}
 
 	@Override
-	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope,
-			NameResolverVisitor visitor) {
+	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		String imp = findImport(staticExactImports, name);
 		if (imp != null) {
 			QualifiedMethodPath path = QualifiedPath.withMethod(imp, this, visitor);
@@ -122,8 +119,8 @@ public class ImportScope extends NameScope implements ClassResolver {
 					visitor.getResolvedImports().add(loadedClass.getName());
 				}
 
-				return new QualifiedName<NameType.MethodName>(this, isStatic, false, NameTypes.METHOD, receiverField
-						.getDefinitionPoint().getOrNull(), receiverField.isGlobal());
+				return new QualifiedName<NameType.MethodName>(this, isStatic, false, NameTypes.METHOD, receiverField.getDefinitionPoint()
+						.getOrNull(), receiverField.isGlobal(), false);
 			}
 		}
 
@@ -137,8 +134,8 @@ public class ImportScope extends NameScope implements ClassResolver {
 		for (ClassWrapper clazz : classLoader.loadClass(path)) {
 			for (Method m : clazz.getDeclaredMethods()) {
 				if (m.getName().equals(path.getMethodName())) {
-					return Option.some(new QualifiedName<NameType.MethodName>(this, true, false, NameTypes.METHOD,
-							new JavaTypeName(path), isGlobal(clazz)));
+					return Option.some(new QualifiedName<NameType.MethodName>(this, true, false, NameTypes.METHOD, new JavaTypeName(path),
+							isGlobal(clazz), isMockType(clazz)));
 				}
 			}
 		}
@@ -153,8 +150,8 @@ public class ImportScope extends NameScope implements ClassResolver {
 			QualifiedFieldPath path = withField(imp);
 			for (ClassWrapper clazz : classLoader.loadClass(path.getClassQualifiedName())) {
 				if (clazz.hasDeclaredField(path.getFieldName())) {
-					return new QualifiedName<NameType.IdentifierName>(this, true, false, NameTypes.FIELD,
-							new JavaTypeName(path), isGlobal(clazz));
+					return new QualifiedName<NameType.IdentifierName>(this, true, false, NameTypes.FIELD, new JavaTypeName(path),
+							isGlobal(clazz), isMockType(clazz));
 				}
 			}
 		}
@@ -162,8 +159,8 @@ public class ImportScope extends NameScope implements ClassResolver {
 		for (String staticImport : this.staticStarImports) {
 			for (ClassWrapper clazz : classLoader.loadClass(staticImport)) {
 				if (clazz.hasDeclaredField(name)) {
-					return new QualifiedName<NameType.IdentifierName>(this, true, false, NameTypes.FIELD,
-							new JavaTypeName(clazz), isGlobal(clazz));
+					return new QualifiedName<NameType.IdentifierName>(this, true, false, NameTypes.FIELD, new JavaTypeName(clazz),
+							isGlobal(clazz), isMockType(clazz));
 				}
 			}
 		}
@@ -189,13 +186,21 @@ public class ImportScope extends NameScope implements ClassResolver {
 		return false;
 	}
 
-	@Override
-	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope,
-			NameResolverVisitor visitor) {
-		for (ClassWrapper clazz : resolveClass(name, visitor)) {
+	private boolean isMockType(ClassWrapper clazz) {
+		// TODO : cache?
+		for (Annotation annote : clazz.getAnnotations()) {
+			if (annote.annotationType().getName().equals("org.stjs.javascript.MockType")) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-			return new QualifiedName<TypeName>(this, isStatic(clazz.getModifiers()), NameTypes.CLASS, new JavaTypeName(
-					clazz));
+	@Override
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
+		for (ClassWrapper clazz : resolveClass(name, visitor)) {
+			return new QualifiedName<TypeName>(this, isStatic(clazz.getModifiers()), false, NameTypes.CLASS, new JavaTypeName(clazz), false,
+					isMockType(clazz));
 		}
 		return null;
 	}
@@ -207,7 +212,6 @@ public class ImportScope extends NameScope implements ClassResolver {
 
 	/**
 	 * The name of the class is as it may appear in a source file (i.e. relative to one of the imports or absolute)
-	 * 
 	 * @param parentClassName
 	 * @return
 	 */
@@ -234,13 +238,12 @@ public class ImportScope extends NameScope implements ClassResolver {
 			if (parentClass.isEmpty()) {
 				return Option.none();
 			}
-			String searchedClassName = parentClass.getOrThrow().getName() + "$"
-					+ QualifiedPath.afterFirstDot(className).replace('.', '$');
+			String searchedClassName = parentClass.getOrThrow().getName() + "$" + QualifiedPath.afterFirstDot(className).replace('.', '$');
 			return resolveClass(searchedClassName, visitor);
 		}
 
 		// 2. try in the current package
-		if (currentPackage != null && currentPackage.length() > 0) {
+		if ((currentPackage != null) && (currentPackage.length() > 0)) {
 			for (ClassWrapper resolvedClass : classLoader.loadClass(currentPackage + "." + className)) {
 				resolvedClasses.put(className, resolvedClass);
 				visitor.getResolvedImports().add(resolvedClass.getName());

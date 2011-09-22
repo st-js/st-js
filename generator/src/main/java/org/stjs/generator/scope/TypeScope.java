@@ -30,9 +30,7 @@ import org.stjs.generator.scope.path.QualifiedPath;
 
 /**
  * This scope is for a class definition. It contains the name of the fields and methods
- * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
- * 
  */
 public class TypeScope extends NameScope {
 	private final Set<String> staticFields = new HashSet<String>();
@@ -44,14 +42,16 @@ public class TypeScope extends NameScope {
 	private final Set<String> typeParameters = new HashSet<String>();
 
 	private final JavaTypeName declaredTypeName;
+	private final String typedThis;
 
 	public TypeScope(File inputFile, String name, JavaTypeName declaredTypeName, NameScope parent) {
 		super(inputFile, name, parent);
 		this.declaredTypeName = declaredTypeName;
+		//the construction to access the outer this Type.this
+		this.typedThis = declaredTypeName.getFullName(true).getOrThrow() + ".this";
 	}
 
 	/**
-	 * 
 	 * @param scope
 	 * @return true if the given scope is in the current TypeScope, and false if is in some outer type
 	 */
@@ -63,7 +63,7 @@ public class TypeScope extends NameScope {
 			return true;
 		}
 		if (scope instanceof TypeScope) {
-			if (currentScope instanceof ParentTypeScope && scope.getParent() == currentScope) {
+			if ((currentScope instanceof ParentTypeScope) && (scope.getParent() == currentScope)) {
 				// this is the case for calls from a type to its parent type
 				return true;
 			}
@@ -76,16 +76,14 @@ public class TypeScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String fullName, NameScope currentScope,
-			NameResolverVisitor visitor) {
+	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String fullName, NameScope currentScope, NameResolverVisitor visitor) {
 		String name = QualifiedPath.afterLastDot(fullName);
 		String scopePath = QualifiedPath.beforeLastDot(fullName);
 
 		// if (SUPER.equals(scopePath) && isInCurrentTypeScope(this, currentScope)) {// go directly to the parent
-		if (scopePath != null && !scopePath.isEmpty()) {
+		if ((scopePath != null) && !scopePath.isEmpty() && !scopePath.equals(typedThis)) {
 			if (getParent() != null) {
-				return getParent().resolveMethod(pos, GeneratorConstants.SUPER.equals(scopePath) ? name : fullName,
-						currentScope, visitor);
+				return getParent().resolveMethod(pos, GeneratorConstants.SUPER.equals(scopePath) ? name : fullName, currentScope, visitor);
 			}
 			return null;
 		}
@@ -109,17 +107,16 @@ public class TypeScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String fullName,
-			NameScope currentScope, NameResolverVisitor visitor) {
+	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String fullName, NameScope currentScope,
+			NameResolverVisitor visitor) {
 		boolean accessingOuterScope = !isInCurrentTypeScope(this, currentScope);
 		String name = QualifiedPath.afterLastDot(fullName);
 		String scopePath = QualifiedPath.beforeLastDot(fullName);
 
 		// if (SUPER.equals(scopePath) && isInCurrentTypeScope(this, currentScope)) {// go directly to the parent
-		if (scopePath != null && !scopePath.isEmpty()) {
+		if ((scopePath != null) && !scopePath.isEmpty()) {
 			if (getParent() != null) {
-				return getParent().resolveIdentifier(pos, GeneratorConstants.SUPER.equals(scopePath) ? name : fullName,
-						currentScope, visitor);
+				return getParent().resolveIdentifier(pos, GeneratorConstants.SUPER.equals(scopePath) ? name : fullName, currentScope, visitor);
 			}
 			return null;
 		}
@@ -151,28 +148,31 @@ public class TypeScope extends NameScope {
 		return new QualifiedName<IdentifierName>(this, isStatic, accessingOuterScope, type, getDeclaredTypeName());
 	}
 
+	private void checkName(String name, SourcePosition sourcePosition, Set<String> fields, Set<String> methods) {
+		if (fields.contains(name) || methods.contains(name)) {
+			throw new JavascriptGenerationException(getInputFile(), sourcePosition, "The type contains already a method or a field called ["
+					+ name + "] with a different signature. Javascript cannot distinguish methods/fields with the same name");
+		}
+	}
+
 	public void addStaticField(String name, SourcePosition sourcePosition) {
+		checkName(name, sourcePosition, staticFields, staticMethods);
 		staticFields.add(name);
 	}
 
 	public void addStaticMethod(String name, SourcePosition sourcePosition) {
-		if (!staticMethods.add(name)) {
-			throw new JavascriptGenerationException(getInputFile(), sourcePosition,
-					"The type contains already a method called [" + name
-							+ "] with a different signature. Javascript cannot distinguish methods with the same name");
-		}
+		checkName(name, sourcePosition, staticFields, staticMethods);
+		staticMethods.add(name);
 	}
 
 	public void addInstanceField(String name, SourcePosition sourcePosition) {
+		checkName(name, sourcePosition, instanceFields, instanceMethods);
 		instanceFields.add(name);
 	}
 
 	public void addInstanceMethod(String name, SourcePosition sourcePosition) {
-		if (!instanceMethods.add(name)) {
-			throw new JavascriptGenerationException(getInputFile(), sourcePosition,
-					"The type contains already a method called [" + name
-							+ "] with a different signature. Javascript cannot distinguish methods with the same name");
-		}
+		checkName(name, sourcePosition, instanceFields, instanceMethods);
+		instanceMethods.add(name);
 	}
 
 	public void addStaticInnerType(String name) {
@@ -188,8 +188,7 @@ public class TypeScope extends NameScope {
 	}
 
 	@Override
-	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope,
-			NameResolverVisitor visitor) {
+	protected QualifiedName<TypeName> resolveType(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		// TODO : do not check strings, but qualified names. Becaue OuterClass.InnerClass is === to InnerClass
 		if (staticInnerTypes.contains(name)) {
 			return createInnerTypeQualifiedName(pos, name, true);
@@ -212,8 +211,8 @@ public class TypeScope extends NameScope {
 
 	@Override
 	public String toString() {
-		return "TypeScope [staticFields=" + staticFields + ", staticMethods=" + staticMethods + ", instanceFields="
-				+ instanceFields + ", instanceMethods=" + instanceMethods + ", getChildren()=" + getChildren() + "]";
+		return "TypeScope [staticFields=" + staticFields + ", staticMethods=" + staticMethods + ", instanceFields=" + instanceFields
+				+ ", instanceMethods=" + instanceMethods + ", getChildren()=" + getChildren() + "]";
 	}
 
 	public JavaTypeName getDeclaredTypeName() {

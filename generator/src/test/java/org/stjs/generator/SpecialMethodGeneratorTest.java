@@ -8,6 +8,7 @@ import test.generator.specialMethods.SpecialMethod1;
 import test.generator.specialMethods.SpecialMethod10;
 import test.generator.specialMethods.SpecialMethod11;
 import test.generator.specialMethods.SpecialMethod12;
+import test.generator.specialMethods.SpecialMethod13;
 import test.generator.specialMethods.SpecialMethod2;
 import test.generator.specialMethods.SpecialMethod3;
 import test.generator.specialMethods.SpecialMethod4;
@@ -68,6 +69,12 @@ public class SpecialMethodGeneratorTest {
 	}
 
 	@Test
+	public void testSpecialLengthAppliedToString() {
+		// $length(x, y) -> x.length = y
+		assertCodeContains(SpecialMethod13.class, "(this).length = 1");
+	}
+
+	@Test
 	public void testSpecialOr() {
 		// $or(a,b) -> a || b
 		assertCodeContains(SpecialMethod9.class, "3 || 4");
@@ -90,4 +97,5 @@ public class SpecialMethodGeneratorTest {
 		// $get(x,y) -> x[y]
 		assertCodeContains(SpecialMethod12.class, "(obj)[\"a\"]");
 	}
+
 }
