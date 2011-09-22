@@ -18,7 +18,13 @@ package org.stjs.javascript.jquery.plugins;
 import static org.stjs.javascript.Global.$array;
 
 import org.stjs.javascript.Array;
+import org.stjs.javascript.Date;
 import org.stjs.javascript.Map;
+import org.stjs.javascript.dom.HTMLElement;
+import org.stjs.javascript.functions.Callback2;
+import org.stjs.javascript.functions.Callback3;
+import org.stjs.javascript.functions.Function1;
+import org.stjs.javascript.functions.Function2;
 import org.stjs.javascript.jquery.JQuery;
 
 public class DatePickerOptions<FullJQuery extends JQuery<?>> {
@@ -74,11 +80,10 @@ public class DatePickerOptions<FullJQuery extends JQuery<?>> {
 
 	public Object minDate = null;
 
-	public Array<String> monthNames = $array("January", "February", "March", "April", "May", "June", "July", "August",
-			"September", "October", "November", "December");
+	public Array<String> monthNames = $array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+			"November", "December");
 
-	public Array<String> monthNamesShort = $array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct",
-			"Nov", "Dec");
+	public Array<String> monthNamesShort = $array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
 
 	public boolean navigationAsDateFormat = false;
 
@@ -118,12 +123,13 @@ public class DatePickerOptions<FullJQuery extends JQuery<?>> {
 
 	public UIEventHandler<DatePickerUI<FullJQuery>> create;
 
-	public UIEventHandler<DatePickerUI<FullJQuery>> beforeShow;
+	public Function2<HTMLElement, FullJQuery, Object> beforeShow;
 
-	public UIEventHandler<DatePickerUI<FullJQuery>> beforeShowDay;
-	public UIEventHandler<DatePickerUI<FullJQuery>> onChangeMonthYear;
+	public Function1<Date, Array<Object>> beforeShowDay;
 
-	public UIEventHandler<DatePickerUI<FullJQuery>> onClose;
+	public Callback3<Integer, Integer, FullJQuery> onChangeMonthYear;
 
-	public UIEventHandler<DatePickerUI<FullJQuery>> onSelect;
+	public Callback2<String, FullJQuery> onClose;
+
+	public Callback2<String, FullJQuery> onSelect;
 }

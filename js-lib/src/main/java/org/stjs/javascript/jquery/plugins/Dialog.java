@@ -22,7 +22,7 @@ public interface Dialog<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery dialog(DialogOptions<FullJQuery> options);
 
-	public FullJQuery dialog(String methodName);
+	public Object dialog(String methodName);
 
 	public Object dialog(String option, String optionName);
 

@@ -15,6 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
+import org.stjs.javascript.Location;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
@@ -33,6 +34,7 @@ abstract public class HTMLDocument {
 	public String referrer;
 	public String title;
 	public HTMLElement documentElement;
+	public Location location;
 
 	abstract public HTMLList<HTMLElement> getElementsByName(String arg0);
 

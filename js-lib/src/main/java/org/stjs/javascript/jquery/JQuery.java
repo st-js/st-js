@@ -22,8 +22,8 @@ import org.stjs.javascript.functions.Callback2;
 import org.stjs.javascript.utils.NameValue;
 
 /**
- * jquery interface for all jquery method + all used plugins in a web app. it can be mocked easily for testing purposes.
- * Compatible with jquery 1.6
+ * jquery interface for all jquery method + all used plugins in a web app. it can be mocked easily for testing purposes. Compatible with jquery
+ * 1.6
  */
 public interface JQuery<FullJQuery extends JQuery<?>> {
 	/************* ajax ***************/
@@ -137,11 +137,11 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery removeAttr(String name);
 
-	public FullJQuery prop(String name, String value);
+	public FullJQuery prop(String name, Object value);
 
 	public FullJQuery removeProp(String name);
 
-	public String prop(String attrName);
+	public Object prop(String attrName);
 
 	public FullJQuery html(String html);
 

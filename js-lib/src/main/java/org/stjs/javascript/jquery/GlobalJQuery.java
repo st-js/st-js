@@ -18,6 +18,7 @@ package org.stjs.javascript.jquery;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.GlobalScope;
 import org.stjs.javascript.Map;
+import org.stjs.javascript.dom.HTMLElement;
 import org.stjs.javascript.functions.Callback2;
 import org.stjs.javascript.functions.Function2;
 
@@ -25,10 +26,16 @@ import org.stjs.javascript.functions.Function2;
 abstract public class GlobalJQuery {
 	public static GlobalJQuery $;
 
+	public int active;
+
 	/**
 	 * jquery constructors
 	 */
 	public static <FullJQuery extends JQueryAndPlugins<?>> JQueryAndPlugins<FullJQuery> $(String path) {
+		return null;
+	}
+
+	public static <FullJQuery extends JQueryAndPlugins<?>> JQueryAndPlugins<FullJQuery> $(String path, Object context) {
 		return null;
 	}
 
@@ -40,14 +47,26 @@ abstract public class GlobalJQuery {
 
 	abstract public void get(String url, Object params, SuccessListener successListener, String mode);
 
+	abstract public void getJSON(String url, Object params, SuccessListener successListener);
+
 	abstract public <C, E, R> Array<R> map(C collection, Function2<E, Integer, R> callback);
 
 	abstract public <T> int inArray(T element, Array<T> registeredListeners);
 
 	abstract public <E> void each(Array<E> collection, Callback2<Integer, E> elementIterationFunction);
 
+	abstract public <FullJQuery extends JQueryAndPlugins<?>> void each(JQueryAndPlugins<FullJQuery> collection,
+			Callback2<Integer, HTMLElement> elementIterationFunction);
+
 	abstract public <K, V> void each(Map<K, V> collection, Callback2<K, V> elementIterationFunction);
+
+	//	abstract public void each(Object object, Callback2<String, Object> elementIterationFunction);
 
 	abstract public String trim(String obj);
 
+	abstract public <K, V> Map<K, V> extend(Map<K, V> target, Map<K, V>... objects);
+
+	abstract public <K, V> Map<K, V> extend(boolean deep, Map<K, V> target, Map<K, V>... objects);
+
+	abstract public <T> T parseJSON(String message);
 }

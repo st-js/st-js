@@ -22,7 +22,7 @@ abstract public class Location {
 	public String href;
 	public String pathname;
 	public int port;
-	public String protocal;
+	public String protocol;
 	public String search;
 
 	abstract public void assign(String url);

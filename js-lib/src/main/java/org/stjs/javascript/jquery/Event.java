@@ -34,6 +34,12 @@ abstract public class Event {
 	public long timeStamp;
 	public String type;
 
+	public boolean altKey;
+	public int keyCode;
+	public HTMLElement srcElement;
+	public boolean ctrlKey;
+	public boolean returnValue;
+
 	abstract public boolean isDefaultPrevented();
 
 	abstract public boolean isImmediatePropagationStopped();

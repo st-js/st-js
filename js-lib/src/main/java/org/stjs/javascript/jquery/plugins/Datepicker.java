@@ -22,7 +22,7 @@ public interface Datepicker<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery datepicker(DatePickerOptions<FullJQuery> options);
 
-	public FullJQuery datepicker(String methodName);
+	public Object datepicker(String methodName);
 
 	public Object datepicker(String option, String optionName);
 
