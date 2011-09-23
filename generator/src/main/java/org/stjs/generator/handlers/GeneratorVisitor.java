@@ -128,8 +128,9 @@ import org.stjs.generator.utils.Option;
 import org.stjs.generator.utils.PreConditions;
 
 /**
- * This class visits the AST corresponding to a Java file and generates the corresponding Javascript code. It presumes the
- * {@link NameResolverVisitor} previously visited the tree and set the resolved name of certain nodes.
+ * This class visits the AST corresponding to a Java file and generates the corresponding Javascript code. It presumes
+ * the {@link NameResolverVisitor} previously visited the tree and set the resolved name of certain nodes.
+ * 
  * @author acraciun
  */
 public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
@@ -201,7 +202,8 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(SynchronizedStmt n, GenerationContext arg) {
-		throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(n), "synchronized blocks are not supported by Javascript");
+		throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(n),
+				"synchronized blocks are not supported by Javascript");
 	}
 
 	@Override
@@ -427,7 +429,8 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		}
 	}
 
-	private void printMethod(String name, List<Parameter> parameters, int modifiers, BlockStmt body, GenerationContext arg, boolean anonymous) {
+	private void printMethod(String name, List<Parameter> parameters, int modifiers, BlockStmt body,
+			GenerationContext arg, boolean anonymous) {
 
 		if (ModifierSet.isAbstract(modifiers) || ModifierSet.isNative(modifiers)) {
 			return;
@@ -491,8 +494,8 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		printArguments(Collections.<String> emptyList(), args, Collections.<String> emptyList(), arg);
 	}
 
-	private void printArguments(Collection<String> beforeParams, Collection<Expression> args, Collection<String> afterParams,
-			GenerationContext arg) {
+	private void printArguments(Collection<String> beforeParams, Collection<Expression> args,
+			Collection<String> afterParams, GenerationContext arg) {
 		printer.print("(");
 		boolean first = true;
 		for (String param : beforeParams) {
@@ -533,8 +536,8 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		return null;
 	}
 
-	private ClassOrInterfaceDeclaration buildClassDeclaration(String className, String extendsFrom, List<BodyDeclaration> members,
-			List<Expression> constructorArgs) {
+	private ClassOrInterfaceDeclaration buildClassDeclaration(String className, String extendsFrom,
+			List<BodyDeclaration> members, List<Expression> constructorArgs) {
 		ClassOrInterfaceDeclaration decl = new ClassOrInterfaceDeclaration();
 		decl.setName(className);
 		decl.setExtends(Collections.singletonList(new ClassOrInterfaceType(extendsFrom)));
@@ -554,7 +557,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 		QualifiedName<TypeName> qname = arg.resolveType(n.getType());
 		if ((qname != null) && qname.isMockType()) {
-			//this is a call to an mock type
+			// this is a call to an mock type
 			printer.print("{}");
 			return;
 		}
@@ -563,14 +566,15 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 			// special construction for inline function definition
 			MethodDeclaration method = getMethodDeclaration(n);
 			if (method != null) {
-				printMethod(method.getName(), method.getParameters(), method.getModifiers(), method.getBody(), arg, true);
+				printMethod(method.getName(), method.getParameters(), method.getModifiers(), method.getBody(), arg,
+						true);
 				return;
 			}
 			// special construction to handle the inline body
 			// build a special type called _InlineType to handle this
 			printer.printLn("(function(){");
-			ClassOrInterfaceDeclaration inlineFakeClass =
-					buildClassDeclaration(GeneratorConstants.SPECIAL_INLINE_TYPE, n.getType().getName(), n.getAnonymousClassBody(), n.getArgs());
+			ClassOrInterfaceDeclaration inlineFakeClass = buildClassDeclaration(GeneratorConstants.SPECIAL_INLINE_TYPE,
+					n.getType().getName(), n.getAnonymousClassBody(), n.getArgs());
 			inlineFakeClass.setData(n.getData());
 			inlineFakeClass.accept(this, arg);
 
@@ -775,7 +779,8 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(InitializerDeclaration n, GenerationContext arg) {
 		// should find a way to implement these blocks. For the moment forbid them
-		throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(n), "Initializing blocks are not supported by Javascript");
+		throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(n),
+				"Initializing blocks are not supported by Javascript");
 	}
 
 	@Override
@@ -853,8 +858,10 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 	/**
 	 * TODO - this can be done more generically
+	 * 
 	 * @param n
-	 * @return true if the node is a direct child following the path: //ObjectCreationExpr/InitializerDeclaration/BlockStmt/Child
+	 * @return true if the node is a direct child following the path:
+	 *         //ObjectCreationExpr/InitializerDeclaration/BlockStmt/Child
 	 */
 	private boolean isInlineObjectCreationChild(Node n, int upLevel) {
 		return isInlineObjectCreationBlock(parent(n, upLevel));
@@ -882,15 +889,20 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(AssignExpr n, GenerationContext arg) {
 		if (isInlineObjectCreationChild(n, 2)) {
-			n.getTarget().accept(this, arg);
+			if (n.getTarget() instanceof FieldAccessExpr) {
+				// in inline object creation "this." should be removed
+				printer.print(((FieldAccessExpr) n.getTarget()).getField());
+			} else {
+				n.getTarget().accept(this, arg);
+			}
 			printer.print(" ");
 			switch (n.getOperator()) {
-				case assign:
-					printer.print(":");
-					break;
-				default:
-					throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(n),
-							"Cannot have this assign operator inside an inline object creation block");
+			case assign:
+				printer.print(":");
+				break;
+			default:
+				throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(n),
+						"Cannot have this assign operator inside an inline object creation block");
 			}
 			printer.print(" ");
 			n.getValue().accept(this, arg);
@@ -900,42 +912,42 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		n.getTarget().accept(this, arg);
 		printer.print(" ");
 		switch (n.getOperator()) {
-			case assign:
-				printer.print("=");
-				break;
-			case and:
-				printer.print("&=");
-				break;
-			case or:
-				printer.print("|=");
-				break;
-			case xor:
-				printer.print("^=");
-				break;
-			case plus:
-				printer.print("+=");
-				break;
-			case minus:
-				printer.print("-=");
-				break;
-			case rem:
-				printer.print("%=");
-				break;
-			case slash:
-				printer.print("/=");
-				break;
-			case star:
-				printer.print("*=");
-				break;
-			case lShift:
-				printer.print("<<=");
-				break;
-			case rSignedShift:
-				printer.print(">>=");
-				break;
-			case rUnsignedShift:
-				printer.print(">>>=");
-				break;
+		case assign:
+			printer.print("=");
+			break;
+		case and:
+			printer.print("&=");
+			break;
+		case or:
+			printer.print("|=");
+			break;
+		case xor:
+			printer.print("^=");
+			break;
+		case plus:
+			printer.print("+=");
+			break;
+		case minus:
+			printer.print("-=");
+			break;
+		case rem:
+			printer.print("%=");
+			break;
+		case slash:
+			printer.print("/=");
+			break;
+		case star:
+			printer.print("*=");
+			break;
+		case lShift:
+			printer.print("<<=");
+			break;
+		case rSignedShift:
+			printer.print(">>=");
+			break;
+		case rUnsignedShift:
+			printer.print(">>>=");
+			break;
 		}
 		printer.print(" ");
 		n.getValue().accept(this, arg);
@@ -947,63 +959,63 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		n.getLeft().accept(this, arg);
 		printer.print(" ");
 		switch (n.getOperator()) {
-			case or:
-				printer.print("||");
-				break;
-			case and:
-				printer.print("&&");
-				break;
-			case binOr:
-				printer.print("|");
-				break;
-			case binAnd:
-				printer.print("&");
-				break;
-			case xor:
-				printer.print("^");
-				break;
-			case equals:
-				printer.print("==");
-				break;
-			case notEquals:
-				printer.print("!=");
-				break;
-			case less:
-				printer.print("<");
-				break;
-			case greater:
-				printer.print(">");
-				break;
-			case lessEquals:
-				printer.print("<=");
-				break;
-			case greaterEquals:
-				printer.print(">=");
-				break;
-			case lShift:
-				printer.print("<<");
-				break;
-			case rSignedShift:
-				printer.print(">>");
-				break;
-			case rUnsignedShift:
-				printer.print(">>>");
-				break;
-			case plus:
-				printer.print("+");
-				break;
-			case minus:
-				printer.print("-");
-				break;
-			case times:
-				printer.print("*");
-				break;
-			case divide:
-				printer.print("/");
-				break;
-			case remainder:
-				printer.print("%");
-				break;
+		case or:
+			printer.print("||");
+			break;
+		case and:
+			printer.print("&&");
+			break;
+		case binOr:
+			printer.print("|");
+			break;
+		case binAnd:
+			printer.print("&");
+			break;
+		case xor:
+			printer.print("^");
+			break;
+		case equals:
+			printer.print("==");
+			break;
+		case notEquals:
+			printer.print("!=");
+			break;
+		case less:
+			printer.print("<");
+			break;
+		case greater:
+			printer.print(">");
+			break;
+		case lessEquals:
+			printer.print("<=");
+			break;
+		case greaterEquals:
+			printer.print(">=");
+			break;
+		case lShift:
+			printer.print("<<");
+			break;
+		case rSignedShift:
+			printer.print(">>");
+			break;
+		case rUnsignedShift:
+			printer.print(">>>");
+			break;
+		case plus:
+			printer.print("+");
+			break;
+		case minus:
+			printer.print("-");
+			break;
+		case times:
+			printer.print("*");
+			break;
+		case divide:
+			printer.print("/");
+			break;
+		case remainder:
+			printer.print("%");
+			break;
 		}
 		printer.print(" ");
 		n.getRight().accept(this, arg);
@@ -1055,11 +1067,8 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(FieldAccessExpr n, GenerationContext arg) {
-		if (!isInlineObjectCreationChild(n, 3)) {
-			//in inline object creation "this." should be removed
-			n.getScope().accept(this, arg);
-			printer.print(".");
-		}
+		n.getScope().accept(this, arg);
+		printer.print(".");
 		printer.print(n.getField());
 	}
 
@@ -1087,8 +1096,8 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 							public Boolean caseParentTypeScope(ParentTypeScope parentTypeScope) {
 								// Non static reference to parent type
 								printer.print("this._super");
-								printArguments(Collections.singleton("\"" + n.getName() + "\""), n.getArgs(), Collections.<String> emptyList(),
-										arg);
+								printArguments(Collections.singleton("\"" + n.getName() + "\""), n.getArgs(),
+										Collections.<String> emptyList(), arg);
 								return true;
 							}
 						});
@@ -1116,7 +1125,8 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		}
 	}
 
-	private void printStaticFieldOrMethodAccessPrefix(final Node n, final GenerationContext context, final QualifiedName<?> qname, boolean addDot) {
+	private void printStaticFieldOrMethodAccessPrefix(final Node n, final GenerationContext context,
+			final QualifiedName<?> qname, boolean addDot) {
 		if (!qname.isGlobal()) {
 			JavaTypeName definitionPoint = qname.getDefinitionPoint().getOrThrow();
 			if (definitionPoint.isAnonymous()) {
@@ -1185,35 +1195,35 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(UnaryExpr n, GenerationContext arg) {
 		switch (n.getOperator()) {
-			case positive:
-				printer.print("+");
-				break;
-			case negative:
-				printer.print("-");
-				break;
-			case inverse:
-				printer.print("~");
-				break;
-			case not:
-				printer.print("!");
-				break;
-			case preIncrement:
-				printer.print("++");
-				break;
-			case preDecrement:
-				printer.print("--");
-				break;
+		case positive:
+			printer.print("+");
+			break;
+		case negative:
+			printer.print("-");
+			break;
+		case inverse:
+			printer.print("~");
+			break;
+		case not:
+			printer.print("!");
+			break;
+		case preIncrement:
+			printer.print("++");
+			break;
+		case preDecrement:
+			printer.print("--");
+			break;
 		}
 
 		n.getExpr().accept(this, arg);
 
 		switch (n.getOperator()) {
-			case posIncrement:
-				printer.print("++");
-				break;
-			case posDecrement:
-				printer.print("--");
-				break;
+		case posIncrement:
+			printer.print("++");
+			break;
+		case posDecrement:
+			printer.print("--");
+			break;
 		}
 	}
 
@@ -1241,7 +1251,8 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 	public void visit(ExplicitConstructorInvocationStmt n, GenerationContext arg) {
 		if (n.isThis()) {
 			// This should not happen as another constructor is forbidden
-			throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(n), "Only one constructor is allowed");
+			throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(n),
+					"Only one constructor is allowed");
 		}
 
 		ClassOrInterfaceDeclaration currentTypeDecl = arg.getCurrentType();
@@ -1261,7 +1272,8 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(AssertStmt n, GenerationContext arg) {
-		throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(n), "Assert statement is not supported by Javascript");
+		throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(n),
+				"Assert statement is not supported by Javascript");
 	}
 
 	private void checkAssignStatement(Statement s, GenerationContext arg) {
@@ -1364,7 +1376,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		QualifiedName<?> qualifiedName = selectorData.getQualifiedName();
 		if (qualifiedName != null) {
 			for (JavaTypeName type : qualifiedName.getDefinitionPoint()) {
-				//TODO if (type.isEnum()?)
+				// TODO if (type.isEnum()?)
 				return qualifiedName.getDefinitionPoint();
 			}
 		}

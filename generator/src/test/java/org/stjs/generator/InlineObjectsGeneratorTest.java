@@ -33,7 +33,7 @@ public class InlineObjectsGeneratorTest {
 	@Test
 	public void testFieldsQualifiedWithThis() {
 		// the "this." should be removed (otherwise is rhino who complains)
-		assertCodeContains(InlineObjects4.class, "o={a:1}");
+		assertCodeContains(InlineObjects4.class, "o={a:other.a}");
 	}
 
 	@Test

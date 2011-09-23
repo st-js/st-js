@@ -75,4 +75,8 @@ public class JSStringAdapter {
 	public static String replace(String applyTo, RegExp re, String repl) {
 		return null;
 	}
+
+	public static int $length(String applyTo) {
+		return 0;
+	}
 }

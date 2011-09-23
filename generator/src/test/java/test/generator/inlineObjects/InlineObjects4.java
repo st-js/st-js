@@ -4,9 +4,10 @@ public class InlineObjects4 {
 
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
+		final Pojo other = new Pojo();
 		Pojo o = new Pojo() {
 			{
-				this.a = 1;
+				this.a = other.a;
 			}
 		};
 	}
