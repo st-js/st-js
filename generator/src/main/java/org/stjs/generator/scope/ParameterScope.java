@@ -37,20 +37,21 @@ import org.stjs.generator.scope.path.QualifiedPath;
  */
 public class ParameterScope extends NameScope {
 
-	private final Map<String, Type> parameters = new HashMap<String, Type>();
+	private final VariableDeclarationRegistry registry;
 	private final Set<String> typeParameters = new HashSet<String>();
 
 	public ParameterScope(File inputFile, String name, NameScope parent) {
 		super(inputFile, name, parent);
+		registry = new VariableDeclarationRegistry(this);
 	}
 
 	public ParameterScope(File inputFile, String name, NameScope parent, String parameter, Type type) {
 		this(inputFile, name, parent);
-		parameters.put(parameter, type);
+		registry.addVariable(type, parameter);
 	}
 
 	public void addParameter(String parameter, Type type) {
-		parameters.put(parameter, type);
+		registry.addVariable(type, parameter);
 	}
 
 	public void addTypeParameter(String typeParameter) {
@@ -60,31 +61,8 @@ public class ParameterScope extends NameScope {
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope,
 			NameResolverVisitor visitor) {
-		if (parameters.containsKey(name)) {
-			// XXX: ACRACIUN: copied from the VariableScope
-			Type type = parameters.get(name);
-			QualifiedName<TypeName> resolvedType = super.resolveType(pos, type.toString(), visitor);
-			if (resolvedType != null) {
-				// TODO : this should be done in other scopes too (for parameters, fields, ....)
-				// this is not at all specific to variables
-				if ((resolvedType.getType() == NameTypes.INNER_CLASS) && resolvedType.getDefinitionPoint().isDefined()) {
-
-					// TODO: Something is broken in the data type here.
-					// we're using the definition point of the member to build a fake definition point...
-					// since the type has already been resolved, the following code is pointless.
-					// the QualifiedName itself should be smart enough
-					// JavaTypeName should really be deleted.
-					for (JavaTypeName enclosingNameType : resolvedType.getDefinitionPoint()) {
-						QualifiedPath qualifiedPath = enclosingNameType.getClassPath().getOrThrow();
-						JavaTypeName javaTypeName = new JavaTypeName(QualifiedPath.withClassName(type.toString()),
-								qualifiedPath);
-						return new QualifiedName<IdentifierName>(this, false, NameTypes.VARIABLE, javaTypeName);
-					}
-				}
-				return new QualifiedName<IdentifierName>(this, false, NameTypes.VARIABLE, resolvedType
-						.getDefinitionPoint().getOrNull());
-			}
-			return new QualifiedName<IdentifierName>(this, false, NameTypes.VARIABLE);
+		for (QualifiedName<IdentifierName> qName : registry.resolveIdentifier(name)) {
+			return qName;
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(pos, name, currentScope, visitor);
@@ -104,7 +82,7 @@ public class ParameterScope extends NameScope {
 
 	@Override
 	public String toString() {
-		return "ParameterScope [parameters=" + parameters + ", getChildren()=" + getChildren() + "]";
+		return "ParameterScope [parameters=" + registry.getVariables() + ", getChildren()=" + getChildren() + "]";
 	}
 
 	@Override

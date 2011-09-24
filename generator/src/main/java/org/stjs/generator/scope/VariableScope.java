@@ -15,14 +15,9 @@
  */
 package org.stjs.generator.scope;
 
-import japa.parser.ast.type.ReferenceType;
-import japa.parser.ast.type.Type;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.stjs.generator.ASTNodeData;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
@@ -38,26 +33,21 @@ import org.stjs.generator.scope.path.QualifiedPath;
  */
 public class VariableScope extends NameScope {
 
-	private final Map<String, Type> variables = new HashMap<String, Type>();
-
+	private final VariableDeclarationRegistry registry;
+	
 	public VariableScope(File inputFile, String name, NameScope parent) {
 		super(inputFile, name, parent);
+		registry = new VariableDeclarationRegistry(this);
 	}
 
-	public void addVariable(Type type, String var) {
-		variables.put(var, type);
+	public VariableDeclarationRegistry getRegistry() {
+		return registry;
 	}
 
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
-		if (variables.containsKey(name)) {
-			Type type = getDefinitionType(variables.get(name));
-			QualifiedName<TypeName> resolvedType = (QualifiedName<TypeName>) ((ASTNodeData)type.getData()).getQualifiedName();
-			if (resolvedType != null) {
-				return new QualifiedName<IdentifierName>(this, false, NameTypes.VARIABLE, resolvedType.getDefinitionPoint().getOrNull());
-			}
-			// probably type instanceof PrimitiveType
-			return new QualifiedName<IdentifierName>(this, false, NameTypes.VARIABLE);
+		for (QualifiedName<IdentifierName> qName : registry.resolveIdentifier(name)) {
+			return qName;
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(pos, name, currentScope, visitor);
@@ -65,12 +55,6 @@ public class VariableScope extends NameScope {
 		return null;
 	}
 
-	private Type getDefinitionType(Type type) {
-		if (type instanceof ReferenceType) {
-			return getDefinitionType(((ReferenceType)type).getType());
-		}
-		return type;
-	}
 
 	@Override
 	protected QualifiedName<MethodName> resolveMethod(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
@@ -78,7 +62,7 @@ public class VariableScope extends NameScope {
 			String receiverOrStaticClass = QualifiedPath.beforeFirstDot(name);
 			// it is ok to check even without knowing if the receiver is a class or a variable
 			// since variables have precedence if there is a collision
-			if (variables.containsKey(receiverOrStaticClass)) {
+			if (registry.containsKey(receiverOrStaticClass)) {
 				return new QualifiedName<NameType.MethodName>(this, false, NameTypes.VARIABLE);
 			}
 		}
@@ -98,7 +82,7 @@ public class VariableScope extends NameScope {
 
 	@Override
 	public String toString() {
-		return "VariableScope [variables=" + variables + ", getChildren()=" + getChildren() + "]";
+		return "VariableScope [variables=" + registry.getVariables() + ", getChildren()=" + getChildren() + "]";
 	}
 
 	@Override
