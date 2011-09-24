@@ -15,12 +15,14 @@
  */
 package org.stjs.generator.scope;
 
+import japa.parser.ast.type.ReferenceType;
 import japa.parser.ast.type.Type;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.stjs.generator.ASTNodeData;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
@@ -49,33 +51,25 @@ public class VariableScope extends NameScope {
 	@Override
 	protected QualifiedName<IdentifierName> resolveIdentifier(SourcePosition pos, String name, NameScope currentScope, NameResolverVisitor visitor) {
 		if (variables.containsKey(name)) {
-			Type type = variables.get(name);
-			QualifiedName<TypeName> resolvedType = super.resolveType(pos, type.toString(), visitor);
+			Type type = getDefinitionType(variables.get(name));
+			QualifiedName<TypeName> resolvedType = (QualifiedName<TypeName>) ((ASTNodeData)type.getData()).getQualifiedName();
 			if (resolvedType != null) {
-				// TODO : this should be done in other scopes too (for parameters, fields, ....)
-				// this is not at all specific to variables
-				if (resolvedType.getType() == NameTypes.INNER_CLASS && resolvedType.getDefinitionPoint().isDefined()) {
-					
-					// TODO: Something is broken in the data type here.
-					// we're using the definition point of the member to build a fake definition point...
-					// since the type has already been resolved, the following code is pointless.
-					// the QualifiedName itself should be smart enough
-					// JavaTypeName should really be deleted.
-					for (JavaTypeName enclosingNameType : resolvedType.getDefinitionPoint()) {
-						QualifiedPath qualifiedPath = enclosingNameType.getClassPath().getOrThrow();
-						JavaTypeName javaTypeName = new JavaTypeName(QualifiedPath.withClassName(type.toString()), qualifiedPath);
-						return new QualifiedName<IdentifierName>(this, false, NameTypes.VARIABLE, javaTypeName);
-					}
-				} else {
-					return new QualifiedName<IdentifierName>(this, false, NameTypes.VARIABLE, resolvedType.getDefinitionPoint().getOrNull());
-				}
+				return new QualifiedName<IdentifierName>(this, false, NameTypes.VARIABLE, resolvedType.getDefinitionPoint().getOrNull());
 			}
+			// probably type instanceof PrimitiveType
 			return new QualifiedName<IdentifierName>(this, false, NameTypes.VARIABLE);
 		}
 		if (getParent() != null) {
 			return getParent().resolveIdentifier(pos, name, currentScope, visitor);
 		}
 		return null;
+	}
+
+	private Type getDefinitionType(Type type) {
+		if (type instanceof ReferenceType) {
+			return getDefinitionType(((ReferenceType)type).getType());
+		}
+		return type;
 	}
 
 	@Override

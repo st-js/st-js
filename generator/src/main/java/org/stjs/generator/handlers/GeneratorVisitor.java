@@ -169,8 +169,8 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(ClassOrInterfaceType n, GenerationContext arg) {
 		QualifiedName<IdentifierName> qname = arg.resolveIdentifier(n);
-		if ((qname != null) && (qname.getScope() != null) && qname.isStatic()) {
-			printStaticFieldOrMethodAccessPrefix(n, arg, qname, false);
+		if ((qname != null) && (qname.getDefinitionPoint().isDefined())) {
+			printer.print(qname.getDefinitionPoint().getOrNull().getFullName(false).getOrThrow());
 		} else {
 			if (n.getScope() != null) {
 				n.getScope().accept(this, arg);

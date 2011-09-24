@@ -22,8 +22,6 @@ public class EnumGeneratorTest {
 		assertCodeContains(Enums2.class, "Enums2.Value.a");
 	}
 
-
-	
 	@Ignore
 	public void testEnumWithFieldsDeclaration() {
 		assertCodeContains(Enums4.class, "case Enums4.a");

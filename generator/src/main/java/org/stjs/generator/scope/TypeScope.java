@@ -15,6 +15,8 @@
  */
 package org.stjs.generator.scope;
 
+import static org.stjs.generator.scope.path.QualifiedPath.withClassName;
+
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
@@ -206,7 +208,8 @@ public class TypeScope extends NameScope {
 	}
 
 	private QualifiedName<TypeName> createInnerTypeQualifiedName(SourcePosition pos, String name, boolean isStatic) {
-		return new QualifiedName<TypeName>(this, isStatic, NameTypes.INNER_CLASS, declaredTypeName);
+		JavaTypeName innerType = new JavaTypeName(withClassName(name), withClassName(declaredTypeName.getFullName(true).getOrThrow()));
+		return new QualifiedName<TypeName>(this, isStatic, NameTypes.INNER_CLASS, innerType);
 	}
 
 	@Override

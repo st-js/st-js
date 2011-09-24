@@ -116,4 +116,8 @@ public class QualifiedName<T extends NameType> {
 		return isMockType;
 	}
 
+	public boolean isInnerClass() {
+		return NameTypes.INNER_CLASS == type;
+	}
+
 }

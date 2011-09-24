@@ -8,5 +8,6 @@ public class InnerTypes3 {
 
 	public void method() {
 		new InnerTypes3.InnerType().innerMethod();
+		InnerType x = new InnerType();
 	}
 }

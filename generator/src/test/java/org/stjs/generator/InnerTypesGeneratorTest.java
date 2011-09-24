@@ -28,6 +28,7 @@ public class InnerTypesGeneratorTest {
 	public void testDeclarationAndAccessInnerTypeInstanceMethod() {
 		assertCodeContains(InnerTypes3.class, "InnerTypes3.InnerType.prototype.innerMethod=function()");
 		assertCodeContains(InnerTypes3.class, "new InnerTypes3.InnerType().innerMethod()");
+		assertCodeContains(InnerTypes3.class, "var x = new InnerTypes3.InnerType()");
 	}
 
 	@Test
