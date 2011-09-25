@@ -16,84 +16,93 @@
 package org.stjs.javascript;
 
 public class Math {
-	public static final double E = 0;
-	public static final double LN2 = 0;
-	public static final double LN10 = 0;
-	public static final double LOG2E = 0;
-	public static final double LOG10E = 0;
-	public static final double PI = 0;
-	public static final double SQRT1_2 = 0;
-	public static final double SQRT2 = 0;
+	public static final double E = java.lang.Math.E;
+	public static final double LN2 = java.lang.Math.log(2);
+	public static final double LN10 = java.lang.Math.log(10);
+	public static final double LOG2E = 1 / LN2;
+	public static final double LOG10E = LN10 / LN2;
+	public static final double PI = java.lang.Math.PI;
+	public static final double SQRT1_2 = java.lang.Math.sqrt(1 / 2);
+	public static final double SQRT2 = java.lang.Math.sqrt(2);
 
 	public static final double abs(double x) {
-		return 0;
+		return java.lang.Math.abs(x);
 	}
 
 	public static final double acos(double x) {
-		return 0;
+		return java.lang.Math.acos(x);
 	}
 
 	public static final double asin(double x) {
-		return 0;
+		return java.lang.Math.asin(x);
 	}
 
 	public static final double atan(double x) {
-		return 0;
+		return java.lang.Math.atan(x);
 	}
 
 	public static final double atan2(double y, double x) {
-		return 0;
+		return java.lang.Math.atan2(y, x);
 	}
 
 	public static final double ceil(double x) {
-		return 0;
+		return java.lang.Math.ceil(x);
 	}
 
 	public static final double cos(double x) {
-		return 0;
+		return java.lang.Math.cos(x);
 	}
 
 	public static final double exp(double x) {
-		return 0;
+		return java.lang.Math.exp(x);
 	}
 
 	public static final double floor(double x) {
-		return 0;
+		return java.lang.Math.floor(x);
 	}
 
 	public static final double log(double x) {
-		return 0;
+		return java.lang.Math.log(x);
 	}
 
 	public static final double max(double... x) {
-		return 0;
+		double m = Double.NEGATIVE_INFINITY;
+		for (double xx : x) {
+			m = java.lang.Math.max(xx, m);
+		}
+		return m == Double.NEGATIVE_INFINITY ? Double.NaN : m;
 	}
 
 	public static final double min(double... x) {
-		return 0;
+		double m = Double.POSITIVE_INFINITY;
+		for (double xx : x) {
+			m = java.lang.Math.min(xx, m);
+		}
+		return m == Double.POSITIVE_INFINITY ? Double.NaN : m;
 	}
 
 	public static final double pow(double x, double y) {
-		return 0;
+		return java.lang.Math.pow(x, y);
 	}
 
 	public static final double random() {
-		return 0;
+		return java.lang.Math.random();
 	}
 
 	public static final double round(double x) {
-		return 0;
+		return java.lang.Math.round(x);
 	}
 
 	public static final double sin(double x) {
-		return 0;
+		return java.lang.Math.sin(x);
 	}
 
 	public static final double sqrt(double x) {
-		return 0;
+		return java.lang.Math.sqrt(x);
 	}
 
 	public static final double tan(double x) {
-		return 0;
+		return java.lang.Math.tan(x);
 	}
+
 }

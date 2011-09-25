@@ -18,12 +18,13 @@ package org.stjs.javascript;
 import org.stjs.javascript.functions.Callback1;
 
 /**
- * This interface represents an array from Javascript.The value may be typed. The iteration is done on the indexes to have the javascript
- * equivalent of <br>
+ * This interface represents an array from Javascript.The value may be typed. The iteration is done on the indexes to
+ * have the javascript equivalent of <br>
  * <b>for(var key in array)</b> <br>
  * The methods are prefixed with $ to let the generator know that is should generate braket access instead, i.e <br>
  * array.$get(key) => array[key] <br>
  * array.$set(key, value) => array[key]=value
+ * 
  * @author acraciun
  */
 public interface Array<V> extends Iterable<Integer> {
@@ -35,7 +36,7 @@ public interface Array<V> extends Iterable<Integer> {
 
 	public void $length(int newLength);
 
-	public void concat(V... values);
+	public Array<V> concat(Array<V>... arrays);
 
 	public int indexOf(V element);
 

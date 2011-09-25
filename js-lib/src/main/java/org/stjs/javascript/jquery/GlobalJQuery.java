@@ -60,8 +60,6 @@ abstract public class GlobalJQuery {
 
 	abstract public <K, V> void each(Map<K, V> collection, Callback2<K, V> elementIterationFunction);
 
-	//	abstract public void each(Object object, Callback2<String, Object> elementIterationFunction);
-
 	abstract public String trim(String obj);
 
 	abstract public <K, V> Map<K, V> extend(Map<K, V> target, Map<K, V>... objects);

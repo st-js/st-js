@@ -28,34 +28,35 @@ public class Global {
 	// public static Window self;
 
 	public static <T> T eval(String expr) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public static void alert(Object expr) {
+		throw new UnsupportedOperationException();
 	}
 
 	public static boolean confirm(String expr) {
-		return true;
+		throw new UnsupportedOperationException();
 	}
 
 	public static String prompt(String expr) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public static String prompt(String expr, String defaultText) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public static double parseFloat(Object expr) {
-		return 0;
+		throw new UnsupportedOperationException();
 	}
 
 	public static int parseInt(Object expr) {
-		return 0;
+		throw new UnsupportedOperationException();
 	}
 
 	public static String typeof(Object obj) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -64,90 +65,124 @@ public class Global {
 	 * @return
 	 */
 	public static <T> T $or(T value, T... otherValues) {
-		return value;
+		throw new UnsupportedOperationException();
 	}
 
 	public static TimeoutHandler setTimeout(String expr, int timeoutMillis) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public static TimeoutHandler setTimeout(Runnable expr, int timeoutMillis) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public static TimeoutHandler setInterval(String expr, int timeoutMillis) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public static TimeoutHandler setInterval(Runnable expr, int timeoutMillis) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public static void clearTimeout(TimeoutHandler handler) {
+		throw new UnsupportedOperationException();
 	}
 
 	public static void clearInterval(TimeoutHandler handler) {
+		throw new UnsupportedOperationException();
 	}
 
 	public static <V> Array<V> $array(V... values) {
-		return null;
+		Array<V> a = new ArrayImpl<V>();
+		a.splice(0, 0, values);
+		return a;
 	}
 
 	public static <K, V> Map<K, V> $map() {
-		return null;
+		return new MapImpl<K, V>();
 	}
 
 	public static <K, V> Map<K, V> $map(K k1, V v1) {
-		return null;
+		Map<K, V> m = new MapImpl<K, V>();
+		m.$put(k1, v1);
+		return m;
 	}
 
 	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2) {
-		return null;
+		Map<K, V> m = new MapImpl<K, V>();
+		m.$put(k1, v1);
+		m.$put(k2, v2);
+		return m;
 	}
 
 	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3) {
-		return null;
+		Map<K, V> m = new MapImpl<K, V>();
+		m.$put(k1, v1);
+		m.$put(k2, v2);
+		m.$put(k3, v3);
+		return m;
 	}
 
 	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
-		return null;
+		Map<K, V> m = new MapImpl<K, V>();
+		m.$put(k1, v1);
+		m.$put(k2, v2);
+		m.$put(k3, v3);
+		m.$put(k4, v4);
+		return m;
 	}
 
 	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {
-		return null;
+		Map<K, V> m = new MapImpl<K, V>();
+		m.$put(k1, v1);
+		m.$put(k2, v2);
+		m.$put(k3, v3);
+		m.$put(k4, v4);
+		m.$put(k5, v5);
+		return m;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6,
 			Object... morePairs) {
-		return null;
+		Map<K, V> m = new MapImpl<K, V>();
+		m.$put(k1, v1);
+		m.$put(k2, v2);
+		m.$put(k3, v3);
+		m.$put(k4, v4);
+		m.$put(k5, v5);
+		for (int i = 0; i < morePairs.length - 1; i += 2) {
+			m.$put((K) morePairs[i], (V) morePairs[i + 1]);
+		}
+		return m;
 	}
 
 	public static String decodeURI(String uri) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public static String decodeURIComponent(String uri) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public static String encodeURI(String uri) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public static String encodeURIComponent(String uri) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public static String escape(String uri) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public static boolean isFinite(Object value) {
-		return true;
+		throw new UnsupportedOperationException();
 	}
 
 	public static boolean isNaN(Object value) {
-		return true;
+		throw new UnsupportedOperationException();
 	}
 
 	public static String unescape(String uri) {
