@@ -15,7 +15,6 @@
  */
 package org.stjs.javascript.jquery;
 
-
 public class AjaxParams {
 	public boolean async;
 	public String url;
@@ -23,4 +22,8 @@ public class AjaxParams {
 	public Object data;
 	public SuccessListener success;
 	public SuccessListener error;
+
+	public boolean cache;
+	public String type;
+	public Object context;
 }

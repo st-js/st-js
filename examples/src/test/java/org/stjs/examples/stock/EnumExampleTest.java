@@ -1,6 +1,6 @@
 package org.stjs.examples.stock;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,5 +14,5 @@ public class EnumExampleTest {
 		assertEquals(2, new EnumExample().getNum(EnumExample.MyEnum.B));
 		assertEquals(1, new EnumExample().getNum(EnumExample.MyEnum.A));
 	}
-	
+
 }

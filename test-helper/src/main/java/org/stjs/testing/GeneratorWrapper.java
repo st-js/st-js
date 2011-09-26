@@ -11,6 +11,7 @@ import org.junit.runners.model.TestClass;
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.utils.ClassUtils;
 
 import com.google.common.collect.Sets;
 
@@ -34,6 +35,9 @@ public class GeneratorWrapper {
 				iterator.remove();
 				File maybeTestFile = new File("src/test/java/" + nextFile.replaceAll("\\.", "/") + ".java");
 				File src;
+				if (checkMockType(nextFile)) {
+					continue;
+				}
 				if (nextFile.startsWith("org.stjs.testing") || nextFile.startsWith("org.stjs.javascript")) {
 					continue;
 				}
@@ -64,10 +68,8 @@ public class GeneratorWrapper {
 								.generateMainMethodCall(false)
 								// do not generate the "main" method call
 								.allowedPackage(testClass.getJavaClass().getPackage().getName())
-								.allowedPackage("org.stjs.javascript").allowedPackage("org.w3c.dom.html")
-								.allowedPackage("org.junit.Test").allowedPackage("org.junit.runner")
-								.allowedPackage("org.stjs.testing").allowedPackage("junit.framework.Assert").build(),
-						true);
+								.allowedPackage("org.stjs.javascript").allowedPackage("org.junit")
+								.allowedPackage("org.stjs.testing").build(), true);
 				for (String iterationResolvedImport : iterationResolvedImports) {
 
 					if (!exceptions.matcher(iterationResolvedImport).matches()
@@ -84,5 +86,14 @@ public class GeneratorWrapper {
 		// Files.copy(outputFile, System.out);
 		// System.out.flush();
 		return outputFile;
+	}
+
+	private boolean checkMockType(String className) {
+		try {
+			return ClassUtils.isMockType(Class.forName(className));
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return false;
+		}
 	}
 }

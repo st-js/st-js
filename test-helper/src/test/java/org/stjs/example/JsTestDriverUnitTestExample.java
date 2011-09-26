@@ -1,6 +1,6 @@
 package org.stjs.example;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,7 +10,7 @@ import org.stjs.testing.jstestdriver.JSTestDriverRunner;
 public class JsTestDriverUnitTestExample {
 
 	@Test
-	public void shouldRetreiveString() throws Exception {
+	public void shouldRetreiveString() {
 		MyPojo pojo = new MyPojo("Foo");
 		assertEquals("Foo", pojo.y);
 	}

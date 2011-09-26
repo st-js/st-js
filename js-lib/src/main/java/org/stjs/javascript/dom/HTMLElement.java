@@ -22,6 +22,7 @@ abstract public class HTMLElement extends Node {
 	public String lang;
 	public String title;
 	public String tagName;
+	public String innerHTML;
 
 	abstract public String getAttribute(String name);
 

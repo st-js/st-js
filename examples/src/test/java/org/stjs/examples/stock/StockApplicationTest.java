@@ -1,6 +1,6 @@
 package org.stjs.examples.stock;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.stjs.javascript.jquery.GlobalJQuery.$;
 
 import org.junit.Test;
