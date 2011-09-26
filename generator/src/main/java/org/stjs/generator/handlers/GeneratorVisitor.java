@@ -466,10 +466,13 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		printer.print(")");
 		// skip throws
 		if (body == null) {
-			printer.print("{};");
+			printer.print("{}");
 		} else {
 			printer.print(" ");
 			body.accept(this, arg);
+		}
+		if (!anonymous) {
+			printer.print(";");
 		}
 	}
 
@@ -555,13 +558,6 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 			return;
 		}
 
-		QualifiedName<TypeName> qname = arg.resolveType(n.getType());
-		if ((qname != null) && qname.isMockType()) {
-			// this is a call to an mock type
-			printer.print("{}");
-			return;
-		}
-
 		if ((n.getAnonymousClassBody() != null) && (n.getAnonymousClassBody().size() >= 1)) {
 			// special construction for inline function definition
 			MethodDeclaration method = getMethodDeclaration(n);
@@ -586,6 +582,12 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 			return;
 		}
 
+		QualifiedName<TypeName> qname = arg.resolveType(n.getType());
+		if ((qname != null) && qname.isMockType()) {
+			// this is a call to an mock type
+			printer.print("{}");
+			return;
+		}
 		printer.print("new ");
 		n.getType().accept(this, arg);
 		printArguments(n.getArgs(), arg);
@@ -640,7 +642,14 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		// printer.print(n.getName() + " = ");
 		if (GeneratorConstants.SPECIAL_INLINE_TYPE.equals(n.getName())) {
 			printer.print("var ");
+		} else {
+			TypeScope typeScope = ((ASTNodeData) n.getData()).getTypeScope();
+			JavaTypeName declaredClassName = typeScope.getDeclaredTypeName();
+			if (!declaredClassName.isSubtype()) {
+				printer.print("var ");
+			}
 		}
+
 		printStaticMembersPrefix(n, arg);
 
 		printer.print(" = ");
@@ -649,8 +658,9 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 			ConstructorDeclaration constr = getConstructor(n.getMembers(), arg);
 			if (constr != null) {
 				constr.accept(this, arg);
+				printer.print(";");
 			} else {
-				printer.printLn("function(){}");
+				printer.printLn("function(){};");
 			}
 
 			if ((n.getExtends() != null) && (n.getExtends().size() > 0)) {

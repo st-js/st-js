@@ -75,9 +75,10 @@ trim()
 var stjs={};
 
 stjs.extend=function( _constructor,  _super){
-	function I(){};
+	var key;
+	var I = function(){};
 	I.prototype	= _super.prototype;
-	_constructor.prototype	= new I;
+	_constructor.prototype	= new I();
 
 	// this prototype accepts zero or more arguments
 	// if the first argument is a nullable value (undefined, false, 0, "", null)
@@ -85,15 +86,15 @@ stjs.extend=function( _constructor,  _super){
 	// while if name is a string, this function will call
 	// super method with that name (if any, otherwise it will rightly raise an error)
 	_constructor.prototype._super = function(name){
-		var	_rem	= this._super,
-			result;
+		var	_rem	= this._super;
+
 		// to continue with inherited chain
 		// the _super property has to be
 		// setted as the one stored in parent constructor prototype
 		this._super	= _super.prototype._super;
 		// this is because inside super method we would like to be able
 		// to use again the magic _super with parent constructor or method as well
-		result		= (name ? _super.prototype[name] : _super).apply(this, Array.prototype.slice.call(arguments, 1));
+		var result		= (name ? _super.prototype[name] : _super).apply(this, Array.prototype.slice.call(arguments, 1));
 
 		// after constructor or parent method execution
 		// we have to set the original super to be able
@@ -106,8 +107,9 @@ stjs.extend=function( _constructor,  _super){
 
 	//copy static properties
 	// assign every method from proto instance
-	for(key in _super)
+	for(key in _super){
 		_constructor[key]	= _super[key];
+	}
 	// remember the correct constructor
 	_constructor.prototype.constructor	= _constructor;
 
@@ -118,25 +120,26 @@ stjs.extend=function( _constructor,  _super){
 stjs.enumEntry=function(idx, name){
 	this._name = name;
 	this._ordinal = idx;
-}
+};
 
 stjs.enumEntry.prototype.name=function(){
 	return this._name;
-}
+};
 stjs.enumEntry.prototype.ordinal=function(){
 	return this._ordinal;
-}
+};
 stjs.enumEntry.prototype.toString=function(){
 	return this._name;
-}
+};
 
-stjs.enumeration=function(args){
+stjs.enumeration=function(){
+	var i;
 	var e = {};
 	e._values = [];
-	for(var i = 0; i < arguments.length; ++i){
+	for(i = 0; i < arguments.length; ++i){
 		e[arguments[i]] = new stjs.enumEntry(i, arguments[i]);
 		e._values[i] = e[arguments[i]];
 	}
-	e.values = function(){return this._values};
+	e.values = function(){return this._values;};
 	return e;
-}
+};

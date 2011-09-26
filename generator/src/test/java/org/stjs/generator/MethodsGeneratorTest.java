@@ -16,7 +16,7 @@ import test.generator.methods.Methods8;
 public class MethodsGeneratorTest {
 	@Test
 	public void testPublicInstanceMethod() {
-		assertCodeContains(Methods1.class, "Methods1.prototype.method = function(arg1,arg2){");
+		assertCodeContains(Methods1.class, "Methods1.prototype.method = function(arg1,arg2){return 0;};");
 	}
 
 	@Test

@@ -9,7 +9,7 @@ public class ClassUtils {
 		if (clazz == null) {
 			return false;
 		}
-		return isMockType(clazz.getDeclaringClass().getOrNull());
+		return isMockType(clazz.getClazz());
 	}
 
 	public static boolean isMockType(Class<?> clazz) {

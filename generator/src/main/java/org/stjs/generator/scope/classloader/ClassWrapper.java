@@ -62,4 +62,8 @@ public class ClassWrapper {
 		return clazz.getName();
 	}
 
+	public Class<?> getClazz() {
+		return clazz;
+	}
+
 }

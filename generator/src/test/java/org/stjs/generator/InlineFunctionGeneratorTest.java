@@ -25,8 +25,8 @@ public class InlineFunctionGeneratorTest {
 	@Test
 	public void testInterfaceTwoMethods() {
 		assertCodeContains(InlineFunctions3.class, "stjs.extend(_InlineType, FunctionInterface2);");
-		assertCodeContains(InlineFunctions3.class, "_InlineType.prototype.run=function(arg){arg=arg+1;}"
-				+ " _InlineType.prototype.run2=function(arg2){arg2=arg2+1;}");
+		assertCodeContains(InlineFunctions3.class, "_InlineType.prototype.run=function(arg){arg=arg+1;};"
+				+ " _InlineType.prototype.run2=function(arg2){arg2=arg2+1;};");
 	}
 
 	@Test

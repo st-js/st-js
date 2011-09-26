@@ -62,4 +62,8 @@ public class JavaTypeName {
 		return classPath;
 	}
 
+	public boolean isSubtype() {
+		return !enclosingTypePath.isEmpty();
+	}
+
 }
