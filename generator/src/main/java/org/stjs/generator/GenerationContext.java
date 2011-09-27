@@ -19,6 +19,7 @@ import japa.parser.ast.Node;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 
 import java.io.File;
+import java.util.Set;
 
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
@@ -34,6 +35,8 @@ public class GenerationContext {
 	private final File inputFile;
 
 	private ClassOrInterfaceDeclaration currentType = null;
+	
+	private Set<String> resolvedImports = null;
 
 	public GenerationContext(File inputFile) {
 		this.inputFile = inputFile;
@@ -69,6 +72,14 @@ public class GenerationContext {
 
 	public ClassOrInterfaceDeclaration getCurrentType() {
 		return currentType;
+	}
+	
+	public Set<String> getResolvedImports() {
+		return resolvedImports;
+	}
+
+	public void setResolvedImports(Set<String> resolvedImports) {
+		this.resolvedImports = resolvedImports;
 	}
 
 }

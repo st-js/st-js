@@ -39,7 +39,7 @@ public class GeneratorTestHelper {
 			String content = Files.toString(file, Charset.defaultCharset());
 			// now generate the remaining imports
 			file.delete();
-			gen.generateJavascriptWithImports(Thread.currentThread().getContextClassLoader(), new File(path), file,
+			gen.generateJavascriptWithImports(Thread.currentThread().getContextClassLoader(), clazz.getName(), file,
 					new GeneratorConfigurationBuilder()
 							//
 							.generateMainMethodCall(false).allowedPackage("test").allowedPackage("org.stjs.javascript")
