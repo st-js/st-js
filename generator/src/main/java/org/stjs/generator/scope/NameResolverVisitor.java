@@ -205,19 +205,6 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		super.visit(n, currentScope);
 	}
 
-	private String getFirstScope(FieldAccessExpr n) {
-		if (n.getScope() instanceof MethodCallExpr) {
-			MethodCallExpr methodCall = (MethodCallExpr) n.getScope();
-			if (methodCall.getScope() instanceof FieldAccessExpr) {
-				return getFirstScope((FieldAccessExpr) methodCall.getScope());
-			}
-		}
-		if (n.getScope() instanceof FieldAccessExpr) {
-			return getFirstScope((FieldAccessExpr) n.getScope());
-		}
-		return n.getScope().toString();
-	}
-
 	/**
 	 * throws an exception if none of the allowedPackages is found as parent package of the given declaration
 	 * 
