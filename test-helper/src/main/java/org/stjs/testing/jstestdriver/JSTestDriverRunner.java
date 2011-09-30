@@ -41,6 +41,8 @@ import com.google.jstestdriver.config.UnreadableFilesException;
 import com.google.jstestdriver.config.YamlParser;
 import com.google.jstestdriver.guice.TestResultPrintingModule;
 import com.google.jstestdriver.hooks.PluginInitializer;
+import com.google.jstestdriver.util.NullStopWatch;
+import com.google.jstestdriver.util.StopWatch;
 
 public class JSTestDriverRunner extends BlockJUnit4ClassRunner {
 
@@ -144,8 +146,7 @@ public class JSTestDriverRunner extends BlockJUnit4ClassRunner {
 					};
 
 					File basePath = configuration.getBasePath().getCanonicalFile();
-					initializeModules.add(new InitializeModule(pluginLoader, basePath, new Args4jFlagsParser(
-							cmdLineFlags), cmdLineFlags.getRunnerMode()));
+					initializeModules.add(new InitializeModule(pluginLoader, basePath, new Args4jFlagsParser(), cmdLineFlags.getRunnerMode()));
 
 					initializeModules.add(new Module() {
 						@Override
@@ -162,9 +163,6 @@ public class JSTestDriverRunner extends BlockJUnit4ClassRunner {
 
 					Injector injector = Guice.createInjector(actionRunnerModules);
 					(injector.getInstance(ActionRunner.class)).runActions();
-				} catch (CmdLineException e) {
-					System.out.println(e.getMessage());
-					throw e;
 				} catch (UnreadableFilesException e) {
 					System.out.println("Configuration Error: \n" + e.getMessage());
 					throw e;
@@ -192,7 +190,7 @@ public class JSTestDriverRunner extends BlockJUnit4ClassRunner {
 			// TODO take this from a config file, let the users config the address
 			URL jsServerURL = new URL("http://localhost:9876");
 			if (jsServerURL.getHost().equals("localhost")) {
-				HttpServer server = new HttpServer();
+				HttpServer server = new HttpServer(new NullStopWatch());
 				if (ping(server, jsServerURL)) {
 					return;
 				}

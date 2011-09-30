@@ -8,57 +8,71 @@ import com.google.jstestdriver.FileInfo;
 import com.google.jstestdriver.Flags;
 import com.google.jstestdriver.PathResolver;
 import com.google.jstestdriver.Plugin;
+import com.google.jstestdriver.browser.DocType;
 import com.google.jstestdriver.config.Configuration;
 import com.google.jstestdriver.model.HandlerPathPrefix;
 
 public class DelegatingConfiguration implements Configuration {
 
-  private Configuration delegate;
-  
-  public DelegatingConfiguration(Configuration delegate) {
-    this.delegate = delegate;
-  }
+	private Configuration delegate;
 
-  @Override
-  public Set<FileInfo> getFilesList() {
-    return delegate.getFilesList();
-  }
+	public DelegatingConfiguration(Configuration delegate) {
+		this.delegate = delegate;
+	}
 
-  @Override
-  public String getServer(String paramString, int paramInt, HandlerPathPrefix paramHandlerPathPrefix) {
-    return delegate.getServer(paramString, paramInt, paramHandlerPathPrefix);
-  }
+	@Override
+	public Set<FileInfo> getFilesList() {
+		return delegate.getFilesList();
+	}
 
-  @Override
-  public List<Plugin> getPlugins() {
-    return delegate.getPlugins();
-  }
+	@Override
+	public String getServer(String paramString, int paramInt,
+			HandlerPathPrefix paramHandlerPathPrefix) {
+		return delegate
+				.getServer(paramString, paramInt, paramHandlerPathPrefix);
+	}
 
-  @Override
-  public long getTestSuiteTimeout() {
-    return delegate.getTestSuiteTimeout();
-  }
+	@Override
+	public List<Plugin> getPlugins() {
+		return delegate.getPlugins();
+	}
 
-  @Override
-  public Configuration resolvePaths(PathResolver paramPathResolver, Flags paramFlags) {
-    this.delegate = delegate.resolvePaths(paramPathResolver, paramFlags);
-    return this;
-  }
+	@Override
+	public long getTestSuiteTimeout() {
+		return delegate.getTestSuiteTimeout();
+	}
 
-  @Override
-  public List<FileInfo> getTests() {
-    return delegate.getTests();
-  }
+	@Override
+	public Configuration resolvePaths(PathResolver paramPathResolver,
+			Flags paramFlags) {
+		this.delegate = delegate.resolvePaths(paramPathResolver, paramFlags);
+		return this;
+	}
 
-  @Override
-  public File getBasePath() {
-    return delegate.getBasePath();
-  }
+	@Override
+	public List<FileInfo> getTests() {
+		return delegate.getTests();
+	}
 
-  @Override
-  public JsonArray getProxyConfiguration() {
-    return delegate.getProxyConfiguration();
-  }
+	@Override
+	public File getBasePath() {
+		return delegate.getBasePath();
+	}
 
+	@Override
+	public String getCaptureAddress(String arg0, String arg1,
+			HandlerPathPrefix arg2) {
+		return delegate.getCaptureAddress(arg0, arg1, arg2);
+	}
+
+	@Override
+	public DocType getDocType() {
+		return delegate.getDocType();
+	}
+
+	@Override
+	public JsonArray getGatewayConfiguration() {
+		return delegate.getGatewayConfiguration();
+	}
 
 }
