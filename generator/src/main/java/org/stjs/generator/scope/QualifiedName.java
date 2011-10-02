@@ -28,6 +28,7 @@ public class QualifiedName<T extends NameType> {
 	private final Option<JavaTypeName> definitionPoint; // Local variables and parameters don't have definition points
 	private final boolean isGlobalScope;
 	private final boolean isMockType;
+	private final boolean isDataType;
 
 	public enum NameTypes {
 		METHOD, FIELD, VARIABLE, CLASS, GENERIC_TYPE, INNER_CLASS
@@ -41,12 +42,13 @@ public class QualifiedName<T extends NameType> {
 		this(scope, isStatic, false, type, definitionPoint);
 	}
 
-	public QualifiedName(NameScope scope, boolean isStatic, boolean accessingOuterScope, NameTypes type, JavaTypeName definitionPoint) {
-		this(scope, isStatic, accessingOuterScope, type, definitionPoint, false, false);
+	public QualifiedName(NameScope scope, boolean isStatic, boolean accessingOuterScope, NameTypes type,
+			JavaTypeName definitionPoint) {
+		this(scope, isStatic, accessingOuterScope, type, definitionPoint, false, false, false);
 	}
 
-	public QualifiedName(NameScope scope, boolean isStatic, boolean accessingOuterScope, NameTypes type, JavaTypeName definitionPoint,
-			boolean isGlobalScope, boolean isMockType) {
+	public QualifiedName(NameScope scope, boolean isStatic, boolean accessingOuterScope, NameTypes type,
+			JavaTypeName definitionPoint, boolean isGlobalScope, boolean isMockType, boolean isDataType) {
 		this.scope = checkNotNull(scope);
 		this.isStatic = isStatic;
 		this.accessingOuterScope = accessingOuterScope;
@@ -54,6 +56,7 @@ public class QualifiedName<T extends NameType> {
 		this.definitionPoint = Option.of(definitionPoint);
 		this.isGlobalScope = isGlobalScope;
 		this.isMockType = isMockType;
+		this.isDataType = isDataType;
 		if (!this.definitionPoint.isDefined()) {
 			// variable may or may not be resolved
 			checkState((type == NameTypes.VARIABLE) || (type == NameTypes.GENERIC_TYPE),
@@ -64,6 +67,7 @@ public class QualifiedName<T extends NameType> {
 
 	/**
 	 * This is the name scope in which the name was found
+	 * 
 	 * @return
 	 */
 	public NameScope getScope() {
@@ -102,6 +106,7 @@ public class QualifiedName<T extends NameType> {
 
 	/**
 	 * Indicates that a variable, field or method can be accessed through the global scope
+	 * 
 	 * @return
 	 */
 	public boolean isGlobal() {
@@ -114,6 +119,10 @@ public class QualifiedName<T extends NameType> {
 
 	public boolean isMockType() {
 		return isMockType;
+	}
+
+	public boolean isDataType() {
+		return isDataType;
 	}
 
 	public boolean isInnerClass() {

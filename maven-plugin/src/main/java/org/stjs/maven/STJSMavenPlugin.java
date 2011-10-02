@@ -135,6 +135,7 @@ public class STJSMavenPlugin extends AbstractMojo {
 		Generator generator = new Generator();
 
 		GeneratorConfigurationBuilder configBuilder = new GeneratorConfigurationBuilder();
+		// TODO use config to add this package
 		configBuilder.allowedPackage("org.stjs.javascript");
 		if (allowedPackages != null) {
 			configBuilder.allowedPackages(allowedPackages);

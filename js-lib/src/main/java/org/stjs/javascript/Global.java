@@ -15,6 +15,8 @@
  */
 package org.stjs.javascript;
 
+import org.stjs.javascript.annotation.GlobalScope;
+
 @GlobalScope
 public class Global {
 	public static Number Infinity;

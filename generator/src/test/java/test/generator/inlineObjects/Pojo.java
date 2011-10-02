@@ -1,6 +1,6 @@
 package test.generator.inlineObjects;
 
-import org.stjs.javascript.MockType;
+import org.stjs.javascript.annotation.MockType;
 
 @MockType
 public class Pojo {

@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.stjs.javascript;
+package org.stjs.javascript.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -21,13 +21,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation is used to mark types that part of a mock library (like the jquery one). There are in this library classes that do not
- * correspond to real types in the javascript library counterpart. So the constructor of these type should be replaced with a anonymous object
- * constructor in javascript: {}
+ * This annotation is used to mark types that part of a mock library (like the jquery one). The source the javascript
+ * implementation is found should be set.
+ * 
  * @author acraciun
  */
-@Target({ElementType.TYPE})
+@Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MockType {//
-
+	String[] sources() default "";
 }

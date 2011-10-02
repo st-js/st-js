@@ -19,7 +19,6 @@ import static japa.parser.ast.body.ModifierSet.isStatic;
 import static org.stjs.generator.scope.path.QualifiedPath.withField;
 
 import java.io.File;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,6 +38,7 @@ import org.stjs.generator.scope.path.QualifiedPath.QualifiedFieldPath;
 import org.stjs.generator.scope.path.QualifiedPath.QualifiedMethodPath;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.Option;
+import org.stjs.javascript.annotation.GlobalScope;
 
 /**
  * This scope tries to solve the methods inside the static imports and the identifiers (that can be the name of a class)
@@ -123,7 +123,7 @@ public class ImportScope extends NameScope implements ClassResolver {
 				}
 
 				return new QualifiedName<NameType.MethodName>(this, isStatic, false, NameTypes.METHOD, receiverField
-						.getDefinitionPoint().getOrNull(), receiverField.isGlobal(), false);
+						.getDefinitionPoint().getOrNull(), receiverField.isGlobal(), false, false);
 			}
 		}
 
@@ -138,7 +138,8 @@ public class ImportScope extends NameScope implements ClassResolver {
 			for (Method m : clazz.getDeclaredMethods()) {
 				if (m.getName().equals(path.getMethodName())) {
 					return Option.some(new QualifiedName<NameType.MethodName>(this, true, false, NameTypes.METHOD,
-							new JavaTypeName(path), isGlobal(clazz), ClassUtils.isMockType(clazz)));
+							new JavaTypeName(path), isGlobal(clazz), ClassUtils.isMockType(clazz), ClassUtils
+									.isDataType(clazz)));
 				}
 			}
 		}
@@ -154,7 +155,8 @@ public class ImportScope extends NameScope implements ClassResolver {
 			for (ClassWrapper clazz : classLoader.loadClass(path.getClassQualifiedName())) {
 				if (clazz.hasDeclaredField(path.getFieldName())) {
 					return new QualifiedName<NameType.IdentifierName>(this, true, false, NameTypes.FIELD,
-							new JavaTypeName(path), isGlobal(clazz), ClassUtils.isMockType(clazz));
+							new JavaTypeName(path), isGlobal(clazz), ClassUtils.isMockType(clazz),
+							ClassUtils.isDataType(clazz));
 				}
 			}
 		}
@@ -163,7 +165,8 @@ public class ImportScope extends NameScope implements ClassResolver {
 			for (ClassWrapper clazz : classLoader.loadClass(staticImport)) {
 				if (clazz.hasDeclaredField(name)) {
 					return new QualifiedName<NameType.IdentifierName>(this, true, false, NameTypes.FIELD,
-							new JavaTypeName(clazz), isGlobal(clazz), ClassUtils.isMockType(clazz));
+							new JavaTypeName(clazz), isGlobal(clazz), ClassUtils.isMockType(clazz),
+							ClassUtils.isDataType(clazz));
 				}
 			}
 		}
@@ -180,13 +183,7 @@ public class ImportScope extends NameScope implements ClassResolver {
 	}
 
 	private boolean isGlobal(ClassWrapper clazz) {
-		// TODO : cache?
-		for (Annotation annote : clazz.getAnnotations()) {
-			if (annote.annotationType().getName().equals("org.stjs.javascript.GlobalScope")) {
-				return true;
-			}
-		}
-		return false;
+		return ClassUtils.hasAnnotation(clazz, GlobalScope.class.getName());
 	}
 
 	@Override
@@ -194,7 +191,7 @@ public class ImportScope extends NameScope implements ClassResolver {
 			NameResolverVisitor visitor) {
 		for (ClassWrapper clazz : resolveClass(name, visitor)) {
 			return new QualifiedName<TypeName>(this, isStatic(clazz.getModifiers()), false, NameTypes.CLASS,
-					new JavaTypeName(clazz), false, ClassUtils.isMockType(clazz));
+					new JavaTypeName(clazz), false, ClassUtils.isMockType(clazz), ClassUtils.isDataType(clazz));
 		}
 		return null;
 	}

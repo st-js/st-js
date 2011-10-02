@@ -583,7 +583,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		}
 
 		QualifiedName<TypeName> qname = arg.resolveType(n.getType());
-		if ((qname != null) && qname.isMockType()) {
+		if ((qname != null) && qname.isDataType()) {
 			// this is a call to an mock type
 			printer.print("{}");
 			return;

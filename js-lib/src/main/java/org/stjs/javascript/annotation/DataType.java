@@ -13,30 +13,21 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package org.stjs.javascript.annotation;
 
-package org.stjs.javascript;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * here are the methods existent in Javascript for number objects and inexistent in the Java counterpart. The generator
- * should generate the correct code
+ * There are in this library classes that do not correspond to real types in the javascript library counterpart. So the
+ * constructor of these type should be replaced with a anonymous object constructor in javascript: {}
  * 
  * @author acraciun
  */
-public class JSNumberAdapter {
-	public static String toFixed(Number n, int positions) {
-		return "";
-	}
-
-	public static String toFixed(String n, int positions) {
-		return "";
-	}
-
-	public static String toExponential(Number n, int positions) {
-		return "";
-	}
-
-	public static String toPrecision(Number n, int positions) {
-		return "";
-	}
+@Target({ ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface DataType {//
 
 }
