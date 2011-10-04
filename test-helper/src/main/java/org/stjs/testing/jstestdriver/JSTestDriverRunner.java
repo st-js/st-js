@@ -14,7 +14,6 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
-import org.kohsuke.args4j.CmdLineException;
 import org.stjs.testing.GeneratorWrapper;
 import org.stjs.testing.HTMLFixture;
 
@@ -42,7 +41,6 @@ import com.google.jstestdriver.config.YamlParser;
 import com.google.jstestdriver.guice.TestResultPrintingModule;
 import com.google.jstestdriver.hooks.PluginInitializer;
 import com.google.jstestdriver.util.NullStopWatch;
-import com.google.jstestdriver.util.StopWatch;
 
 public class JSTestDriverRunner extends BlockJUnit4ClassRunner {
 
@@ -81,7 +79,7 @@ public class JSTestDriverRunner extends BlockJUnit4ClassRunner {
 						public Set<FileInfo> getFilesList() {
 							try {
 								Set<FileInfo> filesList = userConfig.getFilesList();
-								File srcFile = new GeneratorWrapper().generateCode(getTestClass(), method);
+								File srcFile = new GeneratorWrapper().generateCode(getTestClass());
 								System.out.println("Added source file:" + srcFile);
 
 								filesList.add(new FileInfo(srcFile.getAbsolutePath(), System.currentTimeMillis(), -1L,
@@ -146,7 +144,8 @@ public class JSTestDriverRunner extends BlockJUnit4ClassRunner {
 					};
 
 					File basePath = configuration.getBasePath().getCanonicalFile();
-					initializeModules.add(new InitializeModule(pluginLoader, basePath, new Args4jFlagsParser(), cmdLineFlags.getRunnerMode()));
+					initializeModules.add(new InitializeModule(pluginLoader, basePath, new Args4jFlagsParser(),
+							cmdLineFlags.getRunnerMode()));
 
 					initializeModules.add(new Module() {
 						@Override

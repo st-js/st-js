@@ -3,15 +3,13 @@ package org.stjs.testing;
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.TestClass;
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 
 public class GeneratorWrapper {
 
-	public File generateCode(final TestClass testClass, final FrameworkMethod method) throws IOException,
-			AssertionError {
+	public File generateCode(final TestClass testClass) throws IOException, AssertionError {
 		Generator generator = new Generator();
 		File outputFile = File.createTempFile(testClass.getName(), ".js");
 		outputFile.deleteOnExit();

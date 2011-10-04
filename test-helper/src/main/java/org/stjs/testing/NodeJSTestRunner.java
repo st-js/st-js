@@ -27,7 +27,7 @@ public class NodeJSTestRunner extends BlockJUnit4ClassRunner {
 
 			@Override
 			public void evaluate() throws Throwable {
-				File outputFile = new GeneratorWrapper().generateCode(getTestClass(), method);
+				File outputFile = new GeneratorWrapper().generateCode(getTestClass());
 				FileWriter writer = new FileWriter(outputFile, true);
 				// TODO : need to let the user plug or at least choose a test framework
 				writer.append("Assert={assertEquals:function(a,b){if(a!=b){console.log('__STSJS__Expected '+a+' got '+b);}}};");
