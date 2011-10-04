@@ -1171,8 +1171,8 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 					@Override
 					public void caseParentTypeScope(ParentTypeScope parentTypeScope) {
-						// TODO : do we need to use a pointer to the super class the same it is done for mehtods Alex?
-						// Test it
+						// prefix with this fields that are accesses directly from the super class
+						printer.print("this.");
 					}
 				});
 			}

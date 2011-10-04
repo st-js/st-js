@@ -36,4 +36,5 @@ public class FieldsGeneratorTest {
 	public void testFieldAndMethodTheSameName() {
 		generate(Fields5.class);
 	}
+
 }
