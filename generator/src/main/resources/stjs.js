@@ -143,3 +143,7 @@ stjs.enumeration=function(){
 	e.values = function(){return this._values;};
 	return e;
 };
+
+stjs.exception=function(err){
+	return err;
+}

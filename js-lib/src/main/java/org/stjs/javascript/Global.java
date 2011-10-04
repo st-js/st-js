@@ -193,7 +193,10 @@ public class Global {
 	}
 
 	public static String unescape(String uri) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
+	public static RuntimeException exception(Object exception) {
+		throw new UnsupportedOperationException();
+	}
 }

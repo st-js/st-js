@@ -129,7 +129,7 @@ public class Generator {
 			cu.accept(new SetParentVisitor(), context);
 
 			Collection<String> allowedPackages = configuration.getAllowedPackages();
-			if (cu.getPackage() != null && !cu.getPackage().getName().toString().isEmpty()) {
+			if ((cu.getPackage() != null) && !cu.getPackage().getName().toString().isEmpty()) {
 				allowedPackages = append(Lists.newArrayList(allowedPackages), cu.getPackage().getName().toString());
 			}
 
@@ -197,6 +197,12 @@ public class Generator {
 			}, outputFile);
 		} catch (IOException e) {
 			throw new RuntimeException("Could not copy the " + STJS_FILE + " file to the folder " + folder, e);
+		} finally {
+			try {
+				stjs.close();
+			} catch (IOException e) {
+				// silent
+			}
 		}
 	}
 
