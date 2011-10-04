@@ -18,6 +18,7 @@ package org.stjs.javascript;
 import org.stjs.javascript.annotation.GlobalScope;
 
 @GlobalScope
+@SuppressWarnings("unused")
 public class Global {
 	public static Number Infinity;
 	public static Number NaN;
@@ -54,6 +55,10 @@ public class Global {
 	}
 
 	public static int parseInt(Object expr) {
+		throw new UnsupportedOperationException();
+	}
+
+	public static int parseInt(Object expr, int radix) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -153,7 +158,7 @@ public class Global {
 		m.$put(k3, v3);
 		m.$put(k4, v4);
 		m.$put(k5, v5);
-		for (int i = 0; i < morePairs.length - 1; i += 2) {
+		for (int i = 0; i < (morePairs.length - 1); i += 2) {
 			m.$put((K) morePairs[i], (V) morePairs[i + 1]);
 		}
 		return m;

@@ -45,6 +45,8 @@ abstract public class GlobalJQuery {
 
 	abstract public void ajax(AjaxParams params);
 
+	abstract public void ajaxSetup(Map<String, Object> options);
+
 	abstract public void get(String url, Object params, SuccessListener successListener, String mode);
 
 	abstract public void getJSON(String url, Object params, SuccessListener successListener);
@@ -67,4 +69,6 @@ abstract public class GlobalJQuery {
 	abstract public <K, V> Map<K, V> extend(boolean deep, Map<K, V> target, Map<K, V>... objects);
 
 	abstract public <T> T parseJSON(String message);
+
+	abstract public boolean isArray(Object value);
 }

@@ -22,8 +22,8 @@ import org.stjs.javascript.functions.Callback2;
 import org.stjs.javascript.utils.NameValue;
 
 /**
- * jquery interface for all jquery method + all used plugins in a web app. it can be mocked easily for testing purposes. Compatible with jquery
- * 1.6
+ * jquery interface for all jquery method + all used plugins in a web app. it can be mocked easily for testing purposes.
+ * Compatible with jquery 1.6
  */
 public interface JQuery<FullJQuery extends JQuery<?>> {
 	/************* ajax ***************/
@@ -120,6 +120,8 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 	public FullJQuery addClass(String className);
 
 	public boolean hasClass(String className);
+
+	public FullJQuery removeClass();
 
 	public FullJQuery removeClass(String className);
 
@@ -424,6 +426,8 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery remove();
 
+	public FullJQuery detach();
+
 	public FullJQuery remove(String selector);
 
 	public FullJQuery replaceAll(String selector);
@@ -464,6 +468,10 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	/************* traversing ***************/
 	public FullJQuery andSelf();
+
+	public FullJQuery add(FullJQuery selector);
+
+	public FullJQuery add(String selector);
 
 	public FullJQuery children();
 
