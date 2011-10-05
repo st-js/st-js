@@ -11,6 +11,8 @@ import test.generator.callSuper.CallSuper4;
 import test.generator.callSuper.CallSuper5;
 import test.generator.callSuper.CallSuper6;
 import test.generator.callSuper.CallSuper7;
+import test.generator.callSuper.CallSuper8;
+import test.generator.callSuper.CallSuper9;
 
 public class CallSuperGeneratorTest {
 	@Test
@@ -51,5 +53,17 @@ public class CallSuperGeneratorTest {
 	@Test
 	public void testStaticCallStaticSuperNotExplicit() {
 		assertCodeContains(CallSuper7.class, "CallSuper7.staticMethod2 = function(arg){ CallSuper7.staticMethod(arg);}");
+	}
+
+	@Test
+	public void testAddCallSuperConstructorDefined() {
+		// call to super should be generated, when not defined explicitely
+		assertCodeContains(CallSuper8.class, "CallSuper8 = function(x){this._super(null);var y = x;}");
+	}
+
+	@Test
+	public void testAddCallSuperConstructorUndefined() {
+		// call to super should be generated, when not defined explicitely
+		assertCodeContains(CallSuper9.class, "CallSuper9 = function(){this._super(null);}");
 	}
 }

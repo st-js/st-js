@@ -98,7 +98,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 	@Override
 	public void visit(ClassOrInterfaceDeclaration n, NameScopeWalker currentScope) {
 		NameScopeWalker classScope = currentScope;
-		if (n.getExtends() != null && n.getExtends().size() > 0 && !n.isInterface()) {
+		if ((n.getExtends() != null) && (n.getExtends().size() > 0) && !n.isInterface()) {
 			classScope = currentScope.nextChild();
 		}
 
@@ -116,7 +116,8 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		}
 		super.visit(n, nextScope);
 	}
-	
+
+	@Override
 	public void visit(SwitchStmt n, NameScopeWalker currentScope) {
 		super.visit(n, currentScope);
 	}
@@ -247,8 +248,7 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		super.visit(n, currentScope);
 	}
 
-	@Override
-	public void visit(ClassOrInterfaceType n, NameScopeWalker currentScope) {
+	private void resolveType(ClassOrInterfaceType n, NameScopeWalker currentScope) {
 		SourcePosition pos = new SourcePosition(n);
 		StringBuilder fullName = new StringBuilder(n.getName());
 		for (ClassOrInterfaceType t = n.getScope(); t != null; t = t.getScope()) {
@@ -261,9 +261,8 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		if (qname != null) {
 
 			((ASTNodeData) n.getData()).setQualifiedName(qname);
-			if (qname.getType() == GENERIC_TYPE || qname.getType() == INNER_CLASS) {
+			if ((qname.getType() == GENERIC_TYPE) || (qname.getType() == INNER_CLASS)) {
 				// no need to check for imports
-				super.visit(n, currentScope);
 				return;
 			}
 			fullName = new StringBuilder(qname.getDefinitionPoint().getOrThrow().getFullName(true).getOrThrow());
@@ -276,7 +275,11 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		// }
 		// }
 		checkImport(n, fullName.toString(), currentScope);
+	}
 
+	@Override
+	public void visit(ClassOrInterfaceType n, NameScopeWalker currentScope) {
+		resolveType(n, currentScope);
 		super.visit(n, currentScope);
 	}
 

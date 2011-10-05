@@ -147,3 +147,7 @@ stjs.enumeration=function(){
 stjs.exception=function(err){
 	return err;
 }
+
+function isEnum(obj){
+	return obj != null && obj.constructor == stjs.enumEntry;
+}

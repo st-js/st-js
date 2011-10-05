@@ -196,7 +196,23 @@ public class Global {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * defined in stjs.js
+	 * 
+	 * @param exception
+	 * @return
+	 */
 	public static RuntimeException exception(Object exception) {
+		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * defined in stjs.js
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	public static boolean isEnum(Object obj) {
 		throw new UnsupportedOperationException();
 	}
 }

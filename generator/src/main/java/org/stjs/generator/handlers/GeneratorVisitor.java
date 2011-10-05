@@ -100,6 +100,7 @@ import japa.parser.ast.stmt.WhileStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.PrimitiveType;
 import japa.parser.ast.type.ReferenceType;
+import japa.parser.ast.type.Type;
 import japa.parser.ast.type.VoidType;
 import japa.parser.ast.type.WildcardType;
 import japa.parser.ast.visitor.VoidVisitor;
@@ -118,6 +119,7 @@ import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.JavaTypeName;
 import org.stjs.generator.scope.NameResolverVisitor;
 import org.stjs.generator.scope.NameScope;
+import org.stjs.generator.scope.NameType;
 import org.stjs.generator.scope.NameType.IdentifierName;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.NameType.TypeName;
@@ -606,9 +608,34 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 		printMethod(n.getName(), n.getParameters(), n.getModifiers(), n.getBody(), arg, false);
 	}
 
+	private void addCallToSuper(GenerationContext arg) {
+		ClassOrInterfaceDeclaration currentTypeDecl = arg.getCurrentType();
+		PreConditions.checkNotNull(currentTypeDecl);
+		if ((currentTypeDecl.getExtends() != null) && (currentTypeDecl.getExtends().size() > 0)) {
+			// avoid useless call to super() when the super class is Object
+			printer.print("this._super");
+			printArguments(Collections.singleton("null"), Collections.<Expression> emptyList(),
+					Collections.<String> emptyList(), arg);
+			printer.print(";");
+		}
+	}
+
+	private <T extends Node> T addParent(T node, Node parent) {
+		node.setData(new ASTNodeData(parent));
+		return node;
+	}
+
 	@Override
 	public void visit(ConstructorDeclaration n, GenerationContext arg) {
 		printComments(n, arg);
+		if ((n.getBlock().getStmts() != null) && (n.getBlock().getStmts().size() > 0)) {
+			Statement firstStatement = n.getBlock().getStmts().get(0);
+			if (!(firstStatement instanceof ExplicitConstructorInvocationStmt)) {
+				// generate possibly missing super() call
+				n.getBlock().getStmts().add(0, addParent(new ExplicitConstructorInvocationStmt(), n.getBlock()));
+				// addCallToSuper(arg);
+			}
+		}
 		printMethod(n.getName(), n.getParameters(), n.getModifiers(), n.getBlock(), arg, true);
 	}
 
@@ -660,7 +687,9 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 				constr.accept(this, arg);
 				printer.print(";");
 			} else {
-				printer.printLn("function(){};");
+				printer.print("function(){");
+				addCallToSuper(arg);
+				printer.printLn("};");
 			}
 
 			if ((n.getExtends() != null) && (n.getExtends().size() > 0)) {
@@ -717,6 +746,15 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 					"definition of static members of anonymous classes is not supported");
 		}
 		printer.print(fullyQualifiedString.getOrThrow());
+	}
+
+	private void printStaticMembersPrefix(Type n, GenerationContext context) {
+		QualifiedName<NameType.TypeName> name = context.resolveType(n);
+		if (name == null) {
+			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n), "Unknown type name:"
+					+ n);
+		}
+		printer.print(name.getDefinitionPoint().getOrThrow().getFullName(false).getOrThrow());
 	}
 
 	private void printMainMethodCall(ClassOrInterfaceDeclaration n, GenerationContext context) {
@@ -1056,8 +1094,14 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(InstanceOfExpr n, GenerationContext arg) {
 		n.getExpr().accept(this, arg);
-		printer.print(" instanceof ");
-		n.getType().accept(this, arg);
+		printer.print(".constructor ==  ");
+		if (n.getType() instanceof ReferenceType) {
+			printStaticMembersPrefix(((ReferenceType) n.getType()).getType(), arg);
+		} else {
+			throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(n),
+					"Do not know how to handle instanceof statement");
+		}
+		// n.getType().accept(this, arg);
 	}
 
 	@Override

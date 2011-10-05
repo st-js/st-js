@@ -5,6 +5,7 @@ import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 import org.junit.Test;
 
 import test.generator.statements.Statements1;
+import test.generator.statements.Statements10;
 import test.generator.statements.Statements2;
 import test.generator.statements.Statements3;
 import test.generator.statements.Statements4;
@@ -62,5 +63,10 @@ public class StatementsGeneratorTest {
 	public void testLiterals() {
 		// "abc", "\"", "'", 'a', '\'', 1D, 2f, 1l);
 		assertCodeContains(Statements9.class, "\"abc\", \"\\\"\", \"'\", 'a', '\\'', 1, 2, 1");
+	}
+
+	@Test
+	public void testInstanceof() {
+		assertCodeContains(Statements10.class, "arg.constructor == Statements10");
 	}
 }
