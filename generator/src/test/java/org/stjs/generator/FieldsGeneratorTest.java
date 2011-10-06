@@ -10,6 +10,8 @@ import test.generator.fields.Fields2;
 import test.generator.fields.Fields3;
 import test.generator.fields.Fields4;
 import test.generator.fields.Fields5;
+import test.generator.fields.Fields6;
+import test.generator.fields.Fields7;
 
 public class FieldsGeneratorTest {
 	@Test
@@ -35,6 +37,16 @@ public class FieldsGeneratorTest {
 	@Test(expected = JavascriptGenerationException.class)
 	public void testFieldAndMethodTheSameName() {
 		generate(Fields5.class);
+	}
+
+	@Test(expected = JavascriptGenerationException.class)
+	public void testForbidInstanceFieldInit() {
+		generate(Fields6.class);
+	}
+
+	@Test
+	public void testAllowStaticFieldInit() {
+		assertCodeContains(Fields7.class, "Fields7.x = {};");
 	}
 
 }

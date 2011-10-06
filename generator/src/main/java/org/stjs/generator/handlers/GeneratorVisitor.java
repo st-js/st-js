@@ -126,6 +126,7 @@ import org.stjs.generator.scope.NameType.TypeName;
 import org.stjs.generator.scope.ParentTypeScope;
 import org.stjs.generator.scope.QualifiedName;
 import org.stjs.generator.scope.TypeScope;
+import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.Option;
 import org.stjs.generator.utils.PreConditions;
 
@@ -397,6 +398,11 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 		// skip type
 		for (VariableDeclarator v : n.getVariables()) {
+			if (!ModifierSet.isStatic(n.getModifiers()) && v.getInit() != null && !ClassUtils.isBasicType(n.getType())) {
+				throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(v),
+						"Instance field inline initialization is allowed only for string and number field types");
+			}
+
 			// i need prefix here!!
 			printStaticMembersPrefix(arg.getCurrentType(), arg);
 			if (!isStatic(n.getModifiers())) {
