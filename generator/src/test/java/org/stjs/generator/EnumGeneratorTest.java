@@ -10,6 +10,7 @@ import test.generator.enums.Enums2;
 import test.generator.enums.Enums4;
 import test.generator.enums.Enums5;
 import test.generator.enums.Enums6;
+import test.generator.enums.Enums8;
 
 public class EnumGeneratorTest {
 	@Test
@@ -35,5 +36,10 @@ public class EnumGeneratorTest {
 	@Test
 	public void testEnumValues() {
 		assertCodeContains(Enums6.class, "for(var v in Enums6.Value.values())");
+	}
+
+	@Test
+	public void testEnumDeclarationInInterface() {
+		assertCodeContains(Enums8.class, "Enums8.MyEnum = stjs.enumeration(\"a\", \"b\", \"c\");");
 	}
 }

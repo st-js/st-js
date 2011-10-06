@@ -59,6 +59,7 @@ import japa.parser.ast.expr.FieldAccessExpr;
 import japa.parser.ast.expr.InstanceOfExpr;
 import japa.parser.ast.expr.IntegerLiteralExpr;
 import japa.parser.ast.expr.IntegerLiteralMinValueExpr;
+import japa.parser.ast.expr.LiteralExpr;
 import japa.parser.ast.expr.LongLiteralExpr;
 import japa.parser.ast.expr.LongLiteralMinValueExpr;
 import japa.parser.ast.expr.MarkerAnnotationExpr;
@@ -398,9 +399,15 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 		// skip type
 		for (VariableDeclarator v : n.getVariables()) {
-			if (!ModifierSet.isStatic(n.getModifiers()) && v.getInit() != null && !ClassUtils.isBasicType(n.getType())) {
-				throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(v),
-						"Instance field inline initialization is allowed only for string and number field types");
+			if (!ModifierSet.isStatic(n.getModifiers()) && v.getInit() != null) {
+				if (!ClassUtils.isBasicType(n.getType())) {
+					throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(v),
+							"Instance field inline initialization is allowed only for string and number field types");
+				}
+				if (!(v.getInit() instanceof LiteralExpr)) {
+					throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(v),
+							"Instance field inline initialization can only done with literal constants");
+				}
 			}
 
 			// i need prefix here!!

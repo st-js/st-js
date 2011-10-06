@@ -12,6 +12,7 @@ import test.generator.fields.Fields4;
 import test.generator.fields.Fields5;
 import test.generator.fields.Fields6;
 import test.generator.fields.Fields7;
+import test.generator.fields.Fields8;
 
 public class FieldsGeneratorTest {
 	@Test
@@ -49,4 +50,8 @@ public class FieldsGeneratorTest {
 		assertCodeContains(Fields7.class, "Fields7.x = {};");
 	}
 
+	@Test(expected = JavascriptGenerationException.class)
+	public void testForbidInstanceFieldInitWithNonLiterals() {
+		generate(Fields8.class);
+	}
 }
