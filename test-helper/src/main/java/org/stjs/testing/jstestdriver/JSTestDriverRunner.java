@@ -144,7 +144,7 @@ public class JSTestDriverRunner extends BlockJUnit4ClassRunner {
 					};
 
 					File basePath = configuration.getBasePath().getCanonicalFile();
-					initializeModules.add(new InitializeModule(pluginLoader, basePath, new Args4jFlagsParser(),
+					initializeModules.add(new InitializeModule(pluginLoader, basePath, new Args4jFlagsParser(cmdLineFlags),
 							cmdLineFlags.getRunnerMode()));
 
 					initializeModules.add(new Module() {
@@ -189,7 +189,7 @@ public class JSTestDriverRunner extends BlockJUnit4ClassRunner {
 			// TODO take this from a config file, let the users config the address
 			URL jsServerURL = new URL("http://localhost:9876");
 			if (jsServerURL.getHost().equals("localhost")) {
-				HttpServer server = new HttpServer(new NullStopWatch());
+				HttpServer server = new HttpServer();
 				if (ping(server, jsServerURL)) {
 					return;
 				}

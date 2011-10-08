@@ -3,12 +3,12 @@ package org.stjs.testing.jstestdriver;
 import java.io.File;
 import java.util.List;
 import java.util.Set;
+
 import com.google.gson.JsonArray;
 import com.google.jstestdriver.FileInfo;
 import com.google.jstestdriver.Flags;
 import com.google.jstestdriver.PathResolver;
 import com.google.jstestdriver.Plugin;
-import com.google.jstestdriver.browser.DocType;
 import com.google.jstestdriver.config.Configuration;
 import com.google.jstestdriver.model.HandlerPathPrefix;
 
@@ -60,19 +60,9 @@ public class DelegatingConfiguration implements Configuration {
 	}
 
 	@Override
-	public String getCaptureAddress(String arg0, String arg1,
-			HandlerPathPrefix arg2) {
-		return delegate.getCaptureAddress(arg0, arg1, arg2);
+	public JsonArray getProxyConfiguration() {
+		return delegate.getProxyConfiguration();
 	}
 
-	@Override
-	public DocType getDocType() {
-		return delegate.getDocType();
-	}
-
-	@Override
-	public JsonArray getGatewayConfiguration() {
-		return delegate.getGatewayConfiguration();
-	}
 
 }
