@@ -29,7 +29,6 @@ public class GeneratorConfigurationBuilder {
 	private Collection<String> allowedPackages = new HashSet<String>();
 	private Set<String> allowedJavaLangClasses = new HashSet<String>();
 	private Set<String> adapterClassNames = new HashSet<String>();
-	private boolean generateMainMethodCall = true;
 
 	public GeneratorConfigurationBuilder allowedPackage(String packageName) {
 		allowedPackages.add(packageName);
@@ -74,13 +73,7 @@ public class GeneratorConfigurationBuilder {
 		adapterClassNames.add("org.stjs.javascript.JSStringAdapter");
 		adapterClassNames.add("org.stjs.javascript.JSObjectAdapter");
 
-		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, adapterClassNames,
-				generateMainMethodCall);
-	}
-
-	public GeneratorConfigurationBuilder generateMainMethodCall(boolean b) {
-		generateMainMethodCall = b;
-		return this;
+		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, adapterClassNames);
 	}
 
 }

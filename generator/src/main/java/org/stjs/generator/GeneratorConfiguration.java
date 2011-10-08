@@ -21,15 +21,13 @@ import java.util.Set;
 public class GeneratorConfiguration {
 	private final Collection<String> allowedPackages;
 	private final Set<String> allowedJavaLangClasses;
-	private final boolean generateMainMethodCall;
 	private final Set<String> adapterClassNames;
 
 	GeneratorConfiguration(Collection<String> allowedPackages, Set<String> allowedJavaLangClasses,
-			Set<String> adapterClassNames, boolean generateMainMethodCall) {
+			Set<String> adapterClassNames) {
 		this.allowedPackages = allowedPackages;
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
 		this.adapterClassNames = adapterClassNames;
-		this.generateMainMethodCall = generateMainMethodCall;
 	}
 
 	/**
@@ -54,14 +52,6 @@ public class GeneratorConfiguration {
 	 */
 	public Set<String> getAdapterClassNames() {
 		return adapterClassNames;
-	}
-
-	/**
-	 * 
-	 * @return true if the call to the main method should be generated. During unit tests this should not be done.
-	 */
-	public boolean isGenerateMainMethodCall() {
-		return generateMainMethodCall;
 	}
 
 }

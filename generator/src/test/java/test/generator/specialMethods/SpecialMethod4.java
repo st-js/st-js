@@ -1,7 +1,7 @@
 package test.generator.specialMethods;
 
 public class SpecialMethod4 {
-	public int $invoke(Object... args) {
+	public int $invoke(String s, int n) {
 		return 0;
 	}
 

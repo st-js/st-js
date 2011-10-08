@@ -144,6 +144,12 @@ stjs.enumeration=function(){
 	return e;
 };
 
+/**
+ * if true the execution of generated main methods is disabled.
+ * this is useful when executing unit tests, to no have the main methods executing before the tests
+ */
+stjs.mainCallDisabled = false;
+
 stjs.exception=function(err){
 	return err;
 }

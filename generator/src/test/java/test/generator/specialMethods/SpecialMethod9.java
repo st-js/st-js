@@ -1,7 +1,7 @@
 package test.generator.specialMethods;
 
 public class SpecialMethod9 {
-	public static Object $or(Object... v) {
+	public static Object $or(Object... arguments) {
 		return 0;
 	}
 

@@ -1,7 +1,7 @@
 package test.generator.specialMethods;
 
 public class SpecialMethod6 {
-	public static Object $array(Object... v) {
+	public static Object $array(Object... arguments) {
 		return 0;
 	}
 

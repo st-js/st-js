@@ -59,7 +59,6 @@ import japa.parser.ast.expr.FieldAccessExpr;
 import japa.parser.ast.expr.InstanceOfExpr;
 import japa.parser.ast.expr.IntegerLiteralExpr;
 import japa.parser.ast.expr.IntegerLiteralMinValueExpr;
-import japa.parser.ast.expr.LiteralExpr;
 import japa.parser.ast.expr.LongLiteralExpr;
 import japa.parser.ast.expr.LongLiteralMinValueExpr;
 import japa.parser.ast.expr.MarkerAnnotationExpr;
@@ -127,7 +126,6 @@ import org.stjs.generator.scope.NameType.TypeName;
 import org.stjs.generator.scope.ParentTypeScope;
 import org.stjs.generator.scope.QualifiedName;
 import org.stjs.generator.scope.TypeScope;
-import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.Option;
 import org.stjs.generator.utils.PreConditions;
 
@@ -140,16 +138,14 @@ import org.stjs.generator.utils.PreConditions;
 public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 	private final SpecialMethodHandlers specialMethodHandlers;
 
-	private final boolean generateMainMethodCall;
 	JavascriptWriter printer = new JavascriptWriter();
 
 	private List<Comment> comments;
 
 	private int currentComment = 0;
 
-	public GeneratorVisitor(boolean generateMainMethodCall, Set<String> adapterClassNames) {
+	public GeneratorVisitor(Set<String> adapterClassNames) {
 		specialMethodHandlers = new SpecialMethodHandlers(adapterClassNames);
-		this.generateMainMethodCall = generateMainMethodCall;
 	}
 
 	public String getGeneratedSource() {
@@ -397,19 +393,9 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 	public void visit(FieldDeclaration n, GenerationContext arg) {
 		PreConditions.checkNotNull(arg.getCurrentType());
 
+		Checks.checkFieldDeclaration(n, arg);
 		// skip type
 		for (VariableDeclarator v : n.getVariables()) {
-			if (!ModifierSet.isStatic(n.getModifiers()) && v.getInit() != null) {
-				if (!ClassUtils.isBasicType(n.getType())) {
-					throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(v),
-							"Instance field inline initialization is allowed only for string and number field types");
-				}
-				if (!(v.getInit() instanceof LiteralExpr)) {
-					throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(v),
-							"Instance field inline initialization can only done with literal constants");
-				}
-			}
-
 			// i need prefix here!!
 			printStaticMembersPrefix(arg.getCurrentType(), arg);
 			if (!isStatic(n.getModifiers())) {
@@ -617,6 +603,7 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(MethodDeclaration n, GenerationContext arg) {
+		Checks.checkMethodDeclaration(n, arg);
 		printComments(n, arg);
 		printMethod(n.getName(), n.getParameters(), n.getModifiers(), n.getBody(), arg, false);
 	}
@@ -771,15 +758,13 @@ public class GeneratorVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	private void printMainMethodCall(ClassOrInterfaceDeclaration n, GenerationContext context) {
-		if (!generateMainMethodCall) {
-			return;
-		}
 		List<BodyDeclaration> members = n.getMembers();
 		for (BodyDeclaration member : members) {
 			if (member instanceof MethodDeclaration) {
 				MethodDeclaration methodDeclaration = (MethodDeclaration) member;
 				if (isMainMethod(methodDeclaration)) {
 					printer.printLn();
+					printer.print("if (!stjs.mainCallDisabled) ");
 					printStaticMembersPrefix(n, context);
 					printer.print(".main();");
 				}
