@@ -1,10 +1,26 @@
 package org.stjs.generator.scope.classloader;
 
+import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.Iterables.transform;
+import static java.lang.reflect.Modifier.PRIVATE;
+import static java.lang.reflect.Modifier.STATIC;
+import static java.lang.reflect.Modifier.isPrivate;
+import static java.lang.reflect.Modifier.isStatic;
+import static java.util.Arrays.asList;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.List;
 
 import org.stjs.generator.utils.Option;
+
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 
 public class ClassWrapper {
 
@@ -24,7 +40,8 @@ public class ClassWrapper {
 
 	public Option<ClassWrapper> getDeclaringClass() {
 		Class<?> declaringClass = clazz.getDeclaringClass();
-		return declaringClass != null ? Option.some(new ClassWrapper(declaringClass)) : Option.<ClassWrapper> none();
+		return declaringClass != null ? Option.some(new ClassWrapper(
+				declaringClass)) : Option.<ClassWrapper> none();
 	}
 
 	public int getModifiers() {
@@ -45,6 +62,29 @@ public class ClassWrapper {
 		}
 	}
 
+	public <T> Option<ClassWrapper> getDeclaredClass(String name) {
+		try {
+			for (Class<?> innerClass : clazz.getDeclaredClasses()) {
+				if (innerClass.getSimpleName().equals(name)) {
+					return Option.some(new ClassWrapper(innerClass));
+				}
+			}
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		}
+		return Option.none();
+	}
+
+	public List<Method> getDeclaredMethods(final String name) {
+		return ImmutableList.copyOf(Iterables.filter(
+				asList(getDeclaredMethods()), new Predicate<Method>() {
+					@Override
+					public boolean apply(Method method) {
+						return method.getName().equals(name);
+					}
+				}));
+	}
+
 	public Method[] getDeclaredMethods() {
 		return clazz.getDeclaredMethods();
 	}
@@ -55,7 +95,8 @@ public class ClassWrapper {
 
 	public Option<ClassWrapper> getSuperclass() {
 		Class<?> superClass = clazz.getSuperclass();
-		return superClass != null ? Option.some(new ClassWrapper(superClass)) : Option.<ClassWrapper> none();
+		return superClass != null ? Option.some(new ClassWrapper(superClass))
+				: Option.<ClassWrapper> none();
 	}
 
 	public String getName() {
@@ -64,6 +105,54 @@ public class ClassWrapper {
 
 	public Class<?> getClazz() {
 		return clazz;
+	}
+
+	public List<Field> getDeclaredNonPrivateStaticFields() {
+		return ImmutableList.copyOf(filter(
+				asList(clazz.getDeclaredFields()), 
+				new Predicate<Field>() {
+
+					@Override
+					public boolean apply(Field field) {
+						return isStaticButNotPrivate(field.getModifiers());
+					}
+				}));
+	}
+    
+	private boolean isStaticButNotPrivate(int modifiers) {
+		return (modifiers & (PRIVATE | STATIC)) == STATIC;
+	}
+	
+	public List<Method> getDeclaredNonPrivateStaticMethods() {
+		return ImmutableList.copyOf(filter(
+				asList(clazz.getDeclaredMethods()), 
+				new Predicate<Method>() {
+
+					@Override
+					public boolean apply(Method method) {
+						return isStaticButNotPrivate(method.getModifiers());
+					}
+				}));
+	}
+	
+	public List<ClassWrapper> getDeclaredNonPrivateStaticClasses() {
+		return ImmutableList.copyOf(
+				transform(
+					filter(
+						asList(clazz.getDeclaredClasses()), 
+						new Predicate<Class<?>>() {
+							@Override
+							public boolean apply(Class<?> clazz) {
+								return isStaticButNotPrivate(clazz.getModifiers());
+							}
+						}),
+				new Function<Class<?>, ClassWrapper>() {
+					@Override
+					public ClassWrapper apply(Class<?> clazz) {
+						return new ClassWrapper(clazz);
+					}
+				}
+			));
 	}
 
 }
