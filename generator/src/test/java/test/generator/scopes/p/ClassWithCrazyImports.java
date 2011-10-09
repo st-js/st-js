@@ -9,10 +9,13 @@ import test.generator.scopes.SimpleClass.AmbiguousName.InnerClassLevel2;
 import test.generator.scopes.SimpleClass.AmbiguousName.InnerClassLevel2; // duplicate import
 import static test.generator.scopes.SimpleClass.InnerClass2;// static import of inner class, huh?
 import test.generator.*;
+import test.innerclasses.ClassDeclaringInnerClass.InnerClass;
 
 public class ClassWithCrazyImports {
 	
-	private void m() {
+	static class InnerClassC {}
+	
+	private void m(int z, InnerClassC cc, InnerClass tt, String m) {
 		Integer f = field;
 		method();
 		InnerClassLevel2 x;

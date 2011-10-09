@@ -32,7 +32,7 @@ public class SimpleScopeBuilderTest {
 		CompilationUnit compilationUnit = JavaParser.parse(new File(path));
 		SimpleScopeBuilder builder = new SimpleScopeBuilder(new ClassLoaderWrapper(Thread.currentThread()
 				.getContextClassLoader()));
-		CompilationUnitScope scope = new CompilationUnitScope();
+		AbstractScope scope = new CompilationUnitScope(ClassWithCrazyImports.class.getPackage());
 		builder.visit(compilationUnit, scope);
 		// TODO : assert all imports have been resolved
 		
@@ -51,11 +51,11 @@ public class SimpleScopeBuilderTest {
 		assertEquals("test.generator", getOnlyElement(scope.getTypeImportOnDemandSet()).toString());
 	}
 
-	private void assertTypeEquals(CompilationUnitScope scope, Class<?> type, String name) {
+	private void assertTypeEquals(AbstractScope scope, Class<?> type, String name) {
 		assertEquals(type, scope.getType(name).getClazz());
 	}
 
-	private void assertMethodsEquals(CompilationUnitScope scope, int size, Class<?> declaringClass, String name) {
+	private void assertMethodsEquals(AbstractScope scope, int size, Class<?> declaringClass, String name) {
 		Collection<Method> methods = scope.getMethods(name);
 		assertNotNull(methods);
 		assertEquals(size, methods.size());
@@ -65,7 +65,7 @@ public class SimpleScopeBuilderTest {
 		
 	}
 
-	private void assertFieldEquals(CompilationUnitScope scope, Class<?> type,
+	private void assertFieldEquals(AbstractScope scope, Class<?> type,
 			Class<?> declaringClass,
 			String name) {
 		Field field = scope.getField(name);

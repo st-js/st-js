@@ -24,6 +24,13 @@ import com.google.common.collect.Iterables;
 
 public class ClassWrapper {
 
+	private static final Function<Class<?>, ClassWrapper> WrapClass = new Function<Class<?>, ClassWrapper>() {
+		@Override
+		public ClassWrapper apply(Class<?> clazz) {
+			return new ClassWrapper(clazz);
+		}
+	};
+	
 	private final Class<?> clazz;
 
 	public ClassWrapper(Class<?> clazz) {
@@ -77,7 +84,7 @@ public class ClassWrapper {
 
 	public List<Method> getDeclaredMethods(final String name) {
 		return ImmutableList.copyOf(Iterables.filter(
-				asList(getDeclaredMethods()), new Predicate<Method>() {
+				getDeclaredMethods(), new Predicate<Method>() {
 					@Override
 					public boolean apply(Method method) {
 						return method.getName().equals(name);
@@ -85,8 +92,8 @@ public class ClassWrapper {
 				}));
 	}
 
-	public Method[] getDeclaredMethods() {
-		return clazz.getDeclaredMethods();
+	public List<Method> getDeclaredMethods() {
+		return asList(clazz.getDeclaredMethods());
 	}
 
 	public boolean hasDeclaredField(String fieldName) {
@@ -136,6 +143,7 @@ public class ClassWrapper {
 	}
 	
 	public List<ClassWrapper> getDeclaredNonPrivateStaticClasses() {
+
 		return ImmutableList.copyOf(
 				transform(
 					filter(
@@ -146,13 +154,18 @@ public class ClassWrapper {
 								return isStaticButNotPrivate(clazz.getModifiers());
 							}
 						}),
-				new Function<Class<?>, ClassWrapper>() {
-					@Override
-					public ClassWrapper apply(Class<?> clazz) {
-						return new ClassWrapper(clazz);
-					}
-				}
+				WrapClass
 			));
+	}
+
+	public List<ClassWrapper> getDeclaredClasses() {
+		return ImmutableList.copyOf(
+				transform(asList(clazz.getDeclaredClasses()),
+						WrapClass));
+	}
+
+	public List<Field> getDeclaredFields() {
+		return asList(clazz.getDeclaredFields());
 	}
 
 }
