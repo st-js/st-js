@@ -3,17 +3,18 @@ package org.stjs.generator.scope.simple;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.TypeParameter;
-import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
-import japa.parser.ast.body.EnumConstantDeclaration;
 import japa.parser.ast.body.EnumDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.body.Parameter;
+import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.ObjectCreationExpr;
 import japa.parser.ast.expr.QualifiedNameExpr;
+import japa.parser.ast.expr.VariableDeclarationExpr;
+import japa.parser.ast.stmt.CatchClause;
 import japa.parser.ast.stmt.ForStmt;
 import japa.parser.ast.stmt.ForeachStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
@@ -29,20 +30,9 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.stjs.generator.ASTNodeData;
-import org.stjs.generator.JavascriptKeywords;
-import org.stjs.generator.SourcePosition;
-import org.stjs.generator.scope.NameScope;
-import org.stjs.generator.scope.ParameterScope;
-import org.stjs.generator.scope.TypeScope;
-import org.stjs.generator.scope.VariableScope;
 import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
 import org.stjs.generator.scope.classloader.ClassWrapper;
-import org.stjs.generator.scope.simple.Scope.ScopeVisitor;
 import org.stjs.generator.utils.Option;
-
-import com.google.common.primitives.Primitives;
-
 
 public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 
@@ -157,40 +147,22 @@ public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 		});
 		super.visit(n, classScope.get());
 	}
-	
+
+
 	@Override
 	public void visit(final MethodDeclaration n, Scope currentScope) {
-		handleMethodDeclaration(n.getParameters(), currentScope);
-		super.visit(n, currentScope);
+		BasicScope scope = handleMethodDeclaration(n.getParameters(), currentScope);
+		super.visit(n, scope);
 	}
 
-	private void handleMethodDeclaration(final List<Parameter> parameters, Scope currentScope) {
+	private BasicScope handleMethodDeclaration(final List<Parameter> parameters, Scope currentScope) {
 
 		BasicScope scope = new BasicScope((ClassScope) currentScope);
 		if (parameters != null) {
 			for (Parameter p : parameters) {
-				Type type = p.getType();
-				if (type instanceof ReferenceType) {
-					ReferenceType refType = (ReferenceType) type;
-					if (refType.getArrayCount() > 0) {
-						throw new RuntimeException("Arrays are not supported");
-					}
-					type = refType.getType(); // type is a primitive or class
-				}
-				ClassWrapper clazz;
-				if (type instanceof PrimitiveType) {
-					PrimitiveType primitiveType = (PrimitiveType) type;
-					clazz = PrimitiveTypes.primitiveReflectionType(primitiveType);
-				} else if (type instanceof VoidType) {
-					clazz = new ClassWrapper(void.class);
-				} else if (type instanceof ClassOrInterfaceType) {
-					clazz = scope.resolveType(type.toString());
-				} else if (type instanceof WildcardType) {
-					throw new RuntimeException("Generics not yet implemented");
-				} else {
-					throw new RuntimeException("Unpexcted type " + type);
-				}
+				ClassWrapper clazz = resolveType(scope, p.getType());
 				scope.addVariable(new ParameterVariable(clazz, p.getId().getName()));
+
 			}
 		}
 		// if (n.getTypeParameters() != null) {
@@ -198,14 +170,83 @@ public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 		// // TODO : Generics
 		// }
 		// }
+		return scope;
+	}
 
+
+	private ClassWrapper resolveType(BasicScope scope, Type type) {
+		// TODO : shouldn't that go directly in the scope classes?
+		if (type instanceof ReferenceType) {
+			ReferenceType refType = (ReferenceType) type;
+			if (refType.getArrayCount() > 0) {
+				throw new RuntimeException("Arrays are not supported");
+			}
+			type = refType.getType(); // type is a primitive or class
+		}
+		if (type instanceof PrimitiveType) {
+			PrimitiveType primitiveType = (PrimitiveType) type;
+			return PrimitiveTypes.primitiveReflectionType(primitiveType);
+		} else if (type instanceof VoidType) {
+			return new ClassWrapper(void.class);
+		} else if (type instanceof ClassOrInterfaceType) {
+			return  scope.resolveType(type.toString());
+		} else if (type instanceof WildcardType) {
+			throw new RuntimeException("Generics not yet implemented");
+		} else {
+			throw new RuntimeException("Unpexcted type " + type);
+		}
+	}
+
+	private String x;
+	void m() {
+		String y = x;
+		String x = "hello";
+		String k = x;
+	}
+	@Override
+	public void visit(VariableDeclarationExpr n, Scope scope) {
+		BasicScope basicScope = (BasicScope) scope;
+		if (n.getVars() != null) {
+			ClassWrapper clazz = resolveType(basicScope, n.getType());
+			/* TODO : this is not as simple. the order of the variables declarations matters!
+			 In this example 
+			 class XXX {
+			 	private String x;
+				void m() {
+					String y = x;
+					String x = "hello";
+					String k = x;
+				}
+			}
+			
+			y = x refers to the field but k = x refers to the local var.
+			if you replace String x = "hello", by String x = x; this causes a compilation error,
+			because it is equivalent to;
+			String x;
+			x=x;
+			This means that 'String x;' create a new scope in which ' = x' is evaluated.  
+			*/
+			for (VariableDeclarator var : n.getVars()) {
+				basicScope.addVariable(new LocalVariable(clazz, var.getId().getName()));
+			}
+		}
+
+		super.visit(n, scope);
 	}
 
 	@Override
-	public void visit(ConstructorDeclaration n, Scope currentScope) {
-		handleMethodDeclaration(n.getParameters(), currentScope);
-		super.visit(n, currentScope);
+	public void visit(CatchClause n, Scope currentScope) {
+		// TODO : this is broken in Java7 because a catch block might declare more than one exception
+		// would need a new javap
+		BasicScope scope = new BasicScope(currentScope);
+		scope.addVariable(new ParameterVariable(resolveType(scope, n.getExcept().getType()), n.getExcept().getId().getName()));
+		super.visit(n, scope);
 	}
+	
+	@Override
+	public void visit(ConstructorDeclaration n, Scope currentScope) {
+		BasicScope scope = handleMethodDeclaration(n.getParameters(), currentScope);
+		super.visit(n, scope);	}
 	
 	@Override
 	public void visit(ForeachStmt n, Scope currentScope) {
@@ -216,6 +257,30 @@ public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 	public void visit(ForStmt n, Scope currentScope) {
 		super.visit(n, new BasicScope(currentScope));
 	}
+	
+	@Override
+	public void visit(final EnumDeclaration n, final Scope currentScope) {
+		ClassScope parentClassScope = (ClassScope) currentScope;
+		ClassWrapper parentClass = parentClassScope.getClazz();
+		ClassWrapper enumClass = classLoader.loadClass(parentClass.getName() + "$" + n.getName()).getOrThrow();
+		ClassScope enumClassScope = new ClassScope(enumClass, currentScope);
+		for (ClassWrapper innerClass : enumClass.getDeclaredClasses()) {
+			/*
+			 * TODO : that's maybe not correct. Need to check what's the diff between static and non static inner
+			 * classes of enumrations
+			 */
+			enumClassScope.addType(innerClass);
+		}
+		for (Field field : enumClass.getDeclaredFields()) {
+			enumClassScope.addField(field);
+		}
+		for (Method method : enumClass.getDeclaredMethods()) {
+			enumClassScope.addMethod(method);
+		}
+		super.visit(n, enumClassScope);
+		
+	}
+
 
 	@Override
 	public void visit(ObjectCreationExpr n, Scope scope) {
@@ -243,28 +308,6 @@ public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 	        }
 	}
 	
-	@Override
-	public void visit(final EnumDeclaration n, final Scope currentScope) {
-		ClassScope parentClassScope = (ClassScope) currentScope;
-		ClassWrapper parentClass = parentClassScope.getClazz();
-		ClassWrapper enumClass = classLoader.loadClass(parentClass.getName() + "$" + n.getName()).getOrThrow();
-		ClassScope enumClassScope = new ClassScope(enumClass, currentScope);
-		for (ClassWrapper innerClass : enumClass.getDeclaredClasses()) {
-			/*
-			 * TODO : that's maybe not correct. Need to check what's the diff between static and non static inner
-			 * classes of enumrations
-			 */
-			enumClassScope.addType(innerClass);
-		}
-		for (Field field : enumClass.getDeclaredFields()) {
-			enumClassScope.addField(field);
-		}
-		for (Method method : enumClass.getDeclaredMethods()) {
-			enumClassScope.addMethod(method);
-		}
-		super.visit(n, enumClassScope);
-		
-	}
 
 	
 	private Option<ClassWrapper> identifyQualifiedNameExprClass(NameExpr expr) {
