@@ -36,9 +36,6 @@ sup()
 */
 
 /* Number */
-function toFixed(n, pos){
-	return n.toFixed(pos);
-}
 /**** Functionality in Java, but not in JS ********
  * methods added to JS prototypes
  */
@@ -154,6 +151,53 @@ stjs.exception=function(err){
 	return err;
 }
 
+stjs.isEnum=function(obj){
+	return obj != null && obj.constructor == stjs.enumEntry;
+}
+
+/************* global ***************/
+function exception(err){
+	return err;
+}
+
 function isEnum(obj){
 	return obj != null && obj.constructor == stjs.enumEntry;
+}
+
+/************* STJS asserts ***************/
+var stjsAssertHandler = function(position, code, msg) {
+	throw msg;
+}
+function setAssertHandler(a) {
+	stjsAssertHandler = a;
+}
+
+function assertArgEquals(position, code, expectedValue, testValue) {
+	if (expepectedValue != testValue && stjsAssertHandler)
+		stjsAssertHandler(position, code, "Wrong argument. Expected: " + expectedValue + ", got:" + testValue);
+}
+
+function assertArgNotNull(position, code, testValue) {
+	if (testValue == null && stjsAssertHandler)
+		stjsAssertHandler(position, code, "Wrong argument. Null value");
+}
+
+function assertArgTrue(position, code, condition) {
+	if (!condition && stjsAssertHandler)
+		stjsAssertHandler(position, code, "Wrong argument. Condition is false");
+}
+
+function assertStateEquals(position, code, expectedValue, testValue) {
+	if (expepectedValue != testValue && stjsAssertHandler)
+		stjsAssertHandler(position, code, "Wrong state. Expected: " + expectedValue + ", got:" + testValue);
+}
+
+function assertStateNotNull(position, code, testValue) {
+	if (testValue == null && stjsAssertHandler)
+		stjsAssertHandler("Wrong state. Null value");
+}
+
+function assertStateTrue(position, code, condition) {
+	if (!condition && stjsAssertHandler)
+		stjsAssertHandler(position, code, "Wrong state. Condition is false");
 }

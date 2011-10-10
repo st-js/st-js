@@ -9,6 +9,7 @@ import test.generator.specialMethods.SpecialMethod10;
 import test.generator.specialMethods.SpecialMethod11;
 import test.generator.specialMethods.SpecialMethod12;
 import test.generator.specialMethods.SpecialMethod13;
+import test.generator.specialMethods.SpecialMethod14;
 import test.generator.specialMethods.SpecialMethod2;
 import test.generator.specialMethods.SpecialMethod3;
 import test.generator.specialMethods.SpecialMethod4;
@@ -98,4 +99,10 @@ public class SpecialMethodGeneratorTest {
 		assertCodeContains(SpecialMethod12.class, "(obj)[\"a\"]");
 	}
 
+	@Test
+	public void testAssertMethods() {
+		// the special parameter THIS should not be added
+		assertCodeContains(SpecialMethod14.class,
+				"assertArgEquals(\"SpecialMethod14.java:8\",\"\\\"123\\\", x\", \"123\", x);");
+	}
 }

@@ -60,9 +60,9 @@ public interface Array<V> extends Iterable<Integer> {
 
 	public Array<V> splice(int start);
 
-	public Array<V> splice(int start, int end);
+	public Array<V> splice(int start, int howMany);
 
-	public Array<V> splice(int start, int end, V... values);
+	public Array<V> splice(int start, int howMany, V... values);
 
 	public void sort(SortFunction<V> function);
 

@@ -60,7 +60,6 @@ public class MethodsGeneratorTest {
 	public void testAdapter() {
 		assertCodeContains(Methods8.class, "(10).toFixed(2)");
 	}
-
 	@Test(expected = JavascriptGenerationException.class)
 	public void testVarArgsMethod1() {
 		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable

@@ -32,11 +32,12 @@ import org.stjs.javascript.jquery.JQuery;
 import org.stjs.javascript.jquery.SuccessListener;
 
 public class StockApplication {
-	private Array<String> stocks = $array();
+	private Array<String> stocks;
 	private QuoteProvider quoteProvider;
 
 	public StockApplication(QuoteProvider quoteProvider) {
 		this.quoteProvider = quoteProvider;
+		this.stocks = $array();
 	}
 
 	public static void main(String[] args) {
