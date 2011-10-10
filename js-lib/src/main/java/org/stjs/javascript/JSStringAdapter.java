@@ -15,6 +15,15 @@
  */
 package org.stjs.javascript;
 
+import org.stjs.javascript.annotation.Adapter;
+
+/**
+ * here are the methods existent in Javascript for number objects and inexistent in the Java counterpart. The generator
+ * should generate the correct code
+ * 
+ * @author acraciun
+ */
+@Adapter
 public class JSStringAdapter {
 	public static String anchor(String applyTo, String anchor) {
 		return "";

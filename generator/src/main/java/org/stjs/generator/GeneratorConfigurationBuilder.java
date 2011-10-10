@@ -28,7 +28,6 @@ import java.util.Set;
 public class GeneratorConfigurationBuilder {
 	private Collection<String> allowedPackages = new HashSet<String>();
 	private Set<String> allowedJavaLangClasses = new HashSet<String>();
-	private Set<String> adapterClassNames = new HashSet<String>();
 
 	public GeneratorConfigurationBuilder allowedPackage(String packageName) {
 		allowedPackages.add(packageName);
@@ -69,11 +68,7 @@ public class GeneratorConfigurationBuilder {
 
 		allowedPackages.add("java.lang");
 
-		adapterClassNames.add("org.stjs.javascript.JSNumberAdapter");
-		adapterClassNames.add("org.stjs.javascript.JSStringAdapter");
-		adapterClassNames.add("org.stjs.javascript.JSObjectAdapter");
-
-		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, adapterClassNames);
+		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses);
 	}
 
 }

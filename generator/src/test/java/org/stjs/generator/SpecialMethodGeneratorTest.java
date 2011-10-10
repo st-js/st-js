@@ -103,6 +103,6 @@ public class SpecialMethodGeneratorTest {
 	public void testAssertMethods() {
 		// the special parameter THIS should not be added
 		assertCodeContains(SpecialMethod14.class,
-				"assertArgEquals(\"SpecialMethod14.java:8\",\"\\\"123\\\", x\", \"123\", x);");
+				"assertArgEquals(\"SpecialMethod14.java:8\",\"assertArgEquals(\\\"123\\\", x)\", \"123\", x);");
 	}
 }

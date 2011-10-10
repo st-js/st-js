@@ -19,14 +19,19 @@ import static org.stjs.generator.scope.QualifiedName.NameTypes.GENERIC_TYPE;
 import static org.stjs.generator.scope.QualifiedName.NameTypes.INNER_CLASS;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.Node;
+import japa.parser.ast.body.AnnotationDeclaration;
+import japa.parser.ast.body.AnnotationMemberDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
 import japa.parser.ast.body.EnumDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.expr.FieldAccessExpr;
+import japa.parser.ast.expr.MarkerAnnotationExpr;
 import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.expr.NormalAnnotationExpr;
 import japa.parser.ast.expr.ObjectCreationExpr;
+import japa.parser.ast.expr.SingleMemberAnnotationExpr;
 import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.stmt.CatchClause;
 import japa.parser.ast.stmt.ForStmt;
@@ -259,13 +264,14 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 		// not fully-specified classes
 		QualifiedName<TypeName> qname = currentScope.getScope().resolveType(pos, fullName.toString(), this);
 		if (qname != null) {
-
 			((ASTNodeData) n.getData()).setQualifiedName(qname);
 			if ((qname.getType() == GENERIC_TYPE) || (qname.getType() == INNER_CLASS)) {
 				// no need to check for imports
 				return;
 			}
 			fullName = new StringBuilder(qname.getDefinitionPoint().getOrThrow().getFullName(true).getOrThrow());
+		} else {
+			System.out.println("Type " + n + " could not be resolved");
 		}
 		// }
 
@@ -286,6 +292,33 @@ public class NameResolverVisitor extends VoidVisitorAdapter<NameScopeWalker> {
 	@Override
 	public void visit(PrimitiveType n, NameScopeWalker currentScope) {
 		super.visit(n, currentScope);
+	}
+
+	@Override
+	public void visit(AnnotationDeclaration n, NameScopeWalker arg) {
+		// skip
+	}
+
+	@Override
+	public void visit(AnnotationMemberDeclaration n, NameScopeWalker arg) {
+		// skip
+	}
+
+	@Override
+	public void visit(SingleMemberAnnotationExpr n, NameScopeWalker arg) {
+		// skip
+
+	}
+
+	@Override
+	public void visit(NormalAnnotationExpr n, NameScopeWalker arg) {
+		// skip
+
+	}
+
+	@Override
+	public void visit(MarkerAnnotationExpr n, NameScopeWalker arg) {
+		// skip
 	}
 
 	public Set<String> getResolvedImports() {

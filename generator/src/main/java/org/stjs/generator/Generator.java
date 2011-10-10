@@ -88,7 +88,7 @@ public class Generator {
 		FileWriter writer = null;
 		try {
 			// 3. generate the javascript code
-			GeneratorVisitor generatorVisitor = new GeneratorVisitor(configuration.getAdapterClassNames());
+			GeneratorVisitor generatorVisitor = new GeneratorVisitor();
 			generatorVisitor.visit(cu, context);
 
 			writer = new FileWriter(outputFile, append);

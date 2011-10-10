@@ -1,6 +1,8 @@
 package org.stjs.generator.scope.simple;
 
+import org.junit.Ignore;
 
+@Ignore
 public class SimpleScopeBuilderTest {
 	/*
 	 * @Test public void test() throws ParseException, IOException { String path =

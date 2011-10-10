@@ -42,12 +42,11 @@ import org.stjs.generator.GeneratorConfigurationBuilder;
  * Java classes that will processed to generate the corresponding Javascript classes. The Javascript files are generated
  * in a configured target folder.
  * 
- * @goal generate
- * @phase process-classes
- * @requiresDependencyResolution runtime
+ * 
+ * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
-public class STJSMavenPlugin extends AbstractMojo {
+abstract public class AbstractSTJSMojo extends AbstractMojo {
 	private static final String AUTO_ROOT_PACKAGE = "auto";
 
 	/**
@@ -55,45 +54,28 @@ public class STJSMavenPlugin extends AbstractMojo {
 	 * @required
 	 * @readonly
 	 */
-	private MavenProject project;
-
-	/**
-	 * The source directories containing the sources to be compiled.
-	 * 
-	 * @parameter default-value="${project.compileSourceRoots}"
-	 * @required
-	 */
-	private List<String> compileSourceRoots;
+	protected MavenProject project;
 
 	/**
 	 * The list of packages that can be referenced from the classes that will be processed by the generator
 	 * 
 	 * @parameter
 	 */
-	private List<String> allowedPackages;
-
-	/**
-	 * <p>
-	 * Specify where to place generated source files
-	 * </p>
-	 * 
-	 * @parameter default-value="${project.build.directory}/${project.build.finalName}/generated-js"
-	 */
-	private File generatedSourcesDirectory;
+	protected List<String> allowedPackages;
 
 	/**
 	 * A list of inclusion filters for the compiler.
 	 * 
 	 * @parameter
 	 */
-	private Set<String> includes = new HashSet<String>();
+	protected Set<String> includes = new HashSet<String>();
 
 	/**
 	 * A list of exclusion filters for the compiler.
 	 * 
 	 * @parameter
 	 */
-	private Set<String> excludes = new HashSet<String>();
+	protected Set<String> excludes = new HashSet<String>();
 
 	/**
 	 * Sets the granularity in milliseconds of the last modification date for testing whether a source needs
@@ -101,7 +83,7 @@ public class STJSMavenPlugin extends AbstractMojo {
 	 * 
 	 * @parameter expression="${lastModGranularityMs}" default-value="0"
 	 */
-	private int staleMillis;
+	protected int staleMillis;
 
 	/**
 	 * 
@@ -112,7 +94,11 @@ public class STJSMavenPlugin extends AbstractMojo {
 	 *         generated
 	 * @parameter
 	 */
-	private String rootPackage = null;
+	protected String rootPackage = null;
+
+	abstract List<String> getCompileSourceRoots();
+
+	abstract File getGeneratedSourcesDirectory();
 
 	private ClassLoader getBuiltProjectClassLoader() throws MojoExecutionException {
 		try {
@@ -131,12 +117,16 @@ public class STJSMavenPlugin extends AbstractMojo {
 
 	public void execute() throws MojoExecutionException {
 		getLog().info("Generating javascript files");
+
 		ClassLoader builtProjectClassLoader = getBuiltProjectClassLoader();
 		Generator generator = new Generator();
 
 		GeneratorConfigurationBuilder configBuilder = new GeneratorConfigurationBuilder();
 		// TODO use config to add this package
 		configBuilder.allowedPackage("org.stjs.javascript");
+		configBuilder.allowedPackage("org.junit");
+		configBuilder.allowedPackage("org.stjs.testing");
+
 		if (allowedPackages != null) {
 			configBuilder.allowedPackages(allowedPackages);
 		}
@@ -145,7 +135,7 @@ public class STJSMavenPlugin extends AbstractMojo {
 		boolean autoRootPackage = AUTO_ROOT_PACKAGE.equals(targetRootPackage);
 
 		// scan all the packages
-		for (String sourceRoot : compileSourceRoots) {
+		for (String sourceRoot : getCompileSourceRoots()) {
 			File sourceDir = new File(sourceRoot);
 			Collection<String> packages = accumulatePackages(sourceDir);
 			configBuilder.allowedPackages(packages);
@@ -164,7 +154,7 @@ public class STJSMavenPlugin extends AbstractMojo {
 
 		boolean atLeastOneFileGenerated = false;
 		// scan the modified sources
-		for (String sourceRoot : compileSourceRoots) {
+		for (String sourceRoot : getCompileSourceRoots()) {
 			File sourceDir = new File(sourceRoot);
 			List<File> sources = new ArrayList<File>();
 			SourceMapping mapping = targetRootPackage != null ? new SuffixMappingWithCompressedTarget(targetRootPath,
@@ -173,8 +163,8 @@ public class STJSMavenPlugin extends AbstractMojo {
 			for (File source : sources) {
 				try {
 					File absoluteSource = new File(sourceDir, source.getPath());
-					File absoluteTarget = (File) mapping.getTargetFiles(generatedSourcesDirectory, source.getPath())
-							.iterator().next();
+					File absoluteTarget = (File) mapping
+							.getTargetFiles(getGeneratedSourcesDirectory(), source.getPath()).iterator().next();
 					getLog().info("Generating " + absoluteTarget);
 					if (!absoluteTarget.getParentFile().exists() && !absoluteTarget.getParentFile().mkdirs()) {
 						getLog().error("Cannot create output directory:" + absoluteTarget.getParentFile());
@@ -202,7 +192,7 @@ public class STJSMavenPlugin extends AbstractMojo {
 
 		if (atLeastOneFileGenerated) {
 			// copy the javascript support
-			generator.copyJavascriptSupport(generatedSourcesDirectory);
+			generator.copyJavascriptSupport(getGeneratedSourcesDirectory());
 		}
 	}
 
@@ -284,7 +274,7 @@ public class STJSMavenPlugin extends AbstractMojo {
 			}
 
 			try {
-				staleFiles.addAll(scanner.getIncludedSources(f.getParentFile(), generatedSourcesDirectory));
+				staleFiles.addAll(scanner.getIncludedSources(f.getParentFile(), getGeneratedSourcesDirectory()));
 			} catch (InclusionScanException e) {
 				throw new MojoExecutionException("Error scanning source root: \'" + sourceDir.getPath() + "\' "
 						+ "for stale files to recompile.", e);

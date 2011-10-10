@@ -22,11 +22,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.scope.NameType.MethodName;
 import org.stjs.generator.scope.QualifiedName;
+import org.stjs.generator.scope.path.QualifiedPath;
+import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.Option;
 
 /**
@@ -41,12 +42,9 @@ public class SpecialMethodHandlers {
 
 	private Map<String, SpecialMethodHandler> methodHandlers = new HashMap<String, SpecialMethodHandler>();
 
-	private final Set<String> adapterNames;
-
 	private final AssertHandler assertHandler;
 
-	public SpecialMethodHandlers(Set<String> adapterClassNames) {
-		this.adapterNames = adapterClassNames;
+	public SpecialMethodHandlers() {
 		// array.$get(x) -> array[x], or $get(obj, prop) -> obj[prop]
 		methodHandlers.put("$get", new SpecialMethodHandler() {
 			@Override
@@ -238,15 +236,15 @@ public class SpecialMethodHandlers {
 
 		if ((qname != null) && qname.getDefinitionPoint().isDefined() && (n.getArgs() != null)
 				&& (n.getArgs().size() > 0)) {
-			for (String adapterName : adapterNames) {
-				Option<String> fullyQualifiedString = qname.getDefinitionPoint().getOrThrow().getFullName(true);
-				if (fullyQualifiedString.isDefined()) {
-					if (fullyQualifiedString.getOrThrow().startsWith(adapterName)) {
-						adapterMethod(currentHandler, n, qname, context);
-						return true;
-					}
+			Option<QualifiedPath> fullyQualifiedString = qname.getDefinitionPoint().getOrThrow().getClassPath();
+			if (fullyQualifiedString.isDefined()) {
+
+				if (ClassUtils.isAdapter(fullyQualifiedString.getOrThrow())) {
+					adapterMethod(currentHandler, n, qname, context);
+					return true;
 				}
 			}
+
 		}
 
 		if (n.getName().startsWith(ASSERT_PREFIX)) {
@@ -343,8 +341,8 @@ public class SpecialMethodHandlers {
 				GenerationContext context) {
 			printScope(currentHandler, n, qname, context, false);
 			currentHandler.printer.print(n.getName());
-			String location = "\"" + context.getInputFile() + ":" + n.getBeginLine() + "\"";
-			String params = "\"params\"";
+			String location = "\"" + context.getInputFile().getName() + ":" + n.getBeginLine() + "\"";
+			String params = "\"" + n.toString().replace("\"", "\\\"") + "\"";
 			currentHandler.printArguments(Arrays.asList(location, params), n.getArgs(),
 					Collections.<String> emptyList(), context);
 			return true;

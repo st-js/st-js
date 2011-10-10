@@ -37,7 +37,7 @@ public class StockApplication {
 
 	public StockApplication(QuoteProvider quoteProvider) {
 		this.quoteProvider = quoteProvider;
-		this.stocks = $array();
+		stocks = $array();
 	}
 
 	public static void main(String[] args) {

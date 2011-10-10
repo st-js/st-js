@@ -16,7 +16,6 @@ public class GeneratorWrapper {
 
 		generator.generateJavascriptWithImports(Thread.currentThread().getContextClassLoader(), testClass
 				.getJavaClass().getName(), outputFile, new GeneratorConfigurationBuilder()
-				.generateMainMethodCall(false)
 				// do not generate the "main" method call
 				.allowedPackage(testClass.getJavaClass().getPackage().getName()).allowedPackage("org.stjs.javascript")
 				.allowedPackage("org.junit").allowedPackage("org.stjs.testing").build());

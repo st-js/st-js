@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.stjs.generator.scope.classloader.ClassWrapper;
+import org.stjs.generator.scope.path.QualifiedPath;
+import org.stjs.javascript.annotation.Adapter;
 import org.stjs.javascript.annotation.DataType;
 import org.stjs.javascript.annotation.MockType;
 
@@ -79,6 +81,21 @@ public class ClassUtils {
 		}
 
 		return false;
+	}
+
+	public static boolean isAdapter(ClassWrapper clazz) {
+		if (clazz == null) {
+			return false;
+		}
+		return hasAnnotation(clazz.getClazz(), Adapter.class.getName());
+	}
+
+	public static boolean isAdapter(QualifiedPath path) {
+		if (path == null) {
+			return false;
+		}
+		// FIXME temporary until the type resolution is fixed
+		return path.getClassName(true).matches("org\\.stjs\\.javascript\\.(.+)Adapter");
 	}
 
 }

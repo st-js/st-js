@@ -15,12 +15,15 @@
  */
 package org.stjs.javascript;
 
+import org.stjs.javascript.annotation.Adapter;
+
 /**
  * here are the methods existent in Javascript for number objects and inexistent in the Java counterpart. The generator
  * should generate the correct code
  * 
  * @author acraciun
  */
+@Adapter
 public class JSNumberAdapter {
 	public static String toFixed(Number n, int positions) {
 		return "";

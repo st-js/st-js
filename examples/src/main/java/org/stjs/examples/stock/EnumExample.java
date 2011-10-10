@@ -3,9 +3,9 @@ package org.stjs.examples.stock;
 public class EnumExample {
 
 	enum MyEnum {
-		A,B
+		A, B
 	}
-	
+
 	int getNum(MyEnum m) {
 		MyEnum n = m;
 		switch (n) {
