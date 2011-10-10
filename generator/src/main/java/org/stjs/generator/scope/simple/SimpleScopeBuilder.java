@@ -197,12 +197,6 @@ public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 		}
 	}
 
-	private String x;
-	void m() {
-		String y = x;
-		String x = "hello";
-		String k = x;
-	}
 	@Override
 	public void visit(VariableDeclarationExpr n, Scope scope) {
 		BasicScope basicScope = (BasicScope) scope;
