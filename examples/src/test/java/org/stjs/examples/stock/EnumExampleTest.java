@@ -2,11 +2,13 @@ package org.stjs.examples.stock;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.stjs.testing.jstestdriver.JSTestDriverRunner;
 
 @RunWith(JSTestDriverRunner.class)
+@Ignore
 public class EnumExampleTest {
 
 	@Test

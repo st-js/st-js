@@ -33,42 +33,40 @@ public class SimpleScopeBuilderTest {
 		String path = ClassWithCrazyImports.class.getName().replace('.', File.separatorChar);
 		path = "src/test/java/" + path + ".java";
 		CompilationUnit compilationUnit = JavaParser.parse(new File(path));
-		ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread()
-				.getContextClassLoader());
+		ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader());
 		SimpleScopeBuilder builder = new SimpleScopeBuilder(classLoader);
 		CompilationUnitScope scope = new CompilationUnitScope(ClassWithCrazyImports.class.getPackage(), classLoader);
 		builder.visit(compilationUnit, scope);
 		// TODO : assert all imports have been resolved
-		
+
 		assertFieldEquals(scope, Integer.class, SimpleClass.class, "field");
 		assertMethodsEquals(scope, 2, SimpleClass.class, "method");
 		assertFieldEquals(scope, Integer.class, InnerClassLevel2.class, "innerField");
 		assertTypeEquals(scope, SimpleClass.class, "SimpleClass");
-		
+
 		assertTypeEquals(scope, AmbiguousName.class, "AmbiguousName");
 		assertFieldEquals(scope, AmbiguousName.class, SimpleClass.class, "AmbiguousName");
 		assertMethodsEquals(scope, 1, SimpleClass.class, "AmbiguousName");
-		
+
 		assertTypeEquals(scope, InnerClassLevel2.class, "InnerClassLevel2");
 		assertTypeEquals(scope, InnerClass2.class, "InnerClass2");
 		assertEquals("test.generator", getOnlyElement(scope.getTypeImportOnDemandSet()).toString());
-		
+
 		NameScopeWalker walker = new NameScopeWalker(scope);
 		NameScopeWalker classScope = walker.nextChild();
 		NameScopeWalker methodScope = classScope.nextChild();
-		
+
 		assertVariableEquals(methodScope, int.class, "z");
 		assertVariableEquals(methodScope, ClassWithCrazyImports.InnerClassC.class, "cc");
 		assertVariableEquals(methodScope, InnerClass.class, "tt");
 		assertVariableEquals(methodScope, String.class, "m");
-		
+
 		NameScopeWalker methodBodyScope = methodScope.nextChild();
 		assertVariableEquals(methodBodyScope, Integer.class, "f");
 		assertVariableEquals(methodBodyScope, InnerClassLevel2.class, "x");
 		assertVariableEquals(methodBodyScope, SimpleClass.class, "y");
 		assertVariableEquals(methodBodyScope, InnerClass2.class, "k");
-		
-		
+
 		assertMethodsEquals(methodBodyScope.getScope(), 2, SimpleClass.class, "method");
 
 		method();
@@ -77,8 +75,6 @@ public class SimpleScopeBuilderTest {
 		SimpleClass y;
 		InnerClass2 k;
 
-
-		
 	}
 
 	private void assertVariableEquals(NameScopeWalker scope, Class<?> declaringClass, String name) {
@@ -97,12 +93,10 @@ public class SimpleScopeBuilderTest {
 		for (Method method : methods) {
 			assertSame(declaringClass, method.getDeclaringClass());
 		}
-		
+
 	}
 
-	private void assertFieldEquals(AbstractScope scope, Class<?> type,
-			Class<?> declaringClass,
-			String name) {
+	private void assertFieldEquals(AbstractScope scope, Class<?> type, Class<?> declaringClass, String name) {
 		Field field = ((FieldVariable) scope.resolveVariable(name)).getField();
 		assertNotNull(field);
 		assertSame(type, field.getType());
