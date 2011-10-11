@@ -37,4 +37,24 @@ public class ClassLoaderWrapper {
 		}
 		return loadClass(className.toString());
 	}
+
+	public Option<ClassWrapper> loadClassOrInnerClass(String classLoaderCompatibleName) {
+		while (true) {
+			Option<ClassWrapper> clazz = loadClass(classLoaderCompatibleName);
+			if (clazz.isDefined()) {
+				return clazz;
+			}
+			int lastIndexDot = classLoaderCompatibleName.lastIndexOf('.');
+			if (lastIndexDot < 0) {
+				return Option.none();
+			}
+			classLoaderCompatibleName = replaceCharAt(classLoaderCompatibleName, lastIndexDot, '$');
+		}
+	}
+	
+	private String replaceCharAt(String s, int pos, char c) {
+		StringBuffer buf = new StringBuffer(s);
+		buf.setCharAt(pos, c);
+		return buf.toString();
+	}
 }

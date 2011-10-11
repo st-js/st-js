@@ -15,6 +15,7 @@ public class ParameterVariable implements Variable {
 	public ClassWrapper getType() {
 		return type;
 	}
+	
 	public String getName() {
 		return name;
 	}

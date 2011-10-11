@@ -118,7 +118,7 @@ public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 				// TODO : this is not good enough for inner classes (which need the list of outer classes in their qualified name)
 				String qualifiedName = compilationUnitScope.getPackage().getName().toString()+"."+n.getName();
 				if (!n.isInterface()) {
-					ClassWrapper clazz = loadClassOrInnerClass(qualifiedName).getOrThrow("Cannot load class or interface "+qualifiedName);
+					ClassWrapper clazz = classLoader.loadClassOrInnerClass(qualifiedName).getOrThrow("Cannot load class or interface "+qualifiedName);
 					compilationUnitScope.addType(clazz);
 					if (n.getTypeParameters() != null) {
 						for (TypeParameter p : n.getTypeParameters()) {
@@ -152,7 +152,7 @@ public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 	@Override
 	public void visit(final MethodDeclaration n, Scope currentScope) {
 		BasicScope scope = handleMethodDeclaration(n.getParameters(), currentScope);
-		super.visit(n, scope);
+		super.visit(n, new BasicScope(scope));
 	}
 
 	private BasicScope handleMethodDeclaration(final List<Parameter> parameters, Scope currentScope) {
@@ -173,7 +173,7 @@ public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 	}
 
 
-	private ClassWrapper resolveType(BasicScope scope, Type type) {
+	private ClassWrapper resolveType(Scope scope, Type type) {
 		// TODO : shouldn't that go directly in the scope classes?
 		if (type instanceof ReferenceType) {
 			ReferenceType refType = (ReferenceType) type;
@@ -239,7 +239,8 @@ public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 	@Override
 	public void visit(ConstructorDeclaration n, Scope currentScope) {
 		BasicScope scope = handleMethodDeclaration(n.getParameters(), currentScope);
-		super.visit(n, scope);	}
+		super.visit(n, new BasicScope(scope));
+	}
 	
 	@Override
 	public void visit(ForeachStmt n, Scope currentScope) {
@@ -301,31 +302,11 @@ public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 	        }
 	}
 	
-
 	
 	private Option<ClassWrapper> identifyQualifiedNameExprClass(NameExpr expr) {
-		return loadClassOrInnerClass(expr.toString());
-	}
-	
-	private Option<ClassWrapper> loadClassOrInnerClass(String classLoaderCompatibleName) {
-		while (true) {
-			Option<ClassWrapper> clazz = classLoader.loadClass(classLoaderCompatibleName);
-			if (clazz.isDefined()) {
-				return clazz;
-			}
-			int lastIndexDot = classLoaderCompatibleName.lastIndexOf('.');
-			if (lastIndexDot < 0) {
-				return Option.none();
-			}
-			classLoaderCompatibleName = replaceCharAt(classLoaderCompatibleName, lastIndexDot, '$');
-		}
+		return classLoader.loadClassOrInnerClass(expr.toString());
 	}
 
-	private String replaceCharAt(String s, int pos, char c) {
-		StringBuffer buf = new StringBuffer(s);
-		buf.setCharAt(pos, c);
-		return buf.toString();
-	}
 
 	private void checkImport(ImportDeclaration importDecl, String string) {
 		// TODO Auto-generated method stub

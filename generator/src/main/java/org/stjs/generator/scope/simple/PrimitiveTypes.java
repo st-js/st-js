@@ -11,19 +11,19 @@ public class PrimitiveTypes {
 			case Boolean:
 				return new ClassWrapper(boolean.class);
 			case Char:
-				return new ClassWrapper( char.class);
+				return new ClassWrapper(char.class);
 			case Byte:
-				return new ClassWrapper( byte.class);
+				return new ClassWrapper(byte.class);
 			case Short:
-				return new ClassWrapper( short.class);
+				return new ClassWrapper(short.class);
 			case Int:
-				return new ClassWrapper( int.class);
+				return new ClassWrapper(int.class);
 			case Long:
-				return new ClassWrapper( long.class);
+				return new ClassWrapper(long.class);
 			case Float:
-				return new ClassWrapper( float.class);
+				return new ClassWrapper(float.class);
 			case Double:
-				return new ClassWrapper( double.class);
+				return new ClassWrapper(double.class);
 			default :
 				throw new RuntimeException("Fuck java switches");
 		}

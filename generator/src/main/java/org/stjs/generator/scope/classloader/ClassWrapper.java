@@ -162,10 +162,14 @@ public class ClassWrapper {
 		return ImmutableList.copyOf(
 				transform(asList(clazz.getDeclaredClasses()),
 						WrapClass));
-	}
+	} 
 
 	public List<Field> getDeclaredFields() {
 		return asList(clazz.getDeclaredFields());
+	}
+
+	public static ClassWrapper wrap(Class<?> clazz) {
+		return new ClassWrapper(clazz);
 	}
 
 }

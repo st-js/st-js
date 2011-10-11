@@ -1,5 +1,7 @@
 package org.stjs.generator.scope.simple;
 
+import java.util.List;
+
 
 public class BasicScope extends AbstractScope {
 

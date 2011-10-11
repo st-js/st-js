@@ -13,7 +13,7 @@ import test.innerclasses.ClassDeclaringInnerClass.InnerClass;
 
 public class ClassWithCrazyImports {
 	
-	static class InnerClassC {}
+	public static class InnerClassC {}
 	
 	private void m(int z, InnerClassC cc, InnerClass tt, String m) {
 		Integer f = field;
