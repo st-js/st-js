@@ -1,11 +1,12 @@
 package org.stjs.generator.scope.simple;
 
-public class CompilationUnitScope {
+
+public class CompilationUnitScope extends AbstractScope {
 
 	private Package packageDeclaration;
 
 	public CompilationUnitScope(Package packageDeclaration) {
-		// super(null);
+		super(null);
 		this.packageDeclaration = packageDeclaration;
 	}
 
@@ -13,9 +14,9 @@ public class CompilationUnitScope {
 		return packageDeclaration;
 	}
 
-	// @Override
-	// public void apply(ScopeVisitor visitor) {
-	// visitor.apply(this);
-	// }
+	@Override
+	public void apply(ScopeVisitor visitor) {
+		visitor.apply(this);
+	}
 
 }
