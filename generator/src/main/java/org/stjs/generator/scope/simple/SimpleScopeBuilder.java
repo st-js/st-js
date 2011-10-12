@@ -3,6 +3,7 @@ package org.stjs.generator.scope.simple;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.TypeParameter;
+import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
 import japa.parser.ast.body.EnumDeclaration;
@@ -28,15 +29,29 @@ import japa.parser.ast.visitor.VoidVisitorAdapter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
 import org.stjs.generator.scope.classloader.ClassWrapper;
 import org.stjs.generator.utils.Option;
 
+import com.google.common.base.Function;
+import com.google.common.collect.MapMaker;
+
 public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 
 	private final ClassLoaderWrapper classLoader;
+	
+	private final Map<ClassScope, AtomicInteger> anonymousClassCount = 
+		new MapMaker().makeComputingMap(new Function<ClassScope, AtomicInteger>() {
+
+			@Override
+			public AtomicInteger apply(ClassScope input) {
+				return new AtomicInteger(0);
+			}
+	});
 
 	public SimpleScopeBuilder(ClassLoaderWrapper classLoader) {
 		this.classLoader = classLoader;
@@ -293,15 +308,27 @@ public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 	            }
 	        }
 	        if (n.getAnonymousClassBody() != null) {
-	        	// TODO : How to load the class???? the class name is automatically generated,
-	        	// and we might have more than 1
-//	        	scope = new ClassScope(scope);
-//	            for (BodyDeclaration member : n.getAnonymousClassBody()) {
-//	                member.accept(this, scope);
-//	            }
+	        	ClassScope classScope = scope.closest(ClassScope.class);
+	        	int anonymousClassNumber = anonymousClassCount.get(classScope).incrementAndGet();
+	        	ClassWrapper anonymousClass = classLoader.loadClass(classScope.getClazz().getName()+"$"+anonymousClassNumber).getOrThrow();
+	        	ClassScope anonymousClassScope = new ClassScope(anonymousClass, scope);
+				for (ClassWrapper innerClass : anonymousClass.getDeclaredClasses()) {
+					anonymousClassScope.addType(innerClass);
+				}
+				for (Field field : anonymousClass.getDeclaredFields()) {
+					anonymousClassScope.addField(field);
+				}
+				for (Method method : anonymousClass.getDeclaredMethods()) {
+					anonymousClassScope.addMethod(method);
+				}
+				
+	        	for (BodyDeclaration member : n.getAnonymousClassBody()) {
+	            	member.accept(this, anonymousClassScope);
+	            }
 	        }
 	}
 	
+
 	
 	private Option<ClassWrapper> identifyQualifiedNameExprClass(NameExpr expr) {
 		return classLoader.loadClassOrInnerClass(expr.toString());

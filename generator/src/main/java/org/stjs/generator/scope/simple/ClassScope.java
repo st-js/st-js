@@ -14,12 +14,6 @@ public class ClassScope extends AbstractScope {
 
 	private final ClassWrapper clazz;
 	
-	private Map<String, Field> fields = Maps.newHashMap();
-	
-	public void addField(Field field) {
-		fields.put(field.getName(), field);
-	}
-	
 	ClassScope(ClassWrapper clazz, Scope parent) {
 		super(parent);
 		this.clazz = clazz;
@@ -33,10 +27,6 @@ public class ClassScope extends AbstractScope {
 	public ClassWrapper getClazz() {
 		return clazz;
 	}
-	
-	@VisibleForTesting
-	public Field getField(String name) {
-		return fields.get(name);
-	}
+
 
 }

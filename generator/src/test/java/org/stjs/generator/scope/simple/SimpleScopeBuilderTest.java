@@ -24,6 +24,7 @@ import test.generator.scopes.SimpleClass.AmbiguousName;
 import test.generator.scopes.SimpleClass.AmbiguousName.InnerClassLevel2;
 import test.generator.scopes.SimpleClass.InnerClass2;
 import test.generator.scopes.p.ClassWithCrazyImports;
+import test.generator.scopes.p.ClassWithCrazyImports.InnerClassC;
 import test.innerclasses.ClassDeclaringInnerClass.InnerClass;
 
 public class SimpleScopeBuilderTest {
@@ -69,11 +70,17 @@ public class SimpleScopeBuilderTest {
 
 		assertMethodsEquals(methodBodyScope.getScope(), 2, SimpleClass.class, "method");
 
-		method();
-		InnerClassLevel2 x;
-		Integer innerFieldx = innerField;
-		SimpleClass y;
-		InnerClass2 k;
+		NameScopeWalker method2BodyScope = classScope.nextChild().nextChild();
+		NameScopeWalker anonymousClass1 = method2BodyScope.nextChild();
+		NameScopeWalker anonymousClass1_1 = anonymousClass1.nextChild().nextChild().nextChild();
+		NameScopeWalker anopnymousClass2Method1Body = anonymousClass1_1.nextChild().nextChild();
+		assertVariableEquals(anopnymousClass2Method1Body, byte.class, "b");
+		
+		NameScopeWalker anonymousClass2 = method2BodyScope.nextChild();
+		NameScopeWalker anopnymousClass2Method2Body = anonymousClass2.nextChild().nextChild();
+		assertVariableEquals(anopnymousClass2Method2Body, InnerClassC.class, "k");
+		assertVariableEquals(anonymousClass2, int.class, "counter");
+
 
 	}
 

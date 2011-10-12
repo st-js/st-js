@@ -71,6 +71,19 @@ public abstract class AbstractScope implements Scope {
 		return scope;
 	}
 	
+	public Scope getParent() {
+		return parent;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T extends Scope> T closest(Class<T> scopeType) {
+		Scope currentScope = this;
+		do {
+			currentScope = currentScope.getParent();
+		} while (currentScope != null && currentScope.getClass() != scopeType);
+		return (T) currentScope;
+	}
+	
 	@Override
 	public Collection<Method> resolveMethods(String name) {
 		Collection<Method> methodList = methods.get(name);

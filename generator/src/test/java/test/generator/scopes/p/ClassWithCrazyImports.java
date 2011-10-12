@@ -15,6 +15,7 @@ public class ClassWithCrazyImports {
 	
 	public static class InnerClassC {}
 	
+	
 	private void m(int z, InnerClassC cc, InnerClass tt, String m) {
 		Integer f = field;
 		method();
@@ -22,5 +23,31 @@ public class ClassWithCrazyImports {
 		Integer innerFieldx = innerField;
 		SimpleClass y;
 		InnerClass2 k;
+	}
+	public static void crazyInnerClasses() {
+		new Runnable() {
+			
+			@Override
+			public void run() {
+				new Runnable() {
+					
+					@Override
+					public void run() {
+						byte b;
+					}
+				}.run();
+				
+			}
+		}.run();
+		new Runnable() {
+			
+			int counter;
+			
+			@Override
+			public void run() {
+				InnerClassC k;
+				
+			}
+		}.run();
 	}
 }

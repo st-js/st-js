@@ -1,8 +1,5 @@
 package org.stjs.generator.scope.simple;
 
-import java.util.List;
-
-
 public class BasicScope extends AbstractScope {
 
 	BasicScope(Scope parent) {
@@ -13,6 +10,5 @@ public class BasicScope extends AbstractScope {
 	public void apply(ScopeVisitor visitor) {
 		visitor.apply(this);
 	}
-
 
 }

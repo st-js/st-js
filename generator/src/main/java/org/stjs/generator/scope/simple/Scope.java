@@ -27,4 +27,14 @@ public interface Scope {
 	Variable resolveVariable(String string);
 
 	Collection<Method> resolveMethods(String name);
+
+	Scope getParent();
+	
+	/**
+	 * Find the closest parent of type T
+	 * @param <T>
+	 * @param scopeType
+	 * @return
+	 */
+	<T extends Scope> T closest(Class<T> scopeType);
 }
