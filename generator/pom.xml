@@ -26,15 +26,6 @@
 		</repository>
 
 		<repository>
-			<id>apache.snapshots</id>
-			<url>http://people.apache.org/repo/m2-snapshot-repository/</url>
-		</repository>
-		<repository>
-			<id>codehaus.snapshots</id>
-			<url>http://snapshots.repository.codehaus.org</url>
-		</repository>
-
-		<repository>
 			<id>javaparser-releases</id>
 			<url>http://javaparser.googlecode.com/svn/maven2</url>
 		</repository>
