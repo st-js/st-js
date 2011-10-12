@@ -10,6 +10,7 @@ import test.generator.specialMethods.SpecialMethod11;
 import test.generator.specialMethods.SpecialMethod12;
 import test.generator.specialMethods.SpecialMethod13;
 import test.generator.specialMethods.SpecialMethod14;
+import test.generator.specialMethods.SpecialMethod15;
 import test.generator.specialMethods.SpecialMethod2;
 import test.generator.specialMethods.SpecialMethod3;
 import test.generator.specialMethods.SpecialMethod4;
@@ -84,13 +85,13 @@ public class SpecialMethodGeneratorTest {
 	@Test
 	public void testSpecialEquals() {
 		// x.equals(y) -> x == y
-		assertCodeContains(SpecialMethod10.class, "x == 2");
+		assertCodeContains(SpecialMethod10.class, "(x == 2)");
 	}
 
 	@Test
-	public void testSpecialDelete() {
-		// x.$delete(key) -> delete x[key]
-		assertCodeContains(SpecialMethod11.class, "delete this[\"key\"]");
+	public void testSpecialNotEquals() {
+		// !x.equals(y) -> !(x == y)
+		assertCodeContains(SpecialMethod11.class, "!(x == 2)");
 	}
 
 	@Test
@@ -105,4 +106,11 @@ public class SpecialMethodGeneratorTest {
 		assertCodeContains(SpecialMethod14.class,
 				"assertArgEquals(\"SpecialMethod14.java:8\",\"assertArgEquals(\\\"123\\\", x)\", \"123\", x);");
 	}
+
+	@Test
+	public void testSpecialDelete() {
+		// x.$delete(key) -> delete x[key]
+		assertCodeContains(SpecialMethod15.class, "delete this[\"key\"]");
+	}
+
 }

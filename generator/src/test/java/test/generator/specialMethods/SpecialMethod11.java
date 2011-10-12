@@ -2,11 +2,10 @@ package test.generator.specialMethods;
 
 public class SpecialMethod11 {
 
-	public void $delete(String x) {
-
-	}
-
 	public void method() {
-		this.$delete("key");
+		Integer x = 1;
+		if (!x.equals(2)) {
+			x = 3;
+		}
 	}
 }

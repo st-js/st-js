@@ -195,9 +195,11 @@ public class SpecialMethodHandlers {
 				if ((n.getArgs() == null) || (n.getArgs().size() != 1)) {
 					return false;
 				}
+				currentHandler.printer.print("(");
 				printScope(currentHandler, n, qname, context, false);
 				currentHandler.printer.print(" == ");
 				n.getArgs().get(0).accept(currentHandler, context);
+				currentHandler.printer.print(")");
 				return true;
 			}
 		});

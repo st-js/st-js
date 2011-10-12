@@ -15,12 +15,18 @@
  */
 package org.stjs.generator.scope;
 
+import org.stjs.generator.scope.simple.CompilationUnitScope;
+
 public class NameScopeWalker {
 	private final NameScope scope;
 	private int currentChild = 0;
 
 	public NameScopeWalker(NameScope scope) {
 		this.scope = scope;
+	}
+
+	public NameScopeWalker(CompilationUnitScope scope2) {
+		scope = null;
 	}
 
 	public NameScope getScope() {
