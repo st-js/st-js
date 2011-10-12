@@ -7,8 +7,8 @@ public class BasicScope extends AbstractScope {
 	}
 
 	@Override
-	public void apply(ScopeVisitor visitor) {
-		visitor.apply(this);
+	public <T> T apply(ScopeVisitor<T> visitor) {
+		return visitor.apply(this);
 	}
 
 }

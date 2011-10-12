@@ -15,6 +15,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 
+import org.stjs.generator.scope.simple.ClassScope;
 import org.stjs.generator.utils.Option;
 
 import com.google.common.base.Function;
@@ -168,8 +169,40 @@ public class ClassWrapper {
 		return asList(clazz.getDeclaredFields());
 	}
 
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ClassWrapper other = (ClassWrapper) obj;
+		return clazz == other.clazz;
+	}
+
 	public static ClassWrapper wrap(Class<?> clazz) {
 		return new ClassWrapper(clazz);
 	}
+
+	public boolean isParentClassOf(ClassWrapper otherClass) {
+		Class<?> classPointer = otherClass.getClazz();
+		do {
+			classPointer = classPointer.getSuperclass();
+			if (classPointer == null) {
+				return false;
+			}
+			if (classPointer == this.clazz) {
+				return true;
+			}
+		} while (true);
+	}
+
+	public boolean isInnerType() {
+		return clazz.getDeclaringClass() != null;
+	}
+	
+
 
 }

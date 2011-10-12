@@ -36,7 +36,8 @@ public class SimpleScopeBuilderTest {
 		CompilationUnit compilationUnit = JavaParser.parse(new File(path));
 		ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader());
 		SimpleScopeBuilder builder = new SimpleScopeBuilder(classLoader);
-		CompilationUnitScope scope = new CompilationUnitScope(ClassWithCrazyImports.class.getPackage(), classLoader);
+		CompilationUnitScope scope = new CompilationUnitScope(classLoader);
+		
 		builder.visit(compilationUnit, scope);
 		// TODO : assert all imports have been resolved
 
@@ -53,7 +54,7 @@ public class SimpleScopeBuilderTest {
 		assertTypeEquals(scope, InnerClass2.class, "InnerClass2");
 		assertEquals("test.generator", getOnlyElement(scope.getTypeImportOnDemandSet()).toString());
 
-		NameScopeWalker walker = new NameScopeWalker(scope);
+		NameScopeWalker walker = new NameScopeWalker(scope, null); 
 		NameScopeWalker classScope = walker.nextChild();
 		NameScopeWalker methodScope = classScope.nextChild();
 

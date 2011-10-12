@@ -2,21 +2,21 @@ package org.stjs.generator.scope.simple;
 
 import org.stjs.generator.scope.simple.Scope.ScopeVisitor;
 
-public class DefaultScopeVisitor implements ScopeVisitor {
+public class DefaultScopeVisitor<T> implements ScopeVisitor<T> {
 
 	@Override
-	public void apply(CompilationUnitScope scope) {
-		
+	public T apply(CompilationUnitScope scope) {
+		return null;
 	}
 
 	@Override
-	public void apply(ClassScope classScope) {
-		
+	public T apply(ClassScope classScope) {
+		return null;
 	}
 
 	@Override
-	public void apply(BasicScope basicScope) {
-		
+	public T apply(BasicScope basicScope) {
+		return null;
 	}
 
 }

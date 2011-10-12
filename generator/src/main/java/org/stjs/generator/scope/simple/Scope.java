@@ -8,15 +8,15 @@ import org.stjs.generator.scope.classloader.ClassWrapper;
 
 public interface Scope {
 
-	public interface ScopeVisitor {
-		void apply(CompilationUnitScope scope);
+	public interface ScopeVisitor<T> {
+		T apply(CompilationUnitScope scope);
 
-		void apply(ClassScope classScope);
+		T apply(ClassScope classScope);
 
-		void apply(BasicScope basicScope);
+		T apply(BasicScope basicScope);
 	}
 	
-	void apply(ScopeVisitor visitor);
+	<T> T apply(ScopeVisitor<T> visitor);
 	
 	public ClassWrapper resolveType(String name);
 

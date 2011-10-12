@@ -15,14 +15,17 @@
  */
 package org.stjs.generator.scope.simple;
 
-import org.stjs.generator.scope.simple.Scope;
+import org.stjs.generator.GenerationContext;
 
 public class NameScopeWalker {
 	private final Scope scope;
+	private final GenerationContext context;
 	private int currentChild = 0;
+	
 
-	public NameScopeWalker(Scope scope) {
-		this.scope = scope;
+	public NameScopeWalker(Scope scope, GenerationContext context) {
+		this.scope = scope; 
+		this.context = context;
 	}
 
 	public Scope getScope() {
@@ -34,7 +37,11 @@ public class NameScopeWalker {
 			throw new IllegalStateException("The scope [" + scope + "] does not have a child #"
 					+ currentChild);
 		}
-		return new NameScopeWalker(scope.getChildren().get(currentChild++));
+		return new NameScopeWalker(scope.getChildren().get(currentChild++), context);
+	}
+
+	public GenerationContext getContext() {
+		return context;
 	}
 
 }

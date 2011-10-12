@@ -7,22 +7,22 @@ import java.util.Set;
 
 import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
 import org.stjs.generator.scope.classloader.ClassWrapper;
+import org.stjs.generator.scope.simple.Scope.ScopeVisitor;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 
 public class CompilationUnitScope extends AbstractScope {
 
-	private final Package packageDeclaration;
+	private String packageName;
 	
 	private final Set<NameExpr> typeImportOnDemandSet = Sets.newHashSet();
 
 	private final ClassLoaderWrapper classLoaderWrapper;
 
 
-	public CompilationUnitScope(Package packageDeclaration, ClassLoaderWrapper classLoaderWrapper) {
+	public CompilationUnitScope(ClassLoaderWrapper classLoaderWrapper) {
 		super(null);
-		this.packageDeclaration = packageDeclaration;
 		this.classLoaderWrapper = classLoaderWrapper;
 		addType(wrap(String.class));
 		addType(wrap(Integer.class));
@@ -36,13 +36,17 @@ public class CompilationUnitScope extends AbstractScope {
 		addType(wrap(RuntimeException.class));
 	}
 
-	public Package getPackage() {
-		return packageDeclaration;
+	public String getPackageName() {
+		return packageName;
+	}
+	
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
 	}
 
 	@Override
-	public void apply(ScopeVisitor visitor) {
-		visitor.apply(this);
+	public <T> T apply(ScopeVisitor<T> visitor) {
+		return visitor.apply(this);
 	}
 	
 	public void addTypeImportOnDemand(NameExpr name) {
@@ -62,7 +66,7 @@ public class CompilationUnitScope extends AbstractScope {
 			return type;
 		}
 		// try in package
-		for (ClassWrapper packageClass : classLoaderWrapper.loadClassOrInnerClass(packageDeclaration.getName()+"."+name)) {
+		for (ClassWrapper packageClass : classLoaderWrapper.loadClassOrInnerClass(packageName+"."+name)) {
 			return packageClass;
 		}
 		

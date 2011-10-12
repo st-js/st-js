@@ -78,9 +78,9 @@ public abstract class AbstractScope implements Scope {
 	@SuppressWarnings("unchecked")
 	public <T extends Scope> T closest(Class<T> scopeType) {
 		Scope currentScope = this;
-		do {
+		while (currentScope != null && currentScope.getClass() != scopeType) {
 			currentScope = currentScope.getParent();
-		} while (currentScope != null && currentScope.getClass() != scopeType);
+		}
 		return (T) currentScope;
 	}
 	

@@ -2,6 +2,7 @@ package org.stjs.generator.scope.simple;
 
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
+import japa.parser.ast.PackageDeclaration;
 import japa.parser.ast.TypeParameter;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
@@ -57,10 +58,15 @@ public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 		this.classLoader = classLoader;
 	}
 
+	public void visit(final PackageDeclaration n, Scope scope) {
+		((CompilationUnitScope)scope).setPackageName(n.getName().toString());
+		super.visit(n, scope);
+	}
+	
 	@Override
 	public void visit(final CompilationUnit n, Scope scope) {
-		scope.apply(new DefaultScopeVisitor() {
-			public void apply(CompilationUnitScope scope) {
+		scope.apply(new DefaultScopeVisitor<Void>() {
+			public Void apply(CompilationUnitScope scope) {
 				// asterisk declaration have lower priority => process them first (JLS §7.5.2)
 				if (n.getImports() != null) {
 					for (ImportDeclaration importDecl : n.getImports()) {
@@ -114,6 +120,7 @@ public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 						}
 					}
 				}
+				return null;
 			}
 		});
 		
@@ -125,13 +132,12 @@ public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 		if ((n.getExtends() != null) && (n.getExtends().size() > 0) && !n.isInterface()) {
 			// TODO : populate scope with parent
 		}
-		final AtomicReference<Scope> classScope = new AtomicReference<Scope>();
-		scope.apply(new DefaultScopeVisitor() {
+		Scope classScope = scope.apply(new DefaultScopeVisitor<Scope>() {
 			
 			@Override
-			public void apply(CompilationUnitScope compilationUnitScope) {
+			public Scope apply(CompilationUnitScope compilationUnitScope) {
 				// TODO : this is not good enough for inner classes (which need the list of outer classes in their qualified name)
-				String qualifiedName = compilationUnitScope.getPackage().getName().toString()+"."+n.getName();
+				String qualifiedName = compilationUnitScope.getPackageName().toString()+"."+n.getName();
 				if (!n.isInterface()) {
 					ClassWrapper clazz = classLoader.loadClassOrInnerClass(qualifiedName).getOrThrow("Cannot load class or interface "+qualifiedName);
 					compilationUnitScope.addType(clazz);
@@ -150,17 +156,19 @@ public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 					for (Method method : clazz.getDeclaredMethods()) {
 						scope.addMethod(method);
 					}
-					classScope.set(scope);
+					return scope;
 				}
+				return null;
 			}
 
 			@Override
-			public void apply(ClassScope classScope) {
+			public Scope apply(ClassScope classScope) {
 				// NOTE : static class must inherit the compilation unit scope, non static class the class scope
 			//	throw new RuntimeException("Inner class not implemented yet");
+				return null;
 			}
 		});
-		super.visit(n, classScope.get());
+		super.visit(n, classScope != null ? classScope : scope);
 	}
 
 
@@ -269,9 +277,16 @@ public class SimpleScopeBuilder extends VoidVisitorAdapter<Scope> {
 	
 	@Override
 	public void visit(final EnumDeclaration n, final Scope currentScope) {
-		ClassScope parentClassScope = (ClassScope) currentScope;
-		ClassWrapper parentClass = parentClassScope.getClazz();
-		ClassWrapper enumClass = classLoader.loadClass(parentClass.getName() + "$" + n.getName()).getOrThrow();
+		ClassWrapper enumClass = currentScope.apply(new DefaultScopeVisitor<ClassWrapper>(){
+			public ClassWrapper apply(CompilationUnitScope scope) {
+				return classLoader.loadClass(scope.getPackageName()+"."+n.getName()).getOrThrow();
+			}
+			
+			public ClassWrapper apply(ClassScope scope) {
+				ClassWrapper parentClass = scope.getClazz();
+				return classLoader.loadClass(parentClass.getName() + "$" + n.getName()).getOrThrow();
+			}
+		});
 		ClassScope enumClassScope = new ClassScope(enumClass, currentScope);
 		for (ClassWrapper innerClass : enumClass.getDeclaredClasses()) {
 			/*

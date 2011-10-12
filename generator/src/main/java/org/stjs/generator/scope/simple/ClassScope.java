@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.stjs.generator.scope.classloader.ClassWrapper;
+import org.stjs.generator.scope.simple.Scope.ScopeVisitor;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
@@ -20,8 +21,8 @@ public class ClassScope extends AbstractScope {
 	}
 
 	@Override
-	public void apply(ScopeVisitor visitor) {
-		visitor.apply(this);
+	public <T> T apply(ScopeVisitor<T> visitor) {
+		return visitor.apply(this);
 	}
 
 	public ClassWrapper getClazz() {
