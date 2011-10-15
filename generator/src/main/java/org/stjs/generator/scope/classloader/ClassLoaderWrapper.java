@@ -1,6 +1,5 @@
 package org.stjs.generator.scope.classloader;
 
-import org.stjs.generator.scope.path.QualifiedPath.QualifiedMethodPath;
 import org.stjs.generator.utils.Option;
 
 public class ClassLoaderWrapper {
@@ -23,21 +22,6 @@ public class ClassLoaderWrapper {
 		}
 	}
 
-	public Option<ClassWrapper> loadClass(QualifiedMethodPath path) {
-		if (path == null) {
-			return Option.none();
-		}
-
-		StringBuilder className = new StringBuilder(path.getOuterClassQualifiedName());
-		if (path.getInnerClassesName() != null) {
-			for (String innerClass : path.getInnerClassesName().split("\\.")) {
-				className.append("$");
-				className.append(innerClass);
-			}
-		}
-		return loadClass(className.toString());
-	}
-
 	public Option<ClassWrapper> loadClassOrInnerClass(String classLoaderCompatibleName) {
 		while (true) {
 			Option<ClassWrapper> clazz = loadClass(classLoaderCompatibleName);
@@ -51,7 +35,7 @@ public class ClassLoaderWrapper {
 			classLoaderCompatibleName = replaceCharAt(classLoaderCompatibleName, lastIndexDot, '$');
 		}
 	}
-	
+
 	private String replaceCharAt(String s, int pos, char c) {
 		StringBuffer buf = new StringBuffer(s);
 		buf.setCharAt(pos, c);

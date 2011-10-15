@@ -22,7 +22,6 @@ import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,20 +30,26 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
-import org.stjs.generator.handlers.SetParentVisitor;
-import org.stjs.generator.scope.QualifiedName.NameTypes;
 import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
+import org.stjs.generator.scope.simple.CompilationUnitScope;
+import org.stjs.generator.scope.simple.FieldVariable;
+import org.stjs.generator.scope.simple.SimpleScopeBuilder;
 
 public class ScopeTest {
 
-	static NameResolverVisitor resolveName2(CompilationUnit cu, String clazz) throws ParseException, IOException {
+	static CompilationUnitScope resolveName2(CompilationUnit cu, String clazz) throws ParseException, IOException {
 		return resolveName2(cu, clazz, Collections.<String> emptyList());
 	}
 
-	static NameResolverVisitor resolveName2(CompilationUnit cu, String clazz, Collection<String> packages)
+	static CompilationUnitScope resolveName2(CompilationUnit cu, String clazz, Collection<String> packages)
 			throws ParseException, IOException {
 
-		cu.accept(new SetParentVisitor(), null);
+		ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader());
+		SimpleScopeBuilder builder = new SimpleScopeBuilder(classLoader);
+		CompilationUnitScope scope = new CompilationUnitScope(classLoader);
+
+		builder.visit(cu, scope);
+
 		packages = new HashSet<String>(packages);
 		packages.add("test");
 		packages.add("java.lang");
@@ -53,16 +58,8 @@ public class ScopeTest {
 		javaLangClasses.add("Number");
 		javaLangClasses.add("Runnable");
 		javaLangClasses.add("Object");
-		DeclarationVisitor scopes = new DeclarationVisitor(new File(clazz), Thread.currentThread()
-				.getContextClassLoader(), packages);
-		NameScope rootScope = new FullyQualifiedScope(new File(clazz), new ClassLoaderWrapper(Thread.currentThread()
-				.getContextClassLoader()));
-		scopes.visit(cu, rootScope);
 
-		NameResolverVisitor resolver = new NameResolverVisitor(rootScope, packages, javaLangClasses);
-		resolver.visit(cu, new NameScopeWalker(rootScope));
-
-		return resolver;
+		return scope;
 	}
 
 	static CompilationUnit compilationUnit(String fileName) throws ParseException {
@@ -81,28 +78,28 @@ public class ScopeTest {
 	public void testScopeParam() throws ParseException, IOException {
 		String fileName = "test/Declaration1.java";
 		CompilationUnit cu = compilationUnit(fileName);
-		resolveName2(cu, fileName);
-		assertScope(cu).line(32).column(20, 2).assertName("param")
+		CompilationUnitScope scope = resolveName2(cu, fileName);
+		assertScope(scope, cu).line(32).column(20, 2).assertName("param")
 				.assertScopePath("root.import.parent-ParentDeclaration1.type-Declaration1.param-30");
 	}
 
 	public void fieldVsInnerClass() throws ParseException, IOException {
 		String fileName = "test/FieldsVsInnerClass.java";
 		CompilationUnit cu = compilationUnit(fileName);
-		resolveName2(cu, fileName);
-		assertScope(cu).line(13).column(9, 2).assertName("MyInnerClass")
-				.assertScopePath("root.import.type-FieldsVsInnerClass").assertType(NameTypes.FIELD);
+		CompilationUnitScope scope = resolveName2(cu, fileName);
+		assertScope(scope, cu).line(13).column(9, 2).assertName("MyInnerClass")
+				.assertScopePath("root.import.type-FieldsVsInnerClass").assertType(FieldVariable.class);
 
-		assertScope(cu).line(14).column(9, 2).assertName("MyInnerClass2")
-				.assertScopePath("root.import.type-FieldsVsInnerClass").assertType(NameTypes.CLASS);
+		assertScope(scope, cu).line(14).column(9, 2).assertName("MyInnerClass2")
+				.assertScopePath("root.import.type-FieldsVsInnerClass").assertType(null);
 	}
 
 	@Test
 	public void testScopeVariable() throws ParseException, IOException {
 		String fileName = "test/Declaration1.java";
 		CompilationUnit cu = compilationUnit(fileName);
-		resolveName2(cu, fileName);
-		assertScope(cu).line(32).column(28, 2).assertName("var2")
+		CompilationUnitScope scope = resolveName2(cu, fileName);
+		assertScope(scope, cu).line(32).column(28, 2).assertName("var2")
 				.assertScopePath("root.import.parent-ParentDeclaration1.type-Declaration1.param-30.block-30");
 	}
 
@@ -110,8 +107,8 @@ public class ScopeTest {
 	public void testScopeType() throws ParseException, IOException {
 		String fileName = "test/Declaration1.java";
 		CompilationUnit cu = compilationUnit(fileName);
-		resolveName2(cu, fileName);
-		assertScope(cu).line(32).column(35, 2).assertName("type")
+		CompilationUnitScope scope = resolveName2(cu, fileName);
+		assertScope(scope, cu).line(32).column(35, 2).assertName("type")
 				.assertScopePath("root.import.parent-ParentDeclaration1.type-Declaration1");
 	}
 
@@ -141,16 +138,16 @@ public class ScopeTest {
 	public void testScopeParent() throws ParseException, IOException {
 		String fileName = "test/Declaration1.java";
 		CompilationUnit cu = compilationUnit(fileName);
-		resolveName2(cu, fileName);
+		CompilationUnitScope scope = resolveName2(cu, fileName);
 
 		// 27:int exp6 = parentPrivate + parentProtected + parentPackage + parentPublic;
 		// parentPrivate resolves to the import not the private field
-		assertScope(cu).line(43).column(20, 2).assertName("parentPrivate").assertScopePath("root.import");
-		assertScope(cu).line(43).column(36, 2).assertName("parentProtected")
+		assertScope(scope, cu).line(43).column(20, 2).assertName("parentPrivate").assertScopePath("root.import");
+		assertScope(scope, cu).line(43).column(36, 2).assertName("parentProtected")
 				.assertScopePath("root.import.parent-ParentDeclaration1");
-		assertScope(cu).line(43).column(54, 2).assertName("parentPackage")
+		assertScope(scope, cu).line(43).column(54, 2).assertName("parentPackage")
 				.assertScopePath("root.import.parent-ParentDeclaration1");
-		assertScope(cu).line(43).column(70, 2).assertName("parentPublic")
+		assertScope(scope, cu).line(43).column(70, 2).assertName("parentPublic")
 				.assertScopePath("root.import.parent-ParentDeclaration1");
 	}
 
@@ -158,17 +155,17 @@ public class ScopeTest {
 	public void testScopeImport() throws ParseException, IOException {
 		String fileName = "test/Declaration1.java";
 		CompilationUnit cu = compilationUnit(fileName);
-		resolveName2(cu, fileName);
-		assertScope(cu).line(32).column(54, 2).assertName("stat").assertScopePath("root.import");
+		CompilationUnitScope scope = resolveName2(cu, fileName);
+		assertScope(scope, cu).line(32).column(54, 2).assertName("stat").assertScopePath("root.import");
 	}
 
 	@Test
 	public void testScopeFull() throws ParseException, IOException {
 		String fileName = "test/Declaration1.java";
 		CompilationUnit cu = compilationUnit(fileName);
-		resolveName2(cu, fileName);
-		assertScope(cu).line(33).column(20, 2).assertName("full").assertScopePath("root");
-		// assertScope(cu).line(5).column(20, 2).assertName("full").assertScopePath("root");
+		CompilationUnitScope scope = resolveName2(cu, fileName);
+		assertScope(scope, cu).line(33).column(20, 2).assertName("full").assertScopePath("root");
+		// assertScope(scope, cu).line(5).column(20, 2).assertName("full").assertScopePath("root");
 	}
 
 	@Test

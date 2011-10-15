@@ -1,10 +1,6 @@
 package org.stjs.generator.scope.simple;
 
-import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.List;
-
-import org.stjs.generator.scope.classloader.ClassWrapper;
 
 public interface Scope {
 
@@ -15,23 +11,24 @@ public interface Scope {
 
 		T apply(BasicScope basicScope);
 	}
-	
+
 	<T> T apply(ScopeVisitor<T> visitor);
-	
-	public ClassWrapper resolveType(String name);
+
+	public TypeWithScope resolveType(String name);
+
+	public VariableWithScope resolveVariable(String string);
+
+	public MethodsWithScope resolveMethods(String name);
 
 	Scope addChild(Scope abstractScope);
 
 	List<Scope> getChildren();
 
-	Variable resolveVariable(String string);
-
-	Collection<Method> resolveMethods(String name);
-
 	Scope getParent();
-	
+
 	/**
 	 * Find the closest parent of type T
+	 * 
 	 * @param <T>
 	 * @param scopeType
 	 * @return

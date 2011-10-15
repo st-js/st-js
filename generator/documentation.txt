@@ -17,3 +17,13 @@ Here is the list of scopes in the order of their precedence (and how the element
 - FullyQualifiedScope (lazy)
 
 
+
+a -> Name
+a.b -> Name/Field
+a.b.c -> Name(a)/QualifiedName(a.b)/Field(c)
+a.b.method() -> Name(a)/QualifiedName(a.b)/Method
+a.b.method().c -> Name(a)/QualifiedName(a.b)/Method
+
+Type
+(a+b).toString()
+

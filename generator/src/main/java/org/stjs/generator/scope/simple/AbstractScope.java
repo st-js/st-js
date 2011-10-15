@@ -13,16 +13,15 @@ import org.stjs.generator.scope.classloader.ClassWrapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 public abstract class AbstractScope implements Scope {
-	
+
 	private final Scope parent;
 	private final List<Scope> children;
-	
+
 	AbstractScope(Scope parent) {
 		this.parent = parent;
 		if (parent != null) {
@@ -30,14 +29,13 @@ public abstract class AbstractScope implements Scope {
 		}
 		children = Lists.newArrayList();
 	}
-	
+
 	private Map<String, Variable> variables = Maps.newHashMap();
-	
+
 	private Multimap<String, Method> methods = ArrayListMultimap.create();
-	
+
 	private Map<String, ClassWrapper> types = Maps.newHashMap();
-	
-	
+
 	public void addField(Field field) {
 		variables.put(field.getName(), new FieldVariable(field));
 	}
@@ -54,27 +52,26 @@ public abstract class AbstractScope implements Scope {
 		types.put(clazz.getSimpleName(), clazz);
 	}
 
-
-	public ClassWrapper resolveType(String name) {
+	public TypeWithScope resolveType(String name) {
 		ClassWrapper classWrapper = types.get(name);
 		if (classWrapper != null) {
-			return classWrapper;
+			return new TypeWithScope(this, classWrapper);
 		}
 		if (parent != null) {
 			return parent.resolveType(name);
 		}
 		return null;
 	}
-	
+
 	public Scope addChild(Scope scope) {
 		children.add(scope);
 		return scope;
 	}
-	
+
 	public Scope getParent() {
 		return parent;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public <T extends Scope> T closest(Class<T> scopeType) {
 		Scope currentScope = this;
@@ -83,52 +80,52 @@ public abstract class AbstractScope implements Scope {
 		}
 		return (T) currentScope;
 	}
-	
+
 	@Override
-	public Collection<Method> resolveMethods(String name) {
+	public MethodsWithScope resolveMethods(String name) {
 		Collection<Method> methodList = methods.get(name);
 		if (parent != null) {
-			Collection<Method> parentMethods = parent.resolveMethods(name);
+			MethodsWithScope parentMethods = parent.resolveMethods(name);
 			if (parentMethods != null) {
 				// TODO : remove overridden definitions!
-				return methodList != null ? ImmutableList.copyOf(concat(parentMethods, methodList)) : parentMethods;
+				// XXX: in fact is a scope per method
+				return new MethodsWithScope(parentMethods.getScope(), methodList != null ? ImmutableList.copyOf(concat(
+						parentMethods.getMethods(), methodList)) : parentMethods.getMethods());
 			}
 		}
-		return methodList;
+		return methodList != null ? new MethodsWithScope(this, methodList) : null;
 	}
-	
+
 	@Override
 	public List<Scope> getChildren() {
 		return ImmutableList.copyOf(children);
 	}
 
 	@Override
-	public Variable resolveVariable(String name) {
-		Variable variable = variables.get(name); 
+	public VariableWithScope resolveVariable(String name) {
+		Variable variable = variables.get(name);
 		if (variable != null) {
-			return variable;
+			return new VariableWithScope(this, variable);
 		}
-		
+
 		if (parent != null) {
 			return parent.resolveVariable(name);
 		}
 		return null;
 	}
 
-	
 	@VisibleForTesting
 	public Collection<Method> getMethods(String name) {
 		return methods.get(name);
-	} 
+	}
 
 	@VisibleForTesting
 	public ClassWrapper getType(String name) {
 		return types.get(name);
 	}
-	
+
 	public void addVariable(Variable variable) {
 		variables.put(variable.getName(), variable);
 	}
-
 
 }

@@ -15,19 +15,15 @@
  */
 package org.stjs.generator;
 
-import japa.parser.ast.Node;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 
 import java.io.File;
 import java.util.Set;
 
-import org.stjs.generator.scope.NameType.IdentifierName;
-import org.stjs.generator.scope.NameType.MethodName;
-import org.stjs.generator.scope.NameType.TypeName;
-import org.stjs.generator.scope.QualifiedName;
-
 /**
- * This class can resolve an identifier or a method in the given source context. There is one context create for each generation process.
+ * This class can resolve an identifier or a method in the given source context. There is one context create for each
+ * generation process.
+ * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class GenerationContext {
@@ -35,29 +31,11 @@ public class GenerationContext {
 	private final File inputFile;
 
 	private ClassOrInterfaceDeclaration currentType = null;
-	
+
 	private Set<String> resolvedImports = null;
 
 	public GenerationContext(File inputFile) {
 		this.inputFile = inputFile;
-	}
-
-	@SuppressWarnings("unchecked")
-	public QualifiedName<MethodName> resolveMethod(Node node) {
-		// TODO : why not resolving here? what's the point of having an other pass?
-		return (QualifiedName<MethodName>) ((ASTNodeData) node.getData()).getQualifiedName();
-	}
-
-	@SuppressWarnings("unchecked")
-	public QualifiedName<IdentifierName> resolveIdentifier(Node node) {
-		// TODO : why not resolving here? what's the point of having an other pass?
-		return (QualifiedName<IdentifierName>) ((ASTNodeData) node.getData()).getQualifiedName();
-	}
-
-	@SuppressWarnings("unchecked")
-	public QualifiedName<TypeName> resolveType(Node node) {
-		// TODO : why not resolving here? what's the point of having an other pass?
-		return (QualifiedName<TypeName>) ((ASTNodeData) node.getData()).getQualifiedName();
 	}
 
 	public File getInputFile() {
@@ -73,7 +51,7 @@ public class GenerationContext {
 	public ClassOrInterfaceDeclaration getCurrentType() {
 		return currentType;
 	}
-	
+
 	public Set<String> getResolvedImports() {
 		return resolvedImports;
 	}

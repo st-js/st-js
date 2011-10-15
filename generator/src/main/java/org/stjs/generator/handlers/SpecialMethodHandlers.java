@@ -15,20 +15,22 @@
  */
 package org.stjs.generator.handlers;
 
+import static org.stjs.generator.ASTNodeData.scope;
 import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.MethodCallExpr;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.stjs.generator.ASTNodeData;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.scope.NameType.MethodName;
-import org.stjs.generator.scope.QualifiedName;
-import org.stjs.generator.scope.path.QualifiedPath;
+import org.stjs.generator.scope.ScopeUtils;
+import org.stjs.generator.scope.simple.Scope;
 import org.stjs.generator.utils.ClassUtils;
-import org.stjs.generator.utils.Option;
 
 /**
  * this is a handler to handle special method names (those starting with $).
@@ -48,14 +50,14 @@ public class SpecialMethodHandlers {
 		// array.$get(x) -> array[x], or $get(obj, prop) -> obj[prop]
 		methodHandlers.put("$get", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+			public boolean handle(SimpleScopeGeneratorVisitor currentHandler, MethodCallExpr n,
 					GenerationContext context) {
 				if ((n.getArgs() == null) || (n.getArgs().size() < 1) || (n.getArgs().size() > 2)) {
 					return false;
 				}
 				int arg = 0;
 				if (n.getArgs().size() == 1) {
-					printScope(currentHandler, n, qname, context, false);
+					printScope(currentHandler, n, context, false);
 				} else {
 					currentHandler.printer.print("(");
 					n.getArgs().get(arg++).accept(currentHandler, context);
@@ -72,14 +74,14 @@ public class SpecialMethodHandlers {
 		// array.$set(index, value) -> array[index] = value, or $set(obj, prop, value) -> obj[prop]=value
 		methodHandlers.put("$set", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+			public boolean handle(SimpleScopeGeneratorVisitor currentHandler, MethodCallExpr n,
 					GenerationContext context) {
 				if ((n.getArgs() == null) || (n.getArgs().size() < 2) || (n.getArgs().size() > 3)) {
 					return false;
 				}
 				int arg = 0;
 				if (n.getArgs().size() == 2) {
-					printScope(currentHandler, n, qname, context, false);
+					printScope(currentHandler, n, context, false);
 				} else {
 					currentHandler.printer.print("(");
 					n.getArgs().get(arg++).accept(currentHandler, context);
@@ -99,13 +101,13 @@ public class SpecialMethodHandlers {
 		// map.$delete(key) -> delete map[key]
 		methodHandlers.put("$delete", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+			public boolean handle(SimpleScopeGeneratorVisitor currentHandler, MethodCallExpr n,
 					GenerationContext context) {
 				if ((n.getArgs() == null) || (n.getArgs().size() != 1)) {
 					return false;
 				}
 				currentHandler.printer.print("delete ");
-				printScope(currentHandler, n, qname, context, false);
+				printScope(currentHandler, n, context, false);
 				currentHandler.printer.print("[");
 				n.getArgs().get(0).accept(currentHandler, context);
 				currentHandler.printer.print("]");
@@ -116,7 +118,7 @@ public class SpecialMethodHandlers {
 		// $array() -> []
 		methodHandlers.put("$array", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+			public boolean handle(SimpleScopeGeneratorVisitor currentHandler, MethodCallExpr n,
 					GenerationContext context) {
 
 				currentHandler.printer.print("[");
@@ -137,7 +139,7 @@ public class SpecialMethodHandlers {
 		// $map() -> {}
 		methodHandlers.put("$map", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+			public boolean handle(SimpleScopeGeneratorVisitor currentHandler, MethodCallExpr n,
 					GenerationContext context) {
 				if ((n.getArgs() != null) && (n.getArgs().size() > 1)) {
 					currentHandler.printer.printLn();
@@ -170,7 +172,7 @@ public class SpecialMethodHandlers {
 		// $or(x, y, z) -> (x || y || z)
 		methodHandlers.put("$or", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+			public boolean handle(SimpleScopeGeneratorVisitor currentHandler, MethodCallExpr n,
 					GenerationContext context) {
 				if ((n.getArgs() == null) || (n.getArgs().size() < 2)) {
 					// not exactly what it was expected
@@ -190,13 +192,13 @@ public class SpecialMethodHandlers {
 		// equals -> ==
 		methodHandlers.put("equals", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+			public boolean handle(SimpleScopeGeneratorVisitor currentHandler, MethodCallExpr n,
 					GenerationContext context) {
 				if ((n.getArgs() == null) || (n.getArgs().size() != 1)) {
 					return false;
 				}
 				currentHandler.printer.print("(");
-				printScope(currentHandler, n, qname, context, false);
+				printScope(currentHandler, n, context, false);
 				currentHandler.printer.print(" == ");
 				n.getArgs().get(0).accept(currentHandler, context);
 				currentHandler.printer.print(")");
@@ -209,10 +211,13 @@ public class SpecialMethodHandlers {
 		assertHandler = new AssertHandler();
 	}
 
-	private static void printScope(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+	private static void printScope(SimpleScopeGeneratorVisitor currentHandler, MethodCallExpr n,
 			GenerationContext context, boolean withDot) {
 		// TODO -> handle super
-		if ((qname != null) && !qname.isStatic() && (qname.getScope() != null) && qname.getScope().isThisScope()) {
+		Scope scope = scope(n);
+		// the check for one method should'be been already done
+		Method method = scope.resolveMethods(n.getName()).getMethods().iterator().next();
+		if (!Modifier.isStatic(method.getModifiers()) && ScopeUtils.isDeclaredInThisScope(n)) {
 			currentHandler.printer.print("this");
 			if (withDot) {
 				currentHandler.printer.print(".");
@@ -226,31 +231,25 @@ public class SpecialMethodHandlers {
 
 	}
 
-	public boolean handleMethodCall(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+	public boolean handleMethodCall(SimpleScopeGeneratorVisitor currentHandler, MethodCallExpr n,
 			GenerationContext context) {
 
 		SpecialMethodHandler handler = methodHandlers.get(n.getName());
 		if (handler != null) {
-			if (handler.handle(currentHandler, n, qname, context)) {
+			if (handler.handle(currentHandler, n, context)) {
+				return true;
+			}
+		}
+		Method method = ASTNodeData.method(n);
+		if ((n.getArgs() != null) && (n.getArgs().size() > 0)) {
+			if (ClassUtils.isAdapter(method.getDeclaringClass())) {
+				adapterMethod(currentHandler, n, context);
 				return true;
 			}
 		}
 
-		if ((qname != null) && qname.getDefinitionPoint().isDefined() && (n.getArgs() != null)
-				&& (n.getArgs().size() > 0)) {
-			Option<QualifiedPath> fullyQualifiedString = qname.getDefinitionPoint().getOrThrow().getClassPath();
-			if (fullyQualifiedString.isDefined()) {
-
-				if (ClassUtils.isAdapter(fullyQualifiedString.getOrThrow())) {
-					adapterMethod(currentHandler, n, qname, context);
-					return true;
-				}
-			}
-
-		}
-
 		if (n.getName().startsWith(ASSERT_PREFIX)) {
-			assertHandler.handle(currentHandler, n, qname, context);
+			assertHandler.handle(currentHandler, n, context);
 			return true;
 		}
 
@@ -262,7 +261,7 @@ public class SpecialMethodHandlers {
 		if ((n.getArgs() != null) && (n.getArgs().size() > 2)) {
 			return false;
 		}
-		methodToProperty(currentHandler, n, qname, context);
+		methodToProperty(currentHandler, n, context);
 		return true;
 	}
 
@@ -274,8 +273,7 @@ public class SpecialMethodHandlers {
 	 * @param qname
 	 * @param context
 	 */
-	private void adapterMethod(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
-			GenerationContext context) {
+	private void adapterMethod(SimpleScopeGeneratorVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
 		Expression arg0 = n.getArgs().get(0);
 		// TODO : use parenthesis only if the expression is complex
 		currentHandler.printer.print("(");
@@ -307,15 +305,16 @@ public class SpecialMethodHandlers {
 	 * @param qname
 	 * @param context
 	 */
-	private void methodToProperty(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
+	private void methodToProperty(SimpleScopeGeneratorVisitor currentHandler, MethodCallExpr n,
 			GenerationContext context) {
 		int arg = 0;
-		if ((qname != null) && qname.isStatic()) {
+		Method method = ASTNodeData.method(n);
+		if (Modifier.isStatic(method.getModifiers())) {
 			currentHandler.printer.print("(");
 			n.getArgs().get(arg++).accept(currentHandler, context);
 			currentHandler.printer.print(").");
 		} else {
-			printScope(currentHandler, n, qname, context, true);
+			printScope(currentHandler, n, context, true);
 		}
 		if ((n.getArgs() == null) || (n.getArgs().size() == arg)) {
 			currentHandler.printer.print(n.getName().substring(1));
@@ -328,9 +327,8 @@ public class SpecialMethodHandlers {
 
 	static final class $InvokeHandler implements SpecialMethodHandler {
 		@Override
-		public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
-				GenerationContext context) {
-			printScope(currentHandler, n, qname, context, false);
+		public boolean handle(SimpleScopeGeneratorVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
+			printScope(currentHandler, n, context, false);
 			// skip methodname
 			currentHandler.printArguments(n.getArgs(), context);
 			return true;
@@ -339,9 +337,8 @@ public class SpecialMethodHandlers {
 
 	static final class AssertHandler implements SpecialMethodHandler {
 		@Override
-		public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
-				GenerationContext context) {
-			printScope(currentHandler, n, qname, context, false);
+		public boolean handle(SimpleScopeGeneratorVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
+			printScope(currentHandler, n, context, false);
 			currentHandler.printer.print(n.getName());
 			String location = "\"" + context.getInputFile().getName() + ":" + n.getBeginLine() + "\"";
 			String params = "\"" + n.toString().replace("\"", "\\\"") + "\"";
@@ -352,7 +349,6 @@ public class SpecialMethodHandlers {
 	}
 
 	private interface SpecialMethodHandler {
-		public boolean handle(GeneratorVisitor currentHandler, MethodCallExpr n, QualifiedName<MethodName> qname,
-				GenerationContext context);
+		public boolean handle(SimpleScopeGeneratorVisitor currentHandler, MethodCallExpr n, GenerationContext context);
 	}
 }

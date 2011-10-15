@@ -17,13 +17,23 @@ package org.stjs.generator;
 
 import japa.parser.ast.Node;
 
-import org.stjs.generator.scope.QualifiedName;
-import org.stjs.generator.scope.TypeScope;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+
+import org.stjs.generator.scope.simple.Scope;
 
 public class ASTNodeData {
-	private QualifiedName<?> qualifiedName;
-	private TypeScope typeScope;
+	private Scope scope;
 	private Node parent;
+	/**
+	 * this is the type of the current node - if it an expression
+	 */
+	private Type expressionType;
+
+	/**
+	 * this is the method resolved only for a methodCall
+	 */
+	private Method method;
 
 	public ASTNodeData() {
 
@@ -33,20 +43,12 @@ public class ASTNodeData {
 		this.parent = parent;
 	}
 
-	public QualifiedName<?> getQualifiedName() {
-		return qualifiedName;
+	public Scope getScope() {
+		return scope;
 	}
 
-	public void setQualifiedName(QualifiedName<?> qualifiedName) {
-		this.qualifiedName = qualifiedName;
-	}
-
-	public TypeScope getTypeScope() {
-		return typeScope;
-	}
-
-	public void setTypeScope(TypeScope typeScope) {
-		this.typeScope = typeScope;
+	public void setScope(Scope scope) {
+		this.scope = scope;
 	}
 
 	public Node getParent() {
@@ -55,6 +57,58 @@ public class ASTNodeData {
 
 	public void setParent(Node parent) {
 		this.parent = parent;
+	}
+
+	public Type getExpressionType() {
+		return expressionType;
+	}
+
+	public void setExpressionType(Type expressionType) {
+		this.expressionType = expressionType;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
+
+	public void setMethod(Method method) {
+		this.method = method;
+	}
+
+	public static Scope scope(Node n) {
+		return ((ASTNodeData) n.getData()).getScope();
+	}
+
+	public static Node parent(Node n) {
+		return ((ASTNodeData) n.getData()).getParent();
+	}
+
+	public static Method method(Node n) {
+		return ((ASTNodeData) n.getData()).getMethod();
+	}
+
+	public static java.lang.reflect.Type expressionType(Node n) {
+		return ((ASTNodeData) n.getData()).getExpressionType();
+	}
+
+	public static void expressionType(Node n, java.lang.reflect.Type type) {
+		((ASTNodeData) n.getData()).setExpressionType(type);
+	}
+
+	public static Node parent(Node n, int upLevel) {
+		Node p = n;
+		for (int i = 0; (i < upLevel) && (p != null); ++i) {
+			p = parent(p);
+		}
+		return p;
+	}
+
+	public static Node checkParent(Node n, Class<?> clazz) {
+		Node parent = parent(n);
+		if (parent == null) {
+			return null;
+		}
+		return (clazz.isAssignableFrom(parent.getClass())) ? parent : null;
 	}
 
 }

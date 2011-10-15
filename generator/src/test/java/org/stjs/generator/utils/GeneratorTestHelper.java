@@ -9,7 +9,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import org.mozilla.javascript.RhinoException;
+import javax.script.ScriptException;
+
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.executor.RhinoExecutor;
@@ -48,10 +49,10 @@ public class GeneratorTestHelper {
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
-		} catch (RhinoException ex) {
+		} catch (ScriptException ex) {
 			// display the generated code in case of exception
 			displayWithLines(file);
-			throw ex;
+			throw new RuntimeException(ex);
 		}
 	}
 

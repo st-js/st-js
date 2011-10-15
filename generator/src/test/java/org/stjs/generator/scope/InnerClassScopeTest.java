@@ -8,7 +8,7 @@ import japa.parser.ast.CompilationUnit;
 import java.io.IOException;
 
 import org.junit.Test;
-import org.stjs.generator.scope.QualifiedName.NameTypes;
+import org.stjs.generator.scope.simple.CompilationUnitScope;
 
 public class InnerClassScopeTest {
 
@@ -16,7 +16,7 @@ public class InnerClassScopeTest {
 	public void resolvesInnerClassesInOtherFiles() throws ParseException, IOException {
 		String fileName = "test/innerclasses/ClassUsingInnerClass.java";
 		CompilationUnit cu = compilationUnit(fileName);
-		ScopeTest.resolveName2(cu, fileName);
+		CompilationUnitScope scope = ScopeTest.resolveName2(cu, fileName);
 
 		// Alex: the "scoped" method should not be resolved
 		// assertScope(cu).line(9).column(24, 0).assertName("doSth").assertScopePath("root.import")
@@ -26,8 +26,7 @@ public class InnerClassScopeTest {
 		// assertScope(cu).line(9).column(70, 0).assertName("doSth").assertScopePath("root.import")
 		// .assertType(NameTypes.METHOD);
 
-		assertScope(cu).line(9).column(91, 0).assertName("doSth").assertScopePath("root.import")
-				.assertType(NameTypes.METHOD);
+		assertScope(scope, cu).line(9).column(91, 0).assertName("doSth").assertScopePath("root.import");
 
 	}
 }

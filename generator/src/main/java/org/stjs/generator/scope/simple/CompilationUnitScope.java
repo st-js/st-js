@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
 import org.stjs.generator.scope.classloader.ClassWrapper;
-import org.stjs.generator.scope.simple.Scope.ScopeVisitor;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
@@ -15,11 +14,10 @@ import com.google.common.collect.Sets;
 public class CompilationUnitScope extends AbstractScope {
 
 	private String packageName;
-	
+
 	private final Set<NameExpr> typeImportOnDemandSet = Sets.newHashSet();
 
 	private final ClassLoaderWrapper classLoaderWrapper;
-
 
 	public CompilationUnitScope(ClassLoaderWrapper classLoaderWrapper) {
 		super(null);
@@ -39,7 +37,7 @@ public class CompilationUnitScope extends AbstractScope {
 	public String getPackageName() {
 		return packageName;
 	}
-	
+
 	public void setPackageName(String packageName) {
 		this.packageName = packageName;
 	}
@@ -48,33 +46,32 @@ public class CompilationUnitScope extends AbstractScope {
 	public <T> T apply(ScopeVisitor<T> visitor) {
 		return visitor.apply(this);
 	}
-	
+
 	public void addTypeImportOnDemand(NameExpr name) {
 		typeImportOnDemandSet.add(name);
 	}
 
-	
 	@VisibleForTesting
 	public Set<NameExpr> getTypeImportOnDemandSet() {
 		return typeImportOnDemandSet;
 	}
-	
+
 	@Override
-	public ClassWrapper resolveType(String name) {
-		ClassWrapper type = super.resolveType(name);
+	public TypeWithScope resolveType(String name) {
+		TypeWithScope type = super.resolveType(name);
 		if (type != null) {
 			return type;
 		}
 		// try in package
-		for (ClassWrapper packageClass : classLoaderWrapper.loadClassOrInnerClass(packageName+"."+name)) {
-			return packageClass;
+		for (ClassWrapper packageClass : classLoaderWrapper.loadClassOrInnerClass(packageName + "." + name)) {
+			return new TypeWithScope(this, packageClass);
 		}
-		
+
 		// fully qualified
 		for (ClassWrapper qualifiedClass : classLoaderWrapper.loadClassOrInnerClass(name)) {
-			return qualifiedClass;
+			return new TypeWithScope(this, qualifiedClass);
 		}
-		throw new RuntimeException("Could not resolve type "+name);
+		throw new RuntimeException("Could not resolve type " + name);
 	}
 
 }

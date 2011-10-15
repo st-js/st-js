@@ -13,9 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.stjs.generator.scope.simple;
+package org.stjs.generator.handlers;
 
 import static japa.parser.ast.body.ModifierSet.isStatic;
+import static org.stjs.generator.ASTNodeData.checkParent;
+import static org.stjs.generator.ASTNodeData.expressionType;
+import static org.stjs.generator.ASTNodeData.parent;
+import static org.stjs.generator.ASTNodeData.scope;
 import static org.stjs.generator.scope.classloader.ClassWrapper.wrap;
 import japa.parser.ast.BlockComment;
 import japa.parser.ast.Comment;
@@ -107,20 +111,23 @@ import japa.parser.ast.visitor.VoidVisitor;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.stjs.generator.ASTNodeData;
+import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
-import org.stjs.generator.handlers.JavascriptWriter;
-import org.stjs.generator.handlers.SpecialMethodHandlers;
-import org.stjs.generator.scope.JavaTypeName;
-import org.stjs.generator.scope.TypeScope;
 import org.stjs.generator.scope.classloader.ClassWrapper;
+import org.stjs.generator.scope.simple.ClassScope;
+import org.stjs.generator.scope.simple.Scope;
+import org.stjs.generator.scope.simple.SimpleScopeBuilder;
+import org.stjs.generator.scope.simple.TypeWithScope;
+import org.stjs.generator.scope.simple.Variable;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.PreConditions;
 import org.stjs.javascript.annotation.GlobalScope;
@@ -130,7 +137,7 @@ import org.stjs.javascript.annotation.GlobalScope;
  * the {@link SimpleScopeBuilder} previously visited the tree and set the resolved name of certain nodes.
  * 
  */
-public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker> {
+public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContext> {
 	private final SpecialMethodHandlers specialMethodHandlers;
 
 	JavascriptWriter printer = new JavascriptWriter();
@@ -148,11 +155,11 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	@Override
-	public void visit(CompilationUnit n, NameScopeWalker scopeWalker) {
+	public void visit(CompilationUnit n, GenerationContext context) {
 		comments = n.getComments();
 		if (n.getTypes() != null) {
 			for (Iterator<TypeDeclaration> i = n.getTypes().iterator(); i.hasNext();) {
-				i.next().accept(this, scopeWalker);
+				i.next().accept(this, context);
 				printer.printLn();
 				if (i.hasNext()) {
 					printer.printLn();
@@ -162,8 +169,8 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	@Override
-	public void visit(ClassOrInterfaceType n, NameScopeWalker scopeWalker) {
-		ClassScope scope = (ClassScope) scopeWalker.getScope();
+	public void visit(ClassOrInterfaceType n, GenerationContext context) {
+		ClassScope scope = (ClassScope) scope(n);
 		printer.print(stJsName(scope.getClazz()));
 	}
 
@@ -173,66 +180,66 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	@Override
-	public void visit(ReferenceType n, NameScopeWalker scopeWalker) {
+	public void visit(ReferenceType n, GenerationContext context) {
 		// skip
 	}
 
 	@Override
-	public void visit(ImportDeclaration n, NameScopeWalker scopeWalker) {
+	public void visit(ImportDeclaration n, GenerationContext context) {
 		// skip
 	}
 
 	@Override
-	public void visit(PackageDeclaration n, NameScopeWalker scopeWalker) {
+	public void visit(PackageDeclaration n, GenerationContext context) {
 		// skip
 	}
 
 	@Override
-	public void visit(MarkerAnnotationExpr n, NameScopeWalker scopeWalker) {
+	public void visit(MarkerAnnotationExpr n, GenerationContext context) {
 		// skip
 	}
 
 	@Override
-	public void visit(SynchronizedStmt n, NameScopeWalker scopeWalker) {
-		throw new JavascriptGenerationException(scopeWalker.getContext().getInputFile(), new SourcePosition(n),
+	public void visit(SynchronizedStmt n, GenerationContext context) {
+		throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 				"synchronized blocks are not supported by Javascript");
 	}
 
 	@Override
-	public void visit(CastExpr n, NameScopeWalker scopeWalker) {
+	public void visit(CastExpr n, GenerationContext context) {
 		// skip to cast type - continue with the expression
 		if (n.getExpr() != null) {
-			n.getExpr().accept(this, scopeWalker);
+			n.getExpr().accept(this, context);
 		}
 	}
 
 	@Override
-	public void visit(IntegerLiteralExpr n, NameScopeWalker context) {
+	public void visit(IntegerLiteralExpr n, GenerationContext context) {
 		printer.printNumberLiteral(n.getValue());
 	}
 
 	@Override
-	public void visit(LongLiteralExpr n, NameScopeWalker context) {
+	public void visit(LongLiteralExpr n, GenerationContext context) {
 		printer.printNumberLiteral(n.getValue());
 	}
 
 	@Override
-	public void visit(StringLiteralExpr n, NameScopeWalker scopeWalker) {
+	public void visit(StringLiteralExpr n, GenerationContext context) {
 		printer.printStringLiteral(n.getValue());
 	}
 
 	@Override
-	public void visit(CharLiteralExpr n, NameScopeWalker scopeWalker) {
+	public void visit(CharLiteralExpr n, GenerationContext context) {
 		printer.printCharLiteral(n.getValue());
 	}
 
 	@Override
-	public void visit(DoubleLiteralExpr n, NameScopeWalker scopeWalker) {
+	public void visit(DoubleLiteralExpr n, GenerationContext context) {
 		printer.printNumberLiteral(n.getValue());
 	}
 
 	@Override
-	public void visit(BooleanLiteralExpr n, NameScopeWalker scopeWalker) {
+	public void visit(BooleanLiteralExpr n, GenerationContext context) {
 		printer.printLiteral(Boolean.toString(n.getValue()));
 	}
 
@@ -244,11 +251,11 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	@Override
-	public void visit(EnumDeclaration n, NameScopeWalker scopeWalker) {
-		printComments(n, scopeWalker);
+	public void visit(EnumDeclaration n, GenerationContext context) {
+		printComments(n, context);
 		// printer.print(n.getName());
-		Scope scope = scopeWalker.getScope();
-		printer.print(stJsName(scope.resolveType(n.getName())));
+		Scope scope = scope(n);
+		printer.print(stJsName(scope.resolveType(n.getName()).getClazz()));
 		// TxODO implements not considered
 		printer.print(" = ");
 		printer.printLn(" stjs.enumeration(");
@@ -269,37 +276,37 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	@Override
-	public void visit(ForeachStmt n, NameScopeWalker scopeWalker) {
+	public void visit(ForeachStmt n, GenerationContext context) {
 		printer.print("for (");
-		n.getVariable().accept(this, scopeWalker);
+		n.getVariable().accept(this, context);
 		printer.print(" in ");
-		n.getIterable().accept(this, scopeWalker);
+		n.getIterable().accept(this, context);
 		printer.print(") ");
-		n.getBody().accept(this, scopeWalker);
+		n.getBody().accept(this, context);
 	}
 
 	@Override
-	public void visit(IfStmt n, NameScopeWalker scopeWalker) {
+	public void visit(IfStmt n, GenerationContext context) {
 		printer.print("if (");
-		n.getCondition().accept(this, scopeWalker);
+		n.getCondition().accept(this, context);
 		printer.print(") ");
-		n.getThenStmt().accept(this, scopeWalker);
+		n.getThenStmt().accept(this, context);
 		if (n.getElseStmt() != null) {
 			printer.print(" else ");
-			n.getElseStmt().accept(this, scopeWalker);
+			n.getElseStmt().accept(this, context);
 		}
 	}
 
 	@Override
-	public void visit(WhileStmt n, NameScopeWalker scopeWalker) {
+	public void visit(WhileStmt n, GenerationContext context) {
 		printer.print("while (");
-		n.getCondition().accept(this, scopeWalker);
+		n.getCondition().accept(this, context);
 		printer.print(") ");
-		n.getBody().accept(this, scopeWalker);
+		n.getBody().accept(this, context);
 	}
 
 	@Override
-	public void visit(ContinueStmt n, NameScopeWalker scopeWalker) {
+	public void visit(ContinueStmt n, GenerationContext context) {
 		printer.print("continue");
 		if (n.getId() != null) {
 			printer.print(" ");
@@ -309,21 +316,21 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	@Override
-	public void visit(DoStmt n, NameScopeWalker scopeWalker) {
+	public void visit(DoStmt n, GenerationContext context) {
 		printer.print("do ");
-		n.getBody().accept(this, scopeWalker);
+		n.getBody().accept(this, context);
 		printer.print(" while (");
-		n.getCondition().accept(this, scopeWalker);
+		n.getCondition().accept(this, context);
 		printer.print(");");
 	}
 
 	@Override
-	public void visit(ForStmt n, NameScopeWalker scopeWalker) {
+	public void visit(ForStmt n, GenerationContext context) {
 		printer.print("for (");
 		if (n.getInit() != null) {
 			for (Iterator<Expression> i = n.getInit().iterator(); i.hasNext();) {
 				Expression e = i.next();
-				e.accept(this, scopeWalker);
+				e.accept(this, context);
 				if (i.hasNext()) {
 					printer.print(", ");
 				}
@@ -331,37 +338,37 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 		}
 		printer.print("; ");
 		if (n.getCompare() != null) {
-			n.getCompare().accept(this, scopeWalker);
+			n.getCompare().accept(this, context);
 		}
 		printer.print("; ");
 		if (n.getUpdate() != null) {
 			for (Iterator<Expression> i = n.getUpdate().iterator(); i.hasNext();) {
 				Expression e = i.next();
-				e.accept(this, scopeWalker);
+				e.accept(this, context);
 				if (i.hasNext()) {
 					printer.print(", ");
 				}
 			}
 		}
 		printer.print(") ");
-		n.getBody().accept(this, scopeWalker);
+		n.getBody().accept(this, context);
 	}
 
 	@Override
-	public void visit(VariableDeclaratorId n, NameScopeWalker scopeWalker) {
+	public void visit(VariableDeclaratorId n, GenerationContext context) {
 		printer.print(n.getName());
 	}
 
 	@Override
-	public void visit(VariableDeclarator n, NameScopeWalker scopeWalker) {
+	public void visit(VariableDeclarator n, GenerationContext context) {
 		throw new IllegalStateException("Unexpected visit in a VariableDeclarator node:" + n);
 	}
 
-	private void printVariableDeclarator(VariableDeclarator n, NameScopeWalker scopeWalker, boolean forceInitNull) {
-		n.getId().accept(this, scopeWalker);
+	private void printVariableDeclarator(VariableDeclarator n, GenerationContext context, boolean forceInitNull) {
+		n.getId().accept(this, context);
 		if (n.getInit() != null) {
 			printer.print(" = ");
-			n.getInit().accept(this, scopeWalker);
+			n.getInit().accept(this, context);
 		} else if (forceInitNull) {
 			printer.print(" = null");
 		}
@@ -369,13 +376,13 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	@Override
-	public void visit(VariableDeclarationExpr n, NameScopeWalker scopeWalker) {
+	public void visit(VariableDeclarationExpr n, GenerationContext context) {
 		// skip type
 		printer.print("var ");
 
 		for (Iterator<VariableDeclarator> i = n.getVars().iterator(); i.hasNext();) {
 			VariableDeclarator v = i.next();
-			printVariableDeclarator(v, scopeWalker, false);
+			printVariableDeclarator(v, context, false);
 			if (i.hasNext()) {
 				printer.print(", ");
 			}
@@ -383,12 +390,11 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	@Override
-	public void visit(FieldDeclaration n, NameScopeWalker scopeWalker) {
-		PreConditions.checkNotNull(scopeWalker.getScope());
-		
-		ClassScope scope = (ClassScope) scopeWalker.getScope();
-		// FIXME : Enable checks
-		//Checks.checkFieldDeclaration(n, scopeWalker);
+	public void visit(FieldDeclaration n, GenerationContext context) {
+		PreConditions.checkNotNull(scope(n));
+
+		ClassScope scope = (ClassScope) scope(n);
+		Checks.checkFieldDeclaration(n, context);
 		// skip type
 		for (VariableDeclarator v : n.getVariables()) {
 			printStaticMembersPrefix(scope);
@@ -397,18 +403,18 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 			}
 			printer.print(".");
 
-			printVariableDeclarator(v, scopeWalker, true);
+			printVariableDeclarator(v, context, true);
 			printer.print(";");
 		}
 	}
 
-	private void printJavadoc(JavadocComment javadoc, NameScopeWalker scopeWalker) {
+	private void printJavadoc(JavadocComment javadoc, GenerationContext context) {
 		if (javadoc != null) {
-			javadoc.accept(this, scopeWalker);
+			javadoc.accept(this, context);
 		}
 	}
 
-	private void printComments(Node n, NameScopeWalker scopeWalker) {
+	private void printComments(Node n, GenerationContext context) {
 		if (comments == null) {
 			return;
 		}
@@ -416,7 +422,7 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 		// so this method will display all the comments before the given node.
 		while (currentComment < comments.size()) {
 			if (comments.get(currentComment).getBeginLine() < n.getBeginLine()) {
-				comments.get(currentComment).accept(this, scopeWalker);
+				comments.get(currentComment).accept(this, context);
 			} else {
 				break;
 			}
@@ -425,7 +431,7 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	private void printMethod(String name, List<Parameter> parameters, int modifiers, BlockStmt body,
-			NameScopeWalker scopeWalker, boolean anonymous) {
+			GenerationContext context, Scope scope, boolean anonymous) {
 
 		if (ModifierSet.isAbstract(modifiers) || ModifierSet.isNative(modifiers)) {
 			return;
@@ -434,7 +440,7 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 		if (anonymous) {
 			printer.print("function");
 		} else {
-			printStaticMembersPrefix((ClassScope) scopeWalker.getScope());
+			printStaticMembersPrefix((ClassScope) scope);
 			if (!isStatic(modifiers)) {
 				printer.print(".prototype");
 			}
@@ -454,7 +460,7 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 				if (!first) {
 					printer.print(", ");
 				}
-				p.accept(this, scopeWalker);
+				p.accept(this, context);
 				first = false;
 			}
 		}
@@ -464,7 +470,7 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 			printer.print("{}");
 		} else {
 			printer.print(" ");
-			body.accept(this, scopeWalker);
+			body.accept(this, context);
 		}
 		if (!anonymous) {
 			printer.print(";");
@@ -488,12 +494,12 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 		return singleMethod;
 	}
 
-	void printscopeWalkeruments(List<Expression> scopeWalkers, NameScopeWalker scopeWalker) {
-		printscopeWalkeruments(Collections.<String> emptyList(), scopeWalkers, Collections.<String> emptyList(), scopeWalker);
+	public void printArguments(List<Expression> expressions, GenerationContext context) {
+		printArguments(Collections.<String> emptyList(), expressions, Collections.<String> emptyList(), context);
 	}
 
-	void printscopeWalkeruments(Collection<String> beforeParams, Collection<Expression> scopeWalkers, Collection<String> afterParams,
-			NameScopeWalker scopeWalker) {
+	public void printArguments(Collection<String> beforeParams, Collection<Expression> expressions,
+			Collection<String> afterParams, GenerationContext context) {
 		printer.print("(");
 		boolean first = true;
 		for (String param : beforeParams) {
@@ -503,12 +509,12 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 			printer.print(param);
 			first = false;
 		}
-		if (scopeWalkers != null) {
-			for (Expression e : scopeWalkers) {
+		if (expressions != null) {
+			for (Expression e : expressions) {
 				if (!first) {
 					printer.print(", ");
 				}
-				e.accept(this, scopeWalker);
+				e.accept(this, context);
 				first = false;
 			}
 		}
@@ -545,11 +551,11 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	@Override
-	public void visit(ObjectCreationExpr n, NameScopeWalker scopeWalker) {
+	public void visit(ObjectCreationExpr n, GenerationContext context) {
 		InitializerDeclaration block = getInitializerDeclaration(n);
 		if (block != null) {
 			// special construction for object initialization new Object(){{x = 1; y = 2; }};
-			block.getBlock().accept(this, scopeWalker);
+			block.getBlock().accept(this, context);
 			return;
 		}
 
@@ -557,61 +563,56 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 			// special construction for inline function definition
 			MethodDeclaration method = getMethodDeclaration(n);
 			if (method != null) {
-				printMethod(method.getName(), method.getParameters(), method.getModifiers(), method.getBody(), scopeWalker,
-						true);
+				printMethod(method.getName(), method.getParameters(), method.getModifiers(), method.getBody(), context,
+						scope(n), true);
 				return;
 			}
 			// special construction to handle the inline body
 			// build a special type called _InlineType to handle this
-			/* FIXME : fix inline types
-			printer.printLn("(function(){");
-			ClassOrInterfaceDeclaration inlineFakeClass = buildClassDeclaration(GeneratorConstants.SPECIAL_INLINE_TYPE,
-					n.getType().getName(), n.getAnonymousClassBody(), n.getArgs());
-			inlineFakeClass.setData(n.getData());
-			inlineFakeClass.accept(this, scopeWalker);
-
-			printer.printLn("");
-			printer.print("return new ").print(GeneratorConstants.SPECIAL_INLINE_TYPE);
-			printscopeWalkeruments(n.getArgs(), scopeWalker);
-			printer.printLn(";");
-			printer.print("})()");*/
+			/*
+			 * FIXME : fix inline types printer.printLn("(function(){"); ClassOrInterfaceDeclaration inlineFakeClass =
+			 * buildClassDeclaration(GeneratorConstants.SPECIAL_INLINE_TYPE, n.getType().getName(),
+			 * n.getAnonymousClassBody(), n.getArgs()); inlineFakeClass.setData(n.getData());
+			 * inlineFakeClass.accept(this, context);
+			 * 
+			 * printer.printLn(""); printer.print("return new ").print(GeneratorConstants.SPECIAL_INLINE_TYPE);
+			 * printArguments(n.getArgs(), context); printer.printLn(";"); printer.print("})()");
+			 */
 			return;
-			
+
 		}
 
-		ClassWrapper clazz = scopeWalker.getScope().resolveType(n.getType().getName());
-		if ((clazz != null) && ClassUtils.isDataType(clazz)) {
+		TypeWithScope clazz = scope(n).resolveType(n.getType().getName());
+		if ((clazz != null) && ClassUtils.isDataType(clazz.getClazz())) {
 			// this is a call to an mock type
 			printer.print("{}");
 			return;
 		}
 		printer.print("new ");
-		n.getType().accept(this, scopeWalker);
-		printscopeWalkeruments(n.getArgs(), scopeWalker);
+		n.getType().accept(this, context);
+		printArguments(n.getArgs(), context);
 	}
 
 	@Override
-	public void visit(Parameter n, NameScopeWalker scopeWalker) {
+	public void visit(Parameter n, GenerationContext context) {
 		// skip type
-		n.getId().accept(this, scopeWalker);
+		n.getId().accept(this, context);
 	}
 
 	@Override
-	public void visit(MethodDeclaration n, NameScopeWalker scopeWalker) {
-		/* FIXME : Fix checks
-		 * Checks.checkMethodDeclaration(n, scopeWalker);*/
-		printComments(n, scopeWalker);
-		printMethod(n.getName(), n.getParameters(), n.getModifiers(), n.getBody(), scopeWalker, false);
+	public void visit(MethodDeclaration n, GenerationContext context) {
+		Checks.checkMethodDeclaration(n, context);
+		printComments(n, context);
+		printMethod(n.getName(), n.getParameters(), n.getModifiers(), n.getBody(), context, scope(n), false);
 	}
 
-	private void addCallToSuper(NameScopeWalker scopeWalker) {
-		ClassScope classScope = (ClassScope) scopeWalker.getScope();
+	private void addCallToSuper(ClassScope classScope, GenerationContext context) {
 		PreConditions.checkNotNull(classScope);
 		if (classScope.getClazz().getSuperclass().isDefined()) {
 			// avoid useless call to super() when the super class is Object
 			printer.print("this._super");
-			printscopeWalkeruments(Collections.singleton("null"), Collections.<Expression> emptyList(),
-					Collections.<String> emptyList(), scopeWalker);
+			printArguments(Collections.singleton("null"), Collections.<Expression> emptyList(),
+					Collections.<String> emptyList(), context);
 			printer.print(";");
 		}
 	}
@@ -622,8 +623,8 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	@Override
-	public void visit(ConstructorDeclaration n, NameScopeWalker scopeWalker) {
-		printComments(n, scopeWalker);
+	public void visit(ConstructorDeclaration n, GenerationContext context) {
+		printComments(n, context);
 		if ((n.getBlock().getStmts() != null) && (n.getBlock().getStmts().size() > 0)) {
 			Statement firstStatement = n.getBlock().getStmts().get(0);
 			if (!(firstStatement instanceof ExplicitConstructorInvocationStmt)) {
@@ -632,17 +633,17 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 				// addCallToSuper(scopeWalker);
 			}
 		}
-		printMethod(n.getName(), n.getParameters(), n.getModifiers(), n.getBlock(), scopeWalker, true);
+		printMethod(n.getName(), n.getParameters(), n.getModifiers(), n.getBlock(), context, scope(n), true);
 	}
 
 	@Override
-	public void visit(TypeParameter n, NameScopeWalker scopeWalker) {
+	public void visit(TypeParameter n, GenerationContext context) {
 		// skip
 
 	}
 
 	@Override
-	public void visit(LineComment n, NameScopeWalker scopeWalker) {
+	public void visit(LineComment n, GenerationContext context) {
 		printer.print("//");
 		if (n.getContent().endsWith("\n")) {
 			// remove trailing enter and printLn
@@ -653,42 +654,38 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	@Override
-	public void visit(BlockComment n, NameScopeWalker scopeWalker) {
+	public void visit(BlockComment n, GenerationContext context) {
 		printer.print("/*");
 		printer.print(n.getContent());
 		printer.printLn("*/");
 	}
 
 	@Override
-	public void visit(ClassOrInterfaceDeclaration n, NameScopeWalker scopeWalker) {
-		printComments(n, scopeWalker);
+	public void visit(ClassOrInterfaceDeclaration n, GenerationContext context) {
+		printComments(n, context);
 		// printer.print(n.getName() + " = ");
 		if (GeneratorConstants.SPECIAL_INLINE_TYPE.equals(n.getName())) {
 			printer.print("var ");
 		} else {
-			ClassWrapper type = scopeWalker.getScope().resolveType(n.getName());
+			ClassWrapper type = scope(n).resolveType(n.getName()).getClazz();
 			if (!type.isInnerType()) {
 				printer.print("var ");
 			}
 		}
 
-		Scope scope = scopeWalker.getScope();
-		String className = stJsName(scope.resolveType(n.getName()));
+		ClassScope scope = (ClassScope) scope(n);
+		String className = stJsName(scope.resolveType(n.getName()).getClazz());
 		printer.print(className);
 
-		NameScopeWalker classScopeWalker = scopeWalker.nextChild();
-		ClassScope classScope = (ClassScope) (classScopeWalker.getScope());
-		
 		printer.print(" = ");
 		if (n.getMembers() != null) {
-			ClassOrInterfaceDeclaration prevType = scopeWalker.getContext().setCurrentType(n);
-			ConstructorDeclaration constr = getConstructor(n.getMembers(), scopeWalker);
+			ConstructorDeclaration constr = getConstructor(n.getMembers(), context);
 			if (constr != null) {
-				constr.accept(this, scopeWalker);
+				constr.accept(this, context);
 				printer.print(";");
 			} else {
 				printer.print("function(){");
-				addCallToSuper(classScopeWalker);
+				addCallToSuper(scope, context);
 				printer.printLn("};");
 			}
 
@@ -701,18 +698,15 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 				// TODO extends should also be with full qualifier
 				printer.printLn(", " + n.getExtends().get(0).getName() + ");");
 			}
-			printMembers(n.getMembers(), classScopeWalker);
-
-			printMainMethodCall(n, classScope);
-			scopeWalker.getContext().setCurrentType(prevType);
+			printMembers(n.getMembers(), context);
+			printMainMethodCall(n);
 		}
-		
+
 	}
 
-	private void printMembers(List<BodyDeclaration> members, NameScopeWalker context) {
+	private void printMembers(List<BodyDeclaration> members, GenerationContext context) {
 		for (BodyDeclaration member : members) {
 			if (member instanceof ConstructorDeclaration) {
-				context.nextChild();
 				continue;
 			}
 			printer.printLn();
@@ -720,12 +714,12 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 		}
 	}
 
-	private ConstructorDeclaration getConstructor(List<BodyDeclaration> members, NameScopeWalker scopeWalker) {
+	private ConstructorDeclaration getConstructor(List<BodyDeclaration> members, GenerationContext context) {
 		ConstructorDeclaration constr = null;
 		for (BodyDeclaration member : members) {
 			if (member instanceof ConstructorDeclaration) {
 				if (constr != null) {
-					throw new JavascriptGenerationException(scopeWalker.getContext().getInputFile(), new SourcePosition(member),
+					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(member),
 							"Only maximum one constructor is allowed");
 				} else {
 					constr = (ConstructorDeclaration) member;
@@ -736,15 +730,16 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	private void printStaticMembersPrefix(ClassScope scope) {
-// FIXME, find a solution for inline types (and unserstand how they work)
-//		if (GeneratorConstants.SPECIAL_INLINE_TYPE.equals(n.getName())) {
-//			printer.print(n.getName());
-//			return;
-//		}
+		// FIXME, find a solution for inline types (and unserstand how they work)
+		// if (GeneratorConstants.SPECIAL_INLINE_TYPE.equals(n.getName())) {
+		// printer.print(n.getName());
+		// return;
+		// }
 		printer.print(stJsName(scope.getClazz()));
 	}
 
-	private void printMainMethodCall(ClassOrInterfaceDeclaration n, ClassScope scope) {
+	private void printMainMethodCall(ClassOrInterfaceDeclaration n) {
+		ClassScope scope = (ClassScope) scope(n);
 		List<BodyDeclaration> members = n.getMembers();
 		for (BodyDeclaration member : members) {
 			if (member instanceof MethodDeclaration) {
@@ -780,86 +775,86 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	@Override
-	public void visit(EmptyTypeDeclaration n, NameScopeWalker scopeWalker) {
-		printJavadoc(n.getJavaDoc(), scopeWalker);
+	public void visit(EmptyTypeDeclaration n, GenerationContext context) {
+		printJavadoc(n.getJavaDoc(), context);
 		printer.print(";");
 	}
 
 	@Override
-	public void visit(EnumConstantDeclaration n, NameScopeWalker scopeWalker) {
+	public void visit(EnumConstantDeclaration n, GenerationContext context) {
 		// the enum constants are processed within the EnumDeclaration node. So this node should not be visited
 		throw new IllegalStateException("Unexpected visit in a EnumConstantDeclaration node:" + n);
 
 	}
 
 	@Override
-	public void visit(AnnotationDeclaration n, NameScopeWalker scopeWalker) {
+	public void visit(AnnotationDeclaration n, GenerationContext context) {
 		// skip
 
 	}
 
 	@Override
-	public void visit(AnnotationMemberDeclaration n, NameScopeWalker scopeWalker) {
+	public void visit(AnnotationMemberDeclaration n, GenerationContext context) {
 		// skip
 
 	}
 
 	@Override
-	public void visit(EmptyMemberDeclaration n, NameScopeWalker scopeWalker) {
+	public void visit(EmptyMemberDeclaration n, GenerationContext context) {
 		printer.print(";");
 	}
 
 	@Override
-	public void visit(InitializerDeclaration n, NameScopeWalker scopeWalker) {
+	public void visit(InitializerDeclaration n, GenerationContext context) {
 		// should find a way to implement these blocks. For the moment forbid them
-		throw new JavascriptGenerationException(scopeWalker.getContext().getInputFile(), new SourcePosition(n),
+		throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 				"Initializing blocks are not supported by Javascript");
 	}
 
 	@Override
-	public void visit(JavadocComment n, NameScopeWalker scopeWalker) {
+	public void visit(JavadocComment n, GenerationContext context) {
 		printer.print("/**");
 		printer.print(n.getContent());
 		printer.printLn("*/");
 	}
 
 	@Override
-	public void visit(PrimitiveType n, NameScopeWalker scopeWalker) {
+	public void visit(PrimitiveType n, GenerationContext context) {
 		throw new IllegalStateException("Unexpected visit in a PrimitiveType node:" + n);
 
 	}
 
 	@Override
-	public void visit(VoidType n, NameScopeWalker scopeWalker) {
+	public void visit(VoidType n, GenerationContext context) {
 		throw new IllegalStateException("Unexpected visit in a VoidType node:" + n);
 	}
 
 	@Override
-	public void visit(WildcardType n, NameScopeWalker scopeWalker) {
+	public void visit(WildcardType n, GenerationContext context) {
 		throw new IllegalStateException("Unexpected visit in a WildcardType node:" + n);
 	}
 
 	@Override
-	public void visit(ArrayAccessExpr n, NameScopeWalker scopeWalker) {
-		n.getName().accept(this, scopeWalker);
+	public void visit(ArrayAccessExpr n, GenerationContext context) {
+		n.getName().accept(this, context);
 		printer.print("[");
-		n.getIndex().accept(this, scopeWalker);
+		n.getIndex().accept(this, context);
 		printer.print("]");
 	}
 
 	@Override
-	public void visit(ArrayCreationExpr n, NameScopeWalker scopeWalker) {
+	public void visit(ArrayCreationExpr n, GenerationContext context) {
 		// skip the new type[][]
-		n.getInitializer().accept(this, scopeWalker);
+		n.getInitializer().accept(this, context);
 	}
 
 	@Override
-	public void visit(ArrayInitializerExpr n, NameScopeWalker scopeWalker) {
+	public void visit(ArrayInitializerExpr n, GenerationContext context) {
 		printer.print("[");
 		if (n.getValues() != null) {
 			for (Iterator<Expression> i = n.getValues().iterator(); i.hasNext();) {
 				Expression expr = i.next();
-				expr.accept(this, scopeWalker);
+				expr.accept(this, context);
 				if (i.hasNext()) {
 					printer.print(", ");
 				}
@@ -867,26 +862,6 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 
 		}
 		printer.print("]");
-	}
-
-	private Node parent(Node n) {
-		return ((ASTNodeData) n.getData()).getParent();
-	}
-
-	private Node parent(Node n, int upLevel) {
-		Node p = n;
-		for (int i = 0; (i < upLevel) && (p != null); ++i) {
-			p = parent(p);
-		}
-		return p;
-	}
-
-	private Node checkParent(Node n, Class<?> clazz) {
-		Node parent = parent(n);
-		if (parent == null) {
-			return null;
-		}
-		return (clazz.isAssignableFrom(parent.getClass())) ? parent : null;
 	}
 
 	/**
@@ -920,13 +895,13 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	@Override
-	public void visit(AssignExpr n, NameScopeWalker scopeWalker) {
+	public void visit(AssignExpr n, GenerationContext context) {
 		if (isInlineObjectCreationChild(n, 2)) {
 			if (n.getTarget() instanceof FieldAccessExpr) {
 				// in inline object creation "this." should be removed
 				printer.print(((FieldAccessExpr) n.getTarget()).getField());
 			} else {
-				n.getTarget().accept(this, scopeWalker);
+				n.getTarget().accept(this, context);
 			}
 			printer.print(" ");
 			switch (n.getOperator()) {
@@ -934,15 +909,15 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 				printer.print(":");
 				break;
 			default:
-				throw new JavascriptGenerationException(scopeWalker.getContext().getInputFile(), new SourcePosition(n),
+				throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 						"Cannot have this assign operator inside an inline object creation block");
 			}
 			printer.print(" ");
-			n.getValue().accept(this, scopeWalker);
+			n.getValue().accept(this, context);
 			return;
 		}
 
-		n.getTarget().accept(this, scopeWalker);
+		n.getTarget().accept(this, context);
 		printer.print(" ");
 		switch (n.getOperator()) {
 		case assign:
@@ -983,13 +958,13 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 			break;
 		}
 		printer.print(" ");
-		n.getValue().accept(this, scopeWalker);
+		n.getValue().accept(this, context);
 
 	}
 
 	@Override
-	public void visit(BinaryExpr n, NameScopeWalker scopeWalker) {
-		n.getLeft().accept(this, scopeWalker);
+	public void visit(BinaryExpr n, GenerationContext context) {
+		n.getLeft().accept(this, context);
 		printer.print(" ");
 		switch (n.getOperator()) {
 		case or:
@@ -1051,74 +1026,76 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 			break;
 		}
 		printer.print(" ");
-		n.getRight().accept(this, scopeWalker);
+		n.getRight().accept(this, context);
 	}
 
 	@Override
-	public void visit(ClassExpr n, NameScopeWalker scopeWalker) {
-		n.getType().accept(this, scopeWalker);
+	public void visit(ClassExpr n, GenerationContext context) {
+		n.getType().accept(this, context);
 		printer.print(".prototype");
 	}
 
 	@Override
-	public void visit(ConditionalExpr n, NameScopeWalker scopeWalker) {
-		n.getCondition().accept(this, scopeWalker);
+	public void visit(ConditionalExpr n, GenerationContext context) {
+		n.getCondition().accept(this, context);
 		printer.print(" ? ");
-		n.getThenExpr().accept(this, scopeWalker);
+		n.getThenExpr().accept(this, context);
 		printer.print(" : ");
-		n.getElseExpr().accept(this, scopeWalker);
+		n.getElseExpr().accept(this, context);
 	}
 
 	@Override
-	public void visit(EnclosedExpr n, NameScopeWalker scopeWalker) {
+	public void visit(EnclosedExpr n, GenerationContext context) {
 		printer.print("(");
-		n.getInner().accept(this, scopeWalker);
+		n.getInner().accept(this, context);
 		printer.print(")");
 	}
 
 	@Override
-	public void visit(InstanceOfExpr n, NameScopeWalker scopeWalker) {
-		n.getExpr().accept(this, scopeWalker);
+	public void visit(InstanceOfExpr n, GenerationContext context) {
+		n.getExpr().accept(this, context);
 		printer.print(".constructor ==  ");
 		if (n.getType() instanceof ReferenceType) {
 			// TODO : could be more generic
-			ClassWrapper type = scopeWalker.getScope().resolveType(((ReferenceType) n.getType()).getType().toString());
+			ClassWrapper type = scope(n).resolveType(((ReferenceType) n.getType()).getType().toString()).getClazz();
 			printer.print(stJsName(type));
 		} else {
-			throw new JavascriptGenerationException(scopeWalker.getContext().getInputFile(), new SourcePosition(n),
+			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 					"Do not know how to handle instanceof statement");
 		}
-		// n.getType().accept(this, scopeWalker);
+		// n.getType().accept(this, context);
 	}
 
 	@Override
-	public void visit(IntegerLiteralMinValueExpr n, NameScopeWalker scopeWalker) {
+	public void visit(IntegerLiteralMinValueExpr n, GenerationContext context) {
 		printer.print(n.getValue());
 	}
 
 	@Override
-	public void visit(LongLiteralMinValueExpr n, NameScopeWalker scopeWalker) {
+	public void visit(LongLiteralMinValueExpr n, GenerationContext context) {
 		printer.print(n.getValue());
 	}
 
 	@Override
-	public void visit(NullLiteralExpr n, NameScopeWalker scopeWalker) {
+	public void visit(NullLiteralExpr n, GenerationContext context) {
 		printer.print("null");
 	}
 
 	@Override
-	public void visit(FieldAccessExpr n, NameScopeWalker scopeWalker) {
-		n.getScope().accept(this, scopeWalker);
+	public void visit(FieldAccessExpr n, GenerationContext context) {
+		n.getScope().accept(this, context);
 		printer.print(".");
 		printer.print(n.getField());
 	}
 
 	@Override
-	public void visit(final MethodCallExpr n, final NameScopeWalker scopeWalker) {
-		Collection<Method> methods = scopeWalker.getScope().resolveMethods(n.getName());
-		if (true  /*FIXME !specialMethodHandlers.handleMethodCall(this, n, qname, scopeWalker)*/) {
+	public void visit(final MethodCallExpr n, final GenerationContext context) {
+		Type scopeType = n.getScope() != null ? expressionType(n) : null;
+		// TODO -> if none, and found in the current type, is this
+		Collection<Method> methods = scope(n).resolveMethods(n.getName()).getMethods();
+		if (!specialMethodHandlers.handleMethodCall(this, n, context)) {
 			if (methods != null) {
-				
+
 				/*
 				 * TODO : resolve not only the list of methods, but the actual method based on the arguments
 				 */
@@ -1127,35 +1104,35 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 				if (Modifier.isStatic(method.getModifiers())) {
 					printStaticFieldOrMethodAccessPrefix(methodDeclaringClass, true);
 					printer.print(n.getName());
-					printscopeWalkeruments(n.getArgs(), scopeWalker);
+					printArguments(n.getArgs(), context);
 					return;
 				} else {
-					ClassScope thisClassScope = scopeWalker.getScope().closest(ClassScope.class);
+					ClassScope thisClassScope = scope(n).closest(ClassScope.class);
 					if (thisClassScope.getClazz().equals(methodDeclaringClass)) {
 						// Non static reference to current enclosing type.
 						printer.print("this.");
 					} else if (methodDeclaringClass.isParentClassOf(thisClassScope.getClazz())) {
 						// Non static reference to parent type
 						printer.print("this._super");
-						printscopeWalkeruments(Collections.singleton("\"" + n.getName() + "\""), n.getArgs(),
-								Collections.<String> emptyList(), scopeWalker);
+						printArguments(Collections.singleton("\"" + n.getName() + "\""), n.getArgs(),
+								Collections.<String> emptyList(), context);
 						return;
 					} else if (n.getScope() != null) {
-						n.getScope().accept(this, scopeWalker);
+						n.getScope().accept(this, context);
 						printer.print(".");
 					}
 					printer.print(n.getName());
-					printscopeWalkeruments(n.getArgs(), scopeWalker);
-					
+					printArguments(n.getArgs(), context);
+
 				}
 			} else {
 				// FIXME : should not exist anymore, we will always resolve methods
 				if (n.getScope() != null) {
-					n.getScope().accept(this, scopeWalker);
+					n.getScope().accept(this, context);
 					printer.print(".");
 				}
 				printer.print(n.getName());
-				printscopeWalkeruments(n.getArgs(), scopeWalker);
+				printArguments(n.getArgs(), context);
 			}
 		}
 	}
@@ -1168,65 +1145,53 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 			}
 		}
 	}
-	
 
 	private boolean isGlobal(ClassWrapper clazz) {
 		return ClassUtils.hasAnnotation(clazz, GlobalScope.class.getName());
 	}
 
 	@Override
-	public void visit(NameExpr n, NameScopeWalker scopeWalker) {
+	public void visit(NameExpr n, GenerationContext context) {
 		if (GeneratorConstants.SPECIAL_THIS.equals(n.getName())) {
 			printer.print("this");
 			return;
 		}
-		/* FIXME: Do I need more context?
-		QualifiedName<IdentifierName> qname = scopeWalker.resolveIdentifier(n);
-		if (qname != null) {
-			if (qname.isStatic()) {
-				printStaticFieldOrMethodAccessPrefix(n, scopeWalker, qname, true);
-			} else {
-				qname.getScope().visit(new NameScope.EmptyVoidNameScopeVisitor(false) {
-					@Override
-					public void caseTypeScope(TypeScope typeScope) {
-						printer.print("this.");
-					}
-
-					@Override
-					public void caseParentTypeScope(ParentTypeScope parentTypeScope) {
-						// prefix with this fields that are accesses directly from the super class
-						printer.print("this.");
-					}
-				});
-			}
-		}
-	*/
+		/*
+		 * FIXME: Do I need more context? QualifiedName<IdentifierName> qname = scopeWalker.resolveIdentifier(n); if
+		 * (qname != null) { if (qname.isStatic()) { printStaticFieldOrMethodAccessPrefix(n, context, qname, true); }
+		 * else { qname.getScope().visit(new NameScope.EmptyVoidNameScopeVisitor(false) {
+		 * 
+		 * @Override public void caseTypeScope(TypeScope typeScope) { printer.print("this."); }
+		 * 
+		 * @Override public void caseParentTypeScope(ParentTypeScope parentTypeScope) { // prefix with this fields that
+		 * are accesses directly from the super class printer.print("this."); } }); } }
+		 */
 		printer.print(n.getName());
 	}
 
 	@Override
-	public void visit(QualifiedNameExpr n, NameScopeWalker scopeWalker) {
-		n.getQualifier().accept(this, scopeWalker);
+	public void visit(QualifiedNameExpr n, GenerationContext context) {
+		n.getQualifier().accept(this, context);
 		printer.print(".");
 		printer.print(n.getName());
 	}
 
 	@Override
-	public void visit(ThisExpr n, NameScopeWalker scopeWalker) {
+	public void visit(ThisExpr n, GenerationContext context) {
 		if (n.getClassExpr() != null) {
-			n.getClassExpr().accept(this, scopeWalker);
+			n.getClassExpr().accept(this, context);
 			printer.print(".");
 		}
 		printer.print("this");
 	}
 
 	@Override
-	public void visit(SuperExpr n, NameScopeWalker scopeWalker) {
+	public void visit(SuperExpr n, GenerationContext context) {
 		throw new IllegalStateException("The [super] node should've been already handled:" + n);
 	}
 
 	@Override
-	public void visit(UnaryExpr n, NameScopeWalker scopeWalker) {
+	public void visit(UnaryExpr n, GenerationContext context) {
 		switch (n.getOperator()) {
 		case positive:
 			printer.print("+");
@@ -1248,7 +1213,7 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 			break;
 		}
 
-		n.getExpr().accept(this, scopeWalker);
+		n.getExpr().accept(this, context);
 
 		switch (n.getOperator()) {
 		case posIncrement:
@@ -1261,76 +1226,76 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	@Override
-	public void visit(SingleMemberAnnotationExpr n, NameScopeWalker scopeWalker) {
+	public void visit(SingleMemberAnnotationExpr n, GenerationContext context) {
 		// skip
 
 	}
 
 	@Override
-	public void visit(NormalAnnotationExpr n, NameScopeWalker scopeWalker) {
+	public void visit(NormalAnnotationExpr n, GenerationContext context) {
 		// skip
 
 	}
 
 	@Override
-	public void visit(MemberValuePair n, NameScopeWalker scopeWalker) {
+	public void visit(MemberValuePair n, GenerationContext context) {
 		// XXX: not very sure when this occurs
 		printer.print(n.getName());
 		printer.print(" = ");
-		n.getValue().accept(this, scopeWalker);
+		n.getValue().accept(this, context);
 	}
 
 	@Override
-	public void visit(ExplicitConstructorInvocationStmt n, NameScopeWalker scopeWalker) {
+	public void visit(ExplicitConstructorInvocationStmt n, GenerationContext context) {
 		if (n.isThis()) {
 			// This should not happen as another constructor is forbidden
-			throw new JavascriptGenerationException(scopeWalker.getContext().getInputFile(), new SourcePosition(n),
+			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 					"Only one constructor is allowed");
 		}
 
-		ClassScope classScope = (ClassScope) scopeWalker.getScope();
+		ClassScope classScope = (ClassScope) scope(n);
 		PreConditions.checkNotNull(classScope);
 		if (classScope.getClazz().getSuperclass().isDefined()) {
 			// avoid useless call to super() when the super class is Object
 			printer.print("this._super");
-			printscopeWalkeruments(Collections.singleton("null"), n.getArgs(), Collections.<String> emptyList(), scopeWalker);
+			printArguments(Collections.singleton("null"), n.getArgs(), Collections.<String> emptyList(), context);
 			printer.print(";");
 		}
 	}
 
 	@Override
-	public void visit(TypeDeclarationStmt n, NameScopeWalker scopeWalker) {
-		n.getTypeDeclaration().accept(this, scopeWalker);
+	public void visit(TypeDeclarationStmt n, GenerationContext context) {
+		n.getTypeDeclaration().accept(this, context);
 	}
 
 	@Override
-	public void visit(AssertStmt n, NameScopeWalker scopeWalker) {
-		throw new JavascriptGenerationException(scopeWalker.getContext().getInputFile(), new SourcePosition(n),
+	public void visit(AssertStmt n, GenerationContext context) {
+		throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 				"Assert statement is not supported by Javascript");
 	}
 
-	private void checkAssignStatement(Statement s, NameScopeWalker scopeWalker) {
+	private void checkAssignStatement(Statement s, GenerationContext context) {
 		if (s instanceof ExpressionStmt) {
 			if (((ExpressionStmt) s).getExpression() instanceof AssignExpr) {
 				return;
 			}
 		}
-		throw new JavascriptGenerationException(scopeWalker.getContext().getInputFile(), new SourcePosition(s),
+		throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(s),
 				"Only assign expression are allowed in an object creation block");
 	}
 
 	@Override
-	public void visit(BlockStmt n, NameScopeWalker scopeWalker) {
+	public void visit(BlockStmt n, GenerationContext context) {
 		printer.printLn("{");
 		if (n.getStmts() != null) {
 			printer.indent();
 			for (int i = 0; i < n.getStmts().size(); ++i) {
 				Statement s = n.getStmts().get(i);
-				printComments(s, scopeWalker);
+				printComments(s, context);
 				if (isInlineObjectCreationChild(s, 1)) {
-					checkAssignStatement(s, scopeWalker);
+					checkAssignStatement(s, context);
 				}
-				s.accept(this, scopeWalker);
+				s.accept(this, context);
 				if (isInlineObjectCreationChild(s, 1) && (i < (n.getStmts().size() - 1)) && (n.getStmts().size() > 1)) {
 					printer.print(",");
 				}
@@ -1343,34 +1308,34 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	@Override
-	public void visit(LabeledStmt n, NameScopeWalker scopeWalker) {
+	public void visit(LabeledStmt n, GenerationContext context) {
 		printer.print(n.getLabel());
 		printer.print(": ");
-		n.getStmt().accept(this, scopeWalker);
+		n.getStmt().accept(this, context);
 	}
 
 	@Override
-	public void visit(EmptyStmt n, NameScopeWalker scopeWalker) {
+	public void visit(EmptyStmt n, GenerationContext context) {
 		printer.print(";");
 	}
 
 	@Override
-	public void visit(ExpressionStmt n, NameScopeWalker scopeWalker) {
-		n.getExpression().accept(this, scopeWalker);
+	public void visit(ExpressionStmt n, GenerationContext context) {
+		n.getExpression().accept(this, context);
 		if (!isInlineObjectCreationChild(n, 1)) {
 			printer.print(";");
 		}
 	}
 
 	@Override
-	public void visit(SwitchStmt n, NameScopeWalker scopeWalker) {
+	public void visit(SwitchStmt n, GenerationContext context) {
 		printer.print("switch(");
-		n.getSelector().accept(this, scopeWalker);
+		n.getSelector().accept(this, context);
 		printer.printLn(") {");
 		if (n.getEntries() != null) {
 			printer.indent();
 			for (SwitchEntryStmt e : n.getEntries()) {
-				e.accept(this, scopeWalker);
+				e.accept(this, context);
 			}
 			printer.unindent();
 		}
@@ -1379,15 +1344,15 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	@Override
-	public void visit(SwitchEntryStmt n, NameScopeWalker scopeWalker) {
+	public void visit(SwitchEntryStmt n, GenerationContext context) {
 		if (n.getLabel() != null) {
 			printer.print("case ");
-			Variable selector = getSwitchSelectorType(n, scopeWalker.getScope());
+			Variable selector = getSwitchSelectorType(n, scope(n));
 			if (selector.getType().getClazz().isEnum()) {
 				printer.print(stJsName(selector.getType()));
 				printer.print(".");
 			}
-			n.getLabel().accept(this, scopeWalker);
+			n.getLabel().accept(this, context);
 			printer.print(":");
 		} else {
 			printer.print("default:");
@@ -1396,7 +1361,7 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 		printer.indent();
 		if (n.getStmts() != null) {
 			for (Statement s : n.getStmts()) {
-				s.accept(this, scopeWalker);
+				s.accept(this, context);
 				printer.printLn();
 			}
 		}
@@ -1404,19 +1369,17 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	private Variable getSwitchSelectorType(SwitchEntryStmt n, Scope scope) {
-		ASTNodeData nodeData = (ASTNodeData) n.getData();
-		SwitchStmt switchStatement = (SwitchStmt) nodeData.getParent();
+		SwitchStmt switchStatement = (SwitchStmt) parent(n);
 		Expression selector = switchStatement.getSelector();
 		/*
-		 * TODO : need to resolve the type of the expression,
-		 * which means visiting all possible expression types.
-		 * For now, assume a NameExpr that would represent a variable
+		 * TODO : need to resolve the type of the expression, which means visiting all possible expression types. For
+		 * now, assume a NameExpr that would represent a variable
 		 */
-		return scope.resolveVariable(selector.toString());
+		return scope.resolveVariable(selector.toString()).getVariable();
 	}
 
 	@Override
-	public void visit(BreakStmt n, NameScopeWalker scopeWalker) {
+	public void visit(BreakStmt n, GenerationContext context) {
 		printer.print("break");
 		if (n.getId() != null) {
 			printer.print(" ");
@@ -1426,43 +1389,43 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<NameScopeWalker>
 	}
 
 	@Override
-	public void visit(ReturnStmt n, NameScopeWalker scopeWalker) {
+	public void visit(ReturnStmt n, GenerationContext context) {
 		printer.print("return");
 		if (n.getExpr() != null) {
 			printer.print(" ");
-			n.getExpr().accept(this, scopeWalker);
+			n.getExpr().accept(this, context);
 		}
 		printer.print(";");
 	}
 
 	@Override
-	public void visit(ThrowStmt n, NameScopeWalker scopeWalker) {
+	public void visit(ThrowStmt n, GenerationContext context) {
 		printer.print("throw ");
-		n.getExpr().accept(this, scopeWalker);
+		n.getExpr().accept(this, context);
 		printer.print(";");
 	}
 
 	@Override
-	public void visit(TryStmt n, NameScopeWalker scopeWalker) {
+	public void visit(TryStmt n, GenerationContext context) {
 		printer.print("try ");
-		n.getTryBlock().accept(this, scopeWalker);
+		n.getTryBlock().accept(this, context);
 		if (n.getCatchs() != null) {
 			for (CatchClause c : n.getCatchs()) {
-				c.accept(this, scopeWalker);
+				c.accept(this, context);
 			}
 		}
 		if (n.getFinallyBlock() != null) {
 			printer.print(" finally ");
-			n.getFinallyBlock().accept(this, scopeWalker);
+			n.getFinallyBlock().accept(this, context);
 		}
 	}
 
 	@Override
-	public void visit(CatchClause n, NameScopeWalker scopeWalker) {
+	public void visit(CatchClause n, GenerationContext context) {
 		printer.print(" catch (");
-		n.getExcept().accept(this, scopeWalker);
+		n.getExcept().accept(this, context);
 		printer.print(") ");
-		n.getCatchBlock().accept(this, scopeWalker);
+		n.getCatchBlock().accept(this, context);
 	}
 
 }

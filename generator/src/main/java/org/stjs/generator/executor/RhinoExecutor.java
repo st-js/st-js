@@ -21,23 +21,22 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 public class RhinoExecutor {
-	public ExecutionResult run(File srcFile) {
-		Context cx = Context.enter();
+	public ExecutionResult run(File srcFile) throws ScriptException {
+		ScriptEngineManager factory = new ScriptEngineManager();
+		ScriptEngine engine = factory.getEngineByName("JavaScript");
 		FileReader input = null;
 		try {
 			input = new FileReader(srcFile);
-			Scriptable scope = cx.initStandardObjects();
-			cx.evaluateReader(scope, new InputStreamReader(Thread.currentThread().getContextClassLoader()
-					.getResourceAsStream("stjs.js")), "stjs.js", 1, null);
-			Object result = cx.evaluateReader(scope, input, srcFile.getAbsolutePath(), 1, null);
-			return new ExecutionResult(Context.toString(result), null, 0);
+			engine.eval(new InputStreamReader(Thread.currentThread().getContextClassLoader()
+					.getResourceAsStream("stjs.js")));
+			Object result = engine.eval(input);
+			return new ExecutionResult(result != null ? result.toString() : null, null, 0);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
 			try {
@@ -47,8 +46,6 @@ public class RhinoExecutor {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-
-			Context.exit();
 		}
 		return null;
 	}

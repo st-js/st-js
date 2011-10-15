@@ -33,7 +33,6 @@ public class JavascriptKeywords {
 		keywords.add("outer");
 		keywords.add("function");
 		keywords.add("prototype");
-		// keywords.add("self");
 	}
 
 	public static void checkIdentifier(File inputFile, SourcePosition pos, String name) {

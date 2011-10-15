@@ -1,8 +1,8 @@
 package org.stjs.generator.scope.simple;
 
-import org.stjs.generator.scope.classloader.ClassWrapper;
-
 import japa.parser.ast.type.PrimitiveType;
+
+import org.stjs.generator.scope.classloader.ClassWrapper;
 
 public class PrimitiveTypes {
 

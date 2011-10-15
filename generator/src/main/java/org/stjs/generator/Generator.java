@@ -34,14 +34,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.stjs.generator.handlers.GeneratorVisitor;
 import org.stjs.generator.handlers.SetParentVisitor;
-import org.stjs.generator.scope.DeclarationVisitor;
-import org.stjs.generator.scope.FullyQualifiedScope;
-import org.stjs.generator.scope.NameResolverVisitor;
-import org.stjs.generator.scope.NameScope;
-import org.stjs.generator.scope.NameScopeWalker;
+import org.stjs.generator.handlers.SimpleScopeGeneratorVisitor;
 import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
+import org.stjs.generator.scope.simple.CompilationUnitScope;
+import org.stjs.generator.scope.simple.SimpleScopeBuilder;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
@@ -83,16 +80,20 @@ public class Generator {
 	public Set<String> generateJavascript(ClassLoader builtProjectClassLoader, File inputFile, File outputFile,
 			GeneratorConfiguration configuration, boolean append) throws JavascriptGenerationException {
 		GenerationContext context = new GenerationContext(inputFile);
-		CompilationUnit cu = parseAndResolve(builtProjectClassLoader, inputFile, configuration, context);
+		CompilationUnitScope unitScope = new CompilationUnitScope(new ClassLoaderWrapper(builtProjectClassLoader));
+
+		CompilationUnit cu = parseAndResolve(builtProjectClassLoader, inputFile, configuration, context, unitScope);
 
 		FileWriter writer = null;
 		try {
 			// 3. generate the javascript code
-			GeneratorVisitor generatorVisitor = new GeneratorVisitor();
+
+			SimpleScopeGeneratorVisitor generatorVisitor = new SimpleScopeGeneratorVisitor();
 			generatorVisitor.visit(cu, context);
 
 			writer = new FileWriter(outputFile, append);
 			writer.write(generatorVisitor.getGeneratedSource());
+
 		} catch (IOException e1) {
 			throw new RuntimeException("Could not open output file " + outputFile);
 		} finally {
@@ -108,7 +109,7 @@ public class Generator {
 	}
 
 	private CompilationUnit parseAndResolve(ClassLoader builtProjectClassLoader, File inputFile,
-			GeneratorConfiguration configuration, GenerationContext context) {
+			GeneratorConfiguration configuration, GenerationContext context, CompilationUnitScope rootScope) {
 		CompilationUnit cu = null;
 		InputStream in = null;
 		try {
@@ -118,8 +119,6 @@ public class Generator {
 			} catch (FileNotFoundException e) {
 				throw new JavascriptGenerationException(inputFile, null, e);
 			}
-
-			NameScope rootScope = new FullyQualifiedScope(inputFile, new ClassLoaderWrapper(builtProjectClassLoader));
 
 			// parse the file
 			cu = JavaParser.parse(in);
@@ -135,17 +134,10 @@ public class Generator {
 			// ASTUtils.dumpXML(cu);
 
 			// 1. read the scope of all declared variables and methods
-			DeclarationVisitor scopes = new DeclarationVisitor(inputFile, builtProjectClassLoader, allowedPackages);
+			SimpleScopeBuilder scopes = new SimpleScopeBuilder(new ClassLoaderWrapper(builtProjectClassLoader));
 			scopes.visit(cu, rootScope);
 			// rootScope.dump(" ");
 
-			// 2. resolve all the calls to methods and variables
-			NameResolverVisitor resolver = new NameResolverVisitor(rootScope, allowedPackages,
-					configuration.getAllowedJavaLangClasses());
-
-			resolver.visit(cu, new NameScopeWalker(rootScope));
-
-			context.setResolvedImports(resolver.getResolvedImports());
 		} catch (ParseException e) {
 			throw new RuntimeException(e);
 		} finally {
@@ -210,15 +202,17 @@ public class Generator {
 			Pattern exceptions) {
 		resolvedImports.add(inputFile);
 		GenerationContext context = new GenerationContext(inputFile);
-		parseAndResolve(builtProjectClassLoader, inputFile, configuration, context);
+		CompilationUnitScope unitScope = new CompilationUnitScope(new ClassLoaderWrapper(builtProjectClassLoader));
+		parseAndResolve(builtProjectClassLoader, inputFile, configuration, context, unitScope);
 
-		for (String iterationResolvedImport : context.getResolvedImports()) {
-			if (!exceptions.matcher(iterationResolvedImport).matches()
-					&& resolvedImportsNames.add(iterationResolvedImport)) {
-				resolveJavascriptWithImports(builtProjectClassLoader, iterationResolvedImport, outputFile,
-						configuration, resolvedImports, resolvedImportsNames, exceptions);
-			}
-		}
+		// FIXME
+		// for (String iterationResolvedImport : context.getResolvedImports()) {
+		// if (!exceptions.matcher(iterationResolvedImport).matches()
+		// && resolvedImportsNames.add(iterationResolvedImport)) {
+		// resolveJavascriptWithImports(builtProjectClassLoader, iterationResolvedImport, outputFile,
+		// configuration, resolvedImports, resolvedImportsNames, exceptions);
+		// }
+		// }
 	}
 
 	private void resolveJavascriptWithImports(ClassLoader builtProjectClassLoader, String inputFileName,
