@@ -80,7 +80,8 @@ public class Generator {
 	public Set<String> generateJavascript(ClassLoader builtProjectClassLoader, File inputFile, File outputFile,
 			GeneratorConfiguration configuration, boolean append) throws JavascriptGenerationException {
 		GenerationContext context = new GenerationContext(inputFile);
-		CompilationUnitScope unitScope = new CompilationUnitScope(new ClassLoaderWrapper(builtProjectClassLoader));
+		CompilationUnitScope unitScope = new CompilationUnitScope(new ClassLoaderWrapper(builtProjectClassLoader),
+				context);
 
 		CompilationUnit cu = parseAndResolve(builtProjectClassLoader, inputFile, configuration, context, unitScope);
 
@@ -134,7 +135,7 @@ public class Generator {
 			// ASTUtils.dumpXML(cu);
 
 			// 1. read the scope of all declared variables and methods
-			SimpleScopeBuilder scopes = new SimpleScopeBuilder(new ClassLoaderWrapper(builtProjectClassLoader));
+			SimpleScopeBuilder scopes = new SimpleScopeBuilder(new ClassLoaderWrapper(builtProjectClassLoader), context);
 			scopes.visit(cu, rootScope);
 			// rootScope.dump(" ");
 
@@ -202,17 +203,17 @@ public class Generator {
 			Pattern exceptions) {
 		resolvedImports.add(inputFile);
 		GenerationContext context = new GenerationContext(inputFile);
-		CompilationUnitScope unitScope = new CompilationUnitScope(new ClassLoaderWrapper(builtProjectClassLoader));
+		CompilationUnitScope unitScope = new CompilationUnitScope(new ClassLoaderWrapper(builtProjectClassLoader),
+				context);
 		parseAndResolve(builtProjectClassLoader, inputFile, configuration, context, unitScope);
 
-		// FIXME
-		// for (String iterationResolvedImport : context.getResolvedImports()) {
-		// if (!exceptions.matcher(iterationResolvedImport).matches()
-		// && resolvedImportsNames.add(iterationResolvedImport)) {
-		// resolveJavascriptWithImports(builtProjectClassLoader, iterationResolvedImport, outputFile,
-		// configuration, resolvedImports, resolvedImportsNames, exceptions);
-		// }
-		// }
+		for (String iterationResolvedImport : context.getResolvedImports()) {
+			if (!exceptions.matcher(iterationResolvedImport).matches()
+					&& resolvedImportsNames.add(iterationResolvedImport)) {
+				resolveJavascriptWithImports(builtProjectClassLoader, iterationResolvedImport, outputFile,
+						configuration, resolvedImports, resolvedImportsNames, exceptions);
+			}
+		}
 	}
 
 	private void resolveJavascriptWithImports(ClassLoader builtProjectClassLoader, String inputFileName,

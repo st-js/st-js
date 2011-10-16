@@ -18,9 +18,10 @@ package org.stjs.generator;
 import japa.parser.ast.Node;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 
+import org.stjs.generator.scope.classloader.TypeWrapper;
 import org.stjs.generator.scope.simple.Scope;
+import org.stjs.generator.scope.simple.Variable;
 
 public class ASTNodeData {
 	private Scope scope;
@@ -28,12 +29,16 @@ public class ASTNodeData {
 	/**
 	 * this is the type of the current node - if it an expression
 	 */
-	private Type expressionType;
+	private TypeWrapper expressionType;
 
 	/**
 	 * this is the method resolved only for a methodCall
 	 */
-	private Method method;
+	private Method resolvedMethod;
+
+	private Variable resolvedVariable;
+
+	private TypeWrapper resolvedType;
 
 	public ASTNodeData() {
 
@@ -59,39 +64,79 @@ public class ASTNodeData {
 		this.parent = parent;
 	}
 
-	public Type getExpressionType() {
+	public TypeWrapper getExpressionType() {
 		return expressionType;
 	}
 
-	public void setExpressionType(Type expressionType) {
+	public void setExpressionType(TypeWrapper expressionType) {
 		this.expressionType = expressionType;
 	}
 
-	public Method getMethod() {
-		return method;
+	public Method getResolvedMethod() {
+		return resolvedMethod;
 	}
 
-	public void setMethod(Method method) {
-		this.method = method;
+	public void setResolvedMethod(Method resolvedMethod) {
+		this.resolvedMethod = resolvedMethod;
+	}
+
+	public Variable getResolvedVariable() {
+		return resolvedVariable;
+	}
+
+	public void setResolvedVariable(Variable resolvedVariable) {
+		this.resolvedVariable = resolvedVariable;
+	}
+
+	public TypeWrapper getResolvedType() {
+		return resolvedType;
+	}
+
+	public void setResolvedType(TypeWrapper resolvedType) {
+		this.resolvedType = resolvedType;
 	}
 
 	public static Scope scope(Node n) {
 		return ((ASTNodeData) n.getData()).getScope();
 	}
 
+	public static void scope(Node n, Scope s) {
+		((ASTNodeData) n.getData()).setScope(s);
+	}
+
 	public static Node parent(Node n) {
 		return ((ASTNodeData) n.getData()).getParent();
 	}
 
-	public static Method method(Node n) {
-		return ((ASTNodeData) n.getData()).getMethod();
+	public static Method resolvedMethod(Node n) {
+		return ((ASTNodeData) n.getData()).getResolvedMethod();
 	}
 
-	public static java.lang.reflect.Type expressionType(Node n) {
+	public static void resolvedMethod(Node n, Method m) {
+		((ASTNodeData) n.getData()).setResolvedMethod(m);
+	}
+
+	public static Variable resolvedVariable(Node n) {
+		return ((ASTNodeData) n.getData()).getResolvedVariable();
+	}
+
+	public static void resolvedVariable(Node n, Variable v) {
+		((ASTNodeData) n.getData()).setResolvedVariable(v);
+	}
+
+	public static TypeWrapper resolvedType(Node n) {
+		return ((ASTNodeData) n.getData()).getResolvedType();
+	}
+
+	public static void resolvedType(Node n, TypeWrapper t) {
+		((ASTNodeData) n.getData()).setResolvedType(t);
+	}
+
+	public static TypeWrapper expressionType(Node n) {
 		return ((ASTNodeData) n.getData()).getExpressionType();
 	}
 
-	public static void expressionType(Node n, java.lang.reflect.Type type) {
+	public static void expressionType(Node n, TypeWrapper type) {
 		((ASTNodeData) n.getData()).setExpressionType(type);
 	}
 

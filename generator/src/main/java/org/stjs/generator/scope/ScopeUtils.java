@@ -13,7 +13,7 @@ import org.stjs.generator.scope.simple.Scope;
 public class ScopeUtils {
 	public static boolean isDeclaredInThisScope(MethodCallExpr n) {
 		Scope scope = ASTNodeData.scope(n);
-		Method method = ASTNodeData.method(n);
+		Method method = ASTNodeData.resolvedMethod(n);
 		ClassWrapper methodDeclaringClass = wrap(method.getDeclaringClass());
 		ClassScope thisClassScope = scope.closest(ClassScope.class);
 		return (thisClassScope.getClazz().equals(methodDeclaringClass));

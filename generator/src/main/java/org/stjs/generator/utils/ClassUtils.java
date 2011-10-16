@@ -4,6 +4,7 @@ import japa.parser.ast.type.PrimitiveType;
 import japa.parser.ast.type.Type;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,6 +23,8 @@ public class ClassUtils {
 		}
 		basicTypeNames.add(String.class.getName());
 	}
+
+	// private static Map<Class<?>, String> primitiveArrayId;
 
 	public static boolean isBasicType(Type type) {
 		if (type instanceof PrimitiveType) {
@@ -94,6 +97,17 @@ public class ClassUtils {
 			return false;
 		}
 		return hasAnnotation(clazz, Adapter.class.getName());
+	}
+
+	/**
+	 * 
+	 * @param resolvedType
+	 * @param arrayCount
+	 * @return the ClassWrapper representing an array of the given type with the given number of dimensions
+	 */
+	public static ClassWrapper arrayOf(ClassWrapper resolvedType, int arrayCount) {
+		// TODO - cache this names
+		return new ClassWrapper(Array.newInstance(resolvedType.getClass(), new int[arrayCount]).getClass());
 	}
 
 }

@@ -24,4 +24,6 @@ public class GeneratorConstants {
 	public static final String SPECIAL_INLINE_TYPE = "_InlineType";
 
 	public static final String SUPER = "super";
+
+	public static final String THIS = "this";
 }

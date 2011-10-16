@@ -15,9 +15,15 @@
  */
 package org.stjs.generator.utils;
 
+import japa.parser.JavaParser;
+import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -40,4 +46,19 @@ public class ASTUtils {
 		writer.write(dom);
 	}
 
+	public static void main(String[] args) throws ParseException, IOException, ClassNotFoundException {
+
+		for (Method m : Enum.class.getDeclaredMethods()) {
+			System.out.println(m);
+		}
+		if (true) {
+			return;
+		}
+		File inputFile = new File("src/test/java/test/generator/callSuper/SuperClass.java");
+		InputStream in = new FileInputStream(inputFile);
+		// parse the file
+		CompilationUnit cu = JavaParser.parse(in);
+		dumpXML(cu);
+
+	}
 }

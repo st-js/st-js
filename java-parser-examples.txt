@@ -1,0 +1,62 @@
+test.generator.callSuper.SuperClass.staticField
+<FieldAccessExpr field="staticField">
+                  <FieldAccessExpr field="SuperClass">
+                    <FieldAccessExpr field="callSuper">
+                      <FieldAccessExpr field="generator">
+                        <NameExpr name="test"/>
+                      </FieldAccessExpr>
+                    </FieldAccessExpr>
+                  </FieldAccessExpr>
+                </FieldAccessExpr>
+                
+                
+test.generator.callSuper.SuperClass.staticMethod("a").instanceField
+<FieldAccessExpr field="instanceField">
+                  <MethodCallExpr name="staticMethod">
+                    <FieldAccessExpr field="SuperClass">
+                      <FieldAccessExpr field="callSuper">
+                        <FieldAccessExpr field="generator">
+                          <NameExpr name="test"/>
+                        </FieldAccessExpr>
+                      </FieldAccessExpr>
+                    </FieldAccessExpr>
+                    <StringLiteralExpr value="a"/>
+                  </MethodCallExpr>
+                </FieldAccessExpr>
+
+import test.generator.callSuper.SuperClass;
+<ImportDeclaration asterisk="false" static="false">
+      <QualifiedNameExpr>
+        <QualifiedNameExpr>
+          <QualifiedNameExpr>
+            <NameExpr name="test"/>
+          </QualifiedNameExpr>
+        </QualifiedNameExpr>
+      </QualifiedNameExpr>
+    </ImportDeclaration>
+
+package test;
+    <PackageDeclaration>
+      <NameExpr name="test"/>
+    </PackageDeclaration>
+    
+package test.generator.callSuper;
+<PackageDeclaration>
+      <QualifiedNameExpr>
+        <QualifiedNameExpr>
+          <NameExpr name="test"/>
+        </QualifiedNameExpr>
+      </QualifiedNameExpr>
+    </PackageDeclaration>
+   
+java.lang.String arg    
+<Parameter modifiers="0" varArgs="false">
+          <ReferenceType arrayCount="0">
+            <ClassOrInterfaceType name="String">
+              <ClassOrInterfaceType name="lang">
+                <ClassOrInterfaceType name="java"/>
+              </ClassOrInterfaceType>
+            </ClassOrInterfaceType>
+          </ReferenceType>
+          <VariableDeclaratorId arrayCount="0" name="arg"/>
+        </Parameter>

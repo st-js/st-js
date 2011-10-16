@@ -18,7 +18,10 @@ package org.stjs.generator;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 
 import java.io.File;
+import java.util.LinkedHashSet;
 import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * This class can resolve an identifier or a method in the given source context. There is one context create for each
@@ -32,7 +35,7 @@ public class GenerationContext {
 
 	private ClassOrInterfaceDeclaration currentType = null;
 
-	private Set<String> resolvedImports = null;
+	private final Set<String> resolvedImports = new LinkedHashSet<String>();
 
 	public GenerationContext(File inputFile) {
 		this.inputFile = inputFile;
@@ -53,11 +56,11 @@ public class GenerationContext {
 	}
 
 	public Set<String> getResolvedImports() {
-		return resolvedImports;
+		return ImmutableSet.copyOf(resolvedImports);
 	}
 
-	public void setResolvedImports(Set<String> resolvedImports) {
-		this.resolvedImports = resolvedImports;
+	public void addResolvedImport(String resolvedImport) {
+		this.resolvedImports.add(resolvedImport);
 	}
 
 }

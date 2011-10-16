@@ -1,13 +1,14 @@
 package org.stjs.generator.scope.simple;
 
+import org.stjs.generator.GenerationContext;
 import org.stjs.generator.scope.classloader.ClassWrapper;
 
 public class ClassScope extends AbstractScope {
 
 	private final ClassWrapper clazz;
-	
-	ClassScope(ClassWrapper clazz, Scope parent) {
-		super(parent);
+
+	ClassScope(ClassWrapper clazz, Scope parent, GenerationContext context) {
+		super(parent, context);
 		this.clazz = clazz;
 	}
 
@@ -19,6 +20,5 @@ public class ClassScope extends AbstractScope {
 	public ClassWrapper getClazz() {
 		return clazz;
 	}
-
 
 }

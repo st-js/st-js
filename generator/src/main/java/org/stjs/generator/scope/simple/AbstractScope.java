@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.stjs.generator.GenerationContext;
 import org.stjs.generator.scope.classloader.ClassWrapper;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -22,12 +23,15 @@ public abstract class AbstractScope implements Scope {
 	private final Scope parent;
 	private final List<Scope> children;
 
-	AbstractScope(Scope parent) {
+	private final GenerationContext context;
+
+	AbstractScope(Scope parent, GenerationContext context) {
 		this.parent = parent;
 		if (parent != null) {
 			parent.addChild(this);
 		}
 		children = Lists.newArrayList();
+		this.context = context;
 	}
 
 	private Map<String, Variable> variables = Maps.newHashMap();
@@ -35,6 +39,10 @@ public abstract class AbstractScope implements Scope {
 	private Multimap<String, Method> methods = ArrayListMultimap.create();
 
 	private Map<String, ClassWrapper> types = Maps.newHashMap();
+
+	protected GenerationContext getContext() {
+		return context;
+	}
 
 	public void addField(Field field) {
 		variables.put(field.getName(), new FieldVariable(field));
@@ -55,6 +63,7 @@ public abstract class AbstractScope implements Scope {
 	public TypeWithScope resolveType(String name) {
 		ClassWrapper classWrapper = types.get(name);
 		if (classWrapper != null) {
+			context.addResolvedImport(classWrapper.getName());
 			return new TypeWithScope(this, classWrapper);
 		}
 		if (parent != null) {

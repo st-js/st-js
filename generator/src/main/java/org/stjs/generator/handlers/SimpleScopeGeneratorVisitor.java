@@ -19,6 +19,9 @@ import static japa.parser.ast.body.ModifierSet.isStatic;
 import static org.stjs.generator.ASTNodeData.checkParent;
 import static org.stjs.generator.ASTNodeData.expressionType;
 import static org.stjs.generator.ASTNodeData.parent;
+import static org.stjs.generator.ASTNodeData.resolvedMethod;
+import static org.stjs.generator.ASTNodeData.resolvedType;
+import static org.stjs.generator.ASTNodeData.resolvedVariable;
 import static org.stjs.generator.ASTNodeData.scope;
 import static org.stjs.generator.scope.classloader.ClassWrapper.wrap;
 import japa.parser.ast.BlockComment;
@@ -109,9 +112,9 @@ import japa.parser.ast.type.VoidType;
 import japa.parser.ast.type.WildcardType;
 import japa.parser.ast.visitor.VoidVisitor;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -123,10 +126,12 @@ import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.SourcePosition;
 import org.stjs.generator.scope.classloader.ClassWrapper;
+import org.stjs.generator.scope.classloader.TypeWrapper;
+import org.stjs.generator.scope.classloader.TypeWrappers;
 import org.stjs.generator.scope.simple.ClassScope;
+import org.stjs.generator.scope.simple.FieldVariable;
 import org.stjs.generator.scope.simple.Scope;
 import org.stjs.generator.scope.simple.SimpleScopeBuilder;
-import org.stjs.generator.scope.simple.TypeWithScope;
 import org.stjs.generator.scope.simple.Variable;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.PreConditions;
@@ -170,13 +175,15 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 
 	@Override
 	public void visit(ClassOrInterfaceType n, GenerationContext context) {
-		ClassScope scope = (ClassScope) scope(n);
-		printer.print(stJsName(scope.getClazz()));
+		printer.print(stJsName(resolvedType(n)));
 	}
 
-	private String stJsName(ClassWrapper classWrapper) {
+	private String stJsName(TypeWrapper typeWrapper) {
 		// We may want to use a more complex naming scheme, to avoid conflicts across packages
-		return classWrapper.getSimpleName();
+		if (typeWrapper instanceof ClassWrapper) {
+			return ((ClassWrapper) typeWrapper).getSimpleNameWithDeclaringClasses();
+		}
+		return typeWrapper.getType().toString();
 	}
 
 	@Override
@@ -356,6 +363,7 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 
 	@Override
 	public void visit(VariableDeclaratorId n, GenerationContext context) {
+		Checks.checkVariableDeclaratorId(n, context);
 		printer.print(n.getName());
 	}
 
@@ -391,13 +399,11 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 
 	@Override
 	public void visit(FieldDeclaration n, GenerationContext context) {
-		PreConditions.checkNotNull(scope(n));
-
-		ClassScope scope = (ClassScope) scope(n);
 		Checks.checkFieldDeclaration(n, context);
+		String typeName = stJsName(resolvedType(parent(n)));
 		// skip type
 		for (VariableDeclarator v : n.getVariables()) {
-			printStaticMembersPrefix(scope);
+			printer.print(typeName);
 			if (!isStatic(n.getModifiers())) {
 				printer.print(".prototype");
 			}
@@ -431,7 +437,7 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 	}
 
 	private void printMethod(String name, List<Parameter> parameters, int modifiers, BlockStmt body,
-			GenerationContext context, Scope scope, boolean anonymous) {
+			GenerationContext context, TypeWrapper type, boolean anonymous) {
 
 		if (ModifierSet.isAbstract(modifiers) || ModifierSet.isNative(modifiers)) {
 			return;
@@ -440,7 +446,7 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 		if (anonymous) {
 			printer.print("function");
 		} else {
-			printStaticMembersPrefix((ClassScope) scope);
+			printer.print(stJsName(type));
 			if (!isStatic(modifiers)) {
 				printer.print(".prototype");
 			}
@@ -564,7 +570,7 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 			MethodDeclaration method = getMethodDeclaration(n);
 			if (method != null) {
 				printMethod(method.getName(), method.getParameters(), method.getModifiers(), method.getBody(), context,
-						scope(n), true);
+						resolvedType(n), true);
 				return;
 			}
 			// special construction to handle the inline body
@@ -582,8 +588,8 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 
 		}
 
-		TypeWithScope clazz = scope(n).resolveType(n.getType().getName());
-		if ((clazz != null) && ClassUtils.isDataType(clazz.getClazz())) {
+		TypeWrapper clazz = resolvedType(n);
+		if ((clazz != null) && ClassUtils.isDataType(((ClassWrapper) clazz).getClazz())) {
 			// this is a call to an mock type
 			printer.print("{}");
 			return;
@@ -603,16 +609,17 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 	public void visit(MethodDeclaration n, GenerationContext context) {
 		Checks.checkMethodDeclaration(n, context);
 		printComments(n, context);
-		printMethod(n.getName(), n.getParameters(), n.getModifiers(), n.getBody(), context, scope(n), false);
+		printMethod(n.getName(), n.getParameters(), n.getModifiers(), n.getBody(), context, resolvedType(parent(n)),
+				false);
 	}
 
-	private void addCallToSuper(ClassScope classScope, GenerationContext context) {
+	private void addCallToSuper(ClassScope classScope, GenerationContext context, Collection<Expression> args) {
 		PreConditions.checkNotNull(classScope);
-		if (classScope.getClazz().getSuperclass().isDefined()) {
+		if (classScope.getClazz().getSuperclass().isDefined()
+				&& !classScope.getClazz().getSuperclass().getOrThrow().getClazz().equals(Object.class)) {
 			// avoid useless call to super() when the super class is Object
 			printer.print("this._super");
-			printArguments(Collections.singleton("null"), Collections.<Expression> emptyList(),
-					Collections.<String> emptyList(), context);
+			printArguments(Collections.singleton("null"), args, Collections.<String> emptyList(), context);
 			printer.print(";");
 		}
 	}
@@ -633,7 +640,8 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 				// addCallToSuper(scopeWalker);
 			}
 		}
-		printMethod(n.getName(), n.getParameters(), n.getModifiers(), n.getBlock(), context, scope(n), true);
+		printMethod(n.getName(), n.getParameters(), n.getModifiers(), n.getBlock(), context, resolvedType(parent(n)),
+				true);
 	}
 
 	@Override
@@ -662,6 +670,8 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 
 	@Override
 	public void visit(ClassOrInterfaceDeclaration n, GenerationContext context) {
+		Checks.checkClassDeclaration(n, context);
+
 		printComments(n, context);
 		// printer.print(n.getName() + " = ");
 		if (GeneratorConstants.SPECIAL_INLINE_TYPE.equals(n.getName())) {
@@ -674,6 +684,7 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 		}
 
 		ClassScope scope = (ClassScope) scope(n);
+		resolvedType(n, scope.resolveType(n.getName()).getClazz());
 		String className = stJsName(scope.resolveType(n.getName()).getClazz());
 		printer.print(className);
 
@@ -685,7 +696,7 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 				printer.print(";");
 			} else {
 				printer.print("function(){");
-				addCallToSuper(scope, context);
+				addCallToSuper(scope, context, Collections.<Expression> emptyList());
 				printer.printLn("};");
 			}
 
@@ -1084,60 +1095,50 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 	@Override
 	public void visit(FieldAccessExpr n, GenerationContext context) {
 		n.getScope().accept(this, context);
-		printer.print(".");
+		TypeWrapper scopeType = resolvedType(n.getScope());
+		if (scopeType == null || !isGlobal(scopeType)) {
+			printer.print(".");
+		}
 		printer.print(n.getField());
 	}
 
 	@Override
 	public void visit(final MethodCallExpr n, final GenerationContext context) {
-		Type scopeType = n.getScope() != null ? expressionType(n) : null;
-		// TODO -> if none, and found in the current type, is this
-		Collection<Method> methods = scope(n).resolveMethods(n.getName()).getMethods();
+		Method method = resolvedMethod(n);
 		if (!specialMethodHandlers.handleMethodCall(this, n, context)) {
-			if (methods != null) {
-
-				/*
-				 * TODO : resolve not only the list of methods, but the actual method based on the arguments
-				 */
-				Method method = methods.iterator().next();
-				ClassWrapper methodDeclaringClass = wrap(method.getDeclaringClass());
-				if (Modifier.isStatic(method.getModifiers())) {
-					printStaticFieldOrMethodAccessPrefix(methodDeclaringClass, true);
-					printer.print(n.getName());
-					printArguments(n.getArgs(), context);
-					return;
-				} else {
-					ClassScope thisClassScope = scope(n).closest(ClassScope.class);
-					if (thisClassScope.getClazz().equals(methodDeclaringClass)) {
-						// Non static reference to current enclosing type.
-						printer.print("this.");
-					} else if (methodDeclaringClass.isParentClassOf(thisClassScope.getClazz())) {
-						// Non static reference to parent type
-						printer.print("this._super");
-						printArguments(Collections.singleton("\"" + n.getName() + "\""), n.getArgs(),
-								Collections.<String> emptyList(), context);
-						return;
-					} else if (n.getScope() != null) {
-						n.getScope().accept(this, context);
-						printer.print(".");
-					}
-					printer.print(n.getName());
-					printArguments(n.getArgs(), context);
-
-				}
+			/*
+			 * TODO : resolve not only the list of methods, but the actual method based on the arguments
+			 */
+			ClassWrapper methodDeclaringClass = wrap(method.getDeclaringClass());
+			if (Modifier.isStatic(method.getModifiers())) {
+				printStaticFieldOrMethodAccessPrefix(methodDeclaringClass, true);
+				printer.print(n.getName());
+				printArguments(n.getArgs(), context);
+				return;
 			} else {
-				// FIXME : should not exist anymore, we will always resolve methods
-				if (n.getScope() != null) {
+				ClassScope thisClassScope = scope(n).closest(ClassScope.class);
+				if (n.getScope() != null && !n.getScope().toString().equals(GeneratorConstants.THIS)
+						&& !n.getScope().toString().equals(GeneratorConstants.SUPER)) {
 					n.getScope().accept(this, context);
 					printer.print(".");
+				} else if (thisClassScope.getClazz().equals(methodDeclaringClass)) {
+					// Non static reference to current enclosing type.
+					printer.print("this.");
+				} else if (methodDeclaringClass.isParentClassOf(thisClassScope.getClazz())) {
+					// Non static reference to parent type
+					printer.print("this._super");
+					printArguments(Collections.singleton("\"" + n.getName() + "\""), n.getArgs(),
+							Collections.<String> emptyList(), context);
+					return;
 				}
 				printer.print(n.getName());
 				printArguments(n.getArgs(), context);
+
 			}
 		}
 	}
 
-	private void printStaticFieldOrMethodAccessPrefix(ClassWrapper type, boolean addDot) {
+	private void printStaticFieldOrMethodAccessPrefix(TypeWrapper type, boolean addDot) {
 		if (!isGlobal(type)) {
 			printer.print(stJsName(type));
 			if (addDot) {
@@ -1146,15 +1147,36 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 		}
 	}
 
-	private boolean isGlobal(ClassWrapper clazz) {
-		return ClassUtils.hasAnnotation(clazz, GlobalScope.class.getName());
+	private boolean isGlobal(TypeWrapper clazz) {
+		if (!(clazz instanceof ClassWrapper)) {
+			return false;
+		}
+		return ClassUtils.hasAnnotation((ClassWrapper) clazz, GlobalScope.class.getName());
 	}
 
 	@Override
 	public void visit(NameExpr n, GenerationContext context) {
+		Checks.checkNameExpr(n, context);
 		if (GeneratorConstants.SPECIAL_THIS.equals(n.getName())) {
 			printer.print("this");
 			return;
+		}
+		Variable var = resolvedVariable(n);
+		if (var != null) {
+			if (var instanceof FieldVariable) {
+				Field field = ((FieldVariable) var).getField();
+				if (Modifier.isStatic(field.getModifiers())) {
+					printStaticFieldOrMethodAccessPrefix(TypeWrappers.wrap(field.getDeclaringClass()), true);
+				} else {
+					printer.print("this.");
+				}
+			}
+		} else {
+			TypeWrapper type = resolvedType(n);
+			if (type != null) {
+				printStaticFieldOrMethodAccessPrefix(type, false);
+				return;
+			}
 		}
 		/*
 		 * FIXME: Do I need more context? QualifiedName<IdentifierName> qname = scopeWalker.resolveIdentifier(n); if
@@ -1178,6 +1200,7 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 
 	@Override
 	public void visit(ThisExpr n, GenerationContext context) {
+		Checks.checkThisExpr(n, context);
 		if (n.getClassExpr() != null) {
 			n.getClassExpr().accept(this, context);
 			printer.print(".");
@@ -1253,14 +1276,8 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 					"Only one constructor is allowed");
 		}
 
-		ClassScope classScope = (ClassScope) scope(n);
-		PreConditions.checkNotNull(classScope);
-		if (classScope.getClazz().getSuperclass().isDefined()) {
-			// avoid useless call to super() when the super class is Object
-			printer.print("this._super");
-			printArguments(Collections.singleton("null"), n.getArgs(), Collections.<String> emptyList(), context);
-			printer.print(";");
-		}
+		ClassScope classScope = scope(n).closest(ClassScope.class);
+		addCallToSuper(classScope, context, n.getArgs());
 	}
 
 	@Override
@@ -1347,9 +1364,11 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 	public void visit(SwitchEntryStmt n, GenerationContext context) {
 		if (n.getLabel() != null) {
 			printer.print("case ");
-			Variable selector = getSwitchSelectorType(n, scope(n));
-			if (selector.getType().getClazz().isEnum()) {
-				printer.print(stJsName(selector.getType()));
+			TypeWrapper selectorType = expressionType(((SwitchStmt) parent(n)).getSelector());
+			PreConditions.checkState(selectorType != null, "The selector of the switch %s should have a type",
+					parent(n).toString());
+			if (selectorType instanceof ClassWrapper && ((ClassWrapper) selectorType).getClazz().isEnum()) {
+				printer.print(stJsName(selectorType));
 				printer.print(".");
 			}
 			n.getLabel().accept(this, context);
@@ -1366,16 +1385,6 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 			}
 		}
 		printer.unindent();
-	}
-
-	private Variable getSwitchSelectorType(SwitchEntryStmt n, Scope scope) {
-		SwitchStmt switchStatement = (SwitchStmt) parent(n);
-		Expression selector = switchStatement.getSelector();
-		/*
-		 * TODO : need to resolve the type of the expression, which means visiting all possible expression types. For
-		 * now, assume a NameExpr that would represent a variable
-		 */
-		return scope.resolveVariable(selector.toString()).getVariable();
 	}
 
 	@Override

@@ -15,7 +15,7 @@
  */
 package org.stjs.generator.handlers;
 
-import static org.stjs.generator.ASTNodeData.scope;
+import static org.stjs.generator.ASTNodeData.resolvedMethod;
 import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.MethodCallExpr;
 
@@ -29,7 +29,6 @@ import java.util.Map;
 import org.stjs.generator.ASTNodeData;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.scope.ScopeUtils;
-import org.stjs.generator.scope.simple.Scope;
 import org.stjs.generator.utils.ClassUtils;
 
 /**
@@ -214,9 +213,7 @@ public class SpecialMethodHandlers {
 	private static void printScope(SimpleScopeGeneratorVisitor currentHandler, MethodCallExpr n,
 			GenerationContext context, boolean withDot) {
 		// TODO -> handle super
-		Scope scope = scope(n);
-		// the check for one method should'be been already done
-		Method method = scope.resolveMethods(n.getName()).getMethods().iterator().next();
+		Method method = resolvedMethod(n);
 		if (!Modifier.isStatic(method.getModifiers()) && ScopeUtils.isDeclaredInThisScope(n)) {
 			currentHandler.printer.print("this");
 			if (withDot) {
@@ -240,7 +237,7 @@ public class SpecialMethodHandlers {
 				return true;
 			}
 		}
-		Method method = ASTNodeData.method(n);
+		Method method = ASTNodeData.resolvedMethod(n);
 		if ((n.getArgs() != null) && (n.getArgs().size() > 0)) {
 			if (ClassUtils.isAdapter(method.getDeclaringClass())) {
 				adapterMethod(currentHandler, n, context);
@@ -308,7 +305,7 @@ public class SpecialMethodHandlers {
 	private void methodToProperty(SimpleScopeGeneratorVisitor currentHandler, MethodCallExpr n,
 			GenerationContext context) {
 		int arg = 0;
-		Method method = ASTNodeData.method(n);
+		Method method = ASTNodeData.resolvedMethod(n);
 		if (Modifier.isStatic(method.getModifiers())) {
 			currentHandler.printer.print("(");
 			n.getArgs().get(arg++).accept(currentHandler, context);

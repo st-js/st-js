@@ -7,9 +7,11 @@ import japa.parser.ast.CompilationUnit;
 
 import java.io.IOException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.scope.simple.CompilationUnitScope;
 
+@Ignore
 public class InnerClassScopeTest {
 
 	@Test

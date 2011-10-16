@@ -5,6 +5,7 @@ import japa.parser.ast.expr.NameExpr;
 
 import java.util.Set;
 
+import org.stjs.generator.GenerationContext;
 import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
 import org.stjs.generator.scope.classloader.ClassWrapper;
 
@@ -19,8 +20,8 @@ public class CompilationUnitScope extends AbstractScope {
 
 	private final ClassLoaderWrapper classLoaderWrapper;
 
-	public CompilationUnitScope(ClassLoaderWrapper classLoaderWrapper) {
-		super(null);
+	public CompilationUnitScope(ClassLoaderWrapper classLoaderWrapper, GenerationContext context) {
+		super(null, context);
 		this.classLoaderWrapper = classLoaderWrapper;
 		addType(wrap(String.class));
 		addType(wrap(Integer.class));
@@ -32,6 +33,7 @@ public class CompilationUnitScope extends AbstractScope {
 		addType(wrap(Double.class));
 		addType(wrap(Exception.class));
 		addType(wrap(RuntimeException.class));
+
 	}
 
 	public String getPackageName() {
@@ -64,14 +66,22 @@ public class CompilationUnitScope extends AbstractScope {
 		}
 		// try in package
 		for (ClassWrapper packageClass : classLoaderWrapper.loadClassOrInnerClass(packageName + "." + name)) {
+			getContext().addResolvedImport(packageClass.getName());
 			return new TypeWithScope(this, packageClass);
 		}
 
 		// fully qualified
 		for (ClassWrapper qualifiedClass : classLoaderWrapper.loadClassOrInnerClass(name)) {
+			getContext().addResolvedImport(qualifiedClass.getName());
 			return new TypeWithScope(this, qualifiedClass);
 		}
-		throw new RuntimeException("Could not resolve type " + name);
+
+		// try java.lang
+		for (ClassWrapper qualifiedClass : classLoaderWrapper.loadClassOrInnerClass("java.lang." + name)) {
+			getContext().addResolvedImport(qualifiedClass.getName());
+			return new TypeWithScope(this, qualifiedClass);
+		}
+		return null;
 	}
 
 }
