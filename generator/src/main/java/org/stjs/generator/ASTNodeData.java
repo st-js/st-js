@@ -108,6 +108,10 @@ public class ASTNodeData {
 		return ((ASTNodeData) n.getData()).getParent();
 	}
 
+	public static void parent(Node n, Node p) {
+		((ASTNodeData) n.getData()).setParent(p);
+	}
+
 	public static Method resolvedMethod(Node n) {
 		return ((ASTNodeData) n.getData()).getResolvedMethod();
 	}

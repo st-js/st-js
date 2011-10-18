@@ -15,6 +15,7 @@ import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
 import japa.parser.ast.body.EnumDeclaration;
+import japa.parser.ast.body.InitializerDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.body.Parameter;
 import japa.parser.ast.body.VariableDeclarator;
@@ -291,6 +292,9 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 	@Override
 	public void visit(VariableDeclarationExpr n, Scope scope) {
 		// TODO add expressionType
+		PreConditions
+				.checkState(scope instanceof BasicScope, "The variable [%s] is not defined inside a BasicScope", n);
+
 		BasicScope basicScope = (BasicScope) scope;
 		if (n.getVars() != null) {
 			ClassWrapper clazz = resolveType(basicScope, n.getType());
@@ -335,6 +339,11 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	@Override
 	public void visit(ForStmt n, Scope currentScope) {
+		super.visit(n, new BasicScope(currentScope, context));
+	}
+
+	@Override
+	public void visit(InitializerDeclaration n, Scope currentScope) {
 		super.visit(n, new BasicScope(currentScope, context));
 	}
 

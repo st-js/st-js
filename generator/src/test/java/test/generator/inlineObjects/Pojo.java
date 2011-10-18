@@ -1,8 +1,8 @@
 package test.generator.inlineObjects;
 
-import org.stjs.javascript.annotation.MockType;
+import org.stjs.javascript.annotation.DataType;
 
-@MockType
+@DataType
 public class Pojo {
 	public int a;
 	public String b;

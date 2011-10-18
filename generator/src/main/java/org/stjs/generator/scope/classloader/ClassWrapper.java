@@ -69,13 +69,16 @@ public class ClassWrapper implements TypeWrapper {
 	}
 
 	public Option<Field> getDeclaredField(String name) {
-		try {
-			return Option.some(clazz.getDeclaredField(name));
-		} catch (SecurityException e) {
-			throw new RuntimeException(e);
-		} catch (NoSuchFieldException e) {
-			return Option.none();
+		for (Class<?> c = clazz; c != null; c = c.getSuperclass()) {
+			try {
+				return Option.some(c.getDeclaredField(name));
+			} catch (SecurityException e) {
+				throw new RuntimeException(e);
+			} catch (NoSuchFieldException e) {
+				// next
+			}
 		}
+		return Option.none();
 	}
 
 	public <T> Option<ClassWrapper> getDeclaredClass(String name) {

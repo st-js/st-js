@@ -52,7 +52,7 @@ public class ClassUtils {
 		if (clazz == null) {
 			return false;
 		}
-		return isMockType(clazz.getClazz());
+		return isDataType(clazz.getClazz());
 	}
 
 	public static boolean isDataType(Class<?> clazz) {
