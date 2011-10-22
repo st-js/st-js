@@ -47,12 +47,12 @@ public class CallSuperGeneratorTest {
 	@Test
 	public void testInstanceCallStaticSuperNotExplicit() {
 		assertCodeContains(CallSuper6.class,
-				"CallSuper6.prototype.instanceMethod = function(arg){ SuperClass.staticMethod(arg);}");
+				"CallSuper6.prototype.instanceMethod = function(arg){ CallSuper6.staticMethod(arg);}");
 	}
 
 	@Test
 	public void testStaticCallStaticSuperNotExplicit() {
-		assertCodeContains(CallSuper7.class, "CallSuper7.staticMethod2 = function(arg){ SuperClass.staticMethod(arg);}");
+		assertCodeContains(CallSuper7.class, "CallSuper7.staticMethod2 = function(arg){ CallSuper7.staticMethod(arg);}");
 	}
 
 	@Test

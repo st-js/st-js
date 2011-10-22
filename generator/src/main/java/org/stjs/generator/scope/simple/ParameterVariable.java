@@ -1,21 +1,21 @@
 package org.stjs.generator.scope.simple;
 
-import org.stjs.generator.scope.classloader.ClassWrapper;
+import org.stjs.generator.scope.classloader.TypeWrapper;
 
 public class ParameterVariable implements Variable {
 
-	private final ClassWrapper type;
-	private final String name; 
-	
-	public ParameterVariable(ClassWrapper type, String name) {
+	private final TypeWrapper type;
+	private final String name;
+
+	public ParameterVariable(TypeWrapper type, String name) {
 		this.type = type;
 		this.name = name;
 	}
-	
-	public ClassWrapper getType() {
+
+	public TypeWrapper getType() {
 		return type;
 	}
-	
+
 	public String getName() {
 		return name;
 	}

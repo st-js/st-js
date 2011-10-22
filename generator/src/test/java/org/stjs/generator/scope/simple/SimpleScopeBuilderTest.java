@@ -10,14 +10,13 @@ import japa.parser.ast.CompilationUnit;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Collection;
 
 import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
+import org.stjs.generator.scope.classloader.FieldWrapper;
+import org.stjs.generator.scope.classloader.MethodWrapper;
 
 import test.generator.scopes.SimpleClass;
 import test.generator.scopes.SimpleClass.AmbiguousName;
@@ -88,28 +87,25 @@ public class SimpleScopeBuilderTest {
 
 	private void assertVariableEquals(NameScopeWalker scope, Class<?> declaringClass, String name) {
 		Variable variable = scope.getScope().resolveVariable(name).getVariable();
-		assertSame(declaringClass, variable.getType().getClazz());
+		assertSame(declaringClass, variable.getType().getType());
 	}
 
 	private void assertTypeEquals(AbstractScope scope, Class<?> type, String name) {
-		assertEquals(type, scope.getType(name).getClazz());
+		assertEquals(type, scope.getType(name).getType());
 	}
 
 	private void assertMethodsEquals(Scope scope, int size, Class<?> declaringClass, String name) {
-		Collection<Method> methods = scope.resolveMethods(name).getMethods();
-		assertNotNull(methods);
-		assertEquals(size, methods.size());
-		for (Method method : methods) {
-			assertSame(declaringClass, method.getDeclaringClass());
-		}
+		MethodWrapper method = scope.resolveMethod(name).getMethod();
+		assertNotNull(method);
+		assertSame(declaringClass, method.getOwnerType().getType());
 
 	}
 
 	private void assertFieldEquals(AbstractScope scope, Class<?> type, Class<?> declaringClass, String name) {
-		Field field = ((FieldVariable) scope.resolveVariable(name).getVariable()).getField();
+		FieldWrapper field = ((FieldWrapper) scope.resolveVariable(name).getVariable());
 		assertNotNull(field);
 		assertSame(type, field.getType());
-		assertSame(declaringClass, field.getDeclaringClass());
+		assertSame(declaringClass, field.getOwnerType().getType());
 	}
 
 }

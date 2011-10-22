@@ -17,8 +17,7 @@ package org.stjs.generator;
 
 import japa.parser.ast.Node;
 
-import java.lang.reflect.Method;
-
+import org.stjs.generator.scope.classloader.MethodWrapper;
 import org.stjs.generator.scope.classloader.TypeWrapper;
 import org.stjs.generator.scope.simple.Scope;
 import org.stjs.generator.scope.simple.Variable;
@@ -27,18 +26,16 @@ public class ASTNodeData {
 	private Scope scope;
 	private Node parent;
 	/**
-	 * this is the type of the current node - if it an expression
+	 * this is the type of the current node - if it an expression, or the associated type if it's a type node
 	 */
-	private TypeWrapper expressionType;
+	private TypeWrapper resolvedType;
 
 	/**
 	 * this is the method resolved only for a methodCall
 	 */
-	private Method resolvedMethod;
+	private MethodWrapper resolvedMethod;
 
 	private Variable resolvedVariable;
-
-	private TypeWrapper resolvedType;
 
 	public ASTNodeData() {
 
@@ -64,19 +61,11 @@ public class ASTNodeData {
 		this.parent = parent;
 	}
 
-	public TypeWrapper getExpressionType() {
-		return expressionType;
-	}
-
-	public void setExpressionType(TypeWrapper expressionType) {
-		this.expressionType = expressionType;
-	}
-
-	public Method getResolvedMethod() {
+	public MethodWrapper getResolvedMethod() {
 		return resolvedMethod;
 	}
 
-	public void setResolvedMethod(Method resolvedMethod) {
+	public void setResolvedMethod(MethodWrapper resolvedMethod) {
 		this.resolvedMethod = resolvedMethod;
 	}
 
@@ -112,11 +101,11 @@ public class ASTNodeData {
 		((ASTNodeData) n.getData()).setParent(p);
 	}
 
-	public static Method resolvedMethod(Node n) {
+	public static MethodWrapper resolvedMethod(Node n) {
 		return ((ASTNodeData) n.getData()).getResolvedMethod();
 	}
 
-	public static void resolvedMethod(Node n, Method m) {
+	public static void resolvedMethod(Node n, MethodWrapper m) {
 		((ASTNodeData) n.getData()).setResolvedMethod(m);
 	}
 
@@ -134,14 +123,6 @@ public class ASTNodeData {
 
 	public static void resolvedType(Node n, TypeWrapper t) {
 		((ASTNodeData) n.getData()).setResolvedType(t);
-	}
-
-	public static TypeWrapper expressionType(Node n) {
-		return ((ASTNodeData) n.getData()).getExpressionType();
-	}
-
-	public static void expressionType(Node n, TypeWrapper type) {
-		((ASTNodeData) n.getData()).setExpressionType(type);
 	}
 
 	public static Node parent(Node n, int upLevel) {

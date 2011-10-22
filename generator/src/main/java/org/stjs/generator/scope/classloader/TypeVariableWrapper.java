@@ -1,12 +1,9 @@
 package org.stjs.generator.scope.classloader;
 
-import java.lang.reflect.Field;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.GenericDeclaration;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.stjs.generator.utils.Option;
 
@@ -29,9 +26,9 @@ public class TypeVariableWrapper<D extends GenericDeclaration> implements TypeWr
 	}
 
 	@Override
-	public Option<Field> getDeclaredField(String name) {
+	public Option<FieldWrapper> findField(String name) {
 		for (TypeWrapper bound : boundsWrappers) {
-			Option<Field> field = bound.getDeclaredField(name);
+			Option<FieldWrapper> field = bound.findField(name);
 			if (field.isDefined()) {
 				return field;
 			}
@@ -41,18 +38,73 @@ public class TypeVariableWrapper<D extends GenericDeclaration> implements TypeWr
 	}
 
 	@Override
-	public List<Method> getDeclaredMethods(String name) {
-		List<Method> methods = new ArrayList<Method>();
+	public Option<MethodWrapper> findMethod(String name, TypeWrapper... paramTypes) {
 		for (TypeWrapper bound : boundsWrappers) {
-			// TODO it could be an interface or a class is found several times, so remove duplicates
-			methods.addAll(bound.getDeclaredMethods(name));
+			Option<MethodWrapper> method = bound.findMethod(name, paramTypes);
+			if (method.isDefined()) {
+				return method;
+			}
 		}
-		return methods;
+
+		return Option.none();
 	}
 
 	@Override
 	public Type getType() {
 		return typeVariable;
+	}
+
+	@Override
+	public String getSimpleName() {
+		return typeVariable.getName();
+	}
+
+	@Override
+	public String getName() {
+		return typeVariable.getName();
+	}
+
+	@Override
+	public String getExternalName() {
+		return typeVariable.getName();
+	}
+
+	@Override
+	public boolean isImportable() {
+		return false;
+	}
+
+	@Override
+	public boolean isInnerType() {
+		return false;
+	}
+
+	@Override
+	public boolean isParentClassOf(ClassWrapper clazz) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean hasAnnotation(Class<? extends Annotation> a) {
+		for (TypeWrapper bound : boundsWrappers) {
+			if (bound.hasAnnotation(a)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean isAssignableFrom(TypeWrapper typeWrapper) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public TypeWrapper getComponentType() {
+		// TODO should this be something else !?
+		return null;
 	}
 
 }

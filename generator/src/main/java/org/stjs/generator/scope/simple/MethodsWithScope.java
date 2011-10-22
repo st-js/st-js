@@ -1,23 +1,22 @@
 package org.stjs.generator.scope.simple;
 
-import java.lang.reflect.Method;
-import java.util.Collection;
+import org.stjs.generator.scope.classloader.MethodWrapper;
 
 public class MethodsWithScope {
 	private final Scope scope;
-	private final Collection<Method> methods;
+	private final MethodWrapper method;
 
-	MethodsWithScope(Scope scope, Collection<Method> methods) {
+	MethodsWithScope(Scope scope, MethodWrapper method) {
 		this.scope = scope;
-		this.methods = methods;
+		this.method = method;
 	}
 
 	public Scope getScope() {
 		return scope;
 	}
 
-	public Collection<Method> getMethods() {
-		return methods;
+	public MethodWrapper getMethod() {
+		return method;
 	}
 
 }

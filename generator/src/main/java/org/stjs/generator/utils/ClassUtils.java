@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.stjs.generator.scope.classloader.ClassWrapper;
+import org.stjs.generator.scope.classloader.TypeWrapper;
 import org.stjs.javascript.annotation.Adapter;
 import org.stjs.javascript.annotation.DataType;
 import org.stjs.javascript.annotation.MockType;
@@ -85,11 +86,11 @@ public class ClassUtils {
 		return false;
 	}
 
-	public static boolean isAdapter(ClassWrapper clazz) {
+	public static boolean isAdapter(TypeWrapper clazz) {
 		if (clazz == null) {
 			return false;
 		}
-		return hasAnnotation(clazz.getClazz(), Adapter.class.getName());
+		return clazz.hasAnnotation(Adapter.class);
 	}
 
 	public static boolean isAdapter(Class<?> clazz) {

@@ -34,8 +34,8 @@ import org.junit.Test;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
+import org.stjs.generator.scope.classloader.FieldWrapper;
 import org.stjs.generator.scope.simple.CompilationUnitScope;
-import org.stjs.generator.scope.simple.FieldVariable;
 import org.stjs.generator.scope.simple.SimpleScopeBuilder;
 
 @Ignore
@@ -93,7 +93,7 @@ public class ScopeTest {
 		CompilationUnit cu = compilationUnit(fileName);
 		CompilationUnitScope scope = resolveName2(cu, fileName);
 		assertScope(scope, cu).line(13).column(9, 2).assertName("MyInnerClass")
-				.assertScopePath("root.import.type-FieldsVsInnerClass").assertType(FieldVariable.class);
+				.assertScopePath("root.import.type-FieldsVsInnerClass").assertType(FieldWrapper.class);
 
 		assertScope(scope, cu).line(14).column(9, 2).assertName("MyInnerClass2")
 				.assertScopePath("root.import.type-FieldsVsInnerClass").assertType(null);

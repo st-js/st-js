@@ -8,13 +8,12 @@ The goals of resolution are:
 5) put full path name for static access to fields
 
 Here is the list of scopes in the order of their precedence (and how the elements are resolved):
-- VariableScope (eager) <=> BlockScope
-- ParemeterScope (eager)
-- TypeScope (eager)
+- BasicScope (eager) (block)
+- BasicScope (eager) (params)
+- ClassScope (eager)
 
-- ParentTypeScope (lazy)
-- ImportScope (lazy)
-- FullyQualifiedScope (lazy)
+- CompilationUnitScope (lazy)
+
 
 
 

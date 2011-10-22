@@ -1,6 +1,5 @@
 package org.stjs.generator.scope.simple;
 
-import static org.stjs.generator.ASTNodeData.expressionType;
 import static org.stjs.generator.ASTNodeData.parent;
 import static org.stjs.generator.ASTNodeData.resolvedMethod;
 import static org.stjs.generator.ASTNodeData.resolvedType;
@@ -10,7 +9,6 @@ import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.Node;
 import japa.parser.ast.PackageDeclaration;
-import japa.parser.ast.TypeParameter;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
@@ -61,10 +59,7 @@ import japa.parser.ast.type.Type;
 import japa.parser.ast.type.VoidType;
 import japa.parser.ast.type.WildcardType;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -74,6 +69,8 @@ import org.stjs.generator.GenerationContext;
 import org.stjs.generator.handlers.ForEachNodeVisitor;
 import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
 import org.stjs.generator.scope.classloader.ClassWrapper;
+import org.stjs.generator.scope.classloader.FieldWrapper;
+import org.stjs.generator.scope.classloader.MethodWrapper;
 import org.stjs.generator.scope.classloader.TypeWrapper;
 import org.stjs.generator.scope.classloader.TypeWrappers;
 import org.stjs.generator.utils.ClassUtils;
@@ -121,110 +118,92 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 	}
 
 	@Override
-	public void visit(final CompilationUnit n, Scope scope) {
-		scope.apply(new DefaultScopeVisitor<Void>() {
-			@Override
-			public Void apply(CompilationUnitScope scope) {
-				// asterisk declaration have lower priority => process them first (JLS §7.5.2)
-				if (n.getImports() != null) {
-					for (ImportDeclaration importDecl : n.getImports()) {
-						NameExpr name = importDecl.getName();
-						checkImport(importDecl, name.toString());
-						if (importDecl.isAsterisk()) {
-							if (importDecl.isStatic()) {
-								QualifiedNameExpr expr = (QualifiedNameExpr) name;
-								for (ClassWrapper clazz : identifyQualifiedNameExprClass(expr.getQualifier())) {
-									for (Field field : clazz.getDeclaredNonPrivateStaticFields()) {
-										scope.addField(field);
-									}
-									for (Method method : clazz.getDeclaredNonPrivateStaticMethods()) {
-										scope.addMethod(method);
-									}
-									for (ClassWrapper type : clazz.getDeclaredNonPrivateStaticClasses()) {
-										scope.addType(type);
-									}
-								}
-							} else {
-								scope.addTypeImportOnDemand(name);
-							}
-						}
-					}
-					for (ImportDeclaration importDecl : n.getImports()) {
-						NameExpr name = importDecl.getName();
-						checkImport(importDecl, name.toString());
-						if (!importDecl.isAsterisk()) {
-							if (importDecl.isStatic()) {
-								QualifiedNameExpr expr = (QualifiedNameExpr) name;
-								for (ClassWrapper clazz : identifyQualifiedNameExprClass(expr.getQualifier())) {
-									String fieldOrTypeOrMethodName = name.getName();
-									for (Field field : clazz.getDeclaredField(fieldOrTypeOrMethodName)) {
-										scope.addField(field);
-									}
-									List<Method> methods = clazz.getDeclaredMethods(fieldOrTypeOrMethodName);
-									if (!methods.isEmpty()) {
-										scope.addMethods(fieldOrTypeOrMethodName, methods);
-									}
-									for (ClassWrapper innerClass : clazz.getDeclaredClass(fieldOrTypeOrMethodName)) {
-										scope.addType(innerClass);
-										break;
-									}
-									// TODO : do wee need to continue here?
-								}
-							}
-							for (ClassWrapper clazz : identifyQualifiedNameExprClass(name)) {
-								scope.addType(clazz);
+	public void visit(final CompilationUnit n, Scope inputScope) {
+		PreConditions.checkState(inputScope instanceof CompilationUnitScope,
+				"A compilationUnitScope was expected. Got %s", inputScope);
 
+		CompilationUnitScope scope = (CompilationUnitScope) inputScope;
+		// asterisk declaration have lower priority => process them first (JLS §7.5.2)
+		if (n.getImports() != null) {
+			for (ImportDeclaration importDecl : n.getImports()) {
+				NameExpr name = importDecl.getName();
+				checkImport(importDecl, name.toString());
+				if (importDecl.isAsterisk()) {
+					if (importDecl.isStatic()) {
+						QualifiedNameExpr expr = (QualifiedNameExpr) name;
+						for (ClassWrapper clazz : identifyQualifiedNameExprClass(expr.getQualifier())) {
+							for (FieldWrapper field : clazz.getDeclaredNonPrivateStaticFields()) {
+								scope.addField(field);
+							}
+							for (MethodWrapper method : clazz.getDeclaredNonPrivateStaticMethods()) {
+								scope.addMethod(method);
+							}
+							for (ClassWrapper type : clazz.getDeclaredNonPrivateStaticClasses()) {
+								scope.addType(type);
 							}
 						}
+					} else {
+						scope.addTypeImportOnDemand(name);
 					}
 				}
-				return null;
 			}
-		});
+			for (ImportDeclaration importDecl : n.getImports()) {
+				NameExpr name = importDecl.getName();
+				checkImport(importDecl, name.toString());
+				if (!importDecl.isAsterisk()) {
+					if (importDecl.isStatic()) {
+						QualifiedNameExpr expr = (QualifiedNameExpr) name;
+						for (ClassWrapper clazz : identifyQualifiedNameExprClass(expr.getQualifier())) {
+							String fieldOrTypeOrMethodName = name.getName();
+							for (FieldWrapper field : clazz.findField(fieldOrTypeOrMethodName)) {
+								scope.addField(field);
+							}
+							List<MethodWrapper> methods = clazz.findMethods(fieldOrTypeOrMethodName);
+							if (!methods.isEmpty()) {
+								scope.addMethods(fieldOrTypeOrMethodName, methods);
+							}
+							for (ClassWrapper innerClass : clazz.getDeclaredClass(fieldOrTypeOrMethodName)) {
+								scope.addType(innerClass);
+								break;
+							}
+							// TODO : do wee need to continue here?
+						}
+					}
+					for (ClassWrapper clazz : identifyQualifiedNameExprClass(name)) {
+						scope.addType(clazz);
+
+					}
+				}
+			}
+		}
 
 		super.visit(n, scope);
 	}
 
-	private ClassScope addClassToScope(CompilationUnitScope compilationUnitScope, ClassScope givenScope,
-			ClassWrapper clazz) {
+	private ClassScope addClassToScope(CompilationUnitScope compilationUnitScope, ClassWrapper clazz) {
 		compilationUnitScope.addType(clazz);
 
 		for (ClassWrapper innerClass : clazz.getDeclaredClasses()) {
 			compilationUnitScope.addType(innerClass);
 		}
-		ClassScope scope = givenScope != null ? givenScope : new ClassScope(clazz, compilationUnitScope, context);
-		for (Field field : clazz.getDeclaredFields()) {
-			scope.addField(field);
-		}
-		for (Method method : clazz.getDeclaredMethods()) {
-			scope.addMethod(method);
-		}
-		if (clazz.getSuperclass().isDefined()) {
-			addClassToScope(compilationUnitScope, scope, clazz.getSuperclass().getOrThrow());
-		}
+
+		ClassScope scope = new ClassScope(clazz, compilationUnitScope, context);
+
 		return scope;
 	}
 
 	@Override
 	public void visit(final ClassOrInterfaceDeclaration n, Scope scope) {
-		if ((n.getExtends() != null) && (n.getExtends().size() > 0)) {
-			// TODO : populate scope with parent
-		}
 		Scope classScope = scope.apply(new DefaultScopeVisitor<Scope>() {
 			@Override
 			public Scope apply(CompilationUnitScope compilationUnitScope) {
 				// TODO : this is not good enough for inner classes (which need the list of outer classes in their
 				// qualified name)
-				if (n.getTypeParameters() != null) {
-					for (TypeParameter p : n.getTypeParameters()) {
-						// TODO : Handle Generic Types definitions
-					}
-				}
 
 				String qualifiedName = compilationUnitScope.getPackageName().toString() + "." + n.getName();
 				ClassWrapper clazz = classLoader.loadClassOrInnerClass(qualifiedName).getOrThrow(
 						"Cannot load class or interface " + qualifiedName);
-				return addClassToScope(compilationUnitScope, null, clazz);
+				return addClassToScope(compilationUnitScope, clazz);
 			}
 
 			@Override
@@ -250,7 +229,7 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 		BasicScope scope = new BasicScope(currentScope, context);
 		if (parameters != null) {
 			for (Parameter p : parameters) {
-				ClassWrapper clazz = resolveType(scope, p.getType());
+				TypeWrapper clazz = resolveType(scope, p.getType());
 				scope.addVariable(new ParameterVariable(clazz, p.getId().getName()));
 			}
 		}
@@ -262,7 +241,7 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 		return scope;
 	}
 
-	private ClassWrapper resolveType(Scope scope, Type type) {
+	private TypeWrapper resolveType(Scope scope, Type type) {
 		// TODO : shouldn't that go directly in the scope classes?
 		int arrayCount = 0;
 		if (type instanceof ReferenceType) {
@@ -270,14 +249,14 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 			arrayCount = refType.getArrayCount();
 			type = refType.getType(); // type is a primitive or class
 		}
-		ClassWrapper resolvedType;
+		TypeWrapper resolvedType;
 		if (type instanceof PrimitiveType) {
 			PrimitiveType primitiveType = (PrimitiveType) type;
 			resolvedType = PrimitiveTypes.primitiveReflectionType(primitiveType);
 		} else if (type instanceof VoidType) {
 			resolvedType = new ClassWrapper(void.class);
 		} else if (type instanceof ClassOrInterfaceType) {
-			resolvedType = scope.resolveType(type.toString()).getClazz();
+			resolvedType = scope.resolveType(type.toString()).getType();
 		} else if (type instanceof WildcardType) {
 			throw new RuntimeException("Generics not yet implemented");
 		} else {
@@ -286,18 +265,21 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 		if (arrayCount == 0) {
 			return resolvedType;
 		}
-		return ClassUtils.arrayOf(resolvedType, arrayCount);
+		if (resolvedType instanceof ClassWrapper) {
+			return ClassUtils.arrayOf((ClassWrapper) resolvedType, arrayCount);
+		}
+		throw new RuntimeException("Array of generics type is not yet implemented");
 	}
 
 	@Override
 	public void visit(VariableDeclarationExpr n, Scope scope) {
-		// TODO add expressionType
+		// TODO add resolvedType
 		PreConditions
 				.checkState(scope instanceof BasicScope, "The variable [%s] is not defined inside a BasicScope", n);
 
 		BasicScope basicScope = (BasicScope) scope;
 		if (n.getVars() != null) {
-			ClassWrapper clazz = resolveType(basicScope, n.getType());
+			TypeWrapper clazz = resolveType(basicScope, n.getType());
 			/*
 			 * TODO : this is not as simple. the order of the variables declarations matters! In this example class XXX
 			 * { private String x; void m() { String y = x; String x = "hello"; String k = x; } }
@@ -362,19 +344,7 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 			}
 		});
 		ClassScope enumClassScope = new ClassScope(enumClass, currentScope, context);
-		for (ClassWrapper innerClass : enumClass.getDeclaredClasses()) {
-			/*
-			 * TODO : that's maybe not correct. Need to check what's the diff between static and non static inner
-			 * classes of enumrations
-			 */
-			enumClassScope.addType(innerClass);
-		}
-		for (Field field : enumClass.getDeclaredFields()) {
-			enumClassScope.addField(field);
-		}
-		for (Method method : enumClass.getDeclaredMethods()) {
-			enumClassScope.addMethod(method);
-		}
+
 		super.visit(n, enumClassScope);
 
 	}
@@ -401,22 +371,13 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 			ClassWrapper anonymousClass = classLoader.loadClass(
 					classScope.getClazz().getName() + "$" + anonymousClassNumber).getOrThrow();
 			ClassScope anonymousClassScope = new ClassScope(anonymousClass, scope, context);
-			for (ClassWrapper innerClass : anonymousClass.getDeclaredClasses()) {
-				anonymousClassScope.addType(innerClass);
-			}
-			for (Field field : anonymousClass.getDeclaredFields()) {
-				anonymousClassScope.addField(field);
-			}
-			for (Method method : anonymousClass.getDeclaredMethods()) {
-				anonymousClassScope.addMethod(method);
-			}
 
 			for (BodyDeclaration member : n.getAnonymousClassBody()) {
 				member.accept(this, anonymousClassScope);
 			}
 		}
 		// TODO add potential generic params
-		expressionType(n, resolveType(scope, n.getType()));
+		resolvedType(n, resolveType(scope, n.getType()));
 		scope(n, scope);
 	}
 
@@ -467,11 +428,11 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 	@Override
 	public void visit(ArrayAccessExpr n, Scope arg) {
 		super.visit(n, arg);
-		TypeWrapper arrayType = expressionType(n.getName());
+		TypeWrapper arrayType = resolvedType(n.getName());
 		if (arrayType.getType() instanceof GenericArrayType) {
-			expressionType(n, TypeWrappers.wrap(((GenericArrayType) arrayType.getType()).getGenericComponentType()));
+			resolvedType(n, TypeWrappers.wrap(((GenericArrayType) arrayType.getType()).getGenericComponentType()));
 		} else if (arrayType.getType() instanceof Class<?>) {
-			expressionType(n, TypeWrappers.wrap(((Class<?>) arrayType.getType()).getComponentType()));
+			resolvedType(n, TypeWrappers.wrap(((Class<?>) arrayType.getType()).getComponentType()));
 		} else {
 			throw new IllegalStateException("Unknown reflect type for node:" + n);
 		}
@@ -492,155 +453,159 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 	@Override
 	public void visit(AssignExpr n, Scope arg) {
 		super.visit(n, arg);
-		expressionType(n, expressionType(n.getTarget()));
+		resolvedType(n, resolvedType(n.getTarget()));
 	}
 
 	@Override
 	public void visit(BinaryExpr n, Scope arg) {
 		super.visit(n, arg);
 		if (Operators.isLogical(n.getOperator())) {
-			expressionType(n, TypeWrappers.wrap(boolean.class));
+			resolvedType(n, TypeWrappers.wrap(boolean.class));
 		} else if (n.getOperator() == Operator.plus
-				&& (String.class.equals(expressionType(n.getLeft())) || String.class
-						.equals(expressionType(n.getRight())))) {
+				&& (String.class.equals(resolvedType(n.getLeft())) || String.class.equals(resolvedType(n.getRight())))) {
 			// if at least one is string, the result would be string
-			expressionType(n, TypeWrappers.wrap(String.class));
+			resolvedType(n, TypeWrappers.wrap(String.class));
 		} else {
 			// Number is not very exact, but it's enough for our purposes
-			expressionType(n, TypeWrappers.wrap(Number.class));
+			resolvedType(n, TypeWrappers.wrap(Number.class));
 		}
 	}
 
 	@Override
 	public void visit(CastExpr n, Scope arg) {
 		super.visit(n, arg);
-		ClassWrapper type = resolveType(arg, n.getType());
-		expressionType(n, type);
+		TypeWrapper type = resolveType(arg, n.getType());
+		resolvedType(n, type);
 	}
 
 	@Override
 	public void visit(ClassExpr n, Scope arg) {
 		super.visit(n, arg);
-		ClassWrapper type = resolveType(arg, n.getType());
-		expressionType(n, type);
+		TypeWrapper type = resolveType(arg, n.getType());
+		resolvedType(n, type);
 	}
 
 	@Override
 	public void visit(ConditionalExpr n, Scope arg) {
 		super.visit(n, arg);
-		expressionType(n,
-				expressionType((n.getThenExpr() instanceof NullLiteralExpr) ? n.getElseExpr() : n.getThenExpr()));
+		resolvedType(n, resolvedType((n.getThenExpr() instanceof NullLiteralExpr) ? n.getElseExpr() : n.getThenExpr()));
 	}
 
 	@Override
 	public void visit(EnclosedExpr n, Scope arg) {
 		super.visit(n, arg);
-		expressionType(n, expressionType(n.getInner()));
+		resolvedType(n, resolvedType(n.getInner()));
 	}
 
 	@Override
 	public void visit(InstanceOfExpr n, Scope arg) {
 		super.visit(n, arg);
-		expressionType(n, TypeWrappers.wrap(boolean.class));
+		resolvedType(n, TypeWrappers.wrap(boolean.class));
 
 	}
 
 	@Override
 	public void visit(StringLiteralExpr n, Scope arg) {
 		super.visit(n, arg);
-		expressionType(n, TypeWrappers.wrap(String.class));
+		resolvedType(n, TypeWrappers.wrap(String.class));
 	}
 
 	@Override
 	public void visit(IntegerLiteralExpr n, Scope arg) {
 		super.visit(n, arg);
-		expressionType(n, TypeWrappers.wrap(int.class));
+		resolvedType(n, TypeWrappers.wrap(int.class));
 	}
 
 	@Override
 	public void visit(LongLiteralExpr n, Scope arg) {
 		super.visit(n, arg);
-		expressionType(n, TypeWrappers.wrap(long.class));
+		resolvedType(n, TypeWrappers.wrap(long.class));
 	}
 
 	@Override
 	public void visit(IntegerLiteralMinValueExpr n, Scope arg) {
 		super.visit(n, arg);
-		expressionType(n, TypeWrappers.wrap(int.class));
+		resolvedType(n, TypeWrappers.wrap(int.class));
 
 	}
 
 	@Override
 	public void visit(LongLiteralMinValueExpr n, Scope arg) {
 		super.visit(n, arg);
-		expressionType(n, TypeWrappers.wrap(long.class));
+		resolvedType(n, TypeWrappers.wrap(long.class));
 
 	}
 
 	@Override
 	public void visit(CharLiteralExpr n, Scope arg) {
 		super.visit(n, arg);
-		expressionType(n, TypeWrappers.wrap(char.class));
+		resolvedType(n, TypeWrappers.wrap(char.class));
 	}
 
 	@Override
 	public void visit(DoubleLiteralExpr n, Scope arg) {
 		super.visit(n, arg);
-		expressionType(n, TypeWrappers.wrap(double.class));
+		resolvedType(n, TypeWrappers.wrap(n.getValue().endsWith("f") || n.getValue().endsWith("F") ? float.class
+				: double.class));
 	}
 
 	@Override
 	public void visit(BooleanLiteralExpr n, Scope arg) {
 		super.visit(n, arg);
-		expressionType(n, TypeWrappers.wrap(boolean.class));
+		resolvedType(n, TypeWrappers.wrap(boolean.class));
 	}
 
 	@Override
 	public void visit(NullLiteralExpr n, Scope arg) {
 		super.visit(n, arg);
-		expressionType(n, null);
+		resolvedType(n, null);
 	}
 
 	@Override
 	public void visit(MethodCallExpr n, Scope arg) {
 		super.visit(n, arg);
-		Collection<Method> methods;
-		if (n.getScope() == null) {
-			MethodsWithScope ms = arg.resolveMethods(n.getName());
-			PreConditions.checkState(ms != null, "The method %s should've been resolved", n.getName());
-			methods = ms.getMethods();
+		MethodWrapper method;
+		TypeWrapper[] argumentTypes = null;
+		if (n.getArgs() != null) {
+			argumentTypes = new TypeWrapper[n.getArgs().size()];
+			for (int i = 0; i < n.getArgs().size(); ++i) {
+				argumentTypes[i] = resolvedType(n.getArgs().get(i));
+			}
 		} else {
-			TypeWrapper scopeType = expressionType(n.getScope());
+			argumentTypes = new TypeWrapper[0];
+		}
+		if (n.getScope() == null) {
+			MethodsWithScope ms = arg.resolveMethod(n.getName(), argumentTypes);
+			PreConditions.checkState(ms != null, "The method %s should've been resolved", n.getName());
+			method = ms.getMethod();
+		} else {
+			TypeWrapper scopeType = resolvedType(n.getScope());
 			PreConditions.checkState(scopeType != null, "The method %s 's scope should've been resolved", n.getName());
-			methods = scopeType.getDeclaredMethods(n.getName());
+			method = scopeType.findMethod(n.getName(), argumentTypes).getOrThrow();
 		}
-		PreConditions.checkState(!methods.isEmpty(), "At least one method should be found");
-		if (methods.size() > 1) {
-			// TODO the method may belong to a bridge library. so a resolution with param types should be done
-		}
-		Method m = methods.iterator().next();
-		expressionType(n, TypeWrappers.wrap(m.getGenericReturnType()));
-		resolvedMethod(n, m);
+
+		resolvedType(n, method.getReturnType());
+		resolvedMethod(n, method);
 
 	}
 
 	@Override
 	public void visit(FieldAccessExpr n, Scope arg) {
 		super.visit(n, arg);
-		TypeWrapper scopeType = expressionType(n.getScope());
+		TypeWrapper scopeType = resolvedType(n.getScope());
 		if (scopeType == null) {
-			// if the scope's type is null than it's because is part of a qualified class name x.y.z -> so try to
+			// if the scope's type is null, it's because is part of a qualified class name x.y.z -> so try to
 			// resolve it
 			TypeWithScope exprType = arg.resolveType(n.toString());
 			if (exprType != null) {
-				expressionType(n, exprType.getClazz());
+				resolvedType(n, exprType.getType());
 			} else {
-				expressionType(n, null);
+				resolvedType(n, null);
 			}
 		} else {
 			// if not -> resolve the field in the type
-			Field field = scopeType.getDeclaredField(n.getField()).getOrThrow();
-			expressionType(n, TypeWrappers.wrap(field.getGenericType()));
+			FieldWrapper field = scopeType.findField(n.getField()).getOrThrow();
+			resolvedType(n, field.getType());
 		}
 
 	}
@@ -652,10 +617,10 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 		if (parent instanceof QualifiedNameExpr || parent instanceof ImportDeclaration
 				|| parent instanceof PackageDeclaration) {
 			// don't bother as is only part of a package or import declaration
-			expressionType(n, null);
+			resolvedType(n, null);
 		} else if (parent instanceof SwitchEntryStmt) {
 			// this is an enum label -> the type is the enum from the selector
-			expressionType(n, expressionType(((SwitchStmt) parent(parent)).getSelector()));
+			resolvedType(n, resolvedType(((SwitchStmt) parent(parent)).getSelector()));
 		} else {
 
 			// here n can be:
@@ -667,12 +632,11 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 			VariableWithScope var = arg.resolveVariable(n.getName());
 			if (var != null) {
 				resolvedVariable(n, var.getVariable());
-				expressionType(n, var.getVariable().getType());
+				resolvedType(n, var.getVariable().getType());
 			} else {
 				TypeWithScope type = arg.resolveType(n.getName());
 				if (type != null) {
-					resolvedType(n, type.getClazz());
-					expressionType(n, type.getClazz());
+					resolvedType(n, type.getType());
 				}
 			}
 		}
@@ -682,7 +646,7 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 	@Override
 	public void visit(QualifiedNameExpr n, Scope arg) {
 		// don't bother as is only part of a package or import declaration
-		expressionType(n, null);
+		resolvedType(n, null);
 		super.visit(n, arg);
 	}
 
@@ -690,10 +654,10 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 	public void visit(ThisExpr n, Scope arg) {
 		super.visit(n, arg);
 		if (n.getClassExpr() != null) {
-			expressionType(n, expressionType(n.getClassExpr()));
+			resolvedType(n, resolvedType(n.getClassExpr()));
 		} else {
 			ClassScope classScope = arg.closest(ClassScope.class);
-			expressionType(n, classScope.getClazz());
+			resolvedType(n, classScope.getClazz());
 		}
 	}
 
@@ -702,18 +666,18 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 		super.visit(n, arg);
 		ClassWrapper thisClazz;
 		if (n.getClassExpr() != null) {
-			thisClazz = (ClassWrapper) expressionType(n.getClassExpr());
+			thisClazz = (ClassWrapper) resolvedType(n.getClassExpr());
 		} else {
 			ClassScope classScope = arg.closest(ClassScope.class);
 			thisClazz = classScope.getClazz();
 		}
-		expressionType(n, thisClazz.getSuperclass().getOrElse((ClassWrapper) TypeWrappers.wrap(Object.class)));
+		resolvedType(n, thisClazz.getSuperclass().getOrElse(TypeWrappers.wrap(Object.class)));
 	}
 
 	@Override
 	public void visit(UnaryExpr n, Scope arg) {
 		super.visit(n, arg);
-		expressionType(n, expressionType(n.getExpr()));
+		resolvedType(n, resolvedType(n.getExpr()));
 	}
 
 }

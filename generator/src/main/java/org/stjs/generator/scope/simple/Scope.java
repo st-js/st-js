@@ -2,6 +2,8 @@ package org.stjs.generator.scope.simple;
 
 import java.util.List;
 
+import org.stjs.generator.scope.classloader.TypeWrapper;
+
 public interface Scope {
 
 	public interface ScopeVisitor<T> {
@@ -18,7 +20,7 @@ public interface Scope {
 
 	public VariableWithScope resolveVariable(String string);
 
-	public MethodsWithScope resolveMethods(String name);
+	public MethodsWithScope resolveMethod(String name, TypeWrapper... paramTypes);
 
 	Scope addChild(Scope abstractScope);
 

@@ -1,22 +1,22 @@
 package org.stjs.generator.scope.simple;
 
-import org.stjs.generator.scope.classloader.ClassWrapper;
+import org.stjs.generator.scope.classloader.TypeWrapper;
 
 public class TypeWithScope {
 	private final Scope scope;
-	private final ClassWrapper clazz;
+	private final TypeWrapper type;
 
-	TypeWithScope(Scope scope, ClassWrapper clazz) {
+	TypeWithScope(Scope scope, TypeWrapper type) {
 		this.scope = scope;
-		this.clazz = clazz;
+		this.type = type;
 	}
 
 	public Scope getScope() {
 		return scope;
 	}
 
-	public ClassWrapper getClazz() {
-		return clazz;
+	public TypeWrapper getType() {
+		return type;
 	}
 
 }

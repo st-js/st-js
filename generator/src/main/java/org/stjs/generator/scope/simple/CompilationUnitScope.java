@@ -1,6 +1,6 @@
 package org.stjs.generator.scope.simple;
 
-import static org.stjs.generator.scope.classloader.ClassWrapper.wrap;
+import static org.stjs.generator.scope.classloader.TypeWrappers.wrap;
 import japa.parser.ast.expr.NameExpr;
 
 import java.util.Set;

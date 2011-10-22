@@ -1,11 +1,11 @@
 package org.stjs.generator.scope.simple;
 
-import org.stjs.generator.scope.classloader.ClassWrapper;
+import org.stjs.generator.scope.classloader.TypeWrapper;
 
 public interface Variable {
 
 	String getName();
-	
-	ClassWrapper getType();
+
+	TypeWrapper getType();
 
 }

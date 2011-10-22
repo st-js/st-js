@@ -1,15 +1,13 @@
 package org.stjs.generator.scope.simple;
 
-import static com.google.common.collect.Iterables.concat;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.scope.classloader.ClassWrapper;
+import org.stjs.generator.scope.classloader.FieldWrapper;
+import org.stjs.generator.scope.classloader.MethodWrapper;
+import org.stjs.generator.scope.classloader.TypeWrapper;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
@@ -36,34 +34,37 @@ public abstract class AbstractScope implements Scope {
 
 	private Map<String, Variable> variables = Maps.newHashMap();
 
-	private Multimap<String, Method> methods = ArrayListMultimap.create();
+	private Multimap<String, MethodWrapper> methods = ArrayListMultimap.create();
 
-	private Map<String, ClassWrapper> types = Maps.newHashMap();
+	private Map<String, TypeWrapper> types = Maps.newHashMap();
 
 	protected GenerationContext getContext() {
 		return context;
 	}
 
-	public void addField(Field field) {
-		variables.put(field.getName(), new FieldVariable(field));
+	public void addField(FieldWrapper field) {
+		variables.put(field.getName(), field);
 	}
 
-	public void addMethods(String alias, List<Method> methods) {
+	public void addMethods(String alias, List<MethodWrapper> methods) {
 		this.methods.putAll(alias, methods);
 	}
 
-	public void addMethod(Method method) {
+	public void addMethod(MethodWrapper method) {
 		methods.put(method.getName(), method);
 	}
 
-	public void addType(ClassWrapper clazz) {
+	public void addType(TypeWrapper clazz) {
 		types.put(clazz.getSimpleName(), clazz);
 	}
 
 	public TypeWithScope resolveType(String name) {
-		ClassWrapper classWrapper = types.get(name);
+		TypeWrapper classWrapper = types.get(name);
 		if (classWrapper != null) {
-			context.addResolvedImport(classWrapper.getName());
+			if (classWrapper.isImportable()) {
+				// only classes are used as imports
+				context.addResolvedImport(classWrapper.getName());
+			}
 			return new TypeWithScope(this, classWrapper);
 		}
 		if (parent != null) {
@@ -90,19 +91,19 @@ public abstract class AbstractScope implements Scope {
 		return (T) currentScope;
 	}
 
-	@Override
-	public MethodsWithScope resolveMethods(String name) {
-		Collection<Method> methodList = methods.get(name);
-		if (parent != null) {
-			MethodsWithScope parentMethods = parent.resolveMethods(name);
-			if (parentMethods != null) {
-				// TODO : remove overridden definitions!
-				// XXX: in fact is a scope per method
-				return new MethodsWithScope(parentMethods.getScope(), methodList != null ? ImmutableList.copyOf(concat(
-						parentMethods.getMethods(), methodList)) : parentMethods.getMethods());
+	public MethodsWithScope resolveMethod(final String name, TypeWrapper... paramTypes) {
+		Collection<MethodWrapper> methodList = methods.get(name);
+		if (methodList != null) {
+			for (MethodWrapper w : methodList) {
+				if (w.isCompatibleParameterTypes(paramTypes)) {
+					return new MethodsWithScope(this, w);
+				}
 			}
 		}
-		return methodList != null ? new MethodsWithScope(this, methodList) : null;
+		if (parent != null) {
+			return parent.resolveMethod(name, paramTypes);
+		}
+		return null;
 	}
 
 	@Override
@@ -124,12 +125,12 @@ public abstract class AbstractScope implements Scope {
 	}
 
 	@VisibleForTesting
-	public Collection<Method> getMethods(String name) {
+	public Collection<MethodWrapper> getMethods(String name) {
 		return methods.get(name);
 	}
 
 	@VisibleForTesting
-	public ClassWrapper getType(String name) {
+	public TypeWrapper getType(String name) {
 		return types.get(name);
 	}
 
