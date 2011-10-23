@@ -13,23 +13,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.stjs.javascript.jquery;
+package org.stjs.shared;
 
-import org.stjs.javascript.Array;
-import org.stjs.javascript.JsFunction;
-
-public abstract class SuccessListener implements JsFunction<Void> {
-	public abstract void onSuccess(Object data);
-	@Override
-	public Void $invoke(Object... args) {
-		return null;
-	}
-	@Override
-	public Void apply(Object receiver, Array<?> args) {
-		return null;
-	}
-	@Override
-	public Void call(Object receiver, Object... args) {
-		return null;
-	}
+public interface SortFunction<V> {
+	public int compare(V a, V b);
 }

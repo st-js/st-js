@@ -30,6 +30,12 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.stjs</groupId>
+			<artifactId>jquery</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- tests -->
 		<dependency>

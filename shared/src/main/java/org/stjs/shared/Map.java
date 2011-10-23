@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.stjs.javascript;
+package org.stjs.shared;
 
 /**
  * This interface represents a normal object in javascript (that acts as a map). The key can be any object type. But be aware that in Javascript

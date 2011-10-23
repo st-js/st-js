@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.stjs.javascript;
+package org.stjs.server;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +23,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.stjs.javascript.functions.Callback1;
+import org.stjs.shared.Array;
+import org.stjs.shared.SortFunction;
+import org.stjs.shared.functions.Callback1;
 
 /**
  * This class implements the {@link Array} interface to be used on the server side.

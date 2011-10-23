@@ -1,4 +1,4 @@
-package org.stjs.javascript.functions;
+package org.stjs.shared.functions;
 
 public interface Function0<R> {
 	public R $invoke();

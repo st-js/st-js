@@ -22,7 +22,6 @@ import static org.stjs.javascript.Global.window;
 import static org.stjs.javascript.JSNumberAdapter.toFixed;
 import static org.stjs.javascript.jquery.GlobalJQuery.$;
 
-import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;
 import org.stjs.javascript.dom.HTMLElement;
 import org.stjs.javascript.jquery.Event;
@@ -30,6 +29,7 @@ import org.stjs.javascript.jquery.EventHandler;
 import org.stjs.javascript.jquery.EvtHandler;
 import org.stjs.javascript.jquery.JQuery;
 import org.stjs.javascript.jquery.SuccessListener;
+import org.stjs.shared.Array;
 
 public class StockApplication {
 	private Array<String> stocks;

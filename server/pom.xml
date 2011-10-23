@@ -16,7 +16,11 @@
 	</properties>
 
 	<dependencies>
-
+		<dependency>
+			<groupId>org.stjs</groupId>
+			<artifactId>shared</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 
 

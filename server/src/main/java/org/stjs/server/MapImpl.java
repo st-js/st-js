@@ -13,10 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.stjs.javascript;
+package org.stjs.server;
 
 import java.util.HashMap;
 import java.util.Iterator;
+
+import org.stjs.shared.Map;
 
 /**
  * This class implements the {@link Map} interface to be used on the server side.

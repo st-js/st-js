@@ -16,6 +16,7 @@
 package org.stjs.javascript;
 
 import org.stjs.javascript.annotation.Adapter;
+import org.stjs.shared.Array;
 
 /**
  * here are the methods existent in Javascript for number objects and inexistent in the Java counterpart. The generator
