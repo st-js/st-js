@@ -3,14 +3,17 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.stjs</groupId>
-	<artifactId>parent</artifactId>
+	<artifactId>stjs</artifactId>
 	<version>1.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Strongly-typed Javascript</name>
 
 	<modules>
 		<module>generator</module>
+		<module>shared</module>
 		<module>js-lib</module>
+		<module>jquery</module>
+		<module>server</module>
 		<module>maven-plugin</module>
 		<module>test-helper</module>
 		<module>examples</module>

@@ -8,7 +8,7 @@
 
 	<parent>
 		<groupId>org.stjs</groupId>
-		<artifactId>parent</artifactId>
+		<artifactId>stjs</artifactId>
 		<version>1.0.1-SNAPSHOT</version>
 	</parent>
 
