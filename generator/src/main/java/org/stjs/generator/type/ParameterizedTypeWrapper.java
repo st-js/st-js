@@ -13,27 +13,28 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.stjs.generator.scope.simple;
+package org.stjs.generator.type;
 
-import org.stjs.generator.scope.Scope;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
-public class NameScopeWalker {
-	private final Scope scope;
-	private int currentChild = 0;
+/**
+ * This is a wrapper around a parameterized type. Basically it was the same behavior as a regular class
+ * 
+ * @author acraciun
+ * 
+ */
+public class ParameterizedTypeWrapper extends ClassWrapper {
+	private final ParameterizedType type;
 
-	public NameScopeWalker(Scope scope) {
-		this.scope = scope;
+	public ParameterizedTypeWrapper(ParameterizedType type) {
+		super(getRawClazz(type.getRawType()));
+		this.type = type;
 	}
 
-	public Scope getScope() {
-		return scope;
-	}
-
-	public NameScopeWalker nextChild() {
-		if (currentChild >= scope.getChildren().size()) {
-			throw new IllegalStateException("The scope [" + scope + "] does not have a child #" + currentChild);
-		}
-		return new NameScopeWalker(scope.getChildren().get(currentChild++));
+	@Override
+	public Type getType() {
+		return type;
 	}
 
 }

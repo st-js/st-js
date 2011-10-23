@@ -17,6 +17,8 @@ package org.stjs.generator;
 
 import java.io.File;
 
+import org.stjs.generator.ast.SourcePosition;
+
 /**
  * This is the exception thrown by the Generator.
  * 

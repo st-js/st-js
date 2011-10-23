@@ -1,12 +1,25 @@
+/**
+ *  Copyright 2011 Alexandru Craciun, Eyal Kaspi
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package org.stjs.generator.scope;
 
 import japa.parser.ast.expr.MethodCallExpr;
 
-import org.stjs.generator.ASTNodeData;
-import org.stjs.generator.scope.classloader.MethodWrapper;
-import org.stjs.generator.scope.classloader.TypeWrapper;
-import org.stjs.generator.scope.simple.ClassScope;
-import org.stjs.generator.scope.simple.Scope;
+import org.stjs.generator.ast.ASTNodeData;
+import org.stjs.generator.type.MethodWrapper;
+import org.stjs.generator.type.TypeWrapper;
 
 public class ScopeUtils {
 	public static boolean isDeclaredInThisScope(MethodCallExpr n) {

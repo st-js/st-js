@@ -7,8 +7,8 @@ import static org.junit.Assert.assertTrue;
 import java.lang.reflect.ParameterizedType;
 
 import org.junit.Test;
-import org.stjs.generator.scope.classloader.TypeWrapper;
-import org.stjs.generator.scope.classloader.TypeWrappers;
+import org.stjs.generator.type.TypeWrapper;
+import org.stjs.generator.type.TypeWrappers;
 import org.stjs.javascript.annotation.GlobalScope;
 
 public class WildcardTypeWrapperTest {

@@ -13,27 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.stjs.generator.scope.simple;
+package org.stjs.generator.scope;
 
-import org.stjs.generator.scope.Scope;
+import org.stjs.generator.type.TypeWrapper;
 
-public class NameScopeWalker {
+public class TypeWithScope {
 	private final Scope scope;
-	private int currentChild = 0;
+	private final TypeWrapper type;
 
-	public NameScopeWalker(Scope scope) {
+	TypeWithScope(Scope scope, TypeWrapper type) {
 		this.scope = scope;
+		this.type = type;
 	}
 
 	public Scope getScope() {
 		return scope;
 	}
 
-	public NameScopeWalker nextChild() {
-		if (currentChild >= scope.getChildren().size()) {
-			throw new IllegalStateException("The scope [" + scope + "] does not have a child #" + currentChild);
-		}
-		return new NameScopeWalker(scope.getChildren().get(currentChild++));
+	public TypeWrapper getType() {
+		return type;
 	}
 
 }

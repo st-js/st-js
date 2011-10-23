@@ -33,10 +33,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptGenerationException;
-import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
-import org.stjs.generator.scope.classloader.FieldWrapper;
-import org.stjs.generator.scope.simple.CompilationUnitScope;
-import org.stjs.generator.scope.simple.SimpleScopeBuilder;
+import org.stjs.generator.scope.CompilationUnitScope;
+import org.stjs.generator.scope.ScopeBuilder;
+import org.stjs.generator.type.ClassLoaderWrapper;
+import org.stjs.generator.type.FieldWrapper;
 
 @Ignore
 public class ScopeTest {
@@ -50,7 +50,7 @@ public class ScopeTest {
 
 		ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader());
 		GenerationContext context = new GenerationContext(new File(clazz));
-		SimpleScopeBuilder builder = new SimpleScopeBuilder(classLoader, context);
+		ScopeBuilder builder = new ScopeBuilder(classLoader, context);
 		CompilationUnitScope scope = new CompilationUnitScope(classLoader, context);
 
 		builder.visit(cu, scope);

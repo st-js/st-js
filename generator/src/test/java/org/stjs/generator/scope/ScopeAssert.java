@@ -20,9 +20,9 @@ import japa.parser.ast.Node;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.stjs.generator.handlers.ForEachNodeVisitor;
-import org.stjs.generator.scope.simple.CompilationUnitScope;
-import org.stjs.generator.scope.simple.VariableWithScope;
+import org.stjs.generator.scope.CompilationUnitScope;
+import org.stjs.generator.scope.VariableWithScope;
+import org.stjs.generator.visitor.ForEachNodeVisitor;
 
 public class ScopeAssert {
 	private static final int MY_TAB_CONFIG = 4;

@@ -14,9 +14,14 @@ import java.io.IOException;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
-import org.stjs.generator.scope.classloader.FieldWrapper;
-import org.stjs.generator.scope.classloader.MethodWrapper;
+import org.stjs.generator.scope.AbstractScope;
+import org.stjs.generator.scope.CompilationUnitScope;
+import org.stjs.generator.scope.Scope;
+import org.stjs.generator.scope.ScopeBuilder;
+import org.stjs.generator.type.ClassLoaderWrapper;
+import org.stjs.generator.type.FieldWrapper;
+import org.stjs.generator.type.MethodWrapper;
+import org.stjs.generator.variable.Variable;
 
 import test.generator.scopes.SimpleClass;
 import test.generator.scopes.SimpleClass.AmbiguousName;
@@ -36,7 +41,7 @@ public class SimpleScopeBuilderTest {
 		CompilationUnit compilationUnit = JavaParser.parse(new File(path));
 		ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader());
 		GenerationContext context = new GenerationContext(new File(path));
-		SimpleScopeBuilder builder = new SimpleScopeBuilder(classLoader, context);
+		ScopeBuilder builder = new ScopeBuilder(classLoader, context);
 		CompilationUnitScope scope = new CompilationUnitScope(classLoader, context);
 
 		builder.visit(compilationUnit, scope);

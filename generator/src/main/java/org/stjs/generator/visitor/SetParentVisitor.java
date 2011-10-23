@@ -13,25 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.stjs.generator.utils;
+package org.stjs.generator.visitor;
 
-import japa.parser.ast.expr.BinaryExpr;
-import japa.parser.ast.expr.BinaryExpr.Operator;
+import japa.parser.ast.Node;
 
-import java.util.EnumSet;
+import org.stjs.generator.GenerationContext;
+import org.stjs.generator.ast.ASTNodeData;
 
 /**
- * This class is a helper for the {@link BinaryExpr.Operator} class
+ * This visitor go to every node and sets it's parent
  * 
  * @author acraciun
  * 
  */
-public class Operators {
-	private static final EnumSet<Operator> logicalOperators = EnumSet.of(Operator.and, Operator.notEquals,
-			Operator.equals, Operator.greater, Operator.greaterEquals, Operator.less, Operator.lessEquals, Operator.or,
-			Operator.xor);
+public class SetParentVisitor extends ForEachNodeVisitor<GenerationContext> {
+	private Node currentParent = null;
 
-	public static boolean isLogical(Operator op) {
-		return logicalOperators.contains(op);
+	@Override
+	protected void before(Node node, GenerationContext arg) {
+		node.setData(new ASTNodeData(currentParent));
+		currentParent = node;
+	}
+
+	@Override
+	protected void after(Node node, GenerationContext arg) {
+		currentParent = ((ASTNodeData) node.getData()).getParent();
 	}
 }

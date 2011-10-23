@@ -34,11 +34,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.stjs.generator.handlers.SetParentVisitor;
-import org.stjs.generator.handlers.SimpleScopeGeneratorVisitor;
-import org.stjs.generator.scope.classloader.ClassLoaderWrapper;
-import org.stjs.generator.scope.simple.CompilationUnitScope;
-import org.stjs.generator.scope.simple.SimpleScopeBuilder;
+import org.stjs.generator.scope.CompilationUnitScope;
+import org.stjs.generator.scope.ScopeBuilder;
+import org.stjs.generator.type.ClassLoaderWrapper;
+import org.stjs.generator.visitor.SetParentVisitor;
+import org.stjs.generator.writer.JavascriptWriterVisitor;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
@@ -89,7 +89,7 @@ public class Generator {
 		try {
 			// 3. generate the javascript code
 
-			SimpleScopeGeneratorVisitor generatorVisitor = new SimpleScopeGeneratorVisitor();
+			JavascriptWriterVisitor generatorVisitor = new JavascriptWriterVisitor();
 			generatorVisitor.visit(cu, context);
 
 			writer = new FileWriter(outputFile, append);
@@ -135,7 +135,7 @@ public class Generator {
 			// ASTUtils.dumpXML(cu);
 
 			// 1. read the scope of all declared variables and methods
-			SimpleScopeBuilder scopes = new SimpleScopeBuilder(new ClassLoaderWrapper(builtProjectClassLoader), context);
+			ScopeBuilder scopes = new ScopeBuilder(new ClassLoaderWrapper(builtProjectClassLoader), context);
 			scopes.visit(cu, rootScope);
 			// rootScope.dump(" ");
 
