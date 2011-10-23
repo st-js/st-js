@@ -8,7 +8,9 @@ import static java.util.Arrays.asList;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -17,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.Option;
 import org.stjs.generator.utils.PreConditions;
 
@@ -27,15 +30,17 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import com.google.common.primitives.Primitives;
 
+/**
+ * 
+ * @author acraciun,ekaspi
+ * 
+ */
 public class ClassWrapper implements TypeWrapper {
 	private final Class<?> clazz;
 
 	private Map<String, FieldWrapper> fields = null;
 	private Multimap<String, MethodWrapper> methods = null;
-
-	private TypeWrapper componentType;
 
 	public ClassWrapper(Class<?> clazz) {
 		this.clazz = clazz;
@@ -88,6 +93,9 @@ public class ClassWrapper implements TypeWrapper {
 		if (type instanceof ParameterizedType) {
 			return getRawClazz(((ParameterizedType) type).getRawType());
 		}
+		if (type instanceof GenericArrayType) {
+			return Object[].class;
+		}
 		// TODO what to do exacly here !?
 		return Object.class;
 	}
@@ -105,7 +113,9 @@ public class ClassWrapper implements TypeWrapper {
 			}
 			return typeArguments;
 		}
-
+		if (type instanceof GenericArrayType) {
+			return null;
+		}
 		throw new RuntimeException("Received unknown type:" + type + " of class:" + type.getClass());
 	}
 
@@ -134,6 +144,12 @@ public class ClassWrapper implements TypeWrapper {
 						buildFieldWrapper(f.getName(), TypeWrappers.wrap(f.getGenericType()), f.getModifiers(),
 								rawClass, actualTypeArgs));
 			}
+		}
+		if (rawClass.isArray()) {
+			// add the "length" field not listed for generic arrays
+			fields.put(
+					"length",
+					buildFieldWrapper("length", TypeWrappers.wrap(int.class), Modifier.PUBLIC, rawClass, actualTypeArgs));
 		}
 	}
 
@@ -328,19 +344,6 @@ public class ClassWrapper implements TypeWrapper {
 		return clazz == other.clazz;
 	}
 
-	public boolean isParentClassOf(ClassWrapper otherClass) {
-		Class<?> classPointer = otherClass.getClazz();
-		do {
-			classPointer = classPointer.getSuperclass();
-			if (classPointer == null) {
-				return false;
-			}
-			if (classPointer == this.clazz) {
-				return true;
-			}
-		} while (true);
-	}
-
 	public boolean isInnerType() {
 		return clazz.getDeclaringClass() != null;
 	}
@@ -366,23 +369,7 @@ public class ClassWrapper implements TypeWrapper {
 			// assignable from a null value
 			return true;
 		}
-		if (typeWrapper instanceof ClassWrapper) {
-			// try first normal assignable
-			Class<?> otherClass = ((ClassWrapper) typeWrapper).clazz;
-			if (clazz.isAssignableFrom(otherClass)) {
-				return true;
-			}
-			// try primitives
-			if (Primitives.wrap(clazz).isAssignableFrom(Primitives.wrap(otherClass))) {
-				return true;
-			}
-
-			// go on with primitive rules double/float -> accept long/int -> accept byte/char (but this only if there is
-			// none more specific!)
-			return false;
-		}
-		// TODO do for the other types
-		return false;
+		return ClassUtils.isAssignableFromType(clazz, typeWrapper.getType());
 	}
 
 	@Override
@@ -393,8 +380,6 @@ public class ClassWrapper implements TypeWrapper {
 	@Override
 	public TypeWrapper getComponentType() {
 		prepareFieldsAndMethods();
-		// TODO fix this
-
 		return TypeWrappers.wrap(clazz.getComponentType());
 	}
 }

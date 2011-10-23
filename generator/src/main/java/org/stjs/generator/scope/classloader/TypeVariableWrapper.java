@@ -80,12 +80,6 @@ public class TypeVariableWrapper<D extends GenericDeclaration> implements TypeWr
 	}
 
 	@Override
-	public boolean isParentClassOf(ClassWrapper clazz) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
 	public boolean hasAnnotation(Class<? extends Annotation> a) {
 		for (TypeWrapper bound : boundsWrappers) {
 			if (bound.hasAnnotation(a)) {
@@ -97,8 +91,46 @@ public class TypeVariableWrapper<D extends GenericDeclaration> implements TypeWr
 
 	@Override
 	public boolean isAssignableFrom(TypeWrapper typeWrapper) {
-		// TODO Auto-generated method stub
+		if (typeWrapper == null) {
+			return true;
+		}
+		// it's different from what happens when the given typeWrapper corresponds to a variable assignment inside the
+		// method/class or is the parameter of the method i.e
+		// public static <T> void method(T t){}
+		// in the method i cannot to t=1;
+		// by i can call method(1)
+
+		// outside the method
+		if (typeVariable.getBounds().length == 0) {
+			return true;
+		}
+
+		for (TypeWrapper bound : boundsWrappers) {
+			if (bound.isAssignableFrom(typeWrapper)) {
+				return true;
+			}
+		}
 		return false;
+
+		// inside the method
+		/**
+		 * <pre>
+		 * if (!(typeWrapper instanceof TypeVariableWrapper)) {
+		 * 	return false;
+		 * }
+		 * 
+		 * TypeVariable&lt;?&gt; otherType = ((TypeVariableWrapper&lt;?&gt;) typeWrapper).typeVariable;
+		 * if (otherType == typeVariable) {
+		 * 	return true;
+		 * }
+		 * for (Type bound : otherType.getBounds()) {
+		 * 	if (typeVariable == bound) {
+		 * 		return true;
+		 * 	}
+		 * }
+		 * return false;
+		 * </pre>
+		 */
 	}
 
 	@Override

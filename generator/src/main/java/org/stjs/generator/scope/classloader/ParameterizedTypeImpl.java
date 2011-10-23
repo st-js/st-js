@@ -1,4 +1,4 @@
-package org.stjs.generator.scope;
+package org.stjs.generator.scope.classloader;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

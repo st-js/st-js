@@ -571,15 +571,20 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 			}
 			// special construction to handle the inline body
 			// build a special type called _InlineType to handle this
-			/*
-			 * FIXME : fix inline types printer.printLn("(function(){"); ClassOrInterfaceDeclaration inlineFakeClass =
-			 * buildClassDeclaration(GeneratorConstants.SPECIAL_INLINE_TYPE, n.getType().getName(),
-			 * n.getAnonymousClassBody(), n.getArgs()); inlineFakeClass.setData(n.getData());
-			 * inlineFakeClass.accept(this, context);
-			 * 
-			 * printer.printLn(""); printer.print("return new ").print(GeneratorConstants.SPECIAL_INLINE_TYPE);
-			 * printArguments(n.getArgs(), context); printer.printLn(";"); printer.print("})()");
-			 */
+
+			// FIXME : fix inline types
+			printer.printLn("(function(){");
+			ClassOrInterfaceDeclaration inlineFakeClass = buildClassDeclaration(GeneratorConstants.SPECIAL_INLINE_TYPE,
+					n.getType().getName(), n.getAnonymousClassBody(), n.getArgs());
+			inlineFakeClass.setData(n.getData());
+			inlineFakeClass.accept(this, context);
+
+			printer.printLn("");
+			printer.print("return new ").print(GeneratorConstants.SPECIAL_INLINE_TYPE);
+			printArguments(n.getArgs(), context);
+			printer.printLn(";");
+			printer.print("})()");
+
 			return;
 
 		}
@@ -668,7 +673,6 @@ public class SimpleScopeGeneratorVisitor implements VoidVisitor<GenerationContex
 		Checks.checkClassDeclaration(n, context);
 
 		printComments(n, context);
-		// printer.print(n.getName() + " = ");
 		if (GeneratorConstants.SPECIAL_INLINE_TYPE.equals(n.getName())) {
 			printer.print("var ");
 		} else {

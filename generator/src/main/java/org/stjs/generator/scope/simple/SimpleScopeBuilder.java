@@ -59,7 +59,12 @@ import japa.parser.ast.type.Type;
 import japa.parser.ast.type.VoidType;
 import japa.parser.ast.type.WildcardType;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.GenericDeclaration;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.TypeVariable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -73,6 +78,8 @@ import org.stjs.generator.scope.classloader.FieldWrapper;
 import org.stjs.generator.scope.classloader.MethodWrapper;
 import org.stjs.generator.scope.classloader.TypeWrapper;
 import org.stjs.generator.scope.classloader.TypeWrappers;
+import org.stjs.generator.scope.classloader.WildcardTypeImpl;
+import org.stjs.generator.scope.classloader.WildcardTypeWrapper;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.Operators;
 import org.stjs.generator.utils.Option;
@@ -180,64 +187,68 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 		super.visit(n, scope);
 	}
 
-	private ClassScope addClassToScope(CompilationUnitScope compilationUnitScope, ClassWrapper clazz) {
-		compilationUnitScope.addType(clazz);
+	private ClassScope addClassToScope(AbstractScope parentScope, ClassWrapper clazz) {
+		parentScope.addType(clazz);
 
+		AbstractScope compilationUnitScope = parentScope.closest(CompilationUnitScope.class);
+
+		ClassScope scope = new ClassScope(clazz, parentScope, context);
 		for (ClassWrapper innerClass : clazz.getDeclaredClasses()) {
-			compilationUnitScope.addType(innerClass);
+			if (Modifier.isStatic(innerClass.getModifiers())) {
+				compilationUnitScope.addType(innerClass);
+			} else {
+				scope.addType(innerClass);
+			}
 		}
-
-		ClassScope scope = new ClassScope(clazz, compilationUnitScope, context);
-
 		return scope;
 	}
 
 	@Override
 	public void visit(final ClassOrInterfaceDeclaration n, Scope scope) {
-		Scope classScope = scope.apply(new DefaultScopeVisitor<Scope>() {
-			@Override
-			public Scope apply(CompilationUnitScope compilationUnitScope) {
-				// TODO : this is not good enough for inner classes (which need the list of outer classes in their
-				// qualified name)
+		// NOTE : static class must inherit the compilation unit scope, non static class the class scope
+		AbstractScope parentScope = Modifier.isStatic(n.getModifiers()) ? scope.closest(CompilationUnitScope.class)
+				: (AbstractScope) scope;
 
-				String qualifiedName = compilationUnitScope.getPackageName().toString() + "." + n.getName();
-				ClassWrapper clazz = classLoader.loadClassOrInnerClass(qualifiedName).getOrThrow(
-						"Cannot load class or interface " + qualifiedName);
-				return addClassToScope(compilationUnitScope, clazz);
-			}
+		TypeWithScope type = scope.resolveType(n.getName());
+		PreConditions.checkState(type != null, "%s class cannot be resolved in the scope", n.getName());
+		Scope classScope = addClassToScope(parentScope, (ClassWrapper) type.getType());
 
-			@Override
-			public Scope apply(ClassScope classScope) {
-				// NOTE : static class must inherit the compilation unit scope, non static class the class scope
-				// throw new RuntimeException("Inner class not implemented yet");
-				return null;
-			}
-		});
-		super.visit(n, classScope != null ? classScope : scope);
+		super.visit(n, classScope);
 	}
 
 	@Override
 	public void visit(final MethodDeclaration n, Scope currentScope) {
 		// the scope is where the method is defined, i.e. the classScope
 		((ASTNodeData) n.getData()).setScope(currentScope);
-		BasicScope scope = handleMethodDeclaration(n.getParameters(), currentScope);
+		// this is safe as only one method is allowed with a given name
+		Class<?> ownerClass = currentScope.closest(ClassScope.class).getClazz().getClazz();
+		Method m = ClassUtils.findDeclaredMethod(ownerClass, n.getName());
+		PreConditions.checkState(m != null, "Method [%s] not  found in the class [%s]", n.getName(),
+				ownerClass.getName());
+
+		BasicScope scope = handleMethodDeclaration(n.getParameters(), m.getGenericParameterTypes(),
+				m.getTypeParameters(), currentScope);
 		super.visit(n, new BasicScope(scope, context));
 	}
 
-	private BasicScope handleMethodDeclaration(final List<Parameter> parameters, Scope currentScope) {
+	private BasicScope handleMethodDeclaration(final List<Parameter> parameters,
+			java.lang.reflect.Type[] resolvedParameterTypes,
+			TypeVariable<? extends GenericDeclaration>[] resolvedTypeParameters, Scope currentScope) {
 
 		BasicScope scope = new BasicScope(currentScope, context);
-		if (parameters != null) {
-			for (Parameter p : parameters) {
-				TypeWrapper clazz = resolveType(scope, p.getType());
-				scope.addVariable(new ParameterVariable(clazz, p.getId().getName()));
+		if (resolvedTypeParameters != null) {
+			for (TypeVariable<? extends GenericDeclaration> tv : resolvedTypeParameters) {
+				scope.addType(TypeWrappers.wrap(tv));
 			}
 		}
-		// if (n.getTypeParameters() != null) {
-		// for (TypeParameter p : n.getTypeParameters()) {
-		// // TODO : Generics
-		// }
-		// }
+
+		if (parameters != null) {
+			for (int i = 0; i < parameters.size(); ++i) {
+				TypeWrapper clazz = TypeWrappers.wrap(resolvedParameterTypes[i]);
+				scope.addVariable(new ParameterVariable(clazz, parameters.get(i).getId().getName()));
+			}
+		}
+
 		return scope;
 	}
 
@@ -258,17 +269,21 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 		} else if (type instanceof ClassOrInterfaceType) {
 			resolvedType = scope.resolveType(type.toString()).getType();
 		} else if (type instanceof WildcardType) {
-			throw new RuntimeException("Generics not yet implemented");
+			WildcardType wildcardType = (WildcardType) type;
+			java.lang.reflect.Type[] upperBound = wildcardType.getExtends() != null ? new java.lang.reflect.Type[] { resolveType(
+					scope, wildcardType.getExtends()).getType() }
+					: new java.lang.reflect.Type[0];
+			java.lang.reflect.Type[] lowerBound = wildcardType.getSuper() != null ? new java.lang.reflect.Type[] { resolveType(
+					scope, wildcardType.getSuper()).getType() }
+					: new java.lang.reflect.Type[0];
+			resolvedType = new WildcardTypeWrapper(new WildcardTypeImpl(lowerBound, upperBound));
 		} else {
 			throw new RuntimeException("Unexpected type " + type);
 		}
 		if (arrayCount == 0) {
 			return resolvedType;
 		}
-		if (resolvedType instanceof ClassWrapper) {
-			return ClassUtils.arrayOf((ClassWrapper) resolvedType, arrayCount);
-		}
-		throw new RuntimeException("Array of generics type is not yet implemented");
+		return ClassUtils.arrayOf(resolvedType, arrayCount);
 	}
 
 	@Override
@@ -310,7 +325,16 @@ public class SimpleScopeBuilder extends ForEachNodeVisitor<Scope> {
 	public void visit(ConstructorDeclaration n, Scope currentScope) {
 		// the scope is where the constructor is defined, i.e. the classScope
 		((ASTNodeData) n.getData()).setScope(currentScope);
-		BasicScope scope = handleMethodDeclaration(n.getParameters(), currentScope);
+		Class<?> ownerClass = currentScope.closest(ClassScope.class).getClazz().getClazz();
+		Constructor<?> c = ClassUtils.findConstructor(ownerClass);
+		BasicScope scope;
+		if (c == null) {
+			// synthetic constructor
+			scope = handleMethodDeclaration(n.getParameters(), null, null, currentScope);
+		} else {
+			scope = handleMethodDeclaration(n.getParameters(), c.getGenericParameterTypes(), c.getTypeParameters(),
+					currentScope);
+		}
 		super.visit(n, new BasicScope(scope, context));
 	}
 

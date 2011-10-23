@@ -35,8 +35,6 @@ public interface TypeWrapper {
 
 	public boolean isInnerType();
 
-	public boolean isParentClassOf(ClassWrapper clazz);
-
 	public boolean hasAnnotation(Class<? extends Annotation> class1);
 
 	public boolean isAssignableFrom(TypeWrapper typeWrapper);

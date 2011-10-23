@@ -2,7 +2,7 @@ package org.stjs.generator.scope.classloader;
 
 /**
  * 
- * This is a wrapper around a method
+ * This is a wrapper around a method, but with the correct type for a generic type for example
  * 
  * @author acraciun
  * 
@@ -57,7 +57,7 @@ public class MethodWrapper {
 		// System.out.println(Arrays.toString(parameterTypes));
 		// System.out.println(Arrays.toString(paramTypes));
 		int i = 0;
-		for (i = 0; i < paramTypes.length; ++i) {
+		for (i = 0; i < paramTypes.length && i < parameterTypes.length; ++i) {
 			if (!parameterTypes[i].isAssignableFrom(paramTypes[i])) {
 				// System.out.println("DIFF:" + i + ":" + parameterTypes[i] + "<>" + paramTypes[i]);
 				break;
@@ -67,7 +67,7 @@ public class MethodWrapper {
 			return true;
 		}
 		// try a varargs match
-		if (parameterTypes[i].getComponentType() != null) {
+		if (i < parameterTypes.length && parameterTypes[i].getComponentType() != null) {
 			TypeWrapper varArgParamType = parameterTypes[i].getComponentType();
 			for (; i < paramTypes.length; ++i) {
 				if (!varArgParamType.isAssignableFrom(paramTypes[i])) {

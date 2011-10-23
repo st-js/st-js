@@ -5,10 +5,18 @@ import japa.parser.ast.type.Type;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.stjs.generator.scope.classloader.ClassWrapper;
+import org.stjs.generator.scope.classloader.GenericArrayTypeImpl;
+import org.stjs.generator.scope.classloader.GenericArrayTypeWrapper;
 import org.stjs.generator.scope.classloader.TypeWrapper;
 import org.stjs.javascript.annotation.Adapter;
 import org.stjs.javascript.annotation.DataType;
@@ -106,9 +114,93 @@ public class ClassUtils {
 	 * @param arrayCount
 	 * @return the ClassWrapper representing an array of the given type with the given number of dimensions
 	 */
-	public static ClassWrapper arrayOf(ClassWrapper resolvedType, int arrayCount) {
-		// TODO - cache this names
-		return new ClassWrapper(Array.newInstance(resolvedType.getClass(), new int[arrayCount]).getClass());
+	public static TypeWrapper arrayOf(TypeWrapper resolvedType, int arrayCount) {
+		if (resolvedType.getClass() == ClassWrapper.class) {
+			return new ClassWrapper(Array.newInstance(resolvedType.getClass(), new int[arrayCount]).getClass());
+		}
+		TypeWrapper returnType = resolvedType;
+		for (int i = 0; i < arrayCount; ++i) {
+			returnType = new GenericArrayTypeWrapper(new GenericArrayTypeImpl(returnType.getType()));
+		}
+		return returnType;
+	}
+
+	public static Method findDeclaredMethod(Class<?> clazz, String name) {
+		for (Method m : clazz.getDeclaredMethods()) {
+			if (m.getName().equals(name)) {
+				return m;
+			}
+		}
+		return null;
+	}
+
+	public static Constructor<?> findConstructor(Class<?> clazz) {
+		if (clazz.getDeclaredConstructors().length != 0) {
+			return clazz.getDeclaredConstructors()[0];
+		}
+		return null;
+	}
+
+	public static boolean isAssignableFromType(final Class<?> cls, final java.lang.reflect.Type type) {
+		if (type instanceof Class<?>) {
+			Class<?> otherClass = (Class<?>) type;
+			if (cls.isAssignableFrom(otherClass)) {
+				return true;
+			}
+			// try primitives
+			if (Primitives.wrap(cls).isAssignableFrom(Primitives.wrap(otherClass))) {
+				return true;
+			}
+
+			// go on with primitive rules double/float -> accept long/int -> accept byte/char (but this only if there is
+			// none more specific!)
+			return false;
+		}
+		if (type instanceof GenericArrayType) {
+			return isAssignableFromGenericArrayType(cls, (GenericArrayType) type);
+		}
+		if (type instanceof ParameterizedType) {
+			return isAssignableFromParameterizedType(cls, (ParameterizedType) type);
+		}
+		if (type instanceof TypeVariable<?>) {
+			return isAssignableFromTypeVariable(cls, (TypeVariable<?>) type);
+		}
+		if (type instanceof WildcardType) {
+			return isAssignableFromWildcardType(cls, (WildcardType) type);
+		}
+
+		throw new IllegalArgumentException("Unsupported type: " + type);
+	}
+
+	private static boolean isAssignableFromGenericArrayType(final Class<?> cls, final GenericArrayType genericArrayType) {
+		if (!cls.isArray()) {
+			return false;
+		}
+
+		final java.lang.reflect.Type componentType = genericArrayType.getGenericComponentType();
+		return isAssignableFromType(cls.getComponentType(), componentType);
+	}
+
+	private static boolean isAssignableFromParameterizedType(final Class<?> cls,
+			final ParameterizedType parameterizedType) {
+		return isAssignableFromType(cls, parameterizedType.getRawType());
+	}
+
+	private static boolean isAssignableFromTypeVariable(final Class<?> cls, final TypeVariable<?> typeVariable) {
+		return isAssignableFromUpperBounds(cls, typeVariable.getBounds());
+	}
+
+	private static boolean isAssignableFromWildcardType(final Class<?> cls, final WildcardType wildcardType) {
+		return isAssignableFromUpperBounds(cls, wildcardType.getUpperBounds());
+	}
+
+	private static boolean isAssignableFromUpperBounds(final Class<?> cls, final java.lang.reflect.Type[] bounds) {
+		for (final java.lang.reflect.Type bound : bounds) {
+			if (isAssignableFromType(cls, bound)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
