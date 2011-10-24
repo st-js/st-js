@@ -26,14 +26,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.type.GenericArrayTypeImpl;
 import org.stjs.generator.type.GenericArrayTypeWrapper;
-import org.stjs.generator.type.MethodWrapper;
+import org.stjs.generator.type.PrimitiveTypes;
 import org.stjs.generator.type.TypeWrapper;
 import org.stjs.javascript.annotation.Adapter;
 import org.stjs.javascript.annotation.DataType;
@@ -181,6 +180,9 @@ public class ClassUtils {
 
 			// go on with primitive rules double/float -> accept long/int -> accept byte/char (but this only if there is
 			// none more specific!)
+			if (PrimitiveTypes.isAssignableFrom(cls, otherClass)) {
+				return true;
+			}
 			return false;
 		}
 		if (type instanceof GenericArrayType) {
@@ -230,15 +232,18 @@ public class ClassUtils {
 		return false;
 	}
 
-	public static MethodWrapper resolveMethod(Collection<MethodWrapper> candidates, TypeWrapper... paramTypes) {
-		if (candidates == null || candidates.isEmpty()) {
-			return null;
+	public static Class<?> getRawClazz(java.lang.reflect.Type type) {
+		if (type instanceof Class<?>) {
+			return (Class<?>) type;
 		}
-		for (MethodWrapper w : candidates) {
-			if (w.isCompatibleParameterTypes(paramTypes)) {
-				return w;
-			}
+		if (type instanceof ParameterizedType) {
+			return getRawClazz(((ParameterizedType) type).getRawType());
 		}
-		return null;
+		if (type instanceof GenericArrayType) {
+			return Object[].class;
+		}
+		// TODO what to do exacly here !?
+		return Object.class;
 	}
+
 }

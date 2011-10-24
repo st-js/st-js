@@ -121,23 +121,10 @@ public class ClassWrapper implements TypeWrapper {
 	}
 
 	private MethodWrapper buildMethodWrapper(String name, TypeWrapper returnType, TypeWrapper[] parameterTypes,
-			int modifiers, Class<?> ownerClass, TypeWrapper[] actualTypeArgs) {
+			int modifiers, TypeVariableWrapper<Method>[] typeParameters, Class<?> ownerClass,
+			TypeWrapper[] actualTypeArgs) {
 		return new MethodWrapper(name, substituteType(returnType, ownerClass, actualTypeArgs), substituteTypes(
-				parameterTypes, ownerClass, actualTypeArgs), modifiers, this, ownerClass == clazz);
-	}
-
-	static Class<?> getRawClazz(Type type) {
-		if (type instanceof Class<?>) {
-			return (Class<?>) type;
-		}
-		if (type instanceof ParameterizedType) {
-			return getRawClazz(((ParameterizedType) type).getRawType());
-		}
-		if (type instanceof GenericArrayType) {
-			return Object[].class;
-		}
-		// TODO what to do exacly here !?
-		return Object.class;
+				parameterTypes, ownerClass, actualTypeArgs), modifiers, typeParameters, this, ownerClass == clazz);
 	}
 
 	private TypeWrapper[] getActualTypeArgs(Type type, Class<?> subTypeClass, TypeWrapper[] subTypeActualTypeArgs) {
@@ -171,7 +158,7 @@ public class ClassWrapper implements TypeWrapper {
 	private void addFieldsAndMethods(Type type, Class<?> rawClass, TypeWrapper[] actualTypeArgs) {
 		for (Type c = type; c != null; c = rawClass.getGenericSuperclass()) {
 			actualTypeArgs = getActualTypeArgs(c, rawClass, actualTypeArgs);
-			rawClass = getRawClazz(c);
+			rawClass = ClassUtils.getRawClazz(c);
 			addFields(rawClass, actualTypeArgs);
 			addMethods(rawClass, actualTypeArgs);
 			// add also the methods from interfaces (not really needed when the root is actual class, but need when the
@@ -208,14 +195,14 @@ public class ClassWrapper implements TypeWrapper {
 		// }
 		//
 		for (Method m : rawClass.getDeclaredMethods()) {
-			TypeWrapper[] paramTypes = new TypeWrapper[m.getGenericParameterTypes().length];
-			for (int i = 0; i < m.getGenericParameterTypes().length; ++i) {
-				paramTypes[i] = TypeWrappers.wrap(m.getGenericParameterTypes()[i]);
-			}
+			TypeWrapper[] paramTypes = TypeWrappers.wrap(m.getGenericParameterTypes());
+			@SuppressWarnings("unchecked")
+			TypeVariableWrapper<Method>[] typeParams = (TypeVariableWrapper<Method>[]) TypeWrappers.wrap(m
+					.getTypeParameters());
 			methods.put(
 					m.getName(),
 					buildMethodWrapper(m.getName(), TypeWrappers.wrap(m.getGenericReturnType()), paramTypes,
-							m.getModifiers(), rawClass, actualTypeArgs));
+							m.getModifiers(), typeParams, rawClass, actualTypeArgs));
 		}
 
 	}
@@ -298,7 +285,7 @@ public class ClassWrapper implements TypeWrapper {
 			return Option.none();
 		}
 
-		MethodWrapper w = ClassUtils.resolveMethod(wrappers, paramTypes);
+		MethodWrapper w = MethodSelector.resolveMethod(wrappers, paramTypes);
 		if (w != null) {
 			return Option.some(w);
 		}

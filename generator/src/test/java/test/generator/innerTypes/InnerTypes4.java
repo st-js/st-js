@@ -1,7 +1,7 @@
 package test.generator.innerTypes;
 
 public class InnerTypes4 {
-	class InnerType {
+	public static class InnerType {
 		public int innerField;
 	}
 

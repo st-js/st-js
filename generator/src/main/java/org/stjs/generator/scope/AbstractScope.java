@@ -21,9 +21,9 @@ import java.util.Map;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.type.FieldWrapper;
+import org.stjs.generator.type.MethodSelector;
 import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.type.TypeWrapper;
-import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.variable.Variable;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -111,7 +111,7 @@ public abstract class AbstractScope implements Scope {
 	public MethodsWithScope resolveMethod(final String name, TypeWrapper... paramTypes) {
 		Collection<MethodWrapper> methodList = methods.get(name);
 		if (methodList != null && methodList.size() > 0) {
-			MethodWrapper w = ClassUtils.resolveMethod(methodList, paramTypes);
+			MethodWrapper w = MethodSelector.resolveMethod(methodList, paramTypes);
 			if (w != null) {
 				return new MethodsWithScope(this, w);
 			}

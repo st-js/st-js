@@ -11,6 +11,9 @@ import test.generator.innerTypes.InnerTypes3;
 import test.generator.innerTypes.InnerTypes4;
 import test.generator.innerTypes.InnerTypes5;
 import test.generator.innerTypes.InnerTypes6;
+import test.generator.innerTypes.InnerTypes7;
+import test.generator.innerTypes.InnerTypes8;
+import test.generator.innerTypes.InnerTypes9;
 
 public class InnerTypesGeneratorTest {
 	@Test
@@ -45,5 +48,20 @@ public class InnerTypesGeneratorTest {
 	@Test(expected = JavascriptGenerationException.class)
 	public void testCallToQualifiedOuterType() {
 		generate(InnerTypes6.class);
+	}
+
+	@Test
+	public void testExternalAccessToInnerType() {
+		assertCodeContains(InnerTypes7.class, "new InnerTypes4.InnerType()");
+	}
+
+	@Test
+	public void testExternalAndQualifiedAccessToInnerType() {
+		assertCodeContains(InnerTypes8.class, "new InnerTypes4.InnerType()");
+	}
+
+	@Test
+	public void testQualifiedFieldAccess() {
+		assertCodeContains(InnerTypes9.class, "n = InnerTypes9.InnerType.innerField");
 	}
 }

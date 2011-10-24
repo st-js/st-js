@@ -18,6 +18,8 @@ package org.stjs.generator.type;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+import org.stjs.generator.utils.ClassUtils;
+
 /**
  * This is a wrapper around a parameterized type. Basically it was the same behavior as a regular class
  * 
@@ -28,13 +30,17 @@ public class ParameterizedTypeWrapper extends ClassWrapper {
 	private final ParameterizedType type;
 
 	public ParameterizedTypeWrapper(ParameterizedType type) {
-		super(getRawClazz(type.getRawType()));
+		super(ClassUtils.getRawClazz(type.getRawType()));
 		this.type = type;
 	}
 
 	@Override
 	public Type getType() {
 		return type;
+	}
+
+	public TypeWrapper[] getActualTypeArguments() {
+		return TypeWrappers.wrap(type.getActualTypeArguments());
 	}
 
 }

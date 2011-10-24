@@ -15,6 +15,9 @@
  */
 package org.stjs.generator.type;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+
 /**
  * 
  * This is a wrapper around a method, but with the correct type for a generic type for example
@@ -26,18 +29,20 @@ public class MethodWrapper {
 	private final String name;
 	private final TypeWrapper returnType;
 	private final TypeWrapper[] parameterTypes;
+	private final TypeVariableWrapper<Method>[] typeParameters;
 	private final int modifiers;
 	private final TypeWrapper ownerType;
 	private final boolean declared;
 
 	public MethodWrapper(String name, TypeWrapper returnType, TypeWrapper[] parameterTypes, int modifiers,
-			TypeWrapper ownerType, boolean declared) {
+			TypeVariableWrapper<Method>[] typeParameters, TypeWrapper ownerType, boolean declared) {
 		this.name = name;
 		this.returnType = returnType;
 		this.parameterTypes = parameterTypes;
 		this.modifiers = modifiers;
 		this.ownerType = ownerType;
 		this.declared = declared;
+		this.typeParameters = typeParameters;
 	}
 
 	public String getName() {
@@ -58,6 +63,10 @@ public class MethodWrapper {
 
 	public TypeWrapper getOwnerType() {
 		return ownerType;
+	}
+
+	public TypeVariableWrapper<Method>[] getTypeParameters() {
+		return typeParameters;
 	}
 
 	/**
@@ -98,11 +107,25 @@ public class MethodWrapper {
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 		s.append(returnType).append(" ").append(name).append(" (");
-		for (TypeWrapper paramType : parameterTypes) {
-			s.append(" ").append(paramType);
-		}
+		s.append(Arrays.toString(parameterTypes));
 		s.append(")");
 		return s.toString();
+	}
+
+	public boolean hasCompatibleNumberOfParams(int length) {
+		if (parameterTypes.length == length) {
+			return true;
+		}
+		if (length >= parameterTypes.length - 1 && parameterTypes.length > 0
+				&& parameterTypes[parameterTypes.length - 1].getComponentType() != null) {
+			// last param is a vararg
+			return true;
+		}
+		return false;
+	}
+
+	public MethodWrapper withReturnType(TypeWrapper newReturnType) {
+		return new MethodWrapper(name, newReturnType, parameterTypes, modifiers, typeParameters, ownerType, declared);
 	}
 
 }

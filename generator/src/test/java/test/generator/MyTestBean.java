@@ -1,9 +1,14 @@
 package test.generator;
 
-import static org.stjs.javascript.jquery.GlobalJQuery.$;
 
 public class MyTestBean {
+	private static int pollingInterval = 7; // in seconds
+
+	private static void m(double d, int n) {
+
+	}
+
 	public static void main(String[] args) {
-		$("#orders_and_positions .tabListView").width($("#orders_and_positions .tabList").width());
+		m(1, 0);
 	}
 }

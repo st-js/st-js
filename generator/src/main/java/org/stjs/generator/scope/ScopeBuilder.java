@@ -37,7 +37,6 @@ import japa.parser.ast.expr.ArrayCreationExpr;
 import japa.parser.ast.expr.ArrayInitializerExpr;
 import japa.parser.ast.expr.AssignExpr;
 import japa.parser.ast.expr.BinaryExpr;
-import japa.parser.ast.expr.BinaryExpr.Operator;
 import japa.parser.ast.expr.BooleanLiteralExpr;
 import japa.parser.ast.expr.CastExpr;
 import japa.parser.ast.expr.CharLiteralExpr;
@@ -273,6 +272,14 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		return scope;
 	}
 
+	private String fullName(ClassOrInterfaceType type) {
+		StringBuilder s = new StringBuilder(type.getName());
+		for (ClassOrInterfaceType p = type.getScope(); p != null; p = p.getScope()) {
+			s.insert(0, p.getName() + ".");
+		}
+		return s.toString();
+	}
+
 	private TypeWrapper resolveType(Scope scope, Type type) {
 		// TODO : shouldn't that go directly in the scope classes?
 		int arrayCount = 0;
@@ -289,8 +296,14 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			resolvedType = new ClassWrapper(void.class);
 		} else if (type instanceof ClassOrInterfaceType) {
 			ClassOrInterfaceType classType = (ClassOrInterfaceType) type;
-			TypeWithScope rawType = scope.resolveType(classType.getName());
-			PreConditions.checkState(rawType != null, "Cannot resolve type [%s]", classType.getName());
+			// type can be the name of a class/interface
+			// or can be a part of the package name for a fully qualified name
+			// or can be an inner class name
+			TypeWithScope rawType = scope.resolveType(fullName(classType));
+			if (rawType == null) {
+				return null;
+			}
+			// PreConditions.checkState(rawType != null, "Cannot resolve type [%s]", classType.getName());
 			if (classType.getTypeArgs() != null) {
 				List<java.lang.reflect.Type> args = new ArrayList<java.lang.reflect.Type>();
 				for (Type arg : classType.getTypeArgs()) {
@@ -518,15 +531,11 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		super.visit(n, arg);
 		if (Operators.isLogical(n.getOperator())) {
 			resolvedType(n, TypeWrappers.wrap(boolean.class));
-		} else if (n.getOperator() == Operator.plus
-				&& (String.class.equals(resolvedType(n.getLeft()).getType()) || String.class.equals(resolvedType(
-						n.getRight()).getType()))) {
-			// if at least one is string, the result would be string
-			resolvedType(n, TypeWrappers.wrap(String.class));
 		} else {
-			// Number is not very exact, but it's enough for our purposes
-			resolvedType(n, TypeWrappers.wrap(Number.class));
+			resolvedType(n, TypeWrappers.wrap(PrimitiveTypes.expressionResultType(resolvedType(n.getLeft()).getType(),
+					resolvedType(n.getRight()).getType())));
 		}
+
 	}
 
 	@Override
@@ -645,8 +654,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			PreConditions.checkState(scopeType != null, "%s The method %s 's scope could not be resolved", location(n),
 					n.getName());
 			method = scopeType.findMethod(n.getName(), argumentTypes).getOrThrow(
-					context.getInputFile() + ":" + n.getBeginLine() + "-> type:" + scopeType.getName() + " m:"
-							+ n.getName());
+					location(n) + "-> type:" + scopeType.getName() + " m:" + n.getName());
 		}
 
 		resolvedType(n, method.getReturnType());
@@ -668,9 +676,16 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 				resolvedType(n, null);
 			}
 		} else {
-			// if not -> resolve the field in the type
-			FieldWrapper field = scopeType.findField(n.getField()).getOrThrow();
-			resolvedType(n, field.getType());
+			// if not -> it can be either an inner type or a field in the type
+			Option<FieldWrapper> field = scopeType.findField(n.getField());
+			if (field.isDefined()) {
+				resolvedType(n, field.getOrThrow().getType());
+			} else {
+				TypeWithScope innerType = arg.resolveType(scopeType.getName() + "$" + n.getField());
+				PreConditions.checkState(innerType != null, "%s no inner no or field could be resolved for %s",
+						location(n), n.getField());
+				resolvedType(n, innerType.getType());
+			}
 		}
 
 	}
