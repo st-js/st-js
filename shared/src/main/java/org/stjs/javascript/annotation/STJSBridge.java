@@ -21,13 +21,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation is used to mark types that part of a mock library (like the jquery one). The source the javascript
- * implementation is found should be set.
+ * This annotation is used to mark types that part of a bridge library (like the jquery one). The source the javascript
+ * implementation is found should be set. The annotation can also be set on the package containing the type or any other
+ * parent package.
  * 
  * @author acraciun
  */
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MockType {//
+public @interface STJSBridge {//
 	String[] sources() default "";
 }

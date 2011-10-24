@@ -80,6 +80,7 @@ import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -90,6 +91,8 @@ import org.stjs.generator.type.ClassLoaderWrapper;
 import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.type.FieldWrapper;
 import org.stjs.generator.type.MethodWrapper;
+import org.stjs.generator.type.ParameterizedTypeImpl;
+import org.stjs.generator.type.ParameterizedTypeWrapper;
 import org.stjs.generator.type.PrimitiveTypes;
 import org.stjs.generator.type.TypeWrapper;
 import org.stjs.generator.type.TypeWrappers;
@@ -285,7 +288,19 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		} else if (type instanceof VoidType) {
 			resolvedType = new ClassWrapper(void.class);
 		} else if (type instanceof ClassOrInterfaceType) {
-			resolvedType = scope.resolveType(type.toString()).getType();
+			ClassOrInterfaceType classType = (ClassOrInterfaceType) type;
+			TypeWithScope rawType = scope.resolveType(classType.getName());
+			PreConditions.checkState(rawType != null, "Cannot resolve type [%s]", classType.getName());
+			if (classType.getTypeArgs() != null) {
+				List<java.lang.reflect.Type> args = new ArrayList<java.lang.reflect.Type>();
+				for (Type arg : classType.getTypeArgs()) {
+					args.add(resolveType(scope, arg).getType());
+				}
+				resolvedType = new ParameterizedTypeWrapper(new ParameterizedTypeImpl(rawType.getType().getType(),
+						args.toArray(new java.lang.reflect.Type[args.size()]), null));
+			} else {
+				resolvedType = rawType.getType();
+			}
 		} else if (type instanceof WildcardType) {
 			WildcardType wildcardType = (WildcardType) type;
 			java.lang.reflect.Type[] upperBound = wildcardType.getExtends() != null ? new java.lang.reflect.Type[] { resolveType(
@@ -504,7 +519,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		if (Operators.isLogical(n.getOperator())) {
 			resolvedType(n, TypeWrappers.wrap(boolean.class));
 		} else if (n.getOperator() == Operator.plus
-				&& (String.class.equals(resolvedType(n.getLeft())) || String.class.equals(resolvedType(n.getRight())))) {
+				&& (String.class.equals(resolvedType(n.getLeft()).getType()) || String.class.equals(resolvedType(
+						n.getRight()).getType()))) {
 			// if at least one is string, the result would be string
 			resolvedType(n, TypeWrappers.wrap(String.class));
 		} else {
@@ -603,6 +619,10 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		resolvedType(n, null);
 	}
 
+	private String location(Node n) {
+		return context.getInputFile() + ":" + n.getBeginLine();
+	}
+
 	@Override
 	public void visit(MethodCallExpr n, Scope arg) {
 		super.visit(n, arg);
@@ -618,12 +638,15 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		}
 		if (n.getScope() == null) {
 			MethodsWithScope ms = arg.resolveMethod(n.getName(), argumentTypes);
-			PreConditions.checkState(ms != null, "The method %s should've been resolved", n.getName());
+			PreConditions.checkState(ms != null, "%s The method %s could not be resolved", location(n), n.getName());
 			method = ms.getMethod();
 		} else {
 			TypeWrapper scopeType = resolvedType(n.getScope());
-			PreConditions.checkState(scopeType != null, "The method %s 's scope should've been resolved", n.getName());
-			method = scopeType.findMethod(n.getName(), argumentTypes).getOrThrow();
+			PreConditions.checkState(scopeType != null, "%s The method %s 's scope could not be resolved", location(n),
+					n.getName());
+			method = scopeType.findMethod(n.getName(), argumentTypes).getOrThrow(
+					context.getInputFile() + ":" + n.getBeginLine() + "-> type:" + scopeType.getName() + " m:"
+							+ n.getName());
 		}
 
 		resolvedType(n, method.getReturnType());

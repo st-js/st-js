@@ -1,6 +1,5 @@
 package org.stjs.javascript;
 
-import org.stjs.shared.Array;
 
 public interface JsFunction<T> {
 

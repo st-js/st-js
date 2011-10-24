@@ -1,7 +1,7 @@
 package org.stjs.server;
 
-import org.stjs.shared.Array;
-import org.stjs.shared.Map;
+import org.stjs.javascript.Array;
+import org.stjs.javascript.Map;
 
 public class JSCollections {
 	public static <V> Array<V> $array(V... values) {

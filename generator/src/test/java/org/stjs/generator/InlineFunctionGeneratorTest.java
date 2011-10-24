@@ -8,6 +8,7 @@ import test.generator.inlineFunctions.InlineFunctions1;
 import test.generator.inlineFunctions.InlineFunctions2;
 import test.generator.inlineFunctions.InlineFunctions3;
 import test.generator.inlineFunctions.InlineFunctions4;
+import test.generator.inlineFunctions.InlineFunctions5;
 
 public class InlineFunctionGeneratorTest {
 	@Test
@@ -33,4 +34,10 @@ public class InlineFunctionGeneratorTest {
 	public void testInlineFunctionAssign() {
 		assertCodeContains(InlineFunctions4.class, "func =  function(arg){arg=arg+1;}");
 	}
+
+	@Test
+	public void testInlineFunctionWithAbstractClass() {
+		assertCodeContains(InlineFunctions5.class, "method(function(){})");
+	}
+
 }

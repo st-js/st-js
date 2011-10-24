@@ -2,11 +2,14 @@ package org.stjs.generator.type;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
+
 import org.junit.Test;
-import org.stjs.generator.type.TypeWrapper;
-import org.stjs.generator.type.TypeWrappers;
 import org.stjs.javascript.annotation.GlobalScope;
 
 public class ParameterizedTypeWrapperTest {
@@ -138,5 +141,51 @@ public class ParameterizedTypeWrapperTest {
 						.getOrThrow().getReturnType().getName());
 		assertFalse(wrapper.findMethod("method", TypeWrappers.wrap(int.class), TypeWrappers.wrap(Number.class))
 				.isDefined());
+	}
+
+	@Test
+	public void testCopyWildcardBound() throws SecurityException, NoSuchMethodException, NoSuchFieldException {
+		TypeWrapper wrapper = TypeWrappers.wrap(ParameterizedTypeWrapper6.class.getDeclaredField("get")
+				.getGenericType());
+		assertEquals("ParameterizedTypeWrapper6", wrapper.getSimpleName());
+		assertEquals("ParameterizedTypeWrapper6", wrapper.getExternalName());
+		assertEquals("org.stjs.generator.type.ParameterizedTypeWrapper6", wrapper.getName());
+
+		assertTrue(wrapper.findField("field").isDefined());
+		assertBoundedWildcard(wrapper.findField("field").getOrThrow().getType().getType(),
+				"class org.stjs.generator.type.ParameterizedTypeWrapper6");
+
+		assertTrue(wrapper.findMethod("method").isDefined());
+		assertBoundedWildcard(wrapper.findMethod("method").getOrThrow().getReturnType().getType(),
+				"class org.stjs.generator.type.ParameterizedTypeWrapper6");
+
+	}
+
+	@Test
+	public void testAddWildcardBoundwhenRawCall() throws SecurityException, NoSuchMethodException, NoSuchFieldException {
+		TypeWrapper wrapper = TypeWrappers.wrap(ParameterizedTypeWrapper7.class.getDeclaredField("get")
+				.getGenericType());
+		assertEquals("ParameterizedTypeWrapper7", wrapper.getSimpleName());
+		assertEquals("ParameterizedTypeWrapper7", wrapper.getExternalName());
+		assertEquals("org.stjs.generator.type.ParameterizedTypeWrapper7", wrapper.getName());
+
+		assertTrue(wrapper.findField("field").isDefined());
+		assertBoundedWildcard(wrapper.findField("field").getOrThrow().getType().getType(),
+				"class org.stjs.generator.type.ParameterizedTypeWrapper7");
+
+		assertTrue(wrapper.findMethod("method").isDefined());
+		assertBoundedWildcard(wrapper.findMethod("method").getOrThrow().getReturnType().getType(),
+				"class org.stjs.generator.type.ParameterizedTypeWrapper7");
+
+	}
+
+	private void assertBoundedWildcard(Type type, String boundTypeName) {
+		WildcardType argType = (WildcardType) type;
+
+		// the wildcard arg must be bound with a parameterized type with the same raw type
+		assertNotNull(argType.getUpperBounds());
+		assertEquals(1, argType.getUpperBounds().length);
+		assertTrue(argType.getUpperBounds()[0] instanceof ParameterizedType);
+		assertEquals(boundTypeName, ((ParameterizedType) argType.getUpperBounds()[0]).getRawType().toString());
 	}
 }

@@ -23,9 +23,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.stjs.shared.Array;
-import org.stjs.shared.SortFunction;
-import org.stjs.shared.functions.Callback1;
+import org.stjs.javascript.Array;
+import org.stjs.javascript.SortFunction;
+import org.stjs.javascript.functions.Callback1;
 
 /**
  * This class implements the {@link Array} interface to be used on the server side.

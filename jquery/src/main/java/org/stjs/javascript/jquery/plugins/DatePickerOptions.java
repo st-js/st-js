@@ -17,15 +17,15 @@ package org.stjs.javascript.jquery.plugins;
 
 import static org.stjs.javascript.Global.$array;
 
+import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;
+import org.stjs.javascript.Map;
 import org.stjs.javascript.dom.HTMLElement;
+import org.stjs.javascript.functions.Callback2;
+import org.stjs.javascript.functions.Callback3;
+import org.stjs.javascript.functions.Function1;
+import org.stjs.javascript.functions.Function2;
 import org.stjs.javascript.jquery.JQuery;
-import org.stjs.shared.Array;
-import org.stjs.shared.Map;
-import org.stjs.shared.functions.Callback2;
-import org.stjs.shared.functions.Callback3;
-import org.stjs.shared.functions.Function1;
-import org.stjs.shared.functions.Function2;
 
 public class DatePickerOptions<FullJQuery extends JQuery<?>> {
 	public boolean disabled = false;

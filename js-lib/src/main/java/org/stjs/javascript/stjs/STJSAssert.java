@@ -1,7 +1,7 @@
 package org.stjs.javascript.stjs;
 
 import org.stjs.javascript.annotation.GlobalScope;
-import org.stjs.shared.functions.Callback3;
+import org.stjs.javascript.functions.Callback3;
 
 /**
  * 

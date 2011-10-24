@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.stjs.shared;
+package org.stjs.javascript;
 
 public interface SortFunction<V> {
 	public int compare(V a, V b);

@@ -26,16 +26,18 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.type.GenericArrayTypeImpl;
 import org.stjs.generator.type.GenericArrayTypeWrapper;
+import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.type.TypeWrapper;
 import org.stjs.javascript.annotation.Adapter;
 import org.stjs.javascript.annotation.DataType;
-import org.stjs.javascript.annotation.MockType;
+import org.stjs.javascript.annotation.STJSBridge;
 
 import com.google.common.primitives.Primitives;
 
@@ -61,15 +63,25 @@ public class ClassUtils {
 		return basicTypeNames.contains(typeName);
 	}
 
-	public static boolean isMockType(ClassWrapper clazz) {
-		if (clazz == null) {
-			return false;
-		}
-		return isMockType(clazz.getClazz());
-	}
+	// public static boolean isMockType(ClassWrapper clazz) {
+	// if (clazz == null) {
+	// return false;
+	// }
+	// return isMockType(clazz.getClazz());
+	// }
+	//
+	// public static boolean isMockType(Class<?> clazz) {
+	// return hasAnnotation(clazz, MockType.class.getName());
+	// }
 
-	public static boolean isMockType(Class<?> clazz) {
-		return hasAnnotation(clazz, MockType.class.getName());
+	public static boolean isBridge(String className) {
+
+		try {
+			Class<?> clazz = Class.forName(className);
+			return hasAnnotation(clazz, STJSBridge.class.getName());
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static boolean isDataType(ClassWrapper clazz) {
@@ -218,4 +230,15 @@ public class ClassUtils {
 		return false;
 	}
 
+	public static MethodWrapper resolveMethod(Collection<MethodWrapper> candidates, TypeWrapper... paramTypes) {
+		if (candidates == null || candidates.isEmpty()) {
+			return null;
+		}
+		for (MethodWrapper w : candidates) {
+			if (w.isCompatibleParameterTypes(paramTypes)) {
+				return w;
+			}
+		}
+		return null;
+	}
 }

@@ -8,6 +8,8 @@ import org.junit.Test;
 import test.generator.methods.Methods1;
 import test.generator.methods.Methods10;
 import test.generator.methods.Methods11;
+import test.generator.methods.Methods12;
+import test.generator.methods.Methods13;
 import test.generator.methods.Methods2;
 import test.generator.methods.Methods3;
 import test.generator.methods.Methods4;
@@ -60,6 +62,7 @@ public class MethodsGeneratorTest {
 	public void testAdapter() {
 		assertCodeContains(Methods8.class, "(10).toFixed(2)");
 	}
+
 	@Test(expected = JavascriptGenerationException.class)
 	public void testVarArgsMethod1() {
 		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
@@ -76,5 +79,15 @@ public class MethodsGeneratorTest {
 	public void testVarArgsMethod3() {
 		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
 		assertCodeContains(Methods11.class, "Methods11.prototype.method=function(arguments){}");
+	}
+
+	@Test
+	public void testInterfaceImplResolution() {
+		assertCodeContains(Methods12.class, "method(c);");
+	}
+
+	@Test
+	public void testWildcardResolution() {
+		assertCodeContains(Methods13.class, "m.parent().parent()");
 	}
 }

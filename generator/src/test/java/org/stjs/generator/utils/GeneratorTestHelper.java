@@ -40,10 +40,10 @@ public class GeneratorTestHelper {
 			String content = Files.toString(file, Charset.defaultCharset());
 			// now generate the remaining imports
 			file.delete();
+			Files.append("stjs.mainCallDisabled=true;", file, Charset.defaultCharset());
 			gen.generateJavascriptWithImports(Thread.currentThread().getContextClassLoader(), clazz.getName(), file,
 					new GeneratorConfigurationBuilder().allowedPackage("test").allowedPackage("org.stjs.javascript")
 							.build());
-			Files.append("stjs.mainCallDisabled=true;", file, Charset.defaultCharset());
 			new RhinoExecutor().run(file);
 			return content;
 		} catch (IOException e) {

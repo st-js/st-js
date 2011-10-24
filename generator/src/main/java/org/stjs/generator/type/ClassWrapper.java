@@ -29,6 +29,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -78,10 +79,34 @@ public class ClassWrapper implements TypeWrapper {
 		for (int i = 0; i < ownerClass.getTypeParameters().length; ++i) {
 			TypeVariable<?> typeVar = ownerClass.getTypeParameters()[i];
 			if (origType.getName().equals(typeVar.getName())) {
-				return typeArguments[i];
+				return fixWildcardBounds(typeArguments[i], typeVar);
 			}
 		}
 		return origType;
+	}
+
+	/**
+	 * when the a type variable T is replaced by a simple wildcard (?), it in fact inherits the extends of the type var
+	 * 
+	 * @param typeWrapper
+	 * @param typeVar
+	 * @return
+	 */
+	private TypeWrapper fixWildcardBounds(TypeWrapper typeWrapper, TypeVariable<?> typeVar) {
+		if (!(typeWrapper instanceof WildcardTypeWrapper)) {
+			return typeWrapper;
+		}
+		if (typeVar.getBounds().length == 0) {
+			return typeWrapper;
+		}
+		WildcardType wctype = (WildcardType) typeWrapper.getType();
+		boolean unbounded = wctype.getUpperBounds().length == 0
+				|| (wctype.getUpperBounds().length == 1 && wctype.getUpperBounds()[0] == Object.class);
+		if (!unbounded) {
+			// already bounded with something else
+			return typeWrapper;
+		}
+		return TypeWrappers.wrap(new WildcardTypeImpl(wctype.getLowerBounds(), typeVar.getBounds()));
 	}
 
 	private TypeWrapper[] substituteTypes(TypeWrapper[] origTypes, Class<?> ownerClass, TypeWrapper[] actualTypeArgs) {
@@ -140,13 +165,20 @@ public class ClassWrapper implements TypeWrapper {
 		}
 		fields = new HashMap<String, FieldWrapper>();
 		methods = ArrayListMultimap.create();
-		TypeWrapper[] actualTypeArgs = null;
-		Class<?> rawClass = null;
-		for (Type c = getType(); c != null; c = rawClass.getGenericSuperclass()) {
+		addFieldsAndMethods(getType(), null, null);
+	}
+
+	private void addFieldsAndMethods(Type type, Class<?> rawClass, TypeWrapper[] actualTypeArgs) {
+		for (Type c = type; c != null; c = rawClass.getGenericSuperclass()) {
 			actualTypeArgs = getActualTypeArgs(c, rawClass, actualTypeArgs);
 			rawClass = getRawClazz(c);
 			addFields(rawClass, actualTypeArgs);
 			addMethods(rawClass, actualTypeArgs);
+			// add also the methods from interfaces (not really needed when the root is actual class, but need when the
+			// root is interfaces)
+			for (Type iface : rawClass.getGenericInterfaces()) {
+				addFieldsAndMethods(iface, rawClass, actualTypeArgs);
+			}
 		}
 	}
 
@@ -265,11 +297,12 @@ public class ClassWrapper implements TypeWrapper {
 		if (wrappers == null) {
 			return Option.none();
 		}
-		for (MethodWrapper w : wrappers) {
-			if (w.isCompatibleParameterTypes(paramTypes)) {
-				return Option.some(w);
-			}
+
+		MethodWrapper w = ClassUtils.resolveMethod(wrappers, paramTypes);
+		if (w != null) {
+			return Option.some(w);
 		}
+
 		return Option.none();
 	}
 

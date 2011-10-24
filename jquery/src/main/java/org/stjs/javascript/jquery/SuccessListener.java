@@ -15,8 +15,8 @@
  */
 package org.stjs.javascript.jquery;
 
+import org.stjs.javascript.Array;
 import org.stjs.javascript.JsFunction;
-import org.stjs.shared.Array;
 
 public abstract class SuccessListener implements JsFunction<Void> {
 	public abstract void onSuccess(Object data);

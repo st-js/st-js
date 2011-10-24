@@ -7,7 +7,7 @@ import java.util.List;
  * 
  * @goal generate
  * @phase process-classes
- * @requiresDependencyResolution provided
+ * @requiresDependencyResolution compile
  * @author acraciun
  * 
  */

@@ -34,7 +34,7 @@
 			<groupId>org.stjs</groupId>
 			<artifactId>jquery</artifactId>
 			<version>${project.version}</version>
-			<scope>provided</scope>
+<!-- 			<scope>provided</scope> -->
 		</dependency>
 
 		<!-- tests -->
@@ -97,7 +97,7 @@
 											maven-plugin
 										</artifactId>
 										<versionRange>
-											[1.0.0-SNAPSHOT,)
+											[1.0.1-SNAPSHOT,)
 										</versionRange>
 										<goals>
 											<goal>generate</goal>

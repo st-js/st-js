@@ -18,7 +18,7 @@ package org.stjs.server;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.stjs.shared.Map;
+import org.stjs.javascript.Map;
 
 /**
  * This class implements the {@link Map} interface to be used on the server side.

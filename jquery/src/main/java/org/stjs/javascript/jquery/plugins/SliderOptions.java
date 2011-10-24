@@ -15,8 +15,8 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
+import org.stjs.javascript.Array;
 import org.stjs.javascript.jquery.JQuery;
-import org.stjs.shared.Array;
 
 public class SliderOptions<FullJQuery extends JQuery<?>> {
 	public boolean disabled = false;

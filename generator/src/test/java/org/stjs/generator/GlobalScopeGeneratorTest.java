@@ -8,6 +8,7 @@ import test.generator.globalScope.GlobalScope1;
 import test.generator.globalScope.GlobalScope2;
 import test.generator.globalScope.GlobalScope3;
 import test.generator.globalScope.GlobalScope4;
+import test.generator.globalScope.GlobalScope5;
 
 public class GlobalScopeGeneratorTest {
 	@Test
@@ -28,6 +29,11 @@ public class GlobalScopeGeneratorTest {
 	@Test
 	public void testFieldWithStaticImport() {
 		assertCodeContains(GlobalScope4.class, "s = field");
+	}
+
+	@Test
+	public void testForAdapters() {
+		assertCodeContains(GlobalScope5.class, "replace");
 	}
 
 }

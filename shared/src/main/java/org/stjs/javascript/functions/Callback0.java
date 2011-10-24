@@ -1,4 +1,4 @@
-package org.stjs.shared.functions;
+package org.stjs.javascript.functions;
 
 public interface Callback0 {
 	public void $invoke();

@@ -16,8 +16,6 @@
 package org.stjs.javascript;
 
 import org.stjs.javascript.annotation.GlobalScope;
-import org.stjs.shared.Array;
-import org.stjs.shared.Map;
 
 @GlobalScope
 public class Global {

@@ -1,4 +1,4 @@
-package org.stjs.shared.functions;
+package org.stjs.javascript.functions;
 
 public interface Callback4<P1, P2, P3, P4> {
 

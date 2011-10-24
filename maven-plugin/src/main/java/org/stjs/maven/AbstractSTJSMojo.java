@@ -185,6 +185,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 					throw new MojoExecutionException("Cannot scan the source directory:" + e, e);
 				} catch (Exception e) {
 					getLog().error(e.toString());
+					e.printStackTrace();
 					throw new MojoExecutionException("Error generating javascript:" + e, e);
 				}
 			}

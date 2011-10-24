@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
 import org.stjs.generator.scope.CompilationUnitScope;
 import org.stjs.generator.scope.ScopeBuilder;
 import org.stjs.generator.type.ClassLoaderWrapper;
+import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.visitor.SetParentVisitor;
 import org.stjs.generator.writer.JavascriptWriterVisitor;
 
@@ -221,6 +222,9 @@ public class Generator {
 			Set<String> resolvedImportsNames, Pattern exceptions) {
 
 		File src;
+		if (ClassUtils.isBridge(inputFileName)) {
+			return;
+		}
 		if (inputFileName.startsWith("org.stjs.testing") || inputFileName.startsWith("org.stjs.javascript")) {
 			return;
 		}
