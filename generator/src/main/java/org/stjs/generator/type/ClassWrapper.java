@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.Option;
 import org.stjs.generator.utils.PreConditions;
@@ -197,8 +198,7 @@ public class ClassWrapper implements TypeWrapper {
 		for (Method m : rawClass.getDeclaredMethods()) {
 			TypeWrapper[] paramTypes = TypeWrappers.wrap(m.getGenericParameterTypes());
 			@SuppressWarnings("unchecked")
-			TypeVariableWrapper<Method>[] typeParams = (TypeVariableWrapper<Method>[]) TypeWrappers.wrap(m
-					.getTypeParameters());
+			TypeVariableWrapper<Method>[] typeParams = TypeWrappers.wrap(m.getTypeParameters());
 			methods.put(
 					m.getName(),
 					buildMethodWrapper(m.getName(), TypeWrappers.wrap(m.getGenericReturnType()), paramTypes,
@@ -222,6 +222,9 @@ public class ClassWrapper implements TypeWrapper {
 	@Override
 	public String getExternalName() {
 		String name = clazz.getSimpleName();
+		if (name.isEmpty()) {
+			return GeneratorConstants.SPECIAL_INLINE_TYPE;
+		}
 		for (Class<?> c = clazz.getDeclaringClass(); c != null; c = c.getDeclaringClass()) {
 			name = c.getSimpleName() + "." + name;
 		}

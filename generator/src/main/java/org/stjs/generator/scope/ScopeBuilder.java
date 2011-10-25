@@ -190,9 +190,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 							}
 							for (ClassWrapper innerClass : clazz.getDeclaredClass(fieldOrTypeOrMethodName)) {
 								scope.addType(innerClass);
-								break;
 							}
-							// TODO : do wee need to continue here?
 						}
 					}
 					for (ClassWrapper clazz : identifyQualifiedNameExprClass(name)) {
@@ -271,7 +269,6 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	}
 
 	private TypeWrapper resolveType(Scope scope, Type type) {
-		// TODO : shouldn't that go directly in the scope classes?
 		int arrayCount = 0;
 		if (type instanceof ReferenceType) {
 			ReferenceType refType = (ReferenceType) type;
@@ -324,16 +321,16 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	@Override
 	public void visit(VariableDeclarationExpr n, Scope scope) {
-		// TODO add resolvedType
 		PreConditions
 				.checkState(scope instanceof BasicScope, "The variable [%s] is not defined inside a BasicScope", n);
 
 		BasicScope basicScope = (BasicScope) scope;
 		if (n.getVars() != null) {
 			TypeWrapper clazz = resolveType(basicScope, n.getType());
+			resolvedType(n, clazz);
 			/*
 			 * TODO : this is not as simple. the order of the variables declarations matters! In this example class XXX
-			 * { private String x; void m() { String y = x; String x = "hello"; String k = x; } }
+			 * { private int x; void m() { int y = x; String x = "hello"; String k = x; } }
 			 * 
 			 * y = x refers to the field but k = x refers to the local var. if you replace String x = "hello", by String
 			 * x = x; this causes a compilation error, because it is equivalent to; String x; x=x; This means that
@@ -430,15 +427,20 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			int anonymousClassNumber = anonymousClassCount.get(classScope).incrementAndGet();
 			ClassWrapper anonymousClass = classLoader.loadClass(
 					classScope.getClazz().getName() + "$" + anonymousClassNumber).getOrThrow();
-			ClassScope anonymousClassScope = new ClassScope(anonymousClass, scope, context);
+
+			ClassScope anonymousClassScope = addClassToScope((AbstractScope) scope, anonymousClass);
+
+			resolvedType(n, anonymousClass);
+			scope(n, anonymousClassScope);
 
 			for (BodyDeclaration member : n.getAnonymousClassBody()) {
 				member.accept(this, anonymousClassScope);
 			}
+
+		} else {
+			resolvedType(n, resolveType(scope, n.getType()));
+			scope(n, scope);
 		}
-		// TODO add potential generic params
-		resolvedType(n, resolveType(scope, n.getType()));
-		scope(n, scope);
 	}
 
 	private Option<ClassWrapper> identifyQualifiedNameExprClass(NameExpr expr) {
@@ -500,14 +502,17 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	@Override
 	public void visit(ArrayCreationExpr n, Scope arg) {
-		// TODO Auto-generated method stub
 		super.visit(n, arg);
+		resolvedType(n, ClassUtils.arrayOf(resolveType(arg, n.getType()), n.getArrayCount()));
 	}
 
 	@Override
 	public void visit(ArrayInitializerExpr n, Scope arg) {
-		// TODO Auto-generated method stub
 		super.visit(n, arg);
+		if (n.getValues() != null && n.getValues().size() > 0) {
+			// not exactly sure what to put here - but it doesn't matter much
+			resolvedType(n, resolvedType(n.getValues().get(0)));
+		}
 	}
 
 	@Override

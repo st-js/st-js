@@ -142,7 +142,8 @@ public class ClassUtils {
 	 */
 	public static TypeWrapper arrayOf(TypeWrapper resolvedType, int arrayCount) {
 		if (resolvedType.getClass() == ClassWrapper.class) {
-			return new ClassWrapper(Array.newInstance(resolvedType.getClass(), new int[arrayCount]).getClass());
+			return new ClassWrapper(Array.newInstance((Class<?>) resolvedType.getType(), new int[arrayCount])
+					.getClass());
 		}
 		TypeWrapper returnType = resolvedType;
 		for (int i = 0; i < arrayCount; ++i) {

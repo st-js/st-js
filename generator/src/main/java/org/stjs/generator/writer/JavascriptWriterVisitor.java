@@ -249,7 +249,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	public void print(StringLiteralExpr n) {
 		// java has some more syntax to declare integers :
 		// 0x0, 0b0, (java7) 1_000_000
-		// TxODO : convert it to plain numbers for javascript
+		// TODO : convert it to plain numbers for javascript
 		printer.printLiteral(n.getValue());
 	}
 
@@ -259,7 +259,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		// printer.print(n.getName());
 		Scope scope = scope(n);
 		printer.print(stJsName(scope.resolveType(n.getName()).getType()));
-		// TxODO implements not considered
+		// TODO implements not considered
 		printer.print(" = ");
 		printer.printLn(" stjs.enumeration(");
 		printer.indent();
@@ -272,7 +272,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				}
 			}
 		}
-		// TxODO members not considered
+		// TODO members not considered
 		printer.printLn("");
 		printer.unindent();
 		printer.print(");");
@@ -542,11 +542,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		return null;
 	}
 
-	private ClassOrInterfaceDeclaration buildClassDeclaration(String className, String extendsFrom,
-			List<BodyDeclaration> members, List<Expression> constructorscopeWalkers) {
+	private ClassOrInterfaceDeclaration buildClassDeclaration(String className, ClassOrInterfaceType extendsFrom,
+			List<BodyDeclaration> members, List<Expression> constructorArguments) {
 		ClassOrInterfaceDeclaration decl = new ClassOrInterfaceDeclaration();
 		decl.setName(className);
-		decl.setExtends(Collections.singletonList(new ClassOrInterfaceType(extendsFrom)));
+		decl.setExtends(Collections.singletonList(extendsFrom));
 		decl.setMembers(members);
 		// TODO add constructor if needed to call the super with the constructorscopeWalkers
 		return decl;
@@ -572,10 +572,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			// special construction to handle the inline body
 			// build a special type called _InlineType to handle this
 
-			// FIXME : fix inline types
 			printer.printLn("(function(){");
 			ClassOrInterfaceDeclaration inlineFakeClass = buildClassDeclaration(GeneratorConstants.SPECIAL_INLINE_TYPE,
-					n.getType().getName(), n.getAnonymousClassBody(), n.getArgs());
+					n.getType(), n.getAnonymousClassBody(), n.getArgs());
 			inlineFakeClass.setData(n.getData());
 			inlineFakeClass.accept(this, context);
 
@@ -673,18 +672,24 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		Checks.checkClassDeclaration(n, context);
 
 		printComments(n, context);
+
+		ClassScope scope = (ClassScope) scope(n);
+		if (resolvedType(n) == null) {
+			// for anonymous object creation the type is set already
+			resolvedType(n, scope.resolveType(n.getName()).getType());
+		}
+
+		String className;
 		if (GeneratorConstants.SPECIAL_INLINE_TYPE.equals(n.getName())) {
 			printer.print("var ");
+			className = n.getName();
 		} else {
-			TypeWrapper type = scope(n).resolveType(n.getName()).getType();
+			TypeWrapper type = resolvedType(n);
 			if (!type.isInnerType()) {
 				printer.print("var ");
 			}
+			className = stJsName(resolvedType(n));
 		}
-
-		ClassScope scope = (ClassScope) scope(n);
-		resolvedType(n, scope.resolveType(n.getName()).getType());
-		String className = stJsName(scope.resolveType(n.getName()).getType());
 		printer.print(className);
 
 		printer.print(" = ");
@@ -874,7 +879,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	/**
-	 * TODO - this can be done more generically
+	 * 
 	 * 
 	 * @param n
 	 * @return true if the node is a direct child following the path:
@@ -1104,9 +1109,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	public void visit(final MethodCallExpr n, final GenerationContext context) {
 		MethodWrapper method = resolvedMethod(n);
 		if (!specialMethodHandlers.handleMethodCall(this, n, context)) {
-			/*
-			 * TODO : resolve not only the list of methods, but the actual method based on the arguments
-			 */
 			TypeWrapper methodDeclaringClass = method.getOwnerType();
 			if (Modifier.isStatic(method.getModifiers())) {
 				printStaticFieldOrMethodAccessPrefix(methodDeclaringClass, true);
@@ -1249,10 +1251,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(MemberValuePair n, GenerationContext context) {
-		// XXX: not very sure when this occurs
-		printer.print(n.getName());
-		printer.print(" = ");
-		n.getValue().accept(this, context);
+		// skip (annotations)
 	}
 
 	@Override
