@@ -77,7 +77,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.List;
@@ -210,25 +209,16 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	private ClassScope addClassToScope(AbstractScope parentScope, ClassWrapper clazz) {
 		parentScope.addType(clazz);
 
-		AbstractScope compilationUnitScope = parentScope.closest(CompilationUnitScope.class);
-
 		ClassScope scope = new ClassScope(clazz, parentScope, context);
 		for (ClassWrapper innerClass : clazz.getDeclaredClasses()) {
-			if (Modifier.isStatic(innerClass.getModifiers())) {
-				compilationUnitScope.addType(innerClass);
-			} else {
-				scope.addType(innerClass);
-			}
+			scope.addType(innerClass);
 		}
 		return scope;
 	}
 
 	@Override
 	public void visit(final ClassOrInterfaceDeclaration n, Scope scope) {
-		// NOTE : static class must inherit the compilation unit scope, non static class the class scope
-		AbstractScope parentScope = Modifier.isStatic(n.getModifiers()) ? scope.closest(CompilationUnitScope.class)
-				: (AbstractScope) scope;
-
+		AbstractScope parentScope = (AbstractScope) scope;
 		TypeWithScope type = scope.resolveType(n.getName());
 		PreConditions.checkState(type != null, "%s class cannot be resolved in the scope", n.getName());
 		Scope classScope = addClassToScope(parentScope, (ClassWrapper) type.getType());

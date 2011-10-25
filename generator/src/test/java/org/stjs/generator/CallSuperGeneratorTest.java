@@ -35,7 +35,7 @@ public class CallSuperGeneratorTest {
 	@Test
 	public void testInstanceCallSuper() {
 		assertCodeContains(CallSuper4.class,
-				"CallSuper4.prototype.instanceMethod2 = function(arg){ this._super(\"instanceMethod\", arg);}");
+				"CallSuper4.prototype.instanceMethod2 = function(arg){ this.instanceMethod(arg);}");
 	}
 
 	@Test

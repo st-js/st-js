@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import test.generator.fields.Fields1;
 import test.generator.fields.Fields10;
+import test.generator.fields.Fields11;
 import test.generator.fields.Fields2;
 import test.generator.fields.Fields3;
 import test.generator.fields.Fields4;
@@ -65,5 +66,10 @@ public class FieldsGeneratorTest {
 	@Test
 	public void testGeneric() {
 		assertCodeContains(Fields10.class, "Fields10.prototype.field = null;");
+	}
+
+	@Test
+	public void testAccessOuterStaticField() {
+		assertCodeContains(Fields11.class, "a = Fields11.FIELD;");
 	}
 }

@@ -1120,7 +1120,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				if (n.getScope() != null && !withScopeSuper && !withScopeThis) {
 					n.getScope().accept(this, context);
 					printer.print(".");
-				} else if (method.isDeclared() && !withScopeSuper) {
+				} else if (!withScopeSuper) {
 					// Non static reference to current enclosing type.
 					printer.print("this.");
 				} else {
