@@ -9,6 +9,7 @@ import test.generator.variables.Variables1;
 import test.generator.variables.Variables2;
 import test.generator.variables.Variables3;
 import test.generator.variables.Variables4;
+import test.generator.variables.Variables5;
 
 public class VariablesGeneratorTest {
 	@Test
@@ -30,5 +31,11 @@ public class VariablesGeneratorTest {
 	public void testVariableWrongName() {
 		// "var" is a wrong name
 		generate(Variables4.class);
+	}
+
+	@Test
+	public void testKeepDeclarationLocation() {
+		assertCodeContains(Variables5.class, "y = this.x;");
+		assertCodeContains(Variables5.class, "k = x;");
 	}
 }

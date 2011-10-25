@@ -328,14 +328,6 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		if (n.getVars() != null) {
 			TypeWrapper clazz = resolveType(basicScope, n.getType());
 			resolvedType(n, clazz);
-			/*
-			 * TODO : this is not as simple. the order of the variables declarations matters! In this example class XXX
-			 * { private int x; void m() { int y = x; String x = "hello"; String k = x; } }
-			 * 
-			 * y = x refers to the field but k = x refers to the local var. if you replace String x = "hello", by String
-			 * x = x; this causes a compilation error, because it is equivalent to; String x; x=x; This means that
-			 * 'String x;' create a new scope in which ' = x' is evaluated.
-			 */
 			for (VariableDeclarator var : n.getVars()) {
 				basicScope.addVariable(new LocalVariable(clazz, var.getId().getName()));
 			}

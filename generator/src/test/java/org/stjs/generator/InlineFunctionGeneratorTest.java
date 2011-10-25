@@ -19,8 +19,8 @@ public class InlineFunctionGeneratorTest {
 	@Test
 	public void testInterfaceAndParam() {
 		assertCodeContains(InlineFunctions2.class, "stjs.extend(_InlineType, FunctionInterface);");
-		// assertCodeContains(InlineFunctions2.class, "_InlineType.prototype.test = 2; "
-		// + "_InlineType.prototype.run=function(arg){arg=arg+1;}");
+		assertCodeContains(InlineFunctions2.class, "_InlineType.prototype.test = 2; "
+				+ "_InlineType.prototype.run=function(arg){arg=arg+1;}");
 	}
 
 	@Test
