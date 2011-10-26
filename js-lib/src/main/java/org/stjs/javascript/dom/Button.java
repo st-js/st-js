@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Button extends Element {
+abstract public class Button extends Element {
 	public String accessKey;
 	public boolean disabled;
 	public Form form;

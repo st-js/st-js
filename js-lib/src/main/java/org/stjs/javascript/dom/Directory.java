@@ -15,6 +15,6 @@
  */
 package org.stjs.javascript.dom;
 
-public class Directory extends Element {
+abstract public class Directory extends Element {
 	public boolean compact;
 }

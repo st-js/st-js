@@ -15,6 +15,6 @@
  */
 package org.stjs.javascript.dom;
 
-public class Menu extends Element {
+abstract public class Menu extends Element {
 	public boolean compact;
 }

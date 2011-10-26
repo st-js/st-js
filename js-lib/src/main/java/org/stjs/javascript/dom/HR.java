@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class HR extends Element {
+abstract public class HR extends Element {
 	public String align;
 	public boolean noShade;
 	public String size;

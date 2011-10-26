@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class FrameSet extends Element {
+abstract public class FrameSet extends Element {
 	public String cols;
 	public String rows;
 }

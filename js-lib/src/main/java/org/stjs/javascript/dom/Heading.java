@@ -15,6 +15,6 @@
  */
 package org.stjs.javascript.dom;
 
-public class Heading extends Element {
+abstract public class Heading extends Element {
 	public String align;
 }

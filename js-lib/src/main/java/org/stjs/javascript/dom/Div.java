@@ -15,6 +15,6 @@
  */
 package org.stjs.javascript.dom;
 
-public class Div extends Element {
+abstract public class Div extends Element {
 	public String align;
 }

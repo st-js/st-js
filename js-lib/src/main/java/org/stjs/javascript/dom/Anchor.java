@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Anchor extends Element {
+abstract public class Anchor extends Element {
 	public String accessKey;
 	public String charset;
 	public String coords;

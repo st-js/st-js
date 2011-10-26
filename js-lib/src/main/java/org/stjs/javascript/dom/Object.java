@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Object extends Element {
+abstract public class Object extends Element {
 	public String align;
 	public String archive;
 	public String border;

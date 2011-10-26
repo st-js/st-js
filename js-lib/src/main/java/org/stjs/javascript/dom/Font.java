@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Font extends Element {
+abstract public class Font extends Element {
 	public String color;
 	public String face;
 	public String size;

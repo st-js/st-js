@@ -15,6 +15,6 @@
  */
 package org.stjs.javascript.dom;
 
-public class Title extends Element {
+abstract public class Title extends Element {
 	public String text;
 }

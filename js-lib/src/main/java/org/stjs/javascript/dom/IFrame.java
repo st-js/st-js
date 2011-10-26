@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class IFrame extends Element {
+abstract public class IFrame extends Element {
 	public String align;
 	public Document contentDocument;
 	public String frameBorder;

@@ -15,6 +15,6 @@
  */
 package org.stjs.javascript.dom;
 
-public class Head extends Element {
+abstract public class Head extends Element {
 	public String profile;
 }

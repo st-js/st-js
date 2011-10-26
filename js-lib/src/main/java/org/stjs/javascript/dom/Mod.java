@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Mod extends Element {
+abstract public class Mod extends Element {
 	public String cite;
 	public String dateTime;
 }

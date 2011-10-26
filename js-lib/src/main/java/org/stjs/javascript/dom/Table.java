@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Table extends Element {
+abstract public class Table extends Element {
 	public HTMLCollection<TableSection> TBodies;
 	public TableSection TFoot;
 	public TableSection THead;

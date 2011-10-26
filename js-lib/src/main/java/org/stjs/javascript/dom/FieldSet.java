@@ -15,6 +15,6 @@
  */
 package org.stjs.javascript.dom;
 
-public class FieldSet extends Element {
+abstract public class FieldSet extends Element {
 	public Form form;
 }

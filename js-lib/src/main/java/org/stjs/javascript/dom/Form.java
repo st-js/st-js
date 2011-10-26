@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Form extends Element {
+abstract public class Form extends Element {
 	public String acceptCharset;
 	public String action;
 	public HTMLCollection<Input> elements;

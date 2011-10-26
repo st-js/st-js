@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Area extends Element {
+abstract public class Area extends Element {
 	public String accessKey;
 	public String alt;
 	public String coords;

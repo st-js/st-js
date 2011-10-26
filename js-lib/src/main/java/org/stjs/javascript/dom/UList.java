@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class UList extends Element {
+abstract public class UList extends Element {
 	public boolean compact;
 	public String type;
 }

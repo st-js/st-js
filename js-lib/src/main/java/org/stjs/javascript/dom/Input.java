@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Input extends Element {
+abstract public class Input extends Element {
 	public String accept;
 	public String accessKey;
 	public String align;

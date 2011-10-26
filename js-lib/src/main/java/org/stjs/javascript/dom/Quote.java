@@ -15,6 +15,6 @@
  */
 package org.stjs.javascript.dom;
 
-public class Quote extends Element {
+abstract public class Quote extends Element {
 	public String cite;
 }

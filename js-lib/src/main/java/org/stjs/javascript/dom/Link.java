@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Link extends Element {
+abstract public class Link extends Element {
 	public String charset;
 	public boolean disabled;
 	public String href;

@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Applet extends Element {
+abstract public class Applet extends Element {
 	public String align;
 	public String alt;
 	public String archive;

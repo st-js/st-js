@@ -17,7 +17,7 @@ package org.stjs.javascript.dom;
 
 import org.stjs.javascript.Location;
 
-public class Document {
+abstract public class Document {
 	public String URL;
 	public String documentURI;
 	public HTMLCollection<Anchor> anchors;

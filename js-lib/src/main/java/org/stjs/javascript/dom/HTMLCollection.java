@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class HTMLCollection<T extends Node> {
+abstract public class HTMLCollection<T extends Node> {
 	public int length;
 
 	public T namedItem(String name) {

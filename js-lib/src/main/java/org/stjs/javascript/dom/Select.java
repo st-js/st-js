@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Select extends Element {
+abstract public class Select extends Element {
 	public boolean disabled;
 	public Form form;
 	public int length;

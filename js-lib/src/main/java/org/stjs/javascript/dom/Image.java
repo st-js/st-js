@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Image extends Element {
+abstract public class Image extends Element {
 	public String align;
 	public String alt;
 	public String border;

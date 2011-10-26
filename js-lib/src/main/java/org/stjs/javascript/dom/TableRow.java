@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class TableRow extends Element {
+abstract public class TableRow extends Element {
 	public String VAlign;
 	public String align;
 	public String bgColor;

@@ -15,6 +15,6 @@
  */
 package org.stjs.javascript.dom;
 
-public class Paragraph extends Element {
+abstract public class Paragraph extends Element {
 	public String align;
 }

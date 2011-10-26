@@ -15,6 +15,6 @@
  */
 package org.stjs.javascript.dom;
 
-public class Html extends Element {
+abstract public class Html extends Element {
 	public String version;
 }

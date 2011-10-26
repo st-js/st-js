@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class HTMLList<T extends Node> {
+abstract public class HTMLList<T extends Node> {
 	public int length;
 
 	public T item(int index) {

@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Label extends Element {
+abstract public class Label extends Element {
 	public String accessKey;
 	public Form form;
 	public String htmlFor;

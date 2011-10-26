@@ -15,6 +15,6 @@
  */
 package org.stjs.javascript.dom;
 
-public class BR extends Element {
+abstract public class BR extends Element {
 	public String clear;
 }

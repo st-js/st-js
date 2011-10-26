@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class CharacterData extends Node {
+abstract public class CharacterData extends Node {
 	public void appendData(String arg) {
 		throw new UnsupportedOperationException();
 	}

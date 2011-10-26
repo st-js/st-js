@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Attr extends Node {
+abstract public class Attr extends Node {
 	public String name;
 	public Element ownerElement;
 	// getSchemaTypeInfo()

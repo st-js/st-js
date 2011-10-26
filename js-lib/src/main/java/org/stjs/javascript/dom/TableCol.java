@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class TableCol extends Element {
+abstract public class TableCol extends Element {
 	public String VAlign;
 	public String align;
 	public String ch;

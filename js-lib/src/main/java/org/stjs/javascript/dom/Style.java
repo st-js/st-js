@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Style extends Element {
+abstract public class Style extends Element {
 	public boolean disabled;
 	public String media;
 	public String type;

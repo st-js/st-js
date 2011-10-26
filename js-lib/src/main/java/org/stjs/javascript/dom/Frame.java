@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Frame extends Element {
+abstract public class Frame extends Element {
 	public Document contentDocument;
 	public String frameBorder;
 	public String longDesc;

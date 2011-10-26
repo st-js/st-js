@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Param extends Element {
+abstract public class Param extends Element {
 	public String name;
 	public String type;
 	public String value;

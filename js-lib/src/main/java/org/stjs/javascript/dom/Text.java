@@ -15,6 +15,6 @@
  */
 package org.stjs.javascript.dom;
 
-public class Text extends CharacterData {
+abstract public class Text extends CharacterData {
 
 }

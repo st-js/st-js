@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class TableCell extends Element {
+abstract public class TableCell extends Element {
 	public String VAlign;
 	public String abbr;
 	public String align;

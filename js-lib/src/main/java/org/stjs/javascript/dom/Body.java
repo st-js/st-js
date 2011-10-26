@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class Body extends Element {
+abstract public class Body extends Element {
 	public String ALink;
 	public String VLink;
 	public String background;

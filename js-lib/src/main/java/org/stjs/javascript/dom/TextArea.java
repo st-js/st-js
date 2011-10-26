@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.dom;
 
-public class TextArea extends Element {
+abstract public class TextArea extends Element {
 	public String accessKey;
 	public int cols;
 	public String defaultValue;
