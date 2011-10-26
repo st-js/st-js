@@ -8,9 +8,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.stjs.javascript.jquery.JQuery;
 import org.stjs.testing.annotation.HTMLFixture;
-import org.stjs.testing.jstestdriver.JSTestDriverRunner;
+import org.stjs.testing.driver.STJSTestDriverRunner;
 
-@RunWith(JSTestDriverRunner.class)
+@RunWith(STJSTestDriverRunner.class)
 @HTMLFixture("<form id='form'>" + //
 		"			<table>" + //
 		"				<tbody>" + //

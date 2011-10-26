@@ -4,15 +4,15 @@ public class BrowserConnection {
 	/**
 	 * the result of the last test
 	 */
-	private String result;
+	private TestResult result;
 
 	private long lastTestId;
 
-	public String getResult() {
+	public TestResult getResult() {
 		return result;
 	}
 
-	public void setResult(String result) {
+	public void setResult(TestResult result) {
 		this.result = result;
 	}
 

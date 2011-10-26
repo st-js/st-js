@@ -95,7 +95,7 @@ public class STJSTestServer {
 		BrowserConnection b = browserConnections.get(id);
 		if (b != null) {
 			if (testId == lastTestId) {
-				b.setResult(params.get("result"));
+				b.setResult(new TestResult(params.get("result"), params.get("location")));
 				b.setLastTestId(testId);
 				notify();
 			}
@@ -181,23 +181,18 @@ public class STJSTestServer {
 		return browserConnections.size();
 	}
 
-	public synchronized String test(File srcFile, int timeout) throws InterruptedException {
+	public synchronized TestResultCollection test(File srcFile, int timeout) throws InterruptedException {
 		lastTestId++;
 		testFile = srcFile;
 		System.out.println("--> testing :" + lastTestId + ", file:" + testFile);
 		int testBrowsers = 0;
 		long endTime = System.currentTimeMillis() + timeout;
-		StringBuilder result = new StringBuilder();
+		TestResultCollection result = new TestResultCollection();
 		while (true) {
 			for (BrowserConnection b : browserConnections.values()) {
 				if (b.getLastTestId() == lastTestId) {
 					System.out.println("FOUND result:" + b);
-					if (result.toString().equals("OK") && b.getResult().equals("OK")) {
-						// keep one ok only
-					} else {
-						result.append(b.getResult());
-						result.append("\n");
-					}
+					result.addResult(b.getResult());
 					testBrowsers++;
 				}
 			}
@@ -209,7 +204,7 @@ public class STJSTestServer {
 		System.out.println("<-- testing :" + lastTestId + ", file:" + testFile);
 
 		testFile = null;
-		return result.toString().trim();
+		return result;
 	}
 
 	public URL getHostURL() {

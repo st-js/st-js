@@ -4,12 +4,11 @@ import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 
 import org.junit.Test;
 
-
 public class CallSuperGeneratorTest {
 	@Test
 	public void testCallSuperConstructorObject() {
 		// in fact the call to super should not be generated
-		assertCodeContains(CallSuper1.class, "CallSuper1 = function(){}");
+		assertCodeContains(CallSuper1.class, "xCallSuper1 = function(){}");
 	}
 
 	@Test

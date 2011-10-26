@@ -34,7 +34,7 @@
 			<groupId>org.stjs</groupId>
 			<artifactId>jquery</artifactId>
 			<version>${project.version}</version>
-<!-- 			<scope>provided</scope> -->
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- tests -->
@@ -67,17 +67,14 @@
 							<goal>generate</goal>
 						</goals>
 					</execution>
-<!-- 					<execution> -->
-<!-- 						<id>test</id> -->
-<!-- 						<phase>process-test-classes</phase> -->
-<!-- 						<goals> -->
-<!-- 							<goal>generate-test</goal> -->
-<!-- 						</goals> -->
-<!-- 					</execution> -->
+					<execution>
+						<id>test</id>
+						<phase>process-test-classes</phase>
+						<goals>
+							<goal>generate-test</goal>
+						</goals>
+					</execution>
 				</executions>
-				<configuration>
-					<rootPackage>auto</rootPackage>
-				</configuration>
 			</plugin>
 		</plugins>
 		<pluginManagement>

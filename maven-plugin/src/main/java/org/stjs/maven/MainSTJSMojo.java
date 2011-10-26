@@ -3,11 +3,13 @@ package org.stjs.maven;
 import java.io.File;
 import java.util.List;
 
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
+
 /**
  * 
  * @goal generate
  * @phase process-classes
- * @requiresDependencyResolution compile
+ * @requiresDependencyResolution provided
  * @author acraciun
  * 
  */
@@ -38,6 +40,12 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 	@Override
 	public File getGeneratedSourcesDirectory() {
 		return generatedSourcesDirectory;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	protected List<String> getClasspathElements() throws DependencyResolutionRequiredException {
+		return project.getCompileClasspathElements();
 	}
 
 }

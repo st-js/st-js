@@ -40,7 +40,8 @@
 		logDiv.innerHTML += "<br>Result:" + ex;
 		var xmlhttp = new XMLHttpRequest();
 		try {
-			xmlhttp.open("POST", "/result?id=" + id + "&result=" + ex + "&testId=" + testId + "&method=" + method, true);
+			var result = ex.message || ex;
+			xmlhttp.open("POST", "/result?id=" + id + "&result=" + result + "&testId=" + testId + "&method=" + method + "&location=" + ex.location, true);
 			xmlhttp.send();
 		} catch (ex) {
 			console.error("error:" + ex);

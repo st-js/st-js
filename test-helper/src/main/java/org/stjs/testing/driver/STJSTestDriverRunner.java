@@ -13,11 +13,19 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
+import org.stjs.javascript.annotation.STJSBridge;
 import org.stjs.testing.GeneratorWrapper;
 import org.stjs.testing.annotation.HTMLFixture;
 
 import com.google.common.io.Files;
 
+/**
+ * add the STJSBridge annotation only to allow it to be present in the junit annotation
+ * 
+ * @author acraciun
+ * 
+ */
+@STJSBridge
 public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 	private final STJSTestServer server;
 	/**
@@ -108,16 +116,15 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 					writer.close();
 
 					System.out.println("Added source file:" + htmlFile);
-					String response = server.test(htmlFile, timeout);
-					if (!"OK".equals(response)) {
-						throw new Exception(response);
+					TestResultCollection response = server.test(htmlFile, timeout);
+					if (!response.isOk()) {
+						// take the first wrong result
+						throw response.getResult(0).buildException(getTestClass().getJavaClass().getName(),
+								method.getName());
 					}
 				} catch (IOException e) {
 					throw new RuntimeException(e);
-				} catch (AssertionError e) {
-					throw new RuntimeException(e);
 				}
-
 			}
 		};
 	}

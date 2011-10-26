@@ -3,15 +3,20 @@ package org.stjs.maven;
 import java.io.File;
 import java.util.List;
 
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.plugin.MojoExecutionException;
+
 /**
  * 
  * @goal generate-test
  * @phase process-test-classes
- * @requiresDependencyResolution runtime+test
+ * @requiresDependencyResolution test
  * @author acraciun
  * 
  */
 public class TestSTJSMojo extends AbstractSTJSMojo {
+	private static final String MAVEN_TEST_SKIP = "maven.test.skip";
+
 	/**
 	 * The source directories containing the sources to be compiled.
 	 * 
@@ -30,12 +35,28 @@ public class TestSTJSMojo extends AbstractSTJSMojo {
 	private File generatedTestSourcesDirectory;
 
 	@Override
-	public List<String> getCompileSourceRoots() {
+	protected List<String> getCompileSourceRoots() {
 		return compileSourceRoots;
 	}
 
 	@Override
-	public File getGeneratedSourcesDirectory() {
+	protected File getGeneratedSourcesDirectory() {
 		return generatedTestSourcesDirectory;
 	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	protected List<String> getClasspathElements() throws DependencyResolutionRequiredException {
+		return project.getTestClasspathElements();
+	}
+
+	@Override
+	public void execute() throws MojoExecutionException {
+		if ("true".equals(System.getProperty(MAVEN_TEST_SKIP))) {
+			getLog().info("Tests are skipped, so javascript generation for tests is also skipped");
+		} else {
+			super.execute();
+		}
+	}
+
 }

@@ -25,6 +25,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
@@ -96,17 +97,19 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	 */
 	protected String rootPackage = null;
 
-	abstract List<String> getCompileSourceRoots();
+	abstract protected List<String> getCompileSourceRoots();
 
-	abstract File getGeneratedSourcesDirectory();
+	abstract protected File getGeneratedSourcesDirectory();
+
+	abstract protected List<String> getClasspathElements() throws DependencyResolutionRequiredException;
 
 	private ClassLoader getBuiltProjectClassLoader() throws MojoExecutionException {
 		try {
-			@SuppressWarnings("unchecked")
-			List<String> runtimeClasspathElements = project.getRuntimeClasspathElements();
+			List<String> runtimeClasspathElements = getClasspathElements();
 			URL[] runtimeUrls = new URL[runtimeClasspathElements.size()];
 			for (int i = 0; i < runtimeClasspathElements.size(); i++) {
 				String element = runtimeClasspathElements.get(i);
+				getLog().debug("Classpath:" + element);
 				runtimeUrls[i] = new File(element).toURI().toURL();
 			}
 			return new URLClassLoader(runtimeUrls, Thread.currentThread().getContextClassLoader());
@@ -122,10 +125,9 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		Generator generator = new Generator();
 
 		GeneratorConfigurationBuilder configBuilder = new GeneratorConfigurationBuilder();
-		// TODO use config to add this package
-		configBuilder.allowedPackage("org.stjs.javascript");
+		// configBuilder.allowedPackage("org.stjs.javascript");
 		configBuilder.allowedPackage("org.junit");
-		configBuilder.allowedPackage("org.stjs.testing");
+		// configBuilder.allowedPackage("org.stjs.testing");
 
 		if (allowedPackages != null) {
 			configBuilder.allowedPackages(allowedPackages);
@@ -173,13 +175,6 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 					generator.generateJavascript(builtProjectClassLoader, absoluteSource, absoluteTarget,
 							configBuilder.build());
 					atLeastOneFileGenerated = true;
-
-					/*
-					 * NodeJSExecutor executor = new NodeJSExecutor(); ExecutionResult execution =
-					 * executor.run(absoluteTarget); if (execution.getExitValue() == 0) {
-					 * getLog().info("NodeJS execution sucessfull"); } else {
-					 * getLog().error("Error in NodeJS execution "+execution.getStdOut()+execution.getStdErr()); }
-					 */
 
 				} catch (InclusionScanException e) {
 					throw new MojoExecutionException("Cannot scan the source directory:" + e, e);
