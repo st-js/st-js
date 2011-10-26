@@ -24,7 +24,7 @@ import static org.stjs.javascript.jquery.GlobalJQuery.$;
 
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;
-import org.stjs.javascript.dom.HTMLElement;
+import org.stjs.javascript.dom.Element;
 import org.stjs.javascript.jquery.Event;
 import org.stjs.javascript.jquery.EventHandler;
 import org.stjs.javascript.jquery.EvtHandler;
@@ -55,7 +55,7 @@ public class StockApplication {
 		// add stock
 		$("#form").submit(new EventHandler() {
 			@Override
-			public boolean onEvent(Event ev, final HTMLElement THIS) {
+			public boolean onEvent(Event ev, final Element THIS) {
 				that.quoteProvider.updateStock($("#newStock").val(), new SuccessListener() {
 					@Override
 					public void onSuccess(Object data) {
@@ -73,7 +73,7 @@ public class StockApplication {
 		// the remove stock listener
 		$(".removeStock").live("click", new EventHandler() {
 			@Override
-			public boolean onEvent(Event ev, final HTMLElement THIS) {
+			public boolean onEvent(Event ev, final Element THIS) {
 				JQuery<?> $tr = $(THIS).parents("tr");
 				int index = $tr.parent().find("tr").index($tr);
 				that.stocks.splice(index);

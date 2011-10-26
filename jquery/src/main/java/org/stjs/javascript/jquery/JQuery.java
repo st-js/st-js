@@ -17,7 +17,7 @@ package org.stjs.javascript.jquery;
 
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Map;
-import org.stjs.javascript.dom.HTMLElement;
+import org.stjs.javascript.dom.Element;
 import org.stjs.javascript.functions.Callback2;
 import org.stjs.javascript.utils.NameValue;
 
@@ -154,21 +154,21 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 	public FullJQuery hide();
 
 	/************* core ***************/
-	public HTMLElement get(int index);
+	public Element get(int index);
 
-	public HTMLElement[] get();
+	public Element[] get();
 
 	public int index(String selector);
 
 	public int index(JQuery<?> jq);
 
-	public int index(HTMLElement element);
+	public int index(Element element);
 
 	public int index();
 
 	public int size();
 
-	public Array<HTMLElement> toArray();
+	public Array<Element> toArray();
 
 	/************* css ***************/
 	public Object css(String propertyName);
@@ -372,25 +372,25 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery after(JQuery<?> jq);
 
-	public FullJQuery after(HTMLElement element);
+	public FullJQuery after(Element element);
 
 	public FullJQuery append(Object content);
 
 	public FullJQuery append(JQuery<?> jq);
 
-	public FullJQuery append(HTMLElement element);
+	public FullJQuery append(Element element);
 
 	public FullJQuery appendTo(String selector);
 
 	public FullJQuery appendTo(JQuery<?> jq);
 
-	public FullJQuery appendTo(HTMLElement element);
+	public FullJQuery appendTo(Element element);
 
 	public FullJQuery before(String selector);
 
 	public FullJQuery before(JQuery<?> jq);
 
-	public FullJQuery before(HTMLElement element);
+	public FullJQuery before(Element element);
 
 	public FullJQuery clone();
 
@@ -404,25 +404,25 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery insertAfter(JQuery<?> jq);
 
-	public FullJQuery insertAfter(HTMLElement element);
+	public FullJQuery insertAfter(Element element);
 
 	public FullJQuery insertBefore(String selector);
 
 	public FullJQuery insertBefore(JQuery<?> jq);
 
-	public FullJQuery insertBefore(HTMLElement element);
+	public FullJQuery insertBefore(Element element);
 
 	public FullJQuery prepend(String selector);
 
 	public FullJQuery prepend(JQuery<?> jq);
 
-	public FullJQuery prepend(HTMLElement element);
+	public FullJQuery prepend(Element element);
 
 	public FullJQuery prependTo(String selector);
 
 	public FullJQuery prependTo(JQuery<?> jq);
 
-	public FullJQuery prependTo(HTMLElement element);
+	public FullJQuery prependTo(Element element);
 
 	public FullJQuery remove();
 
@@ -432,7 +432,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery replaceAll(String selector);
 
-	public FullJQuery replaceWith(HTMLElement element);
+	public FullJQuery replaceWith(Element element);
 
 	public FullJQuery replaceWith(String selector);
 
@@ -448,19 +448,19 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery unwrap();
 
-	public FullJQuery wrap(HTMLElement element);
+	public FullJQuery wrap(Element element);
 
 	public FullJQuery wrap(String selector);
 
 	public FullJQuery wrap(JQuery<?> jq);
 
-	public FullJQuery wrapAll(HTMLElement element);
+	public FullJQuery wrapAll(Element element);
 
 	public FullJQuery wrapAll(String selector);
 
 	public FullJQuery wrapAll(JQuery<?> jq);
 
-	public FullJQuery wrapInner(HTMLElement element);
+	public FullJQuery wrapInner(Element element);
 
 	public FullJQuery wrapInner(String selector);
 
@@ -481,11 +481,11 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery closest(JQuery<?> jq);
 
-	public FullJQuery closest(HTMLElement element);
+	public FullJQuery closest(Element element);
 
 	public FullJQuery contents();
 
-	public FullJQuery each(Callback2<Integer, HTMLElement> function);
+	public FullJQuery each(Callback2<Integer, Element> function);
 
 	public FullJQuery end();
 
@@ -495,25 +495,25 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery filter(JQuery<?> jq);
 
-	public FullJQuery filter(HTMLElement element);
+	public FullJQuery filter(Element element);
 
 	public FullJQuery find(String selector);
 
 	public FullJQuery find(JQuery<?> jq);
 
-	public FullJQuery find(HTMLElement element);
+	public FullJQuery find(Element element);
 
 	public FullJQuery first();
 
 	public FullJQuery has(String selector);
 
-	public FullJQuery has(HTMLElement element);
+	public FullJQuery has(Element element);
 
 	public boolean is(String selector);
 
 	public boolean is(JQuery<?> jq);
 
-	public boolean is(HTMLElement element);
+	public boolean is(Element element);
 
 	public FullJQuery last();
 
@@ -529,7 +529,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery nextUntil(JQuery<?> jq);
 
-	public FullJQuery nextUntil(HTMLElement element);
+	public FullJQuery nextUntil(Element element);
 
 	public FullJQuery not(String selector);
 
@@ -547,7 +547,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery parentsUntil(JQuery<?> jq);
 
-	public FullJQuery parentsUntil(HTMLElement element);
+	public FullJQuery parentsUntil(Element element);
 
 	public FullJQuery prev();
 
@@ -561,7 +561,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery prevUntil(JQuery<?> jq);
 
-	public FullJQuery prevUntil(HTMLElement element);
+	public FullJQuery prevUntil(Element element);
 
 	public FullJQuery offsetParent();
 

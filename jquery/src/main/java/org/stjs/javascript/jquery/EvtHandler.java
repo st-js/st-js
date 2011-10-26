@@ -15,13 +15,13 @@
  */
 package org.stjs.javascript.jquery;
 
-import org.stjs.javascript.dom.HTMLElement;
+import org.stjs.javascript.dom.Element;
 
 public abstract class EvtHandler implements EventHandler{
-  HTMLElement THIS;
+  Element THIS;
   public abstract void onEvent(Event ev);
 	@Override
-  public boolean onEvent(Event ev, HTMLElement THIS) {
+  public boolean onEvent(Event ev, Element THIS) {
 	  this.THIS = THIS;
 	  onEvent(ev);
 	  return false;

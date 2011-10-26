@@ -15,14 +15,14 @@
  */
 package org.stjs.javascript;
 
-import org.stjs.javascript.dom.HTMLElement;
+import org.stjs.javascript.dom.Element;
 
 abstract public class XMLHttpRequest {
 	public Runnable onreadystatechange;
 	public int readyState;
 	public String responseText;
 	// is in fact DOM Element, but they were mixed
-	public HTMLElement responseXML;
+	public Element responseXML;
 	public int status;
 	public String statusText;
 

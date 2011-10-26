@@ -1,25 +1,15 @@
-function assertEquals(a, b){
-	if (a!=b)
-		throw "Expected:" + a + " got:" + b;
+var junit = {
+	expectedAssertCount: 0,
+	assertCount : 0,
+	isArray: Array.isArray || function( obj ) {
+		if (obj == null)
+			return false;
+		return toString.call(obj) === "[object Array]";
+	}
 }
 
-/*
- * Copyright 2009 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 function expectAsserts(count) {
-  jstestdriver.expectedAssertCount = count;
+  junit.expectedAssertCount = count;
 }
 
 
@@ -130,7 +120,7 @@ function argsWithOptionalMsg_(args, length) {
 
 function assertTrue(msg, actual) {
   var args = argsWithOptionalMsg_(arguments, 2);
-  jstestdriver.assertCount++;
+  junit.assertCount++;
 
   isBoolean_(args[1]);
   if (args[1] != true) {
@@ -142,7 +132,7 @@ function assertTrue(msg, actual) {
 
 function assertFalse(msg, actual) {
   var args = argsWithOptionalMsg_(arguments, 2);
-  jstestdriver.assertCount++;
+  junit.assertCount++;
 
   isBoolean_(args[1]);
   if (args[1] != false) {
@@ -154,7 +144,7 @@ function assertFalse(msg, actual) {
 
 function assertEquals(msg, expected, actual) {
   var args = argsWithOptionalMsg_(arguments, 3);
-  jstestdriver.assertCount++;
+  junit.assertCount++;
   msg = args[0];
   expected = args[1];
   actual = args[2];
@@ -189,7 +179,7 @@ function compare_(expected, actual) {
   try {
     // If an array is expected the length of actual should be simple to
     // determine. If it is not it is undefined.
-    if (jstestdriver.jQuery.isArray(actual)) {
+    if (junit.isArray(actual)) {
       actualLength = actual.length;
     } else {
       // In case it is an object it is a little bit more complicated to
@@ -254,7 +244,7 @@ function assertNotEquals(msg, expected, actual) {
 
 function assertSame(msg, expected, actual) {
   var args = argsWithOptionalMsg_(arguments, 3);
-  jstestdriver.assertCount++;
+  junit.assertCount++;
 
   if (!isSame_(args[2], args[1])) {
     fail(args[0] + 'expected ' + prettyPrintEntity_(args[1]) + ' but was ' +
@@ -266,7 +256,7 @@ function assertSame(msg, expected, actual) {
 
 function assertNotSame(msg, expected, actual) {
   var args = argsWithOptionalMsg_(arguments, 3);
-  jstestdriver.assertCount++;
+  junit.assertCount++;
 
   if (isSame_(args[2], args[1])) {
     fail(args[0] + 'expected not same as ' + prettyPrintEntity_(args[1]) +
@@ -283,7 +273,7 @@ function isSame_(expected, actual) {
 
 function assertNull(msg, actual) {
   var args = argsWithOptionalMsg_(arguments, 2);
-  jstestdriver.assertCount++;
+  junit.assertCount++;
 
   if (args[1] !== null) {
     fail(args[0] + 'expected null but was ' + prettyPrintEntity_(args[1]));
@@ -294,7 +284,7 @@ function assertNull(msg, actual) {
 
 function assertNotNull(msg, actual) {
   var args = argsWithOptionalMsg_(arguments, 2);
-  jstestdriver.assertCount++;
+  junit.assertCount++;
 
   if (args[1] === null) {
     fail(args[0] + 'expected not null but was null');
@@ -306,7 +296,7 @@ function assertNotNull(msg, actual) {
 
 function assertUndefined(msg, actual) {
   var args = argsWithOptionalMsg_(arguments, 2);
-  jstestdriver.assertCount++;
+  junit.assertCount++;
 
   if (typeof args[1] != 'undefined') {
     fail(args[2] + 'expected undefined but was ' + prettyPrintEntity_(args[1]));
@@ -317,7 +307,7 @@ function assertUndefined(msg, actual) {
 
 function assertNotUndefined(msg, actual) {
   var args = argsWithOptionalMsg_(arguments, 2);
-  jstestdriver.assertCount++;
+  junit.assertCount++;
 
   if (typeof args[1] == 'undefined') {
     fail(args[0] + 'expected not undefined but was undefined');
@@ -328,7 +318,7 @@ function assertNotUndefined(msg, actual) {
 
 function assertNaN(msg, actual) {
   var args = argsWithOptionalMsg_(arguments, 2);
-  jstestdriver.assertCount++;
+  junit.assertCount++;
 
   if (!isNaN(args[1])) {
     fail(args[0] + 'expected to be NaN but was ' + args[1]);
@@ -340,7 +330,7 @@ function assertNaN(msg, actual) {
 
 function assertNotNaN(msg, actual) {
   var args = argsWithOptionalMsg_(arguments, 2);
-  jstestdriver.assertCount++;
+  junit.assertCount++;
 
   if (isNaN(args[1])) {
     fail(args[0] + 'expected not to be NaN');
@@ -370,7 +360,7 @@ function assertException(msg, callback, error) {
     msg += ' ';
   }
 
-  jstestdriver.assertCount++;
+  junit.assertCount++;
 
   try {
     callback();
@@ -392,7 +382,7 @@ function assertException(msg, callback, error) {
 
 function assertNoException(msg, callback) {
   var args = argsWithOptionalMsg_(arguments, 2);
-  jstestdriver.assertCount++;
+  junit.assertCount++;
 
   try {
     args[1]();
@@ -405,9 +395,9 @@ function assertNoException(msg, callback) {
 
 function assertArray(msg, actual) {
   var args = argsWithOptionalMsg_(arguments, 2);
-  jstestdriver.assertCount++;
+  junit.assertCount++;
 
-  if (!jstestdriver.jQuery.isArray(args[1])) {
+  if (!junit.isArray(args[1])) {
     fail(args[0] + 'expected to be array, but was ' +
         prettyPrintEntity_(args[1]));
   }
@@ -416,7 +406,7 @@ function assertArray(msg, actual) {
 
 function assertTypeOf(msg, expected, value) {
   var args = argsWithOptionalMsg_(arguments, 3);
-  jstestdriver.assertCount++;
+  junit.assertCount++;
   var actual = typeof args[2];
 
   if (actual != args[1]) {
@@ -460,7 +450,7 @@ function assertString(msg, actual) {
 function assertMatch(msg, regexp, actual) {
   var args = argsWithOptionalMsg_(arguments, 3);
   var isUndef = typeof args[2] == 'undefined';
-  jstestdriver.assertCount++;
+  junit.assertCount++;
   var _undef;
 
   if (isUndef || !args[1].test(args[2])) {
@@ -474,7 +464,7 @@ function assertMatch(msg, regexp, actual) {
 
 function assertNoMatch(msg, regexp, actual) {
   var args = argsWithOptionalMsg_(arguments, 3);
-  jstestdriver.assertCount++;
+  junit.assertCount++;
 
   if (args[1].test(args[2])) {
     fail(args[0] + 'expected ' + prettyPrintEntity_(args[2]) +
@@ -516,7 +506,7 @@ function assertClassName(msg, className, element) {
 function assertElementId(msg, id, element) {
   var args = argsWithOptionalMsg_(arguments, 3);
   var actual = args[2] && args[2].id;
-  jstestdriver.assertCount++;
+  junit.assertCount++;
 
   if (actual !== args[1]) {
     fail(args[0] + 'expected id to be ' + args[1] + ' but was ' + actual);
@@ -527,7 +517,7 @@ function assertElementId(msg, id, element) {
 
 
 function assertInstanceOf(msg, constructor, actual) {
-  jstestdriver.assertCount++;
+  junit.assertCount++;
   var args = argsWithOptionalMsg_(arguments, 3);
   var pretty = prettyPrintEntity_(args[2]);
   var expected = args[1] && args[1].name || args[1];
@@ -546,7 +536,7 @@ function assertInstanceOf(msg, constructor, actual) {
 
 function assertNotInstanceOf(msg, constructor, actual) {
   var args = argsWithOptionalMsg_(arguments, 3);
-  jstestdriver.assertCount++;
+  junit.assertCount++;
 
   if (Object(args[2]) instanceof args[1]) {
     var expected = args[1] && args[1].name || args[1];
@@ -563,7 +553,7 @@ function assertNotInstanceOf(msg, constructor, actual) {
  */
 function assertEqualsDelta(msg, expected, actual, epsilon) {
   var args = this.argsWithOptionalMsg_(arguments, 4);
-  jstestdriver.assertCount++;
+  junit.assertCount++;
   msg = args[0];
   expected = args[1];
   actual = args[2];
@@ -602,7 +592,7 @@ function compareDelta_(expected, actual, epsilon) {
   try {
     // If an array is expected the length of actual should be simple to
     // determine. If it is not it is undefined.
-    if (jstestdriver.jQuery.isArray(actual)) {
+    if (junit.isArray(actual)) {
       actualLength = actual.length;
     } else {
       // In case it is an object it is a little bit more complicated to

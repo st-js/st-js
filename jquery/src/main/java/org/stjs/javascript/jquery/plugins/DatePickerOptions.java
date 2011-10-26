@@ -20,7 +20,7 @@ import static org.stjs.javascript.Global.$array;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;
 import org.stjs.javascript.Map;
-import org.stjs.javascript.dom.HTMLElement;
+import org.stjs.javascript.dom.Element;
 import org.stjs.javascript.functions.Callback2;
 import org.stjs.javascript.functions.Callback3;
 import org.stjs.javascript.functions.Function1;
@@ -123,7 +123,7 @@ public class DatePickerOptions<FullJQuery extends JQuery<?>> {
 
 	public UIEventHandler<DatePickerUI<FullJQuery>> create;
 
-	public Function2<HTMLElement, FullJQuery, Object> beforeShow;
+	public Function2<Element, FullJQuery, Object> beforeShow;
 
 	public Function1<Date, Array<Object>> beforeShowDay;
 

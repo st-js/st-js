@@ -18,18 +18,18 @@ import org.stjs.generator.scope.AbstractScope;
 import org.stjs.generator.scope.CompilationUnitScope;
 import org.stjs.generator.scope.Scope;
 import org.stjs.generator.scope.ScopeBuilder;
+import org.stjs.generator.scope.ClassDeclaringInnerClass.InnerClass;
 import org.stjs.generator.type.ClassLoaderWrapper;
 import org.stjs.generator.type.FieldWrapper;
 import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.variable.Variable;
+import org.stjs.generator.writer.scopes.SimpleClass;
+import org.stjs.generator.writer.scopes.SimpleClass.AmbiguousName;
+import org.stjs.generator.writer.scopes.SimpleClass.InnerClass2;
+import org.stjs.generator.writer.scopes.SimpleClass.AmbiguousName.InnerClassLevel2;
+import org.stjs.generator.writer.scopes.p.ClassWithCrazyImports;
+import org.stjs.generator.writer.scopes.p.ClassWithCrazyImports.InnerClassC;
 
-import test.generator.scopes.SimpleClass;
-import test.generator.scopes.SimpleClass.AmbiguousName;
-import test.generator.scopes.SimpleClass.AmbiguousName.InnerClassLevel2;
-import test.generator.scopes.SimpleClass.InnerClass2;
-import test.generator.scopes.p.ClassWithCrazyImports;
-import test.generator.scopes.p.ClassWithCrazyImports.InnerClassC;
-import test.innerclasses.ClassDeclaringInnerClass.InnerClass;
 
 @Ignore
 public class SimpleScopeBuilderTest {

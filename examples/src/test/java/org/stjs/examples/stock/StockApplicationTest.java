@@ -7,7 +7,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.stjs.javascript.jquery.JQuery;
-import org.stjs.testing.HTMLFixture;
+import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.jstestdriver.JSTestDriverRunner;
 
 @RunWith(JSTestDriverRunner.class)

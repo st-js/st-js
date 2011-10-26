@@ -1,7 +1,7 @@
 /**
  *  Copyright 2011 Alexandru Craciun, Eyal Kaspi
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  Licensed under the Apache License, Version 2.0 (the "License"){throw new UnsupportedOperationException();}
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
@@ -15,17 +15,27 @@
  */
 package org.stjs.javascript.dom;
 
-abstract public class CharacterData extends Node {
-	abstract public void appendData(String arg);
+public class CharacterData extends Node {
+	public void appendData(String arg) {
+		throw new UnsupportedOperationException();
+	}
 
-	abstract public void deleteData(int offset, int count);
+	public void deleteData(int offset, int count) {
+		throw new UnsupportedOperationException();
+	}
 
 	public String data;
 	public int length;
 
-	abstract public void insertData(int offset, String s);
+	public void insertData(int offset, String s) {
+		throw new UnsupportedOperationException();
+	}
 
-	abstract public void replaceData(int offset, int count, String s);
+	public void replaceData(int offset, int count, String s) {
+		throw new UnsupportedOperationException();
+	}
 
-	abstract public void substringData(int offset, int count);
+	public void substringData(int offset, int count) {
+		throw new UnsupportedOperationException();
+	}
 }

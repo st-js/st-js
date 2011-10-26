@@ -15,12 +15,12 @@
  */
 package org.stjs.javascript;
 
-import org.stjs.javascript.dom.HTMLDocument;
+import org.stjs.javascript.dom.Document;
 
 abstract public class Window {
 	public boolean closed;
 	public String defaultStatus;
-	public HTMLDocument document;
+	public Document document;
 	public Window[] frames;
 	public History history;
 	public int innerHeight;

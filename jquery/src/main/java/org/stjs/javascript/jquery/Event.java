@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.jquery;
 
-import org.stjs.javascript.dom.HTMLElement;
+import org.stjs.javascript.dom.Element;
 
 /**
  * jquery event
@@ -31,7 +31,7 @@ abstract public class Event {
 	public int clientY;
 	public Object detail;
 	public Object eventPhase;
-	public HTMLElement fromElement;
+	public Element fromElement;
 	public Object handler;
 	public int keyCode;
 	public int layerX;
@@ -39,19 +39,19 @@ abstract public class Event {
 	public Object newValue;
 	public int offsetX;
 	public int offsetY;
-	public HTMLElement originalTarget;
+	public Element originalTarget;
 	public Object prevValue;
-	public HTMLElement relatedNode;
+	public Element relatedNode;
 	public int screenX;
 	public int screenY;
-	public HTMLElement srcElement;
-	public HTMLElement toElement;
+	public Element srcElement;
+	public Element toElement;
 	public Object view;
 	public int wheelDelta;
 
-	public HTMLElement target;
-	public HTMLElement relatedTarget;
-	public HTMLElement currentTarget;
+	public Element target;
+	public Element relatedTarget;
+	public Element currentTarget;
 	public int pageX;
 	public int pageY;
 	public int which;

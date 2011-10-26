@@ -15,7 +15,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 import org.stjs.testing.GeneratorWrapper;
-import org.stjs.testing.HTMLFixture;
+import org.stjs.testing.annotation.HTMLFixture;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;

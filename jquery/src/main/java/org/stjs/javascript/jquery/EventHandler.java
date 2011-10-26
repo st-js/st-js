@@ -15,8 +15,8 @@
  */
 package org.stjs.javascript.jquery;
 
-import org.stjs.javascript.dom.HTMLElement;
+import org.stjs.javascript.dom.Element;
 
 public interface EventHandler {
-	public boolean onEvent(Event ev, HTMLElement THIS);
+	public boolean onEvent(Event ev, Element THIS);
 }

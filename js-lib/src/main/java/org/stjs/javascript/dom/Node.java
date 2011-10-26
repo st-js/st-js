@@ -1,7 +1,7 @@
 /**
  *  Copyright 2011 Alexandru Craciun, Eyal Kaspi
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  Licensed under the Apache License, Version 2.0 (the "License"){throw new UnsupportedOperationException();}
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
@@ -18,16 +18,24 @@ package org.stjs.javascript.dom;
 abstract public class Node {
 	public HTMLCollection<Attr> attributes;
 
-	abstract public void appendChild(Node node);
+	public void appendChild(Node node) {
+		throw new UnsupportedOperationException();
+	}
 
-	abstract public Node cloneNode(boolean deep);
+	public Node cloneNode(boolean deep) {
+		throw new UnsupportedOperationException();
+	}
 
-	abstract public short compareDocumentPosition(Node n);
+	public short compareDocumentPosition(Node n) {
+		throw new UnsupportedOperationException();
+	}
 
 	public String baseURI;
 	public HTMLList<Node> childNodes;
 
-	abstract public String getFeature(String feature, String version);
+	public String getFeature(String feature, String version) {
+		throw new UnsupportedOperationException();
+	}
 
 	public Node firstChild;
 	public Node lastChild;
@@ -37,35 +45,57 @@ abstract public class Node {
 	public String nodeName;
 	public short nodeType;
 	public String nodeValue;
-	public HTMLDocument ownerDocument;
+	public Document ownerDocument;
 	public Node parentNode;
 	public String prefix;
 	public Node previousSibling;
 	public String textContent;
 
-	abstract public String getUserData(String s);
+	public String getUserData(String s) {
+		throw new UnsupportedOperationException();
+	}
 
 	public boolean hasAttributes;
 	public boolean hasChildNodes;
 
-	abstract public void insertBefore(Node n1, Node n2);
+	public void insertBefore(Node n1, Node n2) {
+		throw new UnsupportedOperationException();
+	}
 
-	abstract public boolean isDefaultNamespace(String s);
+	public boolean isDefaultNamespace(String s) {
+		throw new UnsupportedOperationException();
+	}
 
-	abstract public boolean isEqualNode(Node n);
+	public boolean isEqualNode(Node n) {
+		throw new UnsupportedOperationException();
+	}
 
-	abstract public boolean isSameNode(Node n);
+	public boolean isSameNode(Node n) {
+		throw new UnsupportedOperationException();
+	}
 
-	abstract public boolean isSupported(String feature, String version);
+	public boolean isSupported(String feature, String version) {
+		throw new UnsupportedOperationException();
+	}
 
-	abstract public String lookupNamespaceURI(String s);
+	public String lookupNamespaceURI(String s) {
+		throw new UnsupportedOperationException();
+	}
 
-	abstract public String lookupPrefix(String s);
+	public String lookupPrefix(String s) {
+		throw new UnsupportedOperationException();
+	}
 
-	abstract public void normalize();
+	public void normalize() {
+		throw new UnsupportedOperationException();
+	}
 
-	abstract public void removeChild(Node n);
+	public void removeChild(Node n) {
+		throw new UnsupportedOperationException();
+	}
 
-	abstract public void replaceChild(Node n1, Node n2);
+	public void replaceChild(Node n1, Node n2) {
+		throw new UnsupportedOperationException();
+	}
 	// setUserData(String, Object, UserDataHandler)
 }

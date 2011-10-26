@@ -18,7 +18,7 @@ package org.stjs.javascript.jquery;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Map;
 import org.stjs.javascript.annotation.GlobalScope;
-import org.stjs.javascript.dom.HTMLElement;
+import org.stjs.javascript.dom.Element;
 import org.stjs.javascript.functions.Callback2;
 import org.stjs.javascript.functions.Function2;
 
@@ -58,7 +58,7 @@ abstract public class GlobalJQuery {
 	abstract public <E> void each(Array<E> collection, Callback2<Integer, E> elementIterationFunction);
 
 	abstract public <FullJQuery extends JQueryAndPlugins<?>> void each(JQueryAndPlugins<FullJQuery> collection,
-			Callback2<Integer, HTMLElement> elementIterationFunction);
+			Callback2<Integer, Element> elementIterationFunction);
 
 	abstract public <K, V> void each(Map<K, V> collection, Callback2<K, V> elementIterationFunction);
 
