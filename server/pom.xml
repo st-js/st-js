@@ -4,7 +4,7 @@
 
 	<artifactId>server</artifactId>
 	<packaging>jar</packaging>
-	<name>Strongly-typed Javascript:JQuery Bridge Library</name>
+	<name>Strongly-typed Javascript:Server-side Library</name>
 
 	<parent>
 		<groupId>org.stjs</groupId>

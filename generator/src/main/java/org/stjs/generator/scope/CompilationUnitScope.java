@@ -81,19 +81,16 @@ public class CompilationUnitScope extends AbstractScope {
 		}
 		// try in package
 		for (ClassWrapper packageClass : classLoaderWrapper.loadClassOrInnerClass(packageName + "." + name)) {
-			getContext().addResolvedImport(packageClass.getName());
 			return new TypeWithScope(this, packageClass);
 		}
 
 		// fully qualified
 		for (ClassWrapper qualifiedClass : classLoaderWrapper.loadClassOrInnerClass(name)) {
-			getContext().addResolvedImport(qualifiedClass.getName());
 			return new TypeWithScope(this, qualifiedClass);
 		}
 
 		// try java.lang
 		for (ClassWrapper qualifiedClass : classLoaderWrapper.loadClassOrInnerClass("java.lang." + name)) {
-			getContext().addResolvedImport(qualifiedClass.getName());
 			return new TypeWithScope(this, qualifiedClass);
 		}
 		return null;

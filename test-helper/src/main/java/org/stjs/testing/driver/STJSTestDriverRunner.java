@@ -13,6 +13,9 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
+import org.stjs.generator.ClassWithJavascript;
+import org.stjs.generator.DependencyCollection;
+import org.stjs.generator.Generator;
 import org.stjs.javascript.annotation.STJSBridge;
 import org.stjs.testing.GeneratorWrapper;
 import org.stjs.testing.annotation.HTMLFixture;
@@ -71,6 +74,8 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 			@Override
 			public void evaluate() throws Throwable {
 
+				ClassWithJavascript stjsClass = new Generator().getExistingStjsClass(getTestClass().getJavaClass());
+
 				File jsFile = new GeneratorWrapper().generateCode(getTestClass());
 				final HTMLFixture htmlFixture = getTestClass().getJavaClass().getAnnotation(HTMLFixture.class);
 				try {
@@ -82,6 +87,10 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 					writer.append("<head>");
 					writer.append("<script src='/stjs.js'></script>");
 					writer.append("<script src='/junit.js'></script>");
+
+					for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies()) {
+						writer.append("<script src='/js?" + dep.getClassName() + "'></script>");
+					}
 					writer.append("<script language='javascript'>");
 					Files.copy(jsFile, Charset.defaultCharset(), writer);
 					writer.append("onload=function(){");
@@ -115,7 +124,9 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 					writer.flush();
 					writer.close();
 
-					System.out.println("Added source file:" + htmlFile);
+					System.out.println("Added source file");
+					Files.copy(htmlFile, System.out);
+					System.out.flush();
 					TestResultCollection response = server.test(htmlFile, timeout);
 					if (!response.isOk()) {
 						// take the first wrong result

@@ -20,34 +20,43 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Collection;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 public class RhinoExecutor {
-	public ExecutionResult run(File srcFile) throws ScriptException {
-		ScriptEngineManager factory = new ScriptEngineManager();
-		ScriptEngine engine = factory.getEngineByName("JavaScript");
+	private Object addScript(ScriptEngine engine, File scriptFile) throws ScriptException {
 		FileReader input = null;
 		try {
-			input = new FileReader(srcFile);
-			engine.eval(new InputStreamReader(Thread.currentThread().getContextClassLoader()
-					.getResourceAsStream("stjs.js")));
-			Object result = engine.eval(input);
-			return new ExecutionResult(result != null ? result.toString() : null, null, 0);
+			input = new FileReader(scriptFile);
+			return engine.eval(input);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			throw new ScriptException(e);
 		} finally {
 			try {
 				if (input != null) {
 					input.close();
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				// silent
 			}
 		}
-		return null;
 	}
 
+	public ExecutionResult run(Collection<File> srcFiles, boolean mainClassDisabled) throws ScriptException {
+		ScriptEngineManager factory = new ScriptEngineManager();
+		ScriptEngine engine = factory.getEngineByName("JavaScript");
+		engine.eval(new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream("stjs.js")));
+		if (mainClassDisabled) {
+			engine.eval("stjs.mainCallDisabled=true;");
+		}
+		Object result = null;
+		for (File srcFile : srcFiles) {
+			// keep the result of last evaluation
+			result = addScript(engine, srcFile);
+		}
+		return new ExecutionResult(result != null ? result.toString() : null, null, 0);
+	}
 }

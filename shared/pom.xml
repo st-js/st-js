@@ -4,7 +4,7 @@
 
 	<artifactId>shared</artifactId>
 	<packaging>jar</packaging>
-	<name>Strongly-typed Javascript:JQuery Bridge Library</name>
+	<name>Strongly-typed Javascript:Client-Server Shared Library</name>
 
 	<parent>
 		<groupId>org.stjs</groupId>

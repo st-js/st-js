@@ -10,26 +10,26 @@ import japa.parser.ast.CompilationUnit;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 
 import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.scope.AbstractScope;
+import org.stjs.generator.scope.ClassDeclaringInnerClass.InnerClass;
 import org.stjs.generator.scope.CompilationUnitScope;
 import org.stjs.generator.scope.Scope;
 import org.stjs.generator.scope.ScopeBuilder;
-import org.stjs.generator.scope.ClassDeclaringInnerClass.InnerClass;
 import org.stjs.generator.type.ClassLoaderWrapper;
 import org.stjs.generator.type.FieldWrapper;
 import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.variable.Variable;
 import org.stjs.generator.writer.scopes.SimpleClass;
 import org.stjs.generator.writer.scopes.SimpleClass.AmbiguousName;
-import org.stjs.generator.writer.scopes.SimpleClass.InnerClass2;
 import org.stjs.generator.writer.scopes.SimpleClass.AmbiguousName.InnerClassLevel2;
+import org.stjs.generator.writer.scopes.SimpleClass.InnerClass2;
 import org.stjs.generator.writer.scopes.p.ClassWithCrazyImports;
 import org.stjs.generator.writer.scopes.p.ClassWithCrazyImports.InnerClassC;
-
 
 @Ignore
 public class SimpleScopeBuilderTest {
@@ -39,7 +39,8 @@ public class SimpleScopeBuilderTest {
 		String path = ClassWithCrazyImports.class.getName().replace('.', File.separatorChar);
 		path = "src/test/java/" + path + ".java";
 		CompilationUnit compilationUnit = JavaParser.parse(new File(path));
-		ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader());
+		ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader(),
+				Collections.<String> emptyList(), Collections.<String> emptySet());
 		GenerationContext context = new GenerationContext(new File(path));
 		ScopeBuilder builder = new ScopeBuilder(classLoader, context);
 		CompilationUnitScope scope = new CompilationUnitScope(classLoader, context);

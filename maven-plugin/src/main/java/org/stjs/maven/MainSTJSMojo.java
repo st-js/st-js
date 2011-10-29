@@ -32,6 +32,11 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 	 */
 	private File generatedSourcesDirectory;
 
+	/**
+	 * @parameter default-value="${project.build.outputDirectory}"
+	 */
+	private File buildOutputDirectory;
+
 	@Override
 	public List<String> getCompileSourceRoots() {
 		return compileSourceRoots;
@@ -48,4 +53,8 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 		return project.getCompileClasspathElements();
 	}
 
+	@Override
+	protected File getBuildOutputDirectory() {
+		return buildOutputDirectory;
+	}
 }

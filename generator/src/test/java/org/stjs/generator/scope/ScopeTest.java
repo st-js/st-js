@@ -33,8 +33,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptGenerationException;
-import org.stjs.generator.scope.CompilationUnitScope;
-import org.stjs.generator.scope.ScopeBuilder;
 import org.stjs.generator.type.ClassLoaderWrapper;
 import org.stjs.generator.type.FieldWrapper;
 
@@ -48,13 +46,6 @@ public class ScopeTest {
 	static CompilationUnitScope resolveName2(CompilationUnit cu, String clazz, Collection<String> packages)
 			throws ParseException, IOException {
 
-		ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader());
-		GenerationContext context = new GenerationContext(new File(clazz));
-		ScopeBuilder builder = new ScopeBuilder(classLoader, context);
-		CompilationUnitScope scope = new CompilationUnitScope(classLoader, context);
-
-		builder.visit(cu, scope);
-
 		packages = new HashSet<String>(packages);
 		packages.add("test");
 		packages.add("java.lang");
@@ -63,6 +54,14 @@ public class ScopeTest {
 		javaLangClasses.add("Number");
 		javaLangClasses.add("Runnable");
 		javaLangClasses.add("Object");
+
+		ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader(),
+				packages, javaLangClasses);
+		GenerationContext context = new GenerationContext(new File(clazz));
+		ScopeBuilder builder = new ScopeBuilder(classLoader, context);
+		CompilationUnitScope scope = new CompilationUnitScope(classLoader, context);
+
+		builder.visit(cu, scope);
 
 		return scope;
 	}

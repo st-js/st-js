@@ -153,7 +153,6 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		if (n.getImports() != null) {
 			for (ImportDeclaration importDecl : n.getImports()) {
 				NameExpr name = importDecl.getName();
-				checkImport(importDecl, name.toString());
 				if (importDecl.isAsterisk()) {
 					if (importDecl.isStatic()) {
 						QualifiedNameExpr expr = (QualifiedNameExpr) name;
@@ -175,7 +174,6 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			}
 			for (ImportDeclaration importDecl : n.getImports()) {
 				NameExpr name = importDecl.getName();
-				checkImport(importDecl, name.toString());
 				if (!importDecl.isAsterisk()) {
 					if (importDecl.isStatic()) {
 						QualifiedNameExpr expr = (QualifiedNameExpr) name;
@@ -380,22 +378,12 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	@Override
 	public void visit(final EnumDeclaration n, final Scope currentScope) {
-		ClassWrapper enumClass = currentScope.apply(new DefaultScopeVisitor<ClassWrapper>() {
-			@Override
-			public ClassWrapper apply(CompilationUnitScope scope) {
-				return classLoader.loadClass(scope.getPackageName() + "." + n.getName()).getOrThrow();
-			}
-
-			@Override
-			public ClassWrapper apply(ClassScope scope) {
-				ClassWrapper parentClass = scope.getClazz();
-				return classLoader.loadClass(parentClass.getName() + "$" + n.getName()).getOrThrow();
-			}
-		});
-		ClassScope enumClassScope = new ClassScope(enumClass, currentScope, context);
+		AbstractScope parentScope = (AbstractScope) currentScope;
+		TypeWithScope type = currentScope.resolveType(n.getName());
+		PreConditions.checkState(type != null, "%s class cannot be resolved in the scope", n.getName());
+		Scope enumClassScope = addClassToScope(parentScope, (ClassWrapper) type.getType());
 
 		super.visit(n, enumClassScope);
-
 	}
 
 	@Override
@@ -437,11 +425,6 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	private Option<ClassWrapper> identifyQualifiedNameExprClass(NameExpr expr) {
 		return classLoader.loadClassOrInnerClass(expr.toString());
-	}
-
-	private void checkImport(ImportDeclaration importDecl, String string) {
-		// TODO Auto-generated method stub
-
 	}
 
 	/**

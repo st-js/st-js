@@ -15,25 +15,79 @@
  */
 package org.stjs.generator.type;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.Option;
+
+import com.google.common.collect.ImmutableList;
 
 public class ClassLoaderWrapper {
 
+	private static final String ANONYMOUS_CLASS_NAME = "(\\$\\d+)+$";
 	private final ClassLoader classLoader;
+	private final Set<String> resolvedClasses = new LinkedHashSet<String>();
+	private final Collection<String> allowedPackages;
+	private final Collection<String> allowedJavaLangClasses;
 
-	public ClassLoaderWrapper(ClassLoader classLoader) {
+	public ClassLoaderWrapper(ClassLoader classLoader, Collection<String> allowedPackages,
+			Collection<String> allowedJavaLangClasses) {
 		this.classLoader = classLoader;
+		this.allowedJavaLangClasses = allowedJavaLangClasses;
+		this.allowedPackages = allowedPackages;
 	}
 
 	public boolean hasClass(String name) {
 		return loadClass(name).isDefined();
 	}
 
+	private Class<?> getTopDeclaringClass(Class<?> clazz) throws ClassNotFoundException {
+		if (clazz.getSimpleName().isEmpty()) {// anonymous class
+			String cleanedClassName = clazz.getName().replaceAll(ANONYMOUS_CLASS_NAME, "");
+			return classLoader.loadClass(cleanedClassName);
+		}
+		if (clazz.getDeclaringClass() == null) {
+			return clazz;
+		}
+		return getTopDeclaringClass(clazz.getDeclaringClass());
+	}
+
 	public Option<ClassWrapper> loadClass(String name) {
 		try {
-			return Option.<ClassWrapper> some(new ClassWrapper(classLoader.loadClass(name)));
+			Class<?> clazz = classLoader.loadClass(name);
+			Class<?> topDeclaringClass = getTopDeclaringClass(clazz);
+			checkAndAddResolvedClass(topDeclaringClass);
+			return Option.<ClassWrapper> some(new ClassWrapper(clazz));
 		} catch (ClassNotFoundException e) {
 			return Option.none();
+		}
+	}
+
+	private void checkAndAddResolvedClass(Class<?> clazz) {
+		if (resolvedClasses.contains(clazz.getName())) {
+			return;
+		}
+		if (!ClassUtils.isBridge(clazz)) {
+			if (!allowedJavaLangClasses.contains(clazz.getName())) {
+				boolean found = false;
+				for (String packageName : allowedPackages) {
+					if (clazz.getName().startsWith(packageName)) {
+						found = true;
+						break;
+					}
+				}
+
+				if (!found) {
+					throw new IllegalArgumentException(clazz.getName() + " is not allowed");
+				}
+			}
+		}
+		if (!clazz.getName().startsWith("java.lang.")) {
+			// no need to store java lang classes
+			resolvedClasses.add(clazz.getName());
 		}
 	}
 
@@ -56,4 +110,9 @@ public class ClassLoaderWrapper {
 		buf.setCharAt(pos, c);
 		return buf.toString();
 	}
+
+	public List<String> getResolvedClasses() {
+		return ImmutableList.copyOf(resolvedClasses);
+	}
+
 }

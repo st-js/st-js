@@ -34,6 +34,11 @@ public class TestSTJSMojo extends AbstractSTJSMojo {
 	 */
 	private File generatedTestSourcesDirectory;
 
+	/**
+	 * @parameter default-value="${project.build.testOutputDirectory}"
+	 */
+	private File buildOutputDirectory;
+
 	@Override
 	protected List<String> getCompileSourceRoots() {
 		return compileSourceRoots;
@@ -48,6 +53,11 @@ public class TestSTJSMojo extends AbstractSTJSMojo {
 	@Override
 	protected List<String> getClasspathElements() throws DependencyResolutionRequiredException {
 		return project.getTestClasspathElements();
+	}
+
+	@Override
+	protected File getBuildOutputDirectory() {
+		return buildOutputDirectory;
 	}
 
 	@Override

@@ -28,6 +28,7 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.type.GenericArrayTypeImpl;
@@ -41,7 +42,12 @@ import org.stjs.javascript.annotation.STJSBridge;
 import com.google.common.primitives.Primitives;
 
 public class ClassUtils {
-	private static Set<String> basicTypeNames = new HashSet<String>();
+	/**
+	 * these are packages that don't have the annotation but are considered as bridges
+	 */
+	private static final Pattern implicitBridge = Pattern.compile("java\\.lang.*|org\\.junit.*");
+
+	private static final Set<String> basicTypeNames = new HashSet<String>();
 	static {
 		for (Class<?> clazz : Primitives.allWrapperTypes()) {
 			basicTypeNames.add(clazz.getName());
@@ -73,14 +79,15 @@ public class ClassUtils {
 	// return hasAnnotation(clazz, MockType.class.getName());
 	// }
 
-	public static boolean isBridge(String className) {
-
-		try {
-			Class<?> clazz = Class.forName(className);
-			return hasAnnotation(clazz, STJSBridge.class.getName());
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
+	public static boolean isBridge(Class<?> clazz) {
+		boolean ok = hasAnnotation(clazz, STJSBridge.class.getName());
+		if (ok) {
+			return ok;
 		}
+		if (implicitBridge.matcher(clazz.getName()).matches()) {
+			return true;
+		}
+		return false;
 	}
 
 	public static boolean isDataType(ClassWrapper clazz) {
@@ -111,6 +118,7 @@ public class ClassUtils {
 				return true;
 			}
 		}
+
 		for (Annotation annote : clazz.getPackage().getAnnotations()) {
 			if (annote.annotationType().getName().equals(annotationName)) {
 				return true;

@@ -8,18 +8,23 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.script.ScriptException;
 
+import org.stjs.generator.ClassWithJavascript;
+import org.stjs.generator.DependencyCollection;
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfigurationBuilder;
+import org.stjs.generator.STJSClass;
 import org.stjs.generator.executor.RhinoExecutor;
 
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
 
 public class GeneratorTestHelper {
-	private static final String TMP_FILE = "target/generator-temp.js";
+	private static final String TEMP_GENERATION_PATH = "temp-generated-js";
 
 	/**
 	 * 
@@ -29,29 +34,33 @@ public class GeneratorTestHelper {
 	public static String generate(Class<?> clazz) {
 		Generator gen = new Generator();
 
-		File file = new File(TMP_FILE);
-		String path = clazz.getName().replace('.', File.separatorChar);
-		path = "src/test/java/" + path + ".java";
-		gen.generateJavascript(Thread.currentThread().getContextClassLoader(), new File(path), file,
-				new GeneratorConfigurationBuilder().allowedPackage("test").allowedPackage("org.stjs.javascript")
-						.build());
+		String sourcePath = "src/test/java";
+		STJSClass stjsClass = gen.generateJavascript(
+				Thread.currentThread().getContextClassLoader(),
+				clazz.getName(),
+				new File(sourcePath),
+				new File("target", TEMP_GENERATION_PATH),
+				new File("target", "test-classes"),
+				new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript")
+						.allowedPackage("org.stjs.generator").build());
 
+		File jsFile = stjsClass.getJavascriptFiles().get(0);
 		try {
-			String content = Files.toString(file, Charset.defaultCharset());
-			// now generate the remaining imports
-			file.delete();
-			Files.append("stjs.mainCallDisabled=true;", file, Charset.defaultCharset());
-			gen.generateJavascriptWithImports(Thread.currentThread().getContextClassLoader(), clazz.getName(), file,
-					new GeneratorConfigurationBuilder().allowedPackage("test").allowedPackage("org.stjs.javascript")
-							.build());
-			new RhinoExecutor().run(file);
+			String content = Files.toString(jsFile, Charset.defaultCharset());
+			List<File> javascriptFiles = new ArrayList<File>();
+			for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies()) {
+				javascriptFiles.addAll(dep.getJavascriptFiles());
+			}
+			new RhinoExecutor().run(javascriptFiles, true);
 			return content;
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		} catch (ScriptException ex) {
 			// display the generated code in case of exception
-			displayWithLines(file);
+			for (File file : stjsClass.getJavascriptFiles()) {
+				displayWithLines(file);
+			}
 			throw new RuntimeException(ex);
 		}
 	}
@@ -93,6 +102,7 @@ public class GeneratorTestHelper {
 	private static void displayWithLines(File file) {
 		BufferedReader in = null;
 		try {
+			System.out.println("//---" + file);
 			in = new BufferedReader(new FileReader(file));
 			int lineNo = 1;
 			String line = null;

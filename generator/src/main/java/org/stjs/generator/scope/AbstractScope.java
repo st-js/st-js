@@ -78,10 +78,6 @@ public abstract class AbstractScope implements Scope {
 	public TypeWithScope resolveType(String name) {
 		TypeWrapper classWrapper = types.get(name);
 		if (classWrapper != null) {
-			if (classWrapper.isImportable()) {
-				// only classes are used as imports
-				context.addResolvedImport(classWrapper.getName());
-			}
 			return new TypeWithScope(this, classWrapper);
 		}
 		if (parent != null) {

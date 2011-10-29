@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import org.junit.runners.model.TestClass;
 import org.stjs.generator.Generator;
-import org.stjs.generator.GeneratorConfigurationBuilder;
 
 public class GeneratorWrapper {
 
@@ -14,11 +13,11 @@ public class GeneratorWrapper {
 		File outputFile = File.createTempFile(testClass.getName(), ".js");
 		outputFile.deleteOnExit();
 
-		generator.generateJavascriptWithImports(Thread.currentThread().getContextClassLoader(), testClass
-				.getJavaClass().getName(), outputFile, new GeneratorConfigurationBuilder()
-				// do not generate the "main" method call
-				.allowedPackage(testClass.getJavaClass().getPackage().getName()).allowedPackage("org.stjs.javascript")
-				.allowedPackage("org.junit").allowedPackage("org.stjs.testing").build());
+		// generator.generateJavascriptWithImports(Thread.currentThread().getContextClassLoader(), testClass
+		// .getJavaClass().getName(), outputFile, new GeneratorConfigurationBuilder()
+		// // do not generate the "main" method call
+		// .allowedPackage(testClass.getJavaClass().getPackage().getName()).allowedPackage("org.stjs.javascript")
+		// .allowedPackage("org.junit").allowedPackage("org.stjs.testing").build());
 
 		return outputFile;
 	}

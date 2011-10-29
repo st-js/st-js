@@ -48,7 +48,6 @@ import org.stjs.generator.GeneratorConfigurationBuilder;
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 abstract public class AbstractSTJSMojo extends AbstractMojo {
-	private static final String AUTO_ROOT_PACKAGE = "auto";
 
 	/**
 	 * @parameter expression="${project}"
@@ -86,20 +85,11 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	 */
 	protected int staleMillis;
 
-	/**
-	 * 
-	 * @return the part of the packages for which the folder will not be generated. For example if the value is
-	 *         org.stjs.javascript, for all the classes in the org.stjsjavascript package the javascript files will be
-	 *         generated directly in the {@link #generatedSourcesDirectory}. If the value is "auto", it will be used the
-	 *         longest package without at least class. If the value is empty (or null) the full packages structure is
-	 *         generated
-	 * @parameter
-	 */
-	protected String rootPackage = null;
-
 	abstract protected List<String> getCompileSourceRoots();
 
 	abstract protected File getGeneratedSourcesDirectory();
+
+	abstract protected File getBuildOutputDirectory();
 
 	abstract protected List<String> getClasspathElements() throws DependencyResolutionRequiredException;
 
@@ -133,38 +123,23 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			configBuilder.allowedPackages(allowedPackages);
 		}
 
-		String targetRootPackage = rootPackage;
-		boolean autoRootPackage = AUTO_ROOT_PACKAGE.equals(targetRootPackage);
-
 		// scan all the packages
 		for (String sourceRoot : getCompileSourceRoots()) {
 			File sourceDir = new File(sourceRoot);
 			Collection<String> packages = accumulatePackages(sourceDir);
 			configBuilder.allowedPackages(packages);
-			if (autoRootPackage) {
-				for (String pack : packages) {
-					if (targetRootPackage.equals(AUTO_ROOT_PACKAGE)) {
-						targetRootPackage = pack;
-					} else {
-						targetRootPackage = maximumCommonPackage(targetRootPackage, pack);
-					}
-				}
-			}
 		}
-
-		String targetRootPath = targetRootPackage != null ? targetRootPackage.replace('.', File.separatorChar) : "";
 
 		boolean atLeastOneFileGenerated = false;
 		// scan the modified sources
 		for (String sourceRoot : getCompileSourceRoots()) {
 			File sourceDir = new File(sourceRoot);
 			List<File> sources = new ArrayList<File>();
-			SourceMapping mapping = targetRootPackage != null ? new SuffixMappingWithCompressedTarget(targetRootPath,
-					".java", ".js") : new SuffixMapping(".java", ".js");
+			SourceMapping mapping = new SuffixMapping(".java", ".js");
 			sources = accumulateSources(sourceDir, mapping);
 			for (File source : sources) {
 				try {
-					File absoluteSource = new File(sourceDir, source.getPath());
+					// File absoluteSource = new File(sourceDir, source.getPath());
 					File absoluteTarget = (File) mapping
 							.getTargetFiles(getGeneratedSourcesDirectory(), source.getPath()).iterator().next();
 					getLog().info("Generating " + absoluteTarget);
@@ -172,8 +147,9 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 						getLog().error("Cannot create output directory:" + absoluteTarget.getParentFile());
 						continue;
 					}
-					generator.generateJavascript(builtProjectClassLoader, absoluteSource, absoluteTarget,
-							configBuilder.build());
+					String className = getClassNameForSource(source.getPath());
+					generator.generateJavascript(builtProjectClassLoader, className, sourceDir,
+							getGeneratedSourcesDirectory(), getBuildOutputDirectory(), configBuilder.build());
 					atLeastOneFileGenerated = true;
 
 				} catch (InclusionScanException e) {
@@ -190,33 +166,6 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			// copy the javascript support
 			generator.copyJavascriptSupport(getGeneratedSourcesDirectory());
 		}
-	}
-
-	private String maximumCommonPackage(String p1, String p2) {
-		String[] items1 = p1.split("\\.");
-		String[] items2 = p2.split("\\.");
-		int common = -1;
-		for (int i = 0; i < items1.length && i < items2.length; ++i) {
-			if (!items1[i].equals(items2[i])) {
-				break;
-			}
-			common = i;
-		}
-		StringBuilder commonPackage = new StringBuilder();
-		for (int i = 0; i < common; ++i) {
-			if (i > 0) {
-				commonPackage.append('.');
-			}
-			commonPackage.append(items1[i]);
-		}
-		return commonPackage.toString();
-	}
-
-	private Class<?> getClassForSource(ClassLoader builtProjectClassLoader, String sourcePath)
-			throws ClassNotFoundException {
-		// remove ending .java and replace / by .
-		String className = sourcePath.substring(0, sourcePath.length() - 5).replace(File.separatorChar, '.');
-		return builtProjectClassLoader.loadClass(className);
 	}
 
 	/**
@@ -246,6 +195,11 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		 * 1))); }
 		 */
 		return result;
+	}
+
+	private String getClassNameForSource(String sourcePath) {
+		// remove ending .java and replace / by .
+		return sourcePath.substring(0, sourcePath.length() - 5).replace(File.separatorChar, '.');
 	}
 
 	/**

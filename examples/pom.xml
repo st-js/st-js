@@ -58,7 +58,7 @@
 			<plugin>
 				<groupId>org.stjs</groupId>
 				<artifactId>maven-plugin</artifactId>
-				<version>1.0.1-SNAPSHOT</version>
+				<version>${project.version}</version>
 				<executions>
 					<execution>
 						<id>main</id>
@@ -94,7 +94,7 @@
 											maven-plugin
 										</artifactId>
 										<versionRange>
-											[1.0.1-SNAPSHOT,)
+											[${project.version},)
 										</versionRange>
 										<goals>
 											<goal>generate</goal>

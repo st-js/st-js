@@ -1,7 +1,6 @@
 package org.stjs.testing.driver;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -11,6 +10,10 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.stjs.generator.ClassWithJavascript;
+import org.stjs.generator.Generator;
+
+import com.google.common.io.Files;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -20,6 +23,8 @@ public class STJSTestServer {
 	protected static final String BROWSER_CHECK_URI = "/check";
 	protected static final String BROWSER_RESULT_URI = "/result";
 	protected static final String BROWSER_TEST_URI = "/test";
+	protected static final String BROWSER_GET_JS_URI = "/js";
+
 	private final int port = 8000;
 	private final HttpServer httpServer;
 
@@ -51,6 +56,8 @@ public class STJSTestServer {
 						handleBrowserResult(params, exchange);
 					} else if (BROWSER_TEST_URI.equals(exchange.getRequestURI().getPath())) {
 						handleBrowserTest(params, exchange);
+					} else if (BROWSER_GET_JS_URI.equals(exchange.getRequestURI().getPath())) {
+						handleBrowserGetJs(exchange.getRequestURI().getQuery(), exchange);
 					} else {
 						handleResource(exchange.getRequestURI().getPath(), exchange);
 					}
@@ -158,13 +165,26 @@ public class STJSTestServer {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
 			return;
 		}
-		InputStream is = new FileInputStream(testFile);
 		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-		byte[] buffer = new byte[100000];
-		int length = is.read(buffer);
-		exchange.getResponseBody().write(buffer, 0, length);
-		is.close();
+		Files.copy(testFile, exchange.getResponseBody());
 
+	}
+
+	private synchronized void handleBrowserGetJs(String className, HttpExchange exchange) throws IOException {
+		Class<?> clazz;
+		try {
+			clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+		} catch (ClassNotFoundException e) {
+			System.err.println("Cannot find class:" + className);
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
+			return;
+		}
+		exchange.getResponseHeaders().add("Content-type", "text/javascript");
+		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+		ClassWithJavascript stjsClass = new Generator().getExistingStjsClass(clazz);
+		for (File file : stjsClass.getJavascriptFiles()) {
+			Files.copy(file, exchange.getResponseBody());
+		}
 	}
 
 	public synchronized void start() {
