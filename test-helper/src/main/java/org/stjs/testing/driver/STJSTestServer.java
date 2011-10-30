@@ -10,9 +10,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.stjs.generator.ClassWithJavascript;
-import org.stjs.generator.Generator;
-
 import com.google.common.io.Files;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -170,21 +167,11 @@ public class STJSTestServer {
 
 	}
 
-	private synchronized void handleBrowserGetJs(String className, HttpExchange exchange) throws IOException {
-		Class<?> clazz;
-		try {
-			clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
-		} catch (ClassNotFoundException e) {
-			System.err.println("Cannot find class:" + className);
-			exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
-			return;
-		}
+	private synchronized void handleBrowserGetJs(String fileName, HttpExchange exchange) throws IOException {
 		exchange.getResponseHeaders().add("Content-type", "text/javascript");
 		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-		ClassWithJavascript stjsClass = new Generator().getExistingStjsClass(clazz);
-		for (File file : stjsClass.getJavascriptFiles()) {
-			Files.copy(file, exchange.getResponseBody());
-		}
+		Files.copy(new File(fileName), exchange.getResponseBody());
+
 	}
 
 	public synchronized void start() {

@@ -117,6 +117,7 @@ public class Generator {
 		STJSClass stjsClass = new STJSClass(new GeneratorDependencyResolver(builtProjectClassLoader, sourceFolder,
 				generationFolder, targetFolder, configuration), targetFolder, getMainClassName(cu));
 		stjsClass.setDependencies(classLoaderWrapper.getResolvedClasses());
+		// TODO fix here as the path is absolute!!
 		stjsClass.setGeneratedJavascriptFile(outputFile);
 		stjsClass.store();
 		return stjsClass;

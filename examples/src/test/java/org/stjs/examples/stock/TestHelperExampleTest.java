@@ -2,6 +2,7 @@ package org.stjs.examples.stock;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.stjs.testing.driver.STJSTestDriverRunner;
@@ -15,7 +16,8 @@ public class TestHelperExampleTest {
 		assertEquals("Foo", pojo.y);
 	}
 
-	@Test
+	@Ignore
+	// switch too @Test to see how failure works
 	public void failedTest() {
 		MyPojo pojo = new MyPojo("Foo");
 		assertEquals("xFoo", pojo.y);

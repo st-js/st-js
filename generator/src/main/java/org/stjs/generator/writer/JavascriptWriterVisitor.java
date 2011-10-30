@@ -359,7 +359,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(VariableDeclaratorId n, GenerationContext context) {
-		Checks.checkVariableDeclaratorId(n, context);
 		printer.print(n.getName());
 	}
 
@@ -395,7 +394,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(FieldDeclaration n, GenerationContext context) {
-		Checks.checkFieldDeclaration(n, context);
 		String typeName = stJsName(resolvedType(parent(n)));
 		// skip type
 		for (VariableDeclarator v : n.getVariables()) {
@@ -607,7 +605,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(MethodDeclaration n, GenerationContext context) {
-		Checks.checkMethodDeclaration(n, context);
 		printComments(n, context);
 		printMethod(n.getName(), n.getParameters(), n.getModifiers(), n.getBody(), context, resolvedType(parent(n)),
 				false);
@@ -669,8 +666,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(ClassOrInterfaceDeclaration n, GenerationContext context) {
-		Checks.checkClassDeclaration(n, context);
-
 		printComments(n, context);
 
 		ClassScope scope = (ClassScope) scope(n);
@@ -1154,7 +1149,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(NameExpr n, GenerationContext context) {
-		Checks.checkNameExpr(n, context);
 		if (GeneratorConstants.SPECIAL_THIS.equals(n.getName())) {
 			printer.print("this");
 			return;
@@ -1189,7 +1183,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(ThisExpr n, GenerationContext context) {
-		Checks.checkThisExpr(n, context);
 		if (n.getClassExpr() != null) {
 			n.getClassExpr().accept(this, context);
 			printer.print(".");

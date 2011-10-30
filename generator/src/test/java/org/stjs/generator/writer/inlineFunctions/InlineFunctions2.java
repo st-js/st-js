@@ -5,8 +5,7 @@ public class InlineFunctions2 {
 		func.run(0);
 	}
 
-	public static void main(String[] args) throws ClassNotFoundException {
-		System.out.println("Class:" + Class.forName("org.stjs.generator.writer.inlineFunctions.InlineFunctions2$1"));
+	public static void main(String[] args) {
 		method(new FunctionInterface() {
 			@SuppressWarnings("unused")
 			private int test = 2;

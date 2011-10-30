@@ -19,6 +19,7 @@ import static org.stjs.generator.ast.ASTNodeData.parent;
 import static org.stjs.generator.ast.ASTNodeData.resolvedMethod;
 import static org.stjs.generator.ast.ASTNodeData.resolvedType;
 import static org.stjs.generator.ast.ASTNodeData.resolvedVariable;
+import static org.stjs.generator.ast.ASTNodeData.resolvedVariableScope;
 import static org.stjs.generator.ast.ASTNodeData.scope;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
@@ -28,10 +29,12 @@ import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
 import japa.parser.ast.body.EnumDeclaration;
+import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.InitializerDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.body.Parameter;
 import japa.parser.ast.body.VariableDeclarator;
+import japa.parser.ast.body.VariableDeclaratorId;
 import japa.parser.ast.expr.ArrayAccessExpr;
 import japa.parser.ast.expr.ArrayCreationExpr;
 import japa.parser.ast.expr.ArrayInitializerExpr;
@@ -84,7 +87,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.ast.ASTNodeData;
+import org.stjs.generator.ast.SourcePosition;
 import org.stjs.generator.type.ClassLoaderWrapper;
 import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.type.FieldWrapper;
@@ -214,6 +219,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	@Override
 	public void visit(final ClassOrInterfaceDeclaration n, Scope scope) {
+		Checks.checkClassDeclaration(n, context);
 		AbstractScope parentScope = (AbstractScope) scope;
 		TypeWithScope type = scope.resolveType(n.getName());
 		PreConditions.checkState(type != null, "%s class cannot be resolved in the scope", n.getName());
@@ -224,6 +230,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	@Override
 	public void visit(final MethodDeclaration n, Scope currentScope) {
+		Checks.checkMethodDeclaration(n, context);
+
 		// the scope is where the method is defined, i.e. the classScope
 		((ASTNodeData) n.getData()).setScope(currentScope);
 		// this is safe as only one method is allowed with a given name
@@ -267,54 +275,65 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	}
 
 	private TypeWrapper resolveType(Scope scope, Type type) {
-		int arrayCount = 0;
-		if (type instanceof ReferenceType) {
-			ReferenceType refType = (ReferenceType) type;
-			arrayCount = refType.getArrayCount();
-			type = refType.getType(); // type is a primitive or class
-		}
-		TypeWrapper resolvedType;
-		if (type instanceof PrimitiveType) {
-			PrimitiveType primitiveType = (PrimitiveType) type;
-			resolvedType = PrimitiveTypes.primitiveReflectionType(primitiveType);
-		} else if (type instanceof VoidType) {
-			resolvedType = new ClassWrapper(void.class);
-		} else if (type instanceof ClassOrInterfaceType) {
-			ClassOrInterfaceType classType = (ClassOrInterfaceType) type;
-			// type can be the name of a class/interface
-			// or can be a part of the package name for a fully qualified name
-			// or can be an inner class name
-			TypeWithScope rawType = scope.resolveType(fullName(classType));
-			if (rawType == null) {
-				return null;
+		try {
+			int arrayCount = 0;
+			if (type instanceof ReferenceType) {
+				ReferenceType refType = (ReferenceType) type;
+				arrayCount = refType.getArrayCount();
+				type = refType.getType(); // type is a primitive or class
 			}
-			// PreConditions.checkState(rawType != null, "Cannot resolve type [%s]", classType.getName());
-			if (classType.getTypeArgs() != null) {
-				List<java.lang.reflect.Type> args = new ArrayList<java.lang.reflect.Type>();
-				for (Type arg : classType.getTypeArgs()) {
-					args.add(resolveType(scope, arg).getType());
+			TypeWrapper resolvedType;
+			if (type instanceof PrimitiveType) {
+				PrimitiveType primitiveType = (PrimitiveType) type;
+				resolvedType = PrimitiveTypes.primitiveReflectionType(primitiveType);
+			} else if (type instanceof VoidType) {
+				resolvedType = new ClassWrapper(void.class);
+			} else if (type instanceof ClassOrInterfaceType) {
+				ClassOrInterfaceType classType = (ClassOrInterfaceType) type;
+				// type can be the name of a class/interface
+				// or can be a part of the package name for a fully qualified name
+				// or can be an inner class name
+				TypeWithScope rawType = scope.resolveType(fullName(classType));
+				if (rawType == null) {
+					return null;
 				}
-				resolvedType = new ParameterizedTypeWrapper(new ParameterizedTypeImpl(rawType.getType().getType(),
-						args.toArray(new java.lang.reflect.Type[args.size()]), null));
+				// PreConditions.checkState(rawType != null, "Cannot resolve type [%s]", classType.getName());
+				if (classType.getTypeArgs() != null) {
+					List<java.lang.reflect.Type> args = new ArrayList<java.lang.reflect.Type>();
+					for (Type arg : classType.getTypeArgs()) {
+						args.add(resolveType(scope, arg).getType());
+					}
+					resolvedType = new ParameterizedTypeWrapper(new ParameterizedTypeImpl(rawType.getType().getType(),
+							args.toArray(new java.lang.reflect.Type[args.size()]), null));
+				} else {
+					resolvedType = rawType.getType();
+				}
+			} else if (type instanceof WildcardType) {
+				WildcardType wildcardType = (WildcardType) type;
+				java.lang.reflect.Type[] upperBound = wildcardType.getExtends() != null ? new java.lang.reflect.Type[] { resolveType(
+						scope, wildcardType.getExtends()).getType() }
+						: new java.lang.reflect.Type[0];
+				java.lang.reflect.Type[] lowerBound = wildcardType.getSuper() != null ? new java.lang.reflect.Type[] { resolveType(
+						scope, wildcardType.getSuper()).getType() }
+						: new java.lang.reflect.Type[0];
+				resolvedType = new WildcardTypeWrapper(new WildcardTypeImpl(lowerBound, upperBound));
 			} else {
-				resolvedType = rawType.getType();
+				throw new RuntimeException("Unexpected type " + type);
 			}
-		} else if (type instanceof WildcardType) {
-			WildcardType wildcardType = (WildcardType) type;
-			java.lang.reflect.Type[] upperBound = wildcardType.getExtends() != null ? new java.lang.reflect.Type[] { resolveType(
-					scope, wildcardType.getExtends()).getType() }
-					: new java.lang.reflect.Type[0];
-			java.lang.reflect.Type[] lowerBound = wildcardType.getSuper() != null ? new java.lang.reflect.Type[] { resolveType(
-					scope, wildcardType.getSuper()).getType() }
-					: new java.lang.reflect.Type[0];
-			resolvedType = new WildcardTypeWrapper(new WildcardTypeImpl(lowerBound, upperBound));
-		} else {
-			throw new RuntimeException("Unexpected type " + type);
+			if (arrayCount == 0) {
+				return resolvedType;
+			}
+			return ClassUtils.arrayOf(resolvedType, arrayCount);
+		} catch (IllegalArgumentException ex) {
+			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(type),
+					"Could not resolve type:" + type);
 		}
-		if (arrayCount == 0) {
-			return resolvedType;
-		}
-		return ClassUtils.arrayOf(resolvedType, arrayCount);
+	}
+
+	@Override
+	public void visit(VariableDeclaratorId n, Scope scope) {
+		Checks.checkVariableDeclaratorId(n, context);
+		super.visit(n, scope);
 	}
 
 	@Override
@@ -424,7 +443,12 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	}
 
 	private Option<ClassWrapper> identifyQualifiedNameExprClass(NameExpr expr) {
-		return classLoader.loadClassOrInnerClass(expr.toString());
+		try {
+			return classLoader.loadClassOrInnerClass(expr.toString());
+		} catch (IllegalArgumentException ex) {
+			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(expr),
+					"Could not resolve type:" + expr);
+		}
 	}
 
 	/**
@@ -629,7 +653,13 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 		resolvedType(n, method.getReturnType());
 		resolvedMethod(n, method);
+		Checks.checkScope(n, context);
+	}
 
+	@Override
+	public void visit(FieldDeclaration n, Scope arg) {
+		Checks.checkFieldDeclaration(n, context);
+		super.visit(n, arg);
 	}
 
 	@Override
@@ -650,6 +680,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			Option<FieldWrapper> field = scopeType.findField(n.getField());
 			if (field.isDefined()) {
 				resolvedType(n, field.getOrThrow().getType());
+				resolvedVariable(n, field.getOrThrow());
 			} else {
 				TypeWithScope innerType = arg.resolveType(scopeType.getName() + "$" + n.getField());
 				PreConditions.checkState(innerType != null, "%s no inner no or field could be resolved for %s",
@@ -662,6 +693,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	@Override
 	public void visit(NameExpr n, Scope arg) {
+		Checks.checkNameExpr(n, context);
 		super.visit(n, arg);
 		Node parent = parent(n);
 		if (parent instanceof QualifiedNameExpr || parent instanceof ImportDeclaration
@@ -682,7 +714,9 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			VariableWithScope var = arg.resolveVariable(n.getName());
 			if (var != null) {
 				resolvedVariable(n, var.getVariable());
+				resolvedVariableScope(n, var.getScope());
 				resolvedType(n, var.getVariable().getType());
+				Checks.checkScope(n, context);
 			} else {
 				TypeWithScope type = arg.resolveType(n.getName());
 				if (type != null) {
@@ -702,6 +736,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	@Override
 	public void visit(ThisExpr n, Scope arg) {
+		Checks.checkThisExpr(n, context);
+
 		super.visit(n, arg);
 		if (n.getClassExpr() != null) {
 			resolvedType(n, resolvedType(n.getClassExpr()));
@@ -713,6 +749,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	@Override
 	public void visit(SuperExpr n, Scope arg) {
+		Checks.checkSuperExpr(n, context);
 		super.visit(n, arg);
 		ClassWrapper thisClazz;
 		if (n.getClassExpr() != null) {

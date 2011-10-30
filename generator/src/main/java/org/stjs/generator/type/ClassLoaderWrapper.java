@@ -70,25 +70,30 @@ public class ClassLoaderWrapper {
 		if (resolvedClasses.contains(clazz.getName())) {
 			return;
 		}
+		if (clazz.isAnnotation()) {
+			return;
+		}
+		if (clazz.getName().startsWith("java.lang.")) {
+			if (!allowedJavaLangClasses.contains(clazz.getSimpleName())) {
+				throw new IllegalArgumentException(clazz.getName() + " is not allowed");
+			}
+			// no need to store java lang classes
+		}
 		if (!ClassUtils.isBridge(clazz)) {
-			if (!allowedJavaLangClasses.contains(clazz.getName())) {
-				boolean found = false;
-				for (String packageName : allowedPackages) {
-					if (clazz.getName().startsWith(packageName)) {
-						found = true;
-						break;
-					}
-				}
-
-				if (!found) {
-					throw new IllegalArgumentException(clazz.getName() + " is not allowed");
+			boolean found = false;
+			for (String packageName : allowedPackages) {
+				if (clazz.getName().startsWith(packageName)) {
+					found = true;
+					break;
 				}
 			}
+
+			if (!found) {
+				throw new IllegalArgumentException(clazz.getName() + " is not allowed");
+			}
 		}
-		if (!clazz.getName().startsWith("java.lang.")) {
-			// no need to store java lang classes
-			resolvedClasses.add(clazz.getName());
-		}
+
+		resolvedClasses.add(clazz.getName());
 	}
 
 	public Option<ClassWrapper> loadClassOrInnerClass(String classLoaderCompatibleName) {

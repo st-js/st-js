@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
@@ -88,8 +91,16 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 					writer.append("<script src='/stjs.js'></script>");
 					writer.append("<script src='/junit.js'></script>");
 
+					Set<File> jsFiles = new LinkedHashSet<File>();
 					for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies()) {
-						writer.append("<script src='/js?" + dep.getClassName() + "'></script>");
+						for (File file : dep.getJavascriptFiles()) {
+							jsFiles.add(file);
+						}
+					}
+
+					for (File file : jsFiles) {
+						writer.append("<script src='/js?"
+								+ URLEncoder.encode(file.getPath(), Charset.defaultCharset().name()) + "'></script>");
 					}
 					writer.append("<script language='javascript'>");
 					Files.copy(jsFile, Charset.defaultCharset(), writer);

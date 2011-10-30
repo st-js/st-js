@@ -1,6 +1,5 @@
 package org.stjs.generator.scope.simple;
 
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
@@ -10,28 +9,26 @@ import japa.parser.ast.CompilationUnit;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConfiguration;
+import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.scope.AbstractScope;
-import org.stjs.generator.scope.ClassDeclaringInnerClass.InnerClass;
 import org.stjs.generator.scope.CompilationUnitScope;
 import org.stjs.generator.scope.Scope;
 import org.stjs.generator.scope.ScopeBuilder;
+import org.stjs.generator.scope.inner.ClassDeclaringInnerClass.InnerClass;
+import org.stjs.generator.scope.simple.ClassWithCrazyImports.InnerClassC;
+import org.stjs.generator.scope.simple.SimpleClass.AmbiguousName;
+import org.stjs.generator.scope.simple.SimpleClass.AmbiguousName.InnerClassLevel2;
+import org.stjs.generator.scope.simple.SimpleClass.InnerClass2;
 import org.stjs.generator.type.ClassLoaderWrapper;
 import org.stjs.generator.type.FieldWrapper;
 import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.variable.Variable;
-import org.stjs.generator.writer.scopes.SimpleClass;
-import org.stjs.generator.writer.scopes.SimpleClass.AmbiguousName;
-import org.stjs.generator.writer.scopes.SimpleClass.AmbiguousName.InnerClassLevel2;
-import org.stjs.generator.writer.scopes.SimpleClass.InnerClass2;
-import org.stjs.generator.writer.scopes.p.ClassWithCrazyImports;
-import org.stjs.generator.writer.scopes.p.ClassWithCrazyImports.InnerClassC;
+import org.stjs.generator.visitor.SetParentVisitor;
 
-@Ignore
 public class SimpleScopeBuilderTest {
 
 	@Test
@@ -39,9 +36,13 @@ public class SimpleScopeBuilderTest {
 		String path = ClassWithCrazyImports.class.getName().replace('.', File.separatorChar);
 		path = "src/test/java/" + path + ".java";
 		CompilationUnit compilationUnit = JavaParser.parse(new File(path));
+		GeneratorConfiguration config = new GeneratorConfigurationBuilder().allowedPackage("org.stjs.generator")
+				.build();
 		ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader(),
-				Collections.<String> emptyList(), Collections.<String> emptySet());
+				config.getAllowedPackages(), config.getAllowedJavaLangClasses());
 		GenerationContext context = new GenerationContext(new File(path));
+		// set the parent of each node
+		compilationUnit.accept(new SetParentVisitor(), context);
 		ScopeBuilder builder = new ScopeBuilder(classLoader, context);
 		CompilationUnitScope scope = new CompilationUnitScope(classLoader, context);
 
@@ -59,10 +60,12 @@ public class SimpleScopeBuilderTest {
 
 		assertTypeEquals(scope, InnerClassLevel2.class, "InnerClassLevel2");
 		assertTypeEquals(scope, InnerClass2.class, "InnerClass2");
-		assertEquals("test.generator", getOnlyElement(scope.getTypeImportOnDemandSet()).toString());
+		// XXX asterisk imports are removed by the eclipse
+		// assertEquals("test.generator", getOnlyElement(scope.getTypeImportOnDemandSet()).toString());
 
 		NameScopeWalker walker = new NameScopeWalker(scope);
 		NameScopeWalker classScope = walker.nextChild();
+		classScope.nextChild();// inner type
 		NameScopeWalker methodScope = classScope.nextChild();
 
 		assertVariableEquals(methodScope, int.class, "z");
@@ -110,7 +113,7 @@ public class SimpleScopeBuilderTest {
 	private void assertFieldEquals(AbstractScope scope, Class<?> type, Class<?> declaringClass, String name) {
 		FieldWrapper field = ((FieldWrapper) scope.resolveVariable(name).getVariable());
 		assertNotNull(field);
-		assertSame(type, field.getType());
+		assertSame(type, field.getType().getType());
 		assertSame(declaringClass, field.getOwnerType().getType());
 	}
 

@@ -22,6 +22,12 @@ import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.type.TypeWrapper;
 import org.stjs.generator.variable.Variable;
 
+/**
+ * this is the data associated to a node in the AST
+ * 
+ * @author acraciun
+ * 
+ */
 public class ASTNodeData {
 	private Scope scope;
 	private Node parent;
@@ -36,6 +42,11 @@ public class ASTNodeData {
 	private MethodWrapper resolvedMethod;
 
 	private Variable resolvedVariable;
+
+	/**
+	 * the scope where the variable was resolved
+	 */
+	private Scope resolvedVariableScope;
 
 	public ASTNodeData() {
 
@@ -85,6 +96,14 @@ public class ASTNodeData {
 		this.resolvedType = resolvedType;
 	}
 
+	public Scope getResolvedVariableScope() {
+		return resolvedVariableScope;
+	}
+
+	public void setResolvedVariableScope(Scope resolvedVariableScope) {
+		this.resolvedVariableScope = resolvedVariableScope;
+	}
+
 	public static Scope scope(Node n) {
 		return ((ASTNodeData) n.getData()).getScope();
 	}
@@ -115,6 +134,14 @@ public class ASTNodeData {
 
 	public static void resolvedVariable(Node n, Variable v) {
 		((ASTNodeData) n.getData()).setResolvedVariable(v);
+	}
+
+	public static Scope resolvedVariableScope(Node n) {
+		return ((ASTNodeData) n.getData()).getResolvedVariableScope();
+	}
+
+	public static void resolvedVariableScope(Node n, Scope v) {
+		((ASTNodeData) n.getData()).setResolvedVariableScope(v);
 	}
 
 	public static TypeWrapper resolvedType(Node n) {

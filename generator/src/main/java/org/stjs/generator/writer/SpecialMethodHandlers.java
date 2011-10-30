@@ -26,8 +26,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.ast.ASTNodeData;
-import org.stjs.generator.scope.ScopeUtils;
 import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.utils.ClassUtils;
 
@@ -49,8 +49,7 @@ public class SpecialMethodHandlers {
 		// array.$get(x) -> array[x], or $get(obj, prop) -> obj[prop]
 		methodHandlers.put("$get", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n,
-					GenerationContext context) {
+			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
 				if ((n.getArgs() == null) || (n.getArgs().size() < 1) || (n.getArgs().size() > 2)) {
 					return false;
 				}
@@ -73,8 +72,7 @@ public class SpecialMethodHandlers {
 		// array.$set(index, value) -> array[index] = value, or $set(obj, prop, value) -> obj[prop]=value
 		methodHandlers.put("$set", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n,
-					GenerationContext context) {
+			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
 				if ((n.getArgs() == null) || (n.getArgs().size() < 2) || (n.getArgs().size() > 3)) {
 					return false;
 				}
@@ -100,8 +98,7 @@ public class SpecialMethodHandlers {
 		// map.$delete(key) -> delete map[key]
 		methodHandlers.put("$delete", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n,
-					GenerationContext context) {
+			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
 				if ((n.getArgs() == null) || (n.getArgs().size() != 1)) {
 					return false;
 				}
@@ -117,8 +114,7 @@ public class SpecialMethodHandlers {
 		// $array() -> []
 		methodHandlers.put("$array", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n,
-					GenerationContext context) {
+			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
 
 				currentHandler.printer.print("[");
 				if (n.getArgs() != null) {
@@ -138,8 +134,7 @@ public class SpecialMethodHandlers {
 		// $map() -> {}
 		methodHandlers.put("$map", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n,
-					GenerationContext context) {
+			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
 				if ((n.getArgs() != null) && (n.getArgs().size() > 1)) {
 					currentHandler.printer.printLn();
 					currentHandler.printer.indent();
@@ -171,8 +166,7 @@ public class SpecialMethodHandlers {
 		// $or(x, y, z) -> (x || y || z)
 		methodHandlers.put("$or", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n,
-					GenerationContext context) {
+			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
 				if ((n.getArgs() == null) || (n.getArgs().size() < 2)) {
 					// not exactly what it was expected
 					return false;
@@ -191,8 +185,7 @@ public class SpecialMethodHandlers {
 		// equals -> ==
 		methodHandlers.put("equals", new SpecialMethodHandler() {
 			@Override
-			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n,
-					GenerationContext context) {
+			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
 				if ((n.getArgs() == null) || (n.getArgs().size() != 1)) {
 					return false;
 				}
@@ -210,26 +203,26 @@ public class SpecialMethodHandlers {
 		assertHandler = new AssertHandler();
 	}
 
-	private static void printScope(JavascriptWriterVisitor currentHandler, MethodCallExpr n,
-			GenerationContext context, boolean withDot) {
+	private static void printScope(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context,
+			boolean withDot) {
 		// TODO -> handle super
 		MethodWrapper method = resolvedMethod(n);
-		if (!Modifier.isStatic(method.getModifiers()) && ScopeUtils.isDeclaredInThisScope(n)) {
-			currentHandler.printer.print("this");
-			if (withDot) {
-				currentHandler.printer.print(".");
-			}
-		} else if (n.getScope() != null) {
+		boolean withScopeThis = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.THIS);
+		boolean withScopeSuper = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.SUPER);
+		if (n.getScope() != null && !withScopeSuper && !withScopeThis) {
 			n.getScope().accept(currentHandler, context);
 			if (withDot) {
 				currentHandler.printer.print(".");
 			}
+		} else if (!withScopeSuper && !Modifier.isStatic(method.getModifiers())) {
+			currentHandler.printer.print("this");
+			if (withDot) {
+				currentHandler.printer.print(".");
+			}
 		}
-
 	}
 
-	public boolean handleMethodCall(JavascriptWriterVisitor currentHandler, MethodCallExpr n,
-			GenerationContext context) {
+	public boolean handleMethodCall(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
 
 		SpecialMethodHandler handler = methodHandlers.get(n.getName());
 		if (handler != null) {
@@ -302,8 +295,7 @@ public class SpecialMethodHandlers {
 	 * @param qname
 	 * @param context
 	 */
-	private void methodToProperty(JavascriptWriterVisitor currentHandler, MethodCallExpr n,
-			GenerationContext context) {
+	private void methodToProperty(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
 		int arg = 0;
 		MethodWrapper method = ASTNodeData.resolvedMethod(n);
 		if (Modifier.isStatic(method.getModifiers())) {
