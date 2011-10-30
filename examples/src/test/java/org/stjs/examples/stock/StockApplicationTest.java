@@ -3,11 +3,11 @@ package org.stjs.examples.stock;
 import static org.junit.Assert.assertEquals;
 import static org.stjs.javascript.jquery.GlobalJQuery.$;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.stjs.javascript.jquery.JQuery;
 import org.stjs.testing.annotation.HTMLFixture;
+import org.stjs.testing.annotation.Scripts;
 import org.stjs.testing.driver.STJSTestDriverRunner;
 
 @RunWith(STJSTestDriverRunner.class)
@@ -18,7 +18,7 @@ import org.stjs.testing.driver.STJSTestDriverRunner;
 		"			</table>" + //
 		"			<input type='text' id='newStock'><button id='addStock' type='submit'>Add</button>\n" + //
 		"			</form>")
-@Ignore
+@Scripts("classpath://jquery.js")
 public class StockApplicationTest {
 
 	@Test

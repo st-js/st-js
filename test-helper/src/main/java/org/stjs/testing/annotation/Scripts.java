@@ -23,11 +23,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 /**
- * This annotation sets the html code to be added in the pages used during the unit test
+ * this annotation describes the scripts to be added to the page during the unit test. The scripts can be a file relative to the projects home,
+ * searched in the classpath (classpath://) or as an url
+ *
  * @author acraciun
  *
  */
-public @interface HTMLFixture {
-
-	public String value();
+public @interface Scripts {
+	public String[] value();
 }

@@ -6,10 +6,13 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -22,7 +25,8 @@ public class STJSTestServer {
 	protected static final String BROWSER_TEST_URI = "/test";
 	protected static final String BROWSER_GET_JS_URI = "/js";
 
-	private final int port = 8000;
+	private final int port;
+	private final int testTimeout;
 	private final HttpServer httpServer;
 
 	private final Map<Long, BrowserConnection> browserConnections = new HashMap<Long, BrowserConnection>();
@@ -31,7 +35,9 @@ public class STJSTestServer {
 
 	private File testFile = null;
 
-	public STJSTestServer() throws IOException {
+	public STJSTestServer(int port, int testTimeout) throws IOException {
+		this.port = port;
+		this.testTimeout = testTimeout;
 		// create the HttpServer
 		InetSocketAddress address = new InetSocketAddress(port);
 		httpServer = HttpServer.create(address, 0);
@@ -56,7 +62,7 @@ public class STJSTestServer {
 					} else if (BROWSER_GET_JS_URI.equals(exchange.getRequestURI().getPath())) {
 						handleBrowserGetJs(exchange.getRequestURI().getQuery(), exchange);
 					} else {
-						handleResource(exchange.getRequestURI().getPath(), exchange);
+						handleResource(exchange.getRequestURI().getPath().substring(1), exchange);
 					}
 
 				} catch (Exception ex) {
@@ -107,15 +113,25 @@ public class STJSTestServer {
 	}
 
 	private synchronized void handleResource(String path, HttpExchange exchange) throws IOException {
-		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(path.substring(1));
-		if (is != null) {
-			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-			byte[] buffer = new byte[100000];
-			int length = is.read(buffer);
-			exchange.getResponseBody().write(buffer, 0, length);
-			is.close();
-		} else {
-			exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
+
+		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
+		try {
+			if (is != null) {
+				// TODO - add a proper mime type here
+				if (path.endsWith(".js")) {
+					exchange.getResponseHeaders().add("Content-type", "text/javascript");
+				}
+				exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+				ByteStreams.copy(is, exchange.getResponseBody());
+
+			} else {
+				System.err.println(path + " was not found in classpath");
+				exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
+			}
+		} finally {
+			if (is != null) {
+				is.close();
+			}
 		}
 	}
 
@@ -167,11 +183,16 @@ public class STJSTestServer {
 
 	}
 
-	private synchronized void handleBrowserGetJs(String fileName, HttpExchange exchange) throws IOException {
+	private synchronized void handleBrowserGetJs(String fileName, HttpExchange exchange) throws IOException,
+			URISyntaxException {
 		exchange.getResponseHeaders().add("Content-type", "text/javascript");
-		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-		Files.copy(new File(fileName), exchange.getResponseBody());
-
+		URI uri = new URI(fileName);
+		if ("classpath".equals(uri.getScheme())) {
+			handleResource(uri.getPath(), exchange);
+		} else {
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+			Files.copy(new File(uri.getPath()), exchange.getResponseBody());
+		}
 	}
 
 	public synchronized void start() {
@@ -188,12 +209,12 @@ public class STJSTestServer {
 		return browserConnections.size();
 	}
 
-	public synchronized TestResultCollection test(File srcFile, int timeout) throws InterruptedException {
+	public synchronized TestResultCollection test(File srcFile) throws InterruptedException {
 		lastTestId++;
 		testFile = srcFile;
 		System.out.println("--> testing :" + lastTestId + ", file:" + testFile);
 		int testBrowsers = 0;
-		long endTime = System.currentTimeMillis() + timeout;
+		long endTime = System.currentTimeMillis() + testTimeout * 1000;
 		TestResultCollection result = new TestResultCollection();
 		while (true) {
 			for (BrowserConnection b : browserConnections.values()) {

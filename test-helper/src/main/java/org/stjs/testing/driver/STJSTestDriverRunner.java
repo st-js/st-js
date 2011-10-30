@@ -1,17 +1,17 @@
 package org.stjs.testing.driver;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.junit.internal.runners.model.EachTestNotifier;
+import org.junit.runner.Description;
+import org.junit.runner.notification.Failure;
+import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
@@ -20,8 +20,8 @@ import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
 import org.stjs.generator.Generator;
 import org.stjs.javascript.annotation.STJSBridge;
-import org.stjs.testing.GeneratorWrapper;
 import org.stjs.testing.annotation.HTMLFixture;
+import org.stjs.testing.annotation.Scripts;
 
 import com.google.common.io.Files;
 
@@ -33,42 +33,39 @@ import com.google.common.io.Files;
  */
 @STJSBridge
 public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
-	private final STJSTestServer server;
-	/**
-	 * timeout to wait for all the connected clients
-	 */
-	private int timeout = 5000;
+	private boolean skipIfNoBrowser = false;
+	private final ServerSession serverSession;
 
 	public STJSTestDriverRunner(Class<?> klass) throws InitializationError {
 		super(klass);
+
+		DriverConfiguration config = new DriverConfiguration();
+		skipIfNoBrowser = config.isSkipIfNoBrowser();
 		try {
-			server = new STJSTestServer();
-			server.start();
-			checkBrowsers();
+			serverSession = ServerSession.getInstance();
 		} catch (Exception e) {
 			throw new InitializationError(e);
 		}
 	}
 
-	private void checkBrowsers() throws InterruptedException, MalformedURLException, IOException, URISyntaxException {
-		// wait for any previously open browser to connect
-		Thread.sleep(2000);
-		if (server.getBrowserCount() == 0) {
-			if (Desktop.isDesktopSupported()) {
-				System.out.println("Capturing the default browser ...");
-				Desktop.getDesktop().browse(new URL(server.getHostURL(), "/start.html").toURI());
-				for (int i = 0; i < 10; ++i) {
-					Thread.sleep(500);
-					if (server.getBrowserCount() > 0) {
-						System.out.println("Captured browsers");
-						return;
-					}
-				}
-				System.out.println("Unable to capture a browser");
+	@Override
+	protected void runChild(FrameworkMethod method, RunNotifier notifier) {
+		if (!serverSession.hasBrowsers()) {
+			if (skipIfNoBrowser) {
+				EachTestNotifier eachNotifier = makeNotifier(method, notifier);
+				eachNotifier.fireTestIgnored();
+			} else {
+				notifier.fireTestFailure(new Failure(describeChild(method), new IllegalStateException(
+						"No connected browser")));
 			}
-		} else {
-			System.out.println("Have " + server.getBrowserCount() + " browsers connected");
+			return;
 		}
+		super.runChild(method, notifier);
+	}
+
+	private EachTestNotifier makeNotifier(FrameworkMethod method, RunNotifier notifier) {
+		Description description = describeChild(method);
+		return new EachTestNotifier(notifier, description);
 	}
 
 	@Override
@@ -79,8 +76,8 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 
 				ClassWithJavascript stjsClass = new Generator().getExistingStjsClass(getTestClass().getJavaClass());
 
-				File jsFile = new GeneratorWrapper().generateCode(getTestClass());
 				final HTMLFixture htmlFixture = getTestClass().getJavaClass().getAnnotation(HTMLFixture.class);
+				final Scripts addedScripts = getTestClass().getJavaClass().getAnnotation(Scripts.class);
 				try {
 					File htmlFile = File.createTempFile(getTestClass().getJavaClass().getName()
 							+ "_js_test_driver_adapter", ".html");
@@ -91,6 +88,20 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 					writer.append("<script src='/stjs.js'></script>");
 					writer.append("<script src='/junit.js'></script>");
 
+					if (addedScripts != null) {
+						for (String script : addedScripts.value()) {
+							if (script.startsWith("classpath:")) {
+								writer.append("<script src='" + script.substring("classpath:/".length())
+										+ "'></script>");
+							} else if (script.startsWith("file:")) {
+								writer.append("<script src='/js?"
+										+ URLEncoder.encode(script, Charset.defaultCharset().name()) + "'></script>");
+							} else {
+								writer.append("<script src='" + script + "'></script>");
+							}
+						}
+					}
+
 					Set<File> jsFiles = new LinkedHashSet<File>();
 					for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies()) {
 						for (File file : dep.getJavascriptFiles()) {
@@ -100,10 +111,10 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 
 					for (File file : jsFiles) {
 						writer.append("<script src='/js?"
-								+ URLEncoder.encode(file.getPath(), Charset.defaultCharset().name()) + "'></script>");
+								+ URLEncoder.encode(file.toURI().toString(), Charset.defaultCharset().name())
+								+ "'></script>");
 					}
 					writer.append("<script language='javascript'>");
-					Files.copy(jsFile, Charset.defaultCharset(), writer);
 					writer.append("onload=function(){");
 
 					// Adapter between generated assert (not global) and JS-test-driver assert (which is a
@@ -138,7 +149,7 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 					System.out.println("Added source file");
 					Files.copy(htmlFile, System.out);
 					System.out.flush();
-					TestResultCollection response = server.test(htmlFile, timeout);
+					TestResultCollection response = serverSession.getServer().test(htmlFile);
 					if (!response.isOk()) {
 						// take the first wrong result
 						throw response.getResult(0).buildException(getTestClass().getJavaClass().getName(),
