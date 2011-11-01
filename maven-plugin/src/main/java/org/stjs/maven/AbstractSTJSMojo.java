@@ -110,7 +110,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 	private File relative(File dir) {
 		if (dir.getPath().startsWith(project.getBasedir().getPath())) {
-			return new File(dir.getPath().substring(project.getBasedir().getPath().length()));
+			return new File(dir.getPath().substring(project.getBasedir().getPath().length() + 1));
 		}
 		return dir;
 	}
