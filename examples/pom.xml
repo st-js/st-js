@@ -62,14 +62,12 @@
 				<executions>
 					<execution>
 						<id>main</id>
-						<phase>process-classes</phase>
 						<goals>
 							<goal>generate</goal>
 						</goals>
 					</execution>
 					<execution>
 						<id>test</id>
-						<phase>process-test-classes</phase>
 						<goals>
 							<goal>generate-test</goal>
 						</goals>
@@ -98,6 +96,7 @@
 										</versionRange>
 										<goals>
 											<goal>generate</goal>
+											<goal>generate-test</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>

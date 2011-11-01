@@ -232,6 +232,9 @@ public class STJSTestServer {
 		System.out.println("<-- testing :" + lastTestId + ", file:" + testFile);
 
 		testFile = null;
+		if (result.size() == 0) {
+			result.addResult(new TestResult("No test responded back in " + testTimeout + " seconds", "none"));
+		}
 		return result;
 	}
 

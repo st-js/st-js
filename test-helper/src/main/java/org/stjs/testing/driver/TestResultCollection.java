@@ -22,4 +22,8 @@ public class TestResultCollection {
 	public TestResult getResult(int i) {
 		return results.get(i);
 	}
+
+	public int size() {
+		return results.size();
+	}
 }

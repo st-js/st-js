@@ -44,6 +44,7 @@ public class SpecialMethodHandlers {
 	private Map<String, SpecialMethodHandler> methodHandlers = new HashMap<String, SpecialMethodHandler>();
 
 	private final AssertHandler assertHandler;
+	private final MethodToPropertyHandler methodToPropertyHandler;
 
 	public SpecialMethodHandlers() {
 		// array.$get(x) -> array[x], or $get(obj, prop) -> obj[prop]
@@ -201,11 +202,13 @@ public class SpecialMethodHandlers {
 		methodHandlers.put("$invoke", new $InvokeHandler());
 
 		assertHandler = new AssertHandler();
+		methodToPropertyHandler = new MethodToPropertyHandler();
+
+		methodHandlers.put("java.lang.String.length", methodToPropertyHandler);
 	}
 
 	private static void printScope(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context,
 			boolean withDot) {
-		// TODO -> handle super
 		MethodWrapper method = resolvedMethod(n);
 		boolean withScopeThis = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.THIS);
 		boolean withScopeSuper = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.SUPER);
@@ -223,14 +226,18 @@ public class SpecialMethodHandlers {
 	}
 
 	public boolean handleMethodCall(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
+		MethodWrapper method = ASTNodeData.resolvedMethod(n);
+		String fullName = method.getOwnerType().getName() + "." + method.getName();
 
-		SpecialMethodHandler handler = methodHandlers.get(n.getName());
+		SpecialMethodHandler handler = methodHandlers.get(fullName);
+		if (handler == null) {
+			handler = methodHandlers.get(n.getName());
+		}
 		if (handler != null) {
 			if (handler.handle(currentHandler, n, context)) {
 				return true;
 			}
 		}
-		MethodWrapper method = ASTNodeData.resolvedMethod(n);
 		if ((n.getArgs() != null) && (n.getArgs().size() > 0)) {
 			if (ClassUtils.isAdapter(method.getOwnerType())) {
 				adapterMethod(currentHandler, n, context);
@@ -251,7 +258,7 @@ public class SpecialMethodHandlers {
 		if ((n.getArgs() != null) && (n.getArgs().size() > 2)) {
 			return false;
 		}
-		methodToProperty(currentHandler, n, context);
+		methodToPropertyHandler.handle(currentHandler, n, context);
 		return true;
 	}
 
@@ -269,7 +276,6 @@ public class SpecialMethodHandlers {
 		currentHandler.printer.print("(");
 		arg0.accept(currentHandler, context);
 		currentHandler.printer.print(")");
-		// TODO may add paranthesis here
 		currentHandler.printer.print(".");
 		currentHandler.printer.print(n.getName());
 		currentHandler.printer.print("(");
@@ -295,22 +301,27 @@ public class SpecialMethodHandlers {
 	 * @param qname
 	 * @param context
 	 */
-	private void methodToProperty(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
-		int arg = 0;
-		MethodWrapper method = ASTNodeData.resolvedMethod(n);
-		if (Modifier.isStatic(method.getModifiers())) {
-			currentHandler.printer.print("(");
-			n.getArgs().get(arg++).accept(currentHandler, context);
-			currentHandler.printer.print(").");
-		} else {
-			printScope(currentHandler, n, context, true);
-		}
-		if ((n.getArgs() == null) || (n.getArgs().size() == arg)) {
-			currentHandler.printer.print(n.getName().substring(1));
-		} else {
-			currentHandler.printer.print(n.getName().substring(1));
-			currentHandler.printer.print(" = ");
-			n.getArgs().get(arg++).accept(currentHandler, context);
+	static final class MethodToPropertyHandler implements SpecialMethodHandler {
+		@Override
+		public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
+			int arg = 0;
+			MethodWrapper method = ASTNodeData.resolvedMethod(n);
+			if (Modifier.isStatic(method.getModifiers())) {
+				currentHandler.printer.print("(");
+				n.getArgs().get(arg++).accept(currentHandler, context);
+				currentHandler.printer.print(").");
+			} else {
+				printScope(currentHandler, n, context, true);
+			}
+			int start = n.getName().startsWith("$") ? 1 : 0;
+			if ((n.getArgs() == null) || (n.getArgs().size() == arg)) {
+				currentHandler.printer.print(n.getName().substring(start));
+			} else {
+				currentHandler.printer.print(n.getName().substring(start));
+				currentHandler.printer.print(" = ");
+				n.getArgs().get(arg++).accept(currentHandler, context);
+			}
+			return true;
 		}
 	}
 

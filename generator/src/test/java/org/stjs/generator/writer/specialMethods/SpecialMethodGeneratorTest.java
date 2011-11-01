@@ -4,7 +4,6 @@ import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 
 import org.junit.Test;
 
-
 public class SpecialMethodGeneratorTest {
 
 	@Test
@@ -96,6 +95,12 @@ public class SpecialMethodGeneratorTest {
 	public void testSpecialDelete() {
 		// x.$delete(key) -> delete x[key]
 		assertCodeContains(SpecialMethod15.class, "delete this[\"key\"]");
+	}
+
+	@Test
+	public void testStringLength() {
+		// string.length() -> string.length
+		assertCodeContains(SpecialMethod16.class, "n = (\"a\" + \"b\").length;");
 	}
 
 }
