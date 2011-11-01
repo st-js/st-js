@@ -15,7 +15,7 @@
  */
 package org.stjs.generator;
 
-import java.io.File;
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -29,7 +29,7 @@ import java.util.List;
 public interface ClassWithJavascript {
 	public String getClassName();
 
-	public List<File> getJavascriptFiles();
+	public List<URI> getJavascriptFiles();
 
 	public List<ClassWithJavascript> getDirectDependencies();
 

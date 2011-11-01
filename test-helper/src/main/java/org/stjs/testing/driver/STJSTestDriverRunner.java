@@ -3,6 +3,8 @@ package org.stjs.testing.driver;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.LinkedHashSet;
@@ -68,6 +70,17 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 		return new EachTestNotifier(notifier, description);
 	}
 
+	private void addScript(Writer writer, String script) throws IOException {
+		if (script.startsWith("classpath:")) {
+			writer.append("<script src='" + script.substring("classpath:/".length()) + "'></script>");
+		} else if (script.startsWith("file:")) {
+			writer.append("<script src='/js?" + URLEncoder.encode(script, Charset.defaultCharset().name())
+					+ "'></script>");
+		} else {
+			writer.append("<script src='" + script + "'></script>");
+		}
+	}
+
 	@Override
 	protected Statement methodBlock(final FrameworkMethod method) {
 		return new Statement() {
@@ -90,29 +103,19 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 
 					if (addedScripts != null) {
 						for (String script : addedScripts.value()) {
-							if (script.startsWith("classpath:")) {
-								writer.append("<script src='" + script.substring("classpath:/".length())
-										+ "'></script>");
-							} else if (script.startsWith("file:")) {
-								writer.append("<script src='/js?"
-										+ URLEncoder.encode(script, Charset.defaultCharset().name()) + "'></script>");
-							} else {
-								writer.append("<script src='" + script + "'></script>");
-							}
+							addScript(writer, script);
 						}
 					}
 
-					Set<File> jsFiles = new LinkedHashSet<File>();
+					Set<URI> jsFiles = new LinkedHashSet<URI>();
 					for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies()) {
-						for (File file : dep.getJavascriptFiles()) {
+						for (URI file : dep.getJavascriptFiles()) {
 							jsFiles.add(file);
 						}
 					}
 
-					for (File file : jsFiles) {
-						writer.append("<script src='/js?"
-								+ URLEncoder.encode(file.toURI().toString(), Charset.defaultCharset().name())
-								+ "'></script>");
+					for (URI file : jsFiles) {
+						addScript(writer, file.toString());
 					}
 					writer.append("<script language='javascript'>");
 					writer.append("onload=function(){");

@@ -15,7 +15,7 @@
  */
 package org.stjs.generator;
 
-import java.io.File;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,7 +45,7 @@ public class BridgeClass implements ClassWithJavascript {
 	}
 
 	@Override
-	public List<File> getJavascriptFiles() {
+	public List<URI> getJavascriptFiles() {
 		// TODO use annotations
 		return Collections.emptyList();
 	}

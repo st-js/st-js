@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,12 +45,14 @@ public class GeneratorTestHelper {
 				new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript")
 						.allowedPackage("org.stjs.generator").build());
 
-		File jsFile = stjsClass.getJavascriptFiles().get(0);
+		File jsFile = new File(stjsClass.getJavascriptFiles().get(0).getPath().substring(1));
 		try {
 			String content = Files.toString(jsFile, Charset.defaultCharset());
 			List<File> javascriptFiles = new ArrayList<File>();
 			for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies()) {
-				javascriptFiles.addAll(dep.getJavascriptFiles());
+				for (URI js : dep.getJavascriptFiles()) {
+					javascriptFiles.add(new File(js.getPath().substring(1)));
+				}
 			}
 			new RhinoExecutor().run(javascriptFiles, true);
 			return content;
@@ -58,8 +61,8 @@ public class GeneratorTestHelper {
 			throw new RuntimeException(e);
 		} catch (ScriptException ex) {
 			// display the generated code in case of exception
-			for (File file : stjsClass.getJavascriptFiles()) {
-				displayWithLines(file);
+			for (URI file : stjsClass.getJavascriptFiles()) {
+				displayWithLines(new File(file.getPath()));
 			}
 			throw new RuntimeException(ex);
 		}

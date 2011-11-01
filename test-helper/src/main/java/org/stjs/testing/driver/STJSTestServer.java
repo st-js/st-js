@@ -191,7 +191,7 @@ public class STJSTestServer {
 			handleResource(uri.getPath(), exchange);
 		} else {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-			Files.copy(new File(uri.getPath()), exchange.getResponseBody());
+			Files.copy(new File(uri.getPath().substring(1)), exchange.getResponseBody());
 		}
 	}
 

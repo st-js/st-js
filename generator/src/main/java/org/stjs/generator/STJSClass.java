@@ -19,6 +19,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,7 +49,7 @@ public class STJSClass implements ClassWithJavascript {
 	private List<String> dependencies = Collections.emptyList();
 	private List<ClassWithJavascript> directDependencies = null;
 
-	private File generatedJavascriptFile;
+	private URI generatedJavascriptFile;
 
 	private final String className;
 	private final File targetFolder;
@@ -101,7 +103,11 @@ public class STJSClass implements ClassWithJavascript {
 		// output
 		String output = properties.getProperty(GENERATED_JS_FILE_PROP);
 		if (output != null) {
-			generatedJavascriptFile = new File(output);
+			try {
+				generatedJavascriptFile = new URI(output);
+			} catch (URISyntaxException e) {
+				System.err.println("Could not load URI from " + output);
+			}
 		}
 	}
 
@@ -145,14 +151,10 @@ public class STJSClass implements ClassWithJavascript {
 		}
 	}
 
-	public File getGeneratedJavascriptFile() {
-		return generatedJavascriptFile;
-	}
-
-	public void setGeneratedJavascriptFile(File generatedJavascriptFile) {
+	public void setGeneratedJavascriptFile(URI generatedJavascriptFile) {
 		this.generatedJavascriptFile = generatedJavascriptFile;
 		if (generatedJavascriptFile != null) {
-			properties.put(GENERATED_JS_FILE_PROP, generatedJavascriptFile.getPath());
+			properties.put(GENERATED_JS_FILE_PROP, generatedJavascriptFile.toString());
 		} else {
 			properties.remove(GENERATED_JS_FILE_PROP);
 		}
@@ -165,7 +167,7 @@ public class STJSClass implements ClassWithJavascript {
 	}
 
 	@Override
-	public List<File> getJavascriptFiles() {
+	public List<URI> getJavascriptFiles() {
 		if (generatedJavascriptFile == null) {
 			return Collections.emptyList();
 		}

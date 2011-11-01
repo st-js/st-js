@@ -25,6 +25,8 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.stjs.generator.scope.CompilationUnitScope;
 import org.stjs.generator.scope.ScopeBuilder;
@@ -109,9 +111,22 @@ public class Generator {
 		STJSClass stjsClass = new STJSClass(new GeneratorDependencyResolver(builtProjectClassLoader, sourceFolder,
 				generationFolder, targetFolder, configuration), targetFolder, className);
 		stjsClass.setDependencies(classLoaderWrapper.getResolvedClasses());
-		stjsClass.setGeneratedJavascriptFile(outputFile);
+		stjsClass.setGeneratedJavascriptFile(relative(outputFile));
 		stjsClass.store();
 		return stjsClass;
+	}
+
+	private URI relative(File outputFile) {
+		// FIXME temporary have to remove the full path from the file name.
+		// it should be different depending on whether the final artifact is a war or a jar.
+		String path = outputFile.getPath();
+		int pos = path.indexOf("target");
+		try {
+			return pos >= 0 ? new URI("file", null, "/" + path.substring(pos).replace('\\', '/'), null) : outputFile
+					.toURI();
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private CompilationUnit parseAndResolve(ClassLoaderWrapper builtProjectClassLoader, File inputFile,
@@ -242,5 +257,10 @@ public class Generator {
 	public ClassWithJavascript getExistingStjsClass(Class<?> testClass) {
 		return new GeneratorDependencyResolver(testClass.getClassLoader(), null, null, null, null).resolve(testClass
 				.getName());
+	}
+
+	public static void main(String[] args) throws URISyntaxException {
+		File f = new File("\\repository\\org\\stjs\\examples\\1.1.0-SNAPSHOT\\examples-1.1.0-SNAPSHOT.war");
+		System.out.println(new URI("file", null, f.getPath().replace('\\', '/'), null));
 	}
 }
