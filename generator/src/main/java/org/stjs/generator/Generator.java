@@ -46,14 +46,6 @@ public class Generator {
 
 	private static final String STJS_FILE = "stjs.js";
 
-	private String getMainClassName(CompilationUnit cu) {
-		if (cu.getTypes() != null && cu.getTypes().size() > 0) {
-			// TODO this is not exact and complete
-			return cu.getPackage().getName() + "." + cu.getTypes().get(0).getName();
-		}
-		throw new RuntimeException("No declaration of type found in " + cu);
-	}
-
 	public File getOutputFile(File generationFolder, String className) {
 		File output = new File(generationFolder, className.replace('.', File.separatorChar) + ".js");
 		output.getParentFile().mkdirs();
@@ -115,9 +107,8 @@ public class Generator {
 
 		// now write properties
 		STJSClass stjsClass = new STJSClass(new GeneratorDependencyResolver(builtProjectClassLoader, sourceFolder,
-				generationFolder, targetFolder, configuration), targetFolder, getMainClassName(cu));
+				generationFolder, targetFolder, configuration), targetFolder, className);
 		stjsClass.setDependencies(classLoaderWrapper.getResolvedClasses());
-		// TODO fix here as the path is absolute!!
 		stjsClass.setGeneratedJavascriptFile(outputFile);
 		stjsClass.store();
 		return stjsClass;

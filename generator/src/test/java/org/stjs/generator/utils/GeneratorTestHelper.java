@@ -79,7 +79,6 @@ public class GeneratorTestHelper {
 		String cleanCode = code.replaceAll("\\s+", "");
 		String cleanSnippet = snippet.replaceAll("\\s+", "");
 		assertTrue("[" + snippet + "] not in \n" + code, cleanCode.contains(cleanSnippet));
-		// TODO nice display error
 	}
 
 	public static void assertCodeDoesNotContain(Class<?> clazz, String snippet) {
@@ -96,7 +95,6 @@ public class GeneratorTestHelper {
 		String cleanCode = code.replaceAll("\\s+", "");
 		String cleanSnippet = snippet.replaceAll("\\s+", "");
 		assertTrue("[" + snippet + "] in \n" + code, !cleanCode.contains(cleanSnippet));
-		// TODO nice display error
 	}
 
 	private static void displayWithLines(File file) {

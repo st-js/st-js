@@ -739,11 +739,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	private void printStaticMembersPrefix(ClassScope scope) {
-		// FIXME, find a solution for inline types (and unserstand how they work)
-		// if (GeneratorConstants.SPECIAL_INLINE_TYPE.equals(n.getName())) {
-		// printer.print(n.getName());
-		// return;
-		// }
 		printer.print(stJsName(scope.getClazz()));
 	}
 

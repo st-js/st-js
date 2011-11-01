@@ -47,7 +47,7 @@ public class SimpleScopeBuilderTest {
 		CompilationUnitScope scope = new CompilationUnitScope(classLoader, context);
 
 		builder.visit(compilationUnit, scope);
-		// TODO : assert all imports have been resolved
+		// : assert all imports have been resolved
 
 		assertFieldEquals(scope, Integer.class, SimpleClass.class, "field");
 		assertMethodsEquals(scope, 2, SimpleClass.class, "method");
@@ -60,7 +60,7 @@ public class SimpleScopeBuilderTest {
 
 		assertTypeEquals(scope, InnerClassLevel2.class, "InnerClassLevel2");
 		assertTypeEquals(scope, InnerClass2.class, "InnerClass2");
-		// XXX asterisk imports are removed by the eclipse
+		// WARN asterisk imports are removed by the eclipse
 		// assertEquals("test.generator", getOnlyElement(scope.getTypeImportOnDemandSet()).toString());
 
 		NameScopeWalker walker = new NameScopeWalker(scope);

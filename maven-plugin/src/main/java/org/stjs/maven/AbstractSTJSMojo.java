@@ -108,6 +108,13 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		}
 	}
 
+	private File relative(File dir) {
+		if (dir.getPath().startsWith(project.getBasedir().getPath())) {
+			return new File(dir.getPath().substring(project.getBasedir().getPath().length()));
+		}
+		return dir;
+	}
+
 	public void execute() throws MojoExecutionException {
 		getLog().info("Generating javascript files");
 
@@ -149,7 +156,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 					}
 					String className = getClassNameForSource(source.getPath());
 					generator.generateJavascript(builtProjectClassLoader, className, sourceDir,
-							getGeneratedSourcesDirectory(), getBuildOutputDirectory(), configBuilder.build());
+							relative(getGeneratedSourcesDirectory()), getBuildOutputDirectory(), configBuilder.build());
 					atLeastOneFileGenerated = true;
 
 				} catch (InclusionScanException e) {

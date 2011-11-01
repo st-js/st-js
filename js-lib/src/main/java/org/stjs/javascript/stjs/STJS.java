@@ -20,5 +20,5 @@ public interface STJS {
 	 * 
 	 * @param ex
 	 */
-	public void exception(Object ex);
+	public Exception exception(Object ex);
 }

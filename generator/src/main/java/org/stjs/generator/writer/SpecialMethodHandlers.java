@@ -148,7 +148,6 @@ public class SpecialMethodHandlers {
 							currentHandler.printer.print(", ");
 							currentHandler.printer.printLn();
 						}
-						// TODO : is it safe to unsescape string that are object litteral keys?
 						n.getArgs().get(i).accept(currentHandler, context);
 						currentHandler.printer.print(": ");
 						n.getArgs().get(i + 1).accept(currentHandler, context);

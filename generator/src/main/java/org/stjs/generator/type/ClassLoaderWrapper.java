@@ -78,6 +78,7 @@ public class ClassLoaderWrapper {
 				throw new IllegalArgumentException(clazz.getName() + " is not allowed");
 			}
 			// no need to store java lang classes
+			return;
 		}
 		if (!ClassUtils.isBridge(clazz)) {
 			boolean found = false;

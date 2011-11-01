@@ -189,12 +189,7 @@ public class ClassWrapper implements TypeWrapper {
 	}
 
 	private void addMethods(Class<?> rawClass, TypeWrapper[] actualTypeArgs) {
-		// if (clazz.isEnum()) {
-		// // XXX not sure how to deal with ordinal/name methods
-		// methods = new ArrayList<MethodWrapper>(methods);
-		// methods.addAll(asList(Enum.class.getDeclaredMethods()));
-		// }
-		//
+
 		for (Method m : rawClass.getDeclaredMethods()) {
 			TypeWrapper[] paramTypes = TypeWrappers.wrap(m.getGenericParameterTypes());
 			@SuppressWarnings("unchecked")
