@@ -9,4 +9,12 @@ public class Globals {
 	}
 
 	public static String field;
+
+	public void instanceMethod() {
+
+	}
+
+	public String instanceField;
+
+	public static Globals global = new Globals();
 }

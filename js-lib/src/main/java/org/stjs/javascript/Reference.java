@@ -13,19 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.stjs.generator;
+package org.stjs.javascript;
 
-public class GeneratorConstants {
-	public static final String SPECIAL_THIS = "THIS";
+import org.stjs.javascript.annotation.DataType;
 
-	/**
-	 * this is the type to be used when defining an inline type
-	 */
-	public static final String SPECIAL_INLINE_TYPE = "_InlineType";
-
-	public static final String SUPER = "super";
-
-	public static final String THIS = "this";
-
-	public static final String ARGUMENTS_PARAMETER = "arguments";
+/**
+ * Use this class whenever you want to modify a value inside an inner type and the Java requires you to have a final
+ * variable.
+ * 
+ * @author acraciun
+ * 
+ */
+@DataType
+public class Reference<T> {
+	public T value;
 }

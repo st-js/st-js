@@ -94,6 +94,7 @@ public class Generator {
 
 			writer = new FileWriter(outputFile);
 			writer.write(generatorVisitor.getGeneratedSource());
+			writer.flush();
 
 		} catch (IOException e1) {
 			throw new RuntimeException("Could not open output file " + outputFile + ":" + e1, e1);
@@ -103,7 +104,7 @@ public class Generator {
 					writer.close();
 				}
 			} catch (IOException e) {
-				// silent
+				throw new RuntimeException(e);
 			}
 		}
 

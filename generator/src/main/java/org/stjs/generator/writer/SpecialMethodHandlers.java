@@ -137,7 +137,7 @@ public class SpecialMethodHandlers {
 			@Override
 			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
 				if ((n.getArgs() != null) && (n.getArgs().size() > 1)) {
-					currentHandler.printer.printLn();
+					// currentHandler.printer.printLn();
 					currentHandler.printer.indent();
 				}
 				currentHandler.printer.print("{");

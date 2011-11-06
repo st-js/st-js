@@ -70,7 +70,7 @@ public class MethodsGeneratorTest {
 	@Test
 	public void testVarArgsMethod3() {
 		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
-		assertCodeContains(Methods11.class, "Methods11.prototype.method=function(arguments){}");
+		assertCodeContains(Methods11.class, "Methods11.prototype.method=function(_arguments){}");
 	}
 
 	@Test

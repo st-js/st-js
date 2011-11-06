@@ -16,6 +16,7 @@
 package org.stjs.javascript;
 
 import org.stjs.javascript.annotation.Adapter;
+import org.stjs.javascript.functions.Function1;
 
 /**
  * here are the methods existent in Javascript for number objects and inexistent in the Java counterpart. The generator
@@ -90,6 +91,10 @@ public class JSStringAdapter {
 	}
 
 	public static String replace(String applyTo, RegExp re, String repl) {
+		throw new UnsupportedOperationException();
+	}
+
+	public static String replace(String applyTo, RegExp re, Function1<String, String> replaceFunction) {
 		throw new UnsupportedOperationException();
 	}
 

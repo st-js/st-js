@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.ast.ASTNodeData;
 import org.stjs.generator.ast.SourcePosition;
@@ -54,8 +55,6 @@ import org.stjs.generator.writer.JavascriptKeywords;
  */
 public class Checks {
 
-	private static final String VARARGS_ALLOWED_NAME = "arguments";
-
 	/**
 	 * check a method declaration
 	 * 
@@ -66,7 +65,7 @@ public class Checks {
 		if (n.getParameters() != null) {
 			for (Parameter p : n.getParameters()) {
 				if (p.isVarArgs()) {
-					if (!p.getId().getName().equals(VARARGS_ALLOWED_NAME)) {
+					if (!p.getId().getName().equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
 						throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(n),
 								"You can only have a vararg parameter that has to be called 'arguments'");
 

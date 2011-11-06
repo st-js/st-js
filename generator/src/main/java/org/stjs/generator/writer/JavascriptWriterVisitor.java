@@ -360,6 +360,10 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(VariableDeclaratorId n, GenerationContext context) {
+		if (parent(n) instanceof Parameter && n.getName().equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
+			// add an "_" for the arguments parameter to no override to arguments one.
+			printer.print("_");
+		}
 		printer.print(n.getName());
 	}
 
@@ -395,14 +399,20 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(FieldDeclaration n, GenerationContext context) {
-		String typeName = stJsName(resolvedType(parent(n)));
+		TypeWrapper type = resolvedType(parent(n));
+		boolean skipType = isGlobal(type) && isStatic(n.getModifiers());
+		String typeName = stJsName(type);
 		// skip type
 		for (VariableDeclarator v : n.getVariables()) {
-			printer.print(typeName);
+			if (!skipType) {
+				printer.print(typeName);
+			}
 			if (!isStatic(n.getModifiers())) {
 				printer.print(".prototype");
 			}
-			printer.print(".");
+			if (!skipType) {
+				printer.print(".");
+			}
 
 			printVariableDeclarator(v, context, true);
 			printer.print(";");
@@ -438,14 +448,21 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			return;
 		}
 
+		// no type appears for global scopes
+		boolean skipType = isGlobal(type) && isStatic(modifiers);
+
 		if (anonymous) {
 			printer.print("function");
 		} else {
-			printer.print(stJsName(type));
+			if (!skipType) {
+				printer.print(stJsName(type));
+			}
 			if (!isStatic(modifiers)) {
 				printer.print(".prototype");
 			}
-			printer.print(".");
+			if (!skipType) {
+				printer.print(".");
+			}
 			printer.print(name);
 			printer.print(" = function");
 		}
@@ -1071,7 +1088,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	public void visit(FieldAccessExpr n, GenerationContext context) {
 		n.getScope().accept(this, context);
 		TypeWrapper scopeType = resolvedType(n.getScope());
-		if (scopeType == null || !isGlobal(scopeType)) {
+		FieldWrapper field = (FieldWrapper) resolvedVariable(n);
+		boolean skipType = field != null && Modifier.isStatic(field.getModifiers()) && isGlobal(scopeType);
+		if (scopeType == null || !skipType) {
 			printer.print(".");
 		}
 		printer.print(n.getField());
