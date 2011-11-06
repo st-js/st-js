@@ -15,8 +15,10 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
+import org.stjs.javascript.annotation.DataType;
 import org.stjs.javascript.jquery.JQuery;
 
+@DataType
 public class DialogOptions<FullJQuery extends JQuery<?>> {
 	public boolean disabled = false;
 

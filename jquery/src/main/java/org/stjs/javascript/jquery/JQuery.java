@@ -19,6 +19,8 @@ import org.stjs.javascript.Array;
 import org.stjs.javascript.Map;
 import org.stjs.javascript.dom.Element;
 import org.stjs.javascript.functions.Callback2;
+import org.stjs.javascript.functions.Callback3;
+import org.stjs.javascript.functions.Callback4;
 import org.stjs.javascript.utils.NameValue;
 
 /**
@@ -27,17 +29,19 @@ import org.stjs.javascript.utils.NameValue;
  */
 public interface JQuery<FullJQuery extends JQuery<?>> {
 	/************* ajax ***************/
-	public FullJQuery ajaxStart(AjaxHandler handler);
+	public FullJQuery ajaxStart(Callback3<Event, JQueryXHR, AjaxParams> handler);
 
-	public FullJQuery ajaxStop(AjaxHandler handler);
+	public FullJQuery ajaxStop(Callback3<Event, JQueryXHR, AjaxParams> handler);
 
-	public FullJQuery ajaxSend(AjaxHandler handler);
+	public FullJQuery ajaxSend(Callback3<Event, JQueryXHR, AjaxParams> handler);
 
-	public FullJQuery ajaxComplete(AjaxHandler handler);
+	public FullJQuery ajaxComplete(Callback3<Event, JQueryXHR, AjaxParams> handler);
 
-	public FullJQuery ajaxSuccess(AjaxHandler handler);
+	public FullJQuery ajaxSuccess(Callback3<Event, JQueryXHR, AjaxParams> handler);
 
-	public FullJQuery load(String url, Map<String, String> data, AjaxHandler handler);
+	public FullJQuery ajaxError(Callback4<Event, JQueryXHR, AjaxParams, String> handler);
+
+	public FullJQuery load(String url, Map<String, String> data, Callback3<Object, String, JQueryXHR> handler);
 
 	/************* effects ***************/
 	public FullJQuery animate(Map<String, String> properties);
@@ -175,7 +179,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery css(String propertyName, Object value);
 
-	public FullJQuery css(Map<String, Object> propertyMap);
+	public FullJQuery css(Map<String, ? extends Object> propertyMap);
 
 	public int height();
 
@@ -208,6 +212,14 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 	public int scrollWidth();
 
 	public FullJQuery scrollWidth(int width);
+
+	public int scrollLeft();
+
+	public FullJQuery scrollLeft(int left);
+
+	public int scrollTop();
+
+	public FullJQuery scrollTop(int top);
 
 	/************* data ***************/
 	public Object data(String key);
@@ -469,7 +481,7 @@ public interface JQuery<FullJQuery extends JQuery<?>> {
 	/************* traversing ***************/
 	public FullJQuery andSelf();
 
-	public FullJQuery add(FullJQuery selector);
+	public FullJQuery add(JQuery<?> selector);
 
 	public FullJQuery add(String selector);
 

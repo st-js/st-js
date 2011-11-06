@@ -40,13 +40,14 @@ public class JavascriptKeywords {
 
 	public static void checkIdentifier(File inputFile, SourcePosition pos, String name) {
 		if (keywords.contains(name)) {
-			throw new JavascriptGenerationException(inputFile, pos, "Wrong usage of keyword:" + name);
+			throw new JavascriptGenerationException(inputFile, pos, "Wrong usage of Javascript keyword:" + name);
 		}
 	}
 
 	public static void checkMethod(File inputFile, SourcePosition sourcePosition, String name) {
 		if (keywords.contains(name)) {
-			throw new JavascriptGenerationException(inputFile, sourcePosition, "Wrong usage of keyword:" + name);
+			throw new JavascriptGenerationException(inputFile, sourcePosition, "Wrong usage of Javascript keyword:"
+					+ name);
 		}
 	}
 }

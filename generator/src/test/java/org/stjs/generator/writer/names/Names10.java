@@ -1,12 +1,14 @@
 package org.stjs.generator.writer.names;
 
+import org.stjs.javascript.functions.Callback0;
+
 public class Names10 {
 
 	public int method() {
 		final Names10 that = this;
-		new Runnable() {
+		new Callback0() {
 			@Override
-			public void run() {
+			public void $invoke() {
 				that.method();
 			}
 		};

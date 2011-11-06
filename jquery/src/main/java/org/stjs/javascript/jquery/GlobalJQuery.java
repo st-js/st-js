@@ -20,6 +20,7 @@ import org.stjs.javascript.Map;
 import org.stjs.javascript.annotation.GlobalScope;
 import org.stjs.javascript.dom.Element;
 import org.stjs.javascript.functions.Callback2;
+import org.stjs.javascript.functions.Callback3;
 import org.stjs.javascript.functions.Function2;
 
 @GlobalScope
@@ -28,18 +29,20 @@ abstract public class GlobalJQuery {
 
 	public int active;
 
+	public Browser browser;
+
 	/**
 	 * jquery constructors
 	 */
-	public static <FullJQuery extends JQueryAndPlugins<?>> JQueryAndPlugins<FullJQuery> $(String path) {
+	public static <FullJQuery extends JQueryAndPlugins<?>> FullJQuery $(String path) {
 		return null;
 	}
 
-	public static <FullJQuery extends JQueryAndPlugins<?>> JQueryAndPlugins<FullJQuery> $(String path, Object context) {
+	public static <FullJQuery extends JQueryAndPlugins<?>> FullJQuery $(String path, Object context) {
 		return null;
 	}
 
-	public static <FullJQuery extends JQueryAndPlugins<?>> JQueryAndPlugins<FullJQuery> $(Object path) {
+	public static <FullJQuery extends JQueryAndPlugins<?>> FullJQuery $(Object path) {
 		return null;
 	}
 
@@ -47,9 +50,10 @@ abstract public class GlobalJQuery {
 
 	abstract public void ajaxSetup(Map<String, Object> options);
 
-	abstract public void get(String url, Object params, SuccessListener successListener, String mode);
+	abstract public void get(String url, Object params, Callback3<Object, String, JQueryXHR> successListener,
+			String mode);
 
-	abstract public void getJSON(String url, Object params, SuccessListener successListener);
+	abstract public void getJSON(String url, Object params, Callback3<Object, String, JQueryXHR> successListener);
 
 	abstract public <C, E, R> Array<R> map(C collection, Function2<E, Integer, R> callback);
 
@@ -71,4 +75,7 @@ abstract public class GlobalJQuery {
 	abstract public <T> T parseJSON(String message);
 
 	abstract public boolean isArray(Object value);
+
+	abstract public void widget(String name, Object plugin);
+
 }

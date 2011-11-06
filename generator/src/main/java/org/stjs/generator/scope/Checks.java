@@ -29,6 +29,7 @@ import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.SuperExpr;
 import japa.parser.ast.expr.ThisExpr;
+import japa.parser.ast.expr.UnaryExpr;
 
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
@@ -95,10 +96,17 @@ public class Checks {
 					throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(v),
 							"Instance field inline initialization is allowed only for string and number field types");
 				}
-				if (!(v.getInit() instanceof LiteralExpr)) {
-					throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(v),
-							"Instance field inline initialization can only done with literal constants");
+				// allowed x = 1 and x = -1
+				if ((v.getInit() instanceof LiteralExpr)) {
+					return;
 				}
+				if ((v.getInit() instanceof UnaryExpr)) {
+					if (((UnaryExpr) v.getInit()).getExpr() instanceof LiteralExpr) {
+						return;
+					}
+				}
+				throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(v),
+						"Instance field inline initialization can only done with literal constants");
 			}
 		}
 	}

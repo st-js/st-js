@@ -15,14 +15,14 @@ public class InlineFunctionGeneratorTest {
 	public void testInterfaceAndParam() {
 		assertCodeContains(InlineFunctions2.class, "stjs.extend(_InlineType, FunctionInterface);");
 		assertCodeContains(InlineFunctions2.class, "_InlineType.prototype.test = 2; "
-				+ "_InlineType.prototype.run=function(arg){arg=arg+1;}");
+				+ "_InlineType.prototype.$invoke=function(arg){arg=arg+1;}");
 	}
 
 	@Test
 	public void testInterfaceTwoMethods() {
 		assertCodeContains(InlineFunctions3.class, "stjs.extend(_InlineType, FunctionInterface2);");
-		assertCodeContains(InlineFunctions3.class, "_InlineType.prototype.run=function(arg){arg=arg+1;};"
-				+ " _InlineType.prototype.run2=function(arg2){arg2=arg2+1;};");
+		assertCodeContains(InlineFunctions3.class, "_InlineType.prototype.$invoke=function(arg){arg=arg+1;};"
+				+ " _InlineType.prototype.$invoke2=function(arg2){arg2=arg2+1;};");
 	}
 
 	@Test

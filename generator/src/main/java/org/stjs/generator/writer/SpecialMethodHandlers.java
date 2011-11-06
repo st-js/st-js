@@ -198,6 +198,22 @@ public class SpecialMethodHandlers {
 			}
 		});
 
+		// $properties(obj) -> obj
+		methodHandlers.put("$properties", new SpecialMethodHandler() {
+			@Override
+			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
+				if ((n.getArgs() == null) || (n.getArgs().size() != 1)) {
+					return false;
+				}
+				currentHandler.printer.print("(");
+				n.getArgs().get(0).accept(currentHandler, context);
+				currentHandler.printer.print(")");
+				return true;
+			}
+		});
+		methodHandlers.put("$object", methodHandlers.get("$properties"));
+		methodHandlers.put("$castArray", methodHandlers.get("$properties"));
+
 		methodHandlers.put("$invoke", new $InvokeHandler());
 
 		assertHandler = new AssertHandler();
@@ -237,28 +253,27 @@ public class SpecialMethodHandlers {
 				return true;
 			}
 		}
-		if ((n.getArgs() != null) && (n.getArgs().size() > 0)) {
-			if (ClassUtils.isAdapter(method.getOwnerType())) {
-				adapterMethod(currentHandler, n, context);
-				return true;
-			}
-		}
 
 		if (n.getName().startsWith(ASSERT_PREFIX)) {
 			assertHandler.handle(currentHandler, n, context);
 			return true;
 		}
 
-		if ((n.getName().length() <= SPECIAL_PREFIX.length()) || !n.getName().startsWith(SPECIAL_PREFIX)) {
-			return false;
+		if ((n.getName().length() > SPECIAL_PREFIX.length()) && n.getName().startsWith(SPECIAL_PREFIX)) {
+			// just transform it in property -> with parameter is an assignment, without a parameter is a simple access.
+			// with more parameters -> just skip it
+			// WARNING $ alone should be kept for jquery and alike
+			if ((n.getArgs() == null) || (n.getArgs().size() <= 2)) {
+				return methodToPropertyHandler.handle(currentHandler, n, context);
+			}
 		}
-		// just transform it in property -> with parameter is an assignment, without a parameter is a simple access.
-		// with more parameters -> just skip it
-		if ((n.getArgs() != null) && (n.getArgs().size() > 2)) {
-			return false;
+		if ((n.getArgs() != null) && (n.getArgs().size() > 0)) {
+			if (ClassUtils.isAdapter(method.getOwnerType())) {
+				adapterMethod(currentHandler, n, context);
+				return true;
+			}
 		}
-		methodToPropertyHandler.handle(currentHandler, n, context);
-		return true;
+		return false;
 	}
 
 	/**

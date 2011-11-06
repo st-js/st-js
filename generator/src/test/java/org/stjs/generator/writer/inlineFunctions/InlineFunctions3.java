@@ -9,12 +9,12 @@ public class InlineFunctions3 {
 		@SuppressWarnings("unused")
 		FunctionInterface2 func = new FunctionInterface2() {
 			@Override
-			public void run(int arg) {
+			public void $invoke(int arg) {
 				arg = arg + 1;
 			}
 
 			@Override
-			public void run2(int arg2) {
+			public void $invoke2(int arg2) {
 				arg2 = arg2 + 1;
 			}
 		};

@@ -23,26 +23,26 @@ public class RegExp {
 	public String source;
 
 	public RegExp(String pattern) {
-
+		throw new UnsupportedOperationException();
 	}
 
 	public RegExp(String pattern, String modifiers) {
-
+		throw new UnsupportedOperationException();
 	}
 
 	public void compile(String pattern, String modifiers) {
-
+		throw new UnsupportedOperationException();
 	}
 
 	public void compile(String pattern) {
-
+		throw new UnsupportedOperationException();
 	}
 
-	public String exec(String source) {
-		return null;
+	public RegExpMatch exec(String source) {
+		throw new UnsupportedOperationException();
 	}
 
 	public boolean test(String source) {
-		return true;
+		throw new UnsupportedOperationException();
 	}
 }

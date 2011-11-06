@@ -16,7 +16,7 @@ import java.util.Map;
  * <br>
  * Given the main purpose of this class, here is presented a simpler version of this algorithm. It takes into account
  * that there should be exactly one match as the checked code is already compiled and it's working! So for example if in
- * the given list there is only one method (or one with the correct number of parameter) it returns right away.
+ * the given list there is only one method (or one with the correct number of parameters) it returns it right away.
  * 
  * @author acraciun
  * 

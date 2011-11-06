@@ -1,7 +1,7 @@
 package org.stjs.generator.writer.inlineFunctions;
 
 public interface FunctionInterface2 {
-	public void run(int arg);
+	public void $invoke(int arg);
 
-	public void run2(int arg2);
+	public void $invoke2(int arg2);
 }

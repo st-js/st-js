@@ -1,5 +1,6 @@
 package org.stjs.generator.writer.statements;
 
+
 public class Statements5 {
 	@SuppressWarnings("unused")
 	public void main() {

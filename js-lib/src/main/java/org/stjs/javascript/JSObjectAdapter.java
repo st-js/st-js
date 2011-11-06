@@ -27,13 +27,22 @@ import org.stjs.javascript.annotation.Adapter;
 public class JSObjectAdapter {
 
 	public static Object $get(Object obj, String property) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public static void $put(Object obj, String property, Object value) {
+		throw new UnsupportedOperationException();
 	}
 
 	public static boolean hasOwnProperty(Object obj, String property) {
-		return true;
+		throw new UnsupportedOperationException();
+	}
+
+	public static Map<String, Object> $prototype(Object obj) {
+		throw new UnsupportedOperationException();
+	}
+
+	public static <T> JsFunction<T> $constructor(Object obj) {
+		throw new UnsupportedOperationException();
 	}
 }

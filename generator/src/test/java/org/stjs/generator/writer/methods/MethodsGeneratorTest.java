@@ -6,7 +6,6 @@ import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
 
-
 public class MethodsGeneratorTest {
 	@Test
 	public void testPublicInstanceMethod() {
@@ -49,6 +48,11 @@ public class MethodsGeneratorTest {
 	@Test
 	public void testAdapter() {
 		assertCodeContains(Methods8.class, "(10).toFixed(2)");
+	}
+
+	@Test
+	public void testAdapterForStatic() {
+		assertCodeContains(Methods14.class, "var x = (String).fromCharCode(65,66,67)");
 	}
 
 	@Test(expected = JavascriptGenerationException.class)

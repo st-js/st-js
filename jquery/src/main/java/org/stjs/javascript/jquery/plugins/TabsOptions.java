@@ -45,4 +45,20 @@ public class TabsOptions<FullJQuery extends JQuery<?>> {
 
 	public String tabTemplate = "<li><a href='#{href}'><span>#{label}</span></a></li>";
 
+	public UIEventHandler<TabsUI<FullJQuery>> create;
+
+	public UIEventHandler<TabsUI<FullJQuery>> select;
+
+	public UIEventHandler<TabsUI<FullJQuery>> load;
+
+	public UIEventHandler<TabsUI<FullJQuery>> show;
+
+	public UIEventHandler<TabsUI<FullJQuery>> add;
+
+	public UIEventHandler<TabsUI<FullJQuery>> remove;
+
+	public UIEventHandler<TabsUI<FullJQuery>> enable;
+
+	public UIEventHandler<TabsUI<FullJQuery>> disable;
+
 }

@@ -6,7 +6,6 @@ import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
 
-
 public class FieldsGeneratorTest {
 	@Test
 	public void testInstanceField() {
@@ -16,6 +15,11 @@ public class FieldsGeneratorTest {
 	@Test
 	public void testInstanceFieldAssigned() {
 		assertCodeContains(Fields2.class, "Fields2.prototype.x = 2;");
+	}
+
+	@Test
+	public void testInstanceFieldAssignedNegative() {
+		assertCodeContains(Fields2b.class, "Fields2b.prototype.x = -2;");
 	}
 
 	@Test
@@ -61,5 +65,10 @@ public class FieldsGeneratorTest {
 	@Test
 	public void testAccessOuterStaticField() {
 		assertCodeContains(Fields11.class, "a = Fields11.FIELD;");
+	}
+
+	@Test
+	public void testPrototypeProperty() {
+		assertCodeContains(Fields12.class, "clazz=(String).prototype;");
 	}
 }

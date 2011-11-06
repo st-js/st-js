@@ -20,6 +20,7 @@ import static org.stjs.javascript.Global.$array;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;
 import org.stjs.javascript.Map;
+import org.stjs.javascript.annotation.DataType;
 import org.stjs.javascript.dom.Element;
 import org.stjs.javascript.functions.Callback2;
 import org.stjs.javascript.functions.Callback3;
@@ -27,6 +28,7 @@ import org.stjs.javascript.functions.Function1;
 import org.stjs.javascript.functions.Function2;
 import org.stjs.javascript.jquery.JQuery;
 
+@DataType
 public class DatePickerOptions<FullJQuery extends JQuery<?>> {
 	public boolean disabled = false;
 
@@ -80,10 +82,11 @@ public class DatePickerOptions<FullJQuery extends JQuery<?>> {
 
 	public Object minDate = null;
 
-	public Array<String> monthNames = $array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
-			"November", "December");
+	public Array<String> monthNames = $array("January", "February", "March", "April", "May", "June", "July", "August",
+			"September", "October", "November", "December");
 
-	public Array<String> monthNamesShort = $array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
+	public Array<String> monthNamesShort = $array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct",
+			"Nov", "Dec");
 
 	public boolean navigationAsDateFormat = false;
 

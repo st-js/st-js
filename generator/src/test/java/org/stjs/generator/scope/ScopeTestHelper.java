@@ -95,6 +95,7 @@ public class ScopeTestHelper {
 						nodePointer.set(n);
 					}
 				}
+				super.visit(n, arg);
 			}
 		}, null);
 
@@ -125,6 +126,7 @@ public class ScopeTestHelper {
 					if (++crtOccurrence == occurence) {
 						nodePointer.set(n);
 					}
+					super.visit(n, arg);
 				}
 			}
 		}, null);
@@ -153,6 +155,7 @@ public class ScopeTestHelper {
 						nodePointer.set(n);
 					}
 				}
+				super.visit(n, arg);
 			}
 		}, null);
 

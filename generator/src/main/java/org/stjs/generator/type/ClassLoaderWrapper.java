@@ -66,6 +66,13 @@ public class ClassLoaderWrapper {
 		}
 	}
 
+	private IllegalArgumentException typeNotAllowedException(Class<?> clazz) {
+		return new IllegalArgumentException(
+				"The usage of the class "
+						+ clazz.getName()
+						+ " is not allowed. If it's one of your own bridge types, please add the annotation @STJSBridge to the class or to its package.");
+	}
+
 	private void checkAndAddResolvedClass(Class<?> clazz) {
 		if (resolvedClasses.contains(clazz.getName())) {
 			return;
@@ -75,7 +82,7 @@ public class ClassLoaderWrapper {
 		}
 		if (clazz.getName().startsWith("java.lang.")) {
 			if (!allowedJavaLangClasses.contains(clazz.getSimpleName())) {
-				throw new IllegalArgumentException(clazz.getName() + " is not allowed");
+				throw typeNotAllowedException(clazz);
 			}
 			// no need to store java lang classes
 			return;
@@ -90,7 +97,7 @@ public class ClassLoaderWrapper {
 			}
 
 			if (!found) {
-				throw new IllegalArgumentException(clazz.getName() + " is not allowed");
+				throw typeNotAllowedException(clazz);
 			}
 		}
 

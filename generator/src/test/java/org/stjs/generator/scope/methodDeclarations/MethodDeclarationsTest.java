@@ -8,6 +8,7 @@ import japa.parser.ParseException;
 
 import java.io.IOException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
 
@@ -30,5 +31,12 @@ public class MethodDeclarationsTest {
 			assertEquals(23, ex.getSourcePosition().getLine());
 			assertEquals(9, ex.getSourcePosition().getColumn());
 		}
+	}
+
+	@Ignore
+	public void testInlineTypeOrder() {
+
+		assertResolvedMethod(InlineTypesOrder.class, "method1", 1, InlineTypesOrder.class);
+		assertResolvedMethod(InlineTypesOrder.class, "method2", 1, InlineTypesOrder.class);
 	}
 }

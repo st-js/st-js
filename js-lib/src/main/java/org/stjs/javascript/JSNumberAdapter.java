@@ -26,19 +26,19 @@ import org.stjs.javascript.annotation.Adapter;
 @Adapter
 public class JSNumberAdapter {
 	public static String toFixed(Number n, int positions) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	public static String toFixed(String n, int positions) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	public static String toExponential(Number n, int positions) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	public static String toPrecision(Number n, int positions) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 }

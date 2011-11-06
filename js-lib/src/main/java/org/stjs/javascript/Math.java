@@ -65,20 +65,20 @@ public class Math {
 		return java.lang.Math.log(x);
 	}
 
-	public static final double max(double... x) {
-		double m = Double.NEGATIVE_INFINITY;
-		for (double xx : x) {
-			m = java.lang.Math.max(xx, m);
-		}
-		return m == Double.NEGATIVE_INFINITY ? Double.NaN : m;
-	}
-
 	public static final double min(double... x) {
 		double m = Double.POSITIVE_INFINITY;
 		for (double xx : x) {
 			m = java.lang.Math.min(xx, m);
 		}
 		return m == Double.POSITIVE_INFINITY ? Double.NaN : m;
+	}
+
+	public static final double max(double... x) {
+		double m = Double.NEGATIVE_INFINITY;
+		for (double xx : x) {
+			m = java.lang.Math.max(xx, m);
+		}
+		return m == Double.NEGATIVE_INFINITY ? Double.NaN : m;
 	}
 
 	public static final double pow(double x, double y) {

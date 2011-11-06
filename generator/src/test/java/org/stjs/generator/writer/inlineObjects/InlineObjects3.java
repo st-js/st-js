@@ -1,5 +1,7 @@
 package org.stjs.generator.writer.inlineObjects;
 
+import org.stjs.javascript.functions.Callback0;
+
 public class InlineObjects3 {
 
 	@SuppressWarnings("unused")
@@ -7,9 +9,9 @@ public class InlineObjects3 {
 		Pojo o = new Pojo() {
 			{
 				a = 1;
-				r = new Runnable() {
+				r = new Callback0() {
 					@Override
-					public void run() {
+					public void $invoke() {
 						int x = 2;
 					}
 				};

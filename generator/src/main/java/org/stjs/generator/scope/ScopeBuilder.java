@@ -102,6 +102,7 @@ import org.stjs.generator.type.TypeWrappers;
 import org.stjs.generator.type.WildcardTypeImpl;
 import org.stjs.generator.type.WildcardTypeWrapper;
 import org.stjs.generator.utils.ClassUtils;
+import org.stjs.generator.utils.NodeUtils;
 import org.stjs.generator.utils.Operators;
 import org.stjs.generator.utils.Option;
 import org.stjs.generator.utils.PreConditions;
@@ -280,6 +281,15 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			if (type instanceof ReferenceType) {
 				ReferenceType refType = (ReferenceType) type;
 				arrayCount = refType.getArrayCount();
+				if (arrayCount > 0 && !isMainArgs(type)) {
+					throw new JavascriptGenerationException(
+							context.getInputFile(),
+							new SourcePosition(type),
+							"You cannot use Java arrays because they are incompatible with Javascript arrays. "
+									+ "Use org.stjs.javascript.Array<T> instead. "
+									+ "You can use also the method org.stjs.javascript.Global.$castArray to convert an existent Java array to the corresponding Array type."
+									+ "The only exception is void main(String[] args).");
+				}
 				type = refType.getType(); // type is a primitive or class
 			}
 			TypeWrapper resolvedType;
@@ -325,9 +335,25 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			}
 			return ClassUtils.arrayOf(resolvedType, arrayCount);
 		} catch (IllegalArgumentException ex) {
-			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(type),
-					"Could not resolve type:" + type);
+			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(type), ex.getMessage());
 		}
+	}
+
+	/**
+	 * check if the given type is the argument of the public static void main(String[] args) method
+	 * 
+	 * @param type
+	 * @return
+	 */
+	private boolean isMainArgs(Type type) {
+		Node n;
+		if (!((n = parent(type)) instanceof Parameter)) {
+			return false;
+		}
+		if (!((n = parent(n)) instanceof MethodDeclaration)) {
+			return false;
+		}
+		return NodeUtils.isMainMethod((MethodDeclaration) n);
 	}
 
 	@Override
@@ -423,6 +449,11 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		}
 		if (n.getAnonymousClassBody() != null) {
 			ClassScope classScope = scope.closest(ClassScope.class);
+			// there is a strange order number given to inline types in the same statement. the numbers are assigned
+			// backwards
+			// FIXME it looks like the Eclipse incremental builder assigns the numbers in the correct order
+			// but the command line compiler assigns them the other way around
+
 			int anonymousClassNumber = anonymousClassCount.get(classScope).incrementAndGet();
 			ClassWrapper anonymousClass = classLoader.loadClass(
 					classScope.getClazz().getName() + "$" + anonymousClassNumber).getOrThrow();
@@ -446,8 +477,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		try {
 			return classLoader.loadClassOrInnerClass(expr.toString());
 		} catch (IllegalArgumentException ex) {
-			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(expr),
-					"Could not resolve type:" + expr);
+			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(expr), ex.getMessage());
 		}
 	}
 
@@ -535,15 +565,16 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	@Override
 	public void visit(CastExpr n, Scope arg) {
 		super.visit(n, arg);
-		TypeWrapper type = resolveType(arg, n.getType());
+		TypeWrapper type = resolvedType(n.getType());
 		resolvedType(n, type);
 	}
 
 	@Override
 	public void visit(ClassExpr n, Scope arg) {
 		super.visit(n, arg);
-		TypeWrapper type = resolveType(arg, n.getType());
-		resolvedType(n, type);
+		TypeWrapper type = resolvedType(n.getType());
+		resolvedType(n, TypeWrappers.wrap(new ParameterizedTypeImpl(Class.class, new java.lang.reflect.Type[] { type
+				.getType() }, null)));
 	}
 
 	@Override
@@ -718,9 +749,14 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 				resolvedType(n, var.getVariable().getType());
 				Checks.checkScope(n, context);
 			} else {
-				TypeWithScope type = arg.resolveType(n.getName());
-				if (type != null) {
-					resolvedType(n, type.getType());
+				try {
+					TypeWithScope type = arg.resolveType(n.getName());
+					if (type != null) {
+						resolvedType(n, type.getType());
+					}
+				} catch (IllegalArgumentException ex) {
+					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+							ex.getMessage());
 				}
 			}
 		}

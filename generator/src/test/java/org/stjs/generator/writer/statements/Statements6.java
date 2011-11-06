@@ -1,11 +1,15 @@
 package org.stjs.generator.writer.statements;
 
+import static org.stjs.javascript.Global.$castArray;
+
+import org.stjs.javascript.Array;
+
 public class Statements6 {
-	public void method(int[] xx) {
+	public void method(Array<Integer> x) {
 
 	}
 
 	public void main() {
-		method(new int[] { 1, 2, 3 });
+		method($castArray(new Integer[] { 1, 2, 3 }));
 	}
 }

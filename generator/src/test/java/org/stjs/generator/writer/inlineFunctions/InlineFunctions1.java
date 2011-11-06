@@ -8,7 +8,7 @@ public class InlineFunctions1 {
 	public static void main(String[] args) {
 		method(new FunctionInterface() {
 			@Override
-			public void run(int arg) {
+			public void $invoke(int arg) {
 				arg = arg + 1;
 			}
 		});

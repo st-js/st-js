@@ -26,66 +26,82 @@ import org.stjs.javascript.annotation.Adapter;
 @Adapter
 public class JSStringAdapter {
 	public static String anchor(String applyTo, String anchor) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	public static String big(String applyTo) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	public static String blink(String applyTo) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	public static String bold(String applyTo) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	public static String fixed(String applyTo) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	public static String fontcolor(String applyTo, String color) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	public static String fontsize(String applyTo, int size) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	public static String italics(String applyTo) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	public static String link(String applyTo, String url) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	public static String small(String applyTo) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	public static String strike(String applyTo) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	public static String sub(String applyTo) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	public static String sup(String applyTo) {
-		return "";
+		throw new UnsupportedOperationException();
 	}
 
 	public static Array<String> match(String applyTo, RegExp re) {
-		return null;
+		throw new UnsupportedOperationException();
+	}
+
+	public static Array<String> split(String applyTo, String re) {
+		throw new UnsupportedOperationException();
+	}
+
+	public static Array<String> split(String applyTo, String re, int limit) {
+		throw new UnsupportedOperationException();
 	}
 
 	public static String replace(String applyTo, RegExp re, String repl) {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public static int $length(String applyTo) {
-		return 0;
+		throw new UnsupportedOperationException();
+	}
+
+	public static int charCodeAt(String applyTo, int x) {
+		throw new UnsupportedOperationException();
+	}
+
+	public static String fromCharCode(Class<? extends String> applyTo, int... codes) {
+		throw new UnsupportedOperationException();
 	}
 }

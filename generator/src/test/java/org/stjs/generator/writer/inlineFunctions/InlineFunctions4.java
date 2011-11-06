@@ -9,7 +9,7 @@ public class InlineFunctions4 {
 		@SuppressWarnings("unused")
 		FunctionInterface func = new FunctionInterface() {
 			@Override
-			public void run(int arg) {
+			public void $invoke(int arg) {
 				arg = arg + 1;
 			}
 		};

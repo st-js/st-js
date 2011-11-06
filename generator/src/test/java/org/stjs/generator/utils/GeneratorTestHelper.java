@@ -62,7 +62,7 @@ public class GeneratorTestHelper {
 		} catch (ScriptException ex) {
 			// display the generated code in case of exception
 			for (URI file : stjsClass.getJavascriptFiles()) {
-				displayWithLines(new File(file.getPath()));
+				displayWithLines(new File(file.getPath().substring(1)));
 			}
 			throw new RuntimeException(ex);
 		}

@@ -129,6 +129,7 @@ import org.stjs.generator.type.FieldWrapper;
 import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.type.TypeWrapper;
 import org.stjs.generator.utils.ClassUtils;
+import org.stjs.generator.utils.NodeUtils;
 import org.stjs.generator.utils.PreConditions;
 import org.stjs.generator.variable.Variable;
 import org.stjs.javascript.annotation.GlobalScope;
@@ -748,7 +749,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		for (BodyDeclaration member : members) {
 			if (member instanceof MethodDeclaration) {
 				MethodDeclaration methodDeclaration = (MethodDeclaration) member;
-				if (isMainMethod(methodDeclaration)) {
+				if (NodeUtils.isMainMethod(methodDeclaration)) {
 					printer.printLn();
 					printer.print("if (!stjs.mainCallDisabled) ");
 					printStaticMembersPrefix(scope);
@@ -756,26 +757,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				}
 			}
 		}
-	}
-
-	private boolean isMainMethod(MethodDeclaration methodDeclaration) {
-		boolean isMainMethod = false;
-		if (isStatic(methodDeclaration.getModifiers()) && "main".equals(methodDeclaration.getName())) {
-			List<Parameter> parameters = methodDeclaration.getParameters();
-			if ((parameters != null) && (parameters.size() == 1)) {
-				Parameter parameter = parameters.get(0);
-				if (parameter.getType() instanceof ReferenceType) {
-					ReferenceType refType = (ReferenceType) parameter.getType();
-					if ((refType.getArrayCount() == 1) && (refType.getType() instanceof ClassOrInterfaceType)) {
-						String typeName = ((ClassOrInterfaceType) refType.getType()).getName();
-						if ("String".equals(typeName) || "java.lang.String".equals(typeName)) {
-							isMainMethod = true;
-						}
-					}
-				}
-			}
-		}
-		return isMainMethod;
 	}
 
 	@Override
@@ -1035,8 +1016,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(ClassExpr n, GenerationContext context) {
-		n.getType().accept(this, context);
-		printer.print(".prototype");
+		String typeName = stJsName(resolvedType(n.getType()));
+		printer.print(typeName);
+		// printer.print(".prototype");
 	}
 
 	@Override

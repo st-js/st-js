@@ -15,6 +15,8 @@
  */
 package org.stjs.generator.scope.declarations;
 
+import org.stjs.javascript.functions.Callback0;
+
 @SuppressWarnings("unused")
 public class DeclarationWithOuter4 extends ParentDeclaration1 {
 	public int out() {
@@ -22,10 +24,10 @@ public class DeclarationWithOuter4 extends ParentDeclaration1 {
 	}
 
 	public void x(int param) {
-		new Runnable() {
+		new Callback0() {
 
 			@Override
-			public void run() {
+			public void $invoke() {
 				int exp5 = out();
 			}
 		};

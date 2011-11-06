@@ -16,9 +16,10 @@
 package org.stjs.javascript;
 
 import org.stjs.javascript.dom.Element;
+import org.stjs.javascript.functions.Callback0;
 
 abstract public class XMLHttpRequest {
-	public Runnable onreadystatechange;
+	public Callback0 onreadystatechange;
 	public int readyState;
 	public String responseText;
 	// is in fact DOM Element, but they were mixed
@@ -42,5 +43,5 @@ abstract public class XMLHttpRequest {
 
 	abstract public void send(String data);
 
-	abstract public void setRequestHeader(String name, String value);
+	abstract public void setRequestHeader(String name, Object value);
 }

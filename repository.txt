@@ -1,23 +1,15 @@
-<repositories>
+
+
+	<repositories>
 		<repository>
 			<id>stjs-releases</id>
-			<url>http://http://st-js.sourceforge.net/repository/releases</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
+			<url>http://st-js.sourceforge.net/repository/releases</url>
 		</repository>
-		
-		<repository>
-			<id>stjs-snapshots</id>
-			<url>http://http://st-js.sourceforge.net/repository/snapshots</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-</repositories>
+	</repositories>
+	
+	<pluginRepositories>
+		<pluginRepository>
+			<id>stjs-releases</id>
+			<url>http://st-js.sourceforge.net/repository/releases</url>
+		</pluginRepository>
+	</pluginRepositories>

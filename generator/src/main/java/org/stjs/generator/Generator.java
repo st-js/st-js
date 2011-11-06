@@ -260,7 +260,15 @@ public class Generator {
 	}
 
 	public static void main(String[] args) throws URISyntaxException {
-		File f = new File("\\repository\\org\\stjs\\examples\\1.1.0-SNAPSHOT\\examples-1.1.0-SNAPSHOT.war");
-		System.out.println(new URI("file", null, f.getPath().replace('\\', '/'), null));
+		if (args.length == 0) {
+			System.out.println("Usage: Generator <class.name> [<allow package>] [<allow package>] .. ");
+			return;
+		}
+		GeneratorConfigurationBuilder builder = new GeneratorConfigurationBuilder();
+		for (int i = 1; i < args.length; ++i) {
+			builder.allowedPackage(args[i]);
+		}
+		new Generator().generateJavascript(Thread.currentThread().getContextClassLoader(), args[0], new File(
+				"src/main/java"), new File("target", "generate-js"), new File("target"), builder.build());
 	}
 }

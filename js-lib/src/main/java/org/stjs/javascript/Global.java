@@ -16,6 +16,7 @@
 package org.stjs.javascript;
 
 import org.stjs.javascript.annotation.GlobalScope;
+import org.stjs.javascript.functions.Callback0;
 
 @GlobalScope
 public class Global {
@@ -78,7 +79,7 @@ public class Global {
 		throw new UnsupportedOperationException();
 	}
 
-	public static TimeoutHandler setTimeout(Runnable expr, int timeoutMillis) {
+	public static TimeoutHandler setTimeout(Callback0 expr, int timeoutMillis) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -86,7 +87,7 @@ public class Global {
 		throw new UnsupportedOperationException();
 	}
 
-	public static TimeoutHandler setInterval(Runnable expr, int timeoutMillis) {
+	public static TimeoutHandler setInterval(Callback0 expr, int timeoutMillis) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -154,6 +155,11 @@ public class Global {
 		throw new UnsupportedOperationException();
 	}
 
+	@SuppressWarnings("unchecked")
+	public static <T> Array<T> $castArray(T[] a) {
+		return (Array<T>) (Object) a;
+	}
+
 	public static <K, V> Map<K, V> $map() {
 		throw new UnsupportedOperationException();
 	}
@@ -180,6 +186,14 @@ public class Global {
 
 	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6,
 			Object... morePairs) {
+		throw new UnsupportedOperationException();
+	}
+
+	public static Map<String, Object> $properties(Object obj) {
+		throw new UnsupportedOperationException();
+	}
+
+	public static <T> T $object(Map<String, Object> properties) {
 		throw new UnsupportedOperationException();
 	}
 }

@@ -14,6 +14,7 @@ import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.scope.BasicScope;
 import org.stjs.generator.scope.ClassScope;
 import org.stjs.generator.scope.CompilationUnitScope;
+import org.stjs.javascript.functions.Callback0;
 
 public class DeclarationsTest {
 	@Test
@@ -30,7 +31,7 @@ public class DeclarationsTest {
 	public void testScopeType() throws ParseException, IOException {
 		assertResolvedName(Declaration1.class, "type", ClassScope.class, 1);
 		assertResolvedName(Declaration1.class, "type", 2, ClassScope.class, 4);
-		assertResolvedField(Declaration1.class, "type", Runnable.class);
+		assertResolvedField(Declaration1.class, "type", Callback0.class);
 	}
 
 	@Test
@@ -39,7 +40,7 @@ public class DeclarationsTest {
 			resolveName(DeclarationWithOuter1.class);
 			fail("Expected " + JavascriptGenerationException.class);
 		} catch (JavascriptGenerationException ex) {
-			assertEquals(27, ex.getSourcePosition().getLine());
+			assertEquals(29, ex.getSourcePosition().getLine());
 		}
 	}
 
@@ -55,7 +56,7 @@ public class DeclarationsTest {
 			resolveName(DeclarationWithOuter2.class);
 			fail("Expected " + JavascriptGenerationException.class);
 		} catch (JavascriptGenerationException ex) {
-			assertEquals(24, ex.getSourcePosition().getLine());
+			assertEquals(26, ex.getSourcePosition().getLine());
 		}
 	}
 
@@ -65,7 +66,7 @@ public class DeclarationsTest {
 			resolveName(DeclarationWithOuter2b.class);
 			fail("Expected " + JavascriptGenerationException.class);
 		} catch (JavascriptGenerationException ex) {
-			assertEquals(24, ex.getSourcePosition().getLine());
+			assertEquals(26, ex.getSourcePosition().getLine());
 		}
 	}
 
@@ -75,7 +76,7 @@ public class DeclarationsTest {
 			resolveName(DeclarationWithOuter3.class);
 			fail("Expected " + JavascriptGenerationException.class);
 		} catch (JavascriptGenerationException ex) {
-			assertEquals(28, ex.getSourcePosition().getLine());
+			assertEquals(30, ex.getSourcePosition().getLine());
 		}
 	}
 
@@ -85,7 +86,7 @@ public class DeclarationsTest {
 			resolveName(DeclarationWithOuter4.class);
 			fail("Expected " + JavascriptGenerationException.class);
 		} catch (JavascriptGenerationException ex) {
-			assertEquals(29, ex.getSourcePosition().getLine());
+			assertEquals(31, ex.getSourcePosition().getLine());
 		}
 	}
 
@@ -101,7 +102,7 @@ public class DeclarationsTest {
 			resolveName(DeclarationWithOuter5.class);
 			fail("Expected " + JavascriptGenerationException.class);
 		} catch (JavascriptGenerationException ex) {
-			assertEquals(24, ex.getSourcePosition().getLine());
+			assertEquals(26, ex.getSourcePosition().getLine());
 		}
 	}
 
@@ -111,7 +112,7 @@ public class DeclarationsTest {
 			resolveName(DeclarationWithOuter6.class);
 			fail("Expected " + JavascriptGenerationException.class);
 		} catch (JavascriptGenerationException ex) {
-			assertEquals(32, ex.getSourcePosition().getLine());
+			assertEquals(34, ex.getSourcePosition().getLine());
 		}
 	}
 

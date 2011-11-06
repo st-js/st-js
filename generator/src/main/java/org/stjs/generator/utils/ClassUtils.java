@@ -68,17 +68,6 @@ public class ClassUtils {
 		return basicTypeNames.contains(typeName);
 	}
 
-	// public static boolean isMockType(ClassWrapper clazz) {
-	// if (clazz == null) {
-	// return false;
-	// }
-	// return isMockType(clazz.getClazz());
-	// }
-	//
-	// public static boolean isMockType(Class<?> clazz) {
-	// return hasAnnotation(clazz, MockType.class.getName());
-	// }
-
 	public static boolean isBridge(Class<?> clazz) {
 		boolean ok = hasAnnotation(clazz, STJSBridge.class.getName());
 		if (ok) {

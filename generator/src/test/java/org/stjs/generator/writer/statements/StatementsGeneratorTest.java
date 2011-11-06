@@ -2,8 +2,8 @@ package org.stjs.generator.writer.statements;
 
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 
+import org.junit.Ignore;
 import org.junit.Test;
-
 
 public class StatementsGeneratorTest {
 	@Test
@@ -29,14 +29,15 @@ public class StatementsGeneratorTest {
 		assertCodeContains(Statements4.class, "default: break");
 	}
 
-	@Test
+	@Ignore
+	// arrays are not allowed
 	public void testArray1() {
 		assertCodeContains(Statements5.class, "x = [1,2,3]");
 	}
 
 	@Test
 	public void testArray2() {
-		assertCodeContains(Statements6.class, "method([1,2,3])");
+		assertCodeContains(Statements6.class, "method(([1,2,3]))");
 	}
 
 	@Test

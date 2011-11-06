@@ -24,6 +24,20 @@ abstract public class Element extends Node {
 	public String tagName;
 	public String innerHTML;
 
+	public int clientHeight;
+	public int clientWidth;
+	public int height;
+	public int offsetHeight;
+	public int offsetLeft;
+	public int offsetParent;
+	public int offsetTop;
+	public int offsetWidth;
+	public int scrollHeight;
+	public int scrollLeft;
+	public int scrollTop;
+	public int scrollWidth;
+	public int width;
+
 	public String getAttribute(String name) {
 		throw new UnsupportedOperationException();
 	}

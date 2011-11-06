@@ -51,7 +51,6 @@ public class GeneratorConfigurationBuilder {
 
 	public GeneratorConfiguration build() {
 		allowedJavaLangClasses.add("Object");
-		allowedJavaLangClasses.add("Runnable");
 		allowedJavaLangClasses.add("String");
 		allowedJavaLangClasses.add("Number");
 		allowedJavaLangClasses.add("Double");
@@ -62,6 +61,7 @@ public class GeneratorConfigurationBuilder {
 		allowedJavaLangClasses.add("Boolean");
 		allowedJavaLangClasses.add("Character");
 		allowedJavaLangClasses.add("Byte");
+		allowedJavaLangClasses.add("Void");
 
 		allowedJavaLangClasses.add("Exception");
 		allowedJavaLangClasses.add("RuntimeException");

@@ -15,13 +15,19 @@
  */
 package org.stjs.javascript.jquery;
 
+import org.stjs.javascript.functions.Callback1;
+import org.stjs.javascript.functions.Callback2;
+import org.stjs.javascript.functions.Callback3;
+
 public class AjaxParams {
 	public boolean async;
 	public String url;
 	public String dataType;
 	public Object data;
-	public SuccessListener success;
-	public SuccessListener error;
+	public Callback1<JQueryXHR> beforeSend;
+	public Callback3<? extends Object, String, JQueryXHR> success;
+	public Callback2<JQueryXHR, String> complete;
+	public Callback3<JQueryXHR, String, String> error;
 
 	public boolean cache;
 	public String type;

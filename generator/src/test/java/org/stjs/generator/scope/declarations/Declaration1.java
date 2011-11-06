@@ -18,6 +18,7 @@ package org.stjs.generator.scope.declarations;
 import static org.stjs.generator.scope.declarations.Bean1.parentPrivate;
 import static org.stjs.generator.scope.declarations.Bean1.stat;
 
+import org.stjs.javascript.functions.Callback0;
 
 @SuppressWarnings("unused")
 public class Declaration1 extends ParentDeclaration1 {
@@ -32,11 +33,11 @@ public class Declaration1 extends ParentDeclaration1 {
 		int var2 = 11;
 		int exp1 = param + var2 + type + out + imp + stat + stat2;
 		int exp2 = org.stjs.generator.scope.declarations.Bean1.full;
-		new Runnable() {
+		new Callback0() {
 			int type = 1;
 
 			@Override
-			public void run() {
+			public void $invoke() {
 				int exp3 = type + 1;
 				int exp4 = this.type + 1;
 			}

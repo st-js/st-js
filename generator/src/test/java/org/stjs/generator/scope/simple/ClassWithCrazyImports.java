@@ -9,6 +9,7 @@ import org.stjs.generator.scope.inner.ClassDeclaringInnerClass.InnerClass;
 import org.stjs.generator.scope.simple.SimpleClass.AmbiguousName;
 import org.stjs.generator.scope.simple.SimpleClass.AmbiguousName.InnerClassLevel2;
 import org.stjs.generator.scope.simple.SimpleClass.InnerClass2;
+import org.stjs.javascript.functions.Callback0;
 
 @SuppressWarnings("unused")
 public class ClassWithCrazyImports {
@@ -29,29 +30,29 @@ public class ClassWithCrazyImports {
 	}
 
 	public static void crazyInnerClasses() {
-		new Runnable() {
+		new Callback0() {
 
 			@Override
-			public void run() {
-				new Runnable() {
+			public void $invoke() {
+				new Callback0() {
 
 					@Override
-					public void run() {
+					public void $invoke() {
 						byte b;
 					}
-				}.run();
+				}.$invoke();
 
 			}
-		}.run();
-		new Runnable() {
+		}.$invoke();
+		new Callback0() {
 
 			int counter;
 
 			@Override
-			public void run() {
+			public void $invoke() {
 				InnerClassC k;
 
 			}
-		}.run();
+		}.$invoke();
 	}
 }

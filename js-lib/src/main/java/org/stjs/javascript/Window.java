@@ -16,6 +16,7 @@
 package org.stjs.javascript;
 
 import org.stjs.javascript.dom.Document;
+import org.stjs.javascript.functions.Callback0;
 
 abstract public class Window {
 	public boolean closed;
@@ -43,6 +44,8 @@ abstract public class Window {
 	public Window self;
 	public String status;
 	public Window top;
+
+	public Callback0 onbeforeunload;
 
 	abstract public void blur();
 

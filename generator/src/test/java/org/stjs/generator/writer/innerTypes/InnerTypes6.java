@@ -4,7 +4,7 @@ public class InnerTypes6 {
 	public void method() {
 	}
 	class InnerType {
-		public void run() {
+		public void $invoke() {
 			InnerTypes6.this.method();
 		}
 	}

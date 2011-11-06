@@ -2,7 +2,7 @@ package org.stjs.generator.writer.inlineFunctions;
 
 public class InlineFunctions5 {
 	public static interface I {
-		public void run();
+		public void $invoke();
 	}
 
 	abstract public static class C implements I {
@@ -14,7 +14,7 @@ public class InlineFunctions5 {
 
 	public static void main(String[] args) {
 		method(new C() {
-			public void run() {
+			public void $invoke() {
 			}
 		});
 	}

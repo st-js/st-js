@@ -25,11 +25,12 @@ import static org.stjs.javascript.jquery.GlobalJQuery.$;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;
 import org.stjs.javascript.dom.Element;
+import org.stjs.javascript.functions.Callback0;
+import org.stjs.javascript.functions.Callback3;
 import org.stjs.javascript.jquery.Event;
 import org.stjs.javascript.jquery.EventHandler;
-import org.stjs.javascript.jquery.EvtHandler;
 import org.stjs.javascript.jquery.JQuery;
-import org.stjs.javascript.jquery.SuccessListener;
+import org.stjs.javascript.jquery.JQueryXHR;
 
 public class StockApplication {
 	private Array<String> stocks;
@@ -41,11 +42,12 @@ public class StockApplication {
 	}
 
 	public static void main(String[] args) {
-		$(window).ready(new EvtHandler() {
+		$(window).ready(new EventHandler() {
 			@Override
-			public void onEvent(Event ev) {
+			public boolean onEvent(Event ev, Element THIS) {
 				StockApplication a = new StockApplication(new YahooQuoteProvider());
 				a.init();
+				return false;
 			}
 		});
 	}
@@ -56,9 +58,9 @@ public class StockApplication {
 		$("#form").submit(new EventHandler() {
 			@Override
 			public boolean onEvent(Event ev, final Element THIS) {
-				that.quoteProvider.updateStock($("#newStock").val(), new SuccessListener() {
+				that.quoteProvider.updateStock($("#newStock").val(), new Callback3<Object, String, JQueryXHR>() {
 					@Override
-					public void onSuccess(Object data) {
+					public void $invoke(Object data, String status, JQueryXHR xhr) {
 						Response response = (Response) data;
 						Quote quote = response.query.results.quote;
 						$(that.generateRow(quote)).appendTo("table tbody");
@@ -83,13 +85,13 @@ public class StockApplication {
 		});
 
 		// automatic update
-		setInterval(new Runnable() {
+		setInterval(new Callback0() {
 			@Override
-			public void run() {
+			public void $invoke() {
 				for (int i : that.stocks) {
-					that.quoteProvider.updateStock(that.stocks.$get(i), new SuccessListener() {
+					that.quoteProvider.updateStock(that.stocks.$get(i), new Callback3<Object, String, JQueryXHR>() {
 						@Override
-						public void onSuccess(Object data) {
+						public void $invoke(Object data, String status, JQueryXHR xhr) {
 							Response response = (Response) data;
 							Quote quote = response.query.results.quote;
 							$("table tbody tr:nth(" + that.getRowForStock(quote.symbol) + ")").replaceWith(
