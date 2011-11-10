@@ -4,7 +4,7 @@
 
 	<groupId>org.stjs</groupId>
 	<artifactId>stjs</artifactId>
-	<version>1.1.2-SNAPSHOT</version>
+	<version>1.1.2</version>
 	<packaging>pom</packaging>
 	<name>Strongly-typed Javascript</name>
 
@@ -86,9 +86,9 @@
 	</pluginRepositories>
 
 	<scm>
-		<connection>scm:svn:https://st-js.svn.sourceforge.net/svnroot/st-js/trunk</connection>
-		<developerConnection>scm:svn:https://st-js.svn.sourceforge.net/svnroot/st-js/trunk</developerConnection>
-		<url>http://st-js.svn.sourceforge.net/viewvc/st-js</url>
+		<connection>scm:svn:https://st-js.svn.sourceforge.net/svnroot/st-js/tags/stjs-1.1.2</connection>
+		<developerConnection>scm:svn:https://st-js.svn.sourceforge.net/svnroot/st-js/tags/stjs-1.1.2</developerConnection>
+		<url>http://st-js.svn.sourceforge.net/viewvc/st-js/tags/stjs-1.1.2</url>
 	</scm>
 
 	<distributionManagement>
