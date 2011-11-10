@@ -15,8 +15,10 @@
  */
 package org.stjs.javascript;
 
+import org.stjs.javascript.dom.DOMEvent;
 import org.stjs.javascript.dom.Document;
-import org.stjs.javascript.functions.Callback0;
+import org.stjs.javascript.functions.Callback1;
+import org.stjs.javascript.functions.Function1;
 
 abstract public class Window {
 	public boolean closed;
@@ -45,7 +47,10 @@ abstract public class Window {
 	public String status;
 	public Window top;
 
-	public Callback0 onbeforeunload;
+	public Function1<DOMEvent, String> onbeforeunload;
+	public Callback1<DOMEvent> onload;
+	public Callback1<DOMEvent> onunload;
+	public Callback1<DOMEvent> onresize;
 
 	abstract public void blur();
 

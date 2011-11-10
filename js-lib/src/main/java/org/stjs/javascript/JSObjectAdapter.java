@@ -45,4 +45,12 @@ public class JSObjectAdapter {
 	public static <T> JsFunction<T> $constructor(Object obj) {
 		throw new UnsupportedOperationException();
 	}
+
+	public static Map<String, Object> $properties(Object obj) {
+		throw new UnsupportedOperationException();
+	}
+
+	public static <T> T $object(Map<String, Object> properties) {
+		throw new UnsupportedOperationException();
+	}
 }

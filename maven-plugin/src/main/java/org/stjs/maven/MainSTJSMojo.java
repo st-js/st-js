@@ -9,7 +9,7 @@ import org.apache.maven.artifact.DependencyResolutionRequiredException;
  * 
  * @goal generate
  * @phase process-classes
- * @requiresDependencyResolution provided
+ * @requiresDependencyResolution compile
  * @author acraciun
  * 
  */

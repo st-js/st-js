@@ -32,16 +32,7 @@
 	</repositories>
 
 
-	<build>
-		<testResources>
-			<testResource>
-				<directory>src/test/resources</directory>
-			</testResource>
-			<testResource>
-				<directory>src/test/java</directory>
-			</testResource>
-		</testResources>
-	</build>
+
 
 	<dependencies>
 		<dependency>
@@ -50,11 +41,6 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.stjs</groupId>
-			<artifactId>jquery</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 
 		<dependency>
 			<groupId>com.google.code.javaparser</groupId>

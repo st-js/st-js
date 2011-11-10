@@ -13,41 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.stjs.server;
+package org.stjs.server.json.gson;
 
-import java.util.HashMap;
-import java.util.Iterator;
-
+import org.stjs.javascript.Array;
+import org.stjs.javascript.Date;
 import org.stjs.javascript.Map;
+import org.stjs.server.ArrayImpl;
+import org.stjs.server.MapImpl;
 
-/**
- * This class implements the {@link Map} interface to be used on the server side.
- * 
- * @author acraciun
- * 
- * @param <V>
- */
-public class MapImpl<K, V> implements Map<K, V> {
-	private final java.util.Map<K, V> map = new HashMap<K, V>();
+import com.google.gson.GsonBuilder;
 
-	@Override
-	public Iterator<K> iterator() {
-		return map.keySet().iterator();
+public class GsonAdapters {
+	public static void addAll(GsonBuilder builder) {
+		builder.registerTypeAdapter(MapImpl.class, new JSMapAdapter());
+		builder.registerTypeAdapter(Map.class, new JSMapAdapter());
+		builder.registerTypeAdapter(ArrayImpl.class, new JSArrayAdapter());
+		builder.registerTypeAdapter(Array.class, new JSArrayAdapter());
+		builder.registerTypeAdapter(Date.class, new JSDateAdapter());
 	}
-
-	@Override
-	public V $get(K key) {
-		return map.get(key);
-	}
-
-	@Override
-	public void $put(K key, V value) {
-		map.put(key, value);
-	}
-
-	@Override
-	public void $delete(K key) {
-		map.remove(key);
-	}
-
 }

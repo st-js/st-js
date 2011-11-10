@@ -1,6 +1,6 @@
 package org.stjs.generator.writer.statements;
 
-import static org.stjs.javascript.Global.$castArray;
+import static org.stjs.javascript.JSCollections.$castArray;
 
 import org.stjs.javascript.Array;
 

@@ -15,6 +15,8 @@
  */
 package org.stjs.javascript.dom;
 
+import org.stjs.javascript.functions.Function1;
+
 abstract public class Element extends Node {
 	public String className;
 	public String dir;
@@ -37,6 +39,23 @@ abstract public class Element extends Node {
 	public int scrollTop;
 	public int scrollWidth;
 	public int width;
+
+	// events
+	public Function1<DOMEvent, Boolean> onblur;
+	public Function1<DOMEvent, Boolean> onchange;
+	public Function1<DOMEvent, Boolean> onclick;
+	public Function1<DOMEvent, Boolean> ondblclick;
+	public Function1<DOMEvent, Boolean> onerror;
+	public Function1<DOMEvent, Boolean> onfocus;
+	public Function1<DOMEvent, Boolean> onkeydown;
+	public Function1<DOMEvent, Boolean> onkeypress;
+	public Function1<DOMEvent, Boolean> onkeyup;
+	public Function1<DOMEvent, Boolean> onmousedown;
+	public Function1<DOMEvent, Boolean> onmousemove;
+	public Function1<DOMEvent, Boolean> onmouseout;
+	public Function1<DOMEvent, Boolean> onmouseover;
+	public Function1<DOMEvent, Boolean> onmouseup;
+	public Function1<DOMEvent, Boolean> onselect;
 
 	public String getAttribute(String name) {
 		throw new UnsupportedOperationException();

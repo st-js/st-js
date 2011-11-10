@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import static org.stjs.javascript.Global.$array;
+import static org.stjs.javascript.JSCollections.$array;
 
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;

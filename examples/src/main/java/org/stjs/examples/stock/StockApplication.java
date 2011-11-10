@@ -15,10 +15,10 @@
  */
 package org.stjs.examples.stock;
 
-import static org.stjs.javascript.Global.$array;
 import static org.stjs.javascript.Global.parseFloat;
 import static org.stjs.javascript.Global.setInterval;
 import static org.stjs.javascript.Global.window;
+import static org.stjs.javascript.JSCollections.$array;
 import static org.stjs.javascript.JSNumberAdapter.toFixed;
 import static org.stjs.javascript.jquery.GlobalJQuery.$;
 

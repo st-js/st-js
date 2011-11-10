@@ -27,6 +27,8 @@ public class Global {
 
 	public static Window window;
 
+	public static Console console;
+
 	// do not add this one too
 	// public static Window self;
 
@@ -151,49 +153,4 @@ public class Global {
 		throw new UnsupportedOperationException();
 	}
 
-	public static <V> Array<V> $array(V... values) {
-		throw new UnsupportedOperationException();
-	}
-
-	@SuppressWarnings("unchecked")
-	public static <T> Array<T> $castArray(T[] a) {
-		return (Array<T>) (Object) a;
-	}
-
-	public static <K, V> Map<K, V> $map() {
-		throw new UnsupportedOperationException();
-	}
-
-	public static <K, V> Map<K, V> $map(K k1, V v1) {
-		throw new UnsupportedOperationException();
-	}
-
-	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2) {
-		throw new UnsupportedOperationException();
-	}
-
-	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3) {
-		throw new UnsupportedOperationException();
-	}
-
-	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
-		throw new UnsupportedOperationException();
-	}
-
-	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {
-		throw new UnsupportedOperationException();
-	}
-
-	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6,
-			Object... morePairs) {
-		throw new UnsupportedOperationException();
-	}
-
-	public static Map<String, Object> $properties(Object obj) {
-		throw new UnsupportedOperationException();
-	}
-
-	public static <T> T $object(Map<String, Object> properties) {
-		throw new UnsupportedOperationException();
-	}
 }

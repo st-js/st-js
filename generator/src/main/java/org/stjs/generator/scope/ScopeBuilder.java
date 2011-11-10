@@ -714,7 +714,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 				resolvedVariable(n, field.getOrThrow());
 			} else {
 				TypeWithScope innerType = arg.resolveType(scopeType.getName() + "$" + n.getField());
-				PreConditions.checkState(innerType != null, "%s no inner no or field could be resolved for %s",
+				PreConditions.checkState(innerType != null, "%s no inner type nor field could be resolved for '%s'",
 						location(n), n.getField());
 				resolvedType(n, innerType.getType());
 			}

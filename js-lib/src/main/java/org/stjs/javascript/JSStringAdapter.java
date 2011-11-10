@@ -98,10 +98,6 @@ public class JSStringAdapter {
 		throw new UnsupportedOperationException();
 	}
 
-	public static int $length(String applyTo) {
-		throw new UnsupportedOperationException();
-	}
-
 	public static int charCodeAt(String applyTo, int x) {
 		throw new UnsupportedOperationException();
 	}

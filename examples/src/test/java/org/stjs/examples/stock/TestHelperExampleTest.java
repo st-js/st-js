@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.stjs.testing.driver.STJSTestDriverRunner;
 
 @RunWith(STJSTestDriverRunner.class)
+@Ignore
 public class TestHelperExampleTest {
 
 	@Test

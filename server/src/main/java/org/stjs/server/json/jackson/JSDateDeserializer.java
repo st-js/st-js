@@ -13,41 +13,21 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.stjs.server;
+package org.stjs.server.json.jackson;
 
-import java.util.HashMap;
-import java.util.Iterator;
+import java.io.IOException;
 
-import org.stjs.javascript.Map;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.JsonProcessingException;
+import org.codehaus.jackson.map.DeserializationContext;
+import org.codehaus.jackson.map.JsonDeserializer;
+import org.stjs.javascript.Date;
 
-/**
- * This class implements the {@link Map} interface to be used on the server side.
- * 
- * @author acraciun
- * 
- * @param <V>
- */
-public class MapImpl<K, V> implements Map<K, V> {
-	private final java.util.Map<K, V> map = new HashMap<K, V>();
+public class JSDateDeserializer extends JsonDeserializer<Date> {
 
 	@Override
-	public Iterator<K> iterator() {
-		return map.keySet().iterator();
-	}
-
-	@Override
-	public V $get(K key) {
-		return map.get(key);
-	}
-
-	@Override
-	public void $put(K key, V value) {
-		map.put(key, value);
-	}
-
-	@Override
-	public void $delete(K key) {
-		map.remove(key);
+	public Date deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+		return new Date(jp.getText());
 	}
 
 }

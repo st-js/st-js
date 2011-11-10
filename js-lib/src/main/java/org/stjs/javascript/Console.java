@@ -13,41 +13,35 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.stjs.server;
-
-import java.util.HashMap;
-import java.util.Iterator;
-
-import org.stjs.javascript.Map;
+package org.stjs.javascript;
 
 /**
- * This class implements the {@link Map} interface to be used on the server side.
+ * This is the bridge to the browser console object
  * 
  * @author acraciun
  * 
- * @param <V>
  */
-public class MapImpl<K, V> implements Map<K, V> {
-	private final java.util.Map<K, V> map = new HashMap<K, V>();
+abstract public class Console {
+	abstract void log(Object msg, Object... otherParams);
 
-	@Override
-	public Iterator<K> iterator() {
-		return map.keySet().iterator();
-	}
+	abstract void warn(Object msg, Object... otherParams);
 
-	@Override
-	public V $get(K key) {
-		return map.get(key);
-	}
+	abstract void error(Object msg, Object... otherParams);
 
-	@Override
-	public void $put(K key, V value) {
-		map.put(key, value);
-	}
+	abstract void debug(Object msg, Object... otherParams);
 
-	@Override
-	public void $delete(K key) {
-		map.remove(key);
-	}
+	abstract void trace(Object msg, Object... otherParams);
+
+	abstract void info(Object msg, Object... otherParams);
+
+	abstract void dir(Object msg);
+
+	abstract void time(Object msg);
+
+	abstract void timeEnd(Object msg);
+
+	abstract void profile(Object msg);
+
+	abstract void profileEnd(Object msg);
 
 }

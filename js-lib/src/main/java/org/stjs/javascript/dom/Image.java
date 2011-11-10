@@ -15,6 +15,8 @@
  */
 package org.stjs.javascript.dom;
 
+import org.stjs.javascript.functions.Callback1;
+
 abstract public class Image extends Element {
 	public String align;
 	public String alt;
@@ -29,4 +31,7 @@ abstract public class Image extends Element {
 	public String useMap;
 	public String vspace;
 	public String width;
+
+	public Callback1<DOMEvent> onload;
+
 }
