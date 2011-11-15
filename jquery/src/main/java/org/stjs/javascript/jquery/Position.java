@@ -15,6 +15,9 @@
  */
 package org.stjs.javascript.jquery;
 
+import org.stjs.javascript.annotation.DataType;
+
+@DataType
 public class Position {
 	public int top;
 	public int left;

@@ -1,5 +1,8 @@
 package org.stjs.javascript.jquery;
 
+import org.stjs.javascript.annotation.DataType;
+
+@DataType
 public class Browser {
 	public boolean webkit;
 	@Deprecated

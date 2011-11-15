@@ -28,5 +28,5 @@ public interface Progressbar<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery progressbar(String option, String optionName, Object value);
 
-	public FullJQuery progressbar(String option, DraggableOptions<FullJQuery> options);
+	public FullJQuery progressbar(String option, ProgressbarOptions<FullJQuery> options);
 }

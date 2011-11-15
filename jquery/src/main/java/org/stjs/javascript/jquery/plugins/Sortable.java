@@ -28,5 +28,5 @@ public interface Sortable<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery sortable(String option, String optionName, Object value);
 
-	public FullJQuery sortable(String option, DraggableOptions<FullJQuery> options);
+	public FullJQuery sortable(String option, SortableOptions<FullJQuery> options);
 }

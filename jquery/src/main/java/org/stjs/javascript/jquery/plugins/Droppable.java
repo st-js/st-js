@@ -28,5 +28,5 @@ public interface Droppable<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery droppable(String option, String optionName, Object value);
 
-	public FullJQuery droppable(String option, DraggableOptions<FullJQuery> options);
+	public FullJQuery droppable(String option, DroppableOptions<FullJQuery> options);
 }

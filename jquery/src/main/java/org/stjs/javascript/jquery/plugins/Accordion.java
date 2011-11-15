@@ -28,5 +28,5 @@ public interface Accordion<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery accordion(String option, String optionName, Object value);
 
-	public FullJQuery accordion(String option, DraggableOptions<FullJQuery> options);
+	public FullJQuery accordion(String option, AccordionOptions<FullJQuery> options);
 }

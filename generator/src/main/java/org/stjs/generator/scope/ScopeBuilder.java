@@ -258,6 +258,9 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		}
 
 		if (parameters != null) {
+			PreConditions.checkState(parameters.size() == resolvedParameterTypes.length,
+					"The number of parameters (%d) should be the same as the number of types (%d)", parameters.size(),
+					resolvedParameterTypes.length);
 			for (int i = 0; i < parameters.size(); ++i) {
 				TypeWrapper clazz = TypeWrappers.wrap(resolvedParameterTypes[i]);
 				scope.addVariable(new ParameterVariable(clazz, parameters.get(i).getId().getName()));

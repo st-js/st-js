@@ -28,5 +28,5 @@ public interface Button<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery button(String option, String optionName, Object value);
 
-	public FullJQuery button(String option, DraggableOptions<FullJQuery> options);
+	public FullJQuery button(String option, ButtonOptions<FullJQuery> options);
 }

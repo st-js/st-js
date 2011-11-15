@@ -28,5 +28,5 @@ public interface Slider<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery slider(String option, String optionName, Object value);
 
-	public FullJQuery slider(String option, DraggableOptions<FullJQuery> options);
+	public FullJQuery slider(String option, SliderOptions<FullJQuery> options);
 }

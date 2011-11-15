@@ -28,5 +28,5 @@ public interface Resizable<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery resizable(String option, String optionName, Object value);
 
-	public FullJQuery resizable(String option, DraggableOptions<FullJQuery> options);
+	public FullJQuery resizable(String option, ResizableOptions<FullJQuery> options);
 }

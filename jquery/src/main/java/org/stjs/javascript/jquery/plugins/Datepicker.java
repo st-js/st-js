@@ -28,5 +28,5 @@ public interface Datepicker<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery datepicker(String option, String optionName, Object value);
 
-	public FullJQuery datepicker(String option, DraggableOptions<FullJQuery> options);
+	public FullJQuery datepicker(String option, DatePickerOptions<FullJQuery> options);
 }

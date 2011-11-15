@@ -28,5 +28,5 @@ public interface Selectable<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery selectable(String option, String optionName, Object value);
 
-	public FullJQuery selectable(String option, DraggableOptions<FullJQuery> options);
+	public FullJQuery selectable(String option, SelectableOptions<FullJQuery> options);
 }

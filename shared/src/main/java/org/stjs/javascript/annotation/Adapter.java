@@ -21,8 +21,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation <i>adapter</i> classes. These are classes that are used to add supply methods for Java types when
- * they don't have a method that their Javascript counterpart has. For example for Number in Javascript you can do
+ * This annotation <i>adapter</i> classes. These are classes that are used to supply methods for Java types when they
+ * don't have a method that their Javascript counterpart has. For example for Number in Javascript you can do
  * number.toFixed(2). As in Java this method does not exist and as the Java Number-derived classes are all final, the
  * only alternative is to put this method in another class - an adapter class. All the methods of an adapter class must
  * have their first parameter the object to which the method is applied. The other parameters are the parameters

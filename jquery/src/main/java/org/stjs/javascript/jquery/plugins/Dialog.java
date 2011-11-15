@@ -28,5 +28,5 @@ public interface Dialog<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery dialog(String option, String optionName, Object value);
 
-	public FullJQuery dialog(String option, DraggableOptions<FullJQuery> options);
+	public FullJQuery dialog(String option, DialogOptions<FullJQuery> options);
 }

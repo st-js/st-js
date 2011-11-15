@@ -28,5 +28,5 @@ public interface AutoComplete<FullJQuery extends JQuery<?>> {
 
 	public FullJQuery autocomplete(String option, String optionName, Object value);
 
-	public FullJQuery autocomplete(String option, DraggableOptions<FullJQuery> options);
+	public FullJQuery autocomplete(String option, AutoComplete<FullJQuery> options);
 }
