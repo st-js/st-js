@@ -10,6 +10,7 @@ import japa.parser.ast.Node;
 import japa.parser.ast.expr.FieldAccessExpr;
 import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.expr.ObjectCreationExpr;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
 
 import java.io.File;
@@ -29,6 +30,7 @@ import org.stjs.generator.ast.ASTNodeData;
 import org.stjs.generator.type.ClassLoaderWrapper;
 import org.stjs.generator.type.FieldWrapper;
 import org.stjs.generator.type.MethodWrapper;
+import org.stjs.generator.type.TypeWrapper;
 import org.stjs.generator.type.TypeWrappers;
 import org.stjs.generator.variable.Variable;
 import org.stjs.generator.visitor.SetParentVisitor;
@@ -163,5 +165,28 @@ public class ScopeTestHelper {
 		MethodWrapper method = ASTNodeData.resolvedMethod(nodePointer.get());
 		assertNotNull(method);
 		assertTrue(TypeWrappers.wrap(ownerClass).isAssignableFrom(method.getOwnerType()));
+	}
+
+	public static void assertResolvedAnonymousClass(Class<?> clazz, final int occurence, Class<?> parentClass) {
+		CompilationUnit cu = resolveName(clazz);
+		final AtomicReference<Node> nodePointer = new AtomicReference<Node>();
+		cu.accept(new VoidVisitorAdapter<Boolean>() {
+			private int crtOccurrence = 0;
+
+			@Override
+			public void visit(ObjectCreationExpr n, Boolean arg) {
+				if (n.getAnonymousClassBody() != null) {
+					if (++crtOccurrence == occurence) {
+						nodePointer.set(n);
+					}
+				}
+				super.visit(n, arg);
+			}
+		}, null);
+
+		assertNotNull(nodePointer.get());
+		TypeWrapper type = ASTNodeData.resolvedType(nodePointer.get());
+		assertNotNull(type);
+		assertTrue(TypeWrappers.wrap(parentClass).isAssignableFrom(type));
 	}
 }

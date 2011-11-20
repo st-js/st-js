@@ -68,6 +68,11 @@
 			<version>1.6.1</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.bcel</groupId>
+			<artifactId>bcel</artifactId>
+			<version>5.2</version>
+		</dependency>
 	</dependencies>
 
 </project>

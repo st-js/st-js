@@ -16,21 +16,31 @@
 package org.stjs.server.json.jackson;
 
 import org.codehaus.jackson.Version;
+import org.codehaus.jackson.map.DeserializerProvider;
 import org.codehaus.jackson.map.Module;
+import org.codehaus.jackson.map.deser.StdDeserializerProvider;
 import org.codehaus.jackson.map.module.SimpleModule;
-import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;
-import org.stjs.javascript.Map;
 
 public class STJSModule {
+	private static class STJSSimpleModule extends SimpleModule {
+		public STJSSimpleModule(String name, Version version) {
+			super(name, version);
+			_deserializers = new STJSDeserializers();
+		}
+	}
+
 	public static Module getModule() {
-		SimpleModule module = new SimpleModule("MyModule", new Version(1, 0, 0, null));
+		SimpleModule module = new STJSSimpleModule("MyModule", new Version(1, 0, 0, null));
 		module.addSerializer(new JSArraySerializer());
 		module.addSerializer(new JSMapSerializer());
 		module.addSerializer(new JSDateSerializer());
-		module.addDeserializer(Array.class, new JSArrayDeserializer());
-		module.addDeserializer(Map.class, new JSMapDeserializer());
 		module.addDeserializer(Date.class, new JSDateDeserializer());
 		return module;
+	}
+
+	public static DeserializerProvider getDeserializerProvider() {
+		StdDeserializerProvider provider = new StdDeserializerProvider();
+		return provider;
 	}
 }

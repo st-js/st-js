@@ -5,7 +5,6 @@ import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotCont
 
 import org.junit.Test;
 
-
 public class InheritanceGeneratorTest {
 
 	@Test
@@ -22,5 +21,10 @@ public class InheritanceGeneratorTest {
 	public void testAccessProtectedField() {
 		// the this. prefix should be added for fields from the super class too
 		assertCodeContains(Inheritance3.class, "return this.field;");
+	}
+
+	@Test
+	public void testExtendsMore() {
+		assertCodeContains(Inheritance4.class, "stjs.extend(Inheritance4, MyInterface, MyInterface2);");
 	}
 }

@@ -54,4 +54,17 @@ public class InnerTypesGeneratorTest {
 	public void testQualifiedFieldAccess() {
 		assertCodeContains(InnerTypes9.class, "n = InnerTypes9.InnerType.innerField");
 	}
+
+	@Test
+	public void testNonStaticInnerType() {
+		// for non-static inner classes the constructor contains as first parameter the type of the outer type
+		generate(InnerTypes10.class);
+	}
+
+	@Test
+	public void testNonStaticInnerEnum() {
+		// for non-static inner classes the constructor contains as first parameter the type of the outer type
+		// also enum has first two params name and ordinal
+		generate(InnerTypes11.class);
+	}
 }

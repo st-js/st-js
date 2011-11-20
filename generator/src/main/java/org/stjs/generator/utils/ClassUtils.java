@@ -55,6 +55,20 @@ public class ClassUtils {
 		basicTypeNames.add(String.class.getName());
 	}
 
+	// it serves only to check if the compiler add extra parameters for enum constructors
+	private enum WitnessEnum {
+		a(1);
+		@SuppressWarnings("unused")
+		private int n;
+
+		WitnessEnum(int n) {
+			this.n = n;
+		}
+	}
+
+	private static int enumConstructorExtraParameters = WitnessEnum.class.getDeclaredConstructors()[0]
+			.getGenericParameterTypes().length - 1;
+
 	// private static Map<Class<?>, String> primitiveArrayId;
 
 	public static boolean isBasicType(Type type) {
@@ -244,4 +258,7 @@ public class ClassUtils {
 		return Object.class;
 	}
 
+	public static int getEnumConstructorExtraParameters() {
+		return enumConstructorExtraParameters;
+	}
 }

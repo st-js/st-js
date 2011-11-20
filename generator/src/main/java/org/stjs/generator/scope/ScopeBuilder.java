@@ -80,11 +80,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptGenerationException;
@@ -110,21 +112,17 @@ import org.stjs.generator.variable.LocalVariable;
 import org.stjs.generator.variable.ParameterVariable;
 import org.stjs.generator.visitor.ForEachNodeVisitor;
 
-import com.google.common.base.Function;
-import com.google.common.collect.MapMaker;
-
+/**
+ * This class resolves the variables, methods and types and writes the corresponding information in the AST nodes.
+ * 
+ * @author acraciun,ekaspi
+ * 
+ */
 public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	private final ClassLoaderWrapper classLoader;
 	private final GenerationContext context;
 
-	private final Map<ClassScope, AtomicInteger> anonymousClassCount = new MapMaker()
-			.makeComputingMap(new Function<ClassScope, AtomicInteger>() {
-
-				@Override
-				public AtomicInteger apply(ClassScope input) {
-					return new AtomicInteger(0);
-				}
-			});
+	private final Map<Class<?>, AnonymousClassesHelper> anonymousClassHelpers = new HashMap<Class<?>, AnonymousClassesHelper>();
 
 	public ScopeBuilder(ClassLoaderWrapper classLoader, GenerationContext context) {
 		this.classLoader = classLoader;
@@ -278,7 +276,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		return s.toString();
 	}
 
-	private TypeWrapper resolveType(Scope scope, Type type) {
+	TypeWrapper resolveType(Scope scope, Type type) {
 		try {
 			int arrayCount = 0;
 			if (type instanceof ReferenceType) {
@@ -403,8 +401,21 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			// synthetic constructor
 			scope = handleMethodDeclaration(n.getParameters(), null, null, currentScope);
 		} else {
-			scope = handleMethodDeclaration(n.getParameters(), c.getGenericParameterTypes(), c.getTypeParameters(),
-					currentScope);
+			java.lang.reflect.Type[] parameterTypes = c.getGenericParameterTypes();
+			int skipParams = 0;
+			if (ownerClass.isEnum()) {
+				System.out.println("XXXXXXXXX:" + parameterTypes.length + ":" + c + " ... " + c.isSynthetic());
+				// enums receive label and ordinal as first arguments
+				skipParams = ClassUtils.getEnumConstructorExtraParameters();
+			} else if (ownerClass.getDeclaringClass() != null && !Modifier.isStatic(ownerClass.getModifiers())
+					&& ownerClass.isMemberClass()) {
+				// for non-static inner classes the constructor contains as first parameter the type of the outer type
+				skipParams = 1;
+			}
+			if (skipParams > 0) {
+				parameterTypes = Arrays.copyOfRange(parameterTypes, skipParams, parameterTypes.length);
+			}
+			scope = handleMethodDeclaration(n.getParameters(), parameterTypes, c.getTypeParameters(), currentScope);
 		}
 		super.visit(n, new BasicScope(scope, context));
 	}
@@ -452,14 +463,10 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		}
 		if (n.getAnonymousClassBody() != null) {
 			ClassScope classScope = scope.closest(ClassScope.class);
-			// there is a strange order number given to inline types in the same statement. the numbers are assigned
-			// backwards
-			// FIXME it looks like the Eclipse incremental builder assigns the numbers in the correct order
-			// but the command line compiler assigns them the other way around
 
-			int anonymousClassNumber = anonymousClassCount.get(classScope).incrementAndGet();
-			ClassWrapper anonymousClass = classLoader.loadClass(
-					classScope.getClazz().getName() + "$" + anonymousClassNumber).getOrThrow();
+			ClassWrapper anonymousClass = searchAnonymousClass(classScope.getClazz().getClazz(), n, scope);
+			PreConditions.checkState(anonymousClass != null, "Could not find anoynmous class for node at line %d",
+					n.getBeginLine());
 
 			ClassScope anonymousClassScope = addClassToScope((AbstractScope) scope, anonymousClass);
 
@@ -474,6 +481,19 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			resolvedType(n, resolveType(scope, n.getType()));
 			scope(n, scope);
 		}
+	}
+
+	private ClassWrapper searchAnonymousClass(Class<?> clazz, ObjectCreationExpr n, Scope scope) {
+		AnonymousClassesHelper helper = anonymousClassHelpers.get(clazz);
+		if (helper == null) {
+			helper = new AnonymousClassesHelper(clazz);
+			anonymousClassHelpers.put(clazz, helper);
+		}
+		String className = helper.findAnonymousClass(n, scope, this);
+		if (className == null) {
+			return null;
+		}
+		return classLoader.loadClass(className).getOrThrow("Cannot load class:" + className);
 	}
 
 	private Option<ClassWrapper> identifyQualifiedNameExprClass(NameExpr expr) {

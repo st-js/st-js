@@ -717,13 +717,17 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.printLn("};");
 			}
 
+			// XXX it's not really working for multiple extends
 			if ((n.getExtends() != null) && (n.getExtends().size() > 0)) {
 				printer.printLn();
 				printer.print("stjs.extend(");
 
 				printer.print(className);
 
-				printer.printLn(", " + stJsName(resolvedType(n.getExtends().get(0))) + ");");
+				for (ClassOrInterfaceType ext : n.getExtends()) {
+					printer.print(", " + stJsName(resolvedType(ext)));
+				}
+				printer.printLn(");");
 			}
 			printMembers(n.getMembers(), context);
 			printMainMethodCall(n);
@@ -1086,11 +1090,18 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(FieldAccessExpr n, GenerationContext context) {
-		n.getScope().accept(this, context);
+		boolean withScopeSuper = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.SUPER);
+		if (!withScopeSuper) {
+			n.getScope().accept(this, context);
+		}
 		TypeWrapper scopeType = resolvedType(n.getScope());
 		FieldWrapper field = (FieldWrapper) resolvedVariable(n);
 		boolean skipType = field != null && Modifier.isStatic(field.getModifiers()) && isGlobal(scopeType);
 		if (scopeType == null || !skipType) {
+			if (withScopeSuper) {
+				// super.field does not make sense, so convert it to this
+				printer.print("this");
+			}
 			printer.print(".");
 		}
 		printer.print(n.getField());

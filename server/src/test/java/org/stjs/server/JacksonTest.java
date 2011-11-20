@@ -9,7 +9,6 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;
@@ -32,8 +31,19 @@ public class JacksonTest {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(STJSModule.getModule());
 
-		String s = mapper.writeValueAsString(JSCollections.$array(new Pojo("a", 1), new Pojo("b", 2)));
-		assertEquals("[{\"s\":\"a\",\"n\":1},{\"s\":\"b\",\"n\":2}]", s);
+		String s = mapper.writeValueAsString(JSCollections.$array(new Pojo(1), new Pojo(2)));
+		assertEquals("[{\"n\":1},{\"n\":2}]", s);
+	}
+
+	@Test
+	public void testSerializeArrayPojoChildren() throws JsonGenerationException, JsonMappingException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(STJSModule.getModule());
+
+		Pojo2 p = new Pojo2();
+		p.setChildren(JSCollections.$array(new Pojo(1)));
+		String s = mapper.writeValueAsString(p);
+		assertEquals("{\"children\":[{\"n\":1}]}", s);
 	}
 
 	@Test
@@ -50,8 +60,19 @@ public class JacksonTest {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(STJSModule.getModule());
 
-		String s = mapper.writeValueAsString(JSCollections.$map("A", new Pojo("a", 1)));
-		assertEquals("{\"A\":{\"s\":\"a\",\"n\":1}}", s);
+		String s = mapper.writeValueAsString(JSCollections.$map("A", new Pojo(1)));
+		assertEquals("{\"A\":{\"n\":1}}", s);
+	}
+
+	@Test
+	public void testSerializeMapPojoChildren() throws JsonGenerationException, JsonMappingException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(STJSModule.getModule());
+
+		Pojo3 p = new Pojo3();
+		p.setChildren(JSCollections.$map("b", new Pojo(1)));
+		String s = mapper.writeValueAsString(p);
+		assertEquals("{\"children\":{\"b\":{\"n\":1}}}", s);
 	}
 
 	@Test
@@ -63,28 +84,49 @@ public class JacksonTest {
 		assertEquals("\"2011-11-09 17:10:00\"", s);
 	}
 
-	@Ignore
-	// not yet implemented
+	@Test
 	public void testDeserializeArray() throws JsonParseException, JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(STJSModule.getModule());
-		@SuppressWarnings("unchecked")
-		Array<Integer> a = mapper.readValue("[1,2,3]", Array.class);
+		Array<Integer> a = mapper.readValue("[1,2,3]",
+				mapper.getTypeFactory().constructCollectionLikeType(Array.class, Integer.class));
 		assertNotNull(a);
 		assertEquals(3, a.$length());
 		assertEquals(2, (int) a.$get(1));
 	}
 
-	@Ignore
-	// not yet implemented
+	@Test
+	public void testDeserializeArrayChildren() throws JsonParseException, JsonMappingException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(STJSModule.getModule());
+		Pojo2 p = mapper.readValue("{\"children\":[{\"n\":1}]}", Pojo2.class);
+		assertNotNull(p);
+		assertNotNull(p.getChildren());
+		assertEquals(1, p.getChildren().$length());
+		assertEquals(1, p.getChildren().$get(0).getN());
+	}
+
+	@Test
 	public void testDeserializeMap() throws JsonParseException, JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(STJSModule.getModule());
 
-		@SuppressWarnings("unchecked")
-		Map<String, Integer> m = mapper.readValue("{\"a\":1}", Map.class);
+		Map<String, Integer> m = mapper.readValue("{\"a\":1}",
+				mapper.getTypeFactory().constructMapLikeType(Map.class, String.class, Integer.class));
 		assertNotNull(m);
 		assertEquals(1, (int) m.$get("a"));
+	}
+
+	@Test
+	public void testDeserializeMapChildren() throws JsonParseException, JsonMappingException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(STJSModule.getModule());
+
+		Pojo3 p = mapper.readValue("{\"children\":{\"b\":{\"n\":1}}}", Pojo3.class);
+		assertNotNull(p);
+		assertNotNull(p.getChildren());
+		assertNotNull(p.getChildren().$get("b"));
+		assertEquals(1, p.getChildren().$get("b").getN());
 	}
 
 	@Test

@@ -56,4 +56,11 @@ public class CallSuperGeneratorTest {
 		// call to super should be generated, when not defined explicitely
 		assertCodeContains(CallSuper9.class, "CallSuper9 = function(){this._super(null);}");
 	}
+
+	@Test
+	public void testCallSuperField() {
+		// call to super should not be generated
+		assertCodeContains(CallSuper10.class, "x = this.instanceField;");
+	}
+
 }

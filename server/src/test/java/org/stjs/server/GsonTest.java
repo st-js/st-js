@@ -35,8 +35,8 @@ public class GsonTest {
 		GsonAdapters.addAll(gsonBuilder);
 		Gson gson = gsonBuilder.create();
 
-		String s = gson.toJson(JSCollections.$array(new Pojo("a", 1), new Pojo("b", 2)));
-		assertEquals("[{\"s\":\"a\",\"n\":1},{\"s\":\"b\",\"n\":2}]", s);
+		String s = gson.toJson(JSCollections.$array(new Pojo(1), new Pojo(2)));
+		assertEquals("[{\"n\":1},{\"n\":2}]", s);
 	}
 
 	@Test
@@ -55,8 +55,8 @@ public class GsonTest {
 		GsonAdapters.addAll(gsonBuilder);
 		Gson gson = gsonBuilder.create();
 
-		String s = gson.toJson(JSCollections.$map("A", new Pojo("a", 1)));
-		assertEquals("{\"A\":{\"s\":\"a\",\"n\":1}}", s);
+		String s = gson.toJson(JSCollections.$map("A", new Pojo(1)));
+		assertEquals("{\"A\":{\"n\":1}}", s);
 	}
 
 	@Test

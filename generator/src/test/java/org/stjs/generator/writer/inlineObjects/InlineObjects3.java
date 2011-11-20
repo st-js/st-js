@@ -17,5 +17,6 @@ public class InlineObjects3 {
 				};
 			}
 		};
+
 	}
 }

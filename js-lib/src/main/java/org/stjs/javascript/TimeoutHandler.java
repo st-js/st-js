@@ -15,6 +15,9 @@
  */
 package org.stjs.javascript;
 
-public class TimeoutHandler {
+import org.stjs.javascript.annotation.DataType;
+
+@DataType
+abstract public class TimeoutHandler {
 
 }

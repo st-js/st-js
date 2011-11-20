@@ -25,6 +25,9 @@ public class Math {
 	public static final double SQRT1_2 = java.lang.Math.sqrt(1 / 2);
 	public static final double SQRT2 = java.lang.Math.sqrt(2);
 
+	private Math() {//
+	}
+
 	public static final double abs(double x) {
 		return java.lang.Math.abs(x);
 	}
