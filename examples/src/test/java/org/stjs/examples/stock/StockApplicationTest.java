@@ -1,9 +1,14 @@
 package org.stjs.examples.stock;
 
 import static org.junit.Assert.assertEquals;
+import static org.stjs.javascript.jquery.GlobalJQuery.$;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.stjs.javascript.jquery.JQuery;
+import org.stjs.testing.annotation.HTMLFixture;
+import org.stjs.testing.annotation.Scripts;
+import org.stjs.testing.driver.STJSTestDriverRunner;
 
 @RunWith(STJSTestDriverRunner.class)
 @HTMLFixture("<form id='form'>" + //
