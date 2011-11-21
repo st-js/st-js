@@ -123,7 +123,6 @@ public class JSMapDeserializer extends ContainerDeserializer<Map<Object, Object>
 	 * /**********************************************************
 	 */
 
-	@SuppressWarnings("unchecked")
 	public final Class<?> getMapClass() {
 		return _mapType.getRawClass();
 	}

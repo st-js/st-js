@@ -114,7 +114,8 @@ public class AnonymousClassesHelper {
 	 *         the node should find their corresponding class.
 	 */
 	public String findAnonymousClass(ObjectCreationExpr node, Scope scope, ScopeBuilder scopeBuilder) {
-		// XXX field initializers are considered part of the init constructor -> they should be resolved before!
+		// FIXME field initializers are considered part of the init constructor -> they should be resolved before!
+		// for the moment static blocks are forbidden but they alter the order of nodes
 		String method = getMethodName(node);
 		Collection<String> classes = classesByMethod.get(method);
 		if (classes == null || classes.isEmpty()) {

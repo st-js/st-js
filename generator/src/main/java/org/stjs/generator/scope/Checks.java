@@ -18,6 +18,7 @@ package org.stjs.generator.scope;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
+import japa.parser.ast.body.EnumDeclaration;
 import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.body.ModifierSet;
@@ -154,6 +155,20 @@ public class Checks {
 				}
 			}
 		}
+	}
+
+	/**
+	 * check enum declaration
+	 * 
+	 * @param n
+	 * @param context
+	 */
+	public static void checkEnumDeclaration(EnumDeclaration n, GenerationContext context) {
+		if (n.getMembers() != null && n.getMembers().size() > 0) {
+			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+					"Enums with fields or methods are not supported");
+		}
+
 	}
 
 	/**

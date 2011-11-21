@@ -1,10 +1,10 @@
 package org.stjs.generator.writer.enums;
 
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
+import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
-import org.junit.Ignore;
 import org.junit.Test;
-
+import org.stjs.generator.JavascriptGenerationException;
 
 public class EnumGeneratorTest {
 	@Test
@@ -17,9 +17,10 @@ public class EnumGeneratorTest {
 		assertCodeContains(Enums2.class, "Enums2.Value.a");
 	}
 
-	@Ignore
+	@Test(expected = JavascriptGenerationException.class)
 	public void testEnumWithFieldsDeclaration() {
-		assertCodeContains(Enums4.class, "case Enums4.a");
+		// fields are not supported
+		generate(Enums4.class);
 	}
 
 	@Test

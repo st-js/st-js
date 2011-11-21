@@ -404,9 +404,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			java.lang.reflect.Type[] parameterTypes = c.getGenericParameterTypes();
 			int skipParams = 0;
 			if (ownerClass.isEnum()) {
-				System.out.println("XXXXXXXXX:" + parameterTypes.length + ":" + c + " ... " + c.isSynthetic());
 				// enums receive label and ordinal as first arguments
-				skipParams = ClassUtils.getEnumConstructorExtraParameters();
+				skipParams = parameterTypes.length - (n.getParameters() != null ? n.getParameters().size() : 0);
 			} else if (ownerClass.getDeclaringClass() != null && !Modifier.isStatic(ownerClass.getModifiers())
 					&& ownerClass.isMemberClass()) {
 				// for non-static inner classes the constructor contains as first parameter the type of the outer type
@@ -437,6 +436,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	@Override
 	public void visit(final EnumDeclaration n, final Scope currentScope) {
+		Checks.checkEnumDeclaration(n, context);
 		AbstractScope parentScope = (AbstractScope) currentScope;
 		TypeWithScope type = currentScope.resolveType(n.getName());
 		PreConditions.checkState(type != null, "%s class cannot be resolved in the scope", n.getName());
