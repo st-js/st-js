@@ -74,11 +74,6 @@ public class Generator {
 		File outputFile = getOutputFile(generationFolder, className);
 		GenerationContext context = new GenerationContext(inputFile);
 
-		// Collection<String> allowedPackages = configuration.getAllowedPackages();
-		// if ((cu.getPackage() != null) && !cu.getPackage().getName().toString().isEmpty()) {
-		// allowedPackages = append(Lists.newArrayList(allowedPackages), cu.getPackage().getName().toString());
-		// }
-
 		ClassLoaderWrapper classLoaderWrapper = new ClassLoaderWrapper(builtProjectClassLoader,
 				configuration.getAllowedPackages(), configuration.getAllowedJavaLangClasses());
 
@@ -87,8 +82,7 @@ public class Generator {
 		FileWriter writer = null;
 
 		try {
-			// 3. generate the javascript code
-
+			// generate the javascript code
 			JavascriptWriterVisitor generatorVisitor = new JavascriptWriterVisitor();
 			generatorVisitor.visit(cu, context);
 
@@ -108,7 +102,7 @@ public class Generator {
 			}
 		}
 
-		// now write properties
+		// write properties
 		STJSClass stjsClass = new STJSClass(new GeneratorDependencyResolver(builtProjectClassLoader, sourceFolder,
 				generationFolder, targetFolder, configuration), targetFolder, className);
 		stjsClass.setDependencies(classLoaderWrapper.getResolvedClasses());

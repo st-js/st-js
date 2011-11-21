@@ -125,10 +125,6 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 					writer.append("Assert=window;");
 
 					String testedClassName = getTestClass().getJavaClass().getSimpleName();
-					// String methodName = "test" + method.getName();
-					// String jsObjectName = testedClassName + "Adapter";
-					// writer.append(jsObjectName + " = TestCase('" + jsObjectName + "');\n" + jsObjectName
-					// + ".prototype." + methodName + "= function() {");
 
 					writer.append("try{");
 					writer.append("new " + testedClassName + "()." + method.getName() + "();");

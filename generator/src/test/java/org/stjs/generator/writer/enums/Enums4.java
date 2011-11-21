@@ -1,17 +1,6 @@
 package org.stjs.generator.writer.enums;
 
-
 public enum Enums4 {
-	a(1), b(2), c(3);
+	a, b, c;
 
-	private final int value;
-
-	private Enums4(int v) {
-		this.value = v;
-	}
-
-	public int getValue() {
-		return value;
-	}
-	
 }

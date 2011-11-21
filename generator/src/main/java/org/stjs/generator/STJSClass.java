@@ -31,7 +31,7 @@ import org.stjs.generator.utils.PreConditions;
 
 /**
  * This class represents a class and the corresponding generated javascript file. The information about dependencies and
- * sources are stored at generation time in a properties file that has as name [class-name].stjs (and it packed along
+ * sources are stored at generation time in a properties file that has as name [class-name].stjs (and it's packed along
  * with the source file in the same folder). Thus, if a STJS library is built, it will be delivered with all this
  * information, as the original Java code will no longer be available with the library.
  * 
@@ -100,13 +100,13 @@ public class STJSClass implements ClassWithJavascript {
 				dependencies = Arrays.asList(deps);
 			}
 		}
-		// output
-		String output = properties.getProperty(GENERATED_JS_FILE_PROP);
-		if (output != null) {
+		// js file
+		String jsFile = properties.getProperty(GENERATED_JS_FILE_PROP);
+		if (jsFile != null) {
 			try {
-				generatedJavascriptFile = new URI(output);
+				generatedJavascriptFile = new URI(jsFile);
 			} catch (URISyntaxException e) {
-				System.err.println("Could not load URI from " + output);
+				System.err.println("Could not load URI from " + jsFile);
 			}
 		}
 	}

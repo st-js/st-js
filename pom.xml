@@ -1,12 +1,41 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-
 	<groupId>org.st-js</groupId>
 	<artifactId>stjs</artifactId>
 	<version>1.1.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Strongly-typed Javascript</name>
+	<description>Javascript code generator from Java source code</description>
+	<url>http://st-js.sourceforge.net</url>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<id>acraciun</id>
+			<name>Alexandru Craciun</name>
+			<email>ax.craciun@gmail.com</email>
+		</developer>
+
+		<developer>
+			<id>ekaspi</id>
+			<name>Eyal Kaspi</name>
+			<email>eyal.kaspi@gmail.com</email>
+		</developer>
+	</developers>
+
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
 
 	<modules>
 		<module>generator</module>
@@ -42,17 +71,8 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
-
-			<plugin>
-				<groupId>com.google.code.maven-license-plugin</groupId>
-				<artifactId>maven-license-plugin</artifactId>
-				<version>1.4.0</version>
-				<configuration>
-					<header>LICENSE.TXT</header>
-				</configuration>
-			</plugin>
-
 		</plugins>
+
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -71,19 +91,6 @@
 
 	</build>
 
-	<pluginRepositories>
-		<pluginRepository>
-			<id>mc-release</id>
-			<name>Local Maven repository of releases</name>
-			<url>http://mc-repo.googlecode.com/svn/maven2/releases</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</pluginRepository>
-	</pluginRepositories>
 
 	<scm>
 		<connection>scm:svn:https://st-js.svn.sourceforge.net/svnroot/st-js/trunk</connection>
@@ -91,21 +98,4 @@
 		<url>http://st-js.svn.sourceforge.net/viewvc/st-js</url>
 	</scm>
 
-	<distributionManagement>
-
-		<repository>
-			<id>st-js.server</id>
-			<name>SVN Sourceforge Release Repository</name>
-			<uniqueVersion>false</uniqueVersion>
-			<url>sftp://frs.sourceforge.net:/home/project-web/st-js/htdocs/repository/releases</url>
-		</repository>
-
-		<snapshotRepository>
-			<id>st-js.server</id>
-			<name>SVN Sourceforge Snapshot Repository</name>
-			<uniqueVersion>false</uniqueVersion>
-			<url>sftp://frs.sourceforge.net:/home/project-web/st-js/htdocs/repository/snapshots</url>
-		</snapshotRepository>
-
-	</distributionManagement>
 </project>

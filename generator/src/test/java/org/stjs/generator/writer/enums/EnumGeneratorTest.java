@@ -20,7 +20,7 @@ public class EnumGeneratorTest {
 	@Test(expected = JavascriptGenerationException.class)
 	public void testEnumWithFieldsDeclaration() {
 		// fields are not supported
-		generate(Enums4.class);
+		generate(Enums9.class);
 	}
 
 	@Test

@@ -15,6 +15,8 @@
  */
 package org.stjs.javascript;
 
+import org.stjs.javascript.annotation.GlobalScope;
+
 /**
  * this class offers map and array builders for both client and server side. For the server side, it delegates the
  * execution to an instance of {@link JSCollectionsImplementor}. On the client side, it simply throws an
@@ -23,6 +25,7 @@ package org.stjs.javascript;
  * @author acraciun
  * 
  */
+@GlobalScope
 public class JSCollections {
 	private static JSCollectionsImplementor implementor = null;
 
