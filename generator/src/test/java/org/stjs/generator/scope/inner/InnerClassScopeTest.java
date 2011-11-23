@@ -21,6 +21,11 @@ public class InnerClassScopeTest {
 	}
 
 	@Test
+	public void resolvesNonStaticInner() throws ParseException, IOException {
+		assertResolvedMethod(ClassDeclaringInnerClass2.class, "doSth", 1, ClassDeclaringInnerClass2.InnerClass.class);
+	}
+
+	@Test
 	public void fieldVsInnerClass() throws ParseException, IOException {
 		assertResolvedMethod(FieldsVsInnerClass.class, "print", 1, FieldsVsInnerClass.class);
 		assertResolvedMethod(FieldsVsInnerClass.class, "print", 2, FieldsVsInnerClass.MyInnerClass2.class);

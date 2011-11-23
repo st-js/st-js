@@ -36,6 +36,8 @@ public class DriverConfiguration {
 
 	private static final String PROP_START_BROWSER = "stjs.test.startBrowser";
 
+	private static final String PROP_BROWSER_COUNT = "stjs.test.browserCount";
+
 	private static final String PROP_TEST_TIMEOUT = "stjs.test.testTimeout";
 
 	private int port = 8055;
@@ -43,13 +45,16 @@ public class DriverConfiguration {
 	private boolean skipIfNoBrowser = false;
 	private boolean startBrowser = true;
 	private int testTimeout = 2;
+	private int browserCount = 1;
 
 	public DriverConfiguration() {
 		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(FILE_NAME);
 		if (in != null) {
-			Properties props = new Properties(System.getProperties());
+			Properties props = new Properties();
 			try {
 				props.load(in);
+				// system properties take precedence
+				props.putAll(System.getProperties());
 				if (props.get(PROP_PORT) != null) {
 					port = Integer.parseInt(props.getProperty(PROP_PORT));
 				}
@@ -64,6 +69,10 @@ public class DriverConfiguration {
 				}
 				if (props.get(PROP_TEST_TIMEOUT) != null) {
 					testTimeout = Integer.parseInt(props.getProperty(PROP_TEST_TIMEOUT));
+				}
+
+				if (props.get(PROP_BROWSER_COUNT) != null) {
+					browserCount = Integer.parseInt(props.getProperty(PROP_BROWSER_COUNT));
 				}
 
 			} catch (IOException e) {
@@ -118,6 +127,14 @@ public class DriverConfiguration {
 
 	public void setTestTimeout(int testTimeout) {
 		this.testTimeout = testTimeout;
+	}
+
+	public int getBrowserCount() {
+		return browserCount;
+	}
+
+	public void setBrowserCount(int browserCount) {
+		this.browserCount = browserCount;
 	}
 
 }

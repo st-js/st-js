@@ -9,4 +9,5 @@ public class ClassUsingInnerClass {
 	static int method() {
 		return ClassDeclaringInnerClass.InnerClass.doSth() + InnerClass.doSth() + doSth();
 	}
+
 }

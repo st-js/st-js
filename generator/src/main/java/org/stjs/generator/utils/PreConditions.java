@@ -16,12 +16,19 @@
 package org.stjs.generator.utils;
 
 import static java.lang.String.format;
+import japa.parser.ast.Node;
 
 public class PreConditions {
 
 	public static void checkState(boolean check, String message, Object... args) {
 		if (!check) {
 			throw new IllegalArgumentException(format(message, args));
+		}
+	}
+
+	public static void checkStateNode(Node node, boolean check, String message, Object... args) {
+		if (!check) {
+			throw new IllegalArgumentException("Line " + node.getBeginLine() + ":" + format(message, args));
 		}
 	}
 

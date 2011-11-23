@@ -106,19 +106,22 @@ public class Generator {
 		STJSClass stjsClass = new STJSClass(new GeneratorDependencyResolver(builtProjectClassLoader, sourceFolder,
 				generationFolder, targetFolder, configuration), targetFolder, className);
 		stjsClass.setDependencies(classLoaderWrapper.getResolvedClasses());
-		stjsClass.setGeneratedJavascriptFile(relative(outputFile));
+		stjsClass.setGeneratedJavascriptFile(relative(generationFolder, className));
 		stjsClass.store();
 		return stjsClass;
 	}
 
-	private URI relative(File outputFile) {
+	private URI relative(File generationFolder, String className) {
 		// FIXME temporary have to remove the full path from the file name.
 		// it should be different depending on whether the final artifact is a war or a jar.
-		String path = outputFile.getPath();
-		int pos = path.indexOf("target");
+		String path = generationFolder.getPath();
+		int pos = path.lastIndexOf("target");
 		try {
-			return pos >= 0 ? new URI("file", null, "/" + path.substring(pos).replace('\\', '/'), null) : outputFile
-					.toURI();
+			if (pos >= 0) {
+				File file = getOutputFile(new File(path.substring(pos)), className);
+				return new URI("file", null, "/" + file.getPath().replace('\\', '/'), null);
+			}
+			return getOutputFile(generationFolder, className).toURI();
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}

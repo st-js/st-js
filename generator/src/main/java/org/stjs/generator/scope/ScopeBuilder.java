@@ -80,7 +80,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -114,9 +113,9 @@ import org.stjs.generator.visitor.ForEachNodeVisitor;
 
 /**
  * This class resolves the variables, methods and types and writes the corresponding information in the AST nodes.
- *
+ * 
  * @author acraciun,ekaspi
- *
+ * 
  */
 public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	private final ClassLoaderWrapper classLoader;
@@ -149,7 +148,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	@Override
 	public void visit(final CompilationUnit n, Scope inputScope) {
-		PreConditions.checkState(inputScope instanceof CompilationUnitScope,
+		PreConditions.checkStateNode(n, inputScope instanceof CompilationUnitScope,
 				"A compilationUnitScope was expected. Got %s", inputScope);
 
 		CompilationUnitScope scope = (CompilationUnitScope) inputScope;
@@ -221,7 +220,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		Checks.checkClassDeclaration(n, context);
 		AbstractScope parentScope = (AbstractScope) scope;
 		TypeWithScope type = scope.resolveType(n.getName());
-		PreConditions.checkState(type != null, "%s class cannot be resolved in the scope", n.getName());
+		PreConditions.checkStateNode(n, type != null, "%s class cannot be resolved in the scope", n.getName());
 		Scope classScope = addClassToScope(parentScope, (ClassWrapper) type.getType());
 
 		super.visit(n, classScope);
@@ -236,15 +235,15 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		// this is safe as only one method is allowed with a given name
 		Class<?> ownerClass = currentScope.closest(ClassScope.class).getClazz().getClazz();
 		Method m = ClassUtils.findDeclaredMethod(ownerClass, n.getName());
-		PreConditions.checkState(m != null, "Method [%s] not  found in the class [%s] line %d", n.getName(),
+		PreConditions.checkStateNode(n, m != null, "Method [%s] not  found in the class [%s] line %d", n.getName(),
 				ownerClass.getName(), n.getBeginLine());
 
-		BasicScope scope = handleMethodDeclaration(n.getParameters(), m.getGenericParameterTypes(),
+		BasicScope scope = handleMethodDeclaration(n, n.getParameters(), m.getGenericParameterTypes(),
 				m.getTypeParameters(), currentScope);
 		super.visit(n, new BasicScope(scope, context));
 	}
 
-	private BasicScope handleMethodDeclaration(final List<Parameter> parameters,
+	private BasicScope handleMethodDeclaration(Node node, final List<Parameter> parameters,
 			java.lang.reflect.Type[] resolvedParameterTypes,
 			TypeVariable<? extends GenericDeclaration>[] resolvedTypeParameters, Scope currentScope) {
 
@@ -256,8 +255,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		}
 
 		if (parameters != null) {
-			PreConditions.checkState(parameters.size() == resolvedParameterTypes.length,
-					"The number of parameters (%d) should be the same as the number of types (%d)", parameters.size(),
+			PreConditions.checkStateNode(node, parameters.size() == resolvedParameterTypes.length,
+					"The number of parameters (%d) should be the same as the number of types (%d) ", parameters.size(),
 					resolvedParameterTypes.length);
 			for (int i = 0; i < parameters.size(); ++i) {
 				TypeWrapper clazz = TypeWrappers.wrap(resolvedParameterTypes[i]);
@@ -308,7 +307,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 				if (rawType == null) {
 					return null;
 				}
-				// PreConditions.checkState(rawType != null, "Cannot resolve type [%s]", classType.getName());
+				// PreConditions.checkStateNode(n,rawType != null, "Cannot resolve type [%s]", classType.getName());
 				if (classType.getTypeArgs() != null) {
 					List<java.lang.reflect.Type> args = new ArrayList<java.lang.reflect.Type>();
 					for (Type arg : classType.getTypeArgs()) {
@@ -342,7 +341,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	/**
 	 * check if the given type is the argument of the public static void main(String[] args) method
-	 *
+	 * 
 	 * @param type
 	 * @return
 	 */
@@ -365,8 +364,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	@Override
 	public void visit(VariableDeclarationExpr n, Scope scope) {
-		PreConditions
-				.checkState(scope instanceof BasicScope, "The variable [%s] is not defined inside a BasicScope", n);
+		PreConditions.checkStateNode(n, scope instanceof BasicScope,
+				"The variable [%s] is not defined inside a BasicScope", n);
 
 		BasicScope basicScope = (BasicScope) scope;
 		if (n.getVars() != null) {
@@ -399,22 +398,17 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		BasicScope scope;
 		if (c == null) {
 			// synthetic constructor
-			scope = handleMethodDeclaration(n.getParameters(), null, null, currentScope);
+			scope = handleMethodDeclaration(n, n.getParameters(), null, null, currentScope);
 		} else {
 			java.lang.reflect.Type[] parameterTypes = c.getGenericParameterTypes();
-			int skipParams = 0;
-			if (ownerClass.isEnum()) {
-				// enums receive label and ordinal as first arguments
-				skipParams = parameterTypes.length - (n.getParameters() != null ? n.getParameters().size() : 0);
-			} else if ((ownerClass.getDeclaringClass() != null) && !Modifier.isStatic(ownerClass.getModifiers())
-					&& ownerClass.isMemberClass()) {
-				// for non-static inner classes the constructor contains as first parameter the type of the outer type
-				skipParams = 1;
-			}
+			// enums receive label and ordinal as first arguments
+			// for non-static inner classes the constructor contains as first parameter the type of the outer type
+			int skipParams = parameterTypes.length - (n.getParameters() != null ? n.getParameters().size() : 0);
+
 			if (skipParams > 0) {
 				parameterTypes = Arrays.copyOfRange(parameterTypes, skipParams, parameterTypes.length);
 			}
-			scope = handleMethodDeclaration(n.getParameters(), parameterTypes, c.getTypeParameters(), currentScope);
+			scope = handleMethodDeclaration(n, n.getParameters(), parameterTypes, c.getTypeParameters(), currentScope);
 		}
 		super.visit(n, new BasicScope(scope, context));
 	}
@@ -439,7 +433,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		Checks.checkEnumDeclaration(n, context);
 		AbstractScope parentScope = (AbstractScope) currentScope;
 		TypeWithScope type = currentScope.resolveType(n.getName());
-		PreConditions.checkState(type != null, "%s class cannot be resolved in the scope", n.getName());
+		PreConditions.checkStateNode(n, type != null, "%s class cannot be resolved in the scope", n.getName());
 		Scope enumClassScope = addClassToScope(parentScope, (ClassWrapper) type.getType());
 
 		super.visit(n, enumClassScope);
@@ -465,8 +459,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			ClassScope classScope = scope.closest(ClassScope.class);
 
 			ClassWrapper anonymousClass = searchAnonymousClass(classScope.getClazz().getClazz(), n, scope);
-			PreConditions.checkState(anonymousClass != null, "Could not find anoynmous class for node at line %d",
-					n.getBeginLine());
+			PreConditions.checkStateNode(n, anonymousClass != null,
+					"Could not find anoynmous class for node at line %d", n.getBeginLine());
 
 			ClassScope anonymousClassScope = addClassToScope((AbstractScope) scope, anonymousClass);
 
@@ -695,12 +689,13 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		}
 		if (n.getScope() == null) {
 			MethodsWithScope ms = arg.resolveMethod(n.getName(), argumentTypes);
-			PreConditions.checkState(ms != null, "%s The method %s could not be resolved", location(n), n.getName());
+			PreConditions.checkStateNode(n, ms != null, "%s The method %s could not be resolved", location(n),
+					n.getName());
 			method = ms.getMethod();
 		} else {
 			TypeWrapper scopeType = resolvedType(n.getScope());
-			PreConditions.checkState(scopeType != null, "%s The method %s 's scope could not be resolved", location(n),
-					n.getName());
+			PreConditions.checkStateNode(n, scopeType != null, "%s The method %s 's scope could not be resolved",
+					location(n), n.getName());
 			method = scopeType.findMethod(n.getName(), argumentTypes).getOrThrow(
 					location(n) + "-> type:" + scopeType.getName() + " m:" + n.getName());
 		}
@@ -716,7 +711,6 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		super.visit(n, arg);
 	}
 
-	@SuppressWarnings("null")
 	@Override
 	public void visit(FieldAccessExpr n, Scope arg) {
 		super.visit(n, arg);
@@ -738,8 +732,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 				resolvedVariable(n, field.getOrThrow());
 			} else {
 				TypeWithScope innerType = arg.resolveType(scopeType.getName() + "$" + n.getField());
-				PreConditions.checkState(innerType != null, "%s no inner type nor field could be resolved for '%s'",
-						location(n), n.getField());
+				PreConditions.checkStateNode(n, innerType != null,
+						"%s no inner type nor field could be resolved for '%s'", location(n), n.getField());
 				resolvedType(n, innerType.getType());
 			}
 		}

@@ -22,6 +22,7 @@ public class ServerSession {
 	 */
 	private int timeout;
 	private final boolean hasBrowsers;
+	private final int browserCount;
 	private final boolean startBrowser;
 
 	public static synchronized ServerSession getInstance() throws IOException, InterruptedException {
@@ -35,6 +36,7 @@ public class ServerSession {
 		DriverConfiguration config = new DriverConfiguration();
 		timeout = config.getWaitForBrowser() * 1000;
 		startBrowser = config.isStartBrowser();
+		browserCount = config.getBrowserCount();
 		server = new STJSTestServer(config.getPort(), config.getTestTimeout());
 		server.start();
 		hasBrowsers = checkBrowsers();
@@ -45,23 +47,23 @@ public class ServerSession {
 		final int initialTimeout = 2000;
 		final int stepTimeout = 500;
 
+		System.out.println("Waiting for " + browserCount + " browser(s)");
 		try {
 			Thread.sleep(Math.min(initialTimeout, timeout));
-			if (server.getBrowserCount() == 0) {
-				if (startBrowser && Desktop.isDesktopSupported()) {
+			if (server.getBrowserCount() < browserCount) {
+				if (startBrowser && Desktop.isDesktopSupported() && server.getBrowserCount() == 0) {
 					System.out.println("Starting the default browser ...");
 					Desktop.getDesktop().browse(new URL(server.getHostURL(), "/start.html").toURI());
-					for (int i = initialTimeout; i < timeout; i += stepTimeout) {
-						Thread.sleep(stepTimeout);
-						if (server.getBrowserCount() > 0) {
-							System.out.println("Captured browsers");
-							return true;
-						}
-					}
-					System.out.println("Unable to capture a browser");
-				} else {
-					System.out.println("Cannot start a browser");
 				}
+
+				for (int i = initialTimeout; i < timeout; i += stepTimeout) {
+					Thread.sleep(stepTimeout);
+					if (server.getBrowserCount() >= browserCount) {
+						System.out.println("Captured browsers");
+						return true;
+					}
+				}
+				System.err.println("Unable to capture at least " + browserCount + " browser(s)");
 				return false;
 			}
 		} catch (MalformedURLException ex) {
