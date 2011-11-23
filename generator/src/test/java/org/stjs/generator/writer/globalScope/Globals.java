@@ -4,8 +4,8 @@ import org.stjs.javascript.annotation.GlobalScope;
 
 @GlobalScope
 public class Globals {
-	public static void method() {
-
+	public static int method() {
+		return 0;
 	}
 
 	public static String field;

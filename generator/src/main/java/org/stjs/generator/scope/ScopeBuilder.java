@@ -114,9 +114,9 @@ import org.stjs.generator.visitor.ForEachNodeVisitor;
 
 /**
  * This class resolves the variables, methods and types and writes the corresponding information in the AST nodes.
- * 
+ *
  * @author acraciun,ekaspi
- * 
+ *
  */
 public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	private final ClassLoaderWrapper classLoader;
@@ -160,7 +160,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 				if (importDecl.isAsterisk()) {
 					if (importDecl.isStatic()) {
 						QualifiedNameExpr expr = (QualifiedNameExpr) name;
-						for (ClassWrapper clazz : identifyQualifiedNameExprClass(expr.getQualifier())) {
+						for (ClassWrapper clazz : identifyQualifiedNameExprClass(expr)) {
 							for (FieldWrapper field : clazz.getDeclaredNonPrivateStaticFields()) {
 								scope.addField(field);
 							}
@@ -342,7 +342,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	/**
 	 * check if the given type is the argument of the public static void main(String[] args) method
-	 * 
+	 *
 	 * @param type
 	 * @return
 	 */

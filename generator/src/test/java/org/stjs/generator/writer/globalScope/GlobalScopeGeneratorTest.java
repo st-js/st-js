@@ -5,6 +5,7 @@ import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotCont
 
 import org.junit.Test;
 
+
 public class GlobalScopeGeneratorTest {
 	@Test
 	public void testGlobalScopeGeneration() {
@@ -45,4 +46,8 @@ public class GlobalScopeGeneratorTest {
 		assertCodeContains(GlobalScope6.class, "global.instanceField");
 	}
 
+	@Test
+	public void testMethodWithStarImport() {
+		assertCodeContains(GlobalScope7.class, "n = method()");
+	}
 }
