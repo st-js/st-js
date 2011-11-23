@@ -49,4 +49,14 @@ public class InnerClassScopeTest {
 		assertResolvedAnonymousClass(AnonymousInnerClass2Reversed.class, 2, Callback0.class);
 		assertResolvedAnonymousClass(AnonymousInnerClass2Reversed.class, 3, Callback1.class);
 	}
+
+	@Test
+	public void testAnonClassWithAbstractMethod() {
+		assertResolvedAnonymousClass(AnonymousInnerClass3.class, 1, Callback2.class);
+	}
+
+	@Test
+	public void testAnonClassAndInnerClass() {
+		assertResolvedAnonymousClass(AnonymousInnerClass4.class, 1, Callback2.class);
+	}
 }

@@ -25,6 +25,7 @@ import japa.parser.ast.expr.ObjectCreationExpr;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.regex.Pattern;
 
 import org.apache.bcel.Repository;
 import org.apache.bcel.classfile.JavaClass;
@@ -52,6 +53,7 @@ import com.google.common.collect.Multimap;
 public class AnonymousClassesHelper {
 	private final static String STATIC_INIT_METHOD = "<clinit>";
 	private final static String CONSTRUCTOR_METHOD = "<init>";
+	private final static Pattern ANONYMOUS_CLASS_PATTERN = Pattern.compile("\\$\\d+$");
 	private final Multimap<String, String> classesByMethod = ArrayListMultimap.create();
 
 	// private final Map<Integer, String> classesByLineNumber = new LinkedHashMap<Integer, String>();
@@ -69,19 +71,26 @@ public class AnonymousClassesHelper {
 			MethodGen mg = new MethodGen(m, g.getClassName(), g.getConstantPool());
 			String methodName = mg.getName();
 
+			if (mg.getInstructionList() == null) {
+				continue;
+			}
 			Iterator<InstructionHandle> it = mg.getInstructionList().iterator();
 			while (it.hasNext()) {
 				InstructionHandle h = it.next();
 				if (h.getInstruction() instanceof NEW) {
 					NEW newInstr = (NEW) h.getInstruction();
 					String typeName = newInstr.getType(g.getConstantPool()).toString();
-					if (typeName.contains("$")) {
+					if (isAnonymousClass(typeName)) {
 						classesByMethod.put(methodName, typeName);
 					}
 				}
 			}
 		}
 
+	}
+
+	private boolean isAnonymousClass(String typeName) {
+		return ANONYMOUS_CLASS_PATTERN.matcher(typeName).find();
 	}
 
 	private String getMethodName(ObjectCreationExpr node) {
@@ -118,7 +127,7 @@ public class AnonymousClassesHelper {
 		// for the moment static blocks are forbidden but they alter the order of nodes
 		String method = getMethodName(node);
 		Collection<String> classes = classesByMethod.get(method);
-		if (classes == null || classes.isEmpty()) {
+		if ((classes == null) || classes.isEmpty()) {
 			return null;
 		}
 		// remove first because the calls will come ordered

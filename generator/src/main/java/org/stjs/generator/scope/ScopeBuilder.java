@@ -236,8 +236,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		// this is safe as only one method is allowed with a given name
 		Class<?> ownerClass = currentScope.closest(ClassScope.class).getClazz().getClazz();
 		Method m = ClassUtils.findDeclaredMethod(ownerClass, n.getName());
-		PreConditions.checkState(m != null, "Method [%s] not  found in the class [%s]", n.getName(),
-				ownerClass.getName());
+		PreConditions.checkState(m != null, "Method [%s] not  found in the class [%s] line %d", n.getName(),
+				ownerClass.getName(), n.getBeginLine());
 
 		BasicScope scope = handleMethodDeclaration(n.getParameters(), m.getGenericParameterTypes(),
 				m.getTypeParameters(), currentScope);
@@ -282,7 +282,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			if (type instanceof ReferenceType) {
 				ReferenceType refType = (ReferenceType) type;
 				arrayCount = refType.getArrayCount();
-				if (arrayCount > 0 && !isMainArgs(type)) {
+				if ((arrayCount > 0) && !isMainArgs(type)) {
 					throw new JavascriptGenerationException(
 							context.getInputFile(),
 							new SourcePosition(type),
@@ -406,7 +406,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			if (ownerClass.isEnum()) {
 				// enums receive label and ordinal as first arguments
 				skipParams = parameterTypes.length - (n.getParameters() != null ? n.getParameters().size() : 0);
-			} else if (ownerClass.getDeclaringClass() != null && !Modifier.isStatic(ownerClass.getModifiers())
+			} else if ((ownerClass.getDeclaringClass() != null) && !Modifier.isStatic(ownerClass.getModifiers())
 					&& ownerClass.isMemberClass()) {
 				// for non-static inner classes the constructor contains as first parameter the type of the outer type
 				skipParams = 1;
@@ -561,7 +561,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	@Override
 	public void visit(ArrayInitializerExpr n, Scope arg) {
 		super.visit(n, arg);
-		if (n.getValues() != null && n.getValues().size() > 0) {
+		if ((n.getValues() != null) && (n.getValues().size() > 0)) {
 			// not exactly sure what to put here - but it doesn't matter much
 			resolvedType(n, resolvedType(n.getValues().get(0)));
 		}
@@ -716,6 +716,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		super.visit(n, arg);
 	}
 
+	@SuppressWarnings("null")
 	@Override
 	public void visit(FieldAccessExpr n, Scope arg) {
 		super.visit(n, arg);
@@ -750,8 +751,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		Checks.checkNameExpr(n, context);
 		super.visit(n, arg);
 		Node parent = parent(n);
-		if (parent instanceof QualifiedNameExpr || parent instanceof ImportDeclaration
-				|| parent instanceof PackageDeclaration) {
+		if ((parent instanceof QualifiedNameExpr) || (parent instanceof ImportDeclaration)
+				|| (parent instanceof PackageDeclaration)) {
 			// don't bother as is only part of a package or import declaration
 			resolvedType(n, null);
 		} else if (parent instanceof SwitchEntryStmt) {
