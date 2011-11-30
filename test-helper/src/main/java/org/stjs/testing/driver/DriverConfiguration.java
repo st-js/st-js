@@ -40,12 +40,15 @@ public class DriverConfiguration {
 
 	private static final String PROP_TEST_TIMEOUT = "stjs.test.testTimeout";
 
+	private static final String PROP_DEBUG = "stjs.test.debug";
+
 	private int port = 8055;
 	private int waitForBrowser = 10;
 	private boolean skipIfNoBrowser = false;
 	private boolean startBrowser = true;
 	private int testTimeout = 2;
 	private int browserCount = 1;
+	private boolean debugEnabled = false;
 
 	public DriverConfiguration(Class<?> klass) {
 		InputStream in = klass.getResourceAsStream(FILE_NAME);
@@ -74,6 +77,10 @@ public class DriverConfiguration {
 
 				if (props.get(PROP_BROWSER_COUNT) != null) {
 					browserCount = Integer.parseInt(props.getProperty(PROP_BROWSER_COUNT));
+				}
+
+				if (props.get(PROP_DEBUG) != null) {
+					debugEnabled = Boolean.parseBoolean(props.getProperty(PROP_DEBUG));
 				}
 
 			} catch (IOException e) {
@@ -134,6 +141,14 @@ public class DriverConfiguration {
 
 	public void setBrowserCount(int browserCount) {
 		this.browserCount = browserCount;
+	}
+
+	public boolean isDebugEnabled() {
+		return debugEnabled;
+	}
+
+	public void setDebugEnabled(boolean debugEnabled) {
+		this.debugEnabled = debugEnabled;
 	}
 
 }

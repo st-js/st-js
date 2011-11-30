@@ -37,11 +37,12 @@ import com.google.common.io.Files;
 public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 	private boolean skipIfNoBrowser = false;
 	private final ServerSession serverSession;
+	private final DriverConfiguration config;
 
 	public STJSTestDriverRunner(Class<?> klass) throws InitializationError {
 		super(klass);
 
-		DriverConfiguration config = new DriverConfiguration(klass);
+		config = new DriverConfiguration(klass);
 		skipIfNoBrowser = config.isSkipIfNoBrowser();
 		try {
 			serverSession = ServerSession.getInstance(config);
@@ -145,9 +146,11 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 					writer.flush();
 					writer.close();
 
-					System.out.println("Added source file");
-					Files.copy(htmlFile, System.out);
-					System.out.flush();
+					if (config.isDebugEnabled()) {
+						System.out.println("Added source file");
+						Files.copy(htmlFile, System.out);
+						System.out.flush();
+					}
 					TestResultCollection response = serverSession.getServer().test(htmlFile);
 					if (!response.isOk()) {
 						// take the first wrong result

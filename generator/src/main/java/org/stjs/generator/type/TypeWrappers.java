@@ -27,6 +27,10 @@ import java.util.Map;
 public class TypeWrappers {
 	private static final Map<Type, TypeWrapper> cache = new HashMap<Type, TypeWrapper>();
 
+	public static void clearCache() {
+		cache.clear();
+	}
+
 	public static TypeWrapper[] wrap(Type[] types) {
 		TypeWrapper[] wrapped = new TypeWrapper[types.length];
 		for (int i = 0; i < types.length; ++i) {

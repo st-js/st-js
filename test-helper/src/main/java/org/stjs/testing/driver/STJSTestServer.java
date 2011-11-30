@@ -10,8 +10,13 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
@@ -33,12 +38,14 @@ public class STJSTestServer {
 	private final Map<Long, BrowserConnection> browserConnections = new HashMap<Long, BrowserConnection>();
 	private long lastBrowserId = System.currentTimeMillis();
 	private long lastTestId = System.currentTimeMillis();
+	private boolean debug;
 
 	private File testFile = null;
 
-	public STJSTestServer(int port, int testTimeout) throws IOException {
+	public STJSTestServer(int port, int testTimeout, boolean debugParam) throws IOException {
 		this.port = port;
 		this.testTimeout = testTimeout;
+		this.debug = debugParam;
 		// create the HttpServer
 		InetSocketAddress address = new InetSocketAddress(port);
 		httpServer = HttpServer.create(address, 0);
@@ -47,14 +54,14 @@ public class STJSTestServer {
 
 			@Override
 			public void handle(HttpExchange exchange) throws IOException {
-				System.out.println("GET:" + exchange.getRequestURI());
+				if (debug) {
+					System.out.println("GET:" + exchange.getRequestURI());
+				}
 				try {
-					exchange.getResponseHeaders().add("CacheControl", "no-cache");
-					exchange.getResponseHeaders().add("Pragma", "no-cache");
-					exchange.getResponseHeaders().add("Expires", "-1");
-
 					Map<String, String> params = parseQueryString(exchange.getRequestURI().getQuery());
-
+					exchange.getResponseHeaders().add("Date", formatDateHeader(new Date()));
+					exchange.getResponseHeaders().add("Last-Modified", formatDateHeader(new Date()));
+					exchange.getResponseHeaders().add("Connection", "Keep-Alive");
 					if ("/".equals(exchange.getRequestURI().getPath())) {
 						handleResource("start.html", exchange);
 					} else if (BROWSER_CHECK_URI.equals(exchange.getRequestURI().getPath())) {
@@ -81,6 +88,19 @@ public class STJSTestServer {
 		httpServer.createContext("/", handler);
 	}
 
+	private String formatDateHeader(Date date) {
+		DateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss ZZZ", Locale.ENGLISH);
+		df.setTimeZone(TimeZone.getTimeZone("GMT"));
+		return df.format(date);
+	}
+
+	private void addNoCache(HttpExchange exchange) {
+		exchange.getResponseHeaders().add("CacheControl", "no-cache");
+		exchange.getResponseHeaders().add("Pragma", "no-cache");
+		exchange.getResponseHeaders().add("Expires", "-1");
+
+	}
+
 	private Map<String, String> parseQueryString(String query) {
 		// TODO use a real query parser
 		Map<String, String> params = new HashMap<String, String>();
@@ -98,11 +118,12 @@ public class STJSTestServer {
 	}
 
 	private synchronized void handleBrowserResult(Map<String, String> params, HttpExchange exchange) {
+		addNoCache(exchange);
 		long id = parseLong(params.get("id"), -1);
 		long testId = parseLong(params.get("testId"), -1);
 
 		if ((id < 0) || (testId < 0)) {
-			System.out.println("Test id or browser id missing");
+			System.err.println("Test id or browser id missing");
 			return;
 		}
 
@@ -117,7 +138,6 @@ public class STJSTestServer {
 	}
 
 	private synchronized void handleResource(String path, HttpExchange exchange) throws IOException {
-
 		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
 		try {
 			if (is != null) {
@@ -152,6 +172,7 @@ public class STJSTestServer {
 	}
 
 	private synchronized void handleBrowser(Map<String, String> params, HttpExchange exchange) throws IOException {
+		addNoCache(exchange);
 		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
 		long id = parseLong(params.get("id"), -1);
 
@@ -180,7 +201,7 @@ public class STJSTestServer {
 	}
 
 	private synchronized void handleBrowserTest(Map<String, String> params, HttpExchange exchange) throws IOException {
-
+		addNoCache(exchange);
 		if ((testFile == null) || !testFile.exists()) {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
 			return;
@@ -193,6 +214,8 @@ public class STJSTestServer {
 
 	private synchronized void handleBrowserGetJs(String fileName, HttpExchange exchange) throws IOException,
 			URISyntaxException {
+		// Object modified = exchange.getRequestHeaders().get("If-Modified-Since");
+		// System.out.println(fileName + ":" + exchange.getRequestHeaders().keySet());
 		exchange.getResponseHeaders().add("Content-type", "text/javascript");
 		URI uri = new URI(fileName);
 		if ("classpath".equals(uri.getScheme())) {
@@ -222,14 +245,12 @@ public class STJSTestServer {
 	public synchronized TestResultCollection test(File srcFile) throws InterruptedException {
 		lastTestId++;
 		testFile = srcFile;
-		System.out.println("--> testing :" + lastTestId + ", file:" + testFile);
 		int testBrowsers = 0;
 		long endTime = System.currentTimeMillis() + (testTimeout * 1000);
 		TestResultCollection result = new TestResultCollection();
 		while (true) {
 			for (BrowserConnection b : browserConnections.values()) {
 				if (b.getLastTestId() == lastTestId) {
-					System.out.println("FOUND result:" + b);
 					result.addResult(b.getResult());
 					testBrowsers++;
 				}
@@ -239,7 +260,6 @@ public class STJSTestServer {
 			}
 			wait(500);
 		}
-		System.out.println("<-- testing :" + lastTestId + ", file:" + testFile);
 
 		testFile = null;
 		if (result.size() == 0) {

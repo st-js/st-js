@@ -37,6 +37,7 @@ import org.codehaus.plexus.compiler.util.scan.mapping.SuffixMapping;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfigurationBuilder;
+import org.stjs.generator.type.TypeWrappers;
 
 /**
  * This is the Maven plugin that launches the Javascript generator. The plugin needs a list of packages containing the
@@ -108,8 +109,12 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		}
 	}
 
+	@Override
 	public void execute() throws MojoExecutionException {
 		getLog().info("Generating javascript files");
+
+		// clear cache before each execution
+		TypeWrappers.clearCache();
 
 		ClassLoader builtProjectClassLoader = getBuiltProjectClassLoader();
 		Generator generator = new Generator();

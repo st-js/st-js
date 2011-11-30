@@ -37,7 +37,7 @@ public class ServerSession {
 		timeout = config.getWaitForBrowser() * 1000;
 		startBrowser = config.isStartBrowser();
 		browserCount = config.getBrowserCount();
-		server = new STJSTestServer(config.getPort(), config.getTestTimeout());
+		server = new STJSTestServer(config.getPort(), config.getTestTimeout(), config.isDebugEnabled());
 		server.start();
 		hasBrowsers = checkBrowsers();
 	}
