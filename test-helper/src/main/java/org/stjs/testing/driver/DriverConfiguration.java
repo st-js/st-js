@@ -26,7 +26,7 @@ import java.util.Properties;
  * 
  */
 public class DriverConfiguration {
-	private static final String FILE_NAME = "stjs-test.properties";
+	private static final String FILE_NAME = "/stjs-test.properties";
 
 	private static final String PROP_PORT = "stjs.test.port";
 
@@ -47,12 +47,13 @@ public class DriverConfiguration {
 	private int testTimeout = 2;
 	private int browserCount = 1;
 
-	public DriverConfiguration() {
-		InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(FILE_NAME);
+	public DriverConfiguration(Class<?> klass) {
+		InputStream in = klass.getResourceAsStream(FILE_NAME);
 		if (in != null) {
 			Properties props = new Properties();
 			try {
 				props.load(in);
+
 				// system properties take precedence
 				props.putAll(System.getProperties());
 				if (props.get(PROP_PORT) != null) {
@@ -78,12 +79,10 @@ public class DriverConfiguration {
 			} catch (IOException e) {
 				// silent
 			} finally {
-				if (in != null) {
-					try {
-						in.close();
-					} catch (IOException e) {
-						// silent
-					}
+				try {
+					in.close();
+				} catch (IOException e) {
+					// silent
 				}
 			}
 		}

@@ -41,10 +41,10 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 	public STJSTestDriverRunner(Class<?> klass) throws InitializationError {
 		super(klass);
 
-		DriverConfiguration config = new DriverConfiguration();
+		DriverConfiguration config = new DriverConfiguration(klass);
 		skipIfNoBrowser = config.isSkipIfNoBrowser();
 		try {
-			serverSession = ServerSession.getInstance();
+			serverSession = ServerSession.getInstance(config);
 		} catch (Exception e) {
 			throw new InitializationError(e);
 		}
@@ -72,12 +72,12 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 
 	private void addScript(Writer writer, String script) throws IOException {
 		if (script.startsWith("classpath:")) {
-			writer.append("<script src='" + script.substring("classpath:/".length()) + "'></script>");
+			writer.append("<script src='" + script.substring("classpath:/".length()) + "'></script>\n");
 		} else if (script.startsWith("file:")) {
 			writer.append("<script src='/js?" + URLEncoder.encode(script, Charset.defaultCharset().name())
-					+ "'></script>");
+					+ "'></script>\n");
 		} else {
-			writer.append("<script src='" + script + "'></script>");
+			writer.append("<script src='" + script + "'></script>\n");
 		}
 	}
 
@@ -98,8 +98,8 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 
 					writer.append("<html>");
 					writer.append("<head>");
-					writer.append("<script src='/stjs.js'></script>");
-					writer.append("<script src='/junit.js'></script>");
+					writer.append("<script src='/stjs.js'></script>\n");
+					writer.append("<script src='/junit.js'></script>\n");
 
 					if (addedScripts != null) {
 						for (String script : addedScripts.value()) {

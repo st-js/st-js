@@ -29,9 +29,7 @@ import org.stjs.javascript.functions.Callback1;
 
 /**
  * This class implements the {@link Array} interface to be used on the server side.
- * 
  * @author acraciun
- * 
  * @param <V>
  */
 public class ArrayImpl<V> implements Array<V> {
@@ -64,7 +62,7 @@ public class ArrayImpl<V> implements Array<V> {
 
 	@Override
 	public V $get(int index) {
-		if (index < 0 || index >= array.size()) {
+		if ((index < 0) || (index >= array.size())) {
 			return null;
 		}
 		return array.get(index);
@@ -219,7 +217,7 @@ public class ArrayImpl<V> implements Array<V> {
 		Collections.sort(array, new Comparator<V>() {
 			@Override
 			public int compare(V a, V b) {
-				return function.compare(a, b);
+				return function.$invoke(a, b);
 			}
 		});
 	}

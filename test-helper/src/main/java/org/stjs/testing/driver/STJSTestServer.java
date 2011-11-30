@@ -3,6 +3,7 @@ package org.stjs.testing.driver;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -44,6 +45,7 @@ public class STJSTestServer {
 		// create and register our handler
 		HttpHandler handler = new HttpHandler() {
 
+			@Override
 			public void handle(HttpExchange exchange) throws IOException {
 				System.out.println("GET:" + exchange.getRequestURI());
 				try {
@@ -53,7 +55,9 @@ public class STJSTestServer {
 
 					Map<String, String> params = parseQueryString(exchange.getRequestURI().getQuery());
 
-					if (BROWSER_CHECK_URI.equals(exchange.getRequestURI().getPath())) {
+					if ("/".equals(exchange.getRequestURI().getPath())) {
+						handleResource("start.html", exchange);
+					} else if (BROWSER_CHECK_URI.equals(exchange.getRequestURI().getPath())) {
 						handleBrowser(params, exchange);
 					} else if (BROWSER_RESULT_URI.equals(exchange.getRequestURI().getPath())) {
 						handleBrowserResult(params, exchange);
@@ -97,7 +101,7 @@ public class STJSTestServer {
 		long id = parseLong(params.get("id"), -1);
 		long testId = parseLong(params.get("testId"), -1);
 
-		if (id < 0 || testId < 0) {
+		if ((id < 0) || (testId < 0)) {
 			System.out.println("Test id or browser id missing");
 			return;
 		}
@@ -122,8 +126,9 @@ public class STJSTestServer {
 					exchange.getResponseHeaders().add("Content-type", "text/javascript");
 				}
 				exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-				ByteStreams.copy(is, exchange.getResponseBody());
-
+				OutputStream output = exchange.getResponseBody();
+				ByteStreams.copy(is, output);
+				output.flush();
 			} else {
 				System.err.println(path + " was not found in classpath");
 				exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
@@ -162,25 +167,28 @@ public class STJSTestServer {
 		StringBuilder jsonResponse = new StringBuilder();
 		jsonResponse.append("{");
 		jsonResponse.append("id:").append(id);
-		if (testFile != null && b.getLastTestId() != lastTestId) {
+		if ((testFile != null) && (b.getLastTestId() != lastTestId)) {
 			jsonResponse.append(",src:").append("'").append(BROWSER_TEST_URI).append("?test=").append(lastTestId)
 					.append("'");
 			jsonResponse.append(",testId:").append(lastTestId);
 		}
 		jsonResponse.append("}");
 
-		exchange.getResponseBody().write(jsonResponse.toString().getBytes());
+		OutputStream output = exchange.getResponseBody();
+		output.write(jsonResponse.toString().getBytes());
+		output.flush();
 	}
 
 	private synchronized void handleBrowserTest(Map<String, String> params, HttpExchange exchange) throws IOException {
 
-		if (testFile == null || !testFile.exists()) {
+		if ((testFile == null) || !testFile.exists()) {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
 			return;
 		}
 		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-		Files.copy(testFile, exchange.getResponseBody());
-
+		OutputStream output = exchange.getResponseBody();
+		Files.copy(testFile, output);
+		output.flush();
 	}
 
 	private synchronized void handleBrowserGetJs(String fileName, HttpExchange exchange) throws IOException,
@@ -191,7 +199,9 @@ public class STJSTestServer {
 			handleResource(uri.getPath(), exchange);
 		} else {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-			Files.copy(new File(uri.getPath().substring(1)), exchange.getResponseBody());
+			OutputStream output = exchange.getResponseBody();
+			Files.copy(new File(uri.getPath().substring(1)), output);
+			output.flush();
 		}
 	}
 
@@ -214,7 +224,7 @@ public class STJSTestServer {
 		testFile = srcFile;
 		System.out.println("--> testing :" + lastTestId + ", file:" + testFile);
 		int testBrowsers = 0;
-		long endTime = System.currentTimeMillis() + testTimeout * 1000;
+		long endTime = System.currentTimeMillis() + (testTimeout * 1000);
 		TestResultCollection result = new TestResultCollection();
 		while (true) {
 			for (BrowserConnection b : browserConnections.values()) {
@@ -224,7 +234,7 @@ public class STJSTestServer {
 					testBrowsers++;
 				}
 			}
-			if (testBrowsers == browserConnections.size() || System.currentTimeMillis() >= endTime) {
+			if ((testBrowsers == browserConnections.size()) || (System.currentTimeMillis() >= endTime)) {
 				break;
 			}
 			wait(500);

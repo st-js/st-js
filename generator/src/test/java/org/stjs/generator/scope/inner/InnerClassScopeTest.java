@@ -10,6 +10,8 @@ import org.junit.Test;
 import org.stjs.javascript.functions.Callback0;
 import org.stjs.javascript.functions.Callback1;
 import org.stjs.javascript.functions.Callback2;
+import org.stjs.javascript.functions.Callback3;
+import org.stjs.javascript.functions.Function1;
 
 public class InnerClassScopeTest {
 
@@ -63,5 +65,11 @@ public class InnerClassScopeTest {
 	@Test
 	public void testAnonClassAndInnerClass() {
 		assertResolvedAnonymousClass(AnonymousInnerClass4.class, 1, Callback2.class);
+	}
+
+	@Test
+	public void testAnonClassInConstructor() {
+		assertResolvedAnonymousClass(AnonymousInnerClass5.class, 1, Callback3.class);
+		assertResolvedAnonymousClass(AnonymousInnerClass5.class, 2, Function1.class);
 	}
 }

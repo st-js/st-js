@@ -25,15 +25,15 @@ public class ServerSession {
 	private final int browserCount;
 	private final boolean startBrowser;
 
-	public static synchronized ServerSession getInstance() throws IOException, InterruptedException {
+	public static synchronized ServerSession getInstance(DriverConfiguration config) throws IOException,
+			InterruptedException {
 		if (instance == null) {
-			instance = new ServerSession();
+			instance = new ServerSession(config);
 		}
 		return instance;
 	}
 
-	private ServerSession() throws IOException, InterruptedException {
-		DriverConfiguration config = new DriverConfiguration();
+	private ServerSession(DriverConfiguration config) throws IOException, InterruptedException {
 		timeout = config.getWaitForBrowser() * 1000;
 		startBrowser = config.isStartBrowser();
 		browserCount = config.getBrowserCount();
@@ -51,7 +51,7 @@ public class ServerSession {
 		try {
 			Thread.sleep(Math.min(initialTimeout, timeout));
 			if (server.getBrowserCount() < browserCount) {
-				if (startBrowser && Desktop.isDesktopSupported() && server.getBrowserCount() == 0) {
+				if (startBrowser && Desktop.isDesktopSupported() && (server.getBrowserCount() == 0)) {
 					System.out.println("Starting the default browser ...");
 					Desktop.getDesktop().browse(new URL(server.getHostURL(), "/start.html").toURI());
 				}
