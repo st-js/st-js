@@ -221,10 +221,15 @@ public class Generator {
 
 		@Override
 		public ClassWithJavascript resolve(String className) {
+			String parentClassName = className;
+			int pos = parentClassName.indexOf('$');
+			if (pos > 0) {
+				parentClassName = parentClassName.substring(0, pos);
+			}
 			// try first if to see if it's a bridge class
 			Class<?> clazz;
 			try {
-				clazz = builtProjectClassLoader.loadClass(className);
+				clazz = builtProjectClassLoader.loadClass(parentClassName);
 			} catch (ClassNotFoundException e) {
 				throw new RuntimeException(e);
 			}
@@ -233,14 +238,14 @@ public class Generator {
 			}
 
 			// check if it has already generated
-			STJSClass stjsClass = new STJSClass(this, builtProjectClassLoader, className);
+			STJSClass stjsClass = new STJSClass(this, builtProjectClassLoader, parentClassName);
 			if (stjsClass.getJavascriptFiles().isEmpty()) {
-				if (generationFolder == null || sourceFolder == null || targetFolder == null) {
+				if ((generationFolder == null) || (sourceFolder == null) || (targetFolder == null)) {
 					throw new IllegalStateException("This resolver assumed that the javascript for the class ["
-							+ className + "] was already generated");
+							+ parentClassName + "] was already generated");
 				}
-				stjsClass = generateJavascript(builtProjectClassLoader, className, sourceFolder, generationFolder,
-						targetFolder, configuration);
+				stjsClass = generateJavascript(builtProjectClassLoader, parentClassName, sourceFolder,
+						generationFolder, targetFolder, configuration);
 			}
 			return stjsClass;
 		}
