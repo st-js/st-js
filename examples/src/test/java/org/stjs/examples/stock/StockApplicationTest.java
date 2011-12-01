@@ -5,7 +5,7 @@ import static org.stjs.javascript.jquery.GlobalJQuery.$;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.Scripts;
 import org.stjs.testing.driver.STJSTestDriverRunner;
@@ -28,7 +28,7 @@ public class StockApplicationTest {
 		$("#newStock").val("goog");
 		$("#form").submit();
 		assertEquals(1, $("#form tr").size());
-		JQuery row = $("#form tr:nth-child(1)");
+		JQueryCore row = $("#form tr:nth-child(1)");
 		assertEquals("goog", row.find("td:nth-child(1)").text());
 		assertEquals("3.10", row.find("td:nth-child(2)").text());
 		assertEquals("0.10(0.03%)", row.find("td:nth-child(3)").text());

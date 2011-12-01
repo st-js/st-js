@@ -15,9 +15,9 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
-public interface Droppable<FullJQuery extends JQuery<?>> {
+public interface Droppable<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery droppable();
 
 	public FullJQuery droppable(DroppableOptions<FullJQuery> options);

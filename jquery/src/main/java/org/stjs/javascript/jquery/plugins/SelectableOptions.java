@@ -16,10 +16,10 @@
 package org.stjs.javascript.jquery.plugins;
 
 import org.stjs.javascript.annotation.DataType;
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
 @DataType
-public class SelectableOptions<FullJQuery extends JQuery<?>> {
+public class SelectableOptions<FullJQuery extends JQueryCore<?>> {
 	public boolean disabled = false;
 
 	public boolean autoRefresh = true;

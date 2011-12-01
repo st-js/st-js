@@ -15,9 +15,9 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
-public interface Sortable<FullJQuery extends JQuery<?>> {
+public interface Sortable<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery sortable();
 
 	public FullJQuery sortable(SortableOptions<FullJQuery> options);

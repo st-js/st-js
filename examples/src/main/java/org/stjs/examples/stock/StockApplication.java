@@ -16,6 +16,7 @@
 package org.stjs.examples.stock;
 
 import static org.stjs.javascript.Global.parseFloat;
+import static org.stjs.javascript.Global.parseInt;
 import static org.stjs.javascript.Global.setInterval;
 import static org.stjs.javascript.Global.window;
 import static org.stjs.javascript.JSCollections.$array;
@@ -29,7 +30,7 @@ import org.stjs.javascript.functions.Callback0;
 import org.stjs.javascript.functions.Callback3;
 import org.stjs.javascript.jquery.Event;
 import org.stjs.javascript.jquery.EventHandler;
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 import org.stjs.javascript.jquery.JQueryXHR;
 
 public class StockApplication {
@@ -76,7 +77,7 @@ public class StockApplication {
 		$(".removeStock").live("click", new EventHandler() {
 			@Override
 			public boolean onEvent(Event ev, final Element THIS) {
-				JQuery<?> $tr = $(THIS).parents("tr");
+				JQueryCore<?> $tr = $(THIS).parents("tr");
 				int index = $tr.parent().find("tr").index($tr);
 				that.stocks.splice(index);
 				$tr.remove();
@@ -88,7 +89,7 @@ public class StockApplication {
 		setInterval(new Callback0() {
 			@Override
 			public void $invoke() {
-				for (int i : that.stocks) {
+				for (String i : that.stocks) {
 					that.quoteProvider.updateStock(that.stocks.$get(i), new Callback3<Object, String, JQueryXHR>() {
 						@Override
 						public void $invoke(Object data, String status, JQueryXHR xhr) {
@@ -105,9 +106,9 @@ public class StockApplication {
 	}
 
 	private int getRowForStock(String stock) {
-		for (int i : stocks) {
+		for (String i : stocks) {
 			if (stocks.$get(i) == stock) {
-				return i;
+				return parseInt(i);
 			}
 		}
 		return -1;

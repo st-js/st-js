@@ -15,9 +15,9 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
-public interface Tabs<FullJQuery extends JQuery<?>> {
+public interface Tabs<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery tabs();
 
 	public FullJQuery tabs(TabsOptions<FullJQuery> options);

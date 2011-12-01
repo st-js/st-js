@@ -41,7 +41,12 @@
 		}
 	}
 
+
 	function sendError(method, ex){
+		if (ex != "OK") {
+			console.error(ex);
+			//console.error(stacktrace());
+		}
 		logDiv.innerHTML += "<br>Result:" + ex;
 		var xmlhttp = new XMLHttpRequest();
 		try {

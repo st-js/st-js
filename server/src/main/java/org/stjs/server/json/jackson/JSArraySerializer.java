@@ -25,21 +25,20 @@ import org.stjs.javascript.Array;
 
 public class JSArraySerializer extends JsonSerializer<Array<?>> {
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public Class<Array<?>> handledType() {
 		return (Class) Array.class;
 	}
 
 	@Override
-	public void serialize(Array<?> array, JsonGenerator gen, SerializerProvider provider) throws IOException,
-			JsonProcessingException {
+	public void serialize(Array<?> array, JsonGenerator gen, SerializerProvider provider) throws IOException, JsonProcessingException {
 		if (array == null) {
 			gen.writeNull();
 			return;
 		}
 		gen.writeStartArray();
-		for (int i : array) {
+		for (String i : array) {
 			provider.defaultSerializeValue(array.$get(i), gen);
 		}
 		gen.writeEndArray();

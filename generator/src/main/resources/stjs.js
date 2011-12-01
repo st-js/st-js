@@ -166,7 +166,7 @@ function isEnum(obj){
 
 /************* STJS asserts ***************/
 var stjsAssertHandler = function(position, code, msg) {
-	throw msg;
+	throw msg + " at " + position;
 }
 function setAssertHandler(a) {
 	stjsAssertHandler = a;

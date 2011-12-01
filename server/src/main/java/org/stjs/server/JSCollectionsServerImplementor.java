@@ -21,9 +21,7 @@ import org.stjs.javascript.Map;
 
 /**
  * this class implements the contract for Javascript collection on the server side
- * 
  * @author acraciun
- * 
  */
 public class JSCollectionsServerImplementor implements JSCollectionsImplementor {
 	@Override
@@ -34,19 +32,19 @@ public class JSCollectionsServerImplementor implements JSCollectionsImplementor 
 	}
 
 	@Override
-	public <K, V> Map<K, V> $map() {
+	public <K extends String, V> Map<K, V> $map() {
 		return new MapImpl<K, V>();
 	}
 
 	@Override
-	public <K, V> Map<K, V> $map(K k1, V v1) {
+	public <K extends String, V> Map<K, V> $map(K k1, V v1) {
 		Map<K, V> m = new MapImpl<K, V>();
 		m.$put(k1, v1);
 		return m;
 	}
 
 	@Override
-	public <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2) {
+	public <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2) {
 		Map<K, V> m = new MapImpl<K, V>();
 		m.$put(k1, v1);
 		m.$put(k2, v2);
@@ -54,7 +52,7 @@ public class JSCollectionsServerImplementor implements JSCollectionsImplementor 
 	}
 
 	@Override
-	public <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3) {
+	public <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3) {
 		Map<K, V> m = new MapImpl<K, V>();
 		m.$put(k1, v1);
 		m.$put(k2, v2);
@@ -63,7 +61,7 @@ public class JSCollectionsServerImplementor implements JSCollectionsImplementor 
 	}
 
 	@Override
-	public <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
+	public <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
 		Map<K, V> m = new MapImpl<K, V>();
 		m.$put(k1, v1);
 		m.$put(k2, v2);
@@ -73,7 +71,7 @@ public class JSCollectionsServerImplementor implements JSCollectionsImplementor 
 	}
 
 	@Override
-	public <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {
+	public <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {
 		Map<K, V> m = new MapImpl<K, V>();
 		m.$put(k1, v1);
 		m.$put(k2, v2);
@@ -85,7 +83,7 @@ public class JSCollectionsServerImplementor implements JSCollectionsImplementor 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, Object... morePairs) {
+	public <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, Object... morePairs) {
 		Map<K, V> m = new MapImpl<K, V>();
 		m.$put(k1, v1);
 		m.$put(k2, v2);

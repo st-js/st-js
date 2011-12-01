@@ -15,9 +15,9 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
-abstract public class TabsUI<FullJQuery extends JQuery<?>> {
+abstract public class TabsUI<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery tab; // anchor element of the selected (clicked) tab
 	public FullJQuery panel; // element, that contains the selected/clicked tab contents
 	public int index; // zero-based index of the selected (clicked) tab

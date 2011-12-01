@@ -36,8 +36,8 @@ public class ArrayImpl<V> implements Array<V> {
 	private final List<V> array = new ArrayList<V>();
 
 	@Override
-	public Iterator<Integer> iterator() {
-		return new Iterator<Integer>() {
+	public Iterator<String> iterator() {
+		return new Iterator<String>() {
 			private int current = 0;
 
 			@Override
@@ -46,11 +46,11 @@ public class ArrayImpl<V> implements Array<V> {
 			}
 
 			@Override
-			public Integer next() {
+			public String next() {
 				if (!hasNext()) {
 					throw new NoSuchElementException();
 				}
-				return current++;
+				return Integer.toString(current++);
 			}
 
 			@Override
@@ -69,6 +69,11 @@ public class ArrayImpl<V> implements Array<V> {
 	}
 
 	@Override
+	public V $get(String index) {
+		return $get(Integer.valueOf(index));
+	}
+
+	@Override
 	public void $set(int index, V value) {
 		if (index < 0) {
 			return;
@@ -77,6 +82,10 @@ public class ArrayImpl<V> implements Array<V> {
 			$length(index + 1);
 		}
 		array.set(index, value);
+	}
+
+	public void $set(String index, V value) {
+		$set(Integer.valueOf(index), value);
 	}
 
 	@Override

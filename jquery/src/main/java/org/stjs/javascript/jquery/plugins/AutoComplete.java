@@ -15,9 +15,9 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
-public interface AutoComplete<FullJQuery extends JQuery<?>> {
+public interface AutoComplete<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery autocomplete();
 
 	public FullJQuery autocomplete(AutoCompleteOptions<FullJQuery> options);

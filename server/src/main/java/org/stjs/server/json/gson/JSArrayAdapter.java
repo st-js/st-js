@@ -38,8 +38,7 @@ public class JSArrayAdapter implements JsonSerializer<Array<?>>, JsonDeserialize
 			return null;
 		}
 		JsonArray js = elem.getAsJsonArray();
-		Type elementType = (type instanceof ParameterizedType) ? ((ParameterizedType) type).getActualTypeArguments()[0]
-				: Object.class;
+		Type elementType = (type instanceof ParameterizedType) ? ((ParameterizedType) type).getActualTypeArguments()[0] : Object.class;
 		Array<Object> array = JSCollections.$array();
 		for (int i = 0; i < js.size(); ++i) {
 			array.push(ctx.deserialize(js.get(i), elementType));
@@ -54,7 +53,7 @@ public class JSArrayAdapter implements JsonSerializer<Array<?>>, JsonDeserialize
 			return new JsonNull();
 		}
 		JsonArray js = new JsonArray();
-		for (int i : array) {
+		for (String i : array) {
 			js.add(ctx.serialize(array.$get(i)));
 		}
 		return js;

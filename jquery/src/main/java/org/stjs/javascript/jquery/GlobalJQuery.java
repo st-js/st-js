@@ -50,11 +50,9 @@ abstract public class GlobalJQuery {
 
 	abstract public void ajaxSetup(Map<String, Object> options);
 
-	abstract public void get(String url, Object params, Callback3<Object, String, JQueryXHR> successListener,
-			String mode);
+	abstract public void get(String url, Object params, Callback3<Object, String, JQueryXHR> successListener, String mode);
 
-	abstract public void getJSON(String url, Object params,
-			Callback3<? extends Object, String, JQueryXHR> successListener);
+	abstract public void getJSON(String url, Object params, Callback3<? extends Object, String, JQueryXHR> successListener);
 
 	abstract public <C, E, R> Array<R> map(C collection, Function2<E, Integer, R> callback);
 
@@ -65,13 +63,13 @@ abstract public class GlobalJQuery {
 	abstract public <FullJQuery extends JQueryAndPlugins<?>> void each(JQueryAndPlugins<FullJQuery> collection,
 			Callback2<Integer, Element> elementIterationFunction);
 
-	abstract public <K, V> void each(Map<K, V> collection, Callback2<K, V> elementIterationFunction);
+	abstract public <K extends String, V> void each(Map<K, V> collection, Callback2<K, V> elementIterationFunction);
 
 	abstract public String trim(String obj);
 
-	abstract public <K, V> Map<K, V> extend(Map<K, V> target, Map<K, V>... objects);
+	abstract public <K extends String, V> Map<K, V> extend(Map<K, V> target, Map<K, V>... objects);
 
-	abstract public <K, V> Map<K, V> extend(boolean deep, Map<K, V> target, Map<K, V>... objects);
+	abstract public <K extends String, V> Map<K, V> extend(boolean deep, Map<K, V> target, Map<K, V>... objects);
 
 	abstract public <T> T parseJSON(String message);
 

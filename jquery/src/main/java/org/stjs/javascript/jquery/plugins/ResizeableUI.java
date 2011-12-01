@@ -15,11 +15,11 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 import org.stjs.javascript.jquery.Position;
 import org.stjs.javascript.jquery.Size;
 
-abstract public class ResizeableUI<FullJQuery extends JQuery<?>> {
+abstract public class ResizeableUI<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery helper;
 	public Position originalPosition;
 	public Size originalSize;

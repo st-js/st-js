@@ -15,9 +15,9 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
-public interface Progressbar<FullJQuery extends JQuery<?>> {
+public interface Progressbar<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery progressbar();
 
 	public FullJQuery progressbar(ProgressbarOptions<FullJQuery> options);

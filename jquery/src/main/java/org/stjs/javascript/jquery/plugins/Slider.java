@@ -15,9 +15,9 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
-public interface Slider<FullJQuery extends JQuery<?>> {
+public interface Slider<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery slider();
 
 	public FullJQuery slider(SliderOptions<FullJQuery> options);

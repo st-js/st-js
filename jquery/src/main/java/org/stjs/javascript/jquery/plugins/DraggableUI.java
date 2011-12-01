@@ -15,10 +15,10 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 import org.stjs.javascript.jquery.Position;
 
-abstract public class DraggableUI<FullJQuery extends JQuery<?>> {
+abstract public class DraggableUI<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery helper;
 	public Position position;
 	public Position offset;

@@ -22,12 +22,10 @@ import org.stjs.javascript.Map;
 
 /**
  * This class implements the {@link Map} interface to be used on the server side.
- * 
  * @author acraciun
- * 
  * @param <V>
  */
-public class MapImpl<K, V> implements Map<K, V> {
+public class MapImpl<K extends String, V> implements Map<K, V> {
 	private final java.util.Map<K, V> map = new HashMap<K, V>();
 
 	@Override

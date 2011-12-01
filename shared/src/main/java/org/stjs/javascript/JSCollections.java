@@ -18,14 +18,13 @@ package org.stjs.javascript;
 import org.stjs.javascript.annotation.GlobalScope;
 
 /**
- * this class offers map and array builders for both client and server side. For the server side, it delegates the
- * execution to an instance of {@link JSCollectionsImplementor}. On the client side, it simply throws an
- * {@link UnsupportedOperationException} like all the client-side bridges.
- * 
+ * this class offers map and array builders for both client and server side. For the server side, it delegates the execution to an instance of
+ * {@link JSCollectionsImplementor}. On the client side, it simply throws an {@link UnsupportedOperationException} like all the client-side
+ * bridges.
  * @author acraciun
- * 
  */
 @GlobalScope
+@SuppressWarnings("unchecked")
 public class JSCollections {
 	private static JSCollectionsImplementor implementor = null;
 
@@ -36,10 +35,11 @@ public class JSCollections {
 		}
 		try {
 			// TODO it could be a cleaner way to inject the implementation, but for the moment this should be enough
-			Class<? extends JSCollectionsImplementor> clazz = (Class<? extends JSCollectionsImplementor>) Class
-					.forName("org.stjs.server.JSCollectionsServerImplementor");
+			Class<? extends JSCollectionsImplementor> clazz =
+					(Class<? extends JSCollectionsImplementor>) Class.forName("org.stjs.server.JSCollectionsServerImplementor");
 			implementor = clazz.newInstance();
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new UnsupportedOperationException();
 		}
 		return implementor;
@@ -53,34 +53,33 @@ public class JSCollections {
 		return getImplementor().$castArray(a);
 	}
 
-	public static <K, V> Map<K, V> $map() {
+	public static <K extends String, V> Map<K, V> $map() {
 		return getImplementor().$map();
 	}
 
-	public static <K, V> Map<K, V> $map(K k1, V v1) {
+	public static <K extends String, V> Map<K, V> $map(K k1, V v1) {
 		return getImplementor().$map(k1, v1);
 	}
 
-	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2) {
+	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2) {
 		return getImplementor().$map(k1, v1, k2, v2);
 	}
 
-	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3) {
+	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3) {
 		return getImplementor().$map(k1, v1, k2, v2, k3, v3);
 
 	}
 
-	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
+	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
 		return getImplementor().$map(k1, v1, k2, v2, k3, v3, k4, v4);
 	}
 
-	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {
+	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {
 		return getImplementor().$map(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6,
-			Object... morePairs) {
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, Object... morePairs) {
 		return (Map) getImplementor().$map(k1, v1, k2, v2, k3, v3, k4, v4, k6, morePairs);
 	}
 

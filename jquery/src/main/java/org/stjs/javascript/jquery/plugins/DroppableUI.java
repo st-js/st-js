@@ -15,10 +15,10 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 import org.stjs.javascript.jquery.Position;
 
-abstract public class DroppableUI<FullJQuery extends JQuery<?>> {
+abstract public class DroppableUI<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery draggable;
 	public FullJQuery helper;
 	public Position position;

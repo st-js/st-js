@@ -26,10 +26,10 @@ import org.stjs.javascript.functions.Callback2;
 import org.stjs.javascript.functions.Callback3;
 import org.stjs.javascript.functions.Function1;
 import org.stjs.javascript.functions.Function2;
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
 @DataType
-public class DatePickerOptions<FullJQuery extends JQuery<?>> {
+public class DatePickerOptions<FullJQuery extends JQueryCore<?>> {
 	public boolean disabled = false;
 
 	public Object altField = "";

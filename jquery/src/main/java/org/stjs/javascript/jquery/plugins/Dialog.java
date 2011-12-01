@@ -15,9 +15,9 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
-public interface Dialog<FullJQuery extends JQuery<?>> {
+public interface Dialog<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery dialog();
 
 	public FullJQuery dialog(DialogOptions<FullJQuery> options);

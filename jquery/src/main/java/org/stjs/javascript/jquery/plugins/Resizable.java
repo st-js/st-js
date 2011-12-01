@@ -15,9 +15,9 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
-public interface Resizable<FullJQuery extends JQuery<?>> {
+public interface Resizable<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery resizable();
 
 	public FullJQuery resizable(ResizableOptions<FullJQuery> options);

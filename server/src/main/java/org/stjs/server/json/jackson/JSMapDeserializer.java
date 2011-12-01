@@ -31,7 +31,7 @@ import org.codehaus.jackson.type.JavaType;
 import org.stjs.javascript.JSCollections;
 import org.stjs.javascript.Map;
 
-public class JSMapDeserializer extends ContainerDeserializer<Map<Object, Object>> {
+public class JSMapDeserializer extends ContainerDeserializer<Map<String, Object>> {
 
 	final protected JavaType _mapType;
 
@@ -55,8 +55,7 @@ public class JSMapDeserializer extends ContainerDeserializer<Map<Object, Object>
 	 * /**********************************************************
 	 */
 
-	public JSMapDeserializer(JavaType mapType, KeyDeserializer keyDeser, JsonDeserializer<Object> valueDeser,
-			TypeDeserializer valueTypeDeser) {
+	public JSMapDeserializer(JavaType mapType, KeyDeserializer keyDeser, JsonDeserializer<Object> valueDeser, TypeDeserializer valueTypeDeser) {
 		super(Map.class);
 		_mapType = mapType;
 		_keyDeserializer = keyDeser;
@@ -85,26 +84,25 @@ public class JSMapDeserializer extends ContainerDeserializer<Map<Object, Object>
 	 */
 
 	@Override
-	public Map<Object, Object> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException,
-			JsonProcessingException {
+	public Map<String, Object> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
 		// Ok: must point to START_OBJECT, FIELD_NAME or END_OBJECT
 		JsonToken t = jp.getCurrentToken();
-		if (t != JsonToken.START_OBJECT && t != JsonToken.FIELD_NAME && t != JsonToken.END_OBJECT) {
+		if ((t != JsonToken.START_OBJECT) && (t != JsonToken.FIELD_NAME) && (t != JsonToken.END_OBJECT)) {
 			throw ctxt.mappingException(getMapClass());
 		}
 
-		Map<Object, Object> result = JSCollections.$map();
+		Map<String, Object> result = JSCollections.$map();
 
 		_readAndBind(jp, ctxt, result);
 		return result;
 	}
 
 	@Override
-	public Map<Object, Object> deserialize(JsonParser jp, DeserializationContext ctxt, Map<Object, Object> result)
-			throws IOException, JsonProcessingException {
+	public Map<String, Object> deserialize(JsonParser jp, DeserializationContext ctxt, Map<String, Object> result) throws IOException,
+			JsonProcessingException {
 		// Ok: must point to START_OBJECT or FIELD_NAME
 		JsonToken t = jp.getCurrentToken();
-		if (t != JsonToken.START_OBJECT && t != JsonToken.FIELD_NAME) {
+		if ((t != JsonToken.START_OBJECT) && (t != JsonToken.FIELD_NAME)) {
 			throw ctxt.mappingException(getMapClass());
 		}
 		_readAndBind(jp, ctxt, result);
@@ -112,8 +110,8 @@ public class JSMapDeserializer extends ContainerDeserializer<Map<Object, Object>
 	}
 
 	@Override
-	public Object deserializeWithType(JsonParser jp, DeserializationContext ctxt, TypeDeserializer typeDeserializer)
-			throws IOException, JsonProcessingException {
+	public Object deserializeWithType(JsonParser jp, DeserializationContext ctxt, TypeDeserializer typeDeserializer) throws IOException,
+			JsonProcessingException {
 		// In future could check current token... for now this should be enough:
 		return typeDeserializer.deserializeTypedFromObject(jp, ctxt);
 	}
@@ -137,8 +135,8 @@ public class JSMapDeserializer extends ContainerDeserializer<Map<Object, Object>
 	 * /**********************************************************
 	 */
 
-	protected final void _readAndBind(JsonParser jp, DeserializationContext ctxt, Map<Object, Object> result)
-			throws IOException, JsonProcessingException {
+	protected final void _readAndBind(JsonParser jp, DeserializationContext ctxt, Map<String, Object> result) throws IOException,
+			JsonProcessingException {
 		JsonToken t = jp.getCurrentToken();
 		if (t == JsonToken.START_OBJECT) {
 			t = jp.nextToken();
@@ -166,14 +164,14 @@ public class JSMapDeserializer extends ContainerDeserializer<Map<Object, Object>
 			 * !!! 23-Dec-2008, tatu: should there be an option to verify that there are no duplicate field names?
 			 * (and/or what to do, keep-first or keep-last)
 			 */
-			result.$put(key, value);
+			result.$put(key.toString(), value);
 		}
 	}
 
 	// note: copied form BeanDeserializer; should try to share somehow...
 	protected void wrapAndThrow(Throwable t, Object ref) throws IOException {
 		// to handle StackOverflow:
-		while (t instanceof InvocationTargetException && t.getCause() != null) {
+		while ((t instanceof InvocationTargetException) && (t.getCause() != null)) {
 			t = t.getCause();
 		}
 		// Errors and "plain" IOExceptions to be passed as is
@@ -181,7 +179,7 @@ public class JSMapDeserializer extends ContainerDeserializer<Map<Object, Object>
 			throw (Error) t;
 		}
 		// ... except for mapping exceptions
-		if (t instanceof IOException && !(t instanceof JsonMappingException)) {
+		if ((t instanceof IOException) && !(t instanceof JsonMappingException)) {
 			throw (IOException) t;
 		}
 		throw JsonMappingException.wrapWithPath(t, ref, null);

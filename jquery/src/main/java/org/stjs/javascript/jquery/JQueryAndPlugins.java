@@ -36,7 +36,7 @@ import org.stjs.javascript.jquery.plugins.Tabs;
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  * 
  */
-public interface JQueryAndPlugins<FullJQuery extends JQueryAndPlugins<?>> extends JQuery<FullJQuery>, //
+public interface JQueryAndPlugins<FullJQuery extends JQueryAndPlugins<?>> extends JQueryCore<FullJQuery>, //
 		JQueryUI<FullJQuery>,// Accordion<FullJQuery>,//
 		AutoComplete<FullJQuery>,//
 		Button<FullJQuery>,//

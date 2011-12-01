@@ -15,8 +15,8 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
-abstract public class SelectableUI<FullJQuery extends JQuery<?>> {
+abstract public class SelectableUI<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery helper;
 }

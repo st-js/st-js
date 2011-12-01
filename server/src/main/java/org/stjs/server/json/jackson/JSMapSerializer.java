@@ -24,16 +24,15 @@ import org.codehaus.jackson.map.SerializerProvider;
 import org.stjs.javascript.Map;
 
 public class JSMapSerializer extends JsonSerializer<Map<?, ?>> {
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public Class<Map<?, ?>> handledType() {
 		return (Class) Map.class;
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
-	public void serialize(Map<?, ?> map, JsonGenerator gen, SerializerProvider provider) throws IOException,
-			JsonProcessingException {
+	public void serialize(Map<?, ?> map, JsonGenerator gen, SerializerProvider provider) throws IOException, JsonProcessingException {
 		if (map == null) {
 			gen.writeNull();
 			return;
@@ -41,7 +40,7 @@ public class JSMapSerializer extends JsonSerializer<Map<?, ?>> {
 
 		gen.writeStartObject();
 		for (Object k : map) {
-			provider.defaultSerializeField(k.toString(), ((Map) map).$get(k), gen);
+			provider.defaultSerializeField(k.toString(), ((Map) map).$get(k.toString()), gen);
 		}
 		gen.writeEndObject();
 

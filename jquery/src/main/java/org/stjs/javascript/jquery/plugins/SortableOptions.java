@@ -16,10 +16,10 @@
 package org.stjs.javascript.jquery.plugins;
 
 import org.stjs.javascript.annotation.DataType;
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
 @DataType
-public class SortableOptions<FullJQuery extends JQuery<?>> {
+public class SortableOptions<FullJQuery extends JQueryCore<?>> {
 	public boolean disabled = false;
 
 	public String appendTo = "parent";

@@ -38,8 +38,7 @@ public class JSMapAdapter implements JsonSerializer<Map<?, ?>>, JsonDeserializer
 			return null;
 		}
 		JsonObject js = elem.getAsJsonObject();
-		Type valueType = (type instanceof ParameterizedType) ? ((ParameterizedType) type).getActualTypeArguments()[1]
-				: Object.class;
+		Type valueType = (type instanceof ParameterizedType) ? ((ParameterizedType) type).getActualTypeArguments()[1] : Object.class;
 		Map<String, Object> map = JSCollections.$map();
 		for (java.util.Map.Entry<String, JsonElement> entry : js.entrySet()) {
 			map.$put(entry.getKey(), ctx.deserialize(entry.getValue(), valueType));
@@ -56,7 +55,7 @@ public class JSMapAdapter implements JsonSerializer<Map<?, ?>>, JsonDeserializer
 		}
 		JsonObject js = new JsonObject();
 		for (Object k : map) {
-			js.add(k.toString(), ctx.serialize(((Map) map).$get(k)));
+			js.add(k.toString(), ctx.serialize(((Map) map).$get(k.toString())));
 		}
 		return js;
 	}

@@ -15,9 +15,9 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
-public interface Datepicker<FullJQuery extends JQuery<?>> {
+public interface Datepicker<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery datepicker();
 
 	public FullJQuery datepicker(DatePickerOptions<FullJQuery> options);

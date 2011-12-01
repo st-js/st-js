@@ -17,10 +17,10 @@ package org.stjs.javascript.jquery.plugins;
 
 import org.stjs.javascript.Array;
 import org.stjs.javascript.annotation.DataType;
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
 @DataType
-public class SliderOptions<FullJQuery extends JQuery<?>> {
+public class SliderOptions<FullJQuery extends JQueryCore<?>> {
 	public boolean disabled = false;
 	public double min = 0;
 	public double max = 100;

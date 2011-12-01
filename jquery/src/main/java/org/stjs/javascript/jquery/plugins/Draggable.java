@@ -15,9 +15,9 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
-public interface Draggable<FullJQuery extends JQuery<?>> {
+public interface Draggable<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery draggable();
 
 	public FullJQuery draggable(DraggableOptions<FullJQuery> options);

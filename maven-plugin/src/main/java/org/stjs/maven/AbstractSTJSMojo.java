@@ -141,7 +141,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			File sourceDir = new File(sourceRoot);
 			List<File> sources = new ArrayList<File>();
 			SourceMapping mapping = new SuffixMapping(".java", ".js");
-			sources = accumulateSources(sourceDir, mapping);
+			SourceMapping stjsMapping = new SuffixMapping(".java", ".stjs");
+			sources = accumulateSources(sourceDir, mapping, stjsMapping);
 			for (File source : sources) {
 				try {
 					// File absoluteSource = new File(sourceDir, source.getPath());
@@ -212,14 +213,17 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	 *         file). The returned files are relative to the given source directory.
 	 */
 	@SuppressWarnings("unchecked")
-	private List<File> accumulateSources(File sourceDir, SourceMapping mapping) throws MojoExecutionException {
+	private List<File> accumulateSources(File sourceDir, SourceMapping jsMapping, SourceMapping stjsMapping)
+			throws MojoExecutionException {
 		final List<File> result = new ArrayList<File>();
 		if (sourceDir == null) {
 			return result;
 		}
-		SourceInclusionScanner scanner = getSourceInclusionScanner(staleMillis);
+		SourceInclusionScanner jsScanner = getSourceInclusionScanner(staleMillis);
+		jsScanner.addSourceMapping(jsMapping);
 
-		scanner.addSourceMapping(mapping);
+		SourceInclusionScanner stjsScanner = getSourceInclusionScanner(staleMillis);
+		stjsScanner.addSourceMapping(stjsMapping);
 
 		final Set<File> staleFiles = new LinkedHashSet<File>();
 
@@ -229,7 +233,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			}
 
 			try {
-				staleFiles.addAll(scanner.getIncludedSources(f.getParentFile(), getGeneratedSourcesDirectory()));
+				staleFiles.addAll(jsScanner.getIncludedSources(f.getParentFile(), getGeneratedSourcesDirectory()));
+				staleFiles.addAll(stjsScanner.getIncludedSources(f.getParentFile(), getBuildOutputDirectory()));
 			} catch (InclusionScanException e) {
 				throw new MojoExecutionException("Error scanning source root: \'" + sourceDir.getPath() + "\' "
 						+ "for stale files to recompile.", e);

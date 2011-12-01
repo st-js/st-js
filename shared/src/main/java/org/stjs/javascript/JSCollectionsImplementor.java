@@ -17,26 +17,24 @@ package org.stjs.javascript;
 
 /**
  * This interface is used to separate the implementations between the client and the server for the maps.
- * 
  * @author acraciun
- * 
  */
 public interface JSCollectionsImplementor {
 	public <V> Array<V> $array(V... values);
 
 	public <T> Array<T> $castArray(T[] a);
 
-	public <K, V> Map<K, V> $map();
+	public <K extends String, V> Map<K, V> $map();
 
-	public <K, V> Map<K, V> $map(K k1, V v1);
+	public <K extends String, V> Map<K, V> $map(K k1, V v1);
 
-	public <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2);
+	public <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2);
 
-	public <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3);
+	public <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3);
 
-	public <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4);
+	public <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4);
 
-	public <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5);
+	public <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5);
 
-	public <K, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, Object... morePairs);
+	public <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, Object... morePairs);
 }

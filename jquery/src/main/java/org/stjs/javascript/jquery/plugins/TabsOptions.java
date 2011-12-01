@@ -15,9 +15,9 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
-public class TabsOptions<FullJQuery extends JQuery<?>> {
+public class TabsOptions<FullJQuery extends JQueryCore<?>> {
 	public Object disabled = false;
 	// also : public Array<String> disabled;
 

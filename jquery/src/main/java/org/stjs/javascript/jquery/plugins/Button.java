@@ -15,9 +15,9 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.jquery.JQuery;
+import org.stjs.javascript.jquery.JQueryCore;
 
-public interface Button<FullJQuery extends JQuery<?>> {
+public interface Button<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery button();
 
 	public FullJQuery button(ButtonOptions<FullJQuery> options);
