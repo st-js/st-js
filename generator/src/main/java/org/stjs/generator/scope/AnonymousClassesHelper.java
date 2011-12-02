@@ -56,9 +56,6 @@ public class AnonymousClassesHelper {
 	private final static Pattern ANONYMOUS_CLASS_PATTERN = Pattern.compile("\\$\\d+$");
 	private final Multimap<String, String> classesByMethod = ArrayListMultimap.create();
 
-	// private final Map<Integer, String> classesByLineNumber = new LinkedHashMap<Integer, String>();
-	private String info = "";
-
 	@SuppressWarnings("unchecked")
 	public AnonymousClassesHelper(Class<?> ownerClass) {
 		JavaClass clazz;
@@ -83,7 +80,6 @@ public class AnonymousClassesHelper {
 				if (h.getInstruction() instanceof NEW) {
 					NEW newInstr = (NEW) h.getInstruction();
 					String typeName = newInstr.getType(g.getConstantPool()).toString();
-					info += methodName + "=" + typeName + ", ";
 					if (isAnonymousClass(typeName)) {
 						classesByMethod.put(methodName, typeName);
 					}
@@ -132,9 +128,7 @@ public class AnonymousClassesHelper {
 		String method = getMethodName(node);
 		Collection<String> classes = classesByMethod.get(method);
 		if ((classes == null) || classes.isEmpty()) {
-			throw new IllegalArgumentException("Cannot find for node:" + node.getBeginLine() + " classes:"
-					+ classesByMethod + " xinfo:" + info);
-			// return null;
+			return null;
 		}
 		// remove first because the calls will come ordered
 		Iterator<String> it = classes.iterator();
