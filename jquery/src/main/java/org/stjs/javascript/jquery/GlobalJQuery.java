@@ -48,11 +48,13 @@ abstract public class GlobalJQuery {
 
 	abstract public void ajax(AjaxParams params);
 
-	abstract public void ajaxSetup(Map<String, Object> options);
+	abstract public void ajaxSetup(Map<String, ? extends Object> options);
 
-	abstract public void get(String url, Object params, Callback3<Object, String, JQueryXHR> successListener, String mode);
+	abstract public void get(String url, Object params, Callback3<Object, String, JQueryXHR> successListener,
+			String mode);
 
-	abstract public void getJSON(String url, Object params, Callback3<? extends Object, String, JQueryXHR> successListener);
+	abstract public void getJSON(String url, Object params,
+			Callback3<? extends Object, String, JQueryXHR> successListener);
 
 	abstract public <C, E, R> Array<R> map(C collection, Function2<E, Integer, R> callback);
 

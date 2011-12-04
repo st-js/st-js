@@ -7,6 +7,13 @@
 	var logDiv, statusDiv;
 	var testId = 0;
 
+	function status(s){
+		statusDiv.innerHTML = "STJS Error:" + s;
+	}
+
+	function log(s){
+		logDiv.innerHTML += new Date().toLocaleTimeString() + " " + s + "<br>";
+	}
 	function retrieve() {
 		var xmlhttp = new XMLHttpRequest();
 		xmlhttp.onreadystatechange = function() {
@@ -15,15 +22,15 @@
 						if (xmlhttp.status == 200) {
 							var response = eval("(" + xmlhttp.responseText + ")");
 							id = response.id;
-							statusDiv.innerHTML = xmlhttp.responseText + (++count);
+							status(xmlhttp.responseText + (++count));
 							if (response.src != null && response.src != lastTestSrc) {
 								testId = response.testId;
-								logDiv.innerHTML += "<br>Executing:" + response.src;
+								log("Executing:" + response.src);
 								document.getElementById("iframe").src = response.src;
 								lastTestSrc = response.src;
 							}
 						} else {
-							statusDiv.innerHTML = "Error:" + xmlhttp.status;
+							status(xmlhttp.status);
 						}
 					} catch(ex){
 						console.error("error:" + ex);
@@ -47,7 +54,7 @@
 			console.error(ex);
 			//console.error(stacktrace());
 		}
-		logDiv.innerHTML += "<br>Result:" + ex;
+		log("Result:" + ex);
 		var xmlhttp = new XMLHttpRequest();
 		try {
 			var result = ex.message || ex;
@@ -66,11 +73,24 @@
 		retrieve();
 	}
 </script>
+<style>
+	#status {
+		border-bottom: solid 1px #ccc;
+		padding-bottom: 5px;
+	}
+	#iframe {
+		float:left;
+	}
+	#log {
+		float:left;
+		width:400px;
+		padding-left: 20px;
+	}
+</style>
 </head>
 <body>
-	STJS
 	<div id="status"></div>
+	<iframe id="iframe" src="about:blank" width=600 height=400></iframe>
 	<div id="log"></div>
-	<iframe id="iframe" src="about:blank" width=600 height=300></iframe>
 </body>
 </html>

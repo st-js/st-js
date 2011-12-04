@@ -48,6 +48,7 @@ public class StockApplication {
 			public boolean onEvent(Event ev, Element THIS) {
 				StockApplication a = new StockApplication(new YahooQuoteProvider());
 				a.init();
+				a.startUpdate(5000);
 				return false;
 			}
 		});
@@ -85,6 +86,15 @@ public class StockApplication {
 			}
 		});
 
+	}
+
+	/**
+	 * starts the regular update from the quote provider
+	 * 
+	 * @param interval
+	 */
+	public void startUpdate(int interval) {
+		final StockApplication that = this;
 		// automatic update
 		setInterval(new Callback0() {
 			@Override
@@ -102,7 +112,7 @@ public class StockApplication {
 					});
 				}
 			}
-		}, 5000);
+		}, interval);
 	}
 
 	private int getRowForStock(String stock) {
@@ -127,14 +137,6 @@ public class StockApplication {
 		tr += "<td><button class='removeStock'>Remove</button></td>";
 		tr += "</tr>";
 		return tr;
-	}
-
-	public static void test2() {
-		$("#test2").text("check static");
-	}
-
-	public void test3(String n) {
-		$("#test3").text(n);
 	}
 
 	static class Response {

@@ -6,11 +6,12 @@ import java.util.List;
 public class TestResultCollection {
 	private final List<TestResult> results = new ArrayList<TestResult>();
 
-	public void addResult(TestResult result) {
+	public synchronized void addResult(TestResult result) {
 		results.add(result);
+		notify();
 	}
 
-	public boolean isOk() {
+	public synchronized boolean isOk() {
 		for (TestResult result : results) {
 			if (!result.isOk()) {
 				return false;
@@ -19,11 +20,27 @@ public class TestResultCollection {
 		return true;
 	}
 
-	public TestResult getResult(int i) {
+	public synchronized TestResult getResult(int i) {
 		return results.get(i);
 	}
 
-	public int size() {
+	public synchronized int size() {
 		return results.size();
 	}
+
+	/**
+	 * 
+	 * @param className
+	 * @param methodName
+	 * @return the exception for the first wrong result
+	 */
+	public synchronized AssertionError buildException(String className, String methodName) {
+		for (TestResult result : results) {
+			if (!result.isOk()) {
+				return result.buildException(className, methodName);
+			}
+		}
+		return null;
+	}
+
 }

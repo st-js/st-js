@@ -22,32 +22,30 @@ package org.stjs.testing.driver;
  * 
  */
 public class BrowserConnection {
-	/**
-	 * the result of the last test
-	 */
-	private TestResult result;
 
-	private long lastTestId;
+	private final long id;
+	private final String userAgent;
 
-	public TestResult getResult() {
-		return result;
+	public BrowserConnection(long id, String userAgent) {
+		this.id = id;
+		this.userAgent = userAgent;
 	}
 
-	public void setResult(TestResult result) {
-		this.result = result;
+	public long getId() {
+		return id;
 	}
 
-	public long getLastTestId() {
-		return lastTestId;
+	public TestResult buildResult(String message, String location) {
+		return new TestResult(userAgent, message, location);
 	}
 
-	public void setLastTestId(long lastTestId) {
-		this.lastTestId = lastTestId;
+	public String getUserAgent() {
+		return userAgent;
 	}
 
 	@Override
 	public String toString() {
-		return "BrowserConnection [result=" + result + ", lastTestId=" + lastTestId + "]";
+		return "BrowserConnection [id=" + id + ", userAgent=" + userAgent + "]";
 	}
 
 }

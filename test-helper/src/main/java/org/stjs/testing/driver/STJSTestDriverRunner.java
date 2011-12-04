@@ -102,6 +102,7 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 					writer.append("<script src='/stjs.js'></script>\n");
 					writer.append("<script src='/junit.js'></script>\n");
 
+					writer.append("<script language='javascript'>stjs.mainCallDisabled=true;</script>");
 					if (addedScripts != null) {
 						for (String script : addedScripts.value()) {
 							addScript(writer, script);
@@ -154,8 +155,7 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 					TestResultCollection response = serverSession.getServer().test(htmlFile);
 					if (!response.isOk()) {
 						// take the first wrong result
-						throw response.getResult(0).buildException(getTestClass().getJavaClass().getName(),
-								method.getName());
+						throw response.buildException(getTestClass().getJavaClass().getName(), method.getName());
 					}
 				} catch (IOException e) {
 					throw new RuntimeException(e);

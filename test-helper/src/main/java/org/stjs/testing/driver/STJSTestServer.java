@@ -14,8 +14,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import com.google.common.io.ByteStreams;
@@ -41,6 +43,8 @@ public class STJSTestServer {
 	private boolean debug;
 
 	private File testFile = null;
+	private TestResultCollection results;
+	private Set<Long> browserWithCurrentTest;
 
 	public STJSTestServer(int port, int testTimeout, boolean debugParam) throws IOException {
 		this.port = port;
@@ -55,7 +59,7 @@ public class STJSTestServer {
 			@Override
 			public void handle(HttpExchange exchange) throws IOException {
 				if (debug) {
-					System.out.println("GET:" + exchange.getRequestURI());
+					System.out.println(exchange.getRequestMethod() + ": " + exchange.getRequestURI());
 				}
 				try {
 					Map<String, String> params = parseQueryString(exchange.getRequestURI().getQuery());
@@ -117,7 +121,7 @@ public class STJSTestServer {
 		return params;
 	}
 
-	private synchronized void handleBrowserResult(Map<String, String> params, HttpExchange exchange) {
+	private synchronized void handleBrowserResult(Map<String, String> params, HttpExchange exchange) throws IOException {
 		addNoCache(exchange);
 		long id = parseLong(params.get("id"), -1);
 		long testId = parseLong(params.get("testId"), -1);
@@ -129,12 +133,13 @@ public class STJSTestServer {
 
 		BrowserConnection b = browserConnections.get(id);
 		if (b != null) {
-			if (testId == lastTestId) {
-				b.setResult(new TestResult(params.get("result"), params.get("location")));
-				b.setLastTestId(testId);
-				notify();
+			if (testId == lastTestId && results != null) {
+				results.addResult(b.buildResult(params.get("result"), params.get("location")));
 			}
 		}
+		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+		OutputStream output = exchange.getResponseBody();
+		output.flush();
 	}
 
 	private synchronized void handleResource(String path, HttpExchange exchange) throws IOException {
@@ -182,16 +187,17 @@ public class STJSTestServer {
 
 		BrowserConnection b = browserConnections.get(id);
 		if (b == null) {
-			b = new BrowserConnection();
+			b = new BrowserConnection(id, exchange.getRequestHeaders().getFirst("User-Agent"));
 			browserConnections.put(id, b);
 		}
 		StringBuilder jsonResponse = new StringBuilder();
 		jsonResponse.append("{");
 		jsonResponse.append("id:").append(id);
-		if ((testFile != null) && (b.getLastTestId() != lastTestId)) {
+		if ((testFile != null) && !browserWithCurrentTest.contains(id)) {
 			jsonResponse.append(",src:").append("'").append(BROWSER_TEST_URI).append("?test=").append(lastTestId)
 					.append("'");
 			jsonResponse.append(",testId:").append(lastTestId);
+			browserWithCurrentTest.add(id);
 		}
 		jsonResponse.append("}");
 
@@ -242,30 +248,32 @@ public class STJSTestServer {
 		return browserConnections.size();
 	}
 
-	public synchronized TestResultCollection test(File srcFile) throws InterruptedException {
-		lastTestId++;
-		testFile = srcFile;
-		int testBrowsers = 0;
+	public TestResultCollection test(File srcFile) throws InterruptedException {
+		int testBrowsers;
+		synchronized (this) {
+			lastTestId++;
+			testFile = srcFile;
+			results = new TestResultCollection();
+			browserWithCurrentTest = new HashSet<Long>();
+			testBrowsers = browserConnections.size();
+		}
 		long endTime = System.currentTimeMillis() + (testTimeout * 1000);
-		TestResultCollection result = new TestResultCollection();
-		while (true) {
-			for (BrowserConnection b : browserConnections.values()) {
-				if (b.getLastTestId() == lastTestId) {
-					result.addResult(b.getResult());
-					testBrowsers++;
+
+		synchronized (results) {
+			while (results.size() != testBrowsers) {
+				long stillToWait = endTime - System.currentTimeMillis();
+				if (stillToWait <= 0) {
+					break;
 				}
+				results.wait(stillToWait);
 			}
-			if ((testBrowsers == browserConnections.size()) || (System.currentTimeMillis() >= endTime)) {
-				break;
-			}
-			wait(500);
 		}
 
 		testFile = null;
-		if (result.size() == 0) {
-			result.addResult(new TestResult("No test responded back in " + testTimeout + " seconds", "none"));
+		if (results.size() == 0) {
+			results.addResult(new TestResult("none", "No test responded back in " + testTimeout + " seconds", "none"));
 		}
-		return result;
+		return results;
 	}
 
 	public URL getHostURL() {

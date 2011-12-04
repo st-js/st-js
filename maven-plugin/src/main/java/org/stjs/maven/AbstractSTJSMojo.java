@@ -31,7 +31,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.compiler.util.scan.InclusionScanException;
 import org.codehaus.plexus.compiler.util.scan.SourceInclusionScanner;
-import org.codehaus.plexus.compiler.util.scan.StaleSourceScanner;
 import org.codehaus.plexus.compiler.util.scan.mapping.SourceMapping;
 import org.codehaus.plexus.compiler.util.scan.mapping.SuffixMapping;
 import org.codehaus.plexus.util.DirectoryScanner;
@@ -254,12 +253,12 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		SourceInclusionScanner scanner;
 
 		if (includes.isEmpty() && excludes.isEmpty()) {
-			scanner = new StaleSourceScanner(staleMillis);
+			scanner = new StaleClassSourceScanner(staleMillis, getBuildOutputDirectory());
 		} else {
 			if (includes.isEmpty()) {
 				includes.add("**/*.java");
 			}
-			scanner = new StaleSourceScanner(staleMillis, includes, excludes);
+			scanner = new StaleClassSourceScanner(staleMillis, includes, excludes, getBuildOutputDirectory());
 		}
 
 		return scanner;
