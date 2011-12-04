@@ -26,8 +26,8 @@ public class SpecialMethodGeneratorTest {
 
 	@Test
 	public void testSpecialInvoke() {
-		// x.$invoke(a,b) -> x(a,b)
-		assertCodeContains(SpecialMethod4.class, "this(\"3\", 4)");
+		// x.$invoke(a) -> x(a)
+		assertCodeContains(SpecialMethod4.class, "f(4)");
 	}
 
 	@Test

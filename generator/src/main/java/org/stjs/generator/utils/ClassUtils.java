@@ -37,6 +37,7 @@ import org.stjs.generator.type.PrimitiveTypes;
 import org.stjs.generator.type.TypeWrapper;
 import org.stjs.javascript.annotation.Adapter;
 import org.stjs.javascript.annotation.DataType;
+import org.stjs.javascript.annotation.JavascriptFunction;
 import org.stjs.javascript.annotation.STJSBridge;
 
 import com.google.common.primitives.Primitives;
@@ -129,6 +130,13 @@ public class ClassUtils {
 			return false;
 		}
 		return hasAnnotation(clazz, Adapter.class.getName());
+	}
+
+	public static boolean isJavascriptFunction(TypeWrapper clazz) {
+		if (clazz == null) {
+			return false;
+		}
+		return clazz.hasAnnotation(JavascriptFunction.class);
 	}
 
 	/**

@@ -455,6 +455,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 				e.accept(this, scope);
 			}
 		}
+		Checks.checkObjectCreationExpr(n, context);
+
 		if (n.getAnonymousClassBody() != null) {
 			ClassScope classScope = scope.closest(ClassScope.class);
 

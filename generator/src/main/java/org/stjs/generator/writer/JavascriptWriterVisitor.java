@@ -577,12 +577,17 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			return;
 		}
 
+		TypeWrapper clazz = resolvedType(n.getType());
+
 		if ((n.getAnonymousClassBody() != null) && (n.getAnonymousClassBody().size() >= 1)) {
 			// special construction for inline function definition
-			MethodDeclaration method = getMethodDeclaration(n);
-			if (method != null) {
-				printMethod(method.getName(), method.getParameters(), method.getModifiers(), method.getBody(), context,
-						resolvedType(n), true);
+			if (ClassUtils.isJavascriptFunction(clazz)) {
+				MethodDeclaration method = getMethodDeclaration(n);
+				PreConditions.checkStateNode(n, method != null, "A single method was expected for an inline function");
+				if (method != null) {
+					printMethod(method.getName(), method.getParameters(), method.getModifiers(), method.getBody(),
+							context, resolvedType(n), true);
+				}
 				return;
 			}
 			// special construction to handle the inline body
@@ -604,7 +609,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 		}
 
-		TypeWrapper clazz = resolvedType(n.getType());
 		if ((clazz != null) && clazz instanceof ClassWrapper && ClassUtils.isDataType(((ClassWrapper) clazz))) {
 			// this is a call to an mock type
 			printer.print("{}");

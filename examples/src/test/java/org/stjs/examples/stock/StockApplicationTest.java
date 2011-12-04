@@ -38,8 +38,6 @@ public class StockApplicationTest {
 
 		$(".removeStock").click();
 		assertEquals(0, $("#form tr").size());
-		$("body").append("WEBK:" + $.browser.webkit);
-		assertEquals(true, $.browser.webkit);
 	}
 
 	private static StockApplication.Response answer(String symbol) {

@@ -134,7 +134,6 @@ public class STJSClass implements ClassWithJavascript {
 		} finally {
 			try {
 				if (propertiesWriter != null) {
-					System.out.println("Wrote: " + getStjsPropertiesFile());
 					propertiesWriter.close();
 				}
 			} catch (IOException e) {

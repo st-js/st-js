@@ -21,21 +21,44 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotates <i>adapter</i> classes. These are classes that are used to supply methods for Java types when they
- * don't have a method that their Javascript counterpart has. For example for Number in Javascript you can do
- * number.toFixed(2). As in Java this method does not exist and as the Java Number-derived classes are all final, the
- * only alternative is to put this method in another class - an adapter class. All the methods of an adapter class must
- * have their first parameter the object to which the method is applied. The other parameters are the parameters
- * normally supplied to the Javascript method. For the number.toFixed example, the adapter will have a method
- * NumberAdapter.toFixed(String number, int position). The generated javascript code is the expected one:
- * number.toFixer(position).
+ * This annotation annotates interfaces that are used to simulate Javascript functions. When implementing inline one of
+ * those interfaces, the generated Javascript code will be an anonymous function. Consequently whenever in the code the
+ * unique method of this interface is called, it will be generated a direct call to the function. Example:<br>
  * 
- * Note: The adapter's method must be all static.
+ * <pre>
+ * doSomething(new Function1&lt;P, R&gt;() {
+ * 	public R $invoke(P param) {
+ * 		return null;
+ * 	}
+ * });
+ * </pre>
+ * 
+ * will generate:<br>
+ * 
+ * <pre>
+ *  doSomething(function(param) {
+ * 	});
+ * </pre>
+ * 
+ * And <br>
+ * 
+ * <pre>
+ * Function1&lt;String,Integer&gt; f = ...;
+ * Integer x = f.$invoke("test");
+ * </pre>
+ * 
+ * will generate:<br>
+ * 
+ * <pre>
+ * var f = ...;
+ * var x = f("test");
+ * </pre>
+ * 
  * 
  * @author acraciun
  */
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Adapter {
+public @interface JavascriptFunction {
 
 }

@@ -28,6 +28,7 @@ import japa.parser.ast.body.VariableDeclaratorId;
 import japa.parser.ast.expr.LiteralExpr;
 import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.expr.ObjectCreationExpr;
 import japa.parser.ast.expr.SuperExpr;
 import japa.parser.ast.expr.ThisExpr;
 import japa.parser.ast.expr.UnaryExpr;
@@ -254,6 +255,18 @@ public class Checks {
 		TypeWrapper declaringClass = field.getOwnerType();
 		ClassScope thisClassScope = scope.closest(ClassScope.class);
 		return (thisClassScope.getClazz().equals(declaringClass));
+	}
+
+	public static void checkObjectCreationExpr(ObjectCreationExpr n, GenerationContext context) {
+		TypeWrapper type = ASTNodeData.resolvedType(n.getType());
+		if (!ClassUtils.isJavascriptFunction(type)) {
+			return;
+		}
+		if (n.getAnonymousClassBody() != null && n.getAnonymousClassBody().size() > 1) {
+			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+					"Initialization block for a Javascript function can contain exactly one method");
+		}
+
 	}
 
 }

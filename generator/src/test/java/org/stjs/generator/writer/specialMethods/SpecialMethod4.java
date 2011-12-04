@@ -1,11 +1,15 @@
 package org.stjs.generator.writer.specialMethods;
 
+import org.stjs.generator.writer.inlineFunctions.FunctionInterface;
+
 public class SpecialMethod4 {
-	public int $invoke(String s, int n) {
-		return 0;
-	}
 
 	public void method() {
-		this.$invoke("3", 4);
+		FunctionInterface f = new FunctionInterface() {
+			@Override
+			public void $invoke(int arg) {
+			}
+		};
+		f.$invoke(4);
 	}
 }

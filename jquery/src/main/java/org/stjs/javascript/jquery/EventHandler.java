@@ -15,8 +15,10 @@
  */
 package org.stjs.javascript.jquery;
 
+import org.stjs.javascript.annotation.JavascriptFunction;
 import org.stjs.javascript.dom.Element;
 
+@JavascriptFunction
 public interface EventHandler {
 	public boolean onEvent(Event ev, Element THIS);
 }

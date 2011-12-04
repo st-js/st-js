@@ -45,6 +45,7 @@ public class SpecialMethodHandlers {
 
 	private final AssertHandler assertHandler;
 	private final MethodToPropertyHandler methodToPropertyHandler;
+	private final $InvokeHandler invokeHandler;
 
 	public SpecialMethodHandlers() {
 		// array.$get(x) -> array[x], or $get(obj, prop) -> obj[prop]
@@ -214,10 +215,9 @@ public class SpecialMethodHandlers {
 		methodHandlers.put("$object", methodHandlers.get("$properties"));
 		methodHandlers.put("$castArray", methodHandlers.get("$properties"));
 
-		methodHandlers.put("$invoke", new $InvokeHandler());
-
 		assertHandler = new AssertHandler();
 		methodToPropertyHandler = new MethodToPropertyHandler();
+		invokeHandler = new $InvokeHandler();
 
 		methodHandlers.put("java.lang.String.length", methodToPropertyHandler);
 	}
@@ -256,6 +256,11 @@ public class SpecialMethodHandlers {
 
 		if (n.getName().startsWith(ASSERT_PREFIX)) {
 			assertHandler.handle(currentHandler, n, context);
+			return true;
+		}
+
+		if (ClassUtils.isJavascriptFunction(method.getOwnerType())) {
+			invokeHandler.handle(currentHandler, n, context);
 			return true;
 		}
 

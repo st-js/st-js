@@ -42,7 +42,7 @@ public class JSObjectAdapter {
 		throw new UnsupportedOperationException();
 	}
 
-	public static <T> JsFunction<T> $constructor(Object obj) {
+	public static Object $constructor(Object obj) {
 		throw new UnsupportedOperationException();
 	}
 

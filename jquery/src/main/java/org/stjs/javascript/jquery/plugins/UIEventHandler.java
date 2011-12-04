@@ -15,9 +15,11 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
+import org.stjs.javascript.annotation.JavascriptFunction;
 import org.stjs.javascript.dom.Element;
 import org.stjs.javascript.jquery.Event;
 
+@JavascriptFunction
 public interface UIEventHandler<UI> {
 	public boolean onEvent(Event ev, UI ui, Element THIS);
 }
