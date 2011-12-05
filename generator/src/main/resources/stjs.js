@@ -77,31 +77,6 @@ stjs.extend=function( _constructor,  _super){
 	I.prototype	= _super.prototype;
 	_constructor.prototype	= new I();
 
-	// this prototype accepts zero or more arguments
-	// if the first argument is a nullable value (undefined, false, 0, "", null)
-	// this function will call directly the constructor
-	// while if name is a string, this function will call
-	// super method with that name (if any, otherwise it will rightly raise an error)
-	_constructor.prototype._super = function(name){
-		var	_rem	= this._super;
-
-		// to continue with inherited chain
-		// the _super property has to be
-		// setted as the one stored in parent constructor prototype
-		this._super	= _super.prototype._super;
-		// this is because inside super method we would like to be able
-		// to use again the magic _super with parent constructor or method as well
-		var result		= (name ? _super.prototype[name] : _super).apply(this, Array.prototype.slice.call(arguments, 1));
-
-		// after constructor or parent method execution
-		// we have to set the original super to be able
-		// to call this method another time
-		this._super	= _rem;
-
-		// operation result
-		return	result;
-	};
-
 	//copy static properties
 	// assign every method from proto instance
 	for(key in _super){

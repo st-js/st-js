@@ -55,4 +55,6 @@ public interface TypeWrapper {
 	public boolean isAssignableFrom(TypeWrapper typeWrapper);
 
 	public TypeWrapper getComponentType();
+
+	public TypeWrapper getSuperClass();
 }

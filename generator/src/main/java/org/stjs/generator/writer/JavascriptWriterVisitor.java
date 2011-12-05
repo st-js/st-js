@@ -360,7 +360,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(VariableDeclaratorId n, GenerationContext context) {
-		if (parent(n) instanceof Parameter && n.getName().equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
+		if ((parent(n) instanceof Parameter) && n.getName().equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
 			// add an "_" for the arguments parameter to no override to arguments one.
 			printer.print("_");
 		}
@@ -609,7 +609,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 		}
 
-		if ((clazz != null) && clazz instanceof ClassWrapper && ClassUtils.isDataType(((ClassWrapper) clazz))) {
+		if ((clazz != null) && (clazz instanceof ClassWrapper) && ClassUtils.isDataType(((ClassWrapper) clazz))) {
 			// this is a call to an mock type
 			printer.print("{}");
 			return;
@@ -637,8 +637,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (classScope.getClazz().getSuperclass().isDefined()
 				&& !classScope.getClazz().getSuperclass().getOrThrow().getClazz().equals(Object.class)) {
 			// avoid useless call to super() when the super class is Object
-			printer.print("this._super");
-			printArguments(Collections.singleton("null"), args, Collections.<String> emptyList(), context);
+			printer.print(stJsName(classScope.getClazz().getSuperClass())).print(".call");
+			printArguments(Collections.singleton("this"), args, Collections.<String> emptyList(), context);
 			printer.print(";");
 		}
 	}
@@ -1094,14 +1094,14 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(FieldAccessExpr n, GenerationContext context) {
-		boolean withScopeSuper = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.SUPER);
+		boolean withScopeSuper = (n.getScope() != null) && n.getScope().toString().equals(GeneratorConstants.SUPER);
 		if (!withScopeSuper) {
 			n.getScope().accept(this, context);
 		}
 		TypeWrapper scopeType = resolvedType(n.getScope());
 		FieldWrapper field = (FieldWrapper) resolvedVariable(n);
-		boolean skipType = field != null && Modifier.isStatic(field.getModifiers()) && isGlobal(scopeType);
-		if (scopeType == null || !skipType) {
+		boolean skipType = (field != null) && Modifier.isStatic(field.getModifiers()) && isGlobal(scopeType);
+		if ((scopeType == null) || !skipType) {
 			if (withScopeSuper) {
 				// super.field does not make sense, so convert it to this
 				printer.print("this");
@@ -1121,27 +1121,25 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.print(n.getName());
 				printArguments(n.getArgs(), context);
 				return;
-			} else {
-				boolean withScopeThis = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.THIS);
-				boolean withScopeSuper = n.getScope() != null
-						&& n.getScope().toString().equals(GeneratorConstants.SUPER);
-				if (n.getScope() != null && !withScopeSuper && !withScopeThis) {
-					n.getScope().accept(this, context);
-					printer.print(".");
-				} else if (!withScopeSuper) {
-					// Non static reference to current enclosing type.
-					printer.print("this.");
-				} else {
-					// Non static reference to parent type
-					printer.print("this._super");
-					printArguments(Collections.singleton("\"" + n.getName() + "\""), n.getArgs(),
-							Collections.<String> emptyList(), context);
-					return;
-				}
-				printer.print(n.getName());
-				printArguments(n.getArgs(), context);
-
 			}
+			boolean withScopeThis = (n.getScope() != null) && n.getScope().toString().equals(GeneratorConstants.THIS);
+			boolean withScopeSuper = (n.getScope() != null) && n.getScope().toString().equals(GeneratorConstants.SUPER);
+			if ((n.getScope() != null) && !withScopeSuper && !withScopeThis) {
+				n.getScope().accept(this, context);
+				printer.print(".");
+			} else if (!withScopeSuper) {
+				// Non static reference to current enclosing type.
+				printer.print("this.");
+			} else {
+				// Non static reference to parent type
+				printer.print(stJsName(method.getOwnerType()));
+				printer.print(".prototype.").print(n.getName()).print(".call");
+				printArguments(Collections.singleton("this"), n.getArgs(), Collections.<String> emptyList(), context);
+				return;
+			}
+			printer.print(n.getName());
+			printArguments(n.getArgs(), context);
+
 		}
 	}
 
@@ -1357,7 +1355,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			TypeWrapper selectorType = resolvedType(((SwitchStmt) parent(n)).getSelector());
 			PreConditions.checkState(selectorType != null, "The selector of the switch %s should have a type",
 					parent(n));
-			if (selectorType instanceof ClassWrapper && ((ClassWrapper) selectorType).getClazz().isEnum()) {
+			if ((selectorType instanceof ClassWrapper) && ((ClassWrapper) selectorType).getClazz().isEnum()) {
 				printer.print(stJsName(selectorType));
 				printer.print(".");
 			}

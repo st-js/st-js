@@ -13,13 +13,13 @@ public class CallSuperGeneratorTest {
 
 	@Test
 	public void testCallSuperConstructorParent() {
-		assertCodeContains(CallSuper2.class, "CallSuper2 = function(arg){ this._super(null, arg);}");
+		assertCodeContains(CallSuper2.class, "CallSuper2 = function(arg){ SuperClass2.call(this, arg);}");
 	}
 
 	@Test
 	public void testOverrideAndCallSuper() {
 		assertCodeContains(CallSuper3.class,
-				"CallSuper3.prototype.instanceMethod = function(arg){ this._super(\"instanceMethod\", arg);}");
+				"CallSuper3.prototype.instanceMethod = function(arg){ SuperClass.prototype.instanceMethod.call(this, arg);}");
 	}
 
 	@Test
@@ -48,13 +48,13 @@ public class CallSuperGeneratorTest {
 	@Test
 	public void testAddCallSuperConstructorDefined() {
 		// call to super should be generated, when not defined explicitely
-		assertCodeContains(CallSuper8.class, "CallSuper8 = function(x){this._super(null);var y = x;}");
+		assertCodeContains(CallSuper8.class, "CallSuper8 = function(x){SuperClass.call(this);var y = x;}");
 	}
 
 	@Test
 	public void testAddCallSuperConstructorUndefined() {
 		// call to super should be generated, when not defined explicitely
-		assertCodeContains(CallSuper9.class, "CallSuper9 = function(){this._super(null);}");
+		assertCodeContains(CallSuper9.class, "CallSuper9 = function(){SuperClass.call(this);}");
 	}
 
 	@Test

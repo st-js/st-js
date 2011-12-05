@@ -113,4 +113,10 @@ public class WildcardTypeWrapper implements TypeWrapper {
 		// TODO should this be something else !?
 		return null;
 	}
+
+	@Override
+	public TypeWrapper getSuperClass() {
+		// TODO should this be something else !?
+		return null;
+	}
 }

@@ -17,11 +17,10 @@ package org.stjs.javascript.dom;
 
 import org.stjs.javascript.functions.Callback1;
 
-abstract public class Image extends Element {
+public class Image extends Element {
 	public String align;
 	public String alt;
 	public String border;
-	public String height;
 	public String hspace;
 	public boolean isMap;
 	public String longDesc;
@@ -30,7 +29,6 @@ abstract public class Image extends Element {
 	public String src;
 	public String useMap;
 	public String vspace;
-	public String width;
 
 	public Callback1<DOMEvent> onload;
 

@@ -154,4 +154,10 @@ public class TypeVariableWrapper<D extends GenericDeclaration> implements TypeWr
 		return null;
 	}
 
+	@Override
+	public TypeWrapper getSuperClass() {
+		// TODO should this be something else !?
+		return null;
+	}
+
 }

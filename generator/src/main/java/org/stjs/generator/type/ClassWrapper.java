@@ -101,8 +101,8 @@ public class ClassWrapper implements TypeWrapper {
 			return typeWrapper;
 		}
 		WildcardType wctype = (WildcardType) typeWrapper.getType();
-		boolean unbounded = wctype.getUpperBounds().length == 0
-				|| (wctype.getUpperBounds().length == 1 && wctype.getUpperBounds()[0] == Object.class);
+		boolean unbounded = (wctype.getUpperBounds().length == 0)
+				|| ((wctype.getUpperBounds().length == 1) && (wctype.getUpperBounds()[0] == Object.class));
 		if (!unbounded) {
 			// already bounded with something else
 			return typeWrapper;
@@ -111,7 +111,7 @@ public class ClassWrapper implements TypeWrapper {
 	}
 
 	private TypeWrapper[] substituteTypes(TypeWrapper[] origTypes, Class<?> ownerClass, TypeWrapper[] actualTypeArgs) {
-		if (origTypes.length == 0 || actualTypeArgs == null) {
+		if ((origTypes.length == 0) || (actualTypeArgs == null)) {
 			return origTypes;
 		}
 		TypeWrapper[] substTypes = new TypeWrapper[origTypes.length];
@@ -414,5 +414,10 @@ public class ClassWrapper implements TypeWrapper {
 	public TypeWrapper getComponentType() {
 		prepareFieldsAndMethods();
 		return TypeWrappers.wrap(clazz.getComponentType());
+	}
+
+	@Override
+	public TypeWrapper getSuperClass() {
+		return TypeWrappers.wrap(clazz.getGenericSuperclass());
 	}
 }
