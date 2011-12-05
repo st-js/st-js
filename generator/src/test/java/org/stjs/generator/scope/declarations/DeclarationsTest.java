@@ -14,7 +14,6 @@ import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.scope.BasicScope;
 import org.stjs.generator.scope.ClassScope;
 import org.stjs.generator.scope.CompilationUnitScope;
-import org.stjs.javascript.functions.Callback0;
 
 public class DeclarationsTest {
 	@Test
@@ -31,7 +30,7 @@ public class DeclarationsTest {
 	public void testScopeType() throws ParseException, IOException {
 		assertResolvedName(Declaration1.class, "type", ClassScope.class, 1);
 		assertResolvedName(Declaration1.class, "type", 2, ClassScope.class, 4);
-		assertResolvedField(Declaration1.class, "type", Callback0.class);
+		assertResolvedField(Declaration1.class, "type", MyCallback.class);
 	}
 
 	@Test
@@ -76,7 +75,7 @@ public class DeclarationsTest {
 			resolveName(DeclarationWithOuter3.class);
 			fail("Expected " + JavascriptGenerationException.class);
 		} catch (JavascriptGenerationException ex) {
-			assertEquals(30, ex.getSourcePosition().getLine());
+			assertEquals(29, ex.getSourcePosition().getLine());
 		}
 	}
 
@@ -112,7 +111,7 @@ public class DeclarationsTest {
 			resolveName(DeclarationWithOuter6.class);
 			fail("Expected " + JavascriptGenerationException.class);
 		} catch (JavascriptGenerationException ex) {
-			assertEquals(34, ex.getSourcePosition().getLine());
+			assertEquals(33, ex.getSourcePosition().getLine());
 		}
 	}
 

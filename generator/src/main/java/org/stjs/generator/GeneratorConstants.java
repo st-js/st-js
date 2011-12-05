@@ -28,4 +28,6 @@ public class GeneratorConstants {
 	public static final String THIS = "this";
 
 	public static final String ARGUMENTS_PARAMETER = "arguments";
+
+	public static final String TYPE_DESCRIPTION_PROPERTY = "$typeDescription";
 }

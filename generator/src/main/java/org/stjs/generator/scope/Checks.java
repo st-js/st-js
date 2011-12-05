@@ -32,6 +32,7 @@ import japa.parser.ast.expr.ObjectCreationExpr;
 import japa.parser.ast.expr.SuperExpr;
 import japa.parser.ast.expr.ThisExpr;
 import japa.parser.ast.expr.UnaryExpr;
+import japa.parser.ast.type.ClassOrInterfaceType;
 
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
@@ -42,12 +43,14 @@ import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.ast.ASTNodeData;
 import org.stjs.generator.ast.SourcePosition;
+import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.type.FieldWrapper;
 import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.type.TypeWrapper;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.variable.Variable;
 import org.stjs.generator.writer.JavascriptKeywords;
+import org.stjs.javascript.annotation.JavascriptFunction;
 
 /**
  * this class generate different checks made on the Java statements before they are converted to Javascript
@@ -117,8 +120,21 @@ public class Checks {
 	 * 
 	 * @param n
 	 * @param context
+	 * @param scope
 	 */
-	public static void checkClassDeclaration(ClassOrInterfaceDeclaration n, GenerationContext context) {
+	public static void checkClassDeclaration(ClassOrInterfaceDeclaration n, GenerationContext context, Scope scope) {
+		if (n.getImplements() != null) {
+			for (ClassOrInterfaceType impl : n.getImplements()) {
+				TypeWithScope typeWithScope = scope.resolveType(impl.toString());
+				TypeWrapper type = typeWithScope.getType();
+				if ((type instanceof ClassWrapper)
+						&& ClassUtils.hasAnnotation((ClassWrapper) type, JavascriptFunction.class.getName())) {
+					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+							"You cannot implement intefaces annotated with @JavascriptFunction. "
+									+ "You can only have inline object creation with this type of interfaces");
+				}
+			}
+		}
 		if (n.getMembers() == null) {
 			return;
 		}

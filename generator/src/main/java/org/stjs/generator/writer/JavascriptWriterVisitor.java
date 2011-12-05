@@ -127,6 +127,7 @@ import org.stjs.generator.scope.ScopeBuilder;
 import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.type.FieldWrapper;
 import org.stjs.generator.type.MethodWrapper;
+import org.stjs.generator.type.ParameterizedTypeWrapper;
 import org.stjs.generator.type.TypeWrapper;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.NodeUtils;
@@ -140,6 +141,7 @@ import org.stjs.javascript.annotation.GlobalScope;
  * 
  */
 public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
+
 	private final SpecialMethodHandlers specialMethodHandlers;
 
 	JavascriptWriter printer = new JavascriptWriter();
@@ -737,6 +739,50 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printMainMethodCall(n);
 		}
 
+		printTypeDescription(n, context);
+	}
+
+	private void printTypeDescription(ClassOrInterfaceDeclaration n, GenerationContext context) {
+		TypeWrapper type = resolvedType(n);
+		if (isGlobal(type)) {
+			return;
+		}
+		String typeName = stJsName(type);
+		printer.printLn();
+		printer.print(typeName);
+		printer.print(".");
+		printer.print(GeneratorConstants.TYPE_DESCRIPTION_PROPERTY);
+		printer.print("={");
+		if (n.getMembers() != null) {
+			for (BodyDeclaration member : n.getMembers()) {
+				if (member instanceof FieldDeclaration) {
+					FieldDeclaration field = (FieldDeclaration) member;
+					TypeWrapper fieldType = resolvedType(field.getType());
+					if (fieldType instanceof ParameterizedTypeWrapper) {
+						ParameterizedTypeWrapper paramFieldType = (ParameterizedTypeWrapper) fieldType;
+						if (paramFieldType.getClazz().equals(org.stjs.javascript.Array.class)) {
+							fieldType = paramFieldType.getActualTypeArguments()[0];
+						} else if (paramFieldType.getClazz().equals(org.stjs.javascript.Map.class)) {
+							fieldType = paramFieldType.getActualTypeArguments()[1];
+						}
+					}
+					if (ClassUtils.isBasicType(fieldType)) {
+						continue;
+					}
+					boolean first = true;
+					for (VariableDeclarator v : field.getVariables()) {
+						if (!first) {
+							printer.print(", ");
+						}
+						printer.print("\"").print(v.getId().getName()).print("\":");
+
+						printer.print("\"").print(stJsName(fieldType)).print("\"");
+						first = false;
+					}
+				}
+			}
+		}
+		printer.printLn("};");
 	}
 
 	private void printMembers(List<BodyDeclaration> members, GenerationContext context) {

@@ -1,6 +1,7 @@
 package org.stjs.generator.writer.inlineFunctions;
 
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
+import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
@@ -38,6 +39,12 @@ public class InlineFunctionGeneratorTest {
 	@Test
 	public void testInlineFunctionWithAbstractClass() {
 		assertCodeContains(InlineFunctions5.class, "method(function(){})");
+	}
+
+	@Test(expected = JavascriptGenerationException.class)
+	public void testImplementInlinefunction() {
+		// implement is forbidden
+		generate(InlineFunctions6.class);
 	}
 
 }

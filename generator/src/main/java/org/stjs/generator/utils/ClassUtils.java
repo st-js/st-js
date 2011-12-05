@@ -69,6 +69,18 @@ public class ClassUtils {
 		return basicTypeNames.contains(typeName);
 	}
 
+	public static boolean isBasicType(TypeWrapper type) {
+		if (type == null) {
+			return true;
+		}
+		if (type instanceof ClassWrapper && ((ClassWrapper) type).getClazz().isPrimitive()) {
+			return true;
+		}
+		String typeName = type.getName();
+
+		return basicTypeNames.contains(typeName);
+	}
+
 	public static boolean isBridge(Class<?> clazz) {
 		boolean ok = hasAnnotation(clazz, STJSBridge.class.getName());
 		if (ok) {

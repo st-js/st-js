@@ -15,14 +15,13 @@
  */
 package org.stjs.generator.scope.declarations;
 
-import org.stjs.javascript.functions.Callback0;
 
 @SuppressWarnings("unused")
 public class DeclarationWithOuter3 extends ParentDeclaration1 {
 	int type = 3;
 
 	public void x(int param) {
-		new Callback0() {
+		new MyCallback() {
 			int type = 1;
 
 			@Override

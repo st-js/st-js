@@ -217,7 +217,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	@Override
 	public void visit(final ClassOrInterfaceDeclaration n, Scope scope) {
-		Checks.checkClassDeclaration(n, context);
+		Checks.checkClassDeclaration(n, context, scope);
 		AbstractScope parentScope = (AbstractScope) scope;
 		TypeWithScope type = scope.resolveType(n.getName());
 		PreConditions.checkStateNode(n, type != null, "%s class cannot be resolved in the scope", n.getName());
