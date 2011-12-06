@@ -5,6 +5,7 @@ import static org.stjs.generator.scope.simple.SimpleClass.field;
 import static org.stjs.generator.scope.simple.SimpleClass.method;
 import static org.stjs.generator.scope.simple.SimpleClass.AmbiguousName.InnerClassLevel2.innerField;
 
+import org.stjs.generator.scope.declarations.MyCallback;
 import org.stjs.generator.scope.inner.ClassDeclaringInnerClass.InnerClass;
 import org.stjs.generator.scope.simple.SimpleClass.AmbiguousName;
 import org.stjs.generator.scope.simple.SimpleClass.AmbiguousName.InnerClassLevel2;
@@ -44,7 +45,7 @@ public class ClassWithCrazyImports {
 
 			}
 		}.$invoke();
-		new Callback0() {
+		new MyCallback() {
 
 			int counter;
 

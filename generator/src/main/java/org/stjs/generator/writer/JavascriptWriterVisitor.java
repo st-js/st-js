@@ -724,14 +724,22 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			}
 
 			// XXX it's not really working for multiple extends
-			if ((n.getExtends() != null) && (n.getExtends().size() > 0)) {
+			if (((n.getExtends() != null) && (n.getExtends().size() > 0))
+					|| ((n.getImplements() != null) && (n.getImplements().size() > 0))) {
 				printer.printLn();
 				printer.print("stjs.extend(");
 
 				printer.print(className);
 
-				for (ClassOrInterfaceType ext : n.getExtends()) {
-					printer.print(", " + stJsName(resolvedType(ext)));
+				if (n.getExtends() != null) {
+					for (ClassOrInterfaceType ext : n.getExtends()) {
+						printer.print(", " + stJsName(resolvedType(ext)));
+					}
+				}
+				if (n.getImplements() != null) {
+					for (ClassOrInterfaceType impl : n.getImplements()) {
+						printer.print(", " + stJsName(resolvedType(impl)));
+					}
 				}
 				printer.printLn(");");
 			}
@@ -754,6 +762,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printer.print(GeneratorConstants.TYPE_DESCRIPTION_PROPERTY);
 		printer.print("={");
 		if (n.getMembers() != null) {
+			boolean first = true;
 			for (BodyDeclaration member : n.getMembers()) {
 				if (member instanceof FieldDeclaration) {
 					FieldDeclaration field = (FieldDeclaration) member;
@@ -769,7 +778,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 					if (ClassUtils.isBasicType(fieldType)) {
 						continue;
 					}
-					boolean first = true;
 					for (VariableDeclarator v : field.getVariables()) {
 						if (!first) {
 							printer.print(", ");

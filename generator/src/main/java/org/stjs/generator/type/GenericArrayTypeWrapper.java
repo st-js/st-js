@@ -67,6 +67,10 @@ public class GenericArrayTypeWrapper extends ClassWrapper {
 
 	@Override
 	public boolean isAssignableFrom(TypeWrapper typeWrapper) {
+		if (typeWrapper == null) {
+			// assignable from a null value
+			return true;
+		}
 		if (typeWrapper.getComponentType() == null) {
 			return false;
 		}

@@ -1,7 +1,6 @@
 package org.stjs.generator.writer.inheritance;
 
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
 
 import org.junit.Test;
 
@@ -9,7 +8,7 @@ public class InheritanceGeneratorTest {
 
 	@Test
 	public void testImplements() {
-		assertCodeDoesNotContain(Inheritance1.class, "stjs.extend(Inheritance1, MyInterface);");
+		assertCodeContains(Inheritance1.class, "stjs.extend(Inheritance1, MyInterface);");
 	}
 
 	@Test
@@ -26,5 +25,10 @@ public class InheritanceGeneratorTest {
 	@Test
 	public void testExtendsMore() {
 		assertCodeContains(Inheritance4.class, "stjs.extend(Inheritance4, MyInterface, MyInterface2);");
+	}
+
+	@Test
+	public void testAbstractAndGeneric() {
+		assertCodeContains(Inheritance5.class, "stjs.extend(Inheritance5, MyInterface3);");
 	}
 }

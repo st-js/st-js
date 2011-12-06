@@ -71,16 +71,21 @@ trim()
 /************* STJS helper functions ***************/
 var stjs={};
 
-stjs.extend=function( _constructor,  _super){
-	var key;
+stjs.skipCopy = {"prototype":true, "constructor": true, "$typeDescription":true};
+
+stjs.extend=function( _constructor,  _super, _implements){
+	var key, a;
 	var I = function(){};
 	I.prototype	= _super.prototype;
 	_constructor.prototype	= new I();
 
-	//copy static properties
+	//copy static properties for super and interfaces
 	// assign every method from proto instance
-	for(key in _super){
-		_constructor[key]	= _super[key];
+	for(a = 1; a < arguments.length; ++a){
+		for(key in arguments[a]){
+			if (!stjs.skipCopy[key])
+				_constructor[key]	= arguments[a][key];
+		}
 	}
 	// remember the correct constructor
 	_constructor.prototype.constructor	= _constructor;

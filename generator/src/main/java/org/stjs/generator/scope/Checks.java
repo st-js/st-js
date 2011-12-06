@@ -95,7 +95,7 @@ public class Checks {
 	public static void checkFieldDeclaration(FieldDeclaration n, GenerationContext arg) {
 		for (VariableDeclarator v : n.getVariables()) {
 			JavascriptKeywords.checkIdentifier(arg.getInputFile(), new SourcePosition(v), v.getId().getName());
-			if (!ModifierSet.isStatic(n.getModifiers()) && v.getInit() != null) {
+			if (!ModifierSet.isStatic(n.getModifiers()) && (v.getInit() != null)) {
 				if (!ClassUtils.isBasicType(n.getType())) {
 					throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(v),
 							"Instance field inline initialization is allowed only for string and number field types");
@@ -122,19 +122,7 @@ public class Checks {
 	 * @param context
 	 * @param scope
 	 */
-	public static void checkClassDeclaration(ClassOrInterfaceDeclaration n, GenerationContext context, Scope scope) {
-		if (n.getImplements() != null) {
-			for (ClassOrInterfaceType impl : n.getImplements()) {
-				TypeWithScope typeWithScope = scope.resolveType(impl.toString());
-				TypeWrapper type = typeWithScope.getType();
-				if ((type instanceof ClassWrapper)
-						&& ClassUtils.hasAnnotation((ClassWrapper) type, JavascriptFunction.class.getName())) {
-					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
-							"You cannot implement intefaces annotated with @JavascriptFunction. "
-									+ "You can only have inline object creation with this type of interfaces");
-				}
-			}
-		}
+	public static void checkClassDeclaration(ClassOrInterfaceDeclaration n, GenerationContext context) {
 		if (n.getMembers() == null) {
 			return;
 		}
@@ -174,6 +162,21 @@ public class Checks {
 		}
 	}
 
+	public static void postCheckClassDeclaration(ClassOrInterfaceDeclaration n, GenerationContext context) {
+		if (n.getImplements() != null) {
+			for (ClassOrInterfaceType impl : n.getImplements()) {
+				TypeWrapper type = ASTNodeData.resolvedType(impl);
+				if ((type instanceof ClassWrapper)
+						&& ClassUtils.hasAnnotation((ClassWrapper) type, JavascriptFunction.class.getName())) {
+					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+							"You cannot implement intefaces annotated with @JavascriptFunction. "
+									+ "You can only have inline object creation with this type of interfaces");
+				}
+			}
+		}
+
+	}
+
 	/**
 	 * check enum declaration
 	 * 
@@ -181,7 +184,7 @@ public class Checks {
 	 * @param context
 	 */
 	public static void checkEnumDeclaration(EnumDeclaration n, GenerationContext context) {
-		if (n.getMembers() != null && n.getMembers().size() > 0) {
+		if ((n.getMembers() != null) && (n.getMembers().size() > 0)) {
 			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 					"Enums with fields or methods are not supported");
 		}
@@ -278,7 +281,7 @@ public class Checks {
 		if (!ClassUtils.isJavascriptFunction(type)) {
 			return;
 		}
-		if (n.getAnonymousClassBody() != null && n.getAnonymousClassBody().size() > 1) {
+		if ((n.getAnonymousClassBody() != null) && (n.getAnonymousClassBody().size() > 1)) {
 			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 					"Initialization block for a Javascript function can contain exactly one method");
 		}
