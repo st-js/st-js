@@ -697,7 +697,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			method = ms.getMethod();
 		} else {
 			TypeWrapper scopeType = resolvedType(n.getScope());
-			PreConditions.checkStateNode(n, scopeType != null, "%s The method %s 's scope could not be resolved",
+			PreConditions.checkStateNode(n, scopeType != null, "%s The method %s's scope could not be resolved",
 					location(n), n.getName());
 			method = scopeType.findMethod(n.getName(), argumentTypes).getOrThrow(
 					location(n) + "-> type:" + scopeType.getName() + " m:" + n.getName());

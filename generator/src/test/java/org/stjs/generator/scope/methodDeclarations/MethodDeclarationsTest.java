@@ -4,9 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.stjs.generator.scope.ScopeTestHelper.assertResolvedMethod;
 import static org.stjs.generator.scope.ScopeTestHelper.resolveName;
-import japa.parser.ParseException;
-
-import java.io.IOException;
+import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
@@ -14,7 +12,7 @@ import org.stjs.generator.JavascriptGenerationException;
 public class MethodDeclarationsTest {
 
 	@Test
-	public void resolvesMethods() throws ParseException, IOException {
+	public void resolvesMethods() {
 		assertResolvedMethod(ClassUsingStaticMethod.class, "doSth", 1, ClassDefiningStaticMethod.class);
 		assertResolvedMethod(ClassUsingStaticMethod.class, "doSth", 2, ClassDefiningStaticMethod.class);
 		assertResolvedMethod(ClassUsingStaticMethod.class, "doSth", 3, ClassDefiningStaticMethod.class);
@@ -22,7 +20,7 @@ public class MethodDeclarationsTest {
 
 	// TODO the same for methods with Declaration2
 	@Test
-	public void testMethodsSameName() throws ParseException, IOException {
+	public void testMethodsSameName() {
 		try {
 			resolveName(SameNameMethods.class);
 			fail("Expected " + JavascriptGenerationException.class);
@@ -32,4 +30,9 @@ public class MethodDeclarationsTest {
 		}
 	}
 
+	@Test
+	public void testGenericTypeParam2() {
+		assertResolvedMethod(MethodResolution8.class, "method", 1, MethodResolution7.Inner.class);
+		assertCodeContains(MethodResolution8.class, "xxx");
+	}
 }

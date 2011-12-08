@@ -61,4 +61,5 @@ public class MethodResolutionTest {
 		assertTrue(w.isDefined());
 		assertEquals(int.class, w.getOrThrow().getReturnType().getType());
 	}
+
 }
