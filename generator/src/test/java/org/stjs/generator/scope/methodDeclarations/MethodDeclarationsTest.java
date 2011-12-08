@@ -4,10 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.stjs.generator.scope.ScopeTestHelper.assertResolvedMethod;
 import static org.stjs.generator.scope.ScopeTestHelper.resolveName;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.scope.methodDeclarations.sub.MethodDeclarations2;
 
 public class MethodDeclarationsTest {
 
@@ -31,8 +31,12 @@ public class MethodDeclarationsTest {
 	}
 
 	@Test
-	public void testGenericTypeParam2() {
-		assertResolvedMethod(MethodResolution8.class, "method", 1, MethodResolution7.Inner.class);
-		assertCodeContains(MethodResolution8.class, "xxx");
+	public void testInnerClassSamePackage() {
+		assertResolvedMethod(MethodDeclarations3.class, "method", 1, MethodDeclarations4.Inner.class);
+	}
+
+	@Test
+	public void testInnerClassOtherPackage() {
+		assertResolvedMethod(MethodDeclarations1.class, "method", 1, MethodDeclarations2.Inner.class);
 	}
 }

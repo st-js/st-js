@@ -31,7 +31,7 @@ public class CompilationUnitScope extends AbstractScope {
 
 	private String packageName;
 
-	private final Set<NameExpr> typeImportOnDemandSet = Sets.newHashSet();
+	private final Set<String> typeImportOnDemandSet = Sets.newHashSet();
 
 	private final ClassLoaderWrapper classLoaderWrapper;
 
@@ -65,11 +65,11 @@ public class CompilationUnitScope extends AbstractScope {
 	}
 
 	public void addTypeImportOnDemand(NameExpr name) {
-		typeImportOnDemandSet.add(name);
+		typeImportOnDemandSet.add(name.toString());
 	}
 
 	@VisibleForTesting
-	public Set<NameExpr> getTypeImportOnDemandSet() {
+	public Set<String> getTypeImportOnDemandSet() {
 		return typeImportOnDemandSet;
 	}
 
@@ -96,6 +96,30 @@ public class CompilationUnitScope extends AbstractScope {
 			super.addType(qualifiedClass);
 			return new TypeWithScope(this, qualifiedClass);
 		}
+
+		// try on demand
+		for (String pack : typeImportOnDemandSet) {
+			for (ClassWrapper qualifiedClass : classLoaderWrapper.loadClassOrInnerClass(pack + "." + name)) {
+				super.addType(qualifiedClass);
+				return new TypeWithScope(this, qualifiedClass);
+			}
+		}
+
+		// could be A.B.C and part of the path to be imported
+		int pos = name.lastIndexOf('.');
+		if (pos >= 0) {
+			String parent = name.substring(0, pos);
+			String inner = name.substring(pos + 1, name.length());
+			TypeWithScope ts = resolveType(parent);
+			if (ts != null) {
+				for (ClassWrapper qualifiedClass : classLoaderWrapper.loadClassOrInnerClass(ts.getType().getName()
+						+ "." + inner)) {
+					super.addType(qualifiedClass);
+					return new TypeWithScope(this, qualifiedClass);
+				}
+			}
+		}
+
 		return null;
 	}
 
