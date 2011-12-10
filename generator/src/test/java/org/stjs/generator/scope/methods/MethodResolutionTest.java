@@ -62,4 +62,12 @@ public class MethodResolutionTest {
 		assertEquals(int.class, w.getOrThrow().getReturnType().getType());
 	}
 
+	@Test
+	public void testVarArgAndNull() {
+		TypeWrapper type = TypeWrappers.wrap(MethodResolution7.class);
+		Option<MethodWrapper> w = type.findMethod("method", TypeWrappers.wrap(Double.class), null,
+				TypeWrappers.wrap(boolean.class));
+		assertTrue(w.isDefined());
+	}
+
 }

@@ -77,30 +77,32 @@ public class MethodWrapper {
 		return declared;
 	}
 
+	public TypeWrapper getVarargParamType() {
+		return parameterTypes.length > 0 ? parameterTypes[parameterTypes.length - 1].getComponentType() : null;
+	}
+
 	public boolean isCompatibleParameterTypes(TypeWrapper[] paramTypes) {
-		// System.out.println(Arrays.toString(parameterTypes));
-		// System.out.println(Arrays.toString(paramTypes));
 		int i = 0;
 		for (i = 0; i < paramTypes.length && i < parameterTypes.length; ++i) {
 			if (!parameterTypes[i].isAssignableFrom(paramTypes[i])) {
-				// System.out.println("DIFF:" + i + ":" + parameterTypes[i] + "<>" + paramTypes[i]);
 				break;
 			}
 		}
 		if (i == paramTypes.length) {
 			return true;
 		}
-		// try a varargs match
-		if (i < parameterTypes.length && parameterTypes[i].getComponentType() != null) {
-			TypeWrapper varArgParamType = parameterTypes[i].getComponentType();
-			for (; i < paramTypes.length; ++i) {
-				if (!varArgParamType.isAssignableFrom(paramTypes[i])) {
-					return false;
-				}
-			}
-			return true;
+		TypeWrapper varArgParamType = getVarargParamType();
+		if (varArgParamType == null) {
+			return false;
 		}
-		return false;
+		// try a varargs match
+		i = parameterTypes.length - 1;
+		for (; i < paramTypes.length; ++i) {
+			if (!varArgParamType.isAssignableFrom(paramTypes[i])) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override
