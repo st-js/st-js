@@ -41,6 +41,9 @@ public class ClassScope extends AbstractScope {
 		for (MethodWrapper method : c.getDeclaredMethods()) {
 			addMethod(method);
 		}
+		for (TypeWrapper innerClass : c.getDeclaredClasses()) {
+			addType(innerClass);
+		}
 	}
 
 	@Override

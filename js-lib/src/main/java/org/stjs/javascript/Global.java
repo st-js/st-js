@@ -17,6 +17,7 @@ package org.stjs.javascript;
 
 import org.stjs.javascript.annotation.GlobalScope;
 import org.stjs.javascript.functions.Callback0;
+import org.stjs.javascript.stjs.STJS;
 
 @GlobalScope
 public class Global {
@@ -28,6 +29,8 @@ public class Global {
 	public static Window window;
 
 	public static Console console;
+
+	public static STJS stjs;
 
 	// do not add this one too
 	// public static Window self;

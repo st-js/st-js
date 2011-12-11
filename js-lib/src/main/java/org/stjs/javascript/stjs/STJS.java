@@ -21,4 +21,15 @@ public interface STJS {
 	 * @param ex
 	 */
 	public Exception exception(Object ex);
+
+	/**
+	 * parse the given json String and build the object hierarchy in a typed-manner: i.e it builds the objects using
+	 * their corresponding constructors. If the intermediary classes don't have an empty constructor, it will be called
+	 * with null values for all the parameters.
+	 * 
+	 * @param json
+	 * @param clazz
+	 * @return
+	 */
+	public <T> T parseJSON(String json, Class<T> clazz);
 }

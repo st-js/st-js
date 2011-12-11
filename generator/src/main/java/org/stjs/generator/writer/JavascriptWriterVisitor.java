@@ -179,6 +179,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	private String stJsName(TypeWrapper typeWrapper) {
 		// We may want to use a more complex naming scheme, to avoid conflicts across packages
+
 		if (typeWrapper instanceof ClassWrapper) {
 			return ((ClassWrapper) typeWrapper).getExternalName();
 		}
@@ -744,12 +745,59 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.printLn(");");
 			}
 			printMembers(n.getMembers(), context);
-			printMainMethodCall(n);
 		}
-
 		printTypeDescription(n, context);
+		printMainMethodCall(n);
 	}
 
+	/**
+	 * 
+	 * @param typeWrapper
+	 * @return the name of the given type. if the type is a parameterized type it returns {name:"type-name",
+	 *         arguments:[args..]}
+	 */
+	private String stJsNameInfo(TypeWrapper typeWrapper) {
+		// We may want to use a more complex naming scheme, to avoid conflicts across packages
+		if (typeWrapper instanceof ParameterizedTypeWrapper) {
+			ParameterizedTypeWrapper pt = (ParameterizedTypeWrapper) typeWrapper;
+			StringBuilder s = new StringBuilder();
+			s.append("{name:\"").append(pt.getExternalName()).append("\"");
+
+			s.append(", arguments:[");
+			boolean first = true;
+			for (TypeWrapper arg : pt.getActualTypeArguments()) {
+				if (!first) {
+					s.append(",");
+				}
+				s.append(stJsNameInfo(arg));
+				first = false;
+			}
+			s.append("]");
+			s.append("}");
+			return s.toString();
+		}
+
+		if (typeWrapper instanceof ClassWrapper && ((ClassWrapper) typeWrapper).getClazz().isEnum()) {
+			StringBuilder s = new StringBuilder();
+			s.append("{name:\"Enum\"");
+			s.append(", arguments:[");
+			s.append("\"" + stJsName(typeWrapper) + "\"");
+			s.append("]");
+			s.append("}");
+			return s.toString();
+		}
+		if (ClassUtils.isBasicType(typeWrapper)) {
+			return "null";
+		}
+		return "\"" + stJsName(typeWrapper) + "\"";
+	}
+
+	/**
+	 * print the information needed to deserialize type-safe from json
+	 * 
+	 * @param n
+	 * @param context
+	 */
 	private void printTypeDescription(ClassOrInterfaceDeclaration n, GenerationContext context) {
 		TypeWrapper type = resolvedType(n);
 		if (isGlobal(type)) {
@@ -759,22 +807,26 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printer.printLn();
 		printer.print(typeName);
 		printer.print(".");
-		printer.print(GeneratorConstants.TYPE_DESCRIPTION_PROPERTY);
-		printer.print("={");
+		printer.print(GeneratorConstants.TYPE_DESCRIPTION_PROPERTY).print("=");
+
+		if ((n.getExtends() != null) && (n.getExtends().size() > 0)) {
+			printer.print("stjs.copyProps(");
+
+			// for (ClassOrInterfaceType ext : n.getExtends()) {
+			// printer.print(", " + stJsName(resolvedType(ext)));
+			// }
+			printer.print(stJsName(resolvedType(n.getExtends().get(0))));
+			printer.print(".").print(GeneratorConstants.TYPE_DESCRIPTION_PROPERTY).print(", ");
+		}
+
+		printer.print("{");
 		if (n.getMembers() != null) {
 			boolean first = true;
 			for (BodyDeclaration member : n.getMembers()) {
 				if (member instanceof FieldDeclaration) {
 					FieldDeclaration field = (FieldDeclaration) member;
 					TypeWrapper fieldType = resolvedType(field.getType());
-					if (fieldType instanceof ParameterizedTypeWrapper) {
-						ParameterizedTypeWrapper paramFieldType = (ParameterizedTypeWrapper) fieldType;
-						if (paramFieldType.getClazz().equals(org.stjs.javascript.Array.class)) {
-							fieldType = paramFieldType.getActualTypeArguments()[0];
-						} else if (paramFieldType.getClazz().equals(org.stjs.javascript.Map.class)) {
-							fieldType = paramFieldType.getActualTypeArguments()[1];
-						}
-					}
+
 					if (ClassUtils.isBasicType(fieldType)) {
 						continue;
 					}
@@ -783,14 +835,17 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 							printer.print(", ");
 						}
 						printer.print("\"").print(v.getId().getName()).print("\":");
-
-						printer.print("\"").print(stJsName(fieldType)).print("\"");
+						printer.print(stJsNameInfo(fieldType));
 						first = false;
 					}
 				}
 			}
 		}
-		printer.printLn("};");
+		printer.print("}");
+		if ((n.getExtends() != null) && (n.getExtends().size() > 0)) {
+			printer.print(")");
+		}
+		printer.printLn(";");
 	}
 
 	private void printMembers(List<BodyDeclaration> members, GenerationContext context) {
@@ -823,6 +878,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	private void printMainMethodCall(ClassOrInterfaceDeclaration n) {
+		if (n.getMembers() == null) {
+			return;
+		}
 		ClassScope scope = (ClassScope) scope(n);
 		List<BodyDeclaration> members = n.getMembers();
 		for (BodyDeclaration member : members) {

@@ -1,12 +1,15 @@
 package org.stjs.generator.utils;
 
 import static org.junit.Assert.assertTrue;
+import static org.stjs.javascript.JSCollections.$array;
+import static org.stjs.javascript.JSCollections.$map;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -19,7 +22,11 @@ import org.stjs.generator.DependencyCollection;
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.STJSClass;
+import org.stjs.generator.executor.ExecutionResult;
 import org.stjs.generator.executor.RhinoExecutor;
+import org.stjs.javascript.Array;
+import org.stjs.javascript.Date;
+import org.stjs.javascript.Map;
 
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
@@ -33,6 +40,78 @@ public class GeneratorTestHelper {
 	 * @return the javascript code generator from the given class
 	 */
 	public static String generate(Class<?> clazz) {
+		return (String) executeOrGenerate(clazz, false);
+	}
+
+	/**
+	 * 
+	 * @param clazz
+	 * @return the javascript code generator from the given class
+	 */
+	public static Object execute(Class<?> clazz) {
+		return convert(executeOrGenerate(clazz, true));
+	}
+
+	private static Object convert(Object result) {
+		if (result == null) {
+			return null;
+		}
+		if (result.getClass().getName().contains("NativeObject")) {
+			return convertToMap(result);
+		}
+		if (result.getClass().getName().contains("NativeArray")) {
+			return convertToArray(result);
+		}
+		if (result.getClass().getName().contains("NativeDate")) {
+			return convertToDate(result);
+		}
+		return result;
+	}
+
+	private static Object invoke(Object obj, String method, int argCount, Object... args) {
+		try {
+			for (Method m : obj.getClass().getMethods()) {
+				if (m.getName().equals(method) && m.getParameterTypes().length == argCount) {
+					return m.invoke(obj, args);
+				}
+			}
+			throw new RuntimeException("Method " + method + " not found in class " + obj.getClass());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static Object convertToDate(Object result) {
+		Double time = (Double) invoke(result, "callMethod", 3, result, "getTime", null);
+		return new Date(time.longValue());
+	}
+
+	private static Array<Object> convertToArray(Object result) {
+		Array<Object> js = $array();
+		long length = (Long) invoke(result, "getLength", 0);
+		for (int i = 0; i < length; ++i) {
+			Object value = invoke(result, "get", 2, i, null);
+			js.push(convert(value));
+		}
+		return js;
+	}
+
+	private static Map<String, Object> convertToMap(Object result) {
+		Map<String, Object> js = $map();
+		Object[] ids = (Object[]) invoke(result, "getIds", 0);
+		for (Object key : ids) {
+			Object value = invoke(result, "get", 2, key.toString(), null);
+			js.$put(key.toString(), convert(value));
+		}
+		return js;
+	}
+
+	/**
+	 * 
+	 * @param clazz
+	 * @return the javascript code generator from the given class
+	 */
+	private static Object executeOrGenerate(Class<?> clazz, boolean execute) {
 		Generator gen = new Generator();
 
 		String sourcePath = "src/test/java";
@@ -54,7 +133,10 @@ public class GeneratorTestHelper {
 					javascriptFiles.add(new File(js.getPath().substring(1)));
 				}
 			}
-			new RhinoExecutor().run(javascriptFiles, true);
+			ExecutionResult execResult = new RhinoExecutor().run(javascriptFiles, !execute);
+			if (execute) {
+				return execResult != null ? execResult.getResult() : null;
+			}
 			return content;
 		} catch (IOException e) {
 			e.printStackTrace();

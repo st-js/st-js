@@ -22,6 +22,7 @@ import org.stjs.javascript.Map;
 
 /**
  * This class implements the {@link Map} interface to be used on the server side.
+ * 
  * @author acraciun
  * @param <V>
  */
@@ -48,4 +49,8 @@ public class MapImpl<K extends String, V> implements Map<K, V> {
 		map.remove(key);
 	}
 
+	@Override
+	public String toString() {
+		return map.toString();
+	}
 }

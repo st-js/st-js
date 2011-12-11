@@ -40,8 +40,7 @@ public class Date {
 	}
 
 	public Date(long milliseconds) {
-		calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(milliseconds);
+		getUTC(true).setTimeInMillis(milliseconds);
 	}
 
 	public Date(String dateString) {

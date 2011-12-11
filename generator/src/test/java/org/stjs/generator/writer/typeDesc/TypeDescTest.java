@@ -12,7 +12,7 @@ public class TypeDescTest {
 
 	@Test
 	public void testArrayOfBasicField() {
-		assertCodeContains(TypeDesc2.class, "TypeDesc2.$typeDescription = {};");
+		assertCodeContains(TypeDesc2.class, "TypeDesc2.$typeDescription = {\"x\":{name:\"Array\", arguments:[null]}};");
 	}
 
 	@Test
@@ -22,12 +22,14 @@ public class TypeDescTest {
 
 	@Test
 	public void testArrayOfNonBasicField() {
-		assertCodeContains(TypeDesc4.class, "TypeDesc4.$typeDescription = {\"x\":\"Date\"};");
+		assertCodeContains(TypeDesc4.class,
+				"TypeDesc4.$typeDescription = {\"x\":{name:\"Array\", arguments:[\"Date\"]}};");
 	}
 
 	@Test
 	public void testMapOfNonBasicField() {
-		assertCodeContains(TypeDesc5.class, "TypeDesc5.$typeDescription = {\"x\":\"Date\"};");
+		assertCodeContains(TypeDesc5.class,
+				"TypeDesc5.$typeDescription = {\"x\":{name:\"Map\", arguments:[null,\"Date\"]}};");
 	}
 
 }

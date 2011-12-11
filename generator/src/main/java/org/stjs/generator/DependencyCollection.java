@@ -45,7 +45,6 @@ public class DependencyCollection {
 		List<ClassWithJavascript> deps = new ArrayList<ClassWithJavascript>();
 		Set<ClassWithJavascript> visited = new HashSet<ClassWithJavascript>();
 		for (ClassWithJavascript root : roots) {
-
 			visit(visited, new HashSet<ClassWithJavascript>(), deps, root);
 		}
 

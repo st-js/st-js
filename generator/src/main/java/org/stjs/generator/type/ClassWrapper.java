@@ -57,6 +57,7 @@ public class ClassWrapper implements TypeWrapper {
 	private final Class<?> clazz;
 
 	private Map<String, FieldWrapper> fields = null;
+	private Map<String, TypeWrapper> types = null;
 	private Multimap<String, MethodWrapper> methods = null;
 
 	public ClassWrapper(Class<?> clazz) {
@@ -147,26 +148,34 @@ public class ClassWrapper implements TypeWrapper {
 		throw new RuntimeException("Received unknown type:" + type + " of class:" + type.getClass());
 	}
 
-	private void prepareFieldsAndMethods() {
+	private void prepareFieldsMethodsAndTypes() {
 		if (fields != null) {
 			return;
 		}
 		fields = new HashMap<String, FieldWrapper>();
+		types = new HashMap<String, TypeWrapper>();
 		methods = ArrayListMultimap.create();
-		addFieldsAndMethods(getType(), null, null);
+		addFieldsMethodsAndTypes(getType(), null, null);
 	}
 
-	private void addFieldsAndMethods(Type type, Class<?> rawClass, TypeWrapper[] actualTypeArgs) {
+	private void addFieldsMethodsAndTypes(Type type, Class<?> rawClass, TypeWrapper[] actualTypeArgs) {
 		for (Type c = type; c != null; c = rawClass.getGenericSuperclass()) {
 			actualTypeArgs = getActualTypeArgs(c, rawClass, actualTypeArgs);
 			rawClass = ClassUtils.getRawClazz(c);
 			addFields(rawClass, actualTypeArgs);
 			addMethods(rawClass, actualTypeArgs);
+			addTypes(rawClass, actualTypeArgs);
 			// add also the methods from interfaces (not really needed when the root is actual class, but need when the
 			// root is interfaces)
 			for (Type iface : rawClass.getGenericInterfaces()) {
-				addFieldsAndMethods(iface, rawClass, actualTypeArgs);
+				addFieldsMethodsAndTypes(iface, rawClass, actualTypeArgs);
 			}
+		}
+	}
+
+	private void addTypes(Class<?> rawClass, TypeWrapper[] actualTypeArgs) {
+		for (Class<?> type : rawClass.getDeclaredClasses()) {
+			types.put(type.getName(), TypeWrappers.wrap(type));
 		}
 	}
 
@@ -249,7 +258,7 @@ public class ClassWrapper implements TypeWrapper {
 	}
 
 	public Option<FieldWrapper> findField(String name) {
-		prepareFieldsAndMethods();
+		prepareFieldsMethodsAndTypes();
 		FieldWrapper f = fields.get(name);
 		return f != null ? Option.some(f) : Option.<FieldWrapper> none();
 	}
@@ -277,7 +286,7 @@ public class ClassWrapper implements TypeWrapper {
 	}
 
 	public Option<MethodWrapper> findMethod(final String name, TypeWrapper... paramTypes) {
-		prepareFieldsAndMethods();
+		prepareFieldsMethodsAndTypes();
 		Collection<MethodWrapper> wrappers = methods.get(name);
 		if (wrappers == null) {
 			return Option.none();
@@ -292,7 +301,7 @@ public class ClassWrapper implements TypeWrapper {
 	}
 
 	public List<MethodWrapper> getDeclaredMethods() {
-		prepareFieldsAndMethods();
+		prepareFieldsMethodsAndTypes();
 		return Lists.newArrayList(methods.values());
 	}
 
@@ -353,12 +362,13 @@ public class ClassWrapper implements TypeWrapper {
 		}), WrapClass));
 	}
 
-	public List<ClassWrapper> getDeclaredClasses() {
-		return ImmutableList.copyOf(transform(asList(clazz.getDeclaredClasses()), WrapClass));
+	public List<TypeWrapper> getDeclaredClasses() {
+		prepareFieldsMethodsAndTypes();
+		return Lists.newArrayList(types.values());
 	}
 
 	public List<FieldWrapper> getDeclaredFields() {
-		prepareFieldsAndMethods();
+		prepareFieldsMethodsAndTypes();
 		return Lists.newArrayList(fields.values());
 	}
 
@@ -412,7 +422,7 @@ public class ClassWrapper implements TypeWrapper {
 
 	@Override
 	public TypeWrapper getComponentType() {
-		prepareFieldsAndMethods();
+		prepareFieldsMethodsAndTypes();
 		return TypeWrappers.wrap(clazz.getComponentType());
 	}
 

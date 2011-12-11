@@ -19,11 +19,13 @@ public class ExecutionResult {
 	private final String stdOut;
 	private final String stdErr;
 	private final int exitValue;
+	private final Object result;
 
-	public ExecutionResult(String stdOut, String stdErr, int exitValue) {
+	public ExecutionResult(Object result, String stdOut, String stdErr, int exitValue) {
 		this.stdOut = stdOut;
 		this.stdErr = stdErr;
 		this.exitValue = exitValue;
+		this.result = result;
 	}
 
 	public String getStdOut() {
@@ -38,11 +40,16 @@ public class ExecutionResult {
 		return exitValue;
 	}
 
+	public Object getResult() {
+		return result;
+	}
+
 	@Override
 	public String toString() {
 		if (stdOut.isEmpty() && stdErr.isEmpty()) {
 			return "Execution was sucessful";
 		}
-		return String.format("exitValue : %s\nstdout : %s\nstderr :%s", exitValue, stdOut, stdErr);
+		return String.format("result: %s, exitValue : %s\nstdout : %s\nstderr :%s", result != null ? result.toString()
+				: "null", exitValue, stdOut, stdErr);
 	}
 }

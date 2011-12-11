@@ -28,7 +28,7 @@ public class NodeJSExecutor {
 		try {
 			Process p = Runtime.getRuntime().exec(new String[] { nodeJS, srcFile.getAbsolutePath() });
 			int exitValue = p.waitFor();
-			return new ExecutionResult(readStream(p.getInputStream()), readStream(p.getErrorStream()), exitValue);
+			return new ExecutionResult(null, readStream(p.getInputStream()), readStream(p.getErrorStream()), exitValue);
 		} catch (Exception e) {
 			// TODO : this is not really going to be working on all OS!
 			if (e.getMessage().contains("Cannot run program")) {

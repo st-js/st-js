@@ -29,6 +29,7 @@ import org.stjs.javascript.functions.Callback1;
 
 /**
  * This class implements the {@link Array} interface to be used on the server side.
+ * 
  * @author acraciun
  * @param <V>
  */
@@ -244,4 +245,8 @@ public class ArrayImpl<V> implements Array<V> {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return array.toString();
+	}
 }

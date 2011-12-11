@@ -209,9 +209,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		parentScope.addType(clazz);
 
 		ClassScope scope = new ClassScope(clazz, parentScope, context);
-		for (ClassWrapper innerClass : clazz.getDeclaredClasses()) {
-			scope.addType(innerClass);
-		}
+
 		return scope;
 	}
 

@@ -57,6 +57,6 @@ public class RhinoExecutor {
 			// keep the result of last evaluation
 			result = addScript(engine, srcFile);
 		}
-		return new ExecutionResult(result != null ? result.toString() : null, null, 0);
+		return new ExecutionResult(result, null, null, 0);
 	}
 }
