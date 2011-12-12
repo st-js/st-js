@@ -79,7 +79,6 @@ import japa.parser.ast.type.WildcardType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.GenericDeclaration;
-import java.lang.reflect.Method;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -220,7 +219,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		TypeWithScope type = scope.resolveType(n.getName());
 		PreConditions.checkStateNode(n, type != null, "%s class cannot be resolved in the scope", n.getName());
 		Scope classScope = addClassToScope(parentScope, (ClassWrapper) type.getType());
-
+		resolvedType(n, type.getType());
 		super.visit(n, classScope);
 		Checks.postCheckClassDeclaration(n, context);
 	}
@@ -231,25 +230,34 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 		// the scope is where the method is defined, i.e. the classScope
 		((ASTNodeData) n.getData()).setScope(currentScope);
-		// this is safe as only one method is allowed with a given name
-		Class<?> ownerClass = currentScope.closest(ClassScope.class).getClazz().getClazz();
-		Method m = ClassUtils.findDeclaredMethod(ownerClass, n.getName());
-		PreConditions.checkStateNode(n, m != null, "Method [%s] not  found in the class [%s] line %d", n.getName(),
-				ownerClass.getName(), n.getBeginLine());
+		ClassWrapper ownerClass = currentScope.closest(ClassScope.class).getClazz();
+		List<MethodWrapper> methods = ownerClass.findMethods(n.getName());
+		PreConditions.checkStateNode(n, methods.size() > 0, "Method [%s] not  found in the class [%s] line %d",
+				n.getName(), ownerClass.getName(), n.getBeginLine());
 
-		BasicScope scope = handleMethodDeclaration(n, n.getParameters(), m.getGenericParameterTypes(),
-				m.getTypeParameters(), currentScope);
+		// this is safe as only one method is allowed with a given name
+		MethodWrapper method = methods.get(0);
+		resolvedMethod(n, method);
+
+		BasicScope scope = handleMethodDeclaration(n, n.getParameters(), method.getParameterTypes(),
+				method.getTypeParameters(), currentScope);
 		super.visit(n, new BasicScope(scope, context));
 	}
 
 	private BasicScope handleMethodDeclaration(Node node, final List<Parameter> parameters,
 			java.lang.reflect.Type[] resolvedParameterTypes,
 			TypeVariable<? extends GenericDeclaration>[] resolvedTypeParameters, Scope currentScope) {
+		return handleMethodDeclaration(node, parameters, TypeWrappers.wrap(resolvedParameterTypes),
+				TypeWrappers.wrap(resolvedTypeParameters), currentScope);
+	}
+
+	private BasicScope handleMethodDeclaration(Node node, final List<Parameter> parameters,
+			TypeWrapper[] resolvedParameterTypes, TypeWrapper[] resolvedTypeParameters, Scope currentScope) {
 
 		BasicScope scope = new BasicScope(currentScope, context);
 		if (resolvedTypeParameters != null) {
-			for (TypeVariable<? extends GenericDeclaration> tv : resolvedTypeParameters) {
-				scope.addType(TypeWrappers.wrap(tv));
+			for (TypeWrapper tv : resolvedTypeParameters) {
+				scope.addType(tv);
 			}
 		}
 
@@ -258,7 +266,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 					"The number of parameters (%d) should be the same as the number of types (%d) ", parameters.size(),
 					resolvedParameterTypes.length);
 			for (int i = 0; i < parameters.size(); ++i) {
-				TypeWrapper clazz = TypeWrappers.wrap(resolvedParameterTypes[i]);
+				TypeWrapper clazz = resolvedParameterTypes[i];
 				scope.addVariable(new ParameterVariable(clazz, parameters.get(i).getId().getName()));
 			}
 		}
@@ -397,7 +405,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		BasicScope scope;
 		if (c == null) {
 			// synthetic constructor
-			scope = handleMethodDeclaration(n, n.getParameters(), null, null, currentScope);
+			scope = handleMethodDeclaration(n, n.getParameters(), (java.lang.reflect.Type[]) null, null, currentScope);
 		} else {
 			java.lang.reflect.Type[] parameterTypes = c.getGenericParameterTypes();
 			// enums receive label and ordinal as first arguments

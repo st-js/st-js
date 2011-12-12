@@ -200,6 +200,10 @@ public class ClassWrapper implements TypeWrapper {
 	private void addMethods(Class<?> rawClass, TypeWrapper[] actualTypeArgs) {
 
 		for (Method m : rawClass.getDeclaredMethods()) {
+			if (m.isBridge() || m.isSynthetic()) {
+				// skip the bridges as they don't correspond to actual code
+				continue;
+			}
 			TypeWrapper[] paramTypes = TypeWrappers.wrap(m.getGenericParameterTypes());
 			@SuppressWarnings("unchecked")
 			TypeVariableWrapper<Method>[] typeParams = TypeWrappers.wrap(m.getTypeParameters());

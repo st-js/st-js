@@ -48,6 +48,7 @@ import org.stjs.generator.type.FieldWrapper;
 import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.type.TypeWrapper;
 import org.stjs.generator.utils.ClassUtils;
+import org.stjs.generator.utils.Option;
 import org.stjs.generator.variable.Variable;
 import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.javascript.annotation.JavascriptFunction;
@@ -162,6 +163,12 @@ public class Checks {
 		}
 	}
 
+	/**
+	 * other checks after the types were set
+	 * 
+	 * @param n
+	 * @param context
+	 */
 	public static void postCheckClassDeclaration(ClassOrInterfaceDeclaration n, GenerationContext context) {
 		if (n.getImplements() != null) {
 			for (ClassOrInterfaceType impl : n.getImplements()) {
@@ -171,6 +178,63 @@ public class Checks {
 					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 							"You cannot implement intefaces annotated with @JavascriptFunction. "
 									+ "You can only have inline object creation with this type of interfaces");
+				}
+			}
+		}
+		if (n.getExtends() != null && !n.isInterface()) {
+			TypeWrapper superType = ASTNodeData.resolvedType(n).getSuperClass();
+			if (!(superType instanceof ClassWrapper)) {
+				return;
+			}
+			ClassWrapper superClass = (ClassWrapper) superType;
+
+			for (BodyDeclaration member : n.getMembers()) {
+				if (member instanceof MethodDeclaration) {
+					String name = ((MethodDeclaration) member).getName();
+					MethodWrapper resolvedMethod = ASTNodeData.resolvedMethod(member);
+					if (Modifier.isStatic(resolvedMethod.getModifiers())) {
+						continue;
+					}
+					Option<MethodWrapper> overrideMethod = superClass.findMethod(name,
+							resolvedMethod.getParameterTypes());
+					if (overrideMethod.isDefined()) {
+						if (Modifier.isPrivate(overrideMethod.getOrThrow().getModifiers())) {
+							throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(member),
+									"One of the parent types contains already a private method called [" + name
+											+ "]. Javascript cannot distinguish methods/fields with the same name");
+						}
+						continue;
+					}
+
+					if (superClass.findField(name).isDefined() || !superClass.findMethods(name).isEmpty()) {
+						System.out.println("FIELD:" + superClass.findField(name).isDefined());
+						System.out.println("SEARCH:" + resolvedMethod);
+						System.out.println("OTHER:" + ((ClassWrapper) resolvedMethod.getOwnerType()).findMethods(name));
+						for (MethodWrapper m : superClass.findMethods(name)) {
+							System.out.println(m);
+						}
+						throw new JavascriptGenerationException(
+								context.getInputFile(),
+								new SourcePosition(member),
+								"One of the parent types contains already a method or a field called ["
+										+ name
+										+ "] with a different signature. Javascript cannot distinguish methods/fields with the same name");
+					}
+				} else if (member instanceof FieldDeclaration) {
+					if (Modifier.isStatic(((FieldDeclaration) member).getModifiers())) {
+						continue;
+					}
+					for (VariableDeclarator var : ((FieldDeclaration) member).getVariables()) {
+						String name = var.getId().getName();
+						if (superClass.findField(name).isDefined() || !superClass.findMethods(name).isEmpty()) {
+							throw new JavascriptGenerationException(
+									context.getInputFile(),
+									new SourcePosition(member),
+									"One of the parent types contains already a method or a field called ["
+											+ name
+											+ "] with a different signature. Javascript cannot distinguish methods/fields with the same name");
+						}
+					}
 				}
 			}
 		}

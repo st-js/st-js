@@ -33,11 +33,6 @@ public class FieldsGeneratorTest {
 	}
 
 	@Test(expected = JavascriptGenerationException.class)
-	public void testFieldAndMethodTheSameName() {
-		generate(Fields5.class);
-	}
-
-	@Test(expected = JavascriptGenerationException.class)
 	public void testForbidInstanceFieldInit() {
 		generate(Fields6.class);
 	}
