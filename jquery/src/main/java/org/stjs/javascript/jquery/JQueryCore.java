@@ -18,14 +18,15 @@ package org.stjs.javascript.jquery;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Map;
 import org.stjs.javascript.dom.Element;
+import org.stjs.javascript.functions.Callback1;
 import org.stjs.javascript.functions.Callback2;
 import org.stjs.javascript.functions.Callback3;
 import org.stjs.javascript.functions.Callback4;
 import org.stjs.javascript.utils.NameValue;
 
 /**
- * jquery interface for all jquery method + all used plugins in a web app. it can be mocked easily for testing purposes.
- * Compatible with jquery 1.6
+ * jquery interface for all jquery method + all used plugins in a web app. it can be mocked easily for testing purposes. Compatible with jquery
+ * 1.6
  */
 public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 	/************* ajax ***************/
@@ -46,7 +47,7 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 	/************* effects ***************/
 	public FullJQuery animate(Map<String, String> properties);
 
-	public FullJQuery animate(Map<String, String> properties, Object duration, String easing, Runnable complete);
+	public FullJQuery animate(Map<String, String> properties, Object duration, String easing, Callback1<Element> complete);
 
 	public FullJQuery animate(Map<String, String> properties, AnimateOptions options);
 
@@ -62,33 +63,33 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	public FullJQuery fadeIn(Object duration, String easing);
 
-	public FullJQuery fadeIn(Object duration, String easing, Runnable complete);
+	public FullJQuery fadeIn(Object duration, String easing, Callback1<Element> complete);
 
 	public FullJQuery fadeOut(Object duration);
 
 	public FullJQuery fadeOut(Object duration, String easing);
 
-	public FullJQuery fadeOut(Object duration, String easing, Runnable complete);
+	public FullJQuery fadeOut(Object duration, String easing, Callback1<Element> complete);
 
 	public FullJQuery fadeTo(Object duration, double opacity);
 
-	public FullJQuery fadeTo(Object duration, double opacity, Runnable complete);
+	public FullJQuery fadeTo(Object duration, double opacity, Callback1<Element> complete);
 
 	public FullJQuery fadeToggle(Object duration);
 
 	public FullJQuery fadeToggle(Object duration, String easing);
 
-	public FullJQuery fadeToggle(Object duration, String easing, Runnable complete);
+	public FullJQuery fadeToggle(Object duration, String easing, Callback1<Element> complete);
 
 	public FullJQuery hide(Object duration);
 
-	public FullJQuery hide(Object duration, String easing, Runnable complete);
+	public FullJQuery hide(Object duration, String easing, Callback1<Element> complete);
 
 	public FullJQuery show(Object duration);
 
-	public FullJQuery show(Object duration, Runnable complete);
+	public FullJQuery show(Object duration, Callback1<Element> complete);
 
-	public FullJQuery show(Object duration, String easing, Runnable complete);
+	public FullJQuery show(Object duration, String easing, Callback1<Element> complete);
 
 	public FullJQuery queue(String queueName);
 
@@ -96,19 +97,19 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	public FullJQuery slideDown(Object duration);
 
-	public FullJQuery slideDown(Object duration, String easing, Runnable complete);
+	public FullJQuery slideDown(Object duration, String easing, Callback1<Element> complete);
 
 	public FullJQuery slideToggle();
 
 	public FullJQuery slideToggle(Object duration);
 
-	public FullJQuery slideToggle(Object duration, String easing, Runnable complete);
+	public FullJQuery slideToggle(Object duration, String easing, Callback1<Element> complete);
 
 	public FullJQuery slideUp();
 
 	public FullJQuery slideUp(Object duration);
 
-	public FullJQuery slideUp(Object duration, String easing, Runnable complete);
+	public FullJQuery slideUp(Object duration, String easing, Callback1<Element> complete);
 
 	public FullJQuery stop();
 
@@ -118,7 +119,7 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	public FullJQuery toggle(Object duration);
 
-	public FullJQuery toggle(Object duration, String easing, Runnable complete);
+	public FullJQuery toggle(Object duration, String easing, Callback1<Element> complete);
 
 	/************* attributes ***************/
 	public FullJQuery addClass(String className);
