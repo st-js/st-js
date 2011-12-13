@@ -24,7 +24,7 @@
 		<dependency>
 			<groupId>org.st-js</groupId>
 			<artifactId>generator</artifactId>
-			<version>${parent.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
