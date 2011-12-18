@@ -18,7 +18,7 @@ import org.stjs.testing.jquery.MockjaxOptions;
 @Scripts({ "classpath://jquery.js", "classpath://jquery.mockjax.js", "classpath://json2.js" })
 public class MockjaxExampleTest {
 	@Test
-	public void shouldAddAndRemoveStockInTheListWithMockjax() throws Exception {
+	public void myTest() {
 		$.ajaxSetup($map("async", false));
 		$.mockjax(new MockjaxOptions() {
 			{

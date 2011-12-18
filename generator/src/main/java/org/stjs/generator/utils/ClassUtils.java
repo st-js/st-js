@@ -115,10 +115,17 @@ public class ClassUtils {
 			return false;
 		}
 		// TODO : cache?
+		if (clazz.getAnnotations() == null) {
+			return false;
+		}
 		for (Annotation annote : clazz.getAnnotations()) {
 			if (annote.annotationType().getName().equals(annotationName)) {
 				return true;
 			}
+		}
+
+		if (clazz.getPackage() == null || clazz.getPackage().getAnnotations() == null) {
+			return false;
 		}
 
 		for (Annotation annote : clazz.getPackage().getAnnotations()) {
