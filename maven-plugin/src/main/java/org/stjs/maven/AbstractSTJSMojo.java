@@ -85,6 +85,13 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	 */
 	protected int staleMillis;
 
+	/**
+	 * If true the check, if (array.hasOwnProperty(index)) continue; is added in each "for" array iteration
+	 * 
+	 * @parameter expression="${generateArrayHasOwnProperty}" default-value="true"
+	 */
+	protected boolean generateArrayHasOwnProperty;
+
 	abstract protected List<String> getCompileSourceRoots();
 
 	abstract protected File getGeneratedSourcesDirectory();
@@ -119,6 +126,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		Generator generator = new Generator();
 
 		GeneratorConfigurationBuilder configBuilder = new GeneratorConfigurationBuilder();
+		configBuilder.generateArrayHasOwnProperty(generateArrayHasOwnProperty);
 		// configBuilder.allowedPackage("org.stjs.javascript");
 		configBuilder.allowedPackage("org.junit");
 		// configBuilder.allowedPackage("org.stjs.testing");

@@ -55,7 +55,7 @@ public class ScopeTestHelper {
 
 			ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader(),
 					config.getAllowedPackages(), config.getAllowedJavaLangClasses());
-			GenerationContext context = new GenerationContext(new File(getSourceFile(clazz)));
+			GenerationContext context = new GenerationContext(new File(getSourceFile(clazz)), config);
 			// set the parent of each node
 			cu.accept(new SetParentVisitor(), context);
 			ScopeBuilder builder = new ScopeBuilder(classLoader, context);

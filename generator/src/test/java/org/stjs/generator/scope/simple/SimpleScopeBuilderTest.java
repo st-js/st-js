@@ -40,7 +40,7 @@ public class SimpleScopeBuilderTest {
 				.build();
 		ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader(),
 				config.getAllowedPackages(), config.getAllowedJavaLangClasses());
-		GenerationContext context = new GenerationContext(new File(path));
+		GenerationContext context = new GenerationContext(new File(path), config);
 		// set the parent of each node
 		compilationUnit.accept(new SetParentVisitor(), context);
 		ScopeBuilder builder = new ScopeBuilder(classLoader, context);

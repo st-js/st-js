@@ -129,10 +129,12 @@ import org.stjs.generator.type.FieldWrapper;
 import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.type.ParameterizedTypeWrapper;
 import org.stjs.generator.type.TypeWrapper;
+import org.stjs.generator.type.TypeWrappers;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.NodeUtils;
 import org.stjs.generator.utils.PreConditions;
 import org.stjs.generator.variable.Variable;
+import org.stjs.javascript.Array;
 import org.stjs.javascript.annotation.GlobalScope;
 
 /**
@@ -289,7 +291,21 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printer.print(" in ");
 		n.getIterable().accept(this, context);
 		printer.print(") ");
+		boolean hasBlockBody = n.getBody() instanceof BlockStmt;
+
+		// add braces when we have one line statement
+		if (!hasBlockBody) {
+			printer.printLn("{");
+			printer.indent();
+			generateArrayHasOwnProperty(n, context);
+		}
 		n.getBody().accept(this, context);
+
+		if (!hasBlockBody) {
+			printer.printLn();
+			printer.unindent();
+			printer.print("}");
+		}
 	}
 
 	@Override
@@ -1401,11 +1417,31 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				"Only assign expression are allowed in an object creation block");
 	}
 
+	private void generateArrayHasOwnProperty(ForeachStmt n, GenerationContext context) {
+		if (!context.getConfiguration().isGenerateArrayHasOwnProperty()) {
+			return;
+		}
+
+		TypeWrapper iterated = resolvedType(n.getIterable());
+
+		if (!iterated.isAssignableFrom(TypeWrappers.wrap(Array.class))) {
+			return;
+		}
+		printer.print("if ((");
+		n.getIterable().accept(this, context);
+		printer.print(").hasOwnProperty(");
+		printer.print(n.getVariable().getVars().get(0).getId().getName());
+		printer.printLn(")) continue;");
+	}
+
 	@Override
 	public void visit(BlockStmt n, GenerationContext context) {
 		printer.printLn("{");
 		if (n.getStmts() != null) {
 			printer.indent();
+			if (parent(n) instanceof ForeachStmt) {
+				generateArrayHasOwnProperty((ForeachStmt) parent(n), context);
+			}
 			for (int i = 0; i < n.getStmts().size(); ++i) {
 				Statement s = n.getStmts().get(i);
 				printComments(s, context);

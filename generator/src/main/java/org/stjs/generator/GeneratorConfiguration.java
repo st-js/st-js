@@ -21,10 +21,13 @@ import java.util.Set;
 public class GeneratorConfiguration {
 	private final Collection<String> allowedPackages;
 	private final Set<String> allowedJavaLangClasses;
+	private final boolean generateArrayHasOwnProperty;
 
-	GeneratorConfiguration(Collection<String> allowedPackages, Set<String> allowedJavaLangClasses) {
+	GeneratorConfiguration(Collection<String> allowedPackages, Set<String> allowedJavaLangClasses,
+			boolean generateArrayHasOwnProperty) {
 		this.allowedPackages = allowedPackages;
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
+		this.generateArrayHasOwnProperty = generateArrayHasOwnProperty;
 	}
 
 	/**
@@ -38,6 +41,10 @@ public class GeneratorConfiguration {
 
 	public Set<String> getAllowedJavaLangClasses() {
 		return allowedJavaLangClasses;
+	}
+
+	public boolean isGenerateArrayHasOwnProperty() {
+		return generateArrayHasOwnProperty;
 	}
 
 }

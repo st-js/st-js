@@ -28,6 +28,7 @@ import java.util.Set;
 public class GeneratorConfigurationBuilder {
 	private Collection<String> allowedPackages = new HashSet<String>();
 	private Set<String> allowedJavaLangClasses = new HashSet<String>();
+	private boolean generateArrayHasOwnProperty = true;
 
 	public GeneratorConfigurationBuilder allowedPackage(String packageName) {
 		allowedPackages.add(packageName);
@@ -46,6 +47,11 @@ public class GeneratorConfigurationBuilder {
 
 	public GeneratorConfigurationBuilder allowedJavaLangClasses(Collection<String> classNames) {
 		allowedJavaLangClasses.addAll(classNames);
+		return this;
+	}
+
+	public GeneratorConfigurationBuilder generateArrayHasOwnProperty(boolean b) {
+		generateArrayHasOwnProperty = b;
 		return this;
 	}
 
@@ -68,7 +74,7 @@ public class GeneratorConfigurationBuilder {
 
 		allowedPackages.add("java.lang");
 
-		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses);
+		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, generateArrayHasOwnProperty);
 	}
 
 }

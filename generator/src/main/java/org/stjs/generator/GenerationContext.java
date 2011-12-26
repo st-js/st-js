@@ -29,14 +29,21 @@ public class GenerationContext {
 
 	private final File inputFile;
 
+	private final GeneratorConfiguration configuration;
+
 	private ClassOrInterfaceDeclaration currentType = null;
 
-	public GenerationContext(File inputFile) {
+	public GenerationContext(File inputFile, GeneratorConfiguration configuration) {
 		this.inputFile = inputFile;
+		this.configuration = configuration;
 	}
 
 	public File getInputFile() {
 		return inputFile;
+	}
+
+	public GeneratorConfiguration getConfiguration() {
+		return configuration;
 	}
 
 	public ClassOrInterfaceDeclaration setCurrentType(ClassOrInterfaceDeclaration n) {

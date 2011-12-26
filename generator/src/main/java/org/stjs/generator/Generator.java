@@ -72,7 +72,7 @@ public class Generator {
 
 		File inputFile = getInputFile(sourceFolder, className);
 		File outputFile = getOutputFile(generationFolder, className);
-		GenerationContext context = new GenerationContext(inputFile);
+		GenerationContext context = new GenerationContext(inputFile, configuration);
 
 		ClassLoaderWrapper classLoaderWrapper = new ClassLoaderWrapper(builtProjectClassLoader,
 				configuration.getAllowedPackages(), configuration.getAllowedJavaLangClasses());

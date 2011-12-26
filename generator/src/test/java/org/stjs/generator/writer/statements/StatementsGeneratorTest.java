@@ -1,6 +1,7 @@
 package org.stjs.generator.writer.statements;
 
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
+import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -59,5 +60,20 @@ public class StatementsGeneratorTest {
 	@Test
 	public void testInstanceof() {
 		assertCodeContains(Statements10.class, "arg.constructor == Statements10");
+	}
+
+	@Test
+	public void testForEachArrayOneLine() {
+		assertCodeContains(Statements11.class, "if ((a).hasOwnProperty(i)) continue;");
+	}
+
+	@Test
+	public void testForEachArrayBlock() {
+		assertCodeContains(Statements12.class, "if ((a).hasOwnProperty(i)) continue;");
+	}
+
+	@Test
+	public void testForEachMapBlock() {
+		assertCodeDoesNotContain(Statements13.class, "hasOwnProperty");
 	}
 }
