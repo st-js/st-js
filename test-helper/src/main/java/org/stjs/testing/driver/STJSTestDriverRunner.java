@@ -92,9 +92,10 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 
 				final HTMLFixture htmlFixture = getTestClass().getJavaClass().getAnnotation(HTMLFixture.class);
 				final Scripts addedScripts = getTestClass().getJavaClass().getAnnotation(Scripts.class);
+				File htmlFile = null;
 				try {
-					File htmlFile = File.createTempFile(getTestClass().getJavaClass().getName()
-							+ "_js_test_driver_adapter", ".html");
+					htmlFile = File.createTempFile(getTestClass().getJavaClass().getName() + "_js_test_driver_adapter",
+							".html");
 					FileWriter writer = new FileWriter(htmlFile);
 
 					writer.append("<html>");
@@ -159,6 +160,10 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 					}
 				} catch (IOException e) {
 					throw new RuntimeException(e);
+				} finally {
+					if (htmlFile != null) {
+						htmlFile.delete();
+					}
 				}
 			}
 		};

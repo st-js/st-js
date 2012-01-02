@@ -347,7 +347,7 @@ public class Checks {
 		}
 		if ((n.getAnonymousClassBody() != null) && (n.getAnonymousClassBody().size() > 1)) {
 			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
-					"Initialization block for a Javascript function can contain exactly one method");
+					"Initialization block for a Javascript function must contain exactly one method");
 		}
 
 	}

@@ -34,8 +34,10 @@ import org.codehaus.plexus.compiler.util.scan.SourceInclusionScanner;
 import org.codehaus.plexus.compiler.util.scan.mapping.SourceMapping;
 import org.codehaus.plexus.compiler.util.scan.mapping.SuffixMapping;
 import org.codehaus.plexus.util.DirectoryScanner;
+import org.sonatype.plexus.build.incremental.BuildContext;
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfigurationBuilder;
+import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.type.TypeWrappers;
 
 /**
@@ -56,6 +58,10 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	 */
 	protected MavenProject project;
 
+	/**
+	 * @component
+	 */
+	protected BuildContext buildContext;
 	/**
 	 * The list of packages that can be referenced from the classes that will be processed by the generator
 	 * 
@@ -149,13 +155,16 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			List<File> sources = new ArrayList<File>();
 			SourceMapping mapping = new SuffixMapping(".java", ".js");
 			SourceMapping stjsMapping = new SuffixMapping(".java", ".stjs");
+
 			sources = accumulateSources(sourceDir, mapping, stjsMapping);
 			for (File source : sources) {
 				try {
-					// File absoluteSource = new File(sourceDir, source.getPath());
+					File absoluteSource = new File(sourceDir, source.getPath());
 					File absoluteTarget = (File) mapping
 							.getTargetFiles(getGeneratedSourcesDirectory(), source.getPath()).iterator().next();
 					getLog().info("Generating " + absoluteTarget);
+					buildContext.removeMessages(absoluteSource);
+
 					if (!absoluteTarget.getParentFile().exists() && !absoluteTarget.getParentFile().mkdirs()) {
 						getLog().error("Cannot create output directory:" + absoluteTarget.getParentFile());
 						continue;
@@ -167,6 +176,10 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 				} catch (InclusionScanException e) {
 					throw new MojoExecutionException("Cannot scan the source directory:" + e, e);
+				} catch (JavascriptGenerationException e) {
+					buildContext.addMessage(e.getInputFile(), e.getSourcePosition().getLine(), e.getSourcePosition()
+							.getColumn(), e.getMessage(), BuildContext.SEVERITY_ERROR, null);
+					// continue with the next file
 				} catch (Exception e) {
 					getLog().error(e.toString());
 					e.printStackTrace();

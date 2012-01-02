@@ -4,12 +4,13 @@
 
 	<artifactId>maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
+	<version>1.2.0-SNAPSHOT</version>
 	<name>Strongly-typed Javascript:Maven Plugin</name>
 
 	<parent>
 		<groupId>org.st-js</groupId>
 		<artifactId>stjs</artifactId>
-		<version>1.1.5-SNAPSHOT</version>
+		<version>1.2.0-SNAPSHOT</version>
 	</parent>
 
 	<repositories>
@@ -18,28 +19,29 @@
 	</repositories>
 
 	<properties>
+		<stjs-lib.version>${project.version}</stjs-lib.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.st-js</groupId>
 			<artifactId>generator</artifactId>
-			<version>${project.version}</version>
+			<version>${stjs-lib.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-plugin-api</artifactId>
-			<version>2.0</version>
+			<version>2.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-project</artifactId>
-			<version>2.0</version>
+			<version>2.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.plexus</groupId>
 			<artifactId>plexus-compiler-api</artifactId>
-			<version>1.8.1</version>
+			<version>1.8.2</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.codehaus.plexus</groupId>
@@ -47,6 +49,20 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<dependency>
+			<groupId>org.sonatype.plexus</groupId>
+			<artifactId>plexus-build-api</artifactId>
+			<version>0.0.7</version>
+		</dependency>
 	</dependencies>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.codehaus.plexus</groupId>
+				<artifactId>plexus-utils</artifactId>
+				<version>1.5.8</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>

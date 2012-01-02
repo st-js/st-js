@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>org.st-js</groupId>
 		<artifactId>stjs</artifactId>
-		<version>1.1.5-SNAPSHOT</version>
+		<version>1.2.0-SNAPSHOT</version>
 	</parent>
 
 	<repositories>
@@ -18,6 +18,7 @@
 	</repositories>
 
 	<properties>
+		<stjs-plugin.version>${project.version}</stjs-plugin.version>
 	</properties>
 
 	<dependencies>
@@ -57,7 +58,7 @@
 			<plugin>
 				<groupId>org.st-js</groupId>
 				<artifactId>maven-plugin</artifactId>
-				<version>${project.version}</version>
+				<version>${stjs-plugin.version}</version>
 				<executions>
 					<execution>
 						<id>main</id>
@@ -91,7 +92,7 @@
 											maven-plugin
 										</artifactId>
 										<versionRange>
-											[${project.version},)
+											[${stjs-plugin.version},)
 										</versionRange>
 										<goals>
 											<goal>generate</goal>
@@ -109,34 +110,4 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-	<profiles>
-		<!-- configuration for maven plugin 0.12 for automatic code generation -->
-		<profile>
-			<id>m2e-0.12</id>
-			<activation>
-				<property>
-					<name>m2e.version</name>
-					<value>0.12</value> <!-- you may have to remove the value -->
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.maven.ide.eclipse</groupId>
-						<artifactId>lifecycle-mapping</artifactId>
-						<version>0.10.0</version>
-						<configuration>
-							<mappingId>customizable</mappingId>
-							<configurators>
-								<configurator id="org.maven.ide.eclipse.jdt.javaConfigurator" />
-							</configurators>
-							<mojoExecutions>
-								<mojoExecution>org.st-js:maven-plugin::</mojoExecution>
-							</mojoExecutions>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 </project>
