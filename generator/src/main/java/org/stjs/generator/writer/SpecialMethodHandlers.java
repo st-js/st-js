@@ -18,6 +18,7 @@ package org.stjs.generator.writer;
 import static org.stjs.generator.ast.ASTNodeData.resolvedMethod;
 import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.MethodCallExpr;
+import japa.parser.ast.expr.StringLiteralExpr;
 
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -27,7 +28,9 @@ import java.util.Map;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.ast.ASTNodeData;
+import org.stjs.generator.ast.SourcePosition;
 import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.utils.ClassUtils;
 
@@ -214,6 +217,22 @@ public class SpecialMethodHandlers {
 		});
 		methodHandlers.put("$object", methodHandlers.get("$properties"));
 		methodHandlers.put("$castArray", methodHandlers.get("$properties"));
+
+		methodHandlers.put("$js", new SpecialMethodHandler() {
+			@Override
+			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
+				if ((n.getArgs() == null) || (n.getArgs().size() != 1)) {
+					return false;
+				}
+				if (!(n.getArgs().get(0) instanceof StringLiteralExpr)) {
+					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+							"$js can be used only with string literals");
+				}
+				StringLiteralExpr code = (StringLiteralExpr) n.getArgs().get(0);
+				currentHandler.printer.print(code.getValue());
+				return true;
+			}
+		});
 
 		assertHandler = new AssertHandler();
 		methodToPropertyHandler = new MethodToPropertyHandler();

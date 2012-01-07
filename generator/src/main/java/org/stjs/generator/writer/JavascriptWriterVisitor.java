@@ -1427,7 +1427,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (!iterated.isAssignableFrom(TypeWrappers.wrap(Array.class))) {
 			return;
 		}
-		printer.print("if ((");
+		printer.print("if (!(");
 		n.getIterable().accept(this, context);
 		printer.print(").hasOwnProperty(");
 		printer.print(n.getVariable().getVars().get(0).getId().getName());

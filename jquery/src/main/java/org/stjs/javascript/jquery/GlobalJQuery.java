@@ -31,6 +31,8 @@ abstract public class GlobalJQuery {
 
 	public Browser browser;
 
+	public Object fn;
+
 	/**
 	 * jquery constructors
 	 */
@@ -69,7 +71,7 @@ abstract public class GlobalJQuery {
 
 	abstract public String trim(String obj);
 
-	abstract public <K extends String, V> Map<K, V> extend(Map<K, V> target, Map<K, V>... objects);
+	abstract public <K extends String, V> Map<K, V> extend(Map<?, ?> target, Map<?, ?>... objects);
 
 	abstract public <K extends String, V> Map<K, V> extend(boolean deep, Map<K, V> target, Map<K, V>... objects);
 

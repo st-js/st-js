@@ -126,4 +126,8 @@ public class SpecialMethodGeneratorTest {
 		assertCodeContains(SpecialMethod20.class, "var div = $(\"div\");");
 	}
 
+	@Test
+	public void testJs() {
+		assertCodeContains(SpecialMethod21.class, "x = s.a");
+	}
 }

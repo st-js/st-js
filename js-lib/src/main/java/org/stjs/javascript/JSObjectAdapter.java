@@ -53,4 +53,8 @@ public class JSObjectAdapter {
 	public static <T> T $object(Map<String, Object> properties) {
 		throw new UnsupportedOperationException();
 	}
+
+	public static <T> T $js(String code) {
+		throw new UnsupportedOperationException();
+	}
 }

@@ -34,7 +34,7 @@ public class DialogOptions<FullJQuery extends JQueryCore<?>> {
 
 	public boolean draggable = true;
 
-	public String height = "auto";
+	public Object height = "auto";
 
 	public Object hide = null;
 
@@ -58,7 +58,7 @@ public class DialogOptions<FullJQuery extends JQueryCore<?>> {
 
 	public String title = "";
 
-	public int width = 300;
+	public Object width = 300;
 
 	public int zIndex = 1000;
 

@@ -8,6 +8,7 @@ import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.type.TypeWrapper;
 import org.stjs.generator.type.TypeWrappers;
 import org.stjs.generator.utils.Option;
+import org.stjs.javascript.JSFunctionAdapter;
 
 public class MethodResolutionTest {
 	@Test
@@ -67,6 +68,14 @@ public class MethodResolutionTest {
 		TypeWrapper type = TypeWrappers.wrap(MethodResolution7.class);
 		Option<MethodWrapper> w = type.findMethod("method", TypeWrappers.wrap(Double.class), null,
 				TypeWrappers.wrap(boolean.class));
+		assertTrue(w.isDefined());
+	}
+
+	@Test
+	public void testCallFunc() {
+		TypeWrapper type = TypeWrappers.wrap(JSFunctionAdapter.class);
+		Option<MethodWrapper> w = type.findMethod("call", TypeWrappers.wrap(Object.class),
+				TypeWrappers.wrap(Object.class), TypeWrappers.wrap(int.class), TypeWrappers.wrap(int.class));
 		assertTrue(w.isDefined());
 	}
 

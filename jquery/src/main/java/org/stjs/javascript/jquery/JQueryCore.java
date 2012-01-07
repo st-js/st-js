@@ -22,11 +22,12 @@ import org.stjs.javascript.functions.Callback1;
 import org.stjs.javascript.functions.Callback2;
 import org.stjs.javascript.functions.Callback3;
 import org.stjs.javascript.functions.Callback4;
+import org.stjs.javascript.functions.Function2;
 import org.stjs.javascript.utils.NameValue;
 
 /**
- * jquery interface for all jquery method + all used plugins in a web app. it can be mocked easily for testing purposes. Compatible with jquery
- * 1.6
+ * jquery interface for all jquery method + all used plugins in a web app. it can be mocked easily for testing purposes.
+ * Compatible with jquery 1.6
  */
 public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 	/************* ajax ***************/
@@ -47,7 +48,8 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 	/************* effects ***************/
 	public FullJQuery animate(Map<String, String> properties);
 
-	public FullJQuery animate(Map<String, String> properties, Object duration, String easing, Callback1<Element> complete);
+	public FullJQuery animate(Map<String, String> properties, Object duration, String easing,
+			Callback1<Element> complete);
 
 	public FullJQuery animate(Map<String, String> properties, AnimateOptions options);
 
@@ -138,9 +140,9 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	public Object val();
 
-	public FullJQuery attr(String name, String value);
+	public FullJQuery attr(String name, Object value);
 
-	public String attr(String attrName);
+	public Object attr(String attrName);
 
 	public FullJQuery removeAttr(String name);
 
@@ -499,6 +501,8 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery contents();
 
 	public FullJQuery each(Callback2<Integer, Element> function);
+
+	public <T> FullJQuery each(Function2<Integer, Element, T> function);
 
 	public FullJQuery end();
 

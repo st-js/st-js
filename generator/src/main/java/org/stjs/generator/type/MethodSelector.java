@@ -80,8 +80,8 @@ public class MethodSelector {
 
 		for (int i = 0; i < argumentTypes.length; ++i) {
 			TypeWrapper argumentType = argumentTypes[i];
-			// TODO fix for varargs
-			TypeWrapper paramType = found.getParameterTypes()[i];
+			TypeWrapper paramType = i < found.getParameterTypes().length ? found.getParameterTypes()[i] : found
+					.getVarargParamType();
 			Map<String, TypeWrapper> inferredTypesForParam = resolveTypeVariables(paramType, argumentType);
 			for (Map.Entry<String, TypeWrapper> e : inferredTypesForParam.entrySet()) {
 				TypeWrapper existing = inferredTypes.get(e.getKey());

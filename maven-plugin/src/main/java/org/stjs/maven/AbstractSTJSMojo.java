@@ -28,6 +28,7 @@ import java.util.Set;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.compiler.util.scan.InclusionScanException;
 import org.codehaus.plexus.compiler.util.scan.SourceInclusionScanner;
@@ -92,7 +93,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	protected int staleMillis;
 
 	/**
-	 * If true the check, if (array.hasOwnProperty(index)) continue; is added in each "for" array iteration
+	 * If true the check, if (!array.hasOwnProperty(index)) continue; is added in each "for" array iteration
 	 * 
 	 * @parameter expression="${generateArrayHasOwnProperty}" default-value="true"
 	 */
@@ -122,7 +123,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	}
 
 	@Override
-	public void execute() throws MojoExecutionException {
+	public void execute() throws MojoExecutionException, MojoFailureException {
 		getLog().info("Generating javascript files");
 
 		// clear cache before each execution
@@ -149,6 +150,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		}
 
 		boolean atLeastOneFileGenerated = false;
+		boolean hasFailures = false;
 		// scan the modified sources
 		for (String sourceRoot : getCompileSourceRoots()) {
 			File sourceDir = new File(sourceRoot);
@@ -158,8 +160,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 			sources = accumulateSources(sourceDir, mapping, stjsMapping);
 			for (File source : sources) {
+				File absoluteSource = new File(sourceDir, source.getPath());
 				try {
-					File absoluteSource = new File(sourceDir, source.getPath());
 					File absoluteTarget = (File) mapping
 							.getTargetFiles(getGeneratedSourcesDirectory(), source.getPath()).iterator().next();
 					getLog().info("Generating " + absoluteTarget);
@@ -179,11 +181,13 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				} catch (JavascriptGenerationException e) {
 					buildContext.addMessage(e.getInputFile(), e.getSourcePosition().getLine(), e.getSourcePosition()
 							.getColumn(), e.getMessage(), BuildContext.SEVERITY_ERROR, null);
+					hasFailures = true;
 					// continue with the next file
 				} catch (Exception e) {
-					getLog().error(e.toString());
-					e.printStackTrace();
-					throw new MojoExecutionException("Error generating javascript:" + e, e);
+					// TODO - maybe should filter more here
+					buildContext.addMessage(absoluteSource, 1, 1, e.toString(), BuildContext.SEVERITY_ERROR, e);
+					hasFailures = true;
+					// throw new MojoExecutionException("Error generating javascript:" + e, e);
 				}
 			}
 		}
@@ -191,6 +195,10 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		if (atLeastOneFileGenerated) {
 			// copy the javascript support
 			generator.copyJavascriptSupport(getGeneratedSourcesDirectory());
+		}
+
+		if (hasFailures) {
+			throw new MojoFailureException("Errors generating javascript");
 		}
 	}
 

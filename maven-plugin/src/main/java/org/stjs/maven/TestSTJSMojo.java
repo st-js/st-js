@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 
 /**
  * 
@@ -61,7 +62,7 @@ public class TestSTJSMojo extends AbstractSTJSMojo {
 	}
 
 	@Override
-	public void execute() throws MojoExecutionException {
+	public void execute() throws MojoExecutionException, MojoFailureException {
 		if ("true".equals(System.getProperty(MAVEN_TEST_SKIP))) {
 			getLog().info("Tests are skipped, so javascript generation for tests is also skipped");
 		} else {

@@ -64,12 +64,12 @@ public class StatementsGeneratorTest {
 
 	@Test
 	public void testForEachArrayOneLine() {
-		assertCodeContains(Statements11.class, "if ((a).hasOwnProperty(i)) continue;");
+		assertCodeContains(Statements11.class, "if (!(a).hasOwnProperty(i)) continue;");
 	}
 
 	@Test
 	public void testForEachArrayBlock() {
-		assertCodeContains(Statements12.class, "if ((a).hasOwnProperty(i)) continue;");
+		assertCodeContains(Statements12.class, "if (!(a).hasOwnProperty(i)) continue;");
 	}
 
 	@Test
