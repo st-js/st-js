@@ -15,12 +15,12 @@
  */
 package org.stjs.javascript.jquery;
 
-import org.stjs.javascript.annotation.DataType;
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.functions.Callback1;
 import org.stjs.javascript.functions.Callback2;
 import org.stjs.javascript.functions.Callback3;
 
-@DataType
+@SyntheticType
 public class AjaxParams {
 	public boolean async;
 	public String url;

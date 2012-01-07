@@ -20,7 +20,7 @@ import static org.stjs.javascript.JSCollections.$array;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;
 import org.stjs.javascript.Map;
-import org.stjs.javascript.annotation.DataType;
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.dom.Element;
 import org.stjs.javascript.functions.Callback2;
 import org.stjs.javascript.functions.Callback3;
@@ -28,7 +28,7 @@ import org.stjs.javascript.functions.Function1;
 import org.stjs.javascript.functions.Function2;
 import org.stjs.javascript.jquery.JQueryCore;
 
-@DataType
+@SyntheticType
 public class DatePickerOptions<FullJQuery extends JQueryCore<?>> {
 	public boolean disabled = false;
 

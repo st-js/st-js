@@ -111,6 +111,7 @@ import japa.parser.ast.type.WildcardType;
 import japa.parser.ast.visitor.VoidVisitor;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -132,6 +133,7 @@ import org.stjs.generator.type.TypeWrapper;
 import org.stjs.generator.type.TypeWrappers;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.NodeUtils;
+import org.stjs.generator.utils.Option;
 import org.stjs.generator.utils.PreConditions;
 import org.stjs.generator.variable.Variable;
 import org.stjs.javascript.Array;
@@ -628,7 +630,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 		}
 
-		if ((clazz != null) && (clazz instanceof ClassWrapper) && ClassUtils.isDataType(((ClassWrapper) clazz))) {
+		if ((clazz != null) && (clazz instanceof ClassWrapper) && ClassUtils.isSyntheticType(clazz)) {
 			// this is a call to an mock type
 			printer.print("{}");
 			return;
@@ -653,28 +655,43 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	private void addCallToSuper(ClassScope classScope, GenerationContext context, Collection<Expression> args) {
 		PreConditions.checkNotNull(classScope);
-		if (classScope.getClazz().getSuperclass().isDefined()
-				&& !classScope.getClazz().getSuperclass().getOrThrow().getClazz().equals(Object.class)) {
-			// avoid useless call to super() when the super class is Object
-			printer.print(stJsName(classScope.getClazz().getSuperClass())).print(".call");
+
+		Option<ClassWrapper> superClass = classScope.getClazz().getSuperclass();
+
+		if (superClass.isDefined()) {
+			if (ClassUtils.isSyntheticType(superClass.getOrThrow())) {
+				// do not add call to super class is it's a synthetic
+				return;
+			}
+
+			if (superClass.getOrThrow().getClazz().equals(Object.class)) {
+				// avoid useless call to super() when the super class is Object
+				return;
+			}
+			printer.print(stJsName(superClass.getOrThrow())).print(".call");
 			printArguments(Collections.singleton("this"), args, Collections.<String> emptyList(), context);
 			printer.print(";");
+
 		}
 	}
 
 	@Override
 	public void visit(ConstructorDeclaration n, GenerationContext context) {
 		printComments(n, context);
-		if ((n.getBlock().getStmts() != null) && (n.getBlock().getStmts().size() > 0)) {
-			Statement firstStatement = n.getBlock().getStmts().get(0);
-			if (!(firstStatement instanceof ExplicitConstructorInvocationStmt)) {
-				// generate possibly missing super() call
-				Statement callSuper = new ExplicitConstructorInvocationStmt();
-				callSuper.setData(new ASTNodeData());
-				parent(callSuper, n.getBlock());
-				scope(callSuper, scope(n.getBlock()));
-				n.getBlock().getStmts().add(0, callSuper);
-				// addCallToSuper(scope(n).closest(ClassScope.class), context, Collections.<Expression> emptyList());
+		Option<ClassWrapper> superClass = scope(n).closest(ClassScope.class).getClazz().getSuperclass();
+		if (superClass.isDefined() && !ClassUtils.isSyntheticType(superClass.getOrThrow())) {
+			if ((n.getBlock().getStmts() != null) && (n.getBlock().getStmts().size() > 0)) {
+				Statement firstStatement = n.getBlock().getStmts().get(0);
+				if (!(firstStatement instanceof ExplicitConstructorInvocationStmt)) {
+					// generate possibly missing super() call
+					Statement callSuper = new ExplicitConstructorInvocationStmt();
+					callSuper.setData(new ASTNodeData());
+					parent(callSuper, n.getBlock());
+					scope(callSuper, scope(n.getBlock()));
+					n.getBlock().getStmts().add(0, callSuper);
+					// addCallToSuper(scope(n).closest(ClassScope.class), context, Collections.<Expression>
+					// emptyList());
+				}
 			}
 		}
 		printMethod(n.getName(), n.getParameters(), n.getModifiers(), n.getBlock(), context, resolvedType(parent(n)),
@@ -703,6 +720,29 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printer.print("/*");
 		printer.print(n.getContent());
 		printer.printLn("*/");
+	}
+
+	private List<TypeWrapper> getImplementsOrExtends(ClassOrInterfaceDeclaration n) {
+		List<TypeWrapper> types = new ArrayList<TypeWrapper>();
+
+		if (n.getExtends() != null) {
+			for (ClassOrInterfaceType ext : n.getExtends()) {
+				TypeWrapper type = resolvedType(ext);
+				if (!ClassUtils.isSyntheticType(type)) {
+					types.add(type);
+				}
+
+			}
+		}
+		if (n.getImplements() != null) {
+			for (ClassOrInterfaceType impl : n.getImplements()) {
+				TypeWrapper type = resolvedType(impl);
+				if (!ClassUtils.isSyntheticType(type)) {
+					types.add(type);
+				}
+			}
+		}
+		return types;
 	}
 
 	@Override
@@ -741,23 +781,17 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			}
 
 			// XXX it's not really working for multiple extends
-			if (((n.getExtends() != null) && (n.getExtends().size() > 0))
-					|| ((n.getImplements() != null) && (n.getImplements().size() > 0))) {
+			List<TypeWrapper> implementsOrExtends = getImplementsOrExtends(n);
+			if (implementsOrExtends.size() > 0) {
 				printer.printLn();
 				printer.print("stjs.extend(");
 
 				printer.print(className);
 
-				if (n.getExtends() != null) {
-					for (ClassOrInterfaceType ext : n.getExtends()) {
-						printer.print(", " + stJsName(resolvedType(ext)));
-					}
+				for (TypeWrapper ext : implementsOrExtends) {
+					printer.print(", " + stJsName(ext));
 				}
-				if (n.getImplements() != null) {
-					for (ClassOrInterfaceType impl : n.getImplements()) {
-						printer.print(", " + stJsName(resolvedType(impl)));
-					}
-				}
+
 				printer.printLn(");");
 			}
 			printMembers(n.getMembers(), context);
@@ -825,14 +859,19 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printer.print(".");
 		printer.print(GeneratorConstants.TYPE_DESCRIPTION_PROPERTY).print("=");
 
+		boolean generateSuperClass = false;
 		if ((n.getExtends() != null) && (n.getExtends().size() > 0)) {
-			printer.print("stjs.copyProps(");
+			TypeWrapper superClass = resolvedType(n.getExtends().get(0));
+			if (!ClassUtils.isSyntheticType(superClass)) {
+				generateSuperClass = true;
+				printer.print("stjs.copyProps(");
 
-			// for (ClassOrInterfaceType ext : n.getExtends()) {
-			// printer.print(", " + stJsName(resolvedType(ext)));
-			// }
-			printer.print(stJsName(resolvedType(n.getExtends().get(0))));
-			printer.print(".").print(GeneratorConstants.TYPE_DESCRIPTION_PROPERTY).print(", ");
+				// for (ClassOrInterfaceType ext : n.getExtends()) {
+				// printer.print(", " + stJsName(resolvedType(ext)));
+				// }
+				printer.print(stJsName(superClass));
+				printer.print(".").print(GeneratorConstants.TYPE_DESCRIPTION_PROPERTY).print(", ");
+			}
 		}
 
 		printer.print("{");
@@ -858,7 +897,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			}
 		}
 		printer.print("}");
-		if ((n.getExtends() != null) && (n.getExtends().size() > 0)) {
+		if (generateSuperClass) {
 			printer.print(")");
 		}
 		printer.printLn(";");

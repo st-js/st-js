@@ -1,7 +1,9 @@
 package org.stjs.javascript.jquery;
 
 import org.stjs.javascript.XMLHttpRequest;
+import org.stjs.javascript.annotation.SyntheticType;
 
+@SyntheticType
 public abstract class JQueryXHR extends XMLHttpRequest {
 	String responseText;
 	String responseXML;

@@ -15,11 +15,13 @@
  */
 package org.stjs.javascript.jquery;
 
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.dom.Element;
 
 /**
  * jquery event
  */
+@SyntheticType
 abstract public class Event {
 	public boolean attrChange;
 	public String attrName;

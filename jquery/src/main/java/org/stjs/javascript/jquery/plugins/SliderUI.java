@@ -15,9 +15,11 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.jquery.JQueryCore;
 
-public class SliderUI<FullJQuery extends JQueryCore<?>> {
+@SyntheticType
+abstract public class SliderUI<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery handle;
 	public double value;
 }

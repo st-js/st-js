@@ -1,5 +1,6 @@
 package org.stjs.javascript.jquery.impl;
 
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.jquery.Event;
 import org.stjs.javascript.jquery.JQueryAndPlugins;
 
@@ -9,7 +10,8 @@ import org.stjs.javascript.jquery.JQueryAndPlugins;
  * @author acraciun
  * 
  */
-abstract public class UIMousePlugin<FullJQuery extends JQueryAndPlugins<?>> extends JQueryPlugin {
+@SyntheticType
+abstract public class UIMousePlugin<FullJQuery extends JQueryAndPlugins<?>> extends UIWidget<FullJQuery> {
 	protected FullJQuery helper;
 
 	protected boolean _mouseCapture(Event ev) {

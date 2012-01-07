@@ -21,7 +21,6 @@ import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfigurationBuilder;
-import org.stjs.generator.STJSClass;
 import org.stjs.generator.executor.ExecutionResult;
 import org.stjs.generator.executor.RhinoExecutor;
 import org.stjs.javascript.Array;
@@ -115,14 +114,10 @@ public class GeneratorTestHelper {
 		Generator gen = new Generator();
 
 		String sourcePath = "src/test/java";
-		STJSClass stjsClass = gen.generateJavascript(
-				Thread.currentThread().getContextClassLoader(),
-				clazz.getName(),
-				new File(sourcePath),
-				new File("target", TEMP_GENERATION_PATH),
-				new File("target", "test-classes"),
-				new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript")
-						.allowedPackage("org.stjs.generator").build());
+		ClassWithJavascript stjsClass = gen.generateJavascript(Thread.currentThread().getContextClassLoader(), clazz
+				.getName(), new File(sourcePath), new File("target", TEMP_GENERATION_PATH), new File("target",
+				"test-classes"), new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript")
+				.allowedPackage("org.stjs.generator").build());
 
 		File jsFile = new File(stjsClass.getJavascriptFiles().get(0).getPath().substring(1));
 		try {

@@ -15,11 +15,14 @@
  */
 package org.stjs.javascript.jquery;
 
+import org.stjs.javascript.annotation.SyntheticType;
 
 /**
  * you should use this class if you don't create your own version of JQuery interface in your project
+ * 
  * @author acraciun
  */
+@SyntheticType
 public interface JQuery extends JQueryAndPlugins<JQuery> {//
 
 }

@@ -15,9 +15,11 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.jquery.JQueryCore;
 import org.stjs.javascript.jquery.Position;
 
+@SyntheticType
 abstract public class DraggableUI<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery helper;
 	public Position position;

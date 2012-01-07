@@ -1,8 +1,8 @@
 package org.stjs.javascript.utils;
 
-import org.stjs.javascript.annotation.DataType;
+import org.stjs.javascript.annotation.SyntheticType;
 
-@DataType
+@SyntheticType
 public class NameValue {
 	public String name;
 	public String value;

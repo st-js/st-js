@@ -15,10 +15,10 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
-import org.stjs.javascript.annotation.DataType;
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.jquery.JQueryCore;
 
-@DataType
+@SyntheticType
 public class DraggableOptions<FullJQuery extends JQueryCore<?>> {
 	public boolean disabled = false;
 

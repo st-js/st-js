@@ -18,12 +18,14 @@ package org.stjs.javascript.jquery;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Map;
 import org.stjs.javascript.annotation.GlobalScope;
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.dom.Element;
 import org.stjs.javascript.functions.Callback2;
 import org.stjs.javascript.functions.Callback3;
 import org.stjs.javascript.functions.Function2;
 
 @GlobalScope
+@SyntheticType
 abstract public class GlobalJQuery {
 	public static GlobalJQuery $;
 

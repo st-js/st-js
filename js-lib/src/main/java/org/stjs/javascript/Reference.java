@@ -15,7 +15,7 @@
  */
 package org.stjs.javascript;
 
-import org.stjs.javascript.annotation.DataType;
+import org.stjs.javascript.annotation.SyntheticType;
 
 /**
  * Use this class whenever you want to modify a value inside an inner type and the Java requires you to have a final
@@ -24,7 +24,7 @@ import org.stjs.javascript.annotation.DataType;
  * @author acraciun
  * 
  */
-@DataType
+@SyntheticType
 public class Reference<T> {
 	public T value;
 }

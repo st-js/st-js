@@ -17,6 +17,7 @@ package org.stjs.javascript.jquery;
 
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Map;
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.dom.Element;
 import org.stjs.javascript.functions.Callback1;
 import org.stjs.javascript.functions.Callback2;
@@ -29,6 +30,7 @@ import org.stjs.javascript.utils.NameValue;
  * jquery interface for all jquery method + all used plugins in a web app. it can be mocked easily for testing purposes.
  * Compatible with jquery 1.6
  */
+@SyntheticType
 public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 	/************* ajax ***************/
 	public FullJQuery ajaxStart(Callback3<Event, JQueryXHR, AjaxParams> handler);

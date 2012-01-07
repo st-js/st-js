@@ -36,9 +36,9 @@ import org.stjs.generator.type.GenericArrayTypeWrapper;
 import org.stjs.generator.type.PrimitiveTypes;
 import org.stjs.generator.type.TypeWrapper;
 import org.stjs.javascript.annotation.Adapter;
-import org.stjs.javascript.annotation.DataType;
 import org.stjs.javascript.annotation.JavascriptFunction;
 import org.stjs.javascript.annotation.STJSBridge;
+import org.stjs.javascript.annotation.SyntheticType;
 
 import com.google.common.primitives.Primitives;
 
@@ -92,15 +92,17 @@ public class ClassUtils {
 		return false;
 	}
 
-	public static boolean isDataType(ClassWrapper clazz) {
-		if (clazz == null) {
+	public static boolean isSyntheticType(TypeWrapper clazz) {
+		if (clazz == null || !(clazz instanceof ClassWrapper)) {
 			return false;
 		}
-		return isDataType(clazz.getClazz());
+		return isSyntheticType(((ClassWrapper) clazz).getClazz());
 	}
 
-	public static boolean isDataType(Class<?> clazz) {
-		return hasAnnotation(clazz, DataType.class.getName());
+	@SuppressWarnings("deprecation")
+	public static boolean isSyntheticType(Class<?> clazz) {
+		return hasAnnotation(clazz, org.stjs.javascript.annotation.DataType.class.getName())
+				|| hasAnnotation(clazz, SyntheticType.class.getName());
 	}
 
 	public static boolean hasAnnotation(ClassWrapper clazz, String annotationName) {

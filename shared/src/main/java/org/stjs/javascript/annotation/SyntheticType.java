@@ -26,12 +26,10 @@ import java.lang.annotation.Target;
  * type is an interface, when the Javascript code is generated for a class implementing this interface, the interface
  * name does not appear in the "extends" part.
  * 
- * @deprecated Use {@link SyntheticType} instead
  * @author acraciun
  */
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-@Deprecated()
-public @interface DataType {//
+public @interface SyntheticType {//
 
 }

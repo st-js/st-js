@@ -15,9 +15,9 @@
  */
 package org.stjs.javascript;
 
-import org.stjs.javascript.annotation.DataType;
+import org.stjs.javascript.annotation.SyntheticType;
 
-@DataType
+@SyntheticType
 abstract public class TimeoutHandler {
 
 }

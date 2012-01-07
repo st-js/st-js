@@ -15,8 +15,10 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.jquery.JQueryCore;
 
+@SyntheticType
 abstract public class AutoCompleteUI<FullJQuery extends JQueryCore<?>> {
 
 }

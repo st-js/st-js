@@ -31,6 +31,7 @@ import java.net.URISyntaxException;
 import org.stjs.generator.scope.CompilationUnitScope;
 import org.stjs.generator.scope.ScopeBuilder;
 import org.stjs.generator.type.ClassLoaderWrapper;
+import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.visitor.SetParentVisitor;
 import org.stjs.generator.writer.JavascriptWriterVisitor;
@@ -66,16 +67,23 @@ public class Generator {
 	 * @param configuration
 	 * @return the list of imports needed by the generated class
 	 */
-	public STJSClass generateJavascript(ClassLoader builtProjectClassLoader, String className, File sourceFolder,
-			File generationFolder, File targetFolder, GeneratorConfiguration configuration)
+	public ClassWithJavascript generateJavascript(ClassLoader builtProjectClassLoader, String className,
+			File sourceFolder, File generationFolder, File targetFolder, GeneratorConfiguration configuration)
 			throws JavascriptGenerationException {
+
+		ClassLoaderWrapper classLoaderWrapper = new ClassLoaderWrapper(builtProjectClassLoader,
+				configuration.getAllowedPackages(), configuration.getAllowedJavaLangClasses());
+		DependencyResolver dependencyResolver = new GeneratorDependencyResolver(builtProjectClassLoader, sourceFolder,
+				generationFolder, targetFolder, configuration);
+
+		ClassWrapper clazz = classLoaderWrapper.loadClass(className).getOrThrow();
+		if (ClassUtils.isBridge(clazz.getClazz())) {
+			return new BridgeClass(dependencyResolver, clazz.getClazz());
+		}
 
 		File inputFile = getInputFile(sourceFolder, className);
 		File outputFile = getOutputFile(generationFolder, className);
 		GenerationContext context = new GenerationContext(inputFile, configuration);
-
-		ClassLoaderWrapper classLoaderWrapper = new ClassLoaderWrapper(builtProjectClassLoader,
-				configuration.getAllowedPackages(), configuration.getAllowedJavaLangClasses());
 
 		CompilationUnit cu = parseAndResolve(classLoaderWrapper, inputFile, context);
 
@@ -103,8 +111,7 @@ public class Generator {
 		}
 
 		// write properties
-		STJSClass stjsClass = new STJSClass(new GeneratorDependencyResolver(builtProjectClassLoader, sourceFolder,
-				generationFolder, targetFolder, configuration), targetFolder, className);
+		STJSClass stjsClass = new STJSClass(dependencyResolver, targetFolder, className);
 		stjsClass.setDependencies(classLoaderWrapper.getResolvedClasses());
 		stjsClass.setGeneratedJavascriptFile(relative(generationFolder, className));
 		stjsClass.store();
@@ -244,7 +251,7 @@ public class Generator {
 					throw new IllegalStateException("This resolver assumed that the javascript for the class ["
 							+ parentClassName + "] was already generated");
 				}
-				stjsClass = generateJavascript(builtProjectClassLoader, parentClassName, sourceFolder,
+				stjsClass = (STJSClass) generateJavascript(builtProjectClassLoader, parentClassName, sourceFolder,
 						generationFolder, targetFolder, configuration);
 			}
 			return stjsClass;

@@ -15,8 +15,10 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.jquery.JQueryCore;
 
+@SyntheticType
 abstract public class TabsUI<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery tab; // anchor element of the selected (clicked) tab
 	public FullJQuery panel; // element, that contains the selected/clicked tab contents

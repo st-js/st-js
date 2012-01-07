@@ -15,10 +15,12 @@
  */
 package org.stjs.javascript.jquery.plugins;
 
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.jquery.JQueryCore;
 import org.stjs.javascript.jquery.Position;
 import org.stjs.javascript.jquery.Size;
 
+@SyntheticType
 abstract public class ResizeableUI<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery helper;
 	public Position originalPosition;

@@ -16,10 +16,10 @@
 package org.stjs.javascript.jquery.plugins;
 
 import org.stjs.javascript.Array;
-import org.stjs.javascript.annotation.DataType;
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.jquery.JQueryCore;
 
-@DataType
+@SyntheticType
 public class SliderOptions<FullJQuery extends JQueryCore<?>> {
 	public boolean disabled = false;
 	public double min = 0;

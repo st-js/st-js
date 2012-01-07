@@ -1,8 +1,8 @@
 package org.stjs.javascript;
 
-import org.stjs.javascript.annotation.DataType;
+import org.stjs.javascript.annotation.SyntheticType;
 
-@DataType
+@SyntheticType
 public abstract class RegExpMatch implements Array<String> {
 	public int index;
 	public String input;
