@@ -174,11 +174,18 @@ public class Checks {
 			for (ClassOrInterfaceType impl : n.getImplements()) {
 				TypeWrapper type = ASTNodeData.resolvedType(impl);
 				if ((type instanceof ClassWrapper)
-						&& ClassUtils.hasAnnotation((ClassWrapper) type, JavascriptFunction.class.getName())) {
+						&& ClassUtils.hasAnnotation((ClassWrapper) type, JavascriptFunction.class)) {
 					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 							"You cannot implement intefaces annotated with @JavascriptFunction. "
 									+ "You can only have inline object creation with this type of interfaces");
 				}
+			}
+		}
+		String ns = ClassUtils.getNamespace(ASTNodeData.resolvedType(n));
+		if (ns != null) {
+			if (!GeneratorConstants.NAMESPACE_PATTERN.matcher(ns).matches()) {
+				throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+						"The namespace must be in the form <identifier>[.<identifier>]..");
 			}
 		}
 		if (n.getExtends() != null && !n.isInterface()) {
@@ -207,12 +214,6 @@ public class Checks {
 					}
 
 					if (superClass.findField(name).isDefined() || !superClass.findMethods(name).isEmpty()) {
-						System.out.println("FIELD:" + superClass.findField(name).isDefined());
-						System.out.println("SEARCH:" + resolvedMethod);
-						System.out.println("OTHER:" + ((ClassWrapper) resolvedMethod.getOwnerType()).findMethods(name));
-						for (MethodWrapper m : superClass.findMethods(name)) {
-							System.out.println(m);
-						}
 						throw new JavascriptGenerationException(
 								context.getInputFile(),
 								new SourcePosition(member),

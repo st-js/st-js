@@ -122,6 +122,8 @@ import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.ast.ASTNodeData;
 import org.stjs.generator.ast.SourcePosition;
+import org.stjs.generator.name.DefaultNameProvider;
+import org.stjs.generator.name.NameProvider;
 import org.stjs.generator.scope.ClassScope;
 import org.stjs.generator.scope.Scope;
 import org.stjs.generator.scope.ScopeBuilder;
@@ -148,6 +150,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	private final SpecialMethodHandlers specialMethodHandlers;
 
+	private final NameProvider names;
+
 	JavascriptWriter printer = new JavascriptWriter();
 
 	private List<Comment> comments;
@@ -156,6 +160,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	public JavascriptWriterVisitor() {
 		specialMethodHandlers = new SpecialMethodHandlers();
+		names = new DefaultNameProvider();
 	}
 
 	public String getGeneratedSource() {
@@ -178,16 +183,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(ClassOrInterfaceType n, GenerationContext context) {
-		printer.print(stJsName(resolvedType(n)));
-	}
-
-	private String stJsName(TypeWrapper typeWrapper) {
-		// We may want to use a more complex naming scheme, to avoid conflicts across packages
-
-		if (typeWrapper instanceof ClassWrapper) {
-			return ((ClassWrapper) typeWrapper).getExternalName();
-		}
-		return typeWrapper.getType().toString();
+		printer.print(names.getTypeName(resolvedType(n)));
 	}
 
 	@Override
@@ -266,7 +262,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printComments(n, context);
 		// printer.print(n.getName());
 		Scope scope = scope(n);
-		printer.print(stJsName(scope.resolveType(n.getName()).getType()));
+		printer.print(names.getTypeName(scope.resolveType(n.getName()).getType()));
 		// TODO implements not considered
 		printer.print(" = ");
 		printer.printLn(" stjs.enumeration(");
@@ -422,7 +418,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	public void visit(FieldDeclaration n, GenerationContext context) {
 		TypeWrapper type = resolvedType(parent(n));
 		boolean skipType = isGlobal(type) && isStatic(n.getModifiers());
-		String typeName = stJsName(type);
+		String typeName = names.getTypeName(type);
 		// skip type
 		for (VariableDeclarator v : n.getVariables()) {
 			if (!skipType) {
@@ -476,7 +472,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printer.print("function");
 		} else {
 			if (!skipType) {
-				printer.print(stJsName(type));
+				printer.print(names.getTypeName(type));
 			}
 			if (!isStatic(modifiers)) {
 				printer.print(".prototype");
@@ -649,8 +645,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(MethodDeclaration n, GenerationContext context) {
 		printComments(n, context);
-		printMethod(n.getName(), n.getParameters(), n.getModifiers(), n.getBody(), context, resolvedType(parent(n)),
-				false);
+		printMethod(names.getMethodName(resolvedMethod(n)), n.getParameters(), n.getModifiers(), n.getBody(), context,
+				resolvedType(parent(n)), false);
 	}
 
 	private void addCallToSuper(ClassScope classScope, GenerationContext context, Collection<Expression> args) {
@@ -668,7 +664,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				// avoid useless call to super() when the super class is Object
 				return;
 			}
-			printer.print(stJsName(superClass.getOrThrow())).print(".call");
+			printer.print(names.getTypeName(superClass.getOrThrow())).print(".call");
 			printArguments(Collections.singleton("this"), args, Collections.<String> emptyList(), context);
 			printer.print(";");
 
@@ -755,16 +751,24 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			resolvedType(n, scope.resolveType(n.getName()).getType());
 		}
 
+		TypeWrapper type = resolvedType(n);
+		String namespace = null;
+
+		if (ClassUtils.isRootType(type)) {
+			namespace = ClassUtils.getNamespace(type);
+			if (namespace != null) {
+				printer.printLn("stjs.ns(\"" + namespace + "\");");
+			}
+		}
 		String className;
 		if (GeneratorConstants.SPECIAL_INLINE_TYPE.equals(n.getName())) {
 			printer.print("var ");
 			className = n.getName();
 		} else {
-			TypeWrapper type = resolvedType(n);
-			if (!type.isInnerType()) {
+			if (!type.isInnerType() && namespace == null) {
 				printer.print("var ");
 			}
-			className = stJsName(resolvedType(n));
+			className = names.getTypeName(type);
 		}
 		printer.print(className);
 
@@ -789,7 +793,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.print(className);
 
 				for (TypeWrapper ext : implementsOrExtends) {
-					printer.print(", " + stJsName(ext));
+					printer.print(", " + names.getTypeName(ext));
 				}
 
 				printer.printLn(");");
@@ -806,7 +810,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	 * @return the name of the given type. if the type is a parameterized type it returns {name:"type-name",
 	 *         arguments:[args..]}
 	 */
-	private String stJsNameInfo(TypeWrapper typeWrapper) {
+	private String stjsNameInfo(TypeWrapper typeWrapper) {
 		// We may want to use a more complex naming scheme, to avoid conflicts across packages
 		if (typeWrapper instanceof ParameterizedTypeWrapper) {
 			ParameterizedTypeWrapper pt = (ParameterizedTypeWrapper) typeWrapper;
@@ -819,7 +823,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				if (!first) {
 					s.append(",");
 				}
-				s.append(stJsNameInfo(arg));
+				s.append(stjsNameInfo(arg));
 				first = false;
 			}
 			s.append("]");
@@ -831,7 +835,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			StringBuilder s = new StringBuilder();
 			s.append("{name:\"Enum\"");
 			s.append(", arguments:[");
-			s.append("\"" + stJsName(typeWrapper) + "\"");
+			s.append("\"" + names.getTypeName(typeWrapper) + "\"");
 			s.append("]");
 			s.append("}");
 			return s.toString();
@@ -839,7 +843,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (ClassUtils.isBasicType(typeWrapper)) {
 			return "null";
 		}
-		return "\"" + stJsName(typeWrapper) + "\"";
+		return "\"" + names.getTypeName(typeWrapper) + "\"";
 	}
 
 	/**
@@ -853,7 +857,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (isGlobal(type)) {
 			return;
 		}
-		String typeName = stJsName(type);
+		String typeName = names.getTypeName(type);
 		printer.printLn();
 		printer.print(typeName);
 		printer.print(".");
@@ -865,11 +869,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			if (!ClassUtils.isSyntheticType(superClass)) {
 				generateSuperClass = true;
 				printer.print("stjs.copyProps(");
-
-				// for (ClassOrInterfaceType ext : n.getExtends()) {
-				// printer.print(", " + stJsName(resolvedType(ext)));
-				// }
-				printer.print(stJsName(superClass));
+				printer.print(names.getTypeName(superClass));
 				printer.print(".").print(GeneratorConstants.TYPE_DESCRIPTION_PROPERTY).print(", ");
 			}
 		}
@@ -890,7 +890,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 							printer.print(", ");
 						}
 						printer.print("\"").print(v.getId().getName()).print("\":");
-						printer.print(stJsNameInfo(fieldType));
+						printer.print(stjsNameInfo(fieldType));
 						first = false;
 					}
 				}
@@ -929,7 +929,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	private void printStaticMembersPrefix(ClassScope scope) {
-		printer.print(stJsName(scope.getClazz()));
+		printer.print(names.getTypeName(scope.getClazz()));
 	}
 
 	private void printMainMethodCall(ClassOrInterfaceDeclaration n) {
@@ -1208,7 +1208,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(ClassExpr n, GenerationContext context) {
-		String typeName = stJsName(resolvedType(n.getType()));
+		String typeName = names.getTypeName(resolvedType(n.getType()));
 		printer.print(typeName);
 		// printer.print(".prototype");
 	}
@@ -1236,7 +1236,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (n.getType() instanceof ReferenceType) {
 			// TODO : could be more generic
 			TypeWrapper type = scope(n).resolveType(((ReferenceType) n.getType()).getType().toString()).getType();
-			printer.print(stJsName(type));
+			printer.print(names.getTypeName(type));
 		} else {
 			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 					"Do not know how to handle instanceof statement");
@@ -1285,7 +1285,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			TypeWrapper methodDeclaringClass = method.getOwnerType();
 			if (Modifier.isStatic(method.getModifiers())) {
 				printStaticFieldOrMethodAccessPrefix(methodDeclaringClass, true);
-				printer.print(n.getName());
+				printer.print(names.getMethodName(method));
 				printArguments(n.getArgs(), context);
 				return;
 			}
@@ -1299,12 +1299,12 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.print("this.");
 			} else {
 				// Non static reference to parent type
-				printer.print(stJsName(method.getOwnerType()));
-				printer.print(".prototype.").print(n.getName()).print(".call");
+				printer.print(names.getTypeName(method.getOwnerType()));
+				printer.print(".prototype.").print(names.getMethodName(method)).print(".call");
 				printArguments(Collections.singleton("this"), n.getArgs(), Collections.<String> emptyList(), context);
 				return;
 			}
-			printer.print(n.getName());
+			printer.print(names.getMethodName(method));
 			printArguments(n.getArgs(), context);
 
 		}
@@ -1312,7 +1312,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	private void printStaticFieldOrMethodAccessPrefix(TypeWrapper type, boolean addDot) {
 		if (!isGlobal(type)) {
-			printer.print(stJsName(type));
+			printer.print(names.getTypeName(type));
 			if (addDot) {
 				printer.print(".");
 			}
@@ -1543,7 +1543,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			PreConditions.checkState(selectorType != null, "The selector of the switch %s should have a type",
 					parent(n));
 			if ((selectorType instanceof ClassWrapper) && ((ClassWrapper) selectorType).getClazz().isEnum()) {
-				printer.print(stJsName(selectorType));
+				printer.print(names.getTypeName(selectorType));
 				printer.print(".");
 			}
 			n.getLabel().accept(this, context);

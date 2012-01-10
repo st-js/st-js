@@ -57,4 +57,5 @@ public interface TypeWrapper {
 	public TypeWrapper getComponentType();
 
 	public TypeWrapper getSuperClass();
+
 }

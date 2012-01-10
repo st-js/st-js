@@ -48,7 +48,18 @@ trim()
 /************* STJS helper functions ***************/
 var stjs={};
 
+stjs.global=this;
 stjs.skipCopy = {"prototype":true, "constructor": true, "$typeDescription":true};
+
+stjs.ns=function(path){
+	var p = path.split(".");
+	var obj = stjs.global;
+	for(var i = 0; i < p.length; ++i){
+		var part = p[i];
+		obj = obj[part] = obj[part] || {};
+	}
+	return obj;
+};
 
 stjs.copyProps=function(from, to){
 	for(key in from){

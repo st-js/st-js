@@ -35,11 +35,14 @@ import org.stjs.generator.type.GenericArrayTypeImpl;
 import org.stjs.generator.type.GenericArrayTypeWrapper;
 import org.stjs.generator.type.PrimitiveTypes;
 import org.stjs.generator.type.TypeWrapper;
+import org.stjs.generator.type.TypeWrappers;
 import org.stjs.javascript.annotation.Adapter;
 import org.stjs.javascript.annotation.JavascriptFunction;
+import org.stjs.javascript.annotation.Namespace;
 import org.stjs.javascript.annotation.STJSBridge;
 import org.stjs.javascript.annotation.SyntheticType;
 
+import com.google.common.base.Strings;
 import com.google.common.primitives.Primitives;
 
 public class ClassUtils {
@@ -82,7 +85,7 @@ public class ClassUtils {
 	}
 
 	public static boolean isBridge(Class<?> clazz) {
-		boolean ok = hasAnnotation(clazz, STJSBridge.class.getName());
+		boolean ok = hasAnnotation(clazz, STJSBridge.class);
 		if (ok) {
 			return ok;
 		}
@@ -90,6 +93,20 @@ public class ClassUtils {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * 
+	 * @return true if the type does not have a super class (or that the super class is java.lang.Object). It returns
+	 *         true also for null types
+	 */
+	public static boolean isRootType(TypeWrapper type) {
+		if (type == null) {
+			return true;
+		}
+		TypeWrapper superClass = type.getSuperClass();
+
+		return superClass == null || superClass.equals(TypeWrappers.wrap(Object.class));
 	}
 
 	public static boolean isSyntheticType(TypeWrapper clazz) {
@@ -101,42 +118,64 @@ public class ClassUtils {
 
 	@SuppressWarnings("deprecation")
 	public static boolean isSyntheticType(Class<?> clazz) {
-		return hasAnnotation(clazz, org.stjs.javascript.annotation.DataType.class.getName())
-				|| hasAnnotation(clazz, SyntheticType.class.getName());
+		return hasAnnotation(clazz, org.stjs.javascript.annotation.DataType.class)
+				|| hasAnnotation(clazz, SyntheticType.class);
 	}
 
-	public static boolean hasAnnotation(ClassWrapper clazz, String annotationName) {
+	public static boolean hasAnnotation(ClassWrapper clazz, Class<? extends Annotation> annotation) {
 		if (clazz == null) {
 			return false;
 		}
-		return hasAnnotation(clazz.getClazz(), annotationName);
+		return hasAnnotation(clazz.getClazz(), annotation);
 	}
 
-	public static boolean hasAnnotation(Class<?> clazz, String annotationName) {
+	public static boolean hasAnnotation(Class<?> clazz, Class<? extends Annotation> annotationClass) {
+		return getAnnotation(clazz, annotationClass) != null;
+	}
+
+	/**
+	 * the namespace is taken from the outermost declaring class
+	 * 
+	 * @param type
+	 * @return
+	 */
+	public static String getNamespace(TypeWrapper type) {
+		if (type == null || !(type instanceof ClassWrapper)) {
+			return null;
+		}
+		ClassWrapper outermost = (ClassWrapper) type;
+		while (outermost.getDeclaringClass().isDefined()) {
+			outermost = outermost.getDeclaringClass().getOrNull();
+		}
+		Namespace n = getAnnotation(outermost, Namespace.class);
+		if (n != null && !Strings.isNullOrEmpty(n.value())) {
+			return n.value();
+		}
+		return null;
+	}
+
+	public static <T extends Annotation> T getAnnotation(TypeWrapper clazz, Class<T> annotationClass) {
+		if (clazz == null || !(clazz instanceof ClassWrapper)) {
+			return null;
+		}
+		return getAnnotation(((ClassWrapper) clazz).getClazz(), annotationClass);
+	}
+
+	public static <T extends Annotation> T getAnnotation(Class<?> clazz, Class<T> annotationClass) {
 		if (clazz == null) {
-			return false;
+			return null;
 		}
 		// TODO : cache?
-		if (clazz.getAnnotations() == null) {
-			return false;
-		}
-		for (Annotation annote : clazz.getAnnotations()) {
-			if (annote.annotationType().getName().equals(annotationName)) {
-				return true;
-			}
+		T ann = clazz.getAnnotation(annotationClass);
+		if (ann != null) {
+			return ann;
 		}
 
-		if (clazz.getPackage() == null || clazz.getPackage().getAnnotations() == null) {
-			return false;
+		if (clazz.getPackage() == null) {
+			return null;
 		}
 
-		for (Annotation annote : clazz.getPackage().getAnnotations()) {
-			if (annote.annotationType().getName().equals(annotationName)) {
-				return true;
-			}
-		}
-
-		return false;
+		return clazz.getPackage().getAnnotation(annotationClass);
 	}
 
 	public static boolean isAdapter(TypeWrapper clazz) {
@@ -150,7 +189,7 @@ public class ClassUtils {
 		if (clazz == null) {
 			return false;
 		}
-		return hasAnnotation(clazz, Adapter.class.getName());
+		return hasAnnotation(clazz, Adapter.class);
 	}
 
 	public static boolean isJavascriptFunction(TypeWrapper clazz) {
