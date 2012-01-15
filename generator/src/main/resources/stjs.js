@@ -362,6 +362,15 @@ stjs.parseJSON = (function () {
 	    return ch ? escapes[ch] : String.fromCharCode(parseInt(hex, 16));
 	  }
 
+	  var constructors = {};
+
+	  function constr(name, param){
+		  var c = constructors[name];
+		  if (!c)
+			  constructors[name] = c = eval(name);
+		  return new c(param);
+	  }
+
 	  function convert(type, json){
 		  if (!type)
 			  return json;
@@ -369,7 +378,7 @@ stjs.parseJSON = (function () {
 		  if (cv)
 			  return cv(json, type);
 		  //hopefully the type has a string constructor
-		 return eval("new " + type + "('" + json.replace("'", "\'") + "')");
+		 return constr(type, json);
 	  }
 
 	  function builder(type){
@@ -382,9 +391,9 @@ stjs.parseJSON = (function () {
 					return {};
 				if (type.name == "Map")
 					return [];
-				return eval("new " + type.name + "()");
+				return constr(type.name);
 			}
-			return eval("new " + type + "()");
+			return constr(type);
 	  }
 
 	  // A non-falsy value that coerces to the empty string when used as a key.
@@ -396,12 +405,15 @@ stjs.parseJSON = (function () {
 
 	  var hop = Object.hasOwnProperty;
 
+	  function nextMatch(str){
+		  var m = jsonToken.exec(str);
+		  return m != null ? m[0] : null;
+	  }
 	  return function (json, type) {
 	    // Split into tokens
-	    var toks = json.match(jsonToken);
 	    // Construct the object to return
 	    var result;
-	    var tok = toks[0];
+	    var tok = nextMatch(json);
 	    var topLevelPrimitive = false;
 	    if ('{' === tok) {
 	      result = builder(type, null);
@@ -422,8 +434,7 @@ stjs.parseJSON = (function () {
 	    // arrays.
 	    var stack = [result];
 	    var stack2 = [type];
-	    for (var i = 1 - topLevelPrimitive, n = toks.length; i < n; ++i) {
-	      tok = toks[i];
+	    for (tok = nextMatch(json); tok != null; tok = nextMatch(json)) {
 
 	      var cont;
 	      switch (tok.charCodeAt(0)) {
