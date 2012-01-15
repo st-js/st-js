@@ -17,26 +17,25 @@
 	function retrieve() {
 		var xmlhttp = new XMLHttpRequest();
 		xmlhttp.onreadystatechange = function() {
-				if (xmlhttp.readyState == 4) {
-					try{
-						if (xmlhttp.status == 200) {
-							var response = eval("(" + xmlhttp.responseText + ")");
-							id = response.id;
-							status(xmlhttp.responseText + (++count));
-							if (response.src != null && response.src != lastTestSrc) {
-								testId = response.testId;
-								log("Executing:" + response.src);
-								document.getElementById("iframe").src = response.src;
-								lastTestSrc = response.src;
-							}
-						} else {
-							status(xmlhttp.status);
+			if (xmlhttp.readyState == 4) {
+				try{
+					if (xmlhttp.status == 200) {
+						var response = eval("(" + xmlhttp.responseText + ")");
+						id = response.id;
+						status(xmlhttp.responseText + (++count));
+						if (response.src != null && response.src != lastTestSrc) {
+							testId = response.testId;
+							log("Executing:" + response.src);
+							document.getElementById("iframe").src = response.src;
+							lastTestSrc = response.src;
 						}
-					} catch(ex){
-						console.error("error:" + ex);
+					} else {
+						status(xmlhttp.status);
 					}
-					setTimeout(retrieve, 2000);
-
+				} catch(ex){
+					console.error("error:" + ex);
+				}
+				setTimeout(retrieve, 100);
 			}
 		}
 		try {
