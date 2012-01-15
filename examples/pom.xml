@@ -12,14 +12,6 @@
 		<version>1.2.0-SNAPSHOT</version>
 	</parent>
 
-	<repositories>
-
-
-	</repositories>
-
-	<properties>
-		<stjs-plugin.version>${project.version}</stjs-plugin.version>
-	</properties>
 
 	<dependencies>
 		<!-- for the java libraries -->
@@ -58,7 +50,7 @@
 			<plugin>
 				<groupId>org.st-js</groupId>
 				<artifactId>maven-plugin</artifactId>
-				<version>${stjs-plugin.version}</version>
+				<version>${project.version}</version>
 				<executions>
 					<execution>
 						<id>main</id>
@@ -92,7 +84,7 @@
 											maven-plugin
 										</artifactId>
 										<versionRange>
-											[${stjs-plugin.version},)
+											[${project.version},)
 										</versionRange>
 										<goals>
 											<goal>generate</goal>

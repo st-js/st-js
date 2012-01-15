@@ -19,14 +19,13 @@
 	</repositories>
 
 	<properties>
-		<stjs-lib.version>${project.version}</stjs-lib.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.st-js</groupId>
 			<artifactId>generator</artifactId>
-			<version>${stjs-lib.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
