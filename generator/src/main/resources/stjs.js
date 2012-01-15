@@ -17,33 +17,202 @@
  * methods added to JS prototypes
  */
 
+var NOT_IMPLEMENTED = function(){
+	throw "This method is not implemented in Javascript.";
+}
 /* String */
-/*
-codePointAt(int)
-codePointBefore(int)
-codePointCount(int, int)
-compareTo(String)
-compareToIgnoreCase(String)
-contentEquals(StringBuffer)
-endsWith(String)
-equalsIgnoreCase(String)
-getBytes()
-getBytes(int, int, byte[], int)
-getBytes(String)
-getBytes(Charset)
-getChars(char[], int)
-getChars(int, int, char[], int)
-matches(String)
-regionMatches(boolean, int, String, int, int)
-regionMatches(int, String, int, int)
-replaceFirst(String, String)
-replaceAll(String, String)
-startsWith(String)
-startsWith(String, int)
-trim()
-*/
+
+if (!String.prototype.getBytes) {
+	String.prototype.getBytes=NOT_IMPLEMENTED;
+}
+if (!String.prototype.getChars) {
+	String.prototype.getChars=NOT_IMPLEMENTED;
+}
+if (!String.prototype.contentEquals){
+	String.prototype.contentEquals=NOT_IMPLEMENTED;
+}
+if (!String.prototype.startsWith) {
+	String.prototype.startsWith=function(start, from){
+		var f = from != null ? from : 0;
+		return this.substring(f, f + start.length) == start;
+	}
+}
+if (!String.prototype.endsWith) {
+	String.prototype.endsWith=function(end){
+		if (end == null)
+			return false;
+		if (this.length < end.length)
+			return false;
+		return this.substring(this.length - end.length, this.length) == end;
+	}
+}
+if (!String.prototype.trim) {
+	var trimLeft = /^\s+/;
+	var trimRight = /\s+$/;
+	String.prototype.trim = function(  ) {
+		return this.replace( trimLeft, "" ).replace( trimRight, "" );
+	}
+}
+if (!String.prototype.matches){
+	String.prototype.matches=function(regexp){
+		return this.match("^" + regexp + "$") != null;
+	}
+}
+if (!String.prototype.compareTo){
+	String.prototype.compareTo=function(other){
+		if (other == null)
+			return 1;
+		if (this < other)
+			return -1;
+		if (this == other)
+			return 0;
+		return 1;
+	}
+}
+
+if (!String.prototype.compareToIgnoreCase){
+	String.prototype.compareToIgnoreCase=function(other){
+		if (other == null)
+			return 1;
+		return this.toLowerCase().compareTo(other.toLowerCase());
+	}
+}
+
+if (!String.prototype.equalsIgnoreCase){
+	String.prototype.equalsIgnoreCase=function(other){
+		if (other == null)
+			return false;
+		return this.toLowerCase() === other.toLowerCase();
+	}
+}
+
+if (!String.prototype.codePointAt){
+	String.prototype.codePointAt=String.prototype.charCodeAt;
+}
+
+if (!String.prototype.codePointBefore){
+	String.prototype.codePointBefore=NOT_IMPLEMENTED;
+}
+if (!String.prototype.codePointCount){
+	String.prototype.codePointCount=NOT_IMPLEMENTED;
+}
+
+if (!String.prototype.replaceAll){
+	String.prototype.replaceAll=function(regexp, replace){
+		return this.replace(new RegExp(regexp, "g"), replace);
+	}
+}
+
+if (!String.prototype.replaceFirst){
+	String.prototype.replaceFirst=function(regexp, replace){
+		return this.replace(new RegExp(regexp), replace);
+	}
+}
+
+if (!String.prototype.regionMatches){
+	String.prototype.regionMatches=function(ignoreCase, toffset, other, ooffset, len){
+		if (arguments.length == 4){
+			len=arguments[3];
+			ooffset=arguments[2];
+			other=arguments[1];
+			toffset=arguments[0];
+			ignoreCase=false;
+		}
+		if (toffset < 0 || ooffset < 0 || other == null || toffset + len > this.length || ooffset + len > other.length)
+			return false;
+		var s1 = this.substring(toffset, toffset + len);
+		var s2 = other.substring(ooffset, ooffset + len);
+		return ignoreCase ? s1.equalsIgnoreCase(s2) : s1 === s2;
+	}
+}
+
+//force valueof to match the Java's behavior
+String.valueOf=function(value){
+	return new String(value);
+}
 
 /* Number */
+var Byte=Number;
+var Double=Number;
+var Float=Number;
+var Integer=Number;
+var Long=Number;
+var Short=Number;
+
+/* type conversion - approximative as Javascript only has integers and doubles */
+if (!Number.prototype.intValue) {
+	Number.prototype.intValue=function(){
+		return parseInt(this);
+	}
+}
+if (!Number.prototype.shortValue) {
+	Number.prototype.shortValue=function(){
+		return parseInt(this);
+	}
+}
+if (!Number.prototype.longValue) {
+	Number.prototype.longValue=function(){
+		return parseInt(this);
+	}
+}
+if (!Number.prototype.byteValue) {
+	Number.prototype.byteValue=function(){
+		return parseInt(this);
+	}
+}
+
+if (!Number.prototype.floatValue) {
+	Number.prototype.floatValue=function(){
+		return parseFloat(this);
+	}
+}
+
+if (!Number.prototype.doubleValue) {
+	Number.prototype.doubleValue=function(){
+		return parseFloat(this);
+	}
+}
+
+if (!Number.parseInt) {
+	Number.parseInt = parseInt;
+}
+if (!Number.parseShort) {
+	Number.parseShort = parseInt;
+}
+if (!Number.parseLong) {
+	Number.parseLong = parseInt;
+}
+if (!Number.parseByte) {
+	Number.parseByte = parseInt;
+}
+
+if (!Number.parseDouble) {
+	Number.parseDouble = parseFloat;
+}
+
+if (!Number.parseFloat) {
+	Number.parseFloat = parseFloat;
+}
+
+if (!Number.isNaN) {
+	Number.isNaN = isNaN;
+}
+
+if (!Number.prototype.isNaN) {
+	Number.prototype.isNaN = isNaN;
+}
+
+//force valueof to match approximately the Java's behavior (for Integer.valueOf it returns in fact a double)
+Number.valueOf=function(value){
+	return new Number(value).valueOf();
+}
+
+/* Boolean */
+//force valueof to match the Java's behavior
+Boolean.valueOf=function(value){
+	return new Boolean(value).valueOf();
+}
+
 
 /************* STJS helper functions ***************/
 var stjs={};
