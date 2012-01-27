@@ -1,3 +1,18 @@
+/**
+ *  Copyright 2011 Alexandru Craciun, Eyal Kaspi
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package org.stjs.testing.driver;
 
 import java.io.File;
@@ -5,8 +20,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -25,6 +38,7 @@ import org.stjs.javascript.annotation.STJSBridge;
 import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.Scripts;
 
+import com.google.common.base.Strings;
 import com.google.common.io.Files;
 
 /**
@@ -72,13 +86,13 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 	}
 
 	private void addScript(Writer writer, String script) throws IOException {
-		if (script.startsWith("classpath:")) {
-			writer.append("<script src='" + script.substring("classpath:/".length()) + "'></script>\n");
-		} else if (script.startsWith("file:")) {
-			writer.append("<script src='/js?" + URLEncoder.encode(script, Charset.defaultCharset().name())
-					+ "'></script>\n");
-		} else {
+		if (script.startsWith("http:")) {
 			writer.append("<script src='" + script + "'></script>\n");
+		} else {
+			// remove wrong leading classpath://
+			String cleanScript = script.replace("classpath://", "classpath:/");
+			// add a slash to prevent the browser to interpret the scheme
+			writer.append("<script src='/" + cleanScript + "'></script>\n");
 		}
 	}
 
@@ -100,8 +114,8 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 
 					writer.append("<html>");
 					writer.append("<head>");
-					writer.append("<script src='/stjs.js'></script>\n");
-					writer.append("<script src='/junit.js'></script>\n");
+					addScript(writer, "classpath:/stjs.js");
+					addScript(writer, "classpath:/junit.js");
 
 					writer.append("<script language='javascript'>stjs.mainCallDisabled=true;</script>");
 					if (addedScripts != null) {
@@ -140,7 +154,11 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 					writer.append("</head>");
 					writer.append("<body>");
 					if (htmlFixture != null) {
-						writer.append(htmlFixture.value());
+						if (!Strings.isNullOrEmpty(htmlFixture.value())) {
+							writer.append(htmlFixture.value());
+						} else if (!Strings.isNullOrEmpty(htmlFixture.url())) {
+							StreamUtils.copy(getTestClass().getJavaClass().getClassLoader(), htmlFixture.url(), writer);
+						}
 					}
 					writer.append("</body>");
 					writer.append("</html>");

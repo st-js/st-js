@@ -6,6 +6,8 @@
 	var lastTestSrc = null;
 	var logDiv, statusDiv;
 	var testId = 0;
+	var timeout = 100;
+	var waitResult = false;
 
 	function status(s){
 		statusDiv.innerHTML = "STJS Error:" + s;
@@ -26,6 +28,7 @@
 						if (response.src != null && response.src != lastTestSrc) {
 							testId = response.testId;
 							log("Executing:" + response.src);
+							waitResult = true;
 							document.getElementById("iframe").src = response.src;
 							lastTestSrc = response.src;
 						}
@@ -35,7 +38,10 @@
 				} catch(ex){
 					console.error("error:" + ex);
 				}
-				setTimeout(retrieve, 100);
+				if (xmlhttp.status != 0)
+					timeout = 100;
+				if (!waitResult)
+					setTimeout(retrieve, timeout);
 			}
 		}
 		try {
@@ -43,7 +49,8 @@
 			xmlhttp.send();
 		} catch (ex) {
 			console.error("error:" + ex);
-			setTimeout(retrieve, 2000);
+			timeout = 2000;
+			setTimeout(retrieve, timeout);
 		}
 	}
 
@@ -62,6 +69,7 @@
 		} catch (ex) {
 			console.error("error:" + ex);
 		}
+		setTimeout(retrieve, timeout);
 	}
 	function sendOK(method){
 		sendError(method, "OK");

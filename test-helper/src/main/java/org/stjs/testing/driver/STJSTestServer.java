@@ -1,13 +1,26 @@
+/**
+ *  Copyright 2011 Alexandru Craciun, Eyal Kaspi
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package org.stjs.testing.driver;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DateFormat;
@@ -20,8 +33,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
-import com.google.common.io.ByteStreams;
-import com.google.common.io.Files;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -31,7 +42,6 @@ public class STJSTestServer {
 	protected static final String BROWSER_CHECK_URI = "/check";
 	protected static final String BROWSER_RESULT_URI = "/result";
 	protected static final String BROWSER_TEST_URI = "/test";
-	protected static final String BROWSER_GET_JS_URI = "/js";
 
 	private final int port;
 	private final int testTimeout;
@@ -67,16 +77,15 @@ public class STJSTestServer {
 					exchange.getResponseHeaders().add("Last-Modified", formatDateHeader(new Date()));
 					exchange.getResponseHeaders().add("Connection", "Keep-Alive");
 					if ("/".equals(exchange.getRequestURI().getPath())) {
-						handleResource("start.html", exchange);
+						handleResource("classpath:/start.html", exchange);
 					} else if (BROWSER_CHECK_URI.equals(exchange.getRequestURI().getPath())) {
 						handleBrowser(params, exchange);
 					} else if (BROWSER_RESULT_URI.equals(exchange.getRequestURI().getPath())) {
 						handleBrowserResult(params, exchange);
 					} else if (BROWSER_TEST_URI.equals(exchange.getRequestURI().getPath())) {
 						handleBrowserTest(params, exchange);
-					} else if (BROWSER_GET_JS_URI.equals(exchange.getRequestURI().getPath())) {
-						handleBrowserGetJs(exchange.getRequestURI().getQuery(), exchange);
 					} else {
+						// remove the leading / that prevented the browser to interpret schemes like classpath: or file:
 						handleResource(exchange.getRequestURI().getPath().substring(1), exchange);
 					}
 
@@ -133,7 +142,7 @@ public class STJSTestServer {
 
 		BrowserConnection b = browserConnections.get(id);
 		if (b != null) {
-			if (testId == lastTestId && results != null) {
+			if ((testId == lastTestId) && (results != null)) {
 				results.addResult(b.buildResult(params.get("result"), params.get("location")));
 			}
 		}
@@ -142,26 +151,14 @@ public class STJSTestServer {
 		output.flush();
 	}
 
-	private synchronized void handleResource(String path, HttpExchange exchange) throws IOException {
-		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
-		try {
-			if (is != null) {
-				// TODO - add a proper mime type here
-				if (path.endsWith(".js")) {
-					exchange.getResponseHeaders().add("Content-type", "text/javascript");
-				}
-				exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-				OutputStream output = exchange.getResponseBody();
-				ByteStreams.copy(is, output);
-				output.flush();
-			} else {
-				System.err.println(path + " was not found in classpath");
-				exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
-			}
-		} finally {
-			if (is != null) {
-				is.close();
-			}
+	private synchronized void handleResource(String path, HttpExchange exchange) throws IOException, URISyntaxException {
+		if (path.endsWith(".js")) {
+			exchange.getResponseHeaders().add("Content-type", "text/javascript");
+		}
+		// XXX: legacy fix
+		String cleanPath = path.replaceFirst("file:/+target", "target");
+		if (!StreamUtils.copy(Thread.currentThread().getContextClassLoader(), cleanPath, exchange)) {
+			System.err.println(cleanPath + " was not found in classpath");
 		}
 	}
 
@@ -206,32 +203,11 @@ public class STJSTestServer {
 		output.flush();
 	}
 
-	private synchronized void handleBrowserTest(Map<String, String> params, HttpExchange exchange) throws IOException {
-		addNoCache(exchange);
-		if ((testFile == null) || !testFile.exists()) {
-			exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
-			return;
-		}
-		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-		OutputStream output = exchange.getResponseBody();
-		Files.copy(testFile, output);
-		output.flush();
-	}
-
-	private synchronized void handleBrowserGetJs(String fileName, HttpExchange exchange) throws IOException,
+	@SuppressWarnings("unused")
+	private synchronized void handleBrowserTest(Map<String, String> params, HttpExchange exchange) throws IOException,
 			URISyntaxException {
-		// Object modified = exchange.getRequestHeaders().get("If-Modified-Since");
-		// System.out.println(fileName + ":" + exchange.getRequestHeaders().keySet());
-		exchange.getResponseHeaders().add("Content-type", "text/javascript");
-		URI uri = new URI(fileName);
-		if ("classpath".equals(uri.getScheme())) {
-			handleResource(uri.getPath(), exchange);
-		} else {
-			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-			OutputStream output = exchange.getResponseBody();
-			Files.copy(new File(uri.getPath().substring(1)), output);
-			output.flush();
-		}
+		addNoCache(exchange);
+		StreamUtils.copy(Thread.currentThread().getContextClassLoader(), testFile.toURI().toString(), exchange);
 	}
 
 	public synchronized void start() {

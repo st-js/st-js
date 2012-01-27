@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 /**
  * this annotation describes the scripts to be added to the page during the unit test. The scripts can be a file relative to the projects home,
- * searched in the classpath (classpath://) or as an url
+ * searched in the classpath (classpath:/script.js) or as an url
  *
  * @author acraciun
  *

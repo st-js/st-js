@@ -126,7 +126,7 @@ public class Generator {
 		try {
 			if (pos >= 0) {
 				File file = getOutputFile(new File(path.substring(pos)), className);
-				return new URI("file", null, "/" + file.getPath().replace('\\', '/'), null);
+				return new URI(file.getPath().replace('\\', '/'));
 			}
 			return getOutputFile(generationFolder, className).toURI();
 		} catch (URISyntaxException e) {

@@ -29,5 +29,7 @@ import java.lang.annotation.Target;
  */
 public @interface HTMLFixture {
 
-	public String value();
+	public String value() default "";
+
+	public String url() default "";
 }

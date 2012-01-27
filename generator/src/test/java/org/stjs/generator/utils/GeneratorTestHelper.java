@@ -70,7 +70,7 @@ public class GeneratorTestHelper {
 	private static Object invoke(Object obj, String method, int argCount, Object... args) {
 		try {
 			for (Method m : obj.getClass().getMethods()) {
-				if (m.getName().equals(method) && m.getParameterTypes().length == argCount) {
+				if (m.getName().equals(method) && (m.getParameterTypes().length == argCount)) {
 					return m.invoke(obj, args);
 				}
 			}
@@ -119,13 +119,13 @@ public class GeneratorTestHelper {
 				"test-classes"), new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript")
 				.allowedPackage("org.stjs.generator").build());
 
-		File jsFile = new File(stjsClass.getJavascriptFiles().get(0).getPath().substring(1));
+		File jsFile = new File(stjsClass.getJavascriptFiles().get(0).getPath());
 		try {
 			String content = Files.toString(jsFile, Charset.defaultCharset());
 			List<File> javascriptFiles = new ArrayList<File>();
 			for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies()) {
 				for (URI js : dep.getJavascriptFiles()) {
-					javascriptFiles.add(new File(js.getPath().substring(1)));
+					javascriptFiles.add(new File(js.getPath()));
 				}
 			}
 			ExecutionResult execResult = new RhinoExecutor().run(javascriptFiles, !execute);
@@ -139,7 +139,7 @@ public class GeneratorTestHelper {
 		} catch (ScriptException ex) {
 			// display the generated code in case of exception
 			for (URI file : stjsClass.getJavascriptFiles()) {
-				displayWithLines(new File(file.getPath().substring(1)));
+				displayWithLines(new File(file.getPath()));
 			}
 			throw new RuntimeException(ex);
 		}
