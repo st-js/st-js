@@ -76,17 +76,19 @@ public class STJSTestServer {
 					exchange.getResponseHeaders().add("Date", formatDateHeader(new Date()));
 					exchange.getResponseHeaders().add("Last-Modified", formatDateHeader(new Date()));
 					exchange.getResponseHeaders().add("Connection", "Keep-Alive");
-					if ("/".equals(exchange.getRequestURI().getPath())) {
+					exchange.getResponseHeaders().add("Server", "STJS");
+					String path = exchange.getRequestURI().getPath();
+					if ("/".equals(path) || "/start.html".equals(path)) {
 						handleResource("classpath:/start.html", exchange);
-					} else if (BROWSER_CHECK_URI.equals(exchange.getRequestURI().getPath())) {
+					} else if (BROWSER_CHECK_URI.equals(path)) {
 						handleBrowser(params, exchange);
-					} else if (BROWSER_RESULT_URI.equals(exchange.getRequestURI().getPath())) {
+					} else if (BROWSER_RESULT_URI.equals(path)) {
 						handleBrowserResult(params, exchange);
-					} else if (BROWSER_TEST_URI.equals(exchange.getRequestURI().getPath())) {
+					} else if (BROWSER_TEST_URI.equals(path)) {
 						handleBrowserTest(params, exchange);
 					} else {
 						// remove the leading / that prevented the browser to interpret schemes like classpath: or file:
-						handleResource(exchange.getRequestURI().getPath().substring(1), exchange);
+						handleResource(path.substring(1), exchange);
 					}
 
 				} catch (Exception ex) {
@@ -111,7 +113,6 @@ public class STJSTestServer {
 		exchange.getResponseHeaders().add("CacheControl", "no-cache");
 		exchange.getResponseHeaders().add("Pragma", "no-cache");
 		exchange.getResponseHeaders().add("Expires", "-1");
-
 	}
 
 	private Map<String, String> parseQueryString(String query) {
@@ -153,7 +154,9 @@ public class STJSTestServer {
 
 	private synchronized void handleResource(String path, HttpExchange exchange) throws IOException, URISyntaxException {
 		if (path.endsWith(".js")) {
-			exchange.getResponseHeaders().add("Content-type", "text/javascript");
+			exchange.getResponseHeaders().add("Content-Type", "text/javascript");
+		} else if (path.endsWith(".html")) {
+			exchange.getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
 		}
 		// XXX: legacy fix
 		String cleanPath = path.replaceFirst("file:/+target", "target");
@@ -175,7 +178,6 @@ public class STJSTestServer {
 
 	private synchronized void handleBrowser(Map<String, String> params, HttpExchange exchange) throws IOException {
 		addNoCache(exchange);
-		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
 		long id = parseLong(params.get("id"), -1);
 
 		if (id < 0) {
@@ -198,8 +200,11 @@ public class STJSTestServer {
 		}
 		jsonResponse.append("}");
 
+		byte[] response = jsonResponse.toString().getBytes();
+		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+
 		OutputStream output = exchange.getResponseBody();
-		output.write(jsonResponse.toString().getBytes());
+		output.write(response);
 		output.flush();
 	}
 
@@ -216,7 +221,7 @@ public class STJSTestServer {
 	}
 
 	public synchronized void stop() {
-		// start the server
+		// stop the server
 		httpServer.stop(0);
 	}
 

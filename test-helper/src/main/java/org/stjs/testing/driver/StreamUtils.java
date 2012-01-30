@@ -26,6 +26,7 @@ import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
@@ -55,7 +56,7 @@ public class StreamUtils {
 			if (is == null) {
 				return false;
 			}
-			Reader reader = new InputStreamReader(is);
+			Reader reader = new InputStreamReader(is, Charset.forName("UTF-8"));
 			try {
 				CharStreams.copy(reader, out);
 				out.flush();
@@ -78,6 +79,20 @@ public class StreamUtils {
 		return true;
 	}
 
+	private static long getResourceSize(ClassLoader classLoader, String path) throws IOException {
+		final InputStream is = classLoader.getResourceAsStream(path);
+		try {
+			// TODO improve this
+			long n = 0;
+			while (is.read() >= 0) {
+				n++;
+			}
+			return n;
+		} finally {
+			is.close();
+		}
+	}
+
 	public static boolean copy(ClassLoader classLoader, String url, HttpExchange exchange) throws IOException,
 			URISyntaxException {
 		URI uri = new URI(url);
@@ -93,7 +108,8 @@ public class StreamUtils {
 				return false;
 			}
 			try {
-				exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+				exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK,
+						getResourceSize(classLoader, uri.getPath().substring(1)));
 				OutputStream out = exchange.getResponseBody();
 				ByteStreams.copy(is, out);
 				out.flush();
@@ -107,12 +123,12 @@ public class StreamUtils {
 				exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
 				return false;
 			}
-			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, file.length());
 			OutputStream out = exchange.getResponseBody();
 			Files.copy(file, out);
 			out.flush();
 		}
 		return true;
 	}
-
 }

@@ -1,16 +1,22 @@
 <html>
 <head>
 <script>
+	var STATE = {WAITING:"WAITING", TESTING:"TESTING", DISCONNECTED:"DISCONNECTED"};
+
 	var id = -1;
 	var count = 0;
 	var lastTestSrc = null;
 	var logDiv, statusDiv;
 	var testId = 0;
-	var timeout = 100;
-	var waitResult = false;
+	var state = STATE.WAITING;
 
-	function status(s){
-		statusDiv.innerHTML = "STJS Error:" + s;
+	function status(s, msg){
+		state = s;
+		statusDiv.innerHTML = "#" + count + " " + state + ":" + (msg || "") ;
+	}
+
+	function timeout(){
+		return state == STATE.DISCONNECTED ? 2000 : 100;
 	}
 
 	function log(s){
@@ -24,24 +30,24 @@
 					if (xmlhttp.status == 200) {
 						var response = eval("(" + xmlhttp.responseText + ")");
 						id = response.id;
-						status(xmlhttp.responseText + (++count));
 						if (response.src != null && response.src != lastTestSrc) {
 							testId = response.testId;
+							count++;
 							log("Executing:" + response.src);
-							waitResult = true;
+							status(STATE.TESTING);
 							document.getElementById("iframe").src = response.src;
 							lastTestSrc = response.src;
+						} else {
+							status(STATE.WAITING, xmlhttp.status);
+							setTimeout(retrieve, timeout());
 						}
-					} else {
-						status(xmlhttp.status);
+					} else if (xmlhttp.status == 0){
+						status(STATE.DISCONNECTED);
+						setTimeout(retrieve, timeout());
 					}
 				} catch(ex){
 					console.error("error:" + ex);
 				}
-				if (xmlhttp.status != 0)
-					timeout = 100;
-				if (!waitResult)
-					setTimeout(retrieve, timeout);
 			}
 		}
 		try {
@@ -49,8 +55,8 @@
 			xmlhttp.send();
 		} catch (ex) {
 			console.error("error:" + ex);
-			timeout = 2000;
-			setTimeout(retrieve, timeout);
+			status(STATE.DISCONNECTED);
+			setTimeout(retrieve, timeout());
 		}
 	}
 
@@ -69,7 +75,8 @@
 		} catch (ex) {
 			console.error("error:" + ex);
 		}
-		setTimeout(retrieve, timeout);
+		status(STATE.WAITING);
+		setTimeout(retrieve, timeout());
 	}
 	function sendOK(method){
 		sendError(method, "OK");

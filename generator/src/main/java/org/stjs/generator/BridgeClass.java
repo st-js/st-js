@@ -60,7 +60,7 @@ public class BridgeClass implements ClassWithJavascript {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + clazz.getName().hashCode();
+		result = (prime * result) + clazz.getName().hashCode();
 		return result;
 	}
 
@@ -78,6 +78,11 @@ public class BridgeClass implements ClassWithJavascript {
 		BridgeClass other = (BridgeClass) obj;
 
 		return clazz == other.clazz;
+	}
+
+	@Override
+	public String toString() {
+		return "BridgeClass:" + clazz.getName();
 	}
 
 }
