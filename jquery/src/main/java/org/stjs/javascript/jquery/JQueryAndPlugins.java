@@ -16,6 +16,7 @@
 package org.stjs.javascript.jquery;
 
 import org.stjs.javascript.annotation.SyntheticType;
+import org.stjs.javascript.jquery.plugins.Accordion;
 import org.stjs.javascript.jquery.plugins.AutoComplete;
 import org.stjs.javascript.jquery.plugins.Button;
 import org.stjs.javascript.jquery.plugins.Datepicker;
@@ -39,7 +40,8 @@ import org.stjs.javascript.jquery.plugins.Tabs;
  */
 @SyntheticType
 public interface JQueryAndPlugins<FullJQuery extends JQueryAndPlugins<?>> extends JQueryCore<FullJQuery>, //
-		JQueryUI<FullJQuery>,// Accordion<FullJQuery>,//
+		JQueryUI<FullJQuery>,//
+		Accordion<FullJQuery>,//
 		AutoComplete<FullJQuery>,//
 		Button<FullJQuery>,//
 		Datepicker<FullJQuery>,//
