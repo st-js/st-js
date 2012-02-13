@@ -280,6 +280,9 @@ stjs.enumeration=function(){
 		e._values[i] = e[arguments[i]];
 	}
 	e.values = function(){return this._values;};
+	e.valueOf=function(label){
+		return this[label];
+	}
 	return e;
 };
 

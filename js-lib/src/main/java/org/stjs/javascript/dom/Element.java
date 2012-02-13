@@ -31,7 +31,7 @@ abstract public class Element extends Node {
 	public int height;
 	public int offsetHeight;
 	public int offsetLeft;
-	public int offsetParent;
+	public Element offsetParent;
 	public int offsetTop;
 	public int offsetWidth;
 	public int scrollHeight;
