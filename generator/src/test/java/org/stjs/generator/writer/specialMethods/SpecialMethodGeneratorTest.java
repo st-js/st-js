@@ -1,8 +1,10 @@
 package org.stjs.generator.writer.specialMethods;
 
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
+import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
+import org.stjs.generator.JavascriptGenerationException;
 
 public class SpecialMethodGeneratorTest {
 
@@ -34,6 +36,18 @@ public class SpecialMethodGeneratorTest {
 	public void testSpecialMap() {
 		// $map(k,v) -> {k:v}
 		assertCodeContains(SpecialMethod5.class, "{\"key\":1}");
+	}
+
+	@Test
+	public void testSpecialNumber() {
+		// $map(k,v) -> {k:v}
+		assertCodeContains(SpecialMethod5a.class, "{2:1}");
+	}
+
+	@Test(expected = JavascriptGenerationException.class)
+	public void testWrongMapKey() {
+		// $map(k,v) -> {k:v}
+		generate(SpecialMethod5b.class);
 	}
 
 	@Test

@@ -353,4 +353,22 @@ public class Checks {
 
 	}
 
+	/**
+	 * makes sure only literals can be used as keys (so the even arguments)
+	 * 
+	 * @param n
+	 * @param context
+	 */
+	public static void checkMapConstructor(MethodCallExpr n, GenerationContext context) {
+		if (n.getArgs() != null) {
+			for (int i = 0; i < n.getArgs().size(); i += 2) {
+				if (!(n.getArgs().get(i) instanceof LiteralExpr)) {
+					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+							"The key of a map built this way can only be a literal. Use map.$put(variable) if you want to use variables as keys");
+				}
+
+			}
+		}
+	}
+
 }

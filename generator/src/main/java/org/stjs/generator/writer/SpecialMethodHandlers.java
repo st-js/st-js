@@ -31,6 +31,7 @@ import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.ast.ASTNodeData;
 import org.stjs.generator.ast.SourcePosition;
+import org.stjs.generator.scope.Checks;
 import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.utils.ClassUtils;
 
@@ -146,6 +147,7 @@ public class SpecialMethodHandlers {
 				}
 				currentHandler.printer.print("{");
 				if (n.getArgs() != null) {
+					Checks.checkMapConstructor(n, context);
 					boolean first = true;
 					for (int i = 0; i < n.getArgs().size(); i += 2) {
 						if (!first) {
