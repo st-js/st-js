@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.stjs.generator.GenerationDirectory;
 
 /**
  * 
@@ -43,8 +44,14 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 	}
 
 	@Override
-	public File getGeneratedSourcesDirectory() {
-		return generatedSourcesDirectory;
+	public GenerationDirectory getGeneratedSourcesDirectory() {
+		File baseDir = project.getBasedir();
+		File artifactPath = new File(project.getBuild().getDirectory(), project.getBuild().getFinalName());
+		File classpath = new File(artifactPath.getAbsolutePath().substring(baseDir.getAbsolutePath().length() + 1));
+		File relativeToClasspath = new File(generatedSourcesDirectory.getAbsolutePath().substring(
+				artifactPath.getAbsolutePath().length() + 1));
+		GenerationDirectory gendir = new GenerationDirectory(generatedSourcesDirectory, classpath, relativeToClasspath);
+		return gendir;
 	}
 
 	@SuppressWarnings("unchecked")

@@ -17,6 +17,7 @@ package org.stjs.testing.driver;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Properties;
 
 /**
@@ -50,7 +51,11 @@ public class DriverConfiguration {
 	private int browserCount = 1;
 	private boolean debugEnabled = false;
 
+	private final ClassLoader classLoader;
+
 	public DriverConfiguration(Class<?> klass) {
+		classLoader = new WebAppClassLoader(new URL[] {}, klass.getClassLoader());
+
 		InputStream in = klass.getResourceAsStream(FILE_NAME);
 		if (in != null) {
 			Properties props = new Properties();
@@ -149,6 +154,10 @@ public class DriverConfiguration {
 
 	public void setDebugEnabled(boolean debugEnabled) {
 		this.debugEnabled = debugEnabled;
+	}
+
+	public ClassLoader getClassLoader() {
+		return classLoader;
 	}
 
 }

@@ -35,4 +35,14 @@ public class GeneratorConstants {
 
 	public static final Pattern NAMESPACE_PATTERN = Pattern
 			.compile("([A-Za-z_][A-Za-z_0-9]*)(?:\\.([A-Za-z_][A-Za-z_0-9]*))*");
+
+	/**
+	 * this is the file in which the maven plugin writes the classpath needed to launch tests
+	 */
+	public static final String CLASSPATH_FILE = "stjs.cp";
+
+	/**
+	 * this folder is used by the test runner to write temporary files. the CLASSPATH_FILE is also put in this directory
+	 */
+	public static final String STJS_TEST_TEMP_FOLDER = "stjs-test";
 }

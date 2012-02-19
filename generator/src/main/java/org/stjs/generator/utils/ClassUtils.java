@@ -312,4 +312,7 @@ public class ClassUtils {
 		return Object.class;
 	}
 
+	public static String getPropertiesFileName(String className) {
+		return className.replace('.', '/') + ".stjs";
+	}
 }

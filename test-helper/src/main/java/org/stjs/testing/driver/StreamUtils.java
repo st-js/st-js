@@ -15,8 +15,6 @@
  */
 package org.stjs.testing.driver;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -30,7 +28,6 @@ import java.nio.charset.Charset;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
-import com.google.common.io.Files;
 import com.sun.net.httpserver.HttpExchange;
 
 /**
@@ -51,30 +48,16 @@ public class StreamUtils {
 			throw new IllegalArgumentException("Wrong path in uri:" + url);
 		}
 
-		if ("classpath".equals(uri.getScheme())) {
-			InputStream is = classLoader.getResourceAsStream(uri.getPath().substring(1));
-			if (is == null) {
-				return false;
-			}
-			Reader reader = new InputStreamReader(is, Charset.forName("UTF-8"));
-			try {
-				CharStreams.copy(reader, out);
-				out.flush();
-			} finally {
-				reader.close();
-			}
-		} else {
-			File file = new File(uri.getPath().substring(1));
-			if (!file.exists()) {
-				return false;
-			}
-			Reader reader = new FileReader(file);
-			try {
-				CharStreams.copy(reader, out);
-				out.flush();
-			} finally {
-				reader.close();
-			}
+		InputStream is = classLoader.getResourceAsStream(uri.getPath().substring(1));
+		if (is == null) {
+			return false;
+		}
+		Reader reader = new InputStreamReader(is, Charset.forName("UTF-8"));
+		try {
+			CharStreams.copy(reader, out);
+			out.flush();
+		} finally {
+			reader.close();
 		}
 		return true;
 	}
@@ -101,34 +84,22 @@ public class StreamUtils {
 			throw new IllegalArgumentException("Wrong path in uri:" + url);
 		}
 
-		if ("classpath".equals(uri.getScheme())) {
-			InputStream is = classLoader.getResourceAsStream(uri.getPath().substring(1));
-			if (is == null) {
-				exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
-				return false;
-			}
-			try {
-				exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK,
-						getResourceSize(classLoader, uri.getPath().substring(1)));
-				OutputStream out = exchange.getResponseBody();
-				ByteStreams.copy(is, out);
-				out.flush();
-			} finally {
-				is.close();
-			}
-		} else {
-			// TODO handle remote urls too
-			File file = new File(uri.getPath());
-			if (!file.exists()) {
-				exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
-				return false;
-			}
-
-			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, file.length());
-			OutputStream out = exchange.getResponseBody();
-			Files.copy(file, out);
-			out.flush();
+		InputStream is = classLoader.getResourceAsStream(uri.getPath().substring(1));
+		if (is == null) {
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
+			return false;
 		}
+		try {
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK,
+					getResourceSize(classLoader, uri.getPath().substring(1)));
+			OutputStream out = exchange.getResponseBody();
+			ByteStreams.copy(is, out);
+			out.flush();
+		} finally {
+			is.close();
+		}
+
+		// TODO handle remote urls too
 		return true;
 	}
 }

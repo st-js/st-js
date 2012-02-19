@@ -20,7 +20,7 @@ import org.stjs.testing.jquery.MockjaxOptions;
 		"			</table>" + //
 		"			<input type='text' id='newStock'><button id='addStock' type='submit'>Add</button>\n" + //
 		"			</form>")
-@Scripts({ "classpath://jquery.js", "classpath://jquery.mockjax.js", "classpath://json2.js" })
+@Scripts({ "/jquery.js", "/jquery.mockjax.js", "/json2.js" })
 public class StockApplicationTest {
 
 	@Test

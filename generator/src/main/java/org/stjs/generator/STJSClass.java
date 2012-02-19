@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.PreConditions;
 
 /**
@@ -83,9 +84,11 @@ public class STJSClass implements ClassWithJavascript {
 		this.dependencyResolver = dependencyResolver;
 		properties = new Properties();
 		try {
-			InputStream inputStream = classLoader.getResourceAsStream(getPropertiesFileName());
+			InputStream inputStream = classLoader.getResourceAsStream(ClassUtils.getPropertiesFileName(className));
 			if (inputStream != null) {
 				properties.load(inputStream);
+			} else {
+				System.err.println("CANNOT find:" + ClassUtils.getPropertiesFileName(className));
 			}
 		} catch (IOException e) {
 			// maybe it does not exist
@@ -111,12 +114,8 @@ public class STJSClass implements ClassWithJavascript {
 		}
 	}
 
-	private String getPropertiesFileName() {
-		return className.replace('.', File.separatorChar) + ".stjs";
-	}
-
 	private File getStjsPropertiesFile() {
-		File propFile = new File(targetFolder, getPropertiesFileName());
+		File propFile = new File(targetFolder, ClassUtils.getPropertiesFileName(className));
 		propFile.getParentFile().mkdirs();
 		return propFile;
 	}

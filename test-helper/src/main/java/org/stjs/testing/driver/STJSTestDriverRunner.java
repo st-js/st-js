@@ -34,6 +34,7 @@ import org.junit.runners.model.Statement;
 import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
 import org.stjs.generator.Generator;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.javascript.annotation.STJSBridge;
 import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.Scripts;
@@ -52,6 +53,7 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 	private boolean skipIfNoBrowser = false;
 	private final ServerSession serverSession;
 	private final DriverConfiguration config;
+	public final static File targetDirectory = new File("target", GeneratorConstants.STJS_TEST_TEMP_FOLDER);
 
 	public STJSTestDriverRunner(Class<?> klass) throws InitializationError {
 		super(klass);
@@ -86,19 +88,16 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 	}
 
 	private void addScript(Writer writer, String script) throws IOException {
-		if (script.startsWith("http:")) {
-			writer.append("<script src='" + script + "'></script>\n");
-		} else {
-			// remove wrong leading classpath://
-			String cleanScript = script.replace("classpath://", "classpath:/");
-			// add a slash to prevent the browser to interpret the scheme
-			writer.append("<script src='/" + cleanScript + "'></script>\n");
-		}
+		// remove wrong leading classpath://
+		String cleanScript = script.replace("classpath://", "/");
+		// add a slash to prevent the browser to interpret the scheme
+		writer.append("<script src='" + cleanScript + "'></script>\n");
 	}
 
 	@Override
 	protected Statement methodBlock(final FrameworkMethod method) {
 		return new Statement() {
+
 			@Override
 			public void evaluate() throws Throwable {
 
@@ -108,14 +107,15 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 				final Scripts addedScripts = getTestClass().getJavaClass().getAnnotation(Scripts.class);
 				File htmlFile = null;
 				try {
-					htmlFile = File.createTempFile(getTestClass().getJavaClass().getName() + "_js_test_driver_adapter",
-							".html");
+					targetDirectory.mkdirs();
+					htmlFile = new File(targetDirectory, getTestClass().getJavaClass().getName() + "-"
+							+ method.getName() + ".html");
 					FileWriter writer = new FileWriter(htmlFile);
 
 					writer.append("<html>");
 					writer.append("<head>");
-					addScript(writer, "classpath:/stjs.js");
-					addScript(writer, "classpath:/junit.js");
+					addScript(writer, "/stjs.js");
+					addScript(writer, "/junit.js");
 
 					writer.append("<script language='javascript'>stjs.mainCallDisabled=true;</script>");
 					if (addedScripts != null) {
@@ -157,7 +157,7 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 						if (!Strings.isNullOrEmpty(htmlFixture.value())) {
 							writer.append(htmlFixture.value());
 						} else if (!Strings.isNullOrEmpty(htmlFixture.url())) {
-							StreamUtils.copy(getTestClass().getJavaClass().getClassLoader(), htmlFixture.url(), writer);
+							StreamUtils.copy(serverSession.getServer().getClassLoader(), htmlFixture.url(), writer);
 						}
 					}
 					writer.append("</body>");
@@ -179,9 +179,9 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				} finally {
-					if (htmlFile != null) {
-						htmlFile.delete();
-					}
+					// if (htmlFile != null) {
+					// htmlFile.delete();
+					// }
 				}
 			}
 		};

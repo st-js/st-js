@@ -19,6 +19,7 @@ import javax.script.ScriptException;
 
 import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
+import org.stjs.generator.GenerationDirectory;
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.executor.ExecutionResult;
@@ -113,19 +114,26 @@ public class GeneratorTestHelper {
 	private static Object executeOrGenerate(Class<?> clazz, boolean execute) {
 		Generator gen = new Generator();
 
+		File generationPath = new File("target", TEMP_GENERATION_PATH);
+		GenerationDirectory generationFolder = new GenerationDirectory(generationPath, new File(TEMP_GENERATION_PATH),
+				new File(""));
 		String sourcePath = "src/test/java";
-		ClassWithJavascript stjsClass = gen.generateJavascript(Thread.currentThread().getContextClassLoader(), clazz
-				.getName(), new File(sourcePath), new File("target", TEMP_GENERATION_PATH), new File("target",
-				"test-classes"), new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript")
-				.allowedPackage("org.stjs.generator").build());
+		ClassWithJavascript stjsClass = gen.generateJavascript(
+				Thread.currentThread().getContextClassLoader(),
+				clazz.getName(),
+				new File(sourcePath),
+				generationFolder,
+				new File("target", "test-classes"),
+				new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript")
+						.allowedPackage("org.stjs.generator").build());
 
-		File jsFile = new File(stjsClass.getJavascriptFiles().get(0).getPath());
+		File jsFile = new File(generationPath, stjsClass.getJavascriptFiles().get(0).getPath());
 		try {
 			String content = Files.toString(jsFile, Charset.defaultCharset());
 			List<File> javascriptFiles = new ArrayList<File>();
 			for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies()) {
 				for (URI js : dep.getJavascriptFiles()) {
-					javascriptFiles.add(new File(js.getPath()));
+					javascriptFiles.add(new File(generationPath, js.getPath()));
 				}
 			}
 			ExecutionResult execResult = new RhinoExecutor().run(javascriptFiles, !execute);
@@ -139,7 +147,7 @@ public class GeneratorTestHelper {
 		} catch (ScriptException ex) {
 			// display the generated code in case of exception
 			for (URI file : stjsClass.getJavascriptFiles()) {
-				displayWithLines(new File(file.getPath()));
+				displayWithLines(new File(generationPath, file.getPath()));
 			}
 			throw new RuntimeException(ex);
 		}

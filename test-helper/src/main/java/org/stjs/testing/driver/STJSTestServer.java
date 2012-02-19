@@ -56,13 +56,17 @@ public class STJSTestServer {
 	private TestResultCollection results;
 	private Set<Long> browserWithCurrentTest;
 
-	public STJSTestServer(int port, int testTimeout, boolean debugParam) throws IOException {
+	private final ClassLoader classLoader;
+
+	public STJSTestServer(ClassLoader classLoader, int port, int testTimeout, boolean debugParam) throws IOException {
 		this.port = port;
 		this.testTimeout = testTimeout;
 		this.debug = debugParam;
+		this.classLoader = classLoader;
 		// create the HttpServer
 		InetSocketAddress address = new InetSocketAddress(port);
 		httpServer = HttpServer.create(address, 0);
+
 		// create and register our handler
 		HttpHandler handler = new HttpHandler() {
 
@@ -79,7 +83,7 @@ public class STJSTestServer {
 					exchange.getResponseHeaders().add("Server", "STJS");
 					String path = exchange.getRequestURI().getPath();
 					if ("/".equals(path) || "/start.html".equals(path)) {
-						handleResource("classpath:/start.html", exchange);
+						handleResource("/start.html", exchange);
 					} else if (BROWSER_CHECK_URI.equals(path)) {
 						handleBrowser(params, exchange);
 					} else if (BROWSER_RESULT_URI.equals(path)) {
@@ -87,8 +91,7 @@ public class STJSTestServer {
 					} else if (BROWSER_TEST_URI.equals(path)) {
 						handleBrowserTest(params, exchange);
 					} else {
-						// remove the leading / that prevented the browser to interpret schemes like classpath: or file:
-						handleResource(path.substring(1), exchange);
+						handleResource(path, exchange);
 					}
 
 				} catch (Exception ex) {
@@ -160,7 +163,7 @@ public class STJSTestServer {
 		}
 		// XXX: legacy fix
 		String cleanPath = path.replaceFirst("file:/+target", "target");
-		if (!StreamUtils.copy(Thread.currentThread().getContextClassLoader(), cleanPath, exchange)) {
+		if (!StreamUtils.copy(classLoader, cleanPath, exchange)) {
 			System.err.println(cleanPath + " was not found in classpath");
 		}
 	}
@@ -208,11 +211,12 @@ public class STJSTestServer {
 		output.flush();
 	}
 
-	@SuppressWarnings("unused")
 	private synchronized void handleBrowserTest(Map<String, String> params, HttpExchange exchange) throws IOException,
 			URISyntaxException {
 		addNoCache(exchange);
-		StreamUtils.copy(Thread.currentThread().getContextClassLoader(), testFile.toURI().toString(), exchange);
+		if (!StreamUtils.copy(classLoader, "/" + testFile.getName(), exchange)) {
+			System.err.println("/" + testFile.getName() + " was not found in classpath");
+		}
 	}
 
 	public synchronized void start() {
@@ -227,6 +231,10 @@ public class STJSTestServer {
 
 	public synchronized int getBrowserCount() {
 		return browserConnections.size();
+	}
+
+	public ClassLoader getClassLoader() {
+		return classLoader;
 	}
 
 	public TestResultCollection test(File srcFile) throws InterruptedException {

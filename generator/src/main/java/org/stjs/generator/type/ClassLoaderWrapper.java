@@ -96,12 +96,17 @@ public class ClassLoaderWrapper {
 				}
 			}
 
-			if (!found) {
+			if (!found && !isImportedStjsClass(clazz)) {
 				throw typeNotAllowedException(clazz);
 			}
 		}
 
 		resolvedClasses.add(clazz.getName());
+	}
+
+	private boolean isImportedStjsClass(Class<?> clazz) {
+		String stjsPropertiesName = ClassUtils.getPropertiesFileName(clazz.getName());
+		return classLoader.getResource(stjsPropertiesName) != null;
 	}
 
 	public Option<ClassWrapper> loadClassOrInnerClass(String classLoaderCompatibleName) {

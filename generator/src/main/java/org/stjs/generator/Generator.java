@@ -50,8 +50,14 @@ public class Generator {
 	private static final String STJS_FILE = "stjs.js";
 
 	public File getOutputFile(File generationFolder, String className) {
+		return getOutputFile(generationFolder, className, true);
+	}
+
+	public File getOutputFile(File generationFolder, String className, boolean generateDirectory) {
 		File output = new File(generationFolder, className.replace('.', File.separatorChar) + ".js");
-		output.getParentFile().mkdirs();
+		if (generateDirectory) {
+			output.getParentFile().mkdirs();
+		}
 		return output;
 	}
 
@@ -68,8 +74,8 @@ public class Generator {
 	 * @return the list of imports needed by the generated class
 	 */
 	public ClassWithJavascript generateJavascript(ClassLoader builtProjectClassLoader, String className,
-			File sourceFolder, File generationFolder, File targetFolder, GeneratorConfiguration configuration)
-			throws JavascriptGenerationException {
+			File sourceFolder, GenerationDirectory generationFolder, File targetFolder,
+			GeneratorConfiguration configuration) throws JavascriptGenerationException {
 
 		ClassLoaderWrapper classLoaderWrapper = new ClassLoaderWrapper(builtProjectClassLoader,
 				configuration.getAllowedPackages(), configuration.getAllowedJavaLangClasses());
@@ -82,7 +88,7 @@ public class Generator {
 		}
 
 		File inputFile = getInputFile(sourceFolder, className);
-		File outputFile = getOutputFile(generationFolder, className);
+		File outputFile = getOutputFile(generationFolder.getAbsolutePath(), className);
 		GenerationContext context = new GenerationContext(inputFile, configuration);
 
 		CompilationUnit cu = parseAndResolve(classLoaderWrapper, inputFile, context);
@@ -118,17 +124,25 @@ public class Generator {
 		return stjsClass;
 	}
 
-	private URI relative(File generationFolder, String className) {
+	private URI relative(GenerationDirectory generationFolder, String className) {
 		// FIXME temporary have to remove the full path from the file name.
 		// it should be different depending on whether the final artifact is a war or a jar.
-		String path = generationFolder.getPath();
-		int pos = path.lastIndexOf("target");
+		// String path = generationFolder.getPath();
+		// int pos = path.lastIndexOf("target");
 		try {
-			if (pos >= 0) {
-				File file = getOutputFile(new File(path.substring(pos)), className);
-				return new URI(file.getPath().replace('\\', '/'));
+			File file = getOutputFile(generationFolder.getRelativeToClasspath(), className, false);
+			String path = file.getPath().replace('\\', '/');
+			// make it "absolute"
+			if (!path.startsWith("/")) {
+				path = "/" + path;
 			}
-			return getOutputFile(generationFolder, className).toURI();
+			return new URI(path);
+
+			// if (pos >= 0) {
+			// File file = getOutputFile(new File(path.substring(pos)), className);
+			// return new URI(file.getPath().replace('\\', '/'));
+			// }
+			// return getOutputFile(generationFolder, className).toURI();
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
@@ -213,12 +227,12 @@ public class Generator {
 	private class GeneratorDependencyResolver implements DependencyResolver {
 		private final ClassLoader builtProjectClassLoader;
 		private final File sourceFolder;
-		private final File generationFolder;
+		private final GenerationDirectory generationFolder;
 		private final File targetFolder;
 		private final GeneratorConfiguration configuration;
 
 		public GeneratorDependencyResolver(ClassLoader builtProjectClassLoader, File sourceFolder,
-				File generationFolder, File targetFolder, GeneratorConfiguration configuration) {
+				GenerationDirectory generationFolder, File targetFolder, GeneratorConfiguration configuration) {
 			this.builtProjectClassLoader = builtProjectClassLoader;
 			this.sourceFolder = sourceFolder;
 			this.targetFolder = targetFolder;
@@ -278,7 +292,7 @@ public class Generator {
 		for (int i = 1; i < args.length; ++i) {
 			builder.allowedPackage(args[i]);
 		}
-		new Generator().generateJavascript(Thread.currentThread().getContextClassLoader(), args[0], new File(
-				"src/main/java"), new File("target", "generate-js"), new File("target"), builder.build());
+		// new Generator().generateJavascript(Thread.currentThread().getContextClassLoader(), args[0], new File(
+		// "src/main/java"), new File("target", "generate-js"), new File("target"), builder.build());
 	}
 }
