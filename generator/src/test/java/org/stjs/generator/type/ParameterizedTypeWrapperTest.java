@@ -118,6 +118,20 @@ public class ParameterizedTypeWrapperTest {
 	}
 
 	@Test
+	public void testNormalClassInheritsGenericClassWithArray() throws SecurityException, NoSuchMethodException,
+			NoSuchFieldException {
+		TypeWrapper wrapper = TypeWrappers.wrap(ParameterizedTypeWrapper8a.class.getDeclaredField("get")
+				.getGenericType());
+		assertEquals("ParameterizedTypeWrapper8a", wrapper.getSimpleName());
+
+		assertTrue(wrapper.findField("field").isDefined());
+		TypeWrapper fieldType = wrapper.findField("field").getOrThrow().getType();
+		assertTrue(fieldType instanceof ParameterizedTypeWrapper);
+		assertEquals(1, ((ParameterizedTypeWrapper) fieldType).getActualTypeArguments().length);
+		assertEquals("java.lang.String", ((ParameterizedTypeWrapper) fieldType).getActualTypeArguments()[0].getName());
+	}
+
+	@Test
 	public void testGenericClassInheritsGenericClass() throws SecurityException, NoSuchMethodException,
 			NoSuchFieldException {
 		TypeWrapper wrapper = TypeWrappers.wrap(ParameterizedTypeWrapper5.class.getDeclaredField("get")
