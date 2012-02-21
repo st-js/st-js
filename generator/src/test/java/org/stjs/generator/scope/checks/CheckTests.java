@@ -40,4 +40,24 @@ public class CheckTests {
 	public void testMethodOverwritePublicGenerics() {
 		generate(Checks7.class);
 	}
+
+	@Test
+	public void testFinalAtMethodLevel() {
+		generate(Checks8a.class);
+	}
+
+	@Test(expected = JavascriptGenerationException.class)
+	public void testFinalNotAtMethodLevel() {
+		generate(Checks8b.class);
+	}
+
+	@Test
+	public void testFinalField() {
+		generate(Checks8c.class);
+	}
+
+	@Test
+	public void testFinalParam() {
+		generate(Checks8d.class);
+	}
 }

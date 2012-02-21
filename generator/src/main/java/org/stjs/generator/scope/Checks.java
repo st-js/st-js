@@ -32,6 +32,8 @@ import japa.parser.ast.expr.ObjectCreationExpr;
 import japa.parser.ast.expr.SuperExpr;
 import japa.parser.ast.expr.ThisExpr;
 import japa.parser.ast.expr.UnaryExpr;
+import japa.parser.ast.expr.VariableDeclarationExpr;
+import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
 
 import java.lang.reflect.Modifier;
@@ -368,6 +370,19 @@ public class Checks {
 				}
 
 			}
+		}
+	}
+
+	public static void checkVariableDeclarationExpr(VariableDeclarationExpr n, GenerationContext context) {
+		if (!ModifierSet.isFinal(n.getModifiers())) {
+			return;
+		}
+		BlockStmt parent = ASTNodeData.parent(n, BlockStmt.class);
+		if (parent != null && !(ASTNodeData.parent(parent) instanceof MethodDeclaration)) {
+			throw new JavascriptGenerationException(
+					context.getInputFile(),
+					new SourcePosition(n),
+					"To prevent unexpected behaviour in Javascript, final variables must be declared at method level and not inside inner blocks");
 		}
 	}
 

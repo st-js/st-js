@@ -374,6 +374,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		PreConditions.checkStateNode(n, scope instanceof BasicScope,
 				"The variable [%s] is not defined inside a BasicScope", n);
 
+		Checks.checkVariableDeclarationExpr(n, context);
+
 		BasicScope basicScope = (BasicScope) scope;
 		if (n.getVars() != null) {
 			TypeWrapper clazz = resolveType(basicScope, n.getType());

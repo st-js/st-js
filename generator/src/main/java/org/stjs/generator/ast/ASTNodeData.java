@@ -160,6 +160,16 @@ public class ASTNodeData {
 		return p;
 	}
 
+	@SuppressWarnings("unchecked")
+	public static <T> T parent(Node n, Class<T> clazz) {
+		for (Node p = n; p != null; p = parent(p)) {
+			if (clazz.isAssignableFrom(p.getClass())) {
+				return (T) p;
+			}
+		}
+		return null;
+	}
+
 	public static Node checkParent(Node n, Class<?> clazz) {
 		Node parent = parent(n);
 		if (parent == null) {
