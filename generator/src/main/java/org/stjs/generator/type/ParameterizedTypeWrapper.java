@@ -43,4 +43,14 @@ public class ParameterizedTypeWrapper extends ClassWrapper {
 		return TypeWrappers.wrap(type.getActualTypeArguments());
 	}
 
+	public ParameterizedTypeWrapper withArguments(TypeWrapper[] newArgumentTypesWrappers) {
+		Type[] newArgumentTypes = new Type[newArgumentTypesWrappers.length];
+		for (int i = 0; i < newArgumentTypes.length; ++i) {
+			newArgumentTypes[i] = newArgumentTypesWrappers[i].getType();
+		}
+		ParameterizedTypeImpl newType = new ParameterizedTypeImpl(type.getRawType(), newArgumentTypes,
+				type.getOwnerType());
+		return new ParameterizedTypeWrapper(newType);
+	}
+
 }

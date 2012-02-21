@@ -78,6 +78,17 @@ public class ClassWrapper implements TypeWrapper {
 		PreConditions.checkState(ownerClass.getTypeParameters().length == typeArguments.length,
 				"Difference length between class parameters (%d) and arguments list (%d)",
 				ownerClass.getTypeParameters().length, typeArguments.length);
+		if (origType instanceof ParameterizedTypeWrapper) {
+			ParameterizedTypeWrapper origParamType = (ParameterizedTypeWrapper) origType;
+			TypeWrapper[] argumentTypes = origParamType.getActualTypeArguments();
+			TypeWrapper[] modifiedArgumentTypes = new TypeWrapper[argumentTypes.length];
+			boolean modified = false;
+			for (int i = 0; i < argumentTypes.length; ++i) {
+				modifiedArgumentTypes[i] = substituteType(argumentTypes[i], ownerClass, typeArguments);
+				modified = modified || modifiedArgumentTypes[i] != argumentTypes[i];
+			}
+			return modified ? origParamType.withArguments(modifiedArgumentTypes) : origParamType;
+		}
 		for (int i = 0; i < ownerClass.getTypeParameters().length; ++i) {
 			TypeVariable<?> typeVar = ownerClass.getTypeParameters()[i];
 			if (origType.getName().equals(typeVar.getName())) {
