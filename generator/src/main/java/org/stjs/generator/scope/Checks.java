@@ -15,6 +15,7 @@
  */
 package org.stjs.generator.scope;
 
+import japa.parser.ast.Node;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
@@ -33,7 +34,10 @@ import japa.parser.ast.expr.SuperExpr;
 import japa.parser.ast.expr.ThisExpr;
 import japa.parser.ast.expr.UnaryExpr;
 import japa.parser.ast.expr.VariableDeclarationExpr;
-import japa.parser.ast.stmt.BlockStmt;
+import japa.parser.ast.stmt.DoStmt;
+import japa.parser.ast.stmt.ForStmt;
+import japa.parser.ast.stmt.ForeachStmt;
+import japa.parser.ast.stmt.WhileStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
 
 import java.lang.reflect.Modifier;
@@ -98,16 +102,16 @@ public class Checks {
 	public static void checkFieldDeclaration(FieldDeclaration n, GenerationContext arg) {
 		for (VariableDeclarator v : n.getVariables()) {
 			JavascriptKeywords.checkIdentifier(arg.getInputFile(), new SourcePosition(v), v.getId().getName());
-			if (!ModifierSet.isStatic(n.getModifiers()) && (v.getInit() != null)) {
+			if (!ModifierSet.isStatic(n.getModifiers()) && v.getInit() != null) {
 				if (!ClassUtils.isBasicType(n.getType())) {
 					throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(v),
 							"Instance field inline initialization is allowed only for string and number field types");
 				}
 				// allowed x = 1 and x = -1
-				if ((v.getInit() instanceof LiteralExpr)) {
+				if (v.getInit() instanceof LiteralExpr) {
 					return;
 				}
-				if ((v.getInit() instanceof UnaryExpr)) {
+				if (v.getInit() instanceof UnaryExpr) {
 					if (((UnaryExpr) v.getInit()).getExpr() instanceof LiteralExpr) {
 						return;
 					}
@@ -175,7 +179,7 @@ public class Checks {
 		if (n.getImplements() != null) {
 			for (ClassOrInterfaceType impl : n.getImplements()) {
 				TypeWrapper type = ASTNodeData.resolvedType(impl);
-				if ((type instanceof ClassWrapper)
+				if (type instanceof ClassWrapper
 						&& ClassUtils.hasAnnotation((ClassWrapper) type, JavascriptFunction.class)) {
 					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 							"You cannot implement intefaces annotated with @JavascriptFunction. "
@@ -251,7 +255,7 @@ public class Checks {
 	 * @param context
 	 */
 	public static void checkEnumDeclaration(EnumDeclaration n, GenerationContext context) {
-		if ((n.getMembers() != null) && (n.getMembers().size() > 0)) {
+		if (n.getMembers() != null && n.getMembers().size() > 0) {
 			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 					"Enums with fields or methods are not supported");
 		}
@@ -325,7 +329,7 @@ public class Checks {
 		}
 		TypeWrapper methodDeclaringClass = method.getOwnerType();
 		ClassScope thisClassScope = scope.closest(ClassScope.class);
-		return (thisClassScope.getClazz().equals(methodDeclaringClass));
+		return thisClassScope.getClazz().equals(methodDeclaringClass);
 	}
 
 	private static boolean isAccessInCorrectScope(NameExpr n) {
@@ -340,7 +344,7 @@ public class Checks {
 		}
 		TypeWrapper declaringClass = field.getOwnerType();
 		ClassScope thisClassScope = scope.closest(ClassScope.class);
-		return (thisClassScope.getClazz().equals(declaringClass));
+		return thisClassScope.getClazz().equals(declaringClass);
 	}
 
 	public static void checkObjectCreationExpr(ObjectCreationExpr n, GenerationContext context) {
@@ -348,7 +352,7 @@ public class Checks {
 		if (!ClassUtils.isJavascriptFunction(type)) {
 			return;
 		}
-		if ((n.getAnonymousClassBody() != null) && (n.getAnonymousClassBody().size() > 1)) {
+		if (n.getAnonymousClassBody() != null && n.getAnonymousClassBody().size() > 1) {
 			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 					"Initialization block for a Javascript function must contain exactly one method");
 		}
@@ -373,16 +377,27 @@ public class Checks {
 		}
 	}
 
+	private static boolean isLoop(Node n) {
+		return n instanceof ForeachStmt || n instanceof ForStmt || n instanceof WhileStmt || n instanceof DoStmt;
+	}
+
+	private static boolean isMethodOrClassDeclaration(Node n) {
+		return n instanceof MethodDeclaration || n instanceof ConstructorDeclaration
+				|| n instanceof ClassOrInterfaceDeclaration;
+	}
+
 	public static void checkVariableDeclarationExpr(VariableDeclarationExpr n, GenerationContext context) {
 		if (!ModifierSet.isFinal(n.getModifiers())) {
 			return;
 		}
-		BlockStmt parent = ASTNodeData.parent(n, BlockStmt.class);
-		if (parent != null && !(ASTNodeData.parent(parent) instanceof MethodDeclaration)) {
-			throw new JavascriptGenerationException(
-					context.getInputFile(),
-					new SourcePosition(n),
-					"To prevent unexpected behaviour in Javascript, final variables must be declared at method level and not inside inner blocks");
+		for (Node p = n; p != null; p = ASTNodeData.parent(p)) {
+			if (isLoop(p)) {
+				throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+						"To prevent unexpected behaviour in Javascript, final variables must be declared at method level and not inside loops");
+			}
+			if (isMethodOrClassDeclaration(p)) {
+				break;
+			}
 		}
 	}
 
