@@ -205,7 +205,11 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 	protected void filesGenerated(Generator generator, GenerationDirectory gendir) throws MojoFailureException {
 		// copy the javascript support
-		generator.copyJavascriptSupport(getGeneratedSourcesDirectory().getAbsolutePath());
+		try {
+			generator.copyJavascriptSupport(getGeneratedSourcesDirectory().getAbsolutePath());
+		} catch (Exception ex) {
+			throw new MojoFailureException("Error when copying support files:" + ex.getMessage(), ex);
+		}
 	}
 
 	/**
