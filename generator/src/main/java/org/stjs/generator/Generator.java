@@ -261,7 +261,7 @@ public class Generator {
 			// check if it has already generated
 			STJSClass stjsClass = new STJSClass(this, builtProjectClassLoader, parentClassName);
 			if (stjsClass.getJavascriptFiles().isEmpty()) {
-				if ((generationFolder == null) || (sourceFolder == null) || (targetFolder == null)) {
+				if (generationFolder == null || sourceFolder == null || targetFolder == null) {
 					throw new IllegalStateException("This resolver assumed that the javascript for the class ["
 							+ parentClassName + "] was already generated");
 				}
@@ -278,9 +278,8 @@ public class Generator {
 	 * 
 	 * @param testClass
 	 */
-	public ClassWithJavascript getExistingStjsClass(Class<?> testClass) {
-		return new GeneratorDependencyResolver(testClass.getClassLoader(), null, null, null, null).resolve(testClass
-				.getName());
+	public ClassWithJavascript getExistingStjsClass(ClassLoader classLoader, Class<?> testClass) {
+		return new GeneratorDependencyResolver(classLoader, null, null, null, null).resolve(testClass.getName());
 	}
 
 	public static void main(String[] args) throws URISyntaxException {

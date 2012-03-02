@@ -101,7 +101,8 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 			@Override
 			public void evaluate() throws Throwable {
 
-				ClassWithJavascript stjsClass = new Generator().getExistingStjsClass(getTestClass().getJavaClass());
+				ClassWithJavascript stjsClass = new Generator().getExistingStjsClass(config.getClassLoader(),
+						getTestClass().getJavaClass());
 
 				final HTMLFixture htmlFixture = getTestClass().getJavaClass().getAnnotation(HTMLFixture.class);
 				final Scripts addedScripts = getTestClass().getJavaClass().getAnnotation(Scripts.class);

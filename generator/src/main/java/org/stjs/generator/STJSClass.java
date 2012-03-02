@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,6 +30,8 @@ import java.util.Properties;
 
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.PreConditions;
+
+import com.google.common.io.Closeables;
 
 /**
  * This class represents a class and the corresponding generated javascript file. The information about dependencies and
@@ -83,15 +86,21 @@ public class STJSClass implements ClassWithJavascript {
 		this.targetFolder = null;
 		this.dependencyResolver = dependencyResolver;
 		properties = new Properties();
+
+		InputStream inputStream = null;
 		try {
-			InputStream inputStream = classLoader.getResourceAsStream(ClassUtils.getPropertiesFileName(className));
+			check(classLoader, ClassUtils.getPropertiesFileName(className));
+			inputStream = classLoader.getResourceAsStream(ClassUtils.getPropertiesFileName(className));
 			if (inputStream != null) {
 				properties.load(inputStream);
 			} else {
-				System.err.println("CANNOT find:" + ClassUtils.getPropertiesFileName(className));
+				System.err.println("CANNOT find:" + ClassUtils.getPropertiesFileName(className) + " clazz:"
+						+ classLoader.getResource(ClassUtils.getPropertiesFileName(className)));
 			}
 		} catch (IOException e) {
 			// maybe it does not exist
+		} finally {
+			Closeables.closeQuietly(inputStream);
 		}
 		// deps
 		String depProp = properties.getProperty(DEPENDENCIES_PROP);
@@ -112,6 +121,18 @@ public class STJSClass implements ClassWithJavascript {
 				System.err.println("Could not load URI from " + jsFile);
 			}
 		}
+	}
+
+	private InputStream check(ClassLoader cl, String className) {
+		URL url = cl.getResource(className);
+		try {
+			return url != null ? url.openStream() : null;
+		} catch (IOException e) {
+			System.out.println(e);
+			e.printStackTrace();
+			return null;
+		}
+
 	}
 
 	private File getStjsPropertiesFile() {
@@ -193,7 +214,7 @@ public class STJSClass implements ClassWithJavascript {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = (prime * result) + className.hashCode();
+		result = prime * result + className.hashCode();
 		return result;
 	}
 

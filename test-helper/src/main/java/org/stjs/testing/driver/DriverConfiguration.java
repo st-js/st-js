@@ -20,6 +20,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 
+import com.google.common.io.Closeables;
+
 /**
  * this is a wrapper around the configuration files stjs-test.properties.
  * 
@@ -54,12 +56,11 @@ public class DriverConfiguration {
 	private final ClassLoader classLoader;
 
 	public DriverConfiguration(Class<?> klass) {
-		classLoader = new WebAppClassLoader(new URL[] {}, klass.getClassLoader());
-
-		InputStream in = klass.getResourceAsStream(FILE_NAME);
-		if (in != null) {
-			Properties props = new Properties();
-			try {
+		InputStream in = null;
+		try {
+			in = klass.getResourceAsStream(FILE_NAME);
+			if (in != null) {
+				Properties props = new Properties();
 				props.load(in);
 
 				// system properties take precedence
@@ -88,16 +89,14 @@ public class DriverConfiguration {
 					debugEnabled = Boolean.parseBoolean(props.getProperty(PROP_DEBUG));
 				}
 
-			} catch (IOException e) {
-				// silent
-			} finally {
-				try {
-					in.close();
-				} catch (IOException e) {
-					// silent
-				}
 			}
+		} catch (IOException e) {
+			// silent
+		} finally {
+			Closeables.closeQuietly(in);
 		}
+		classLoader = new WebAppClassLoader(new URL[] {}, klass.getClassLoader(), debugEnabled);
+
 	}
 
 	public int getPort() {

@@ -34,12 +34,14 @@ import com.google.common.io.Files;
  * 
  */
 public class WebAppClassLoader extends URLClassLoader {
+	private final boolean debugEnabled;
 	// TODO get this from maven config
 	public static final File WEBAPP_DIR = new File("src/main/webapp");
 
-	public WebAppClassLoader(URL[] urls, ClassLoader parent) {
+	public WebAppClassLoader(URL[] urls, ClassLoader parent, boolean debugEnabled) {
 		super(urls, parent);
 
+		this.debugEnabled = debugEnabled;
 		try {
 			// make sure the folder exists before adding it
 			STJSTestDriverRunner.targetDirectory.mkdirs();
@@ -71,6 +73,9 @@ public class WebAppClassLoader extends URLClassLoader {
 
 	@Override
 	protected void addURL(URL url) {
+		if (debugEnabled) {
+			System.out.println("Added to test CLASSPATH: " + url);
+		}
 		super.addURL(url);
 	}
 
