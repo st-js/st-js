@@ -20,7 +20,7 @@
 	}
 
 	function log(s){
-		logDiv.innerHTML += new Date().toLocaleTimeString() + " " + s + "<br>";
+		logDiv.innerHTML += "<span class='time'>" + new Date().toLocaleTimeString() + "</span> " + s + "<br>";
 	}
 	function retrieve() {
 		var xmlhttp = new XMLHttpRequest();
@@ -33,7 +33,7 @@
 						if (response.src != null && response.src != lastTestSrc) {
 							testId = response.testId;
 							count++;
-							log("Executing:" + response.src);
+							log("<b>" + response.className + "</b>." + response.methodName);
 							status(STATE.TESTING);
 							document.getElementById("iframe").src = response.src;
 							lastTestSrc = response.src;
@@ -66,7 +66,7 @@
 			console.error(ex);
 			//console.error(stacktrace());
 		}
-		log("Result:" + ex);
+		log("" + ex);
 		var xmlhttp = new XMLHttpRequest();
 		try {
 			var result = ex.message || ex;
@@ -99,6 +99,12 @@
 		float:left;
 		width:400px;
 		padding-left: 20px;
+		font-size: .8em;
+		height: 90%;
+		overflow-y: auto;
+	}
+	.time {
+		color:lightgray;
 	}
 </style>
 </head>

@@ -139,14 +139,14 @@ public class STJSTestServer {
 		long id = parseLong(params.get("id"), -1);
 		long testId = parseLong(params.get("testId"), -1);
 
-		if ((id < 0) || (testId < 0)) {
+		if (id < 0 || testId < 0) {
 			System.err.println("Test id or browser id missing");
 			return;
 		}
 
 		BrowserConnection b = browserConnections.get(id);
 		if (b != null) {
-			if ((testId == lastTestId) && (results != null)) {
+			if (testId == lastTestId && results != null) {
 				results.addResult(b.buildResult(params.get("result"), params.get("location")));
 			}
 		}
@@ -195,10 +195,12 @@ public class STJSTestServer {
 		StringBuilder jsonResponse = new StringBuilder();
 		jsonResponse.append("{");
 		jsonResponse.append("id:").append(id);
-		if ((testFile != null) && !browserWithCurrentTest.contains(id)) {
+		if (testFile != null && !browserWithCurrentTest.contains(id)) {
 			jsonResponse.append(",src:").append("'").append(BROWSER_TEST_URI).append("?test=").append(lastTestId)
 					.append("'");
 			jsonResponse.append(",testId:").append(lastTestId);
+			jsonResponse.append(",className:'").append(results.getTestClassName()).append("'");
+			jsonResponse.append(",methodName:'").append(results.getTestMethodName()).append("'");
 			browserWithCurrentTest.add(id);
 		}
 		jsonResponse.append("}");
@@ -237,16 +239,17 @@ public class STJSTestServer {
 		return classLoader;
 	}
 
-	public TestResultCollection test(File srcFile) throws InterruptedException {
+	public TestResultCollection test(File srcFile, String testClassName, String testMethodName)
+			throws InterruptedException {
 		int testBrowsers;
 		synchronized (this) {
 			lastTestId++;
 			testFile = srcFile;
-			results = new TestResultCollection();
+			results = new TestResultCollection(testClassName, testMethodName);
 			browserWithCurrentTest = new HashSet<Long>();
 			testBrowsers = browserConnections.size();
 		}
-		long endTime = System.currentTimeMillis() + (testTimeout * 1000);
+		long endTime = System.currentTimeMillis() + testTimeout * 1000;
 
 		synchronized (results) {
 			while (results.size() != testBrowsers) {

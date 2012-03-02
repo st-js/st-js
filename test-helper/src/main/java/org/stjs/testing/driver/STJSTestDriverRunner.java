@@ -171,7 +171,8 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 						Files.copy(htmlFile, System.out);
 						System.out.flush();
 					}
-					TestResultCollection response = serverSession.getServer().test(htmlFile);
+					TestResultCollection response = serverSession.getServer().test(htmlFile, testedClassName,
+							method.getName());
 					if (!response.isOk()) {
 						// take the first wrong result
 						throw response.buildException(getTestClass().getJavaClass().getName(), method.getName());

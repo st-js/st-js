@@ -20,6 +20,13 @@ import java.util.List;
 
 public class TestResultCollection {
 	private final List<TestResult> results = new ArrayList<TestResult>();
+	private final String testClassName;
+	private final String testMethodName;
+
+	public TestResultCollection(String testClassName, String testMethodName) {
+		this.testClassName = testClassName;
+		this.testMethodName = testMethodName;
+	}
 
 	public synchronized void addResult(TestResult result) {
 		results.add(result);
@@ -56,6 +63,14 @@ public class TestResultCollection {
 			}
 		}
 		return null;
+	}
+
+	public String getTestClassName() {
+		return testClassName;
+	}
+
+	public String getTestMethodName() {
+		return testMethodName;
 	}
 
 }
