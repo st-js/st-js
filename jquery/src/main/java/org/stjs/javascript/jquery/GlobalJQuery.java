@@ -73,6 +73,14 @@ abstract public class GlobalJQuery {
 
 	abstract public <K extends String, V> Map<K, V> extend(Map<?, ?> target, Map<?, ?>... objects);
 
+	abstract public <T> T extend(T target, T src);
+
+	abstract public <T> T extend(T target, T src1, T... extraSrc);
+
+	abstract public <T> T extend(boolean deep, T target, T src);
+
+	abstract public <T> T extend(boolean deep, T target, T src1, T... extraSrc);
+
 	abstract public <K extends String, V> Map<K, V> extend(boolean deep, Map<K, V> target, Map<K, V>... objects);
 
 	abstract public <T> T parseJSON(String message);
