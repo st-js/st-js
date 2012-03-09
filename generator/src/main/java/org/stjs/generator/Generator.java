@@ -209,7 +209,8 @@ public class Generator {
 				}
 			}, outputFile);
 		} catch (IOException e) {
-			throw new RuntimeException("Could not copy the " + STJS_FILE + " file to the folder " + folder, e);
+			throw new RuntimeException("Could not copy the " + STJS_FILE + " file to the folder " + folder + ":"
+					+ e.getMessage(), e);
 		} finally {
 			try {
 				stjs.close();
