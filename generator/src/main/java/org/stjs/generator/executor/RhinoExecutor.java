@@ -20,11 +20,14 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Collection;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+
+import com.google.common.io.Closeables;
 
 public class RhinoExecutor {
 	private Object addScript(ScriptEngine engine, File scriptFile) throws ScriptException {
@@ -48,15 +51,22 @@ public class RhinoExecutor {
 	public ExecutionResult run(Collection<File> srcFiles, boolean mainClassDisabled) throws ScriptException {
 		ScriptEngineManager factory = new ScriptEngineManager();
 		ScriptEngine engine = factory.getEngineByName("JavaScript");
-		engine.eval(new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream("stjs.js")));
-		if (mainClassDisabled) {
-			engine.eval("stjs.mainCallDisabled=true;");
+		Reader reader = null;
+		try {
+			reader = new InputStreamReader(Thread.currentThread().getContextClassLoader()
+					.getResourceAsStream("stjs.js"));
+			engine.eval(reader);
+			if (mainClassDisabled) {
+				engine.eval("stjs.mainCallDisabled=true;");
+			}
+			Object result = null;
+			for (File srcFile : srcFiles) {
+				// keep the result of last evaluation
+				result = addScript(engine, srcFile);
+			}
+			return new ExecutionResult(result, null, null, 0);
+		} finally {
+			Closeables.closeQuietly(reader);
 		}
-		Object result = null;
-		for (File srcFile : srcFiles) {
-			// keep the result of last evaluation
-			result = addScript(engine, srcFile);
-		}
-		return new ExecutionResult(result, null, null, 0);
 	}
 }

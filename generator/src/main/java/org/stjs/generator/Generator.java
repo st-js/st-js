@@ -36,6 +36,7 @@ import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.visitor.SetParentVisitor;
 import org.stjs.generator.writer.JavascriptWriterVisitor;
 
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
 
@@ -177,14 +178,7 @@ public class Generator {
 		} catch (ParseException e) {
 			throw new RuntimeException(e);
 		} finally {
-			try {
-				if (in != null) {
-					in.close();
-				}
-			} catch (IOException e) {
-				// silent
-			}
-
+			Closeables.closeQuietly(in);
 		}
 		return cu;
 	}
@@ -212,11 +206,7 @@ public class Generator {
 			throw new RuntimeException("Could not copy the " + STJS_FILE + " file to the folder " + folder + ":"
 					+ e.getMessage(), e);
 		} finally {
-			try {
-				stjs.close();
-			} catch (IOException e) {
-				// silent
-			}
+			Closeables.closeQuietly(stjs);
 		}
 	}
 

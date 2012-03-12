@@ -28,6 +28,7 @@ import java.nio.charset.Charset;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
+import com.google.common.io.Closeables;
 import com.sun.net.httpserver.HttpExchange;
 
 /**
@@ -72,7 +73,7 @@ public class StreamUtils {
 			}
 			return n;
 		} finally {
-			is.close();
+			Closeables.closeQuietly(is);
 		}
 	}
 
