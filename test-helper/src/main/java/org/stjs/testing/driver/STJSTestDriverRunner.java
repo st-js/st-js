@@ -126,7 +126,8 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 					}
 
 					Set<URI> jsFiles = new LinkedHashSet<URI>();
-					for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies()) {
+					for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(config
+							.getClassLoader())) {
 						for (URI file : dep.getJavascriptFiles()) {
 							jsFiles.add(file);
 						}

@@ -16,6 +16,8 @@
 package org.stjs.generator;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -42,13 +44,14 @@ public class DependencyCollection {
 		this.roots = ImmutableList.of(root);
 	}
 
-	public List<ClassWithJavascript> orderAllDependencies() {
+	public List<ClassWithJavascript> orderAllDependencies(ClassLoader classLoader) {
 		List<ClassWithJavascript> deps = new ArrayList<ClassWithJavascript>();
 		Set<ClassWithJavascript> visited = new HashSet<ClassWithJavascript>();
 		for (ClassWithJavascript root : roots) {
 			visit(visited, new LinkedHashSet<ClassWithJavascript>(), deps, root);
 		}
 
+		Collections.sort(deps, new ClassWithJavascriptComparator(classLoader));
 		return deps;
 	}
 
@@ -75,5 +78,88 @@ public class DependencyCollection {
 			deps.add(cj);
 
 		}
+	}
+
+	public static Comparator<Class<?>> dependencyComparator = new Comparator<Class<?>>() {
+
+		/**
+		 * -1: if "b" or any child type of "b" (at any level) extends from "a" or any of "a"'s child type <br>
+		 * 1: the other way around<br>
+		 * 0: if none of the cases
+		 * 
+		 * @param a
+		 * @param b
+		 * @return
+		 * @throws if
+		 *             there is a situation where the method cannot decide weather it should return -1 or 1
+		 */
+		@Override
+		public int compare(Class<?> a, Class<?> b) {
+			return compare(a, b, true);
+		}
+
+		private int compare(Class<?> a, Class<?> b, boolean checkInverse) {
+			if (a == b) {
+				return 0;
+			}
+			int direct = 0;
+			if (isAssignableFromTypeOrChildTypes(a, b)) {
+				direct = -1;
+			} else {
+				for (Class<?> child : a.getDeclaredClasses()) {
+					if (isAssignableFromTypeOrChildTypes(child, b)) {
+						direct = -1;
+						break;
+					}
+				}
+			}
+			if (!checkInverse) {
+				return direct;
+			}
+			int inverse = compare(b, a, false);
+
+			if (direct == -1 && inverse == -1) {
+				throw new IllegalArgumentException("Cannot decide the dependency order between the types:" + a
+						+ " and " + b);
+			}
+			if (direct != 0) {
+				return direct;
+			}
+			return -inverse;
+		}
+
+		private boolean isAssignableFromTypeOrChildTypes(Class<?> a, Class<?> b) {
+			if (a.isAssignableFrom(b)) {
+				return true;
+			}
+			for (Class<?> child : b.getDeclaredClasses()) {
+				if (isAssignableFromTypeOrChildTypes(a, child)) {
+					return true;
+				}
+			}
+			return false;
+
+		}
+	};
+
+	public static class ClassWithJavascriptComparator implements Comparator<ClassWithJavascript> {
+		private final ClassLoader classLoader;
+
+		public ClassWithJavascriptComparator(ClassLoader classLoader) {
+			this.classLoader = classLoader;
+		}
+
+		@Override
+		public int compare(ClassWithJavascript o1, ClassWithJavascript o2) {
+
+			try {
+				Class<?> c1 = classLoader.loadClass(o1.getClassName());
+				Class<?> c2 = classLoader.loadClass(o2.getClassName());
+				return dependencyComparator.compare(c1, c2);
+			} catch (ClassNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
 	}
 }
