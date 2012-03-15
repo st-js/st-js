@@ -17,6 +17,7 @@ package org.stjs.generator;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -45,7 +46,7 @@ public class DependencyCollection {
 		List<ClassWithJavascript> deps = new ArrayList<ClassWithJavascript>();
 		Set<ClassWithJavascript> visited = new HashSet<ClassWithJavascript>();
 		for (ClassWithJavascript root : roots) {
-			visit(visited, new HashSet<ClassWithJavascript>(), deps, root);
+			visit(visited, new LinkedHashSet<ClassWithJavascript>(), deps, root);
 		}
 
 		return deps;
@@ -58,6 +59,8 @@ public class DependencyCollection {
 			ClassWithJavascript cj) {
 		if (path.contains(cj)) {
 			// cyclic dependency here - XXX how to solve it
+			System.out.println("WARN: cyclic dependency " + cj + " already visited in path:" + path);
+			System.out.println("VISITED:" + deps);
 			return;
 		}
 		if (!visited.contains(cj)) {

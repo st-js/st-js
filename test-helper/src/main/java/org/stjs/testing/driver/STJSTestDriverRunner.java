@@ -35,7 +35,6 @@ import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConstants;
-import org.stjs.generator.utils.ClassUtils;
 import org.stjs.javascript.annotation.STJSBridge;
 import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.Scripts;
@@ -102,9 +101,6 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 			@Override
 			public void evaluate() throws Throwable {
 
-				System.out.println("STREAM:"
-						+ config.getClassLoader().getResourceAsStream(
-								ClassUtils.getPropertiesFileName(getTestClass().getJavaClass().getName())));
 				ClassWithJavascript stjsClass = new Generator().getExistingStjsClass(config.getClassLoader(),
 						getTestClass().getJavaClass());
 

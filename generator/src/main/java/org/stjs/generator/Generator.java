@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.stjs.generator.scope.CompilationUnitScope;
 import org.stjs.generator.scope.ScopeBuilder;
@@ -119,7 +121,9 @@ public class Generator {
 
 		// write properties
 		STJSClass stjsClass = new STJSClass(dependencyResolver, targetFolder, className);
-		stjsClass.setDependencies(classLoaderWrapper.getResolvedClasses());
+		Set<String> resolvedClasses = new LinkedHashSet<String>(classLoaderWrapper.getResolvedClasses());
+		resolvedClasses.remove(className);
+		stjsClass.setDependencies(resolvedClasses);
 		stjsClass.setGeneratedJavascriptFile(relative(generationFolder, className));
 		stjsClass.store();
 		return stjsClass;

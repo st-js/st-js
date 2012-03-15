@@ -21,9 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -89,7 +89,6 @@ public class STJSClass implements ClassWithJavascript {
 
 		InputStream inputStream = null;
 		try {
-			check(classLoader, ClassUtils.getPropertiesFileName(className));
 			inputStream = classLoader.getResourceAsStream(ClassUtils.getPropertiesFileName(className));
 			if (inputStream != null) {
 				properties.load(inputStream);
@@ -123,18 +122,6 @@ public class STJSClass implements ClassWithJavascript {
 		}
 	}
 
-	private InputStream check(ClassLoader cl, String className) {
-		URL url = cl.getResource(className);
-		try {
-			return url != null ? url.openStream() : null;
-		} catch (IOException e) {
-			System.out.println(e);
-			e.printStackTrace();
-			return null;
-		}
-
-	}
-
 	private File getStjsPropertiesFile() {
 		File propFile = new File(targetFolder, ClassUtils.getPropertiesFileName(className));
 		propFile.getParentFile().mkdirs();
@@ -162,8 +149,8 @@ public class STJSClass implements ClassWithJavascript {
 		}
 	}
 
-	public void setDependencies(List<String> dependencies) {
-		this.dependencies = dependencies;
+	public void setDependencies(Collection<String> dependencies) {
+		this.dependencies = new ArrayList<String>(dependencies);
 		if (dependencies != null) {
 			properties.put(DEPENDENCIES_PROP, dependencies.toString());
 		} else {
