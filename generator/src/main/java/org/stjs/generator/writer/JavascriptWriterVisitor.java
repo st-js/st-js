@@ -377,7 +377,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(VariableDeclaratorId n, GenerationContext context) {
-		if ((parent(n) instanceof Parameter) && n.getName().equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
+		if (parent(n) instanceof Parameter && n.getName().equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
 			// add an "_" for the arguments parameter to no override to arguments one.
 			printer.print("_");
 		}
@@ -596,7 +596,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 		TypeWrapper clazz = resolvedType(n.getType());
 
-		if ((n.getAnonymousClassBody() != null) && (n.getAnonymousClassBody().size() >= 1)) {
+		if (n.getAnonymousClassBody() != null && n.getAnonymousClassBody().size() >= 1) {
 			// special construction for inline function definition
 			if (ClassUtils.isJavascriptFunction(clazz)) {
 				MethodDeclaration method = getMethodDeclaration(n);
@@ -626,7 +626,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 		}
 
-		if ((clazz != null) && (clazz instanceof ClassWrapper) && ClassUtils.isSyntheticType(clazz)) {
+		if (clazz != null && clazz instanceof ClassWrapper && ClassUtils.isSyntheticType(clazz)) {
 			// this is a call to an mock type
 			printer.print("{}");
 			return;
@@ -649,7 +649,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				resolvedType(parent(n)), false);
 	}
 
-	private void addCallToSuper(ClassScope classScope, GenerationContext context, Collection<Expression> args) {
+	private void addCallToSuper(ClassScope classScope, GenerationContext context, Collection<Expression> args,
+			boolean apply) {
 		PreConditions.checkNotNull(classScope);
 
 		Option<ClassWrapper> superClass = classScope.getClazz().getSuperclass();
@@ -664,8 +665,13 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				// avoid useless call to super() when the super class is Object
 				return;
 			}
-			printer.print(names.getTypeName(superClass.getOrThrow())).print(".call");
-			printArguments(Collections.singleton("this"), args, Collections.<String> emptyList(), context);
+			printer.print(names.getTypeName(superClass.getOrThrow()));
+			if (apply) {
+				printer.print(".apply(this, arguments)");
+			} else {
+				printer.print(".call");
+				printArguments(Collections.singleton("this"), args, Collections.<String> emptyList(), context);
+			}
 			printer.print(";");
 
 		}
@@ -676,7 +682,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printComments(n, context);
 		Option<ClassWrapper> superClass = scope(n).closest(ClassScope.class).getClazz().getSuperclass();
 		if (superClass.isDefined() && !ClassUtils.isSyntheticType(superClass.getOrThrow())) {
-			if ((n.getBlock().getStmts() != null) && (n.getBlock().getStmts().size() > 0)) {
+			if (n.getBlock().getStmts() != null && n.getBlock().getStmts().size() > 0) {
 				Statement firstStatement = n.getBlock().getStmts().get(0);
 				if (!(firstStatement instanceof ExplicitConstructorInvocationStmt)) {
 					// generate possibly missing super() call
@@ -746,6 +752,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printComments(n, context);
 
 		ClassScope scope = (ClassScope) scope(n);
+		boolean inlineType = GeneratorConstants.SPECIAL_INLINE_TYPE.equals(n.getName());
+
 		if (resolvedType(n) == null) {
 			// for anonymous object creation the type is set already
 			resolvedType(n, scope.resolveType(n.getName()).getType());
@@ -761,7 +769,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			}
 		}
 		String className;
-		if (GeneratorConstants.SPECIAL_INLINE_TYPE.equals(n.getName())) {
+		if (inlineType) {
 			printer.print("var ");
 			className = n.getName();
 		} else {
@@ -780,7 +788,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.print(";");
 			} else {
 				printer.print("function(){");
-				addCallToSuper(scope, context, Collections.<Expression> emptyList());
+				addCallToSuper(scope, context, Collections.<Expression> emptyList(), inlineType);
 				printer.printLn("};");
 			}
 
@@ -864,7 +872,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printer.print(GeneratorConstants.TYPE_DESCRIPTION_PROPERTY).print("=");
 
 		boolean generateSuperClass = false;
-		if ((n.getExtends() != null) && (n.getExtends().size() > 0)) {
+		if (n.getExtends() != null && n.getExtends().size() > 0) {
 			TypeWrapper superClass = resolvedType(n.getExtends().get(0));
 			if (!ClassUtils.isSyntheticType(superClass)) {
 				generateSuperClass = true;
@@ -1261,14 +1269,14 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(FieldAccessExpr n, GenerationContext context) {
-		boolean withScopeSuper = (n.getScope() != null) && n.getScope().toString().equals(GeneratorConstants.SUPER);
+		boolean withScopeSuper = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.SUPER);
 		if (!withScopeSuper) {
 			n.getScope().accept(this, context);
 		}
 		TypeWrapper scopeType = resolvedType(n.getScope());
 		FieldWrapper field = (FieldWrapper) resolvedVariable(n);
-		boolean skipType = (field != null) && Modifier.isStatic(field.getModifiers()) && isGlobal(scopeType);
-		if ((scopeType == null) || !skipType) {
+		boolean skipType = field != null && Modifier.isStatic(field.getModifiers()) && isGlobal(scopeType);
+		if (scopeType == null || !skipType) {
 			if (withScopeSuper) {
 				// super.field does not make sense, so convert it to this
 				printer.print("this");
@@ -1289,9 +1297,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printArguments(n.getArgs(), context);
 				return;
 			}
-			boolean withScopeThis = (n.getScope() != null) && n.getScope().toString().equals(GeneratorConstants.THIS);
-			boolean withScopeSuper = (n.getScope() != null) && n.getScope().toString().equals(GeneratorConstants.SUPER);
-			if ((n.getScope() != null) && !withScopeSuper && !withScopeThis) {
+			boolean withScopeThis = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.THIS);
+			boolean withScopeSuper = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.SUPER);
+			if (n.getScope() != null && !withScopeSuper && !withScopeThis) {
 				n.getScope().accept(this, context);
 				printer.print(".");
 			} else if (!withScopeSuper) {
@@ -1332,7 +1340,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		Variable var = resolvedVariable(n);
 		if (var != null) {
 			if (var instanceof FieldWrapper) {
-				FieldWrapper field = ((FieldWrapper) var);
+				FieldWrapper field = (FieldWrapper) var;
 				if (Modifier.isStatic(field.getModifiers())) {
 					printStaticFieldOrMethodAccessPrefix(field.getOwnerType(), true);
 				} else if (!isInlineObjectCreationChild(n, 3)) {
@@ -1432,7 +1440,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 
 		ClassScope classScope = scope(n).closest(ClassScope.class);
-		addCallToSuper(classScope, context, n.getArgs());
+		addCallToSuper(classScope, context, n.getArgs(), false);
 	}
 
 	@Override
@@ -1488,7 +1496,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 					checkAssignStatement(s, context);
 				}
 				s.accept(this, context);
-				if (isInlineObjectCreationChild(s, 1) && (i < (n.getStmts().size() - 1)) && (n.getStmts().size() > 1)) {
+				if (isInlineObjectCreationChild(s, 1) && i < n.getStmts().size() - 1 && n.getStmts().size() > 1) {
 					printer.print(",");
 				}
 				printer.printLn();
@@ -1542,7 +1550,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			TypeWrapper selectorType = resolvedType(((SwitchStmt) parent(n)).getSelector());
 			PreConditions.checkState(selectorType != null, "The selector of the switch %s should have a type",
 					parent(n));
-			if ((selectorType instanceof ClassWrapper) && ((ClassWrapper) selectorType).getClazz().isEnum()) {
+			if (selectorType instanceof ClassWrapper && ((ClassWrapper) selectorType).getClazz().isEnum()) {
 				printer.print(names.getTypeName(selectorType));
 				printer.print(".");
 			}

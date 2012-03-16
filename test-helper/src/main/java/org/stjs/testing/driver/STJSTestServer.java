@@ -216,6 +216,10 @@ public class STJSTestServer {
 	private synchronized void handleBrowserTest(Map<String, String> params, HttpExchange exchange) throws IOException,
 			URISyntaxException {
 		addNoCache(exchange);
+		if (testFile == null) {
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
+			return;
+		}
 		if (!StreamUtils.copy(classLoader, "/" + testFile.getName(), exchange)) {
 			System.err.println("/" + testFile.getName() + " was not found in classpath");
 		}

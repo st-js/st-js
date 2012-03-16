@@ -40,6 +40,7 @@ import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.Scripts;
 
 import com.google.common.base.Strings;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 
 /**
@@ -107,11 +108,12 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 				final HTMLFixture htmlFixture = getTestClass().getJavaClass().getAnnotation(HTMLFixture.class);
 				final Scripts addedScripts = getTestClass().getJavaClass().getAnnotation(Scripts.class);
 				File htmlFile = null;
+				FileWriter writer = null;
 				try {
 					targetDirectory.mkdirs();
 					htmlFile = new File(targetDirectory, getTestClass().getJavaClass().getName() + "-"
 							+ method.getName() + ".html");
-					FileWriter writer = new FileWriter(htmlFile);
+					writer = new FileWriter(htmlFile);
 
 					writer.append("<html>");
 					writer.append("<head>");
@@ -182,9 +184,10 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				} finally {
-					// if (htmlFile != null) {
-					// htmlFile.delete();
-					// }
+					Closeables.closeQuietly(writer);
+					if (htmlFile != null) {
+						htmlFile.delete();
+					}
 				}
 			}
 		};

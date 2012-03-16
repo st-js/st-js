@@ -16,7 +16,6 @@
 package org.stjs.generator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -51,8 +50,26 @@ public class DependencyCollection {
 			visit(visited, new LinkedHashSet<ClassWithJavascript>(), deps, root);
 		}
 
-		Collections.sort(deps, new ClassWithJavascriptComparator(classLoader));
-		return deps;
+		Comparator<ClassWithJavascript> comparator = new ClassWithJavascriptComparator(classLoader);
+		List<ClassWithJavascript> orderedDeps = new ArrayList<ClassWithJavascript>();
+		while (deps.size() > 0) {
+			// add to orderedDeps only the classes that have no "extends" dependency to any of the other from the
+			// remaining list.
+			// i.e. the result of the comparison is <= 0
+			outer: for (int i = 0; i < deps.size(); ++i) {
+				for (int j = 0; j < deps.size(); ++j) {
+					if (i != j) {
+						int cmp = comparator.compare(deps.get(i), deps.get(j));
+						if (cmp > 0) {
+							continue outer;
+						}
+					}
+				}
+				orderedDeps.add(deps.remove(i));
+			}
+		}
+
+		return orderedDeps;
 	}
 
 	/**
@@ -61,9 +78,7 @@ public class DependencyCollection {
 	private void visit(Set<ClassWithJavascript> visited, Set<ClassWithJavascript> path, List<ClassWithJavascript> deps,
 			ClassWithJavascript cj) {
 		if (path.contains(cj)) {
-			// cyclic dependency here - XXX how to solve it
-			System.out.println("WARN: cyclic dependency " + cj + " already visited in path:" + path);
-			System.out.println("VISITED:" + deps);
+			// cyclic dependency here
 			return;
 		}
 		if (!visited.contains(cj)) {
