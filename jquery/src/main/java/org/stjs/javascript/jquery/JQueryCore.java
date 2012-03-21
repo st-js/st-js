@@ -27,8 +27,8 @@ import org.stjs.javascript.functions.Function2;
 import org.stjs.javascript.utils.NameValue;
 
 /**
- * jquery interface for all jquery method + all used plugins in a web app. it can be mocked easily for testing purposes.
- * Compatible with jquery 1.6
+ * jquery interface for all jquery method + all used plugins in a web app. it can be mocked easily for testing purposes. Compatible with jquery
+ * 1.6
  */
 @SyntheticType
 public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
@@ -50,8 +50,7 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 	/************* effects ***************/
 	public FullJQuery animate(Map<String, String> properties);
 
-	public FullJQuery animate(Map<String, String> properties, Object duration, String easing,
-			Callback1<Element> complete);
+	public FullJQuery animate(Map<String, String> properties, Object duration, String easing, Callback1<Element> complete);
 
 	public FullJQuery animate(Map<String, String> properties, AnimateOptions options);
 
@@ -207,6 +206,10 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 	public int outerWidth(boolean withMargin);
 
 	public Position offset();
+
+	public FullJQuery offset(Position placement);
+
+	public FullJQuery offset(Function2<Integer, Position, Position> offsetFunction);
 
 	public Position position();
 
