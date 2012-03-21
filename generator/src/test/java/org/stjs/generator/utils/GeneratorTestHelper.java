@@ -131,8 +131,9 @@ public class GeneratorTestHelper {
 		try {
 			String content = Files.toString(jsFile, Charset.defaultCharset());
 			List<File> javascriptFiles = new ArrayList<File>();
-			for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(Thread
-					.currentThread().getContextClassLoader())) {
+			List<ClassWithJavascript> allDeps = new DependencyCollection(stjsClass).orderAllDependencies(Thread
+					.currentThread().getContextClassLoader());
+			for (ClassWithJavascript dep : allDeps) {
 				for (URI js : dep.getJavascriptFiles()) {
 					javascriptFiles.add(new File(generationPath, js.getPath()));
 				}

@@ -66,6 +66,7 @@ public class DependencyCollection {
 					}
 				}
 				orderedDeps.add(deps.remove(i));
+				i--;
 			}
 		}
 
