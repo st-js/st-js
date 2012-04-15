@@ -809,7 +809,25 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printMembers(n.getMembers(), context);
 		}
 		printTypeDescription(n, context);
+		// print static initializers at the end to all the full declaration of the prototype
+		printStaticInitializers(n, context);
 		printMainMethodCall(n);
+	}
+
+	private void printStaticInitializers(ClassOrInterfaceDeclaration n, GenerationContext context) {
+		if (n.getMembers() == null) {
+			return;
+		}
+		for (BodyDeclaration decl : n.getMembers()) {
+			if (decl instanceof InitializerDeclaration && ((InitializerDeclaration) decl).isStatic()) {
+				printStaticInitializer((InitializerDeclaration) decl, context);
+			}
+		}
+
+	}
+
+	private void printStaticInitializer(InitializerDeclaration n, GenerationContext context) {
+		n.getBlock().accept(this, context);
 	}
 
 	/**
@@ -991,9 +1009,13 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(InitializerDeclaration n, GenerationContext context) {
-		// should find a way to implement these blocks. For the moment forbid them
-		throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
-				"Initializing blocks are not supported by Javascript");
+		if (!n.isStatic()) {
+			// should find a way to implement these blocks. For the moment forbid them
+			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+					"Initializing blocks are not supported by Javascript");
+		}
+		// the static initializers are treated inside the class declaration to be able to execute them at the end of
+		// the definition of the type
 	}
 
 	@Override

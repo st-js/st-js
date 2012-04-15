@@ -2,9 +2,11 @@ package org.stjs.generator.writer.statements;
 
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
+import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.stjs.generator.JavascriptGenerationException;
 
 public class StatementsGeneratorTest {
 	@Test
@@ -75,5 +77,18 @@ public class StatementsGeneratorTest {
 	@Test
 	public void testForEachMapBlock() {
 		assertCodeDoesNotContain(Statements13.class, "hasOwnProperty");
+	}
+
+	@Test
+	public void testStaticInitializer() {
+		assertCodeContains(Statements14.class, "{" + //
+				"Statements14.instance = new Statements14();" + //
+				"var n = Statements14.instance.method();" + //
+				"}");
+	}
+
+	@Test(expected = JavascriptGenerationException.class)
+	public void testInstanceInitializer() {
+		generate(Statements15.class);
 	}
 }
