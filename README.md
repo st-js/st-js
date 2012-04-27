@@ -17,23 +17,23 @@ An example
 ==========
 Here is an example of a code written in Java and the corresponding generated Javascript. The Java code may seem a bit longer and possibly more complicated at a first glance, but it provides you with all the advantages of a typed language, while preserving as much as possible the resemblance to the javascript style of programming. The visual resemblance is crucial here since it allows for faster learning and easier transition. This visual resemblance maintained throughout the library design
 
-```java
-$("#form").submit(new EventHandler() {
-  public void onEvent(Event ev, final HTMLElement THIS) {
-    StockData stockData = that.updateStock($("#newStock").val());
-    $(that.row(stockData)).appendTo("table tbody");
-    that.stocks.push(stockData.stock);
-    }
-  });
-  
-$("#form").submit(function(ev) {
 
-  var stockData = that.updateStock($("#newStock").val());
-  $(that.row(stockData)).appendTo("table tbody");
-  that.stocks.push(stockData.stock);
+	$("#form").submit(new EventHandler() {
+	  public void onEvent(Event ev, final HTMLElement THIS) {
+	    StockData stockData = that.updateStock($("#newStock").val());
+	    $(that.row(stockData)).appendTo("table tbody");
+	    that.stocks.push(stockData.stock);
+	    }
+	  });
+	  
+	$("#form").submit(function(ev) {
 
-});
-```    
+	  var stockData = that.updateStock($("#newStock").val());
+	  $(that.row(stockData)).appendTo("table tbody");
+	  that.stocks.push(stockData.stock);
+
+	});
+   
 How does it work
 ================
 STJS does not try to hide from you how Javascript works. STJS addresses Java developers that are comfortable with a regular Javascript way of building application usually using a component library (jQuery or others). We don’t believe in generated Javascript that is unreadable and impossible to debug.
@@ -56,40 +56,41 @@ Map / Object
 In Javascript as an object may have dynamic properties it can be used also as a map.
 
 In Java we’d prefer the typed version.
-```java
-StockData stock = new StockData() {{
-   last=10.0;
-   close = 2.0;
-   stock = "ABC";
-}};
-var stock = {
-  “last”:10,
-  “close” : 2,
-  “stock”:”ABC”
-};
-```
+
+	StockData stock = new StockData() {{
+	   last=10.0;
+	   close = 2.0;
+	   stock = "ABC";
+	}};
+	var stock = {
+	  “last”:10,
+	  “close” : 2,
+	  “stock”:”ABC”
+	};
+
 But if you prefer the dynamic (map-like version) you can do, we created a class Map that provides the same methods and access mode as the Javascript counterpart.
-```java
-Map<String, Object> stock = $map(
-  "last", 2,
-  "close", 3,
-  "stock", "ABC"
-);
-var stock = {
-  “last”:10,
-  “close” : 2,
-  “stock”:”ABC”
-};
-```
+
+	Map<String, Object> stock = $map(
+	  "last", 2,
+	  "close", 3,
+	  "stock", "ABC"
+	);
+	var stock = {
+	  “last”:10,
+	  “close” : 2,
+	  “stock”:”ABC”
+	};
+
 Both codes will generate the same Javascript! 
 To access a map element:
-```java
-Double value = map.$get("key");
-map.$set("key", 4);
-map.$delete("key");
-var value = map["key"];
-map["key"] = 4;
-delete map["key"];
+
+	Double value = map.$get("key");
+	map.$set("key", 4);
+	map.$delete("key");
+	var value = map["key"];
+	map["key"] = 4;
+	delete map["key"];
+
 Array
 -----
 
