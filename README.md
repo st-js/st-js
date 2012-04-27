@@ -58,16 +58,16 @@ In Javascript as an object may have dynamic properties it can be used also as a 
 In Java we’d prefer the typed version.
 ```java
 StockData stock = new StockData() {{
-   last=10.0;
+   last = 10.0;
    close = 2.0;
    stock = "ABC";
 }};
 ```
 ```javascript
 var stock = {
-  “last”:10,
-  “close” : 2,
-  “stock”:”ABC”
+  "last":10,
+  "close":2,
+  "stock":"ABC"
 };
 ```
 But if you prefer the dynamic (map-like version) you can do, we created a class Map that provides the same methods and access mode as the Javascript counterpart.
@@ -80,9 +80,9 @@ Map<String, Object> stock = $map(
 ```
 ```javascript
 var stock = {
-  “last”:10,
-  “close” : 2,
-  “stock”:”ABC”
+  "last":10,
+  "close" : 2,
+  "stock":"ABC"
 };
 ```
 Both codes will generate the same Javascript! 
@@ -167,13 +167,13 @@ STJS comes with a "type-safe" JSON parser, that will use the type definition sto
 import static org.stjs.javascript.Global.stjs;
 
 public class Bean{
-public enum MyEnum {a,b,c};
+	public enum MyEnum {a,b,c};
 
-public Date date;
-public MyEnum enum;
+	public Date date;
+	public MyEnum enum;
 
-public void method(){
-}
+	public void method(){
+	}
 }
 
 ...
@@ -190,16 +190,12 @@ jQuery has an interesting plugin design: each plugin adds some methods to the jQ
 ```java
 public interface Accordion<FullJQuery extends JQueryCore<?>> {
 public FullJQuery accordion();
-
 public FullJQuery accordion(AccordionOptions<FullJQuery> options);
 ...
 ```
 To be able to use jQuery's methods chain (ex. $(".css").accordion().show()), all the plugin methods return a FullJQuery type the is received as generic parameter by the class. This type will give access to all the methods jQuery and the desired plugins offer. We propose already an interface that combine jQuery core and all the UI plugins: JQueryAndPlugins. This interface is used when you want to extend it with other plugins (use org.stjs.javascript.jquery.JQuery if you don't plan to other other jQuery plugins). But if you want to add your own plugin, create the plugin's interface (like Accordion) and create your own interface that will combine your plugin's interface and the JQueryAndPlugins interface.
 ```java
-public interface MyJQueryLib<FullJQuery extends MyJQueryLib<?>>
-extends MyPlugin<FullJQuery>,
-JQueryAndPlugins<FullJQuery>{
-}
+public interface MyJQueryLib<FullJQuery extends MyJQueryLib<?>> extends MyPlugin<FullJQuery>,JQueryAndPlugins<FullJQuery>{}
 ```
 Global Objects
 --------------
@@ -224,7 +220,7 @@ Modules
 STJS has mainly three modules each of which is used in different phases of your development. As you'll remark we used the property stjs.version to specify the version of STJS to use (the modules are released together).
 ```xml
 <properties>
-<stjs.version>1.1.4</stjs.version>
+	<stjs.version>1.1.4</stjs.version>
 </properties>
 ```
 The current STJS version is 1.2.0
