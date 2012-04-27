@@ -18,22 +18,22 @@ An example
 Here is an example of a code written in Java and the corresponding generated Javascript. The Java code may seem a bit longer and possibly more complicated at a first glance, but it provides you with all the advantages of a typed language, while preserving as much as possible the resemblance to the javascript style of programming. The visual resemblance is crucial here since it allows for faster learning and easier transition. This visual resemblance maintained throughout the library design
 
 ```java
-	$("#form").submit(new EventHandler() {
-	  public void onEvent(Event ev, final HTMLElement THIS) {
-	    StockData stockData = that.updateStock($("#newStock").val());
-	    $(that.row(stockData)).appendTo("table tbody");
-	    that.stocks.push(stockData.stock);
-	    }
-	  });
+$("#form").submit(new EventHandler() {
+  public void onEvent(Event ev, final HTMLElement THIS) {
+    StockData stockData = that.updateStock($("#newStock").val());
+    $(that.row(stockData)).appendTo("table tbody");
+    that.stocks.push(stockData.stock);
+    }
+  });
 ```
 
-	$("#form").submit(function(ev) {
-
-	  var stockData = that.updateStock($("#newStock").val());
-	  $(that.row(stockData)).appendTo("table tbody");
-	  that.stocks.push(stockData.stock);
-
-	});
+```javascript
+$("#form").submit(function(ev) {
+  var stockData = that.updateStock($("#newStock").val());
+  $(that.row(stockData)).appendTo("table tbody");
+  that.stocks.push(stockData.stock);
+});
+```
    
 How does it work
 ================
@@ -203,14 +203,14 @@ In Javascript several objects are accessible as global objects, like window, $ (
 
 A web page
 ==========
-
-    <head>
-      <script src="${pageContext.request.contextPath}/generated-js/stjs.js"
-          type="text/javascript"></script>
-      <script src="${pageContext.request.contextPath}/generated-js/StockApplication.js"
-          type="text/javascript"></script>
-    </head>
-
+```html
+<head>
+  <script src="${pageContext.request.contextPath}/generated-js/stjs.js"
+    type="text/javascript"></script>
+  <script src="${pageContext.request.contextPath}/generated-js/StockApplication.js"
+    type="text/javascript"></script>
+</head>
+```
 Modules
 =======
 STJS has mainly three modules each of which is used in different phases of your development. As you'll remark we used the property stjs.version to specify the version of STJS to use (the modules are released together).
@@ -226,31 +226,31 @@ The generator
 
 This is a maven plugin that takes the sources of your project that you indicate and generate the corresponding javascript files in the target folder
 
-
-	<plugin>
-	  <groupId>org.st-js</groupId>
-	  <artifactId>maven-plugin</artifactId>
-	  <version>${stjs.version}</version>
-	  <executions>
-	    <execution>
-	      <id>main</id>
-	      <goals>
-		<goal>generate</goal>
-	      </goals>
-	    </execution>
-	    <!-- if you use the test helper -->
-	    <execution>
-	      <id>test</id>
-	      <goals>
-		<goal>generate-test</goal>
-	      </goals>
-	    </execution>
-	  </executions>
-	  <configuration>
-	    <rootPackage>auto</rootPackage>
-	  </configuration>
-	</plugin>
-
+```xml
+<plugin>
+  <groupId>org.st-js</groupId>
+  <artifactId>maven-plugin</artifactId>
+  <version>${stjs.version}</version>
+  <executions>
+    <execution>
+      <id>main</id>
+      <goals>
+	<goal>generate</goal>
+      </goals>
+    </execution>
+    <!-- if you use the test helper -->
+    <execution>
+      <id>test</id>
+      <goals>
+	<goal>generate-test</goal>
+      </goals>
+    </execution>
+  </executions>
+  <configuration>
+    <rootPackage>auto</rootPackage>
+  </configuration>
+</plugin>
+```
 The Javascript library
 ----------------------
 
