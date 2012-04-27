@@ -121,22 +121,22 @@ The class inheritance is a common construction in Java, but less common in Javas
 Here is an example
 ```java
 public class Child extends Parent {
-public Child(String test) {
-	super(test);
-}
+	public Child(String test) {
+		super(test);
+	}
 
 
-public static int staticField = 1;
-public int instanceField = 2;
+	public static int staticField = 1;
+	public int instanceField = 2;
 
-@Override
-public void instanceMethod(String n) {
-	super.instanceMethod(n + "-");
-}
+	@Override
+	public void instanceMethod(String n) {
+		super.instanceMethod(n + "-");
+	}
 
-public static void staticMethod() {
-	staticField += 1;
-}
+	public static void staticMethod() {
+		staticField += 1;
+	}
 }
  ```
 ```javascript   
