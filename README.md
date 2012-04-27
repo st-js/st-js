@@ -17,7 +17,7 @@ An example
 ==========
 Here is an example of a code written in Java and the corresponding generated Javascript. The Java code may seem a bit longer and possibly more complicated at a first glance, but it provides you with all the advantages of a typed language, while preserving as much as possible the resemblance to the javascript style of programming. The visual resemblance is crucial here since it allows for faster learning and easier transition. This visual resemblance maintained throughout the library design
 
-
+```java
 	$("#form").submit(new EventHandler() {
 	  public void onEvent(Event ev, final HTMLElement THIS) {
 	    StockData stockData = that.updateStock($("#newStock").val());
@@ -25,7 +25,8 @@ Here is an example of a code written in Java and the corresponding generated Jav
 	    that.stocks.push(stockData.stock);
 	    }
 	  });
-	  
+```
+
 	$("#form").submit(function(ev) {
 
 	  var stockData = that.updateStock($("#newStock").val());
