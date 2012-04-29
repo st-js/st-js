@@ -110,6 +110,8 @@ import japa.parser.ast.type.VoidType;
 import japa.parser.ast.type.WildcardType;
 import japa.parser.ast.visitor.VoidVisitor;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -152,15 +154,16 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	private final NameProvider names;
 
-	JavascriptWriter printer = new JavascriptWriter();
+	JavascriptWriter printer;
 
 	private List<Comment> comments;
 
 	private int currentComment = 0;
 
-	public JavascriptWriterVisitor() {
+	public JavascriptWriterVisitor(boolean generateSourceMap) {
 		specialMethodHandlers = new SpecialMethodHandlers();
 		names = new DefaultNameProvider();
+		printer = new JavascriptWriter(generateSourceMap);
 	}
 
 	public String getGeneratedSource() {
@@ -179,6 +182,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				}
 			}
 		}
+		printer.addSourceMapURL(context);
 	}
 
 	@Override
@@ -284,11 +288,15 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(ForeachStmt n, GenerationContext context) {
+		printer.setSourceNode(n);
 		printer.print("for (");
 		n.getVariable().accept(this, context);
 		printer.print(" in ");
 		n.getIterable().accept(this, context);
 		printer.print(") ");
+
+		printer.addSouceMapping(context);
+
 		boolean hasBlockBody = n.getBody() instanceof BlockStmt;
 
 		// add braces when we have one line statement
@@ -308,9 +316,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(IfStmt n, GenerationContext context) {
+		printer.setSourceNode(n);
 		printer.print("if (");
 		n.getCondition().accept(this, context);
 		printer.print(") ");
+		printer.addSouceMapping(context);
 		n.getThenStmt().accept(this, context);
 		if (n.getElseStmt() != null) {
 			printer.print(" else ");
@@ -320,25 +330,31 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(WhileStmt n, GenerationContext context) {
+		printer.setSourceNode(n);
 		printer.print("while (");
 		n.getCondition().accept(this, context);
 		printer.print(") ");
+		printer.addSouceMapping(context);
 		n.getBody().accept(this, context);
 	}
 
 	@Override
 	public void visit(ContinueStmt n, GenerationContext context) {
+		printer.setSourceNode(n);
 		printer.print("continue");
 		if (n.getId() != null) {
 			printer.print(" ");
 			printer.print(n.getId());
 		}
 		printer.print(";");
+		printer.addSouceMapping(context);
 	}
 
 	@Override
 	public void visit(DoStmt n, GenerationContext context) {
+		printer.setSourceNode(n);
 		printer.print("do ");
+		printer.addSouceMapping(context);
 		n.getBody().accept(this, context);
 		printer.print(" while (");
 		n.getCondition().accept(this, context);
@@ -347,6 +363,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(ForStmt n, GenerationContext context) {
+		printer.setSourceNode(n);
 		printer.print("for (");
 		if (n.getInit() != null) {
 			for (Iterator<Expression> i = n.getInit().iterator(); i.hasNext();) {
@@ -372,6 +389,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			}
 		}
 		printer.print(") ");
+		printer.addSouceMapping(context);
 		n.getBody().accept(this, context);
 	}
 
@@ -1543,10 +1561,13 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(ExpressionStmt n, GenerationContext context) {
+		// the expression can be very long. have the marker on the start of the expression only
+		printer.setSourceNode(n);
 		n.getExpression().accept(this, context);
 		if (!isInlineObjectCreationChild(n, 1)) {
 			printer.print(";");
 		}
+		printer.addSouceMapping(context);
 	}
 
 	@Override
@@ -1594,29 +1615,35 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(BreakStmt n, GenerationContext context) {
+		printer.setSourceNode(n);
 		printer.print("break");
 		if (n.getId() != null) {
 			printer.print(" ");
 			printer.print(n.getId());
 		}
 		printer.print(";");
+		printer.addSouceMapping(context);
 	}
 
 	@Override
 	public void visit(ReturnStmt n, GenerationContext context) {
+		printer.setSourceNode(n);
 		printer.print("return");
 		if (n.getExpr() != null) {
 			printer.print(" ");
 			n.getExpr().accept(this, context);
 		}
 		printer.print(";");
+		printer.addSouceMapping(context);
 	}
 
 	@Override
 	public void visit(ThrowStmt n, GenerationContext context) {
+		printer.setSourceNode(n);
 		printer.print("throw ");
 		n.getExpr().accept(this, context);
 		printer.print(";");
+		printer.addSouceMapping(context);
 	}
 
 	@Override
@@ -1640,6 +1667,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		n.getExcept().accept(this, context);
 		printer.print(") ");
 		n.getCatchBlock().accept(this, context);
+	}
+
+	public void writeSourceMap(GenerationContext context, FileWriter sourceMapWriter) throws IOException {
+		printer.writeSourceMap(context, sourceMapWriter);
+
 	}
 
 }

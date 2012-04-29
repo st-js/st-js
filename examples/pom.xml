@@ -58,6 +58,9 @@
 						<goals>
 							<goal>generate</goal>
 						</goals>
+						<configuration>
+							<generateSourceMap>true</generateSourceMap>
+						</configuration>
 					</execution>
 					<execution>
 						<id>test</id>

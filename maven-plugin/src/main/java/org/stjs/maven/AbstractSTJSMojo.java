@@ -100,6 +100,14 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	 */
 	protected boolean generateArrayHasOwnProperty;
 
+	/**
+	 * If true, it generates for each JavaScript the corresponding source map back to the corresponding Java file. It
+	 * also copies the Java source file in the same folder as the generated Javascript file.
+	 * 
+	 * @parameter expression="${generateSourceMap}" default-value="false"
+	 */
+	protected boolean generateSourceMap;
+
 	abstract protected List<String> getCompileSourceRoots();
 
 	abstract protected GenerationDirectory getGeneratedSourcesDirectory();
@@ -136,6 +144,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 		GeneratorConfigurationBuilder configBuilder = new GeneratorConfigurationBuilder();
 		configBuilder.generateArrayHasOwnProperty(generateArrayHasOwnProperty);
+		configBuilder.generateSourceMap(generateSourceMap);
 		// configBuilder.allowedPackage("org.stjs.javascript");
 		configBuilder.allowedPackage("org.junit");
 		// configBuilder.allowedPackage("org.stjs.testing");

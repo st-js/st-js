@@ -56,6 +56,10 @@ public class Generator {
 		return getOutputFile(generationFolder, className, true);
 	}
 
+	public File getSourceMapFile(File generationFolder, String className) {
+		return new File(generationFolder, className.replace('.', File.separatorChar) + ".map");
+	}
+
 	public File getOutputFile(File generationFolder, String className, boolean generateDirectory) {
 		File output = new File(generationFolder, className.replace('.', File.separatorChar) + ".js");
 		if (generateDirectory) {
@@ -97,26 +101,32 @@ public class Generator {
 		CompilationUnit cu = parseAndResolve(classLoaderWrapper, inputFile, context);
 
 		FileWriter writer = null;
+		FileWriter sourceMapWriter = null;
 
 		try {
 			// generate the javascript code
-			JavascriptWriterVisitor generatorVisitor = new JavascriptWriterVisitor();
+			JavascriptWriterVisitor generatorVisitor = new JavascriptWriterVisitor(configuration.isGenerateSourceMap());
 			generatorVisitor.visit(cu, context);
 
 			writer = new FileWriter(outputFile);
 			writer.write(generatorVisitor.getGeneratedSource());
 			writer.flush();
 
+			if (configuration.isGenerateSourceMap()) {
+				// write the source map
+				sourceMapWriter = new FileWriter(getSourceMapFile(generationFolder.getAbsolutePath(), className));
+				generatorVisitor.writeSourceMap(context, sourceMapWriter);
+				sourceMapWriter.flush();
+
+				// copy the source aside the generated js to be able to have it delivered to the browser for debugging
+				Files.copy(inputFile, new File(outputFile.getParentFile(), inputFile.getName()));
+			}
+
 		} catch (IOException e1) {
 			throw new RuntimeException("Could not open output file " + outputFile + ":" + e1, e1);
 		} finally {
-			try {
-				if (writer != null) {
-					writer.close();
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+			Closeables.closeQuietly(writer);
+			Closeables.closeQuietly(sourceMapWriter);
 		}
 
 		// write properties
