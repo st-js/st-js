@@ -36,6 +36,8 @@ import org.codehaus.plexus.compiler.util.scan.mapping.SuffixMapping;
  * 
  */
 public class StaleClassSourceScanner extends AbstractSourceInclusionScanner {
+	private static final String JAVA_CLASS_SUFFIX = ".java";
+
 	private final long lastUpdatedWithinMsecs;
 
 	private final Set sourceIncludes;
@@ -95,6 +97,10 @@ public class StaleClassSourceScanner extends AbstractSourceInclusionScanner {
 
 		for (int i = 0; i < potentialIncludes.length; i++) {
 			String path = potentialIncludes[i];
+
+			if (!path.endsWith(JAVA_CLASS_SUFFIX)) {
+				continue;
+			}
 
 			File sourceFile = new File(sourceDir, path);
 			File classFile = getClassFile(classTargetDir, path);
