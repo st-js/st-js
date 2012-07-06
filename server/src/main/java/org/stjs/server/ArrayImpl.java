@@ -29,7 +29,6 @@ import org.stjs.javascript.functions.Callback1;
 
 /**
  * This class implements the {@link Array} interface to be used on the server side.
- * 
  * @author acraciun
  * @param <V>
  */
@@ -85,6 +84,7 @@ public class ArrayImpl<V> implements Array<V> {
 		array.set(index, value);
 	}
 
+	@Override
 	public void $set(String index, V value) {
 		$set(Integer.valueOf(index), value);
 	}
@@ -109,6 +109,7 @@ public class ArrayImpl<V> implements Array<V> {
 	@Override
 	public Array<V> concat(Array<V>... arrays) {
 		ArrayImpl<V> ret = new ArrayImpl<V>();
+		ret.array.addAll(this.array);
 		for (Array<V> a : arrays) {
 			for (int i = 0; i < a.$length(); ++i) {
 				ret.array.add(a.$get(i));
