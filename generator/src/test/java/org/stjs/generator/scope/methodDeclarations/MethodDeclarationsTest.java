@@ -39,4 +39,9 @@ public class MethodDeclarationsTest {
 	public void testInnerClassOtherPackage() {
 		assertResolvedMethod(MethodDeclarations1.class, "method", 1, MethodDeclarations2.Inner.class);
 	}
+
+	@Test
+	public void testInheritObjectForInterfaces() {
+		assertResolvedMethod(MethodDeclarations5.class, "equals", 1, Object.class);
+	}
 }

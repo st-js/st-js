@@ -66,4 +66,9 @@ public class FieldsGeneratorTest {
 	public void testPrototypeProperty() {
 		assertCodeContains(Fields12.class, "clazz=(String).prototype;");
 	}
+
+	@Test
+	public void testPrivateFinalBooleanBug() {
+		assertCodeContains(Fields13.class, "Fields13.prototype.value = false;");
+	}
 }

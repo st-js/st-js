@@ -170,9 +170,11 @@ public class ClassWrapper implements TypeWrapper {
 	}
 
 	private void addFieldsMethodsAndTypes(Type type, Class<?> rawClass, TypeWrapper[] actualTypeArgs) {
+		boolean seenObjectClass = false;
 		for (Type c = type; c != null; c = rawClass.getGenericSuperclass()) {
 			actualTypeArgs = getActualTypeArgs(c, rawClass, actualTypeArgs);
 			rawClass = ClassUtils.getRawClazz(c);
+			seenObjectClass = seenObjectClass || (rawClass == Object.class);
 			addFields(rawClass, actualTypeArgs);
 			addMethods(rawClass, actualTypeArgs);
 			addTypes(rawClass, actualTypeArgs);
@@ -182,6 +184,12 @@ public class ClassWrapper implements TypeWrapper {
 				addFieldsMethodsAndTypes(iface, rawClass, actualTypeArgs);
 			}
 		}
+
+		// add Object methods too for interfaces (for example "equals" method)
+		if (!seenObjectClass) {
+			addFieldsMethodsAndTypes(Object.class, Object.class, actualTypeArgs);
+		}
+
 	}
 
 	private void addTypes(Class<?> rawClass, TypeWrapper[] actualTypeArgs) {
