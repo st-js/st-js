@@ -14,21 +14,22 @@ public class InlineFunctionGeneratorTest {
 
 	@Test(expected = JavascriptGenerationException.class)
 	public void testInterfaceAndParamForbidden() {
-		assertCodeContains(InlineFunctions2.class, "stjs.extend(_InlineType, FunctionInterface);");
+		assertCodeContains(InlineFunctions2.class, "stjs.extend(function(){}, null, [FunctionInterface],");
 	}
 
 	@Test
 	public void testInterfaceAndParam() {
-		assertCodeContains(InlineFunctions2b.class, "stjs.extend(_InlineType, FunctionInterface2);");
-		assertCodeContains(InlineFunctions2b.class, "_InlineType.prototype.test = 2; "
-				+ "_InlineType.prototype.$invoke=function(arg){arg=arg+1;}");
+		assertCodeContains(InlineFunctions2b.class, 
+				"stjs.extend(function(){},  null, [FunctionInterface2], {" +
+				"test:2, $invoke:function(arg){arg=arg+1;}");
 	}
 
 	@Test
 	public void testInterfaceTwoMethods() {
-		assertCodeContains(InlineFunctions3.class, "stjs.extend(_InlineType, FunctionInterface2);");
-		assertCodeContains(InlineFunctions3.class, "_InlineType.prototype.$invoke=function(arg){arg=arg+1;};"
-				+ " _InlineType.prototype.$invoke2=function(arg2){arg2=arg2+1;};");
+		assertCodeContains(InlineFunctions3.class, "stjs.extend(function(){}, null, [FunctionInterface2], ");
+		assertCodeContains(InlineFunctions3.class, 
+				"$invoke:function(arg){arg=arg+1;}," + 
+				"$invoke2:function(arg2){arg2=arg2+1;}");
 	}
 
 	@Test

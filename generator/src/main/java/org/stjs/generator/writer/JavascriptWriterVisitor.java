@@ -575,7 +575,12 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			List<BodyDeclaration> members, List<Expression> constructorArguments) {
 		ClassOrInterfaceDeclaration decl = new ClassOrInterfaceDeclaration();
 		decl.setName(className);
-		decl.setExtends(Collections.singletonList(extendsFrom));
+		ClassWrapper baseClass = (ClassWrapper)resolvedType(extendsFrom);
+		if(baseClass.getClazz().isInterface()) {
+			decl.setImplements(Collections.singletonList(extendsFrom));
+		} else {
+			decl.setExtends(Collections.singletonList(extendsFrom));
+		}
 		decl.setMembers(members);
 		// TODO add constructor if needed to call the super with the constructorscopeWalkers
 		return decl;
@@ -603,20 +608,15 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				}
 				return;
 			}
+			
 			// special construction to handle the inline body
-			// build a special type called _InlineType to handle this
-
-			printer.printLn("(function(){");
+			printer.print("new ");
 			ClassOrInterfaceDeclaration inlineFakeClass = buildClassDeclaration(GeneratorConstants.SPECIAL_INLINE_TYPE,
 					n.getType(), n.getAnonymousClassBody(), n.getArgs());
 			inlineFakeClass.setData(n.getData());
 			inlineFakeClass.accept(this, context);
 
-			printer.printLn("");
-			printer.print("return new ").print(GeneratorConstants.SPECIAL_INLINE_TYPE);
 			printArguments(n.getArgs(), context);
-			printer.printLn(";");
-			printer.print("})()");
 
 			return;
 
@@ -778,7 +778,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printer.print(className);
 			printer.print(" = ");
 			printConstructorImplementation(n, context, scope, inlineType);
-			printer.printLn();
+			printer.printLn(";");
 		}
 		
 		printer.print("stjs.extend(");
@@ -836,11 +836,10 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		ConstructorDeclaration constr = getConstructor(n.getMembers(), context);
 		if (constr != null) {
 			constr.accept(this, context);
-			printer.print(";");
 		} else {
 			printer.print("function(){");
 			addCallToSuper(scope, context, Collections.<Expression> emptyList(), inlineType);
-			printer.print("};");
+			printer.print("}");
 		}
 	}
 
