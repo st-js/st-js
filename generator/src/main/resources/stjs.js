@@ -253,6 +253,7 @@ stjs.extend=function(_constructor, _super, _implements, _members, _staticMembers
 		// copy static properties for super
 		// assign every method from proto instance
 		stjs.copyProps(_super, _constructor);
+		stjs.copyProps(_super.$typeDescription, _typeDescription);
 		
 		// remember the correct constructor
 		_constructor.prototype.constructor	= _constructor;

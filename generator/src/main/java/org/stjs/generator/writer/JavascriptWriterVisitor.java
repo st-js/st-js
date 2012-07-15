@@ -914,17 +914,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printer.print("null");
 			return;
 		}
-		
-		boolean generateSuperClass = false;
-		if (n.getExtends() != null && n.getExtends().size() > 0) {
-			TypeWrapper superClass = resolvedType(n.getExtends().get(0));
-			if (!ClassUtils.isSyntheticType(superClass)) {
-				generateSuperClass = true;
-				printer.print("stjs.copyProps(");
-				printer.print(names.getTypeName(superClass));
-				printer.print(".").print(GeneratorConstants.TYPE_DESCRIPTION_PROPERTY).print(", ");
-			}
-		}
 
 		printer.print("{");
 		if (n.getMembers() != null) {
@@ -949,9 +938,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			}
 		}
 		printer.print("}");
-		if (generateSuperClass) {
-			printer.print(")");
-		}
 	}
 
 	private void printMembers(List<BodyDeclaration> members, GenerationContext context, boolean printStatic) {
