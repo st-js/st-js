@@ -759,7 +759,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			resolvedType(n, scope.resolveType(n.getName()).getType());
 		}
 
-		TypeWrapper type = resolvedType(n);
+		ClassWrapper type = (ClassWrapper)resolvedType(n);
 		String namespace = null;
 
 		if (ClassUtils.isRootType(type)) {
@@ -816,20 +816,60 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 		printer.print("], ");
 		
-		printMembers(n.getMembers(), context, false);
-		printer.printLn(",");
-		printMembers(n.getMembers(), context, true);
-		printer.printLn(",");
+		printMembers(filterInstanceMembers(n), context);
+		printer.print(", ");
+		printMembers(filterStaticMembers(n, type), context);
+		printer.print(", ");
 		printTypeDescription(n, context);
 		printer.print(")");
 		
 //		// print static initializers at the end to all the full declaration of the prototype
 //		printStaticInitializers(n, context);
-
+		
 		if(!inlineType){
 			printer.printLn(";");
+			for(BodyDeclaration decl : filterInnerTypes(n, type)){
+				decl.accept(this, context);
+			}
 			printMainMethodCall(n);
 		}
+	}
+
+	private List<BodyDeclaration> filterInstanceMembers(ClassOrInterfaceDeclaration n){
+		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
+		for(BodyDeclaration decl : n.getMembers()){
+			if(decl instanceof FieldDeclaration && !isStatic(((FieldDeclaration)decl).getModifiers()) ||
+					decl instanceof MethodDeclaration && !isStatic(((MethodDeclaration)decl).getModifiers())){
+				decls.add(decl);
+			}
+		}
+		return decls;
+	}
+	
+	private List<BodyDeclaration> filterStaticMembers(ClassOrInterfaceDeclaration n, ClassWrapper outerType){
+		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
+		for(BodyDeclaration decl : n.getMembers()){
+			if(decl instanceof ClassOrInterfaceDeclaration && outerType.isInnerType() ||
+					decl instanceof FieldDeclaration && isStatic(((FieldDeclaration)decl).getModifiers()) ||
+					decl instanceof MethodDeclaration && isStatic(((MethodDeclaration)decl).getModifiers())){
+				decls.add(decl);
+			}
+		}
+		return decls;
+	}
+	
+	private List<BodyDeclaration> filterInnerTypes(ClassOrInterfaceDeclaration n, ClassWrapper outerType){
+		if(outerType.isInnerType()){
+			return Collections.emptyList();
+		}
+		
+		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
+		for(BodyDeclaration decl : n.getMembers()){
+			if(decl instanceof ClassOrInterfaceDeclaration){
+				decls.add(decl);
+			}
+		}
+		return decls;
 	}
 
 	private void printConstructorImplementation(ClassOrInterfaceDeclaration n, GenerationContext context, ClassScope scope, boolean inlineType) {
@@ -939,7 +979,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printer.print("}");
 	}
 
-	private void printMembers(List<BodyDeclaration> members, GenerationContext context, boolean printStatic) {
+	private void printMembers(List<BodyDeclaration> members, GenerationContext context) {
 		printer.print("{");
 		printer.indent();
 		boolean printedOne = false;
@@ -947,28 +987,19 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			if (member instanceof ConstructorDeclaration) {
 				continue;
 			}
-			if(printStatic && isStaticMember(member) || !printStatic && !isStaticMember(member)){
-				if(!printedOne){
-					printedOne = true;
-					printer.printLn();
-				}else{
-					printer.printLn(",");
-				}
-				member.accept(this, context);
+			if(!printedOne){
+				printedOne = true;
+				printer.printLn();
+			}else{
+				printer.printLn(",");
 			}
+			member.accept(this, context);
 		}
 		if(printedOne){
 			printer.printLn();
 		}
 		printer.unindent();
 		printer.print("}");
-	}
-	
-	private boolean isStaticMember(BodyDeclaration decl){
-		return decl instanceof ConstructorDeclaration ||
-				decl instanceof FieldDeclaration && isStatic(((FieldDeclaration)decl).getModifiers()) ||
-				decl instanceof MethodDeclaration && isStatic(((MethodDeclaration)decl).getModifiers()) ||
-				decl instanceof InitializerDeclaration && ((InitializerDeclaration)decl).isStatic();
 	}
 
 	private ConstructorDeclaration getConstructor(List<BodyDeclaration> members, GenerationContext context) {

@@ -19,20 +19,20 @@ public class InnerTypesGeneratorTest {
 
 	@Test
 	public void testDeclarationAndAccessInnerTypeInstanceMethod() {
-		assertCodeContains(InnerTypes3.class, "InnerTypes3.InnerType.prototype.innerMethod=function()");
+		assertCodeContains(InnerTypes3.class, "stjs.extend(InnerTypes3.InnerType, null, [], {innerMethod:function()");
 		assertCodeContains(InnerTypes3.class, "new InnerTypes3.InnerType().innerMethod()");
 		assertCodeContains(InnerTypes3.class, "var x = new InnerTypes3.InnerType()");
 	}
 
 	@Test
 	public void testDeclarationAndAccessInnerTypeInstanceField() {
-		assertCodeContains(InnerTypes4.class, "InnerTypes4.InnerType.prototype.innerField = null");
+		assertCodeContains(InnerTypes4.class, "stjs.extend(InnerTypes4.InnerType, null, [], {innerField:null");
 		assertCodeContains(InnerTypes4.class, "new InnerTypes4.InnerType().innerField");
 	}
 
 	@Test
 	public void testInheritance() {
-		assertCodeContains(InnerTypes5.class, "stjs.extend(InnerTypes5.InnerType, MySuperClass);");
+		assertCodeContains(InnerTypes5.class, "stjs.extend(InnerTypes5.InnerType, MySuperClass, [], ");
 	}
 
 	@Test(expected = JavascriptGenerationException.class)
@@ -66,5 +66,15 @@ public class InnerTypesGeneratorTest {
 		// for non-static inner classes the constructor contains as first parameter the type of the outer type
 		// also enum has first two params name and ordinal
 		generate(InnerTypes11.class);
+	}
+	
+	@Test
+	public void testInnerInsideInner(){
+		generate(InnerTypes12.class);
+	}
+	
+	@Test
+	public void testInnerInsideAnonymous(){
+		generate(InnerTypes13.class);
 	}
 }
