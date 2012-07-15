@@ -13,10 +13,10 @@ public class NamespaceGeneratorTest {
 		assertCodeContains(Namespace1.class, "stjs.ns(\"a.b\");");
 		assertCodeDoesNotContain(Namespace1.class, "var a.b");
 		assertCodeContains(Namespace1.class, "a.b.Namespace1=function()");
-		assertCodeContains(Namespace1.class, "a.b.Namespace1.prototype.instanceMethod=");
-		assertCodeContains(Namespace1.class, "a.b.Namespace1.prototype.instanceField=");
-		assertCodeContains(Namespace1.class, "a.b.Namespace1.staticMethod=");
-		assertCodeContains(Namespace1.class, "a.b.Namespace1.staticField=");
+		assertCodeContains(Namespace1.class, "instanceMethod:function()");
+		assertCodeContains(Namespace1.class, "instanceField:null");
+		assertCodeContains(Namespace1.class, "staticMethod:function()");
+		assertCodeContains(Namespace1.class, "staticField:null");
 	}
 
 	@Test

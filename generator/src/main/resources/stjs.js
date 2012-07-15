@@ -238,19 +238,33 @@ stjs.copyProps=function(from, to){
 	return to;
 };
 
-stjs.extend=function( _constructor,  _super, _implements){
+stjs.extend=function(_constructor, _super, _implements, _members, _staticMembers, _typeDescription){
 	var key, a;
-	var I = function(){};
-	I.prototype	= _super.prototype;
-	_constructor.prototype	= new I();
-
-	//copy static properties for super and interfaces
-	// assign every method from proto instance
-	for(a = 1; a < arguments.length; ++a){
-		stjs.copyProps(arguments[a], _constructor);
+	if(_super != null){
+		// I is used as a no-op constructor that has the same prototype as _super
+		// we do this because we cannot predict the result of calling new _super()
+		// without parameters (it might throw an exception).
+		// Basically, the following 3 lines are a safe equivalent for 
+		// _constructor.prototype = new _super();
+		var I = function(){};
+		I.prototype	= _super.prototype;
+		_constructor.prototype	= new I();
+		
+		// copy static properties for super
+		// assign every method from proto instance
+		stjs.copyProps(_super, _constructor);
+		
+		// remember the correct constructor
+		_constructor.prototype.constructor	= _constructor;
 	}
-	// remember the correct constructor
-	_constructor.prototype.constructor	= _constructor;
+	// copy static properties for interfaces
+	for(a = 0; a < _implements.length; ++a){
+		stjs.copyProps(_implements[a], _constructor);
+	}
+	
+	stjs.copyProps(_members, _constructor.prototype);
+	stjs.copyProps(_staticMembers, _constructor);
+	_constructor.$typeDescription = _typeDescription;
 
 	// build package and assign
 	return	_constructor;

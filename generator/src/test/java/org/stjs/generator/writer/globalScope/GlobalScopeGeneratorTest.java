@@ -18,12 +18,12 @@ public class GlobalScopeGeneratorTest {
 
 	@Test
 	public void testQualifiedCall() {
-		assertCodeContains(GlobalScope1.class, "test=function(){method();}");
+		assertCodeContains(GlobalScope1.class, "test:function(){method();}");
 	}
 
 	@Test
 	public void testCallWithStaticImport() {
-		assertCodeContains(GlobalScope2.class, "test=function(){method();}");
+		assertCodeContains(GlobalScope2.class, "test:function(){method();}");
 	}
 
 	@Test

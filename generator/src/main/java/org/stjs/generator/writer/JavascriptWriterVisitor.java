@@ -407,13 +407,14 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		throw new IllegalStateException("Unexpected visit in a VariableDeclarator node:" + n);
 	}
 
-	private void printVariableDeclarator(VariableDeclarator n, GenerationContext context, boolean forceInitNull) {
+	private void printVariableDeclarator(VariableDeclarator n, GenerationContext context, boolean forceInitNull, boolean isProperty) {
+		String assignmentOperator = isProperty ? " : " : " = ";
 		n.getId().accept(this, context);
 		if (n.getInit() != null) {
-			printer.print(" = ");
+			printer.print(assignmentOperator);
 			n.getInit().accept(this, context);
 		} else if (forceInitNull) {
-			printer.print(" = null");
+			printer.print(assignmentOperator + "null");
 		}
 
 	}
@@ -425,7 +426,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 		for (Iterator<VariableDeclarator> i = n.getVars().iterator(); i.hasNext();) {
 			VariableDeclarator v = i.next();
-			printVariableDeclarator(v, context, false);
+			printVariableDeclarator(v, context, false, false);
 			if (i.hasNext()) {
 				printer.print(", ");
 			}
@@ -434,23 +435,12 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(FieldDeclaration n, GenerationContext context) {
-		TypeWrapper type = resolvedType(parent(n));
-		boolean skipType = isGlobal(type) && isStatic(n.getModifiers());
-		String typeName = names.getTypeName(type);
-		// skip type
-		for (VariableDeclarator v : n.getVariables()) {
-			if (!skipType) {
-				printer.print(typeName);
+		List<VariableDeclarator> decls = n.getVariables();
+		for (int i = 0; i < decls.size(); i ++) {
+			if(i > 0){
+				printer.printLn(",");
 			}
-			if (!isStatic(n.getModifiers())) {
-				printer.print(".prototype");
-			}
-			if (!skipType) {
-				printer.print(".");
-			}
-
-			printVariableDeclarator(v, context, true);
-			printer.print(";");
+			printVariableDeclarator(decls.get(i), context, true, true);
 		}
 	}
 
@@ -489,17 +479,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (anonymous) {
 			printer.print("function");
 		} else {
-			if (!skipType) {
-				printer.print(names.getTypeName(type));
-			}
-			if (!isStatic(modifiers)) {
-				printer.print(".prototype");
-			}
-			if (!skipType) {
-				printer.print(".");
-			}
 			printer.print(name);
-			printer.print(" = function");
+			printer.print(" : function");
 		}
 
 		printer.print("(");
@@ -524,9 +505,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		} else {
 			printer.print(" ");
 			body.accept(this, context);
-		}
-		if (!anonymous) {
-			printer.print(";");
 		}
 	}
 
@@ -741,10 +719,22 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printer.print(n.getContent());
 		printer.printLn("*/");
 	}
-
-	private List<TypeWrapper> getImplementsOrExtends(ClassOrInterfaceDeclaration n) {
+	
+	private List<TypeWrapper> getImplements(ClassOrInterfaceDeclaration n){
 		List<TypeWrapper> types = new ArrayList<TypeWrapper>();
-
+		if (n.getImplements() != null) {
+			for (ClassOrInterfaceType impl : n.getImplements()) {
+				TypeWrapper type = resolvedType(impl);
+				if (!ClassUtils.isSyntheticType(type)) {
+					types.add(type);
+				}
+			}
+		}
+		return types;
+	}
+	
+	private List<TypeWrapper> getExtends(ClassOrInterfaceDeclaration n) {
+		List<TypeWrapper> types = new ArrayList<TypeWrapper>();
 		if (n.getExtends() != null) {
 			for (ClassOrInterfaceType ext : n.getExtends()) {
 				TypeWrapper type = resolvedType(ext);
@@ -752,14 +742,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 					types.add(type);
 				}
 
-			}
-		}
-		if (n.getImplements() != null) {
-			for (ClassOrInterfaceType impl : n.getImplements()) {
-				TypeWrapper type = resolvedType(impl);
-				if (!ClassUtils.isSyntheticType(type)) {
-					types.add(type);
-				}
 			}
 		}
 		return types;
@@ -786,50 +768,80 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.printLn("stjs.ns(\"" + namespace + "\");");
 			}
 		}
-		String className;
-		if (inlineType) {
-			printer.print("var ");
-			className = n.getName();
-		} else {
-			if (!type.isInnerType() && namespace == null) {
+
+		String className = null;
+		if(!inlineType){
+			if(!type.isInnerType() && namespace == null){
 				printer.print("var ");
 			}
 			className = names.getTypeName(type);
+			printer.print(className);
+			printer.print(" = ");
+			printConstructorImplementation(n, context, scope, inlineType);
+			printer.printLn();
 		}
-		printer.print(className);
-
-		printer.print(" = ");
-		if (n.getMembers() != null) {
-			ConstructorDeclaration constr = getConstructor(n.getMembers(), context);
-			if (constr != null) {
-				constr.accept(this, context);
-				printer.print(";");
-			} else {
-				printer.print("function(){");
-				addCallToSuper(scope, context, Collections.<Expression> emptyList(), inlineType);
-				printer.printLn("};");
-			}
-
-			// XXX it's not really working for multiple extends
-			List<TypeWrapper> implementsOrExtends = getImplementsOrExtends(n);
-			if (implementsOrExtends.size() > 0) {
-				printer.printLn();
-				printer.print("stjs.extend(");
-
-				printer.print(className);
-
-				for (TypeWrapper ext : implementsOrExtends) {
-					printer.print(", " + names.getTypeName(ext));
-				}
-
-				printer.printLn(");");
-			}
-			printMembers(n.getMembers(), context);
+		
+		printer.print("stjs.extend(");
+		if(inlineType){
+			printConstructorImplementation(n, context, scope, inlineType);
+		}else{
+			printer.print(className);
 		}
+		printer.print(", ");
+		
+		// print the super class
+		List<TypeWrapper> interfaces;
+		if(n.isInterface()){
+			// interfaces do not have super classes. For interfaces, extends actually means implements
+			printer.print("null, ");
+			interfaces = getExtends(n);
+		} else {
+			List<TypeWrapper> superClass = getExtends(n);
+			if(superClass.size() > 0){
+				printer.print(names.getTypeName(superClass.get(0)));
+			}else{
+				printer.print("null");
+			}
+			printer.print(", ");
+			interfaces = getImplements(n);
+		}
+		
+		// print the implemented interfaces
+		printer.print("[");
+		for (int i = 0; i < interfaces.size(); i ++) {
+			if(i > 0){
+				printer.print(", ");
+			}
+			printer.print(names.getTypeName(interfaces.get(i)));
+		}
+		printer.print("], ");
+		
+		printMembers(n.getMembers(), context, false);
+		printer.printLn(",");
+		printMembers(n.getMembers(), context, true);
+		printer.printLn(",");
 		printTypeDescription(n, context);
-		// print static initializers at the end to all the full declaration of the prototype
-		printStaticInitializers(n, context);
-		printMainMethodCall(n);
+		printer.print(")");
+		
+//		// print static initializers at the end to all the full declaration of the prototype
+//		printStaticInitializers(n, context);
+
+		if(!inlineType){
+			printer.printLn(";");
+			printMainMethodCall(n);
+		}
+	}
+
+	private void printConstructorImplementation(ClassOrInterfaceDeclaration n, GenerationContext context, ClassScope scope, boolean inlineType) {
+		ConstructorDeclaration constr = getConstructor(n.getMembers(), context);
+		if (constr != null) {
+			constr.accept(this, context);
+			printer.print(";");
+		} else {
+			printer.print("function(){");
+			addCallToSuper(scope, context, Collections.<Expression> emptyList(), inlineType);
+			printer.print("};");
+		}
 	}
 
 	private void printStaticInitializers(ClassOrInterfaceDeclaration n, GenerationContext context) {
@@ -899,14 +911,10 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	private void printTypeDescription(ClassOrInterfaceDeclaration n, GenerationContext context) {
 		TypeWrapper type = resolvedType(n);
 		if (isGlobal(type)) {
+			printer.print("null");
 			return;
 		}
-		String typeName = names.getTypeName(type);
-		printer.printLn();
-		printer.print(typeName);
-		printer.print(".");
-		printer.print(GeneratorConstants.TYPE_DESCRIPTION_PROPERTY).print("=");
-
+		
 		boolean generateSuperClass = false;
 		if (n.getExtends() != null && n.getExtends().size() > 0) {
 			TypeWrapper superClass = resolvedType(n.getExtends().get(0));
@@ -944,17 +952,38 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (generateSuperClass) {
 			printer.print(")");
 		}
-		printer.printLn(";");
 	}
 
-	private void printMembers(List<BodyDeclaration> members, GenerationContext context) {
+	private void printMembers(List<BodyDeclaration> members, GenerationContext context, boolean printStatic) {
+		printer.print("{");
+		printer.indent();
+		boolean printedOne = false;
 		for (BodyDeclaration member : members) {
 			if (member instanceof ConstructorDeclaration) {
 				continue;
 			}
-			printer.printLn();
-			member.accept(this, context);
+			if(printStatic && isStaticMember(member) || !printStatic && !isStaticMember(member)){
+				if(!printedOne){
+					printedOne = true;
+					printer.printLn();
+				}else{
+					printer.printLn(",");
+				}
+				member.accept(this, context);
+			}
 		}
+		if(printedOne){
+			printer.printLn();
+		}
+		printer.unindent();
+		printer.print("}");
+	}
+	
+	private boolean isStaticMember(BodyDeclaration decl){
+		return decl instanceof ConstructorDeclaration ||
+				decl instanceof FieldDeclaration && isStatic(((FieldDeclaration)decl).getModifiers()) ||
+				decl instanceof MethodDeclaration && isStatic(((MethodDeclaration)decl).getModifiers()) ||
+				decl instanceof InitializerDeclaration && ((InitializerDeclaration)decl).isStatic();
 	}
 
 	private ConstructorDeclaration getConstructor(List<BodyDeclaration> members, GenerationContext context) {

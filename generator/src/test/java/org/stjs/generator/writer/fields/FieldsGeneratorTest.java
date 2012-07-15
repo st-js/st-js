@@ -9,27 +9,27 @@ import org.stjs.generator.JavascriptGenerationException;
 public class FieldsGeneratorTest {
 	@Test
 	public void testInstanceField() {
-		assertCodeContains(Fields1.class, "Fields1.prototype.x = null;");
+		assertCodeContains(Fields1.class, "x : null");
 	}
 
 	@Test
 	public void testInstanceFieldAssigned() {
-		assertCodeContains(Fields2.class, "Fields2.prototype.x = 2;");
+		assertCodeContains(Fields2.class, "x : 2");
 	}
 
 	@Test
 	public void testInstanceFieldAssignedNegative() {
-		assertCodeContains(Fields2b.class, "Fields2b.prototype.x = -2;");
+		assertCodeContains(Fields2b.class, "x : -2");
 	}
 
 	@Test
 	public void testMultipleInstanceField() {
-		assertCodeContains(Fields3.class, "Fields3.prototype.x = 2; Fields3.prototype.y = 3;");
+		assertCodeContains(Fields3.class, "x : 2, y : 3");
 	}
 
 	@Test
 	public void testStaticField() {
-		assertCodeContains(Fields4.class, "Fields4.x = 2;");
+		assertCodeContains(Fields4.class, "x : 2");
 	}
 
 	@Test(expected = JavascriptGenerationException.class)
@@ -39,7 +39,7 @@ public class FieldsGeneratorTest {
 
 	@Test
 	public void testAllowStaticFieldInit() {
-		assertCodeContains(Fields7.class, "Fields7.x = {};");
+		assertCodeContains(Fields7.class, "x : {}");
 	}
 
 	@Test(expected = JavascriptGenerationException.class)
@@ -49,12 +49,12 @@ public class FieldsGeneratorTest {
 
 	@Test
 	public void testParameterizedType() {
-		assertCodeContains(Fields9.class, "Fields9.prototype.field = null;");
+		assertCodeContains(Fields9.class, "field : null");
 	}
 
 	@Test
 	public void testGeneric() {
-		assertCodeContains(Fields10.class, "Fields10.prototype.field = null;");
+		assertCodeContains(Fields10.class, "field : null");
 	}
 
 	@Test
@@ -69,6 +69,6 @@ public class FieldsGeneratorTest {
 
 	@Test
 	public void testPrivateFinalBooleanBug() {
-		assertCodeContains(Fields13.class, "Fields13.prototype.value = false;");
+		assertCodeContains(Fields13.class, "value : false,");
 	}
 }

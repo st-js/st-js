@@ -26,4 +26,11 @@ public class Inheritance {
 
 	public static class C extends B {//
 	}
+	
+	public static class D extends C {
+		@Override
+		public int method1(int n) {
+			return super.method1(n + 1);
+		}
+	}
 }
