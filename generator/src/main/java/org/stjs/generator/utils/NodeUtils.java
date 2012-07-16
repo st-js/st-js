@@ -16,12 +16,17 @@
 package org.stjs.generator.utils;
 
 import static japa.parser.ast.body.ModifierSet.isStatic;
+import japa.parser.ast.Node;
 import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.body.Parameter;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.ReferenceType;
+import japa.parser.ast.visitor.VoidVisitor;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.stjs.generator.visitor.ForEachNodeVisitor;
 
 /**
  * different methods to work with AST nodes.
@@ -48,5 +53,26 @@ public class NodeUtils {
 			}
 		}
 		return isMainMethod;
+	}
+
+	/**
+	 * 
+	 * @param parent
+	 * @param type
+	 * @return the list of all the descendants of the given code that are of the given type (or a subclass of it)
+	 */
+	public static final <T extends Node> List<T> findDescendantsOfType(Node parent, final Class<T> type) {
+		final List<T> children = new ArrayList<T>();
+		VoidVisitor<Boolean> visitor = new ForEachNodeVisitor<Boolean>() {
+			@SuppressWarnings("unchecked")
+			@Override
+			protected void before(Node node, Boolean arg) {
+				if (type.isAssignableFrom(node.getClass())) {
+					children.add((T) node);
+				}
+			}
+		};
+		parent.accept(visitor, null);
+		return children;
 	}
 }

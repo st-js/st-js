@@ -67,4 +67,10 @@ public class InnerTypesGeneratorTest {
 		// also enum has first two params name and ordinal
 		generate(InnerTypes11.class);
 	}
+
+	@Test(expected = JavascriptGenerationException.class)
+	public void testDeadCode() {
+		// the compiler will not generate the code inside the if (dead code), so the inner type may not be found
+		generate(InnerTypes12.class);
+	}
 }

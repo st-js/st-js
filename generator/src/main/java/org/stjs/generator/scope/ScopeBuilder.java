@@ -220,8 +220,36 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		PreConditions.checkStateNode(n, type != null, "%s class cannot be resolved in the scope", n.getName());
 		Scope classScope = addClassToScope(parentScope, (ClassWrapper) type.getType());
 		resolvedType(n, type.getType());
+
+		checkForDeadCode(n, context);
+
 		super.visit(n, classScope);
 		Checks.postCheckClassDeclaration(n, context);
+	}
+
+	private void checkForDeadCode(ClassOrInterfaceDeclaration n, GenerationContext context) {
+		List<ObjectCreationExpr> creationNodes = NodeUtils.findDescendantsOfType(n, ObjectCreationExpr.class);
+		int count = 0;
+		for (ObjectCreationExpr e : creationNodes) {
+			// should make sure it's a anonymous inner type defined in directly in this class (and not in one of other
+			// named or anonymous inner class)
+			if (e.getAnonymousClassBody() != null
+					&& parent(parent(e), ClassOrInterfaceDeclaration.class, ObjectCreationExpr.class) == n) {
+				++count;
+			}
+		}
+		if (count > 0) {
+			Class<?> clazz = ((ClassWrapper) resolvedType(n)).getClazz();
+			AnonymousClassesHelper helper = new AnonymousClassesHelper(clazz);
+			anonymousClassHelpers.put(clazz, helper);
+			if (count != helper.getAnonymousClassesCount()) {
+				throw new JavascriptGenerationException(
+						context.getInputFile(),
+						new SourcePosition(n),
+						"The code for some anonymous inner classes was not generated. Please check if you don't have any dead code in your class and remove it"
+								+ " (for example an 'if' statement on a final boolean variable that yields false). ");
+			}
+		}
 	}
 
 	@Override
