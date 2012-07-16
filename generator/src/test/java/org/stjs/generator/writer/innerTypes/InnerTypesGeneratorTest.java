@@ -77,4 +77,11 @@ public class InnerTypesGeneratorTest {
 	public void testInnerInsideAnonymous(){
 		generate(InnerTypes13.class);
 	}
+	
+	@Test
+	public void testEnumInsideInner(){
+		assertCodeContains(InnerTypes14.class, 
+				"stjs.extend(InnerTypes14.Inner, null, [], {}, {Enum:stjs.enumeration(");
+	}
+	
 }

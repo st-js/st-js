@@ -33,7 +33,7 @@ public class EnumGeneratorTest {
 	@Test
 	public void testEnumValues() {
 		assertCodeContains(Enums6.class, "for(var v in Enums6.Value.values())");
-		assertCodeContains(Enums5.class, "Enums6.Value = stjs.enumeration(\"a\", \"b\", \"c\");");
+		assertCodeContains(Enums6.class, "Enums6.Value = stjs.enumeration(\"a\", \"b\", \"c\");");
 	}
 
 	@Test

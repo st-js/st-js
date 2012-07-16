@@ -850,6 +850,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
 		for(BodyDeclaration decl : n.getMembers()){
 			if(decl instanceof ClassOrInterfaceDeclaration && outerType.isInnerType() ||
+					decl instanceof ClassOrInterfaceDeclaration && outerType.isInnerType() ||
 					decl instanceof FieldDeclaration && isStatic(((FieldDeclaration)decl).getModifiers()) ||
 					decl instanceof MethodDeclaration && isStatic(((MethodDeclaration)decl).getModifiers())){
 				decls.add(decl);
@@ -865,7 +866,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		
 		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
 		for(BodyDeclaration decl : n.getMembers()){
-			if(decl instanceof ClassOrInterfaceDeclaration){
+			if(decl instanceof ClassOrInterfaceDeclaration || decl instanceof EnumDeclaration){
 				decls.add(decl);
 			}
 		}
