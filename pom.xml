@@ -92,9 +92,9 @@
 
 
 	<scm>
-		<connection>scm:svn:https://st-js.svn.sourceforge.net/svnroot/st-js/trunk</connection>
-		<developerConnection>scm:svn:https://st-js.svn.sourceforge.net/svnroot/st-js/trunk</developerConnection>
-		<url>http://st-js.svn.sourceforge.net/viewvc/st-js</url>
+		<connection>https://github.com/st-js/st-js.git</connection>
+		<developerConnection>https://github.com/st-js/st-js.git</developerConnection>
+		<url>https://github.com/st-js/st-js</url>
 	</scm>
 
 </project>
