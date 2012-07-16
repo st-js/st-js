@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>org.st-js</groupId>
 		<artifactId>stjs</artifactId>
-		<version>1.2.2</version>
+		<version>1.2.3-SNAPSHOT</version>
 	</parent>
 
 	<repositories>
