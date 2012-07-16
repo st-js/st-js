@@ -144,4 +144,9 @@ public class SpecialMethodGeneratorTest {
 	public void testJs() {
 		assertCodeContains(SpecialMethod21.class, "x = s.a");
 	}
+
+	@Test
+	public void testTemplateNode() {
+		assertCodeContains(SpecialMethod22.class, "n = m.$get(0)");
+	}
 }
