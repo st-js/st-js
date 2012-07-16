@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.st-js</groupId>
 	<artifactId>stjs</artifactId>
-	<version>1.2.2</version>
+	<version>1.2.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Strongly-typed Javascript</name>
 	<description>Javascript code generator from Java source code</description>
