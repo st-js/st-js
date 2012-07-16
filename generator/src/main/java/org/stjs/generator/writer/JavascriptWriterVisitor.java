@@ -839,7 +839,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
 		for(BodyDeclaration decl : n.getMembers()){
 			if(decl instanceof FieldDeclaration && !isStatic(((FieldDeclaration)decl).getModifiers()) ||
-					decl instanceof MethodDeclaration && !isStatic(((MethodDeclaration)decl).getModifiers())){
+					decl instanceof MethodDeclaration && !isStatic(((MethodDeclaration)decl).getModifiers()) ||
+					decl instanceof InitializerDeclaration && !((InitializerDeclaration)decl).isStatic()){
 				decls.add(decl);
 			}
 		}
