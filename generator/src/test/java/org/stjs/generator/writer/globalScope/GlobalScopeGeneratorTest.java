@@ -9,11 +9,11 @@ import org.junit.Test;
 public class GlobalScopeGeneratorTest {
 	@Test
 	public void testGlobalScopeGeneration() {
-		assertCodeDoesNotContain(Globals.class, "Globals.field");
-		assertCodeDoesNotContain(Globals.class, "Globals.method");
+		assertCodeDoesNotContain(Globals.class, "field:");
+		assertCodeDoesNotContain(Globals.class, "method:");
 
-		assertCodeContains(Globals.class, "Globals.prototype.instanceMethod");
-		assertCodeContains(Globals.class, "Globals.prototype.instanceField");
+		assertCodeContains(Globals.class, "instanceMethod:");
+		assertCodeContains(Globals.class, "instanceField:");
 	}
 
 	@Test
