@@ -827,16 +827,14 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printTypeDescription(n, context);
 		printer.print(")");
 		
-//		// print static initializers at the end to all the full declaration of the prototype
-//		printStaticInitializers(n, context);
-		
 		if(!inlineType){
 			printer.printLn(";");
 			printGlobals(filterGlobals(n, type), context);
 			for(BodyDeclaration decl : filterInnerTypes(n, type)){
 				decl.accept(this, context);
 			}
-			printMainMethodCall(n);
+			printStaticInitializers(n, context);
+			printMainMethodCall(n, type);
 		}
 	}
 
@@ -916,7 +914,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	private void printStaticInitializer(InitializerDeclaration n, GenerationContext context) {
+		// we have to wrap the static initialization block into a function to prevent the local variables
+		// to leak into the global scope
+		printer.print("(function()");
 		n.getBlock().accept(this, context);
+		printer.printLn(")();");
 	}
 
 	/**
@@ -1049,7 +1051,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printer.print(names.getTypeName(scope.getClazz()));
 	}
 
-	private void printMainMethodCall(ClassOrInterfaceDeclaration n) {
+	private void printMainMethodCall(ClassOrInterfaceDeclaration n, ClassWrapper clazz) {
 		if (n.getMembers() == null) {
 			return;
 		}
@@ -1061,8 +1063,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				if (NodeUtils.isMainMethod(methodDeclaration)) {
 					printer.printLn();
 					printer.print("if (!stjs.mainCallDisabled) ");
-					printStaticMembersPrefix(scope);
-					printer.print(".main();");
+					if(!isGlobal(clazz)){
+						printStaticMembersPrefix(scope);
+						printer.print(".");
+					}
+					printer.print("main();");
 				}
 			}
 		}

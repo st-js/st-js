@@ -1,12 +1,16 @@
 package org.stjs.generator.writer.statements;
 
+import static org.junit.Assert.assertEquals;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
+import static org.stjs.generator.utils.GeneratorTestHelper.execute;
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.utils.GeneratorTestHelper;
 
 public class StatementsGeneratorTest {
 	@Test
@@ -90,5 +94,10 @@ public class StatementsGeneratorTest {
 	@Test(expected = JavascriptGenerationException.class)
 	public void testInstanceInitializer() {
 		generate(Statements15.class);
+	}
+	
+	@Test
+	public void testStaticInitializerContainment(){
+		assertEquals(2, execute(Statements16.class));
 	}
 }

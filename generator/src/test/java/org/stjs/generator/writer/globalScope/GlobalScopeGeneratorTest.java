@@ -1,9 +1,13 @@
 package org.stjs.generator.writer.globalScope;
 
+import static org.junit.Assert.assertEquals;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
+import static org.stjs.generator.utils.GeneratorTestHelper.execute;
 
+import org.junit.Assert;
 import org.junit.Test;
+import org.stjs.generator.utils.GeneratorTestHelper;
 
 
 public class GlobalScopeGeneratorTest {
@@ -52,5 +56,11 @@ public class GlobalScopeGeneratorTest {
 	@Test
 	public void testMethodWithStarImport() {
 		assertCodeContains(GlobalScope7.class, "n = method()");
+	}
+	
+	@Test
+	public void testGlobalMainMethod(){
+		Object result = execute(GlobalScope8.class);
+		assertEquals(2, result);
 	}
 }
