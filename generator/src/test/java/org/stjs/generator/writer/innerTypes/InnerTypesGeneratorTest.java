@@ -73,4 +73,10 @@ public class InnerTypesGeneratorTest {
 		// the compiler will not generate the code inside the if (dead code), so the inner type may not be found
 		generate(InnerTypes12.class);
 	}
+
+	@Test
+	public void testDeadCode2() {
+		// check bug where inner types where not correctly detected
+		generate(InnerTypes13.class);
+	}
 }
