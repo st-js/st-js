@@ -15,6 +15,7 @@
  */
 package org.stjs.generator.type;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
@@ -26,7 +27,7 @@ import java.util.Arrays;
  * 
  */
 public class MethodWrapper {
-	private final String name;
+	private final Method method;
 	private final TypeWrapper returnType;
 	private final TypeWrapper[] parameterTypes;
 	private final TypeVariableWrapper<Method>[] typeParameters;
@@ -34,9 +35,9 @@ public class MethodWrapper {
 	private final TypeWrapper ownerType;
 	private final boolean declared;
 
-	public MethodWrapper(String name, TypeWrapper returnType, TypeWrapper[] parameterTypes, int modifiers,
+	public MethodWrapper(Method method, TypeWrapper returnType, TypeWrapper[] parameterTypes, int modifiers,
 			TypeVariableWrapper<Method>[] typeParameters, TypeWrapper ownerType, boolean declared) {
-		this.name = name;
+		this.method = method;
 		this.returnType = returnType;
 		this.parameterTypes = parameterTypes;
 		this.modifiers = modifiers;
@@ -46,7 +47,7 @@ public class MethodWrapper {
 	}
 
 	public String getName() {
-		return name;
+		return method.getName();
 	}
 
 	public TypeWrapper getReturnType() {
@@ -108,7 +109,7 @@ public class MethodWrapper {
 	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder();
-		s.append(returnType).append(" ").append(name).append(" (");
+		s.append(returnType).append(" ").append(getName()).append(" (");
 		s.append(Arrays.toString(parameterTypes));
 		s.append(")");
 		return s.toString();
@@ -127,7 +128,11 @@ public class MethodWrapper {
 	}
 
 	public MethodWrapper withReturnType(TypeWrapper newReturnType) {
-		return new MethodWrapper(name, newReturnType, parameterTypes, modifiers, typeParameters, ownerType, declared);
+		return new MethodWrapper(method, newReturnType, parameterTypes, modifiers, typeParameters, ownerType, declared);
+	}
+
+	public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+		return method.getAnnotation(annotationClass);
 	}
 
 }

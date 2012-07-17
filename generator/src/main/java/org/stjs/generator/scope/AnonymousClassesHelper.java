@@ -137,4 +137,8 @@ public class AnonymousClassesHelper {
 		return result;
 	}
 
+	public int getAnonymousClassesCount() {
+		return classesByMethod.values().size();
+	}
+
 }

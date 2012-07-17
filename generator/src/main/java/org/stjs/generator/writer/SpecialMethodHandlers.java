@@ -41,11 +41,21 @@ import org.stjs.generator.utils.ClassUtils;
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class SpecialMethodHandlers {
+	/**
+	 * 
+	 * allowed templates
+	 * 
+	 */
+	public enum Template {
+		none;
+	}
+
 	private static final String SPECIAL_PREFIX = "$";
 
 	private static final String ASSERT_PREFIX = "assert";
 
 	private Map<String, SpecialMethodHandler> methodHandlers = new HashMap<String, SpecialMethodHandler>();
+	private Map<String, SpecialMethodHandler> methodTemplates = new HashMap<String, SpecialMethodHandler>();
 
 	private final AssertHandler assertHandler;
 	private final MethodToPropertyHandler methodToPropertyHandler;
@@ -241,6 +251,9 @@ public class SpecialMethodHandlers {
 		invokeHandler = new $InvokeHandler();
 
 		methodHandlers.put("java.lang.String.length", methodToPropertyHandler);
+
+		// the new way -> templates
+		methodTemplates.put(Template.none.name(), new DoNothingHandler());
 	}
 
 	private static void printScope(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context,
@@ -263,6 +276,17 @@ public class SpecialMethodHandlers {
 
 	public boolean handleMethodCall(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
 		MethodWrapper method = ASTNodeData.resolvedMethod(n);
+		org.stjs.javascript.annotation.Template templateAnn = method
+				.getAnnotation(org.stjs.javascript.annotation.Template.class);
+		if (templateAnn != null) {
+			SpecialMethodHandler handler = methodTemplates.get(templateAnn.value());
+			if (handler == null) {
+				throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+						"The template named '" + templateAnn.value() + " was not found");
+			}
+			return handler.handle(currentHandler, n, context);
+		}
+
 		String fullName = method.getOwnerType().getName() + "." + method.getName();
 
 		SpecialMethodHandler handler = methodHandlers.get(fullName);
@@ -385,6 +409,13 @@ public class SpecialMethodHandlers {
 			currentHandler.printArguments(Arrays.asList(location, params), n.getArgs(),
 					Collections.<String> emptyList(), context);
 			return true;
+		}
+	}
+
+	static final class DoNothingHandler implements SpecialMethodHandler {
+		@Override
+		public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
+			return false;
 		}
 	}
 

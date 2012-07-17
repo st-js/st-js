@@ -133,10 +133,10 @@ public class ClassWrapper implements TypeWrapper {
 		return substTypes;
 	}
 
-	private MethodWrapper buildMethodWrapper(String name, TypeWrapper returnType, TypeWrapper[] parameterTypes,
+	private MethodWrapper buildMethodWrapper(Method method, TypeWrapper returnType, TypeWrapper[] parameterTypes,
 			int modifiers, TypeVariableWrapper<Method>[] typeParameters, Class<?> ownerClass,
 			TypeWrapper[] actualTypeArgs) {
-		return new MethodWrapper(name, substituteType(returnType, ownerClass, actualTypeArgs), substituteTypes(
+		return new MethodWrapper(method, substituteType(returnType, ownerClass, actualTypeArgs), substituteTypes(
 				parameterTypes, ownerClass, actualTypeArgs), modifiers, typeParameters, this, ownerClass == clazz);
 	}
 
@@ -228,8 +228,8 @@ public class ClassWrapper implements TypeWrapper {
 			TypeVariableWrapper<Method>[] typeParams = TypeWrappers.wrap(m.getTypeParameters());
 			methods.put(
 					m.getName(),
-					buildMethodWrapper(m.getName(), TypeWrappers.wrap(m.getGenericReturnType()), paramTypes,
-							m.getModifiers(), typeParams, rawClass, actualTypeArgs));
+					buildMethodWrapper(m, TypeWrappers.wrap(m.getGenericReturnType()), paramTypes, m.getModifiers(),
+							typeParams, rawClass, actualTypeArgs));
 		}
 
 	}

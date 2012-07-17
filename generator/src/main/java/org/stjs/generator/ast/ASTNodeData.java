@@ -161,10 +161,21 @@ public class ASTNodeData {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> T parent(Node n, Class<T> clazz) {
+	public static <T extends Node> T parent(Node n, Class<T> clazz) {
 		for (Node p = n; p != null; p = parent(p)) {
 			if (clazz.isAssignableFrom(p.getClass())) {
 				return (T) p;
+			}
+		}
+		return null;
+	}
+
+	public static Node parent(Node n, Class<? extends Node>... clazz) {
+		for (Node p = n; p != null; p = parent(p)) {
+			for (Class<? extends Node> c : clazz) {
+				if (c.isAssignableFrom(p.getClass())) {
+					return p;
+				}
 			}
 		}
 		return null;

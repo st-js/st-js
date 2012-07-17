@@ -1,18 +1,38 @@
 package org.stjs.generator.writer.innerTypes;
 
+import org.stjs.javascript.functions.Callback0;
+import org.stjs.javascript.functions.Function0;
+
 public class InnerTypes13 {
 
-	public static void main(String[] args){
-		Object o = new Object(){
-			public void denver(){
-				InnerDeep deep = new InnerDeep();
+	private final Button plusBtn;
+
+	//private final Button minusBtn;
+
+	public InnerTypes13(String id, String name, String labelText, final int decimals) {
+		plusBtn = new Button("+", new Callback0() {
+
+			@Override
+			public void $invoke() {
+
 			}
-			
-			class InnerDeep {
-				private String a = null;
+		});
+
+		method(new Function0<Boolean>() {
+			@Override
+			public Boolean $invoke() {
+				return true;
 			}
-		};
-		
+		});
+
 	}
-	
+
+	public static class Button {
+
+		public Button(Object content, final Callback0 handler) {
+		}
+	}
+
+	public static void method(Function0<Boolean> f) {
+	}
 }
