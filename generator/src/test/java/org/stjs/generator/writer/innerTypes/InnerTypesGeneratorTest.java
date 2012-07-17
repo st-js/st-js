@@ -82,7 +82,7 @@ public class InnerTypesGeneratorTest {
 	
 	@Test
 	public void testInnerInsideInner(){
-		generate(InnerTypes12.class);
+		generate(InnerTypes17.class);
 	}
 	
 	@Test
