@@ -11,6 +11,9 @@ public class GlobalScopeGeneratorTest {
 	public void testGlobalScopeGeneration() {
 		assertCodeDoesNotContain(Globals.class, "field:");
 		assertCodeDoesNotContain(Globals.class, "method:");
+		assertCodeContains(Globals.class, "field=null");
+		assertCodeContains(Globals.class, "method=function(");
+		assertCodeContains(Globals.class, "one=null;two=null;");
 
 		assertCodeContains(Globals.class, "instanceMethod:");
 		assertCodeContains(Globals.class, "instanceField:");

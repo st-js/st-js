@@ -436,11 +436,12 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(FieldDeclaration n, GenerationContext context) {
 		List<VariableDeclarator> decls = n.getVariables();
+		boolean global = isGlobal(resolvedType(parent(n)));
 		for (int i = 0; i < decls.size(); i ++) {
 			if(i > 0){
-				printer.printLn(",");
+				printer.printLn(global ? ";" : ",");
 			}
-			printVariableDeclarator(decls.get(i), context, true, true);
+			printVariableDeclarator(decls.get(i), context, true, !global || isInstanceField(n));
 		}
 	}
 
@@ -474,10 +475,13 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 
 		// no type appears for global scopes
-		boolean skipType = isGlobal(type) && isStatic(modifiers);
+		boolean global = isGlobal(type) && isStatic(modifiers);
 
 		if (anonymous) {
 			printer.print("function");
+		} else if (global) {
+			printer.print(name);
+			printer.print(" = function");
 		} else {
 			printer.print(name);
 			printer.print(" : function");
@@ -815,7 +819,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printer.print(names.getTypeName(interfaces.get(i)));
 		}
 		printer.print("], ");
-		
+	
 		printMembers(filterInstanceMembers(n), context);
 		printer.print(", ");
 		printMembers(filterStaticMembers(n, type), context);
@@ -828,6 +832,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		
 		if(!inlineType){
 			printer.printLn(";");
+			printGlobals(filterGlobals(n, type), context);
 			for(BodyDeclaration decl : filterInnerTypes(n, type)){
 				decl.accept(this, context);
 			}
@@ -838,9 +843,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	private List<BodyDeclaration> filterInstanceMembers(ClassOrInterfaceDeclaration n){
 		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
 		for(BodyDeclaration decl : n.getMembers()){
-			if(decl instanceof FieldDeclaration && !isStatic(((FieldDeclaration)decl).getModifiers()) ||
-					decl instanceof MethodDeclaration && !isStatic(((MethodDeclaration)decl).getModifiers()) ||
-					decl instanceof InitializerDeclaration && !((InitializerDeclaration)decl).isStatic()){
+			if(isInstanceField(decl) || isInstanceMethod(decl) || isInstanceInitializer(decl)){
 				decls.add(decl);
 			}
 		}
@@ -848,12 +851,14 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 	
 	private List<BodyDeclaration> filterStaticMembers(ClassOrInterfaceDeclaration n, ClassWrapper outerType){
+		if(isGlobal(outerType)){
+			return Collections.emptyList();
+		}
 		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
 		for(BodyDeclaration decl : n.getMembers()){
-			if(decl instanceof ClassOrInterfaceDeclaration && outerType.isInnerType() ||
-					decl instanceof ClassOrInterfaceDeclaration && outerType.isInnerType() ||
-					decl instanceof FieldDeclaration && isStatic(((FieldDeclaration)decl).getModifiers()) ||
-					decl instanceof MethodDeclaration && isStatic(((MethodDeclaration)decl).getModifiers())){
+			if(outerType.isInnerType() && (isClassOrInterface(decl) || isEnum(decl)) ||
+					isStaticField(decl) || 
+					isStaticMethod(decl)){
 				decls.add(decl);
 			}
 		}
@@ -861,13 +866,26 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 	
 	private List<BodyDeclaration> filterInnerTypes(ClassOrInterfaceDeclaration n, ClassWrapper outerType){
-		if(outerType.isInnerType()){
+		if(outerType.isInnerType() || isGlobal(outerType)){
 			return Collections.emptyList();
 		}
 		
 		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
 		for(BodyDeclaration decl : n.getMembers()){
 			if(decl instanceof ClassOrInterfaceDeclaration || decl instanceof EnumDeclaration){
+				decls.add(decl);
+			}
+		}
+		return decls;
+	}
+	
+	private List<BodyDeclaration> filterGlobals(ClassOrInterfaceDeclaration n, ClassWrapper outerType){
+		if(!isGlobal(outerType)){
+			return Collections.emptyList();
+		}
+		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
+		for(BodyDeclaration decl : n.getMembers()){
+			if(isClassOrInterface(decl) || isEnum(decl) || isStaticField(decl) || isStaticMethod(decl)){	
 				decls.add(decl);
 			}
 		}
@@ -1002,6 +1020,14 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 		printer.unindent();
 		printer.print("}");
+	}
+	
+
+	private void printGlobals(List<BodyDeclaration> globals, GenerationContext context){
+		for (BodyDeclaration global : globals) {
+			global.accept(this, context);
+			printer.printLn(";");
+		}
 	}
 
 	private ConstructorDeclaration getConstructor(List<BodyDeclaration> members, GenerationContext context) {
@@ -1417,7 +1443,45 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	private boolean isGlobal(TypeWrapper clazz) {
 		return clazz.hasAnnotation(GlobalScope.class);
 	}
+	
+	private boolean isStaticField(BodyDeclaration decl){
+		return decl instanceof FieldDeclaration &&
+				isStatic(((FieldDeclaration)decl).getModifiers());
+	}
+	
+	private boolean isInstanceField(BodyDeclaration decl){
+		return decl instanceof FieldDeclaration &&
+				!isStatic(((FieldDeclaration)decl).getModifiers());
+	}
+	
+	private boolean isStaticMethod(BodyDeclaration decl){
+		return decl instanceof MethodDeclaration &&
+				isStatic(((MethodDeclaration)decl).getModifiers());
+	}
+	
+	private boolean isInstanceMethod(BodyDeclaration decl){
+		return decl instanceof MethodDeclaration &&
+				!isStatic(((MethodDeclaration)decl).getModifiers());
+	}
+	
+	private boolean isStaticInitializer(BodyDeclaration decl){
+		return decl instanceof InitializerDeclaration &&
+				((InitializerDeclaration)decl).isStatic();
+	}
+	
+	private boolean isInstanceInitializer(BodyDeclaration decl){
+		return decl instanceof InitializerDeclaration &&
+				!((InitializerDeclaration)decl).isStatic();
+	}
 
+	private boolean isClassOrInterface(BodyDeclaration decl){
+		return decl instanceof ClassOrInterfaceDeclaration;
+	}
+	
+	private boolean isEnum(BodyDeclaration decl){
+		return decl instanceof EnumDeclaration;
+	}
+	
 	@Override
 	public void visit(NameExpr n, GenerationContext context) {
 		if (GeneratorConstants.SPECIAL_THIS.equals(n.getName())) {

@@ -17,4 +17,5 @@ public class Globals {
 	public String instanceField;
 
 	public static Globals global = new Globals();
+	public static int one, two;
 }
