@@ -4,13 +4,12 @@ package org.stjs.generator.writer.innerTypes;
 public class InnerTypes17 {
 	
 	public static void main(){
-		Inner.InnerDeep deep = new Inner.InnerDeep();
+		Inner.Enum deep = Inner.Enum.a;
 	}
 
 	private static class Inner {
-		private String a = "a";
-		private static class InnerDeep {
-			private String b = "b";
-		}		
+		enum Enum {
+			a, b, c;
+		}
 	}
 }

@@ -20,10 +20,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.type.FieldWrapper;
 import org.stjs.generator.type.MethodSelector;
 import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.type.TypeWrapper;
+import org.stjs.generator.utils.Option;
 import org.stjs.generator.variable.Variable;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -76,14 +78,34 @@ public abstract class AbstractScope implements Scope {
 	}
 
 	public TypeWithScope resolveType(String name) {
-		TypeWrapper classWrapper = types.get(name);
+		String[] components = name.split("\\.");
+		TypeWrapper classWrapper = types.get(components[0]);
 		if (classWrapper != null) {
-			return new TypeWithScope(this, classWrapper);
+			if(components.length == 1){
+				return new TypeWithScope(this, classWrapper);
+			}else{
+				ClassWrapper inner = resolveInnerType(components, (ClassWrapper)classWrapper, 1);
+				return new TypeWithScope(this, inner);
+			}
 		}
 		if (parent != null) {
 			return parent.resolveType(name);
 		}
 		return null;
+	}
+	
+	private ClassWrapper resolveInnerType(String[] innerTypeName, ClassWrapper outerType, int index){
+		Option<ClassWrapper> inner = outerType.getDeclaredClass(innerTypeName[index]);
+		if(inner.isEmpty()){
+			// failed to resolve;
+			return null;
+		}
+		if(index >= innerTypeName.length - 1){
+			// successfully resolved
+			return inner.getOrNull();
+		}
+		// we need to go deeper
+		return resolveInnerType(innerTypeName, inner.getOrNull(), index + 1);
 	}
 
 	public Scope addChild(Scope scope) {

@@ -82,18 +82,36 @@ public class InnerTypesGeneratorTest {
 	
 	@Test
 	public void testInnerInsideInner(){
-		generate(InnerTypes17.class);
+		String code = generate(InnerTypes15.class);
+		assertCodeContains(code, 
+				"var InnerTypes15 = function(){};" +
+				"stjs.extend(InnerTypes15, null, [], {}, {");
+		assertCodeContains(code, 
+				"var deep = new InnerTypes15.Inner.InnerDeep()");
+		assertCodeContains(code, 
+				";InnerTypes15.Inner = function(){}; " + 
+				"stjs.extend(InnerTypes15.Inner, null, [], {");
+		assertCodeContains(code, 
+				"{InnerDeep : stjs.extend(function(){}, null, [], {");
 	}
 	
 	@Test
 	public void testInnerInsideAnonymous(){
-		generate(InnerTypes15.class);
+		generate(InnerTypes16.class);
 	}
 	
 	@Test
 	public void testEnumInsideInner(){
-		assertCodeContains(InnerTypes16.class, 
-				"stjs.extend(InnerTypes16.Inner, null, [], {}, {Enum:stjs.enumeration(");
+		String code = generate(InnerTypes17.class);
+		assertCodeContains(code,
+				"var InnerTypes17 = function(){};" +
+				"stjs.extend(InnerTypes17, null, [], {}, {");
+		assertCodeContains(code,
+				"var deep = InnerTypes17.Inner.Enum.a;");
+		assertCodeContains(code, 
+				"stjs.extend(InnerTypes17.Inner, null, [], {}, {");
+		assertCodeContains(code, 
+				"{Enum:stjs.enumeration(");
 	}
 	
 }
