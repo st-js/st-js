@@ -114,4 +114,21 @@ public class InnerTypesGeneratorTest {
 				"{Enum:stjs.enumeration(");
 	}
 	
+	@Test
+	public void testAnonymousInsideAnonymous(){
+		String code = generate(InnerTypes18.class);
+		assertCodeContains(code, "var o = new stjs.extend(function(){}, Object, [], {");
+		assertCodeContains(code, "var o2 = new stjs.extend(function(){}, Object, [], {");
+	}
+	
+	@Test
+	public void testAnonymousInsideInner(){
+		String code = generate(InnerTypes19.class);
+		assertCodeContains(code, 
+				"InnerTypes19.Inner = function(){};" +
+				"stjs.extend(InnerTypes19.Inner, null, [], {");
+		assertCodeContains(code, 
+				"return new stjs.extend(function(){}, Object, [], {");
+	}
+	
 }
