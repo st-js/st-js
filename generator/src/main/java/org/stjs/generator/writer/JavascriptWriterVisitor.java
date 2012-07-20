@@ -767,8 +767,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printComments(n, context);
 
 		ClassScope scope = (ClassScope) scope(n);
-		boolean isAnonymousType = GeneratorConstants.SPECIAL_INLINE_TYPE.equals(n.getName());
-
+		
 		if (resolvedType(n) == null) {
 			// for anonymous object creation the type is set already
 			resolvedType(n, scope.resolveType(n.getName()).getType());
@@ -776,7 +775,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 		ClassWrapper type = (ClassWrapper)resolvedType(n);
 		ClassWrapper outerType = type.getDeclaringClass().getOrNull();
-		boolean isDeepInnerType = type.isInnerType() && outerType.isInnerType();
+		boolean isDeepInnerType = type.isInnerType() && (outerType.isInnerType() || outerType.isAnonymousClass());
 		String namespace = null;
 
 		if (ClassUtils.isRootType(type)) {
@@ -787,8 +786,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 
 		String className = null;
-		if(!isAnonymousType){
-			if(!type.isInnerType() && namespace == null){
+		if(!type.isAnonymousClass()){
+			if(!type.isInnerType() && !type.isAnonymousClass() && namespace == null){
 				printer.print("var ");
 			}
 			if(isDeepInnerType){
@@ -798,14 +797,14 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				className = names.getTypeName(type);
 				printer.print(className);
 				printer.print(" = ");
-				printConstructorImplementation(n, context, scope, isAnonymousType);
+				printConstructorImplementation(n, context, scope, type.isAnonymousClass());
 				printer.printLn(";");
 			}
 		}
 		
 		printer.print("stjs.extend(");
-		if(isAnonymousType || isDeepInnerType){
-			printConstructorImplementation(n, context, scope, isAnonymousType);
+		if(type.isAnonymousClass() || isDeepInnerType){
+			printConstructorImplementation(n, context, scope, type.isAnonymousClass());
 		}else{
 			printer.print(className);
 		}
@@ -845,7 +844,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printTypeDescription(n, context);
 		printer.print(")");
 		
-		if(!isAnonymousType && !isDeepInnerType){
+		if(!type.isAnonymousClass() && !isDeepInnerType){
 			printer.printLn(";");
 			printGlobals(filterGlobals(n, type), context);
 			for(BodyDeclaration decl : filterInnerTypes(n, type)){
@@ -872,7 +871,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
 		for(BodyDeclaration decl : n.getMembers()){
-			if(outerType.isInnerType() && (isClassOrInterface(decl) || isEnum(decl)) ||
+			if((outerType.isInnerType() || outerType.isAnonymousClass()) && (isClassOrInterface(decl) || isEnum(decl)) ||
 					isStaticField(decl) || 
 					isStaticMethod(decl)){
 				decls.add(decl);

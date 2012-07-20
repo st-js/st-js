@@ -97,7 +97,14 @@ public class InnerTypesGeneratorTest {
 	
 	@Test
 	public void testInnerInsideAnonymous(){
-		generate(InnerTypes16.class);
+		String code = generate(InnerTypes16.class);
+		assertCodeContains(code, 
+				"var InnerTypes16 = function(){};" +
+				"stjs.extend(InnerTypes16, null, [], {}, {");
+		assertCodeContains(code,
+				"var o = new stjs.extend(function(){}, Object, [], {");
+		assertCodeContains(code, "}, {" + 
+		            "InnerDeep : stjs.extend(function(){}, null, [], {");
 	}
 	
 	@Test

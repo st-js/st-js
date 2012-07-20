@@ -252,7 +252,7 @@ public class ClassWrapper implements TypeWrapper {
 		if (name.isEmpty()) {
 			return GeneratorConstants.SPECIAL_INLINE_TYPE;
 		}
-		for (Class<?> c = clazz.getDeclaringClass(); c != null; c = c.getDeclaringClass()) {
+		for (Class<?> c = clazz.getDeclaringClass(); c != null && !c.isAnonymousClass(); c = c.getDeclaringClass()) {
 			name = c.getSimpleName() + "." + name;
 		}
 		return name;
@@ -412,6 +412,10 @@ public class ClassWrapper implements TypeWrapper {
 
 	public boolean isInnerType() {
 		return clazz.getDeclaringClass() != null;
+	}
+	
+	public boolean isAnonymousClass(){
+		return clazz.isAnonymousClass();
 	}
 
 	@Override
