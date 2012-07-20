@@ -98,6 +98,8 @@ public class StatementsGeneratorTest {
 	
 	@Test
 	public void testStaticInitializerContainment(){
-		assertEquals(2, execute(Statements16.class));
+		// We must do the weird (Number).intValue() because for some reason the execution returns the
+		// integer 2 when run from eclipse, but return the double 2.0 when run from maven...
+		assertEquals(2, ((Number)execute(Statements16.class)).intValue());
 	}
 }
