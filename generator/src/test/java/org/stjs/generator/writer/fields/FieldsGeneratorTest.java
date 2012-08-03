@@ -1,6 +1,9 @@
 package org.stjs.generator.writer.fields;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
+import static org.stjs.generator.utils.GeneratorTestHelper.execute;
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
@@ -70,5 +73,12 @@ public class FieldsGeneratorTest {
 	@Test
 	public void testPrivateFinalBooleanBug() {
 		assertCodeContains(Fields13.class, "value : false,");
+	}
+
+	@Test
+	public void testStaticFieldsDependencies() {
+		Object result = execute(Fields14.class);
+		assertNotNull(result);
+		assertEquals(2, ((Number) result).intValue());
 	}
 }
