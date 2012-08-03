@@ -15,6 +15,7 @@
  */
 package org.stjs.generator.writer;
 
+import static japa.parser.ast.body.ModifierSet.isAbstract;
 import static japa.parser.ast.body.ModifierSet.isStatic;
 import static org.stjs.generator.ast.ASTNodeData.checkParent;
 import static org.stjs.generator.ast.ASTNodeData.parent;
@@ -858,7 +859,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	private List<BodyDeclaration> filterInstanceMembers(ClassOrInterfaceDeclaration n){
 		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
 		for(BodyDeclaration decl : n.getMembers()){
-			if(isInstanceField(decl) || isInstanceMethod(decl) || isInstanceInitializer(decl)){
+			if(isInstanceField(decl) || isConcreteInstanceMethod(decl) || isInstanceInitializer(decl)){
 				decls.add(decl);
 			}
 		}
@@ -1481,9 +1482,10 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				isStatic(((MethodDeclaration)decl).getModifiers());
 	}
 	
-	private boolean isInstanceMethod(BodyDeclaration decl){
+	private boolean isConcreteInstanceMethod(BodyDeclaration decl){
 		return decl instanceof MethodDeclaration &&
-				!isStatic(((MethodDeclaration)decl).getModifiers());
+				!isStatic(((MethodDeclaration)decl).getModifiers()) &&
+				!isAbstract(((MethodDeclaration)decl).getModifiers());
 	}
 	
 	private boolean isInstanceInitializer(BodyDeclaration decl){

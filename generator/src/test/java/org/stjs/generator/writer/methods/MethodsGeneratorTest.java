@@ -82,4 +82,10 @@ public class MethodsGeneratorTest {
 	public void testWildcardResolution() {
 		assertCodeContains(Methods13.class, "m.parent().parent()");
 	}
+
+	@Test
+	public void testAbstractMethod() {
+		// the class only contains abstract methods, therefore nothing must be generated
+		assertCodeContains(Methods15.class, "stjs.extend(Methods15, null, [], {}, {}, {});");
+	}
 }
