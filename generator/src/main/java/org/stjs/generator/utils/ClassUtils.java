@@ -106,7 +106,7 @@ public class ClassUtils {
 		}
 		TypeWrapper superClass = type.getSuperClass();
 
-		return superClass == null || superClass.equals(TypeWrappers.wrap(Object.class));
+		return superClass == null || superClass.equals(TypeWrappers.wrap(Object.class)) ;
 	}
 
 	public static boolean isSyntheticType(TypeWrapper clazz) {

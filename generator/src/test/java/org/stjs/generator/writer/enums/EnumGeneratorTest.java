@@ -40,4 +40,11 @@ public class EnumGeneratorTest {
 	public void testEnumDeclarationInInterface() {
 		assertCodeContains(Enums8.class, "Enums8.MyEnum = stjs.enumeration(\"a\", \"b\", \"c\");");
 	}
+	
+	@Test
+	public void testEnumsNamespace(){
+		assertCodeContains(EnumsNamespace.class, // 
+				"stjs.ns(\"my.enum\"); " + //
+				"my.enum.EnumsNamespace =  stjs.enumeration");
+	}
 }

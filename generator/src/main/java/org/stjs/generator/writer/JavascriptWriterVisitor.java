@@ -264,18 +264,18 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(EnumDeclaration n, GenerationContext context) {
-		printComments(n, context);
-		// printer.print(n.getName());
+
 		Scope scope = scope(n);
 		ClassWrapper type = (ClassWrapper)scope.resolveType(n.getName()).getType();
+		String namespace = ClassUtils.getNamespace(type);
+		if (namespace != null) {
+			printer.printLn("stjs.ns(\"" + namespace + "\");");
+		}
+		
+		printComments(n, context);
+		// printer.print(n.getName());
 		ClassWrapper outerType = type.getDeclaringClass().getOrNull();
 		boolean isDeepInnerType = type.isInnerType() && outerType.isInnerType();
-//		if (ClassUtils.isRootType(type)) {
-			String namespace = ClassUtils.getNamespace(type);
-//			if (namespace != null) {
-//				printer.printLn("stjs.ns(\"" + namespace + "\");");
-//			}
-//		}
 		if(!type.isInnerType() && namespace == null){
 				printer.print("var ");
 		}
