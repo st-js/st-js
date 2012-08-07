@@ -19,18 +19,18 @@ public class GlobalScopeGeneratorTest {
 		assertCodeContains(Globals.class, "method=function(");
 		assertCodeContains(Globals.class, "one=null;two=null;");
 
-		assertCodeContains(Globals.class, "instanceMethod:");
-		assertCodeContains(Globals.class, "instanceField:");
+		assertCodeContains(Globals.class, "prototype.instanceMethod=");
+		assertCodeContains(Globals.class, "prototype.instanceField=");
 	}
 
 	@Test
 	public void testQualifiedCall() {
-		assertCodeContains(GlobalScope1.class, "test:function(){method();}");
+		assertCodeContains(GlobalScope1.class, "prototype.test=function(){method();};");
 	}
 
 	@Test
 	public void testCallWithStaticImport() {
-		assertCodeContains(GlobalScope2.class, "test:function(){method();}");
+		assertCodeContains(GlobalScope2.class, "prototype.test=function(){method();};");
 	}
 
 	@Test

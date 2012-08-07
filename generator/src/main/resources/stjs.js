@@ -238,7 +238,7 @@ stjs.copyProps=function(from, to){
 	return to;
 };
 
-stjs.extend=function(_constructor, _super, _implements, _members, _staticMembers, _typeDescription){
+stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescription){
 	var key, a;
 	if(_super != null){
 		// I is used as a no-op constructor that has the same prototype as _super
@@ -253,18 +253,22 @@ stjs.extend=function(_constructor, _super, _implements, _members, _staticMembers
 		// copy static properties for super
 		// assign every method from proto instance
 		stjs.copyProps(_super, _constructor);
-		stjs.copyProps(_super.$typeDescription, _typeDescription);
-		
-		// remember the correct constructor
-		_constructor.prototype.constructor	= _constructor;
+		stjs.copyProps(_super.$typeDescription, _typeDescription);	
 	}
+	
 	// copy static properties for interfaces
 	for(a = 0; a < _implements.length; ++a){
 		stjs.copyProps(_implements[a], _constructor);
 	}
 	
-	stjs.copyProps(_members, _constructor.prototype);
-	stjs.copyProps(_staticMembers, _constructor);
+	// remember the correct constructor
+	_constructor.prototype.constructor	= _constructor;
+	
+	// run the initializer to assign all static and instance variables/functions
+	if(_initializer != null){
+		_initializer(_constructor, _constructor.prototype);
+	}
+	
 	_constructor.$typeDescription = _typeDescription;
 
 	// build package and assign

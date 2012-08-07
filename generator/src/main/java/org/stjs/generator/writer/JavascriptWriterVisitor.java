@@ -270,15 +270,26 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		ClassWrapper type = (ClassWrapper)scope.resolveType(n.getName()).getType();
 		ClassWrapper outerType = type.getDeclaringClass().getOrNull();
 		boolean isDeepInnerType = type.isInnerType() && outerType.isInnerType();
+//		if (ClassUtils.isRootType(type)) {
+			String namespace = ClassUtils.getNamespace(type);
+//			if (namespace != null) {
+//				printer.printLn("stjs.ns(\"" + namespace + "\");");
+//			}
+//		}
+		if(!type.isInnerType() && namespace == null){
+				printer.print("var ");
+		}
 		if(isDeepInnerType){
+			printer.print("constructor.");
 			printer.print(type.getSimpleName());
-			printer.print(" : ");
+			printer.print(" = ");
 		}else{
 			printer.print(names.getTypeName(type));
 			printer.print(" = ");
 		}
+		
 		// TODO implements not considered
-		printer.printLn(" stjs.enumeration(");
+		printer.printLn("stjs.enumeration(");
 		printer.indent();
 		if (n.getEntries() != null) {
 			for (Iterator<EnumConstantDeclaration> i = n.getEntries().iterator(); i.hasNext();) {
@@ -420,15 +431,14 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	private void printVariableDeclarator(VariableDeclarator n, GenerationContext context, boolean forceInitNull, boolean isProperty) {
-		String assignmentOperator = isProperty ? " : " : " = ";
 		n.getId().accept(this, context);
 		if (n.getInit() != null) {
-			printer.print(assignmentOperator);
+			printer.print(" = ");
 			n.getInit().accept(this, context);
 		} else if (forceInitNull) {
-			printer.print(assignmentOperator + "null");
+			printer.print(" = ");
+			printer.print("null");
 		}
-
 	}
 
 	@Override
@@ -447,13 +457,18 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(FieldDeclaration n, GenerationContext context) {
-		List<VariableDeclarator> decls = n.getVariables();
-		boolean global = isGlobal(resolvedType(parent(n)));
-		for (int i = 0; i < decls.size(); i ++) {
-			if(i > 0){
-				printer.printLn(global ? ";" : ",");
+		TypeWrapper type = resolvedType(parent(n));
+		boolean global = isGlobal(type) && isStatic(n.getModifiers());
+		for (VariableDeclarator v : n.getVariables()) {
+			if(!global){
+				if (isStatic(n.getModifiers())) {
+					printer.print("constructor.");
+				}else{
+					printer.print("prototype.");
+				}
 			}
-			printVariableDeclarator(decls.get(i), context, true, !global || isInstanceField(n));
+			printVariableDeclarator(v, context, true, !global || isInstanceField(n));
+			printer.print(";");
 		}
 	}
 
@@ -489,15 +504,18 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		// no type appears for global scopes
 		boolean global = isGlobal(type) && isStatic(modifiers);
 
-		if (anonymous) {
-			printer.print("function");
-		} else if (global) {
+		if (!anonymous) {
+			if (!global) {
+				if(isStatic(modifiers)){
+					printer.print("constructor.");
+				} else {
+					printer.print("prototype.");
+				}
+			}
 			printer.print(name);
-			printer.print(" = function");
-		} else {
-			printer.print(name);
-			printer.print(" : function");
+			printer.print(" = ");
 		}
+		printer.print("function");
 
 		printer.print("(");
 		if (parameters != null) {
@@ -521,6 +539,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		} else {
 			printer.print(" ");
 			body.accept(this, context);
+		}
+		if (!anonymous) {
+			printer.print(";");
 		}
 	}
 
@@ -792,8 +813,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.print("var ");
 			}
 			if(isDeepInnerType){
+				printer.print("constructor.");
 				printer.print(type.getSimpleName());
-				printer.print(" : ");
+				printer.print(" = ");
 			} else {
 				className = names.getTypeName(type);
 				printer.print(className);
@@ -838,9 +860,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 		printer.print("], ");
 	
-		printMembers(filterInstanceMembers(n), context);
-		printer.print(", ");
-		printMembers(filterStaticMembers(n, type), context);
+		printMembers(n.getMembers(), context);
 		printer.print(", ");
 		printTypeDescription(n, context);
 		printer.print(")");
@@ -854,31 +874,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printStaticInitializers(n, context);
 			printMainMethodCall(n, type);
 		}
-	}
-
-	private List<BodyDeclaration> filterInstanceMembers(ClassOrInterfaceDeclaration n){
-		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
-		for(BodyDeclaration decl : n.getMembers()){
-			if(isInstanceField(decl) || isConcreteInstanceMethod(decl) || isInstanceInitializer(decl)){
-				decls.add(decl);
-			}
-		}
-		return decls;
-	}
-	
-	private List<BodyDeclaration> filterStaticMembers(ClassOrInterfaceDeclaration n, ClassWrapper outerType){
-		if(isGlobal(outerType)){
-			return Collections.emptyList();
-		}
-		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
-		for(BodyDeclaration decl : n.getMembers()){
-			if((outerType.isInnerType() || outerType.isAnonymousClass()) && (isClassOrInterface(decl) || isEnum(decl)) ||
-					isStaticField(decl) || 
-					isStaticMethod(decl)){
-				decls.add(decl);
-			}
-		}
-		return decls;
 	}
 	
 	private List<BodyDeclaration> filterInnerTypes(ClassOrInterfaceDeclaration n, ClassWrapper outerType){
@@ -1020,26 +1015,46 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	private void printMembers(List<BodyDeclaration> members, GenerationContext context) {
-		printer.print("{");
-		printer.indent();
-		boolean printedOne = false;
+		// the following members must not appear in the initializer function:
+		// - constructors (they are printed elsewhere)
+		// - abstract methods (they should be omitted)
+		// - named inner types that are no more than one level deep (they are printed outside
+		//         separately from the enclosing type so that browsers know what type name to give to instances)
+		
+		List<BodyDeclaration> nonConstructors = new ArrayList<BodyDeclaration>();
 		for (BodyDeclaration member : members) {
-			if (member instanceof ConstructorDeclaration) {
-				continue;
-			}
-			if(!printedOne){
-				printedOne = true;
+			if (!isConstructor(member) && //
+					!isAbstractInstanceMethod(member) && //
+					!isNamedFirstLevelInnerType(member)) {
+				nonConstructors.add(member);
+			}	
+		}
+		
+//		if(outerType.isInnerType() || isGlobal(outerType)){
+//			return Collections.emptyList();
+//		}
+//		
+//		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
+//		for(BodyDeclaration decl : n.getMembers()){
+//			if(decl instanceof ClassOrInterfaceDeclaration || decl instanceof EnumDeclaration){
+//				decls.add(decl);
+//			}
+//		}
+//		return decls;
+		
+		if(nonConstructors.size() > 0){
+			printer.print("function(constructor, prototype){");
+			printer.indent();
+			for (BodyDeclaration member : nonConstructors) {
 				printer.printLn();
-			}else{
-				printer.printLn(",");
+				member.accept(this, context);
 			}
-			member.accept(this, context);
-		}
-		if(printedOne){
 			printer.printLn();
+			printer.unindent();
+			printer.print("}");
+		} else {
+			printer.print("null");
 		}
-		printer.unindent();
-		printer.print("}");
 	}
 	
 
@@ -1487,6 +1502,15 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				!isStatic(((MethodDeclaration)decl).getModifiers()) &&
 				!isAbstract(((MethodDeclaration)decl).getModifiers());
 	}
+	private boolean isAbstractInstanceMethod(BodyDeclaration decl){
+		return decl instanceof MethodDeclaration &&
+				!isStatic(((MethodDeclaration)decl).getModifiers()) &&
+				isAbstract(((MethodDeclaration)decl).getModifiers());
+	}
+	
+	private boolean isConstructor(BodyDeclaration decl){
+		return decl instanceof ConstructorDeclaration;
+	}
 	
 	private boolean isInstanceInitializer(BodyDeclaration decl){
 		return decl instanceof InitializerDeclaration &&
@@ -1499,6 +1523,20 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	
 	private boolean isEnum(BodyDeclaration decl){
 		return decl instanceof EnumDeclaration;
+	}
+	
+	private boolean isNamedFirstLevelInnerType(BodyDeclaration decl){
+		if(!(decl instanceof ClassOrInterfaceDeclaration)){
+			return false;
+		}
+		
+		ClassWrapper innerType = (ClassWrapper)resolvedType(decl);
+		if(!innerType.isInnerType() || innerType.isAnonymousClass()){
+			return false;
+		}
+		
+		ClassWrapper outerType = innerType.getDeclaringClass().getOrNull();
+		return outerType != null && !outerType.isInnerType() && !outerType.isAnonymousClass();
 	}
 	
 	@Override
