@@ -97,10 +97,11 @@ public class InnerTypesGeneratorTest {
 		assertCodeContains(code, 
 				"var deep = new InnerTypes15.Inner.InnerDeep()");
 		assertCodeContains(code, 
-				";InnerTypes15.Inner = function(){}; " + 
+				"constructor.Inner = function(){}; " + 
 				"stjs.extend(InnerTypes15.Inner, null, [], function(constructor, prototype){");
 		assertCodeContains(code, 
-				";constructor.InnerDeep = stjs.extend(function(){}, null, [], function(constructor, prototype){");
+				"constructor.InnerDeep = function(){};" +
+				"stjs.extend(InnerTypes15.Inner.InnerDeep, null, [], function(constructor, prototype){");
 	}
 	
 	@Test
@@ -140,7 +141,7 @@ public class InnerTypesGeneratorTest {
 	public void testAnonymousInsideInner(){
 		String code = generate(InnerTypes19.class);
 		assertCodeContains(code, 
-				"InnerTypes19.Inner = function(){};" +
+				"constructor.Inner = function(){};" +
 				"stjs.extend(InnerTypes19.Inner, null, [], function(constructor, prototype){");
 		assertCodeContains(code, 
 				"return new stjs.extend(function(){}, Object, [], function(constructor, prototype){");
@@ -151,5 +152,13 @@ public class InnerTypesGeneratorTest {
 		Object result = execute(InnerTypes20.class);
 		assertNotNull(result);
 		assertEquals(2, ((Number)result).intValue());
+		
+		assertCodeContains(InnerTypes20.class,
+				 "constructor.Holder = function(){};" +
+				 "stjs.extend(InnerTypes20.Holder, null, [], function(constructor, prototype){" + 
+				 "       constructor.VALUE = 2;" +
+				 "}, {});"
+				 );
+		
 	}
 }

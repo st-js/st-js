@@ -796,8 +796,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 
 		ClassWrapper type = (ClassWrapper)resolvedType(n);
-		ClassWrapper outerType = type.getDeclaringClass().getOrNull();
-		boolean isDeepInnerType = type.isInnerType() && (outerType.isInnerType() || outerType.isAnonymousClass());
 		String namespace = null;
 
 		if (ClassUtils.isRootType(type)) {
@@ -812,21 +810,21 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			if(!type.isInnerType() && !type.isAnonymousClass() && namespace == null){
 				printer.print("var ");
 			}
-			if(isDeepInnerType){
+			className = names.getTypeName(type);
+			if(type.isInnerType()){
 				printer.print("constructor.");
 				printer.print(type.getSimpleName());
-				printer.print(" = ");
 			} else {
 				className = names.getTypeName(type);
 				printer.print(className);
-				printer.print(" = ");
-				printConstructorImplementation(n, context, scope, type.isAnonymousClass());
-				printer.printLn(";");
 			}
+			printer.print(" = ");
+			printConstructorImplementation(n, context, scope, type.isAnonymousClass());
+			printer.printLn(";");
 		}
 		
 		printer.print("stjs.extend(");
-		if(type.isAnonymousClass() || isDeepInnerType){
+		if(type.isAnonymousClass()){
 			printConstructorImplementation(n, context, scope, type.isAnonymousClass());
 		}else{
 			printer.print(className);
@@ -865,29 +863,14 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printTypeDescription(n, context);
 		printer.print(")");
 		
-		if(!type.isAnonymousClass() && !isDeepInnerType){
+		if(!type.isAnonymousClass()){
 			printer.printLn(";");
-			printGlobals(filterGlobals(n, type), context);
-			for(BodyDeclaration decl : filterInnerTypes(n, type)){
-				decl.accept(this, context);
-			}
-			printStaticInitializers(n, context);
-			printMainMethodCall(n, type);
-		}
-	}
-	
-	private List<BodyDeclaration> filterInnerTypes(ClassOrInterfaceDeclaration n, ClassWrapper outerType){
-		if(outerType.isInnerType() || isGlobal(outerType)){
-			return Collections.emptyList();
-		}
-		
-		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
-		for(BodyDeclaration decl : n.getMembers()){
-			if(decl instanceof ClassOrInterfaceDeclaration || decl instanceof EnumDeclaration){
-				decls.add(decl);
+			if(!type.isInnerType()){
+				printGlobals(filterGlobals(n, type), context);
+				printStaticInitializers(n, context);
+				printMainMethodCall(n, type);
 			}
 		}
-		return decls;
 	}
 	
 	private List<BodyDeclaration> filterGlobals(ClassOrInterfaceDeclaration n, ClassWrapper outerType){
@@ -1018,29 +1001,13 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		// the following members must not appear in the initializer function:
 		// - constructors (they are printed elsewhere)
 		// - abstract methods (they should be omitted)
-		// - named inner types that are no more than one level deep (they are printed outside
-		//         separately from the enclosing type so that browsers know what type name to give to instances)
 		
 		List<BodyDeclaration> nonConstructors = new ArrayList<BodyDeclaration>();
 		for (BodyDeclaration member : members) {
-			if (!isConstructor(member) && //
-					!isAbstractInstanceMethod(member) && //
-					!isNamedFirstLevelInnerType(member)) {
+			if (!isConstructor(member) && !isAbstractInstanceMethod(member)) {
 				nonConstructors.add(member);
 			}	
 		}
-		
-//		if(outerType.isInnerType() || isGlobal(outerType)){
-//			return Collections.emptyList();
-//		}
-//		
-//		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
-//		for(BodyDeclaration decl : n.getMembers()){
-//			if(decl instanceof ClassOrInterfaceDeclaration || decl instanceof EnumDeclaration){
-//				decls.add(decl);
-//			}
-//		}
-//		return decls;
 		
 		if(nonConstructors.size() > 0){
 			printer.print("function(constructor, prototype){");
@@ -1513,20 +1480,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	
 	private boolean isEnum(BodyDeclaration decl){
 		return decl instanceof EnumDeclaration;
-	}
-	
-	private boolean isNamedFirstLevelInnerType(BodyDeclaration decl){
-		if(!(decl instanceof ClassOrInterfaceDeclaration)){
-			return false;
-		}
-		
-		ClassWrapper innerType = (ClassWrapper)resolvedType(decl);
-		if(!innerType.isInnerType() || innerType.isAnonymousClass()){
-			return false;
-		}
-		
-		ClassWrapper outerType = innerType.getDeclaringClass().getOrNull();
-		return outerType != null && !outerType.isInnerType() && !outerType.isAnonymousClass();
 	}
 	
 	@Override
