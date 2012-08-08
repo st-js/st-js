@@ -476,8 +476,10 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		TypeWithScope type = currentScope.resolveType(n.getName());
 		PreConditions.checkStateNode(n, type != null, "%s class cannot be resolved in the scope", n.getName());
 		Scope enumClassScope = addClassToScope(parentScope, (ClassWrapper) type.getType());
-
+		resolvedType(n, type.getType());
+		
 		super.visit(n, enumClassScope);
+		Checks.postCheckEnumDeclaration(n, context);
 	}
 
 	@Override

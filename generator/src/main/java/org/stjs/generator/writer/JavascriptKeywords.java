@@ -16,6 +16,7 @@
 package org.stjs.generator.writer;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,20 +24,16 @@ import org.stjs.generator.JavascriptGenerationException;
 import org.stjs.generator.ast.SourcePosition;
 
 /**
- * This class checks if a method or a variable has the name of a Javascript keyword. Even though the Java compiler lets
- * the user use some of the keywords as variable names, the Generator should not generate code with these names.
- * 
+ * This class checks if a method or a variable has the name of a Javascript keyword. Even though the Java compiler lets the user use some of the
+ * keywords as variable names, the Generator should not generate code with these names.
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
- * 
  */
+
 public class JavascriptKeywords {
-	private static final Set<String> keywords = new HashSet<String>();
-	static {
-		keywords.add("var");
-		keywords.add("outer");
-		keywords.add("function");
-		keywords.add("prototype");
-	}
+	private static final Set<String> keywords = new HashSet<String>(Arrays.asList(new String[] {"break", "case", "catch", "continue",
+			"debugger", "default", "delete", "do", "else", "finally", "for", "function", "if", "in", "instanceof", "new", "return", "switch",
+			"this", "throw", "try", "typeof", "var", "void", "while", "with", "class", "enum", "export", "extends", "import", "super",
+			"implements", "interface", "let", "package", "private", "protected", "public", "static", "yield"}));
 
 	public static void checkIdentifier(File inputFile, SourcePosition pos, String name) {
 		if (keywords.contains(name)) {
@@ -44,10 +41,13 @@ public class JavascriptKeywords {
 		}
 	}
 
+	public static boolean isReservedWord(String identifier) {
+		return keywords.contains(identifier);
+	}
+
 	public static void checkMethod(File inputFile, SourcePosition sourcePosition, String name) {
 		if (keywords.contains(name)) {
-			throw new JavascriptGenerationException(inputFile, sourcePosition, "Wrong usage of Javascript keyword:"
-					+ name);
+			throw new JavascriptGenerationException(inputFile, sourcePosition, "Wrong usage of Javascript keyword:" + name);
 		}
 	}
 }

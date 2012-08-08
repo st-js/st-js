@@ -188,13 +188,7 @@ public class Checks {
 				}
 			}
 		}
-		String ns = ClassUtils.getNamespace(ASTNodeData.resolvedType(n));
-		if (ns != null) {
-			if (!GeneratorConstants.NAMESPACE_PATTERN.matcher(ns).matches()) {
-				throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
-						"The namespace must be in the form <identifier>[.<identifier>]..");
-			}
-		}
+		checkNamespace(n, context);
 		if (n.getExtends() != null && !n.isInterface()) {
 			TypeWrapper superType = ASTNodeData.resolvedType(n).getSuperClass();
 			if (!(superType instanceof ClassWrapper)) {
@@ -248,6 +242,24 @@ public class Checks {
 		}
 
 	}
+	
+	private static void checkNamespace(BodyDeclaration n, GenerationContext context){
+		String ns = ClassUtils.getNamespace(ASTNodeData.resolvedType(n));
+		if (ns != null) {
+			if (!GeneratorConstants.NAMESPACE_PATTERN.matcher(ns).matches()) {
+				throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+						"The namespace must be in the form <identifier>[.<identifier>]..");
+			}
+			String[] identifiers = ns.split("\\.");
+			for(String identifier : identifiers){
+				if(JavascriptKeywords.isReservedWord(identifier)){
+					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n), 
+						"Identifier \"" + identifier + "\" cannot be used as part of a namespace, " +
+						"because it is a javascript keyword or a javascript reserved word");
+				}
+			}
+		}
+	}
 
 	/**
 	 * check enum declaration
@@ -261,6 +273,10 @@ public class Checks {
 					"Enums with fields or methods are not supported");
 		}
 
+	}
+	
+	public static void postCheckEnumDeclaration(EnumDeclaration n, GenerationContext context) {
+		checkNamespace(n, context);
 	}
 
 	/**

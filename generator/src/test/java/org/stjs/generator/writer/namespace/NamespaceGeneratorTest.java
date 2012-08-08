@@ -57,4 +57,8 @@ public class NamespaceGeneratorTest {
 				"stjs.extend(function(){a.b.Namespace8.apply(this, arguments);}, a.b.Namespace8, [], ");
 	}
 
+	@Test(expected = JavascriptGenerationException.class)
+	public void testReservedWordsInNamespace() {
+		generate(Namespace9.class);
+	}
 }
