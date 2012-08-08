@@ -159,6 +159,12 @@ public class InnerTypesGeneratorTest {
 				 "       constructor.VALUE = 2;" +
 				 "}, {});"
 				 );
-		
+	}
+	
+	@Test
+	public void testAnonymousTypeMethodExecution(){
+		Object result = execute(InnerTypes21.class);
+		assertNotNull(result);
+		assertEquals(5, ((Number)result).intValue());
 	}
 }
