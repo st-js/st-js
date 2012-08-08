@@ -1,8 +1,12 @@
 package org.stjs.generator.writer.innerTypes;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
+import static org.stjs.generator.utils.GeneratorTestHelper.execute;
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
+import junit.framework.Assert;
 
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
@@ -142,4 +146,10 @@ public class InnerTypesGeneratorTest {
 				"return new stjs.extend(function(){}, Object, [], function(constructor, prototype){");
 	}
 	
+	@Test
+	public void testInnerConstantAssignment(){
+		Object result = execute(InnerTypes20.class);
+		assertNotNull(result);
+		assertEquals(2, ((Number)result).intValue());
+	}
 }
