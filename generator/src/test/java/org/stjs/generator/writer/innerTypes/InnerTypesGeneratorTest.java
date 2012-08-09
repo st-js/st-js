@@ -111,7 +111,7 @@ public class InnerTypesGeneratorTest {
 				"var InnerTypes16 = function(){};" +
 				"stjs.extend(InnerTypes16, null, [], function(constructor, prototype){");
 		assertCodeContains(code,
-				"var o = new stjs.extend(function(){}, Object, [], function(constructor, prototype){");
+				"var o = new (stjs.extend(function(){}, Object, [], function(constructor, prototype){");
 		assertCodeContains(code, "};" + 
 		            "constructor.InnerDeep = stjs.extend(function(){}, null, [], function(constructor, prototype){");
 	}
@@ -133,8 +133,8 @@ public class InnerTypesGeneratorTest {
 	@Test
 	public void testAnonymousInsideAnonymous(){
 		String code = generate(InnerTypes18.class);
-		assertCodeContains(code, "var o = new stjs.extend(function(){}, Object, [], function(constructor, prototype){");
-		assertCodeContains(code, "var o2 = new stjs.extend(function(){}, Object, [], function(constructor, prototype){");
+		assertCodeContains(code, "var o = new (stjs.extend(function(){}, Object, [], function(constructor, prototype){");
+		assertCodeContains(code, "var o2 = new (stjs.extend(function(){}, Object, [], function(constructor, prototype){");
 	}
 	
 	@Test
@@ -144,7 +144,7 @@ public class InnerTypesGeneratorTest {
 				"constructor.Inner = function(){};" +
 				"stjs.extend(InnerTypes19.Inner, null, [], function(constructor, prototype){");
 		assertCodeContains(code, 
-				"return new stjs.extend(function(){}, Object, [], function(constructor, prototype){");
+				"return new (stjs.extend(function(){}, Object, [], function(constructor, prototype){");
 	}
 	
 	@Test

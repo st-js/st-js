@@ -821,6 +821,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printer.print(" = ");
 			printConstructorImplementation(n, context, scope, type.isAnonymousClass());
 			printer.printLn(";");
+		}else{
+			printer.print("(");
 		}
 		
 		printer.print("stjs.extend(");
@@ -870,6 +872,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printStaticInitializers(n, context);
 				printMainMethodCall(n, type);
 			}
+		}else {
+			printer.print(")");
 		}
 	}
 	
