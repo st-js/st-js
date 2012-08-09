@@ -20,13 +20,13 @@ public class InlineFunctionGeneratorTest {
 	@Test
 	public void testInterfaceAndParam() {
 		assertCodeContains(InlineFunctions2b.class, 
-				"stjs.extend(function(){},  null, [FunctionInterface2], function(constructor, prototype){" +
+				"stjs.extend(function InlineFunctions2b$1(){},  null, [FunctionInterface2], function(constructor, prototype){" +
 				"prototype.test=2; prototype.$invoke=function(arg){arg=arg+1;}");
 	}
 
 	@Test
 	public void testInterfaceTwoMethods() {
-		assertCodeContains(InlineFunctions3.class, "stjs.extend(function(){}, null, [FunctionInterface2], ");
+		assertCodeContains(InlineFunctions3.class, "stjs.extend(function InlineFunctions3$1(){}, null, [FunctionInterface2], ");
 		assertCodeContains(InlineFunctions3.class, 
 				"prototype.$invoke=function(arg){arg=arg+1;};" + 
 				"prototype.$invoke2=function(arg2){arg2=arg2+1;};");

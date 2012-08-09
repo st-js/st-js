@@ -234,6 +234,7 @@ public class ClassWrapper implements TypeWrapper {
 
 	}
 
+	@Override
 	public Type getType() {
 		return clazz;
 	}
@@ -242,8 +243,17 @@ public class ClassWrapper implements TypeWrapper {
 		return clazz.getPackage().getName();
 	}
 
+	@Override
 	public String getSimpleName() {
 		return clazz.getSimpleName();
+	}
+	
+	/**
+	 * Returns the binary name of the wrapped classed (as defined in JLS §13.1) excluding the package name.
+	 */
+	public String getSimpleBinaryName(){
+		String packageName = clazz.getPackage().getName();
+		return clazz.getName().substring(packageName.length() + 1);
 	}
 
 	@Override

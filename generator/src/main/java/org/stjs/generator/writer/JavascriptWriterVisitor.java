@@ -495,8 +495,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	private void printMethod(String name, List<Parameter> parameters, int modifiers, BlockStmt body,
-			GenerationContext context, TypeWrapper type, boolean anonymous) {
-
+			GenerationContext context, TypeWrapper type, boolean anonymous, boolean isInnerClassConstructor) {
+		
 		if (ModifierSet.isAbstract(modifiers) || ModifierSet.isNative(modifiers)) {
 			return;
 		}
@@ -516,7 +516,10 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printer.print(" = ");
 		}
 		printer.print("function");
-
+		if(isInnerClassConstructor){
+			printer.print(" ");
+			printer.print(name);
+		}
 		printer.print("(");
 		if (parameters != null) {
 			boolean first = true;
@@ -641,7 +644,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				PreConditions.checkStateNode(n, method != null, "A single method was expected for an inline function");
 				if (method != null) {
 					printMethod(method.getName(), method.getParameters(), method.getModifiers(), method.getBody(),
-							context, resolvedType(n), true);
+							context, resolvedType(n), true, false);
 				}
 				return;
 			}
@@ -679,7 +682,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	public void visit(MethodDeclaration n, GenerationContext context) {
 		printComments(n, context);
 		printMethod(names.getMethodName(resolvedMethod(n)), n.getParameters(), n.getModifiers(), n.getBody(), context,
-				resolvedType(parent(n)), false);
+				resolvedType(parent(n)), false, false);
 	}
 
 	private void addCallToSuper(ClassScope classScope, GenerationContext context, Collection<Expression> args,
@@ -729,8 +732,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				}
 			}
 		}
-		printMethod(n.getName(), n.getParameters(), n.getModifiers(), n.getBlock(), context, resolvedType(parent(n)),
-				true);
+		ClassWrapper type = (ClassWrapper)resolvedType(parent(n));
+		printMethod(type.getSimpleBinaryName(), n.getParameters(), n.getModifiers(), n.getBlock(), context, type,
+				true, type.isInnerType() || type.isAnonymousClass());
 	}
 
 	@Override
@@ -895,7 +899,13 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (constr != null) {
 			constr.accept(this, context);
 		} else {
-			printer.print("function(){");
+			ClassWrapper type = (ClassWrapper)resolvedType(n);
+			printer.print("function");
+			if(type.isInnerType() || type.isAnonymousClass()){
+				printer.print(" ");
+				printer.print(type.getSimpleBinaryName());
+			}
+			printer.print("(){");
 			addCallToSuper(scope, context, Collections.<Expression> emptyList(), inlineType);
 			printer.print("}");
 		}
