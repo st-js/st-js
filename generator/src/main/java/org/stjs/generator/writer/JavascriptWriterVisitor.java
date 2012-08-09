@@ -823,14 +823,16 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.print(className);
 			}
 			printer.print(" = ");
-			printConstructorImplementation(n, context, scope, type.isAnonymousClass());
-			printer.printLn(";");
+			if(!type.hasAnonymousDeclaringClass()){
+				printConstructorImplementation(n, context, scope, type.isAnonymousClass());
+				printer.printLn(";");
+			}
 		}else{
 			printer.print("(");
 		}
 		
 		printer.print("stjs.extend(");
-		if(type.isAnonymousClass()){
+		if(type.isAnonymousClass() || type.hasAnonymousDeclaringClass()){
 			printConstructorImplementation(n, context, scope, type.isAnonymousClass());
 		}else{
 			printer.print(className);

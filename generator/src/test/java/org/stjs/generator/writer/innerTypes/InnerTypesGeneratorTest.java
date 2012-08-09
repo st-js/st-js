@@ -113,8 +113,7 @@ public class InnerTypesGeneratorTest {
 		assertCodeContains(code,
 				"var o = new (stjs.extend(function InnerTypes16$1(){}, Object, [], function(constructor, prototype){");
 		assertCodeContains(code, "};" + 
-		            "constructor.InnerDeep = function InnerTypes16$1$InnerDeep(){};" +
-		            "stjs.extend(function InnerTypes16$1$InnerDeep(){}, null, [], function(constructor, prototype){");
+		            "constructor.InnerDeep = stjs.extend(function InnerTypes16$1$InnerDeep(){}, null, [], function(constructor, prototype){");
 	}
 	
 	@Test

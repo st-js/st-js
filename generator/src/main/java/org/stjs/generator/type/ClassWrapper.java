@@ -427,6 +427,16 @@ public class ClassWrapper implements TypeWrapper {
 	public boolean isAnonymousClass(){
 		return clazz.isAnonymousClass();
 	}
+	
+	public boolean hasAnonymousDeclaringClass(){
+		if(clazz.getDeclaringClass() == null){
+			return false;
+		}
+		if(clazz.getDeclaringClass().isAnonymousClass()){
+			return true;
+		}
+		return this.getDeclaringClass().getOrNull().hasAnonymousDeclaringClass();
+	}
 
 	@Override
 	public boolean isImportable() {
