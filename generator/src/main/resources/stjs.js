@@ -244,31 +244,31 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 		// I is used as a no-op constructor that has the same prototype as _super
 		// we do this because we cannot predict the result of calling new _super()
 		// without parameters (it might throw an exception).
-		// Basically, the following 3 lines are a safe equivalent for 
+		// Basically, the following 3 lines are a safe equivalent for
 		// _constructor.prototype = new _super();
 		var I = function(){};
 		I.prototype	= _super.prototype;
 		_constructor.prototype	= new I();
-		
+
 		// copy static properties for super
 		// assign every method from proto instance
 		stjs.copyProps(_super, _constructor);
-		stjs.copyProps(_super.$typeDescription, _typeDescription);	
+		stjs.copyProps(_super.$typeDescription, _typeDescription);
 	}
-	
+
 	// copy static properties for interfaces
 	for(a = 0; a < _implements.length; ++a){
 		stjs.copyProps(_implements[a], _constructor);
 	}
-	
+
 	// remember the correct constructor
 	_constructor.prototype.constructor	= _constructor;
-	
+
 	// run the initializer to assign all static and instance variables/functions
 	if(_initializer != null){
 		_initializer(_constructor, _constructor.prototype);
 	}
-	
+
 	_constructor.$typeDescription = _typeDescription;
 
 	// build package and assign
@@ -319,6 +319,12 @@ stjs.isEnum=function(obj){
 	return obj != null && obj.constructor == stjs.enumEntry;
 }
 
+stjs.trunc=function(n) {
+	if (n == null)
+		return null;
+	return n | 0;
+}
+
 stjs.converters = {
 	Date : function(s, type) {
 		var a = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)$/
@@ -334,6 +340,7 @@ stjs.converters = {
 		return eval(type.arguments[0])[s];
 	}
 };
+
 /** *********** global ************** */
 function exception(err){
 	return err;

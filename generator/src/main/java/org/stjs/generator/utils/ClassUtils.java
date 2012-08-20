@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -59,6 +60,8 @@ public class ClassUtils {
 		basicTypeNames.add(String.class.getName());
 	}
 
+	private static final Set<String> integerTypeNames = new HashSet<String>(Arrays.asList("int", "long", "short", "byte"));
+
 	// private static Map<Class<?>, String> primitiveArrayId;
 
 	public static boolean isBasicType(Type type) {
@@ -84,6 +87,16 @@ public class ClassUtils {
 		return basicTypeNames.contains(typeName);
 	}
 
+	public static boolean isIntegerType(TypeWrapper type) {
+		String typeName = type.toString();
+		return integerTypeNames.contains(typeName);
+	}
+
+	public static boolean isIntegerType(Type type) {
+		String typeName = type.toString();
+		return integerTypeNames.contains(typeName);
+	}
+
 	public static boolean isBridge(Class<?> clazz) {
 		boolean ok = hasAnnotation(clazz, STJSBridge.class);
 		if (ok) {
@@ -96,9 +109,7 @@ public class ClassUtils {
 	}
 
 	/**
-	 * 
-	 * @return true if the type does not have a super class (or that the super class is java.lang.Object). It returns
-	 *         true also for null types
+	 * @return true if the type does not have a super class (or that the super class is java.lang.Object). It returns true also for null types
 	 */
 	public static boolean isRootType(TypeWrapper type) {
 		if (type == null) {
@@ -106,7 +117,7 @@ public class ClassUtils {
 		}
 		TypeWrapper superClass = type.getSuperClass();
 
-		return superClass == null || superClass.equals(TypeWrappers.wrap(Object.class)) ;
+		return superClass == null || superClass.equals(TypeWrappers.wrap(Object.class));
 	}
 
 	public static boolean isSyntheticType(TypeWrapper clazz) {
@@ -118,8 +129,7 @@ public class ClassUtils {
 
 	@SuppressWarnings("deprecation")
 	public static boolean isSyntheticType(Class<?> clazz) {
-		return hasAnnotation(clazz, org.stjs.javascript.annotation.DataType.class)
-				|| hasAnnotation(clazz, SyntheticType.class);
+		return hasAnnotation(clazz, org.stjs.javascript.annotation.DataType.class) || hasAnnotation(clazz, SyntheticType.class);
 	}
 
 	public static boolean hasAnnotation(ClassWrapper clazz, Class<? extends Annotation> annotation) {
@@ -135,7 +145,6 @@ public class ClassUtils {
 
 	/**
 	 * the namespace is taken from the outermost declaring class
-	 * 
 	 * @param type
 	 * @return
 	 */
@@ -200,15 +209,13 @@ public class ClassUtils {
 	}
 
 	/**
-	 * 
 	 * @param resolvedType
 	 * @param arrayCount
 	 * @return the ClassWrapper representing an array of the given type with the given number of dimensions
 	 */
 	public static TypeWrapper arrayOf(TypeWrapper resolvedType, int arrayCount) {
 		if (resolvedType.getClass() == ClassWrapper.class) {
-			return new ClassWrapper(Array.newInstance((Class<?>) resolvedType.getType(), new int[arrayCount])
-					.getClass());
+			return new ClassWrapper(Array.newInstance((Class<?>) resolvedType.getType(), new int[arrayCount]).getClass());
 		}
 		TypeWrapper returnType = resolvedType;
 		for (int i = 0; i < arrayCount; ++i) {
@@ -276,8 +283,7 @@ public class ClassUtils {
 		return isAssignableFromType(cls.getComponentType(), componentType);
 	}
 
-	private static boolean isAssignableFromParameterizedType(final Class<?> cls,
-			final ParameterizedType parameterizedType) {
+	private static boolean isAssignableFromParameterizedType(final Class<?> cls, final ParameterizedType parameterizedType) {
 		return isAssignableFromType(cls, parameterizedType.getRawType());
 	}
 

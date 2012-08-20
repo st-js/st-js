@@ -5,7 +5,7 @@ import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
 
-public class CheckTests {
+public class CheckTest {
 	@Test(expected = JavascriptGenerationException.class)
 	public void testFieldAndMethodTheSameName() {
 		generate(Checks1.class);
