@@ -809,7 +809,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		ClassWrapper type = (ClassWrapper) resolvedType(n);
 		String namespace = null;
 
-		if (ClassUtils.isRootType(type)) {
+		if (!ClassUtils.isInnerType(type)) {
 			namespace = ClassUtils.getNamespace(type);
 			if (namespace != null) {
 				printer.printLn("stjs.ns(\"" + namespace + "\");");

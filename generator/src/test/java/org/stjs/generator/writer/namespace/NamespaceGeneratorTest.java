@@ -27,6 +27,12 @@ public class NamespaceGeneratorTest {
 	}
 
 	@Test
+	public void testExtends2() {
+		assertCodeContains(Namespace2a.class, "stjs.extend(a.b.Namespace2a, a.b.Namespace1, [],");
+		assertCodeDoesNotContain(Namespace2a.class, "var a.b");
+	}
+
+	@Test
 	public void testConstructor() {
 		assertCodeContains(Namespace3.class, "var n = new a.b.Namespace3()");
 	}
@@ -53,8 +59,7 @@ public class NamespaceGeneratorTest {
 
 	@Test
 	public void testInlineConstruct() {
-		assertCodeContains(Namespace8.class, 
-				"stjs.extend(function Namespace8$1(){a.b.Namespace8.apply(this, arguments);}, a.b.Namespace8, [], ");
+		assertCodeContains(Namespace8.class, "stjs.extend(function Namespace8$1(){a.b.Namespace8.apply(this, arguments);}, a.b.Namespace8, [], ");
 	}
 
 	@Test(expected = JavascriptGenerationException.class)

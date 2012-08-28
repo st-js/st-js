@@ -120,6 +120,18 @@ public class ClassUtils {
 		return superClass == null || superClass.equals(TypeWrappers.wrap(Object.class));
 	}
 
+	/**
+	 * @param type
+	 * @return true if the given type is defined within another type
+	 */
+	public static boolean isInnerType(TypeWrapper type) {
+		if (type == null || !(type instanceof ClassWrapper)) {
+			return false;
+		}
+		ClassWrapper classWrapper = (ClassWrapper) type;
+		return classWrapper.getDeclaringClass().isDefined();
+	}
+
 	public static boolean isSyntheticType(TypeWrapper clazz) {
 		if (clazz == null || !(clazz instanceof ClassWrapper)) {
 			return false;
@@ -321,4 +333,5 @@ public class ClassUtils {
 	public static String getPropertiesFileName(String className) {
 		return className.replace('.', '/') + ".stjs";
 	}
+
 }
