@@ -53,6 +53,8 @@ import org.stjs.generator.type.TypeWrappers;
  */
 abstract public class AbstractSTJSMojo extends AbstractMojo {
 
+	private static final Object PACKAGE_INFO_JAVA = "package-info.java";
+
 	/**
 	 * @parameter expression="${project}"
 	 * @required
@@ -171,6 +173,10 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 			sources = accumulateSources(gendir, sourceDir, mapping, stjsMapping);
 			for (File source : sources) {
+				if (source.getName().equals(PACKAGE_INFO_JAVA)) {
+					getLog().debug("Skipping " + source);
+					continue;
+				}
 				File absoluteSource = new File(sourceDir, source.getPath());
 				try {
 					File absoluteTarget = (File) mapping.getTargetFiles(gendir.getAbsolutePath(), source.getPath())
