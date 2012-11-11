@@ -91,7 +91,8 @@ public class TestSTJSMojo extends AbstractSTJSMojo {
 	}
 
 	@Override
-	protected void filesGenerated(Generator generator, GenerationDirectory gendir) throws MojoFailureException {
+	protected void filesGenerated(Generator generator, GenerationDirectory gendir) throws MojoFailureException,
+			MojoExecutionException {
 		super.filesGenerated(generator, gendir);
 		writeClasspathFolder(gendir);
 	}
