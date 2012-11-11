@@ -44,7 +44,7 @@ The only dependency STJS requires at runtime is a small Javascript library (that
 
 The Java code you write (with the purpose to generate Javascript) will not be executed as such. You can only use in this code the Java classes that have their Javascript counterpart when you launch it in your browser. So you CANNOT use typical Java classes like Java util or other JDK packages.
 
-Please note that you need a *Java 6* to have ST-JS compiling your projects.
+Please note that you need at least *Java 6* to have ST-JS compiling your projects.
 
 If we managed to convince you, please continue further for a few minutes tutorial.
 
