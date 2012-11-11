@@ -33,7 +33,7 @@ $("#form").submit(function(ev) {
   that.stocks.push(stockData.stock);
 });
 ```
-   
+
 How does it work
 ================
 STJS does not try to hide from you how Javascript works. STJS addresses Java developers that are comfortable with a regular Javascript way of building application usually using a component library (jQuery or others). We don’t believe in generated Javascript that is unreadable and impossible to debug.
@@ -43,6 +43,8 @@ So we limited STJS to only generate Javascript from a Java code that is as close
 The only dependency STJS requires at runtime is a small Javascript library (that basically provides the function to simulate inheritance in Javascript). That’s it! STJS imposes no java dependency, no visual component, no AJAX framework. You can feel free to use the Javascript libraries and components you like. We’d like to believe that if one day you’ll stop using STJS (!?), you just take the generated Javascript code and continue building your project.
 
 The Java code you write (with the purpose to generate Javascript) will not be executed as such. You can only use in this code the Java classes that have their Javascript counterpart when you launch it in your browser. So you CANNOT use typical Java classes like Java util or other JDK packages.
+
+Please note that you need a *Java 6* to have ST-JS compiling your projects.
 
 If we managed to convince you, please continue further for a few minutes tutorial.
 
@@ -85,7 +87,7 @@ var stock = {
   "stock":"ABC"
 };
 ```
-Both codes will generate the same Javascript! 
+Both codes will generate the same Javascript!
 To access a map element:
 ```java
 Double value = map.$get("key");
@@ -139,7 +141,7 @@ public class Child extends Parent {
 	}
 }
  ```
-```javascript   
+```javascript
 Child = function(test) {
 	this._super(null, test);
 }
@@ -220,10 +222,10 @@ Modules
 STJS has mainly three modules each of which is used in different phases of your development. As you'll remark we used the property stjs.version to specify the version of STJS to use (the modules are released together).
 ```xml
 <properties>
-	<stjs.version>1.1.4</stjs.version>
+	<stjs.version>1.2.3</stjs.version>
 </properties>
 ```
-The current STJS version is 1.2.0
+The current STJS version is 1.2.3
 ---------------------------------
 The generator
 -------------
