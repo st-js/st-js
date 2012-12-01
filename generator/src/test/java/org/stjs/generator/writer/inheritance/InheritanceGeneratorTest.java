@@ -1,7 +1,6 @@
 package org.stjs.generator.writer.inheritance;
 
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
 
 import org.junit.Test;
 
@@ -36,5 +35,11 @@ public class InheritanceGeneratorTest {
 	@Test
 	public void testImplementsSyntheticType() {
 		assertCodeContains(Inheritance6.class, "stjs.extend(Inheritance6, null, [], null, {});");
+	}
+
+	@Test
+	public void testExtendsEmptyContructor() {
+		// check that the super constructor is called for empty constructor in the child class
+		assertCodeContains(Inheritance7.class, "MySuperClass.call(this);");
 	}
 }
