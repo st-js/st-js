@@ -3,9 +3,9 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>examples</artifactId>
-	<packaging>war</packaging>
-	<name>Strongly-typed Javascript:Examples</name>
+	<artifactId>example-lib</artifactId>
+	<packaging>jar</packaging>
+	<name>Strongly-typed Javascript:Example Lib</name>
 
 	<parent>
 		<groupId>org.st-js</groupId>
@@ -23,37 +23,15 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.st-js</groupId>
-			<artifactId>jquery</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
 
-		<dependency>
-			<groupId>org.st-js</groupId>
-			<artifactId>example-lib</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- tests -->
-		<dependency>
-			<groupId>org.st-js</groupId>
-			<artifactId>test-helper</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.8.1</version>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/js</directory>
+			</resource>
+		</resources>
 		<plugins>
 			<!-- STJS -->
 			<plugin>
@@ -64,8 +42,6 @@
 					<execution>
 						<goals>
 							<goal>generate</goal>
-							<goal>generate-test</goal>
-							<goal>copy-js</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -74,17 +50,16 @@
 				</configuration>
 			</plugin>
 
-			<!-- jetty -->
+			<!-- put in the manifest file that this is a STJS lib (bridge or not)  -->
 			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
-					<webAppConfig>
-						<contextPath>/examples</contextPath>
-						<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-							<resourcesAsCSV>src/main/webapp,target/${project.artifactId}-${project.version}</resourcesAsCSV>
-						</baseResource>
-					</webAppConfig>
+					<archive>
+						<manifestEntries>
+							<STJS-Library>true</STJS-Library>
+						</manifestEntries>
+					</archive>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -109,7 +84,6 @@
 										</versionRange>
 										<goals>
 											<goal>generate</goal>
-											<goal>generate-test</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>

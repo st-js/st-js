@@ -3,9 +3,9 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>jquery</artifactId>
-	<packaging>jar</packaging>
-	<name>Strongly-typed Javascript:JQuery Bridge Library</name>
+	<artifactId>package-js-war</artifactId>
+	<packaging>war</packaging>
+	<version>1.0.0-SNAPSHOT</version>
 
 	<parent>
 		<groupId>org.st-js</groupId>
@@ -13,15 +13,23 @@
 		<version>1.3.0-SNAPSHOT</version>
 	</parent>
 
-	<properties>
-	</properties>
 
 	<dependencies>
+		<!-- for the java libraries -->
 		<dependency>
 			<groupId>org.st-js</groupId>
 			<artifactId>js-lib</artifactId>
-			<version>${project.version}</version>
+			<version>${parent.version}</version>
+			<scope>provided</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.st-js</groupId>
+			<artifactId>jquery</artifactId>
+			<version>${parent.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -31,18 +39,23 @@
 			</resource>
 		</resources>
 		<plugins>
+			<!-- STJS -->
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
+				<groupId>org.st-js</groupId>
+				<artifactId>maven-plugin</artifactId>
+				<version>${parent.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+							<goal>copy-js</goal>
+						</goals>
+					</execution>
+				</executions>
 				<configuration>
-					<archive>
-						<manifestEntries>
-							<STJS-Library>true</STJS-Library>
-						</manifestEntries>
-					</archive>
+					<generateSourceMap>true</generateSourceMap>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

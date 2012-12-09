@@ -26,10 +26,12 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 
 	/**
 	 * <p>
-	 * Specify where to place generated source files
+	 * Specify where to place generated source files <br>
+	 * Default value for war: "${project.build.directory}/${project.build.finalName}/generated-js" <br>
+	 * Default value for jar: "${project.build.outputDirectory}"
 	 * </p>
 	 * 
-	 * @parameter default-value="${project.build.directory}/${project.build.finalName}/generated-js"
+	 * @parameter
 	 */
 	private File generatedSourcesDirectory;
 
@@ -45,12 +47,25 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 
 	@Override
 	public GenerationDirectory getGeneratedSourcesDirectory() {
-		File baseDir = project.getBasedir();
 		File artifactPath = new File(project.getBuild().getDirectory(), project.getBuild().getFinalName());
+		File generatedSourcesDirectoryVar = generatedSourcesDirectory;
+		if (generatedSourcesDirectoryVar == null) {
+			if (project.getPackaging().equals("jar")) {
+				generatedSourcesDirectoryVar = new File(project.getBuild().getOutputDirectory());
+			} else {
+				generatedSourcesDirectoryVar = new File(artifactPath, "generated-js");
+			}
+		}
+		File baseDir = project.getBasedir();
 		File classpath = new File(artifactPath.getAbsolutePath().substring(baseDir.getAbsolutePath().length() + 1));
-		File relativeToClasspath = new File(generatedSourcesDirectory.getAbsolutePath().substring(
-				artifactPath.getAbsolutePath().length() + 1));
-		GenerationDirectory gendir = new GenerationDirectory(generatedSourcesDirectory, classpath, relativeToClasspath);
+
+		File relativeToClasspath = new File("/");
+		if (generatedSourcesDirectoryVar.getAbsolutePath().length() > artifactPath.getAbsolutePath().length()) {
+			relativeToClasspath = new File(generatedSourcesDirectoryVar.getAbsolutePath().substring(
+					artifactPath.getAbsolutePath().length() + 1));
+		}
+		GenerationDirectory gendir = new GenerationDirectory(generatedSourcesDirectoryVar, classpath,
+				relativeToClasspath);
 		return gendir;
 	}
 

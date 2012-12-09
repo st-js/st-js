@@ -152,7 +152,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			}
 			return new URLClassLoader(runtimeUrls, Thread.currentThread().getContextClassLoader());
 		} catch (Exception ex) {
-			throw new MojoExecutionException("Cannot get builtProjectClassLoader");
+			throw new MojoExecutionException("Cannot get builtProjectClassLoader " + ex, ex);
 		}
 	}
 

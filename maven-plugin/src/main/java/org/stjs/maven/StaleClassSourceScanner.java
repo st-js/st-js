@@ -35,6 +35,7 @@ import org.codehaus.plexus.compiler.util.scan.mapping.SuffixMapping;
  * @author jdcasey,acraciun
  * 
  */
+@SuppressWarnings("rawtypes")
 public class StaleClassSourceScanner extends AbstractSourceInclusionScanner {
 	private static final String JAVA_CLASS_SUFFIX = ".java";
 
@@ -84,6 +85,7 @@ public class StaleClassSourceScanner extends AbstractSourceInclusionScanner {
 	// SourceInclusionScanner Implementation
 	// ----------------------------------------------------------------------
 
+	@SuppressWarnings("unchecked")
 	public Set getIncludedSources(File sourceDir, File targetDir) throws InclusionScanException {
 		List srcMappings = getSourceMappings();
 

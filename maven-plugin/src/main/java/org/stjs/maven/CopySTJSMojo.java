@@ -16,6 +16,7 @@
 package org.stjs.maven;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -41,7 +42,7 @@ import org.sonatype.plexus.build.incremental.BuildContext;
  */
 public class CopySTJSMojo extends AbstractMojo {
 
-	private static final String JS_PATH_ENTRY = "Javascript-Path";
+	private static final String STJS_LIBRARY_ENTRY = "STJS-Library";
 
 	/**
 	 * @parameter expression="${project}"
@@ -77,6 +78,13 @@ public class CopySTJSMojo extends AbstractMojo {
 		getLog().info("Copying javascript files from dependencies to this artifact");
 
 		try {
+			FilenameFilter skipClasses = new FilenameFilter() {
+				public boolean accept(File dir, String name) {
+					name = name.toLowerCase();
+					return !name.endsWith(".class");
+				}
+			};
+
 			@SuppressWarnings("unchecked")
 			List<String> runtimeClasspathElements = project.getCompileClasspathElements();
 			for (int i = 0; i < runtimeClasspathElements.size(); i++) {
@@ -85,16 +93,12 @@ public class CopySTJSMojo extends AbstractMojo {
 				try {
 					if (dep.getPath().endsWith(".jar")) {// TODO: is this enough !?
 						Manifest manifest = new JarInputStream(dep.openStream()).getManifest();
-						String jsDirectoryNames = manifest.getMainAttributes().getValue(JS_PATH_ENTRY);
-						if (jsDirectoryNames != null) {
-							String[] jsDirectories = jsDirectoryNames.split(";");
+						String isStjsLibrary = manifest.getMainAttributes().getValue(STJS_LIBRARY_ENTRY);
+						if ("true".equals(isStjsLibrary)) {
 							// these are directories relative to the jar's root
-							for (String jsDirectory : jsDirectories) {
-								URL jsDirectoryURL = new URL("jar:" + dep + "!/" + jsDirectory);
-								getLog().info("Copy directory:" + jsDirectoryURL);
-								FileCopier.copyResourcesRecursively(jsDirectoryURL, new File(generatedSourcesDirectory,
-										jsDirectory));
-							}
+							URL jsDirectoryURL = new URL("jar:" + dep + "!/");
+							getLog().info("Copy directory:" + jsDirectoryURL);
+							FileCopier.copyResourcesRecursively(jsDirectoryURL, generatedSourcesDirectory, skipClasses);
 						}
 					}
 				} catch (IOException notfound) {
@@ -102,7 +106,7 @@ public class CopySTJSMojo extends AbstractMojo {
 				}
 			}
 		} catch (Exception ex) {
-			throw new MojoExecutionException("Cannot get builtProjectClassLoader:" + ex);
+			throw new MojoExecutionException("Cannot get builtProjectClassLoader:" + ex, ex);
 		}
 
 	}

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -33,18 +34,21 @@ public class FileCopier {
 		return false;
 	}
 
-	private static boolean copyFilesRecusively(final File toCopy, final File destDir) {
+	private static boolean copyFilesRecusively(final File toCopy, final File destDir, FilenameFilter filter) {
 		assert destDir.isDirectory();
 
 		if (!toCopy.isDirectory()) {
-			return copyFile(toCopy, new File(destDir, toCopy.getName()));
+			if (filter.accept(toCopy.getParentFile(), toCopy.getName())) {
+				return copyFile(toCopy, new File(destDir, toCopy.getName()));
+			}
+			return true;
 		} else {
 			final File newDestDir = new File(destDir, toCopy.getName());
 			if (!newDestDir.exists() && !newDestDir.mkdir()) {
 				return false;
 			}
 			for (final File child : toCopy.listFiles()) {
-				if (!copyFilesRecusively(child, newDestDir)) {
+				if (!copyFilesRecusively(child, newDestDir, filter)) {
 					return false;
 				}
 			}
@@ -52,22 +56,28 @@ public class FileCopier {
 		return true;
 	}
 
-	public static boolean copyJarResourcesRecursively(final File destDir, final JarURLConnection jarConnection)
-			throws IOException {
+	public static boolean copyJarResourcesRecursively(final File destDir, final JarURLConnection jarConnection,
+			FilenameFilter filter) throws IOException {
 
 		final JarFile jarFile = jarConnection.getJarFile();
 
 		for (final Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements();) {
 			final JarEntry entry = e.nextElement();
-			if (entry.getName().startsWith(jarConnection.getEntryName())) {
+			String startName = jarConnection.getEntryName();
+			if (startName == null) {
+				startName = "";
+			}
+			if (entry.getName().startsWith(startName)) {
 				final String filename = removeStart(entry.getName(), //
-						jarConnection.getEntryName());
+						startName);
 
 				final File f = new File(destDir, filename);
 				if (!entry.isDirectory()) {
 					final InputStream entryInputStream = jarFile.getInputStream(entry);
-					if (!copyStream(entryInputStream, f)) {
-						return false;
+					if (filter.accept(destDir, filename)) {
+						if (!copyStream(entryInputStream, f)) {
+							return false;
+						}
 					}
 					entryInputStream.close();
 				} else {
@@ -81,13 +91,13 @@ public class FileCopier {
 	}
 
 	public static boolean copyResourcesRecursively( //
-			final URL originUrl, final File destination) {
+			final URL originUrl, final File destination, FilenameFilter filter) {
 		try {
 			final URLConnection urlConnection = originUrl.openConnection();
 			if (urlConnection instanceof JarURLConnection) {
-				return copyJarResourcesRecursively(destination, (JarURLConnection) urlConnection);
+				return copyJarResourcesRecursively(destination, (JarURLConnection) urlConnection, filter);
 			} else {
-				return copyFilesRecusively(new File(originUrl.getPath()), destination);
+				return copyFilesRecusively(new File(originUrl.getPath()), destination, filter);
 			}
 		} catch (final IOException e) {
 			e.printStackTrace();
