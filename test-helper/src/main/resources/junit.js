@@ -111,7 +111,7 @@ function argsWithOptionalMsg_(args, length) {
 
   if (argsLength < min) {
     fail(location, args[0], 'expected at least ' + min + ' arguments, got ' + argsLength);
-  } else if (argsLength == length) {
+  } else if (argsLength >= length && typeof copyOfArgs[0] === "string") {
     copyOfArgs[0] += ' ';
   } else {
     copyOfArgs.unshift('');
@@ -144,14 +144,16 @@ function assertFalse(location, statement, msg, actual) {
 }
 
 
-function assertEquals(location, statement, msg, expected, actual) {
+function assertEquals(location, statement, msg, expected, actual, delta) {
   var args = argsWithOptionalMsg_(arguments, 3);
   junit.assertCount++;
   msg = args[0];
   expected = args[1];
   actual = args[2];
+  delta = args[3];
 
-  if (!compare_(expected, actual)) {
+
+  if (!compare_(expected, actual, delta)) {
     fail(location, msg + 'expected ' + prettyPrintEntity_(expected) + ' but was ' +
         prettyPrintEntity_(actual) + '');
   }
@@ -159,9 +161,12 @@ function assertEquals(location, statement, msg, expected, actual) {
 }
 
 
-function compare_(expected, actual) {
+function compare_(expected, actual, delta) {
   if (expected === actual) {
     return true;
+  }
+  if (delta != null){
+	  return Math.abs(expected - actual) <= delta;
   }
 
   if (typeof expected != 'object' ||
