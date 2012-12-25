@@ -15,7 +15,7 @@ import org.stjs.testing.jquery.MockjaxOptions;
 
 @RunWith(STJSTestDriverRunner.class)
 @HTMLFixture(" <div id='fortune'></div>")
-@Scripts({ "/jquery.js", "/jquery.mockjax.js", "/json2.js" })
+@Scripts({ "/jquery.mockjax.js", "/json2.js" })
 public class MockjaxExampleTest {
 	@Test
 	public void myTest() {

@@ -16,10 +16,14 @@
 package org.stjs.generator;
 
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.PreConditions;
+import org.stjs.javascript.annotation.STJSBridge;
 
 /**
  * This class represents a bridge class. As javascript files it has the corresponding source files from the javascript
@@ -46,8 +50,22 @@ public class BridgeClass implements ClassWithJavascript {
 
 	@Override
 	public List<URI> getJavascriptFiles() {
-		// TODO use annotations
-		return Collections.emptyList();
+		STJSBridge bridgeAnnotation = ClassUtils.getAnnotation(clazz, STJSBridge.class);
+		if (bridgeAnnotation == null || bridgeAnnotation.sources() == null || bridgeAnnotation.sources().length == 0) {
+			return Collections.emptyList();
+		}
+
+		List<URI> files = new ArrayList<URI>();
+		for (String src : bridgeAnnotation.sources()) {
+			try {
+				if (src.length() > 0) {
+					files.add(new URI(src));
+				}
+			} catch (URISyntaxException e) {
+				throw new RuntimeException(src + " is not a well-formed URI", e);
+			}
+		}
+		return files;
 	}
 
 	@Override

@@ -120,13 +120,9 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 					addScript(writer, "/stjs.js");
 					addScript(writer, "/junit.js");
 
-					writer.append("<script language='javascript'>stjs.mainCallDisabled=true;</script>");
-					if (addedScripts != null) {
-						for (String script : addedScripts.value()) {
-							addScript(writer, script);
-						}
-					}
+					writer.append("<script language='javascript'>stjs.mainCallDisabled=true;</script>\n");
 
+					// scripts added manually
 					Set<URI> jsFiles = new LinkedHashSet<URI>();
 					for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(config
 							.getClassLoader())) {
@@ -138,6 +134,14 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 					for (URI file : jsFiles) {
 						addScript(writer, file.toString());
 					}
+
+					// scripts added explicitly
+					if (addedScripts != null) {
+						for (String script : addedScripts.value()) {
+							addScript(writer, script);
+						}
+					}
+
 					writer.append("<script language='javascript'>");
 					writer.append("onload=function(){");
 
