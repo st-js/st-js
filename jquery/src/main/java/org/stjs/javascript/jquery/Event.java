@@ -16,6 +16,7 @@
 package org.stjs.javascript.jquery;
 
 import org.stjs.javascript.annotation.SyntheticType;
+import org.stjs.javascript.dom.DOMEvent;
 import org.stjs.javascript.dom.Element;
 
 /**
@@ -67,6 +68,8 @@ abstract public class Event {
 	public Object result;
 	public long timeStamp;
 	public String type;
+
+	public DOMEvent originalEvent;
 
 	abstract public boolean isDefaultPrevented();
 
