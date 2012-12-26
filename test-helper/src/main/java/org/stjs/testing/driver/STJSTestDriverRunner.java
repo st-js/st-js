@@ -31,6 +31,7 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
+import org.stjs.generator.BridgeClass;
 import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
 import org.stjs.generator.Generator;
@@ -38,6 +39,8 @@ import org.stjs.generator.GeneratorConstants;
 import org.stjs.javascript.annotation.STJSBridge;
 import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.Scripts;
+import org.stjs.testing.annotation.ScriptsAfter;
+import org.stjs.testing.annotation.ScriptsBefore;
 
 import com.google.common.base.Strings;
 import com.google.common.io.Closeables;
@@ -100,13 +103,18 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 		return new Statement() {
 
 			@Override
+			@SuppressWarnings("deprecation")
 			public void evaluate() throws Throwable {
 
 				ClassWithJavascript stjsClass = new Generator().getExistingStjsClass(config.getClassLoader(),
 						getTestClass().getJavaClass());
 
 				final HTMLFixture htmlFixture = getTestClass().getJavaClass().getAnnotation(HTMLFixture.class);
+
 				final Scripts addedScripts = getTestClass().getJavaClass().getAnnotation(Scripts.class);
+				final ScriptsBefore addedScriptsBefore = getTestClass().getJavaClass().getAnnotation(
+						ScriptsBefore.class);
+				final ScriptsAfter addedScriptsAfter = getTestClass().getJavaClass().getAnnotation(ScriptsAfter.class);
 				File htmlFile = null;
 				FileWriter writer = null;
 				try {
@@ -122,10 +130,30 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 
 					writer.append("<script language='javascript'>stjs.mainCallDisabled=true;</script>\n");
 
-					// scripts added manually
+					// scripts added explicitly
+					if (addedScripts != null) {
+						for (String script : addedScripts.value()) {
+							addScript(writer, script);
+						}
+					}
+					// scripts before - new style
+					if (addedScriptsBefore != null) {
+						for (String script : addedScriptsBefore.value()) {
+							addScript(writer, script);
+						}
+					}
+
 					Set<URI> jsFiles = new LinkedHashSet<URI>();
 					for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(config
 							.getClassLoader())) {
+
+						if (addedScripts != null && dep instanceof BridgeClass) {
+							// bridge dependencies are not added when using @Scripts
+							System.out
+									.println("WARNING: You're using @Scripts deprecated annotation that disables the automatic inclusion of the Javascript files of the bridges you're using! "
+											+ "Please consider using @ScriptsBefore and/or @ScriptsAfter instead.");
+							continue;
+						}
 						for (URI file : dep.getJavascriptFiles()) {
 							jsFiles.add(file);
 						}
@@ -135,13 +163,12 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 						addScript(writer, file.toString());
 					}
 
-					// scripts added explicitly
-					if (addedScripts != null) {
-						for (String script : addedScripts.value()) {
+					// scripts after - new style
+					if (addedScriptsAfter != null) {
+						for (String script : addedScriptsAfter.value()) {
 							addScript(writer, script);
 						}
 					}
-
 					writer.append("<script language='javascript'>");
 					writer.append("onload=function(){");
 
