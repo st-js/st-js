@@ -24,9 +24,7 @@ import com.google.common.io.Closeables;
 
 /**
  * this is a wrapper around the configuration files stjs-test.properties.
- * 
  * @author acraciun
- * 
  */
 public class DriverConfiguration {
 	private static final String FILE_NAME = "/stjs-test.properties";
@@ -55,12 +53,14 @@ public class DriverConfiguration {
 
 	private final ClassLoader classLoader;
 
+	private Properties props;
+
 	public DriverConfiguration(Class<?> klass) {
 		InputStream in = null;
 		try {
 			in = klass.getResourceAsStream(FILE_NAME);
 			if (in != null) {
-				Properties props = new Properties();
+				props = new Properties();
 				props.load(in);
 
 				// system properties take precedence
@@ -90,9 +90,11 @@ public class DriverConfiguration {
 				}
 
 			}
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			// silent
-		} finally {
+		}
+		finally {
 			Closeables.closeQuietly(in);
 		}
 		classLoader = new WebAppClassLoader(new URL[] {}, klass.getClassLoader(), debugEnabled);
@@ -157,6 +159,14 @@ public class DriverConfiguration {
 
 	public ClassLoader getClassLoader() {
 		return classLoader;
+	}
+
+	public String getProperty(String name) {
+		return this.props.getProperty(name);
+	}
+
+	public String getProperty(String name, String defaultValue) {
+		return this.props.getProperty(name, defaultValue);
 	}
 
 }

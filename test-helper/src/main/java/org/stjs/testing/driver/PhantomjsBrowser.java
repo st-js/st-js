@@ -25,6 +25,8 @@ import com.sun.net.httpserver.HttpExchange;
 @SuppressWarnings("restriction")
 public class PhantomjsBrowser implements Browser {
 
+	public static final String PROP_PHANTOMJS_BIN = "phantomjs.bin";
+
 	private final DriverConfiguration config;
 
 	public PhantomjsBrowser(DriverConfiguration config) {
@@ -33,22 +35,26 @@ public class PhantomjsBrowser implements Browser {
 
 	@Override
 	public void start(long browserId) {
-		//		ProcessBuilder pb =
-		//				new ProcessBuilder("/home/npiguet/softwares/phantomjs/bin/phantomjs",
-		//						"/home/npiguet/workspace/st-js/test-helper/src/main/js/phantomjs-bootstrap.js", Long.toString(browserId));
-		//		pb.redirectErrorStream();
-		//		try {
-		//			Process p = pb.start();
-		//			if (config.isDebugEnabled()) {
-		//				System.out.println("Started phantomjs");
-		//			}
-		//		}
-		//		catch (IOException e) {
-		//			throw new RuntimeException(e);
-		//		}
 
-		//		~/softwares/phantomjs/bin/phantomjs --web-security=no phantomjs-bootstrap.js 0 "http://localhost:8055"
+		String executableName = config.getProperty(PROP_PHANTOMJS_BIN, "phantomjs");
 
+		ProcessBuilder pb = new ProcessBuilder( //
+				executableName, //
+				"--web-security=no", //
+				"/home/npiguet/workspace/st-js/test-helper/src/main/resources/phantomjs-bootstrap.js", // 
+				Long.toString(browserId), //
+				"http://localhost:" + config.getPort());
+
+		pb.redirectErrorStream();
+		try {
+			Process p = pb.start();
+			if (config.isDebugEnabled()) {
+				System.out.println("Started phantomjs");
+			}
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
