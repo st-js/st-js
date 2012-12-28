@@ -26,7 +26,7 @@ import org.stjs.testing.annotation.ScriptsBefore;
 import com.google.common.base.Strings;
 import com.sun.net.httpserver.HttpExchange;
 
-@SuppressWarnings("restriction")
+@SuppressWarnings({ "restriction" /* for HttpExchange */, "deprecation" /* for @Scripts */ })
 public class PhantomjsBrowser implements Browser {
 
 	public static final String PROP_PHANTOMJS_BIN = "phantomjs.bin";
@@ -193,7 +193,6 @@ public class PhantomjsBrowser implements Browser {
 
 	@Override
 	public void stop() {
-		// for phantomJS stop() does nothing.
 		// phantomJS automatically stops when the noMoreTests fixture is sent
 		tempBootstrapJs.delete();
 	}
