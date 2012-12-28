@@ -36,16 +36,22 @@ public class PhantomjsBrowser implements Browser {
 	@Override
 	public void start(long browserId) {
 
+		// TODO: figure out why the _hell_ the following things happen under linux
+		// 1. As expected: if I use "/path/to/phantomjs" as command, everything works
+		// 2. As expected: if I use "alsdkjlaksjd" as command everything blows up with a "command not found" message
+		// 3. Not as expected: if I use "phantomjs" as command, phantomjs seems to die quietly immediately, or isn't started
+		//
+		// aargh!! This is frustrating as hell...
 		String executableName = config.getProperty(PROP_PHANTOMJS_BIN, "phantomjs");
 
 		ProcessBuilder pb = new ProcessBuilder( //
 				executableName, //
 				"--web-security=no", //
-				"/home/npiguet/workspace/st-js/test-helper/src/main/resources/phantomjs-bootstrap.js", // 
+				"/home/lordofthepigs/Workspace/st-js/test-helper/src/main/resources/phantomjs-bootstrap.js", //
 				Long.toString(browserId), //
 				"http://localhost:" + config.getPort());
-
 		pb.redirectErrorStream();
+
 		try {
 			Process p = pb.start();
 			if (config.isDebugEnabled()) {
@@ -102,8 +108,8 @@ public class PhantomjsBrowser implements Browser {
 			if (addedScripts != null && dep instanceof BridgeClass) {
 				// bridge dependencies are not added when using @Scripts
 				System.out
-						.println("WARNING: You're using @Scripts deprecated annotation that disables the automatic inclusion of the Javascript files of the bridges you're using! "
-								+ "Please consider using @ScriptsBefore and/or @ScriptsAfter instead.");
+				.println("WARNING: You're using @Scripts deprecated annotation that disables the automatic inclusion of the Javascript files of the bridges you're using! "
+						+ "Please consider using @ScriptsBefore and/or @ScriptsAfter instead.");
 				continue;
 			}
 			for (URI file : dep.getJavascriptFiles()) {
