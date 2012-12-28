@@ -48,12 +48,11 @@ import com.google.common.io.Files;
 
 /**
  * add the STJSBridge annotation only to allow it to be present in the junit annotation
- * 
  * @author acraciun
- * 
  */
 @STJSBridge
 public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
+
 	private boolean skipIfNoBrowser = false;
 	private final ServerSession serverSession;
 	private final DriverConfiguration config;
@@ -66,7 +65,8 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 		skipIfNoBrowser = config.isSkipIfNoBrowser();
 		try {
 			serverSession = ServerSession.getInstance(config);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new InitializationError(e);
 		}
 	}
@@ -78,8 +78,7 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 				EachTestNotifier eachNotifier = makeNotifier(method, notifier);
 				eachNotifier.fireTestIgnored();
 			} else {
-				notifier.fireTestFailure(new Failure(describeChild(method), new IllegalStateException(
-						"No connected browser")));
+				notifier.fireTestFailure(new Failure(describeChild(method), new IllegalStateException("No connected browser")));
 			}
 			return;
 		}
@@ -106,21 +105,18 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 			@SuppressWarnings("deprecation")
 			public void evaluate() throws Throwable {
 
-				ClassWithJavascript stjsClass = new Generator().getExistingStjsClass(config.getClassLoader(),
-						getTestClass().getJavaClass());
+				ClassWithJavascript stjsClass = new Generator().getExistingStjsClass(config.getClassLoader(), getTestClass().getJavaClass());
 
 				final HTMLFixture htmlFixture = getTestClass().getJavaClass().getAnnotation(HTMLFixture.class);
 
 				final Scripts addedScripts = getTestClass().getJavaClass().getAnnotation(Scripts.class);
-				final ScriptsBefore addedScriptsBefore = getTestClass().getJavaClass().getAnnotation(
-						ScriptsBefore.class);
+				final ScriptsBefore addedScriptsBefore = getTestClass().getJavaClass().getAnnotation(ScriptsBefore.class);
 				final ScriptsAfter addedScriptsAfter = getTestClass().getJavaClass().getAnnotation(ScriptsAfter.class);
 				File htmlFile = null;
 				FileWriter writer = null;
 				try {
 					targetDirectory.mkdirs();
-					htmlFile = new File(targetDirectory, getTestClass().getJavaClass().getName() + "-"
-							+ method.getName() + ".html");
+					htmlFile = new File(targetDirectory, getTestClass().getJavaClass().getName() + "-" + method.getName() + ".html");
 					writer = new FileWriter(htmlFile);
 
 					writer.append("<html>");
@@ -144,8 +140,7 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 					}
 
 					Set<URI> jsFiles = new LinkedHashSet<URI>();
-					for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(config
-							.getClassLoader())) {
+					for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(config.getClassLoader())) {
 
 						if (addedScripts != null && dep instanceof BridgeClass) {
 							// bridge dependencies are not added when using @Scripts
@@ -206,15 +201,16 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 						Files.copy(htmlFile, System.out);
 						System.out.flush();
 					}
-					TestResultCollection response = serverSession.getServer().test(htmlFile, testedClassName,
-							method.getName());
+					TestResultCollection response = serverSession.getServer().test(htmlFile, testedClassName, method.getName());
 					if (!response.isOk()) {
 						// take the first wrong result
 						throw response.buildException(getTestClass().getJavaClass().getName(), method.getName());
 					}
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 					throw new RuntimeException(e);
-				} finally {
+				}
+				finally {
 					Closeables.closeQuietly(writer);
 					if (htmlFile != null) {
 						htmlFile.delete();

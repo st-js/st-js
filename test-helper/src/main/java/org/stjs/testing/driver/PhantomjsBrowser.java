@@ -27,25 +27,28 @@ public class PhantomjsBrowser implements Browser {
 
 	private final DriverConfiguration config;
 
-	public PhantomjsBrowser(DriverConfiguration config){
+	public PhantomjsBrowser(DriverConfiguration config) {
 		this.config = config;
 	}
 
 	@Override
 	public void start(long browserId) {
-		ProcessBuilder pb = new ProcessBuilder(
-				"/home/lordofthepigs/Downloads/phantomjs-1.8.0-linux-x86_64/bin/phantomjs",
-				"/home/lordofthepigs/Workspace/st-js/test-helper/src/main/js/phantomjs-bootstrap.js",
-				Long.toString(browserId));
-		pb.redirectErrorStream();
-		try {
-			Process p = pb.start();
-			if(config.isDebugEnabled()){
-				System.out.println("Started phantomjs");
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		//		ProcessBuilder pb =
+		//				new ProcessBuilder("/home/npiguet/softwares/phantomjs/bin/phantomjs",
+		//						"/home/npiguet/workspace/st-js/test-helper/src/main/js/phantomjs-bootstrap.js", Long.toString(browserId));
+		//		pb.redirectErrorStream();
+		//		try {
+		//			Process p = pb.start();
+		//			if (config.isDebugEnabled()) {
+		//				System.out.println("Started phantomjs");
+		//			}
+		//		}
+		//		catch (IOException e) {
+		//			throw new RuntimeException(e);
+		//		}
+
+		//		~/softwares/phantomjs/bin/phantomjs --web-security=no phantomjs-bootstrap.js 0 "http://localhost:8055"
+
 	}
 
 	@Override
@@ -54,7 +57,7 @@ public class PhantomjsBrowser implements Browser {
 	}
 
 	@Override
-	public void sendTestFixture(AsyncMethod meth, HttpExchange exchange) throws IOException, URISyntaxException {
+	public void sendTestFixture(AsyncMethod meth, AsyncBrowserSession browser, HttpExchange exchange) throws IOException, URISyntaxException {
 
 		Class<?> testClass = meth.getTestClass().getJavaClass();
 		Method method = meth.getMethod().getMethod();
@@ -67,8 +70,8 @@ public class PhantomjsBrowser implements Browser {
 		final ScriptsAfter addedScriptsAfter = testClass.getAnnotation(ScriptsAfter.class);
 
 		StringBuilder resp = new StringBuilder(8192);
-		resp.append("<html>");
-		resp.append("<head>");
+		resp.append("<html>\n");
+		resp.append("<head>\n");
 		addScript(resp, "/stjs.js");
 		addScript(resp, "/junit.js");
 
@@ -88,14 +91,13 @@ public class PhantomjsBrowser implements Browser {
 		}
 
 		Set<URI> jsFiles = new LinkedHashSet<URI>();
-		for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(config
-				.getClassLoader())) {
+		for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(config.getClassLoader())) {
 
 			if (addedScripts != null && dep instanceof BridgeClass) {
 				// bridge dependencies are not added when using @Scripts
 				System.out
-				.println("WARNING: You're using @Scripts deprecated annotation that disables the automatic inclusion of the Javascript files of the bridges you're using! "
-						+ "Please consider using @ScriptsBefore and/or @ScriptsAfter instead.");
+						.println("WARNING: You're using @Scripts deprecated annotation that disables the automatic inclusion of the Javascript files of the bridges you're using! "
+								+ "Please consider using @ScriptsBefore and/or @ScriptsAfter instead.");
 				continue;
 			}
 			for (URI file : dep.getJavascriptFiles()) {
@@ -113,25 +115,26 @@ public class PhantomjsBrowser implements Browser {
 				addScript(resp, script);
 			}
 		}
-		resp.append("<script language='javascript'>");
-		resp.append("onload=function(){");
+		resp.append("<script language='javascript'>\n");
+		resp.append("  onload=function(){\n");
+		resp.append("    console.error(document.getElementsByTagName('html')[0].innerHTML);\n");
 
 		// Adapter between generated assert (not global) and JS-test-driver assert (which is a
 		// set of global methods)
-		resp.append("Assert=window;");
+		resp.append("    Assert=window;\n");
 
 		String testedClassName = testClass.getSimpleName();
 
-		resp.append("try{");
-		resp.append("new " + testedClassName + "()." + method.getName() + "();");
-		resp.append("parent.sendOK('" + testedClassName + "." + method.getName() + "');");
-		resp.append("}catch(ex){");
-		resp.append("parent.sendError('" + testedClassName + "." + method.getName() + "', ex);");
-		resp.append("}");
-		resp.append("}");
-		resp.append("</script>");
-		resp.append("</head>");
-		resp.append("<body>");
+		resp.append("    try{\n");
+		resp.append("      new " + testedClassName + "()." + method.getName() + "();\n");
+		resp.append("      parent.reportResultAndRunNextTest('OK');\n");
+		resp.append("    }catch(ex){\n");
+		resp.append("      parent.reportResultAndRunNextTest(ex, ex.location);\n");
+		resp.append("    }\n");
+		resp.append("  }\n");
+		resp.append("</script>\n");
+		resp.append("</head>\n");
+		resp.append("<body>\n");
 		if (htmlFixture != null) {
 			if (!Strings.isNullOrEmpty(htmlFixture.value())) {
 				resp.append(htmlFixture.value());
@@ -142,9 +145,8 @@ public class PhantomjsBrowser implements Browser {
 				resp.append(writer.toString());
 			}
 		}
-		resp.append("</body>");
-		resp.append("</html>");
-
+		resp.append("</body>\n");
+		resp.append("</html>\n");
 
 		byte[] response = resp.toString().getBytes("UTF-8");
 		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);

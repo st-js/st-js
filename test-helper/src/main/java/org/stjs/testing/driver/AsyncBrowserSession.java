@@ -16,67 +16,75 @@ public class AsyncBrowserSession {
 		this.browser = browser;
 	}
 
-	public long getId(){
+	public long getId() {
 		return this.id;
 	}
 
-	public void start(){
-		if(browser.getConfig().isDebugEnabled()){
+	public void start() {
+		if (browser.getConfig().isDebugEnabled()) {
 			System.out.println("Starting browser " + this.id);
 		}
 		// non-blocking, gets the browser to send the initial request to the server
 		this.browser.start(this.id);
+		RuntimeException ex = new RuntimeException();
+		ex.fillInStackTrace();
+		ex.printStackTrace();
+		System.out.println(Thread.currentThread().getName());
 	}
 
-	public AsyncMethod awaitNewTestReady(){
+	public AsyncMethod awaitNewTestReady() {
 		try {
-			if(browser.getConfig().isDebugEnabled()){
+			if (browser.getConfig().isDebugEnabled()) {
 				System.out.println("Browser " + this.id + " is waiting for a new test");
 			}
 			methodUnderExecution = exchanger.exchange(null);
-			if(browser.getConfig().isDebugEnabled()){
-				System.out.println("Browser " + this.id + " now has his new test");
+			if (browser.getConfig().isDebugEnabled()) {
+				System.out.println("Browser " + this.id + " has consumed the test " + methodUnderExecution.getMethod().getMethod());
 			}
 			return methodUnderExecution;
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public void notifyNewTestReady(AsyncMethod method){
+	public void notifyNewTestReady(AsyncMethod method) {
 		try {
-			if(browser.getConfig().isDebugEnabled()){
-				System.out.println("Browser " + this.id + " has been notified that a new test is available");
+			if (browser.getConfig().isDebugEnabled()) {
+				System.out.println("Test " + method.getMethod().getMethod() + " is availble for browser " + this.id);
 			}
 			exchanger.exchange(method);
-			if(browser.getConfig().isDebugEnabled()){
-				System.out.println("Browser " + this.id + " has consumed the new test");
+			if (browser.getConfig().isDebugEnabled()) {
+				System.out.println("Browser " + this.id + " has returned the result of the previous test");
 			}
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public void notifyNoMoreTests(){
+	public void notifyNoMoreTests() {
 		try {
-			if(browser.getConfig().isDebugEnabled()){
+			if (browser.getConfig().isDebugEnabled()) {
 				System.out.println("Browser " + this.id + " has been notified that no more tests are coming");
 			}
 			exchanger.exchange(null);
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public AsyncMethod getMethodUnderExecution(){
+	public AsyncMethod getMethodUnderExecution() {
 		return methodUnderExecution;
 	}
 
 	@SuppressWarnings("restriction")
 	public void sendTestFixture(AsyncMethod nextMethod, HttpExchange exchange) {
 		try {
-			this.browser.sendTestFixture(nextMethod, exchange);
-		} catch (Exception e) {
+			this.browser.sendTestFixture(nextMethod, this, exchange);
+		}
+		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}

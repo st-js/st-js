@@ -1,4 +1,5 @@
 package org.stjs.testing.driver;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 
@@ -11,5 +12,5 @@ public interface Browser {
 
 	public DriverConfiguration getConfig();
 
-	public void sendTestFixture(AsyncMethod meth, HttpExchange exchange) throws IOException, URISyntaxException;
+	public void sendTestFixture(AsyncMethod meth, AsyncBrowserSession browser, HttpExchange exchange) throws IOException, URISyntaxException;
 }
