@@ -19,26 +19,4 @@ function runFirstTest(){
 	reportResultAndRunNextTest("OK");
 }
 
-// function sendError(method, ex){
-// 	if (ex != "OK") {
-// 		console.error(ex);
-// 		//console.error(stacktrace());
-// 	}
-// 	console.error("" + ex);
-// 	var xmlhttp = new XMLHttpRequest();
-// 	try {
-// 		var result = ex.message || ex;
-// 		xmlhttp.open("POST", testServer + "/getNextTest?browserId=" + browserId + "&result=" + result + "&location=" + ex.location, true);
-// 		xmlhttp.send();
-// 	} catch (ex) {
-// 		console.error("error:" + ex);
-// 	}
-// }
-// 
-// function sendOK(method){
-// 	sendError(method, "OK");
-// }
-
 runFirstTest();
-
-// phantom.exit();
