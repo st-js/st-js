@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.junit.runners.model.InitializationError;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -21,37 +23,33 @@ public class AsyncServerSession {
 
 	public static final String NEXT_TEST_URI = "/getNextTest";
 
-	private static AsyncServerSession instance;
-
 	private final DriverConfiguration config;
 	private final HttpServer httpServer;
 	private final Map<Long, AsyncBrowserSession> browsers = new ConcurrentHashMap<Long, AsyncBrowserSession>();
 
-	private AsyncServerSession(DriverConfiguration config) throws IOException {
+	public AsyncServerSession(DriverConfiguration config) throws InitializationError {
 		this.config = config;
 		// create the HttpServer
 		InetSocketAddress address = new InetSocketAddress(config.getPort());
-		httpServer = HttpServer.create(address, 0);
+		try {
+			httpServer = HttpServer.create(address, 0);
+		}
+		catch (IOException e) {
+			throw new InitializationError(e);
+		}
 
 		// create and register our handler
 		httpServer.createContext("/", new AsyncHttpHandler());
 
-		if(config.isDebugEnabled()){
+		if (config.isDebugEnabled()) {
 			System.out.println("Server session created");
 		}
 		this.start();
 	}
 
-	public static synchronized AsyncServerSession getInstance(DriverConfiguration config) throws IOException {
-		if (instance == null) {
-			instance = new AsyncServerSession(config);
-		}
-		return instance;
-	}
-
-	private void start(){
+	private void start() {
 		httpServer.start();
-		if(config.isDebugEnabled()){
+		if (config.isDebugEnabled()) {
 			System.out.println("Server session started");
 		}
 	}
@@ -71,7 +69,7 @@ public class AsyncServerSession {
 	private final class AsyncHttpHandler implements HttpHandler {
 		@Override
 		public void handle(HttpExchange exchange) throws IOException {
-			if(config.isDebugEnabled()){
+			if (config.isDebugEnabled()) {
 				System.out.println(exchange.getRequestMethod() + ": " + exchange.getRequestURI());
 			}
 
@@ -86,15 +84,17 @@ public class AsyncServerSession {
 				// now really handle the request
 				Map<String, String> params = parseQueryString(exchange.getRequestURI().getQuery());
 				String path = exchange.getRequestURI().getPath();
-				if(NEXT_TEST_URI.equals(path)){
+				if (NEXT_TEST_URI.equals(path)) {
 					handleNextTest(params, exchange);
 				} else {
 					handleResource(path, exchange);
 				}
-			} catch (Exception ex) {
+			}
+			catch (Exception ex) {
 				System.err.println("Error processing request:" + ex);
 				ex.printStackTrace();
-			} finally {
+			}
+			finally {
 				exchange.close();
 			}
 			//
@@ -130,10 +130,9 @@ public class AsyncServerSession {
 			long browserId = parseLong(params.get("browserId"), -1);
 			AsyncBrowserSession browser = browsers.get(browserId);
 			AsyncMethod completedMethod = browser.getMethodUnderExecution();
-			if(completedMethod != null){
-				if(config.isDebugEnabled()){
-					System.out.println("Server received test results for method " + completedMethod.toString() +
-							" from browser " + browserId);
+			if (completedMethod != null) {
+				if (config.isDebugEnabled()) {
+					System.out.println("Server received test results for method " + completedMethod.toString() + " from browser " + browserId);
 				}
 				// We only have a method under execution, if the HTTP request that is being
 				// handled is not the first one the server has received
@@ -144,7 +143,7 @@ public class AsyncServerSession {
 				// will be reported
 				completedMethod.notifyExecutionResult(null);
 			} else {
-				if(config.isDebugEnabled()){
+				if (config.isDebugEnabled()) {
 					System.out.println("Server received request for the first test from browser " + browserId);
 				}
 			}
@@ -154,8 +153,8 @@ public class AsyncServerSession {
 			// whichever comes first. Basically, we are not sending the HTTP response to the
 			// browser until we have received a new test
 			AsyncMethod nextMethod = browser.awaitNewTestReady();
-			if(nextMethod != null){
-				if(config.isDebugEnabled()){
+			if (nextMethod != null) {
+				if (config.isDebugEnabled()) {
 					System.out.println("Server is sending test for method " + nextMethod.toString() + " to browser " + browserId);
 				}
 				browser.sendTestFixture(nextMethod, exchange);
@@ -171,7 +170,7 @@ public class AsyncServerSession {
 			}
 			// XXX: legacy fix
 			String cleanPath = path.replaceFirst("file:/+target", "target");
-			if(config.isDebugEnabled()){
+			if (config.isDebugEnabled()) {
 				System.out.println("Sending resource from classpath://" + cleanPath);
 			}
 			if (!StreamUtils.copy(config.getClassLoader(), cleanPath, exchange)) {
@@ -207,10 +206,16 @@ public class AsyncServerSession {
 			}
 			try {
 				return Long.parseLong(s);
-			} catch (Exception ex) {
+			}
+			catch (Exception ex) {
 				return defaultValue;
 			}
 		}
+	}
+
+	public void stop() {
+		// TODO Auto-generated method stub
+
 	}
 
 	//	protected static final String BROWSER_CHECK_URI = "/check";
@@ -226,16 +231,12 @@ public class AsyncServerSession {
 	//	private TestResultCollection results;
 	//	private Set<Long> browserWithCurrentTest;
 
-
-
 	//
 	//	private void addNoCache(HttpExchange exchange) {
 	//		exchange.getResponseHeaders().add("CacheControl", "no-cache");
 	//		exchange.getResponseHeaders().add("Pragma", "no-cache");
 	//		exchange.getResponseHeaders().add("Expires", "-1");
 	//	}
-
-
 
 	//	private synchronized void handleBrowserResult(Map<String, String> params, HttpExchange exchange) throws IOException {
 	//		addNoCache(exchange);

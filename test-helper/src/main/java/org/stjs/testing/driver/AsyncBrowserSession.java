@@ -26,10 +26,6 @@ public class AsyncBrowserSession {
 		}
 		// non-blocking, gets the browser to send the initial request to the server
 		this.browser.start(this.id);
-		RuntimeException ex = new RuntimeException();
-		ex.fillInStackTrace();
-		ex.printStackTrace();
-		System.out.println(Thread.currentThread().getName());
 	}
 
 	public AsyncMethod awaitNewTestReady() {
@@ -89,27 +85,9 @@ public class AsyncBrowserSession {
 		}
 	}
 
-	//	public void executeMethod(FrameworkMethod method) {
-	//		// blocks the current thread until the method under has finished executing
-	//		// and the browser has returned the result of the execution
-	//		try {
-	//			doEnqueueMethod(method);
-	//		} catch (InterruptedException e) {
-	//			throw new RuntimeException(e);
-	//		}
-	//	}
-	//
-	//	private void doEnqueueMethod(FrameworkMethod method) throws InterruptedException{
-	//		// Blocks the execution of the current thread until
-	//		methods.put(method);
-	//	}
+	public void stop() {
+		// TODO Auto-generated method stub
 
-	//	public void onTestRequested(){
-	//		// blocks until a new test is available, or the server is stopped
-	//	}
-	//
-	//	public void onClassStart(){
-	//
-	//	}
+	}
 
 }
