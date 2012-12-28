@@ -156,10 +156,26 @@ public class PhantomjsBrowser implements Browser {
 		output.flush();
 	}
 
+	@Override
+	public void sendNoMoreTestFixture(AsyncBrowserSession browser, HttpExchange exchange) throws IOException, URISyntaxException {
+		byte[] response = "<html><head><script language='javascript'>parent.phantom.exit()</script></head></html>".getBytes("UTF-8");
+		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+
+		OutputStream output = exchange.getResponseBody();
+		output.write(response);
+		output.flush();
+	}
+
 	private void addScript(StringBuilder builder, String script) throws IOException {
 		// remove wrong leading classpath://
 		String cleanScript = script.replace("classpath://", "/");
 		// add a slash to prevent the browser to interpret the scheme
 		builder.append("<script src='" + cleanScript + "'></script>\n");
+	}
+
+	@Override
+	public void stop() {
+		// for phantomJS stop() does nothing.
+		// phantomJS automatically stops when the noMoreTests fixture is sent
 	}
 }

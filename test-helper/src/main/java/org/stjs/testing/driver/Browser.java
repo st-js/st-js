@@ -13,4 +13,8 @@ public interface Browser {
 	public DriverConfiguration getConfig();
 
 	public void sendTestFixture(AsyncMethod meth, AsyncBrowserSession browser, HttpExchange exchange) throws IOException, URISyntaxException;
+
+	public void sendNoMoreTestFixture(AsyncBrowserSession browser, HttpExchange exchange) throws IOException, URISyntaxException;
+
+	public void stop();
 }

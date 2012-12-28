@@ -22,7 +22,7 @@ public class AsyncBrowserSession {
 
 	public void start() {
 		if (browser.getConfig().isDebugEnabled()) {
-			System.out.println("Starting browser " + this.id);
+			System.out.println("Browser " + this.id + " starting");
 		}
 		// non-blocking, gets the browser to send the initial request to the server
 		this.browser.start(this.id);
@@ -35,7 +35,11 @@ public class AsyncBrowserSession {
 			}
 			methodUnderExecution = exchanger.exchange(null);
 			if (browser.getConfig().isDebugEnabled()) {
-				System.out.println("Browser " + this.id + " has consumed the test " + methodUnderExecution.getMethod().getMethod());
+				if (methodUnderExecution != null) {
+					System.out.println("Browser " + this.id + " has consumed the test " + methodUnderExecution.getMethod().getMethod());
+				} else {
+					System.out.println("Browser " + this.id + " has no more tests");
+				}
 			}
 			return methodUnderExecution;
 		}
@@ -85,9 +89,21 @@ public class AsyncBrowserSession {
 		}
 	}
 
-	public void stop() {
-		// TODO Auto-generated method stub
+	@SuppressWarnings("restriction")
+	public void sendNoMoreTestFixture(AsyncBrowserSession browser, HttpExchange exchange) {
+		try {
+			this.browser.sendNoMoreTestFixture(this, exchange);
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 
+	public void stop() {
+		browser.stop();
+		if (browser.getConfig().isDebugEnabled()) {
+			System.out.println("Browser " + this.id + " stopped");
+		}
 	}
 
 }

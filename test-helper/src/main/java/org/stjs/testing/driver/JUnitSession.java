@@ -59,13 +59,14 @@ public class JUnitSession {
 
 	private void reset() {
 		config = null;
-		serverSession.stop();
-		serverSession = null;
 		for (AsyncBrowserSession browser : browsers) {
+			browser.notifyNoMoreTests();
 			browser.stop();
 		}
 		browsers.clear();
 		remainingRunners.clear();
+		serverSession.stop();
+		serverSession = null;
 	}
 
 	public void runnerStarting(STJSAsyncTestDriverRunner runner) throws InitializationError {
@@ -97,10 +98,10 @@ public class JUnitSession {
 		if (config.isDebugEnabled()) {
 			System.out.println("Runner for class " + runner.getTestClass().getJavaClass().getName() + " has completed");
 		}
-		//		this.remainingRunners.remove(runner);
-		//		if (this.remainingRunners.isEmpty()) {
-		//			reset();
-		//		}
+		this.remainingRunners.remove(runner);
+		if (this.remainingRunners.isEmpty()) {
+			reset();
+		}
 	}
 
 	public DriverConfiguration getConfig() {

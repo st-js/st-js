@@ -97,32 +97,6 @@ public class AsyncServerSession {
 			finally {
 				exchange.close();
 			}
-			//
-			//				//			try {
-			//				Map<String, String> params = parseQueryString(exchange.getRequestURI().getQuery());
-			//				exchange.getResponseHeaders().add("Date", formatDateHeader(new Date()));
-			//				exchange.getResponseHeaders().add("Last-Modified", formatDateHeader(new Date()));
-			//				exchange.getResponseHeaders().add("Connection", "Keep-Alive");
-			//				exchange.getResponseHeaders().add("Server", "STJS");
-			//				String path = exchange.getRequestURI().getPath();
-			//				if ("/".equals(path) || "/start.html".equals(path)) {
-			//					handleResource("/start.html", exchange);
-			//				} else if (BROWSER_CHECK_URI.equals(path)) {
-			//					handleBrowser(params, exchange);
-			//				} else if (BROWSER_RESULT_URI.equals(path)) {
-			//					handleBrowserResult(params, exchange);
-			//				} else if (BROWSER_TEST_URI.equString path = exchange.getRequestURI().getPath();als(path)) {
-			//					handleBrowserTest(params, exchange);
-			//				} else {
-			//					handleResource(path, exchange);
-			//				}
-			//
-			//			} catch (Exception ex) {
-			//				System.err.println("Error processing request:" + ex);
-			//				ex.printStackTrace();
-			//			} finally {
-			//				exchange.close();
-			//			}
 		}
 
 		private void handleNextTest(Map<String, String> params, HttpExchange exchange) {
@@ -158,7 +132,8 @@ public class AsyncServerSession {
 					System.out.println("Server is sending test for method " + nextMethod.toString() + " to browser " + browserId);
 				}
 				browser.sendTestFixture(nextMethod, exchange);
-				// TODO: send the proper HTTP response, with the instructions to run the next test
+			} else {
+				browser.sendNoMoreTestFixture(browser, exchange);
 			}
 		}
 
@@ -170,9 +145,6 @@ public class AsyncServerSession {
 			}
 			// XXX: legacy fix
 			String cleanPath = path.replaceFirst("file:/+target", "target");
-			if (config.isDebugEnabled()) {
-				System.out.println("Sending resource from classpath://" + cleanPath);
-			}
 			if (!StreamUtils.copy(config.getClassLoader(), cleanPath, exchange)) {
 				System.err.println(cleanPath + " was not found in classpath");
 			}
@@ -214,155 +186,7 @@ public class AsyncServerSession {
 	}
 
 	public void stop() {
-		// TODO Auto-generated method stub
+		this.httpServer.stop(5);
 
 	}
-
-	//	protected static final String BROWSER_CHECK_URI = "/check";
-	//	protected static final String BROWSER_RESULT_URI = "/result";
-	//	protected static final String BROWSER_TEST_URI = "/test";
-
-	//	private final Map<Long, BrowserConnection> browserConnections = new HashMap<Long, BrowserConnection>();
-	//	private long lastBrowserId = System.currentTimeMillis();
-	//	private long lastTestId = System.currentTimeMillis();
-	//	private boolean debug;
-	//
-	//	private File testFile = null;
-	//	private TestResultCollection results;
-	//	private Set<Long> browserWithCurrentTest;
-
-	//
-	//	private void addNoCache(HttpExchange exchange) {
-	//		exchange.getResponseHeaders().add("CacheControl", "no-cache");
-	//		exchange.getResponseHeaders().add("Pragma", "no-cache");
-	//		exchange.getResponseHeaders().add("Expires", "-1");
-	//	}
-
-	//	private synchronized void handleBrowserResult(Map<String, String> params, HttpExchange exchange) throws IOException {
-	//		addNoCache(exchange);
-	//		long id = parseLong(params.get("id"), -1);
-	//		long testId = parseLong(params.get("testId"), -1);
-	//
-	//		if (id < 0 || testId < 0) {
-	//			System.err.println("Test id or browser id missing");
-	//			return;
-	//		}
-	//
-	//		BrowserConnection b = browserConnections.get(id);
-	//		if (b != null) {
-	//			if (testId == lastTestId && results != null) {
-	//				results.addResult(b.buildResult(params.get("result"), params.get("location")));
-	//			}
-	//		}
-	//		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-	//		OutputStream output = exchange.getResponseBody();
-	//		output.flush();
-	//	}
-	//
-	//	private synchronized void handleResource(String path, HttpExchange exchange) throws IOException, URISyntaxException {
-	//		if (path.endsWith(".js")) {
-	//			exchange.getResponseHeaders().add("Content-Type", "text/javascript");
-	//		} else if (path.endsWith(".html")) {
-	//			exchange.getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
-	//		}
-	//		// XXX: legacy fix
-	//		String cleanPath = path.replaceFirst("file:/+target", "target");
-	//		if (!StreamUtils.copy(classLoader, cleanPath, exchange)) {
-	//			System.err.println(cleanPath + " was not found in classpath");
-	//		}
-	//	}
-	//
-	//	private long parseLong(String s, long defaultValue) {
-	//		if (s == null) {
-	//			return defaultValue;
-	//		}
-	//		try {
-	//			return Long.parseLong(s);
-	//		} catch (Exception ex) {
-	//			return defaultValue;
-	//		}
-	//	}
-	//
-	//	private synchronized void handleBrowser(Map<String, String> params, HttpExchange exchange) throws IOException {
-	//		addNoCache(exchange);
-	//		long id = parseLong(params.get("id"), -1);
-	//
-	//		if (id < 0) {
-	//			id = ++lastBrowserId;
-	//		}
-	//
-	//		BrowserConnection b = browserConnections.get(id);
-	//		if (b == null) {
-	//			b = new BrowserConnection(id, exchange.getRequestHeaders().getFirst("User-Agent"));
-	//			browserConnections.put(id, b);
-	//		}
-	//		StringBuilder jsonResponse = new StringBuilder();
-	//		jsonResponse.append("{");
-	//		jsonResponse.append("id:").append(id);
-	//		if (testFile != null && !browserWithCurrentTest.contains(id)) {
-	//			jsonResponse.append(",src:").append("'").append(BROWSER_TEST_URI).append("?test=").append(lastTestId)
-	//			.append("'");
-	//			jsonResponse.append(",testId:").append(lastTestId);
-	//			jsonResponse.append(",className:'").append(results.getTestClassName()).append("'");
-	//			jsonResponse.append(",methodName:'").append(results.getTestMethodName()).append("'");
-	//			browserWithCurrentTest.add(id);
-	//		}
-	//		jsonResponse.append("}");
-	//
-	//		byte[] response = jsonResponse.toString().getBytes();
-	//		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-	//
-	//		OutputStream output = exchange.getResponseBody();
-	//		output.write(response);
-	//		output.flush();
-	//	}
-	//
-	//	private synchronized void handleBrowserTest(Map<String, String> params, HttpExchange exchange) throws IOException,
-	//	URISyntaxException {
-	//		addNoCache(exchange);
-	//		if (testFile == null) {
-	//			exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
-	//			return;
-	//		}
-	//		if (!StreamUtils.copy(classLoader, "/" + testFile.getName(), exchange)) {
-	//			System.err.println("/" + testFile.getName() + " was not found in classpath");
-	//		}
-	//	}
-
-	//	public TestResultCollection test(File srcFile, String testClassName, String testMethodName)
-	//			throws InterruptedException {
-	//		int testBrowsers;
-	//		synchronized (this) {
-	//			lastTestId++;
-	//			testFile = srcFile;
-	//			results = new TestResultCollection(testClassName, testMethodName);
-	//			browserWithCurrentTest = new HashSet<Long>();
-	//			testBrowsers = browserConnections.size();
-	//		}
-	//		long endTime = System.currentTimeMillis() + testTimeout * 1000;
-	//
-	//		synchronized (results) {
-	//			while (results.size() != testBrowsers) {
-	//				long stillToWait = endTime - System.currentTimeMillis();
-	//				if (stillToWait <= 0) {
-	//					break;
-	//				}
-	//				results.wait(stillToWait);
-	//			}
-	//		}
-	//
-	//		testFile = null;
-	//		if (results.size() == 0) {
-	//			results.addResult(new TestResult("none", "No test responded back in " + testTimeout + " seconds", "none"));
-	//		}
-	//		return results;
-	//	}
-	//
-	//	public URL getHostURL() {
-	//		try {
-	//			return new URL("http", "localhost", port, "/");
-	//		} catch (MalformedURLException e) {
-	//			throw new RuntimeException(e);
-	//		}
-	//	}
 }
