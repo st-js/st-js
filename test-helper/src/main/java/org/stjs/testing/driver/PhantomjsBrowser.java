@@ -1,6 +1,10 @@
 package org.stjs.testing.driver;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
@@ -28,6 +32,7 @@ public class PhantomjsBrowser implements Browser {
 	public static final String PROP_PHANTOMJS_BIN = "phantomjs.bin";
 
 	private final DriverConfiguration config;
+	private File tempBootstrapJs;
 
 	public PhantomjsBrowser(DriverConfiguration config) {
 		this.config = config;
@@ -35,25 +40,26 @@ public class PhantomjsBrowser implements Browser {
 
 	@Override
 	public void start(long browserId) {
-
-		// TODO: figure out why the _hell_ the following things happen under linux
-		// 1. As expected: if I use "/path/to/phantomjs" as command, everything works
-		// 2. As expected: if I use "alsdkjlaksjd" as command everything blows up with a "command not found" message
-		// 3. Not as expected: if I use "phantomjs" as command, phantomjs seems to die quietly immediately, or isn't started
-		//
-		// aargh!! This is frustrating as hell...
-		String executableName = config.getProperty(PROP_PHANTOMJS_BIN, "phantomjs");
-
-		ProcessBuilder pb = new ProcessBuilder( //
-				executableName, //
-				"--web-security=no", //
-				"/home/lordofthepigs/Workspace/st-js/test-helper/src/main/resources/phantomjs-bootstrap.js", //
-				Long.toString(browserId), //
-				"http://localhost:" + config.getPort());
-		pb.redirectErrorStream();
-
 		try {
-			Process p = pb.start();
+			// We first need to extract phantomjs-bootstrap.js to the temp directory, because phantomjs
+			// can only be started with a file on the local filesystem as argument
+			tempBootstrapJs = unpackBootstrap();
+
+			// TODO: figure out why the _hell_ the following things happen under linux
+			// 1. As expected: if I use "/path/to/phantomjs" as command, everything works
+			// 2. As expected: if I use "alsdkjlaksjd" as command everything blows up with a "command not found" message
+			// 3. Not as expected: if I use "phantomjs" as command, phantomjs seems to die quietly immediately, or isn't started
+			//
+			// aargh!! This is frustrating as hell...
+			String executableName = config.getProperty(PROP_PHANTOMJS_BIN, "phantomjs");
+
+			new ProcessBuilder( //
+					executableName, //
+					"--web-security=no", //
+					tempBootstrapJs.getAbsolutePath(), //
+					Long.toString(browserId), //
+					"http://localhost:" + config.getPort()).start();
+
 			if (config.isDebugEnabled()) {
 				System.out.println("Started phantomjs");
 			}
@@ -189,5 +195,20 @@ public class PhantomjsBrowser implements Browser {
 	public void stop() {
 		// for phantomJS stop() does nothing.
 		// phantomJS automatically stops when the noMoreTests fixture is sent
+		tempBootstrapJs.delete();
+	}
+
+	private File unpackBootstrap() throws IOException{
+		File tmp = File.createTempFile("phantomjs", null);
+		InputStream in = this.getClass().getResourceAsStream("/phantomjs-bootstrap.js");
+		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(tmp));
+		byte[] buffer = new byte[8192];
+		int bytesRead;
+		while((bytesRead = in.read(buffer)) > 0){
+			out.write(buffer, 0, bytesRead);
+		}
+		in.close();
+		out.close();
+		return tmp;
 	}
 }
