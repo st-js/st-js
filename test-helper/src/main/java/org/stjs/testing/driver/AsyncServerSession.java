@@ -18,6 +18,10 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+/**
+ * Manages the HTTP server that is used to send tests to the browsers.
+ * @author lordofthepigs
+ */
 @SuppressWarnings("restriction")
 public class AsyncServerSession {
 
@@ -27,6 +31,9 @@ public class AsyncServerSession {
 	private final HttpServer httpServer;
 	private final Map<Long, AsyncBrowserSession> browsers = new ConcurrentHashMap<Long, AsyncBrowserSession>();
 
+	/**
+	 * Configures and starts the HTTP server
+	 */
 	public AsyncServerSession(DriverConfiguration config) throws InitializationError {
 		this.config = config;
 		// create the HttpServer
@@ -54,10 +61,19 @@ public class AsyncServerSession {
 		}
 	}
 
-	public void addBrowserConnection(AsyncBrowserSession browser) {
-		browsers.put(browser.getId(), browser);
+	/**
+	 * Registers the specified browser session with this HTTP server, so that this server knows how to respond to HTTP requests containing the
+	 * specified session's id. This method is expected to be called many times in a row before any unit test is started, once per browser
+	 * session.
+	 */
+	public void addBrowserConnection(AsyncBrowserSession browserSession) {
+		browsers.put(browserSession.getId(), browserSession);
 	}
 
+	/**
+	 * Instructs the HTTP server to respond with the specified test to the specified browser session the next time that session asks for test to
+	 * run.
+	 */
 	public void queueTest(AsyncMethod method, AsyncBrowserSession browser) {
 		// notify the browser that a new test is ready to be executed. This will actually cause this
 		// server session to release the HTTP response to any previous request, thereby letting the
@@ -99,6 +115,16 @@ public class AsyncServerSession {
 			}
 		}
 
+		/**
+		 * Called when this HTTP server receives a request for the next test from a browser. This method blocks until one of these to conditions
+		 * are met:<br>
+		 * <ol>
+		 * <li>This server receives a new test to send to the browser session that made the request (via the queueTest()) method.
+		 * <li>This server is notified that no more tests are remaining (via AsyncBrowserSession.notifyNoMoreTest())
+		 * </ol>
+		 * Once one of these events has happened, this HTTP server sends the appropriate HTML/javascript response before returning from this
+		 * method.
+		 */
 		private void handleNextTest(Map<String, String> params, HttpExchange exchange) {
 			// Read the test results returned by the browser, if any
 			long browserId = parseLong(params.get("browserId"), -1);
@@ -187,6 +213,5 @@ public class AsyncServerSession {
 
 	public void stop() {
 		this.httpServer.stop(5);
-
 	}
 }

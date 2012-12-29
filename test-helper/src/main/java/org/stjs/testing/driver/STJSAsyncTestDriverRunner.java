@@ -14,7 +14,7 @@ public class STJSAsyncTestDriverRunner extends BlockJUnit4ClassRunner {
 
 	public STJSAsyncTestDriverRunner(Class<?> klass) throws InitializationError, IOException {
 		super(klass);
-		JUnitSession.getInstance().runnerStarting(this);
+		JUnitSession.getInstance().runnerInstantiated(this);
 	}
 
 	@Override
