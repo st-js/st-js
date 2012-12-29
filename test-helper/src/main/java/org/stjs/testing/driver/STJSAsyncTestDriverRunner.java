@@ -41,8 +41,13 @@ public class STJSAsyncTestDriverRunner extends BlockJUnit4ClassRunner {
 					session.getServer().queueTest(aMethod, browser);
 				}
 
-				aMethod.awaitExecutionResult();
-				session.testCompleted(STJSAsyncTestDriverRunner.this, method);
+				TestResultCollection results = aMethod.awaitExecutionResult();
+				session.testCompleted(STJSAsyncTestDriverRunner.this, method, results);
+
+				if (!results.isOk()) {
+					// take the first wrong result
+					throw results.buildException();
+				}
 			}
 		};
 	}

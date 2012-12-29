@@ -12,6 +12,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.stjs.generator.BridgeClass;
@@ -26,7 +27,7 @@ import org.stjs.testing.annotation.ScriptsBefore;
 import com.google.common.base.Strings;
 import com.sun.net.httpserver.HttpExchange;
 
-@SuppressWarnings({ "restriction" /* for HttpExchange */, "deprecation" /* for @Scripts */ })
+@SuppressWarnings({"restriction" /* for HttpExchange */, "deprecation" /* for @Scripts */})
 public class PhantomjsBrowser implements Browser {
 
 	public static final String PROP_PHANTOMJS_BIN = "phantomjs.bin";
@@ -114,8 +115,8 @@ public class PhantomjsBrowser implements Browser {
 			if (addedScripts != null && dep instanceof BridgeClass) {
 				// bridge dependencies are not added when using @Scripts
 				System.out
-				.println("WARNING: You're using @Scripts deprecated annotation that disables the automatic inclusion of the Javascript files of the bridges you're using! "
-						+ "Please consider using @ScriptsBefore and/or @ScriptsAfter instead.");
+						.println("WARNING: You're using @Scripts deprecated annotation that disables the automatic inclusion of the Javascript files of the bridges you're using! "
+								+ "Please consider using @ScriptsBefore and/or @ScriptsAfter instead.");
 				continue;
 			}
 			for (URI file : dep.getJavascriptFiles()) {
@@ -197,17 +198,30 @@ public class PhantomjsBrowser implements Browser {
 		tempBootstrapJs.delete();
 	}
 
-	private File unpackBootstrap() throws IOException{
+	private File unpackBootstrap() throws IOException {
 		File tmp = File.createTempFile("phantomjs", null);
 		InputStream in = this.getClass().getResourceAsStream("/phantomjs-bootstrap.js");
 		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(tmp));
 		byte[] buffer = new byte[8192];
 		int bytesRead;
-		while((bytesRead = in.read(buffer)) > 0){
+		while ((bytesRead = in.read(buffer)) > 0) {
 			out.write(buffer, 0, bytesRead);
 		}
 		in.close();
 		out.close();
 		return tmp;
+	}
+
+	@Override
+	public TestResult buildResult(Map<String, String> queryStringParameters, HttpExchange exchange) {
+		String userAgent = exchange.getRequestHeaders().getFirst("User-Agent");
+		String result = queryStringParameters.get("result");
+		String location = queryStringParameters.get("location");
+
+		if (config.isDebugEnabled()) {
+			System.out.println("Result was: " + result + ", at " + location + ", from " + userAgent);
+		}
+
+		return new TestResult(userAgent, result, location);
 	}
 }

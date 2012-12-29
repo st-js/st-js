@@ -2,6 +2,7 @@ package org.stjs.testing.driver;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Map;
 
 import com.sun.net.httpserver.HttpExchange;
 
@@ -35,6 +36,8 @@ public interface Browser {
 	 * @param exchange contains the HTTP response that must be written to
 	 */
 	public void sendNoMoreTestFixture(AsyncBrowserSession browser, HttpExchange exchange) throws IOException, URISyntaxException;
+
+	public TestResult buildResult(Map<String, String> queryStringParameters, HttpExchange exchange);
 
 	/**
 	 * Opens a new browser and makes it ready to accept unit tests for execution.

@@ -114,7 +114,7 @@ public class JUnitSession {
 	/**
 	 * Called after a JUnit test has been executed by all the browsers
 	 */
-	public void testCompleted(STJSAsyncTestDriverRunner runner, FrameworkMethod method) {
+	public void testCompleted(STJSAsyncTestDriverRunner runner, FrameworkMethod method, TestResultCollection result) {
 		if (config.isDebugEnabled()) {
 			System.out.println("test " + method.getMethod() + " is completed");
 		}

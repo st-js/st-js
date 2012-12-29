@@ -131,17 +131,17 @@ public class AsyncServerSession {
 			AsyncBrowserSession browser = browsers.get(browserId);
 			AsyncMethod completedMethod = browser.getMethodUnderExecution();
 			if (completedMethod != null) {
+				// We only have a method under execution, if the HTTP request that is being
+				// handled is not the first one the server has received
 				if (config.isDebugEnabled()) {
 					System.out.println("Server received test results for method " + completedMethod.toString() + " from browser " + browserId);
 				}
-				// We only have a method under execution, if the HTTP request that is being
-				// handled is not the first one the server has received
 
-				// TODO: code a real implementation. for now, we just say it's successful
 				// notify JUnit of the result of this test. When the last browser notifies
 				// the AsyncMethod, the JUnit thread will become unblocked and the test result
 				// will be reported
-				completedMethod.notifyExecutionResult(null);
+				TestResult result = browser.buildResult(params, exchange);
+				completedMethod.notifyExecutionResult(result);
 			} else {
 				if (config.isDebugEnabled()) {
 					System.out.println("Server received request for the first test from browser " + browserId);

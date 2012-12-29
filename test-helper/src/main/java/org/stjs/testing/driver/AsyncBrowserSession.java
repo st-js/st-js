@@ -1,5 +1,6 @@
 package org.stjs.testing.driver;
 
+import java.util.Map;
 import java.util.concurrent.Exchanger;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -154,6 +155,11 @@ public class AsyncBrowserSession {
 		if (browser.getConfig().isDebugEnabled()) {
 			System.out.println("Browser " + this.id + " stopped");
 		}
+	}
+
+	@SuppressWarnings("restriction")
+	public TestResult buildResult(Map<String, String> queryStringParameters, HttpExchange exchange) {
+		return browser.buildResult(queryStringParameters, exchange);
 	}
 
 }
