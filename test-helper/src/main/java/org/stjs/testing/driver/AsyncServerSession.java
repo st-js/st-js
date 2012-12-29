@@ -11,6 +11,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.runners.model.InitializationError;
 
@@ -44,6 +47,22 @@ public class AsyncServerSession {
 		catch (IOException e) {
 			throw new InitializationError(e);
 		}
+
+		// by default, the HttpServer uses a single thread to respond to all requests given that we block responses 
+		// to tests requests while waiting for new tests, and that the new tests are only sent when all browsers have
+		// responded, one thread is not enough to handle multiple browsers. 
+		// Let's give him an executor that is a bit more flexible
+		httpServer.setExecutor(Executors.newFixedThreadPool(config.getBrowserCount() * 2, new ThreadFactory() {
+			private AtomicInteger i = new AtomicInteger(0);
+
+			@Override
+			public Thread newThread(Runnable r) {
+				Thread t = new Thread(r);
+				t.setName("httpServer-" + i.incrementAndGet());
+				t.setDaemon(true);
+				return t;
+			}
+		}));
 
 		// create and register our handler
 		httpServer.createContext("/", new AsyncHttpHandler());
