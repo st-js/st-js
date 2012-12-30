@@ -24,6 +24,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import org.stjs.testing.driver.browser.Browser;
+import org.stjs.testing.driver.browser.PhantomjsBrowser;
+
 import com.google.common.io.Closeables;
 
 /**

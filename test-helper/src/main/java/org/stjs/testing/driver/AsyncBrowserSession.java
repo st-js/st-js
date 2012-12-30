@@ -3,6 +3,8 @@ package org.stjs.testing.driver;
 import java.util.Map;
 import java.util.concurrent.Exchanger;
 
+import org.stjs.testing.driver.browser.Browser;
+
 import com.sun.net.httpserver.HttpExchange;
 
 /**

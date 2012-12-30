@@ -1,8 +1,13 @@
-package org.stjs.testing.driver;
+package org.stjs.testing.driver.browser;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
+
+import org.stjs.testing.driver.AsyncBrowserSession;
+import org.stjs.testing.driver.AsyncMethod;
+import org.stjs.testing.driver.DriverConfiguration;
+import org.stjs.testing.driver.TestResult;
 
 import com.sun.net.httpserver.HttpExchange;
 
