@@ -26,7 +26,9 @@ import java.util.List;
 import java.util.Properties;
 
 import org.stjs.testing.driver.browser.Browser;
+import org.stjs.testing.driver.browser.ChromeBrowser;
 import org.stjs.testing.driver.browser.DesktopDefaultBrowser;
+import org.stjs.testing.driver.browser.FirefoxBrowser;
 import org.stjs.testing.driver.browser.PhantomjsBrowser;
 
 import com.google.common.io.Closeables;
@@ -206,7 +208,9 @@ public class DriverConfiguration {
 
 	private static enum BrowserBuilder {
 		PHANTOMJS("phantomjs", PhantomjsBrowser.class), //
-		DESKTOP_DEFAULT("desktopDefault", DesktopDefaultBrowser.class);
+		DESKTOP_DEFAULT("desktopDefault", DesktopDefaultBrowser.class), //
+		FIREFOX("firefox", FirefoxBrowser.class), //
+		CHROME("chrome", ChromeBrowser.class);
 
 		String name;
 		Class<? extends Browser> clazz;
