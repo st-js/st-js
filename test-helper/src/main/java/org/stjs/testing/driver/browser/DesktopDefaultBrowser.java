@@ -1,16 +1,14 @@
 package org.stjs.testing.driver.browser;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.awt.Desktop;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -32,40 +30,37 @@ import org.stjs.testing.driver.TestResult;
 import com.google.common.base.Strings;
 import com.sun.net.httpserver.HttpExchange;
 
-@SuppressWarnings({"restriction" /* for HttpExchange */, "deprecation" /* for @Scripts */})
-public class PhantomjsBrowser implements Browser {
+@SuppressWarnings("restriction")
+public class DesktopDefaultBrowser implements Browser {
 
-	public static final String PROP_PHANTOMJS_BIN = "phantomjs.bin";
+	private DriverConfiguration config;
 
-	private final DriverConfiguration config;
-	private File tempBootstrapJs;
-
-	public PhantomjsBrowser(DriverConfiguration config) {
+	public DesktopDefaultBrowser(DriverConfiguration config) {
 		this.config = config;
 	}
 
 	@Override
 	public void start(long browserId) {
+		System.out.println("Starting the default browser ...");
+
 		try {
-			// We first need to extract phantomjs-bootstrap.js to the temp directory, because phantomjs
-			// can only be started with a file on the local filesystem as argument
-			tempBootstrapJs = unpackBootstrap();
-
-			String executableName = config.getProperty(PROP_PHANTOMJS_BIN, "phantomjs");
-			new ProcessBuilder( //
-					executableName, //
-					"--web-security=no", //
-					tempBootstrapJs.getAbsolutePath(), //
-					Long.toString(browserId), //
-					config.getServerURL().toString()).start();
-
-			if (config.isDebugEnabled()) {
-				System.out.println("Started phantomjs");
+			String startUri = "start-nopoll.html?browserId=" + browserId;
+			if (runningOnWindows()) {
+				// On windows, we use the awt way to launch the default browser
+				Desktop.getDesktop().browse(new URL(config.getServerURL(), startUri).toURI());
+			} else {
+				// Under linux, we've encountered some strange behavior when using Desktop.browse(),
+				// so we'll use xdg-open instead
+				new ProcessBuilder("xdg-open", config.getServerURL() + startUri).start();
 			}
 		}
-		catch (IOException e) {
+		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public boolean runningOnWindows() {
+		return System.getProperty("os.name").contains("Windows");
 	}
 
 	@Override
@@ -74,8 +69,8 @@ public class PhantomjsBrowser implements Browser {
 	}
 
 	@Override
-	public void sendTestFixture(AsyncMethod meth, AsyncBrowserSession browser, HttpExchange exchange) throws IOException, URISyntaxException {
-
+	public void sendTestFixture(AsyncMethod meth, AsyncBrowserSession browserSession, HttpExchange exchange) throws IOException,
+			URISyntaxException {
 		Class<?> testClass = meth.getTestClass().getJavaClass();
 		Method method = meth.getMethod().getMethod();
 		ClassWithJavascript stjsClass = new Generator().getExistingStjsClass(config.getClassLoader(), testClass);
@@ -175,7 +170,7 @@ public class PhantomjsBrowser implements Browser {
 
 	@Override
 	public void sendNoMoreTestFixture(AsyncBrowserSession browser, HttpExchange exchange) throws IOException, URISyntaxException {
-		byte[] response = "<html><head><script language='javascript'>parent.phantom.exit()</script></head></html>".getBytes("UTF-8");
+		byte[] response = "<html><body><h1>Tests completed!</h1></body></html>".getBytes("UTF-8");
 		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
 
 		OutputStream output = exchange.getResponseBody();
@@ -191,26 +186,6 @@ public class PhantomjsBrowser implements Browser {
 	}
 
 	@Override
-	public void stop() {
-		// phantomJS automatically stops when the noMoreTests fixture is sent
-		tempBootstrapJs.delete();
-	}
-
-	private File unpackBootstrap() throws IOException {
-		File tmp = File.createTempFile("phantomjs", null);
-		InputStream in = this.getClass().getResourceAsStream("/phantomjs-bootstrap.js");
-		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(tmp));
-		byte[] buffer = new byte[8192];
-		int bytesRead;
-		while ((bytesRead = in.read(buffer)) > 0) {
-			out.write(buffer, 0, bytesRead);
-		}
-		in.close();
-		out.close();
-		return tmp;
-	}
-
-	@Override
 	public TestResult buildResult(Map<String, String> queryStringParameters, HttpExchange exchange) {
 		String userAgent = exchange.getRequestHeaders().getFirst("User-Agent");
 		String result = queryStringParameters.get("result");
@@ -221,5 +196,10 @@ public class PhantomjsBrowser implements Browser {
 		}
 
 		return new TestResult(userAgent, result, location);
+	}
+
+	@Override
+	public void stop() {
+		// nothing to do, we just leave the browser open
 	}
 }

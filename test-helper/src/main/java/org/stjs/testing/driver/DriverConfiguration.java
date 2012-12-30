@@ -18,6 +18,7 @@ package org.stjs.testing.driver;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.stjs.testing.driver.browser.Browser;
+import org.stjs.testing.driver.browser.DesktopDefaultBrowser;
 import org.stjs.testing.driver.browser.PhantomjsBrowser;
 
 import com.google.common.io.Closeables;
@@ -193,8 +195,18 @@ public class DriverConfiguration {
 		return this.props.getProperty(name, defaultValue);
 	}
 
+	public URL getServerURL() {
+		try {
+			return new URL("http", "localhost", port, "/");
+		}
+		catch (MalformedURLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	private static enum BrowserBuilder {
-		PHANTOMJS("phantomjs", PhantomjsBrowser.class);
+		PHANTOMJS("phantomjs", PhantomjsBrowser.class), //
+		DESKTOP_DEFAULT("desktopDefault", DesktopDefaultBrowser.class);
 
 		String name;
 		Class<? extends Browser> clazz;
