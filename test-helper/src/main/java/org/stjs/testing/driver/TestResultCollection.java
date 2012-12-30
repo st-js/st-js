@@ -51,15 +51,14 @@ public class TestResultCollection {
 	}
 
 	/**
-	 * 
 	 * @param className
 	 * @param methodName
 	 * @return the exception for the first wrong result
 	 */
-	public synchronized AssertionError buildException(String className, String methodName) {
+	public synchronized AssertionError buildException() {
 		for (TestResult result : results) {
 			if (!result.isOk()) {
-				return result.buildException(className, methodName);
+				return result.buildException(testClassName, testMethodName);
 			}
 		}
 		return null;

@@ -9,10 +9,10 @@ import org.junit.runner.RunWith;
 import org.stjs.javascript.jquery.JQueryCore;
 import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.ScriptsAfter;
-import org.stjs.testing.driver.STJSTestDriverRunner;
+import org.stjs.testing.driver.STJSAsyncTestDriverRunner;
 import org.stjs.testing.jquery.MockjaxOptions;
 
-@RunWith(STJSTestDriverRunner.class)
+@RunWith(STJSAsyncTestDriverRunner.class)
 @HTMLFixture("<form id='form'>" + //
 		"			<table>" + //
 		"				<tbody>" + //
@@ -20,7 +20,7 @@ import org.stjs.testing.jquery.MockjaxOptions;
 		"			</table>" + //
 		"			<input type='text' id='newStock'><button id='addStock' type='submit'>Add</button>\n" + //
 		"			</form>")
-@ScriptsAfter({ "/jquery.mockjax.js", "/json2.js" })
+@ScriptsAfter({"/jquery.mockjax.js", "/json2.js"})
 public class StockApplicationTest {
 
 	@Test
