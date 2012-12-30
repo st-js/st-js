@@ -8,7 +8,7 @@ document.body.appendChild(iframe);
 
 function reportResultAndRunNextTest(result, stacktrace){
 	console.error('reporting test result');
-	iframe.src = testServer + '/getNextTest' + 
+	iframe.src = testServer + 'getNextTest' + 
 			'?browserId=' + browserId + 
 			'&result=' + result + 
 			'&location=' + stacktrace + 
