@@ -136,7 +136,7 @@ public class DesktopDefaultBrowser implements Browser {
 		resp.append("    Assert=window;\n");
 
 		String testedClassName = testClass.getSimpleName();
-
+		resp.append("    parent.log('<b>" + testedClassName + "</b>." + method.getName() + "');");
 		resp.append("    try{\n");
 		resp.append("      new " + testedClassName + "()." + method.getName() + "();\n");
 		resp.append("      parent.reportResultAndRunNextTest('OK');\n");

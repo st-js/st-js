@@ -16,9 +16,12 @@
 		logDiv.innerHTML += "<span class='time'>" + new Date().toLocaleTimeString() + "</span> " + s + "<br>";
 	}
 	
-	function reportResultAndRunNextTest(result, stacktrace){
+	function reportResultAndRunNextTest(result, stacktrace, firstTest){
 		if (result != "OK" && console) {
 			console.error(result + '\n' + stacktrace);
+		}
+		if(!firstTest){
+			log(result);
 		}
 		iframe.src = '/getNextTest' + 
 				'?browserId=' + browserId + 
@@ -28,7 +31,7 @@
 	}
 	
 	function runFirstTest(){
-		reportResultAndRunNextTest("OK");
+		reportResultAndRunNextTest("OK", null, true);
 	}
 	
 	// Shamelessly lifted from 
