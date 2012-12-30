@@ -26,7 +26,7 @@ public class JUnitSession {
 
 	private DriverConfiguration config;
 
-	private List<AsyncBrowserSession> browsers;
+	private List<AsyncBrowserSession> browserSessions;
 	private AsyncServerSession serverSession;
 	private Set<STJSAsyncTestDriverRunner> remainingRunners = new HashSet<STJSAsyncTestDriverRunner>();
 
@@ -52,13 +52,14 @@ public class JUnitSession {
 		config = new DriverConfiguration(testClassSample);
 		serverSession = new AsyncServerSession(config);
 
-		browsers = new CopyOnWriteArrayList<AsyncBrowserSession>();
-		for (int i = 0; i < config.getBrowserCount(); i++) {
-			final AsyncBrowserSession browser = new AsyncBrowserSession(new PhantomjsBrowser(config), i);
-			browsers.add(browser);
+		browserSessions = new CopyOnWriteArrayList<AsyncBrowserSession>();
+		List<Browser> browsers = config.getBrowsers();
+		for (int i = 0; i < browsers.size(); i++) {
+			final AsyncBrowserSession browser = new AsyncBrowserSession(browsers.get(i), i);
+			browserSessions.add(browser);
 			serverSession.addBrowserConnection(browser);
 
-			// let's start the browsers asynchronously. Synchronization will
+			// let's start the browserSessions asynchronously. Synchronization will
 			// be done later when the browser GET's and URL from the server
 			new Thread(new Runnable() {
 				@Override
@@ -74,11 +75,11 @@ public class JUnitSession {
 	 */
 	private void reset() {
 		config = null;
-		for (AsyncBrowserSession browser : browsers) {
+		for (AsyncBrowserSession browser : browserSessions) {
 			browser.notifyNoMoreTests();
 			browser.stop();
 		}
-		browsers.clear();
+		browserSessions.clear();
 		remainingRunners.clear();
 		serverSession.stop();
 		serverSession = null;
@@ -140,7 +141,7 @@ public class JUnitSession {
 	}
 
 	public List<AsyncBrowserSession> getBrowsers() {
-		return this.browsers;
+		return this.browserSessions;
 	}
 
 	public AsyncServerSession getServer() {
