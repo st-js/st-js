@@ -1,4 +1,4 @@
-package org.stjs.testing.driver;
+package org.stjs.testing.driver.phantomjs;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -23,6 +23,12 @@ import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.Scripts;
 import org.stjs.testing.annotation.ScriptsAfter;
 import org.stjs.testing.annotation.ScriptsBefore;
+import org.stjs.testing.driver.AsyncBrowserSession;
+import org.stjs.testing.driver.AsyncMethod;
+import org.stjs.testing.driver.Browser;
+import org.stjs.testing.driver.DriverConfiguration;
+import org.stjs.testing.driver.StreamUtils;
+import org.stjs.testing.driver.TestResult;
 
 import com.google.common.base.Strings;
 import com.sun.net.httpserver.HttpExchange;

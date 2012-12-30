@@ -7,6 +7,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
+import org.stjs.testing.driver.phantomjs.PhantomjsBrowser;
 
 /**
  * Represents one session of unit testing that may span multiple tests in multiple classes, and performs startup and cleanup actions based on the
