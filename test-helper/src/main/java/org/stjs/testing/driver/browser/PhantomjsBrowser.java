@@ -1,4 +1,4 @@
-package org.stjs.testing.driver.phantomjs;
+package org.stjs.testing.driver.browser;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -25,7 +25,6 @@ import org.stjs.testing.annotation.ScriptsAfter;
 import org.stjs.testing.annotation.ScriptsBefore;
 import org.stjs.testing.driver.AsyncBrowserSession;
 import org.stjs.testing.driver.AsyncMethod;
-import org.stjs.testing.driver.Browser;
 import org.stjs.testing.driver.DriverConfiguration;
 import org.stjs.testing.driver.StreamUtils;
 import org.stjs.testing.driver.TestResult;
@@ -52,20 +51,13 @@ public class PhantomjsBrowser implements Browser {
 			// can only be started with a file on the local filesystem as argument
 			tempBootstrapJs = unpackBootstrap();
 
-			// TODO: figure out why the _hell_ the following things happen under linux
-			// 1. As expected: if I use "/path/to/phantomjs" as command, everything works
-			// 2. As expected: if I use "alsdkjlaksjd" as command everything blows up with a "command not found" message
-			// 3. Not as expected: if I use "phantomjs" as command, phantomjs seems to die quietly immediately, or isn't started
-			//
-			// aargh!! This is frustrating as hell...
 			String executableName = config.getProperty(PROP_PHANTOMJS_BIN, "phantomjs");
-
 			new ProcessBuilder( //
 					executableName, //
 					"--web-security=no", //
 					tempBootstrapJs.getAbsolutePath(), //
 					Long.toString(browserId), //
-					"http://localhost:" + config.getPort()).start();
+					config.getServerURL().toString()).start();
 
 			if (config.isDebugEnabled()) {
 				System.out.println("Started phantomjs");

@@ -7,18 +7,21 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
-import org.stjs.testing.driver.phantomjs.PhantomjsBrowser;
+import org.stjs.testing.driver.browser.Browser;
 
 /**
- * Represents one session of unit testing that may span multiple tests in multiple classes, and performs startup and cleanup actions based on the
- * JUnit lifecycle.<br>
+ * Represents one session of unit testing that may span multiple tests in multiple classes, and performs startup and
+ * cleanup actions based on the JUnit lifecycle.<br>
  * <br>
- * Since JUnit itself does not provide any easy way to hook into its lifecycle, this class relies on STJSAsyncTestDriverRunner to gather hints
- * about the lifecyle. The JUnit lifecycle has been experimentally determined to be as follows:
+ * Since JUnit itself does not provide any easy way to hook into its lifecycle, this class relies on
+ * STJSAsyncTestDriverRunner to gather hints about the lifecyle. The JUnit lifecycle has been experimentally determined
+ * to be as follows:
  * <ol>
  * <li>The test classes are scanned, and one instance of Runner is created per class
- * <li>run() is called sequentially on each Runner instance. The unit tests are executed sequentially from within the run() method
+ * <li>run() is called sequentially on each Runner instance. The unit tests are executed sequentially from within the
+ * run() method
  * </ol>
+ * 
  * @author lordofthepigs
  */
 public class JUnitSession {
@@ -27,7 +30,7 @@ public class JUnitSession {
 
 	private DriverConfiguration config;
 
-	private List<AsyncBrowserSession> browsers;
+	private List<AsyncBrowserSession> browserSessions;
 	private AsyncServerSession serverSession;
 	private Set<STJSAsyncTestDriverRunner> remainingRunners = new HashSet<STJSAsyncTestDriverRunner>();
 
@@ -45,6 +48,7 @@ public class JUnitSession {
 
 	/**
 	 * Starts all the browser and server sessions. If the sessions are already started, this method has no effect.
+	 * 
 	 * @throws InitializationError
 	 */
 	private void init(Class<?> testClassSample) throws InitializationError {
@@ -53,13 +57,14 @@ public class JUnitSession {
 		config = new DriverConfiguration(testClassSample);
 		serverSession = new AsyncServerSession(config);
 
-		browsers = new CopyOnWriteArrayList<AsyncBrowserSession>();
-		for (int i = 0; i < config.getBrowserCount(); i++) {
-			final AsyncBrowserSession browser = new AsyncBrowserSession(new PhantomjsBrowser(config), i);
-			browsers.add(browser);
+		browserSessions = new CopyOnWriteArrayList<AsyncBrowserSession>();
+		List<Browser> browsers = config.getBrowsers();
+		for (int i = 0; i < browsers.size(); i++) {
+			final AsyncBrowserSession browser = new AsyncBrowserSession(browsers.get(i), i);
+			browserSessions.add(browser);
 			serverSession.addBrowserConnection(browser);
 
-			// let's start the browsers asynchronously. Synchronization will
+			// let's start the browserSessions asynchronously. Synchronization will
 			// be done later when the browser GET's and URL from the server
 			new Thread(new Runnable() {
 				@Override
@@ -75,20 +80,20 @@ public class JUnitSession {
 	 */
 	private void reset() {
 		config = null;
-		for (AsyncBrowserSession browser : browsers) {
+		for (AsyncBrowserSession browser : browserSessions) {
 			browser.notifyNoMoreTests();
 			browser.stop();
 		}
-		browsers.clear();
+		browserSessions.clear();
 		remainingRunners.clear();
 		serverSession.stop();
 		serverSession = null;
 	}
 
 	/**
-	 * Called when a runner has been instantiated. This method is expected to be called many times in a row right after the session has started,
-	 * once per STJSAsyncTestDriverRunner. The first time this method is called, the HTTP server and the browsers are configured and started.
-	 * This method counts the number of times it has been called.
+	 * Called when a runner has been instantiated. This method is expected to be called many times in a row right after
+	 * the session has started, once per STJSAsyncTestDriverRunner. The first time this method is called, the HTTP
+	 * server and the browsers are configured and started. This method counts the number of times it has been called.
 	 */
 	public void runnerInstantiated(STJSAsyncTestDriverRunner runner) throws InitializationError {
 		if (this.config == null) {
@@ -122,9 +127,10 @@ public class JUnitSession {
 	}
 
 	/**
-	 * Called when the specified runner has finished executing all of its tests. When this method is called for the last time, the HTTP server
-	 * and all browsers are stopped and cleaned up. This method can figure out when it i being invoked for the last time by comparing the number
-	 * of times it was invoked with the number of times runnerInstantiated() was invoked.
+	 * Called when the specified runner has finished executing all of its tests. When this method is called for the last
+	 * time, the HTTP server and all browsers are stopped and cleaned up. This method can figure out when it i being
+	 * invoked for the last time by comparing the number of times it was invoked with the number of times
+	 * runnerInstantiated() was invoked.
 	 */
 	public void runnerCompleted(STJSAsyncTestDriverRunner runner) {
 		if (config.isDebugEnabled()) {
@@ -141,7 +147,7 @@ public class JUnitSession {
 	}
 
 	public List<AsyncBrowserSession> getBrowsers() {
-		return this.browsers;
+		return this.browserSessions;
 	}
 
 	public AsyncServerSession getServer() {
