@@ -9,9 +9,13 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runners.model.FrameworkMethod;
 import org.stjs.generator.BridgeClass;
 import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
@@ -29,7 +33,7 @@ import org.stjs.testing.driver.TestResult;
 import com.google.common.base.Strings;
 import com.sun.net.httpserver.HttpExchange;
 
-@SuppressWarnings({"restriction", "deprecation"})
+@SuppressWarnings({ "restriction", "deprecation" })
 public abstract class AbstractBrowser implements Browser {
 
 	private DriverConfiguration config;
@@ -46,8 +50,7 @@ public abstract class AbstractBrowser implements Browser {
 			if (config.isDebugEnabled()) {
 				System.out.println("Started " + executableName);
 			}
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -66,11 +69,14 @@ public abstract class AbstractBrowser implements Browser {
 	}
 
 	@Override
-	public void sendTestFixture(AsyncMethod meth, AsyncBrowserSession browserSession, HttpExchange exchange) throws IOException,
-			URISyntaxException {
+	public void sendTestFixture(AsyncMethod meth, AsyncBrowserSession browserSession, HttpExchange exchange)
+			throws IOException, URISyntaxException {
 		Class<?> testClass = meth.getTestClass().getJavaClass();
 		Method method = meth.getMethod().getMethod();
 		ClassWithJavascript stjsClass = new Generator().getExistingStjsClass(getConfig().getClassLoader(), testClass);
+
+		List<FrameworkMethod> beforeMethods = meth.getTestClass().getAnnotatedMethods(Before.class);
+		List<FrameworkMethod> afterMethods = meth.getTestClass().getAnnotatedMethods(After.class);
 
 		final HTMLFixture htmlFixture = testClass.getAnnotation(HTMLFixture.class);
 
@@ -100,7 +106,8 @@ public abstract class AbstractBrowser implements Browser {
 		}
 
 		Set<URI> jsFiles = new LinkedHashSet<URI>();
-		for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(getConfig().getClassLoader())) {
+		for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(getConfig()
+				.getClassLoader())) {
 
 			if (addedScripts != null && dep instanceof BridgeClass) {
 				// bridge dependencies are not added when using @Scripts
@@ -126,20 +133,32 @@ public abstract class AbstractBrowser implements Browser {
 		}
 		resp.append("<script language='javascript'>\n");
 		resp.append("  onload=function(){\n");
-		resp.append("    console.error(document.getElementsByTagName('html')[0].innerHTML);\n");
+		// resp.append("    console.error(document.getElementsByTagName('html')[0].innerHTML);\n");
 
 		// Adapter between generated assert (not global) and JS-test-driver assert (which is a
 		// set of global methods)
 		resp.append("    Assert=window;\n");
 
 		String testedClassName = testClass.getSimpleName();
-		resp.append("    parent.log('<b>" + testedClassName + "</b>." + method.getName() + "');");
+		resp.append("    parent.startingTest('" + testedClassName + "', '" + method.getName() + "');");
+		resp.append("    var stjsTest = new " + testedClassName + "();\n");
+		resp.append("    var stjsResult = 'OK';\n");
 		resp.append("    try{\n");
-		resp.append("      new " + testedClassName + "()." + method.getName() + "();\n");
-		resp.append("      parent.reportResultAndRunNextTest('OK');\n");
+		// call before methods
+		for (FrameworkMethod beforeMethod : beforeMethods) {
+			resp.append("      stjsTest." + beforeMethod.getName() + "();\n");
+		}
+		// call the test's method
+		resp.append("      stjsTest." + method.getName() + "();\n");
 		resp.append("    }catch(ex){\n");
-		resp.append("      parent.reportResultAndRunNextTest(ex, ex.location);\n");
-		resp.append("    }\n");
+		resp.append("      stjsResult = ex;\n");
+		resp.append("    }finally{\n");
+		// call after methods
+		for (FrameworkMethod afterMethod : afterMethods) {
+			resp.append("     stjsTest." + afterMethod.getName() + "();\n");
+		}
+		resp.append("      parent.reportResultAndRunNextTest(stjsResult, stjsResult.location);\n");
+		resp.append("     }\n");
 		resp.append("  }\n");
 		resp.append("</script>\n");
 		resp.append("</head>\n");
@@ -173,7 +192,8 @@ public abstract class AbstractBrowser implements Browser {
 	 * The default implementation sends a pure HTML page with a title saying "Tests completed".
 	 */
 	@Override
-	public void sendNoMoreTestFixture(AsyncBrowserSession browser, HttpExchange exchange) throws IOException, URISyntaxException {
+	public void sendNoMoreTestFixture(AsyncBrowserSession browser, HttpExchange exchange) throws IOException,
+			URISyntaxException {
 		sendResponse("<html><body><h1>Tests completed!</h1></body></html>", exchange);
 	}
 
@@ -188,8 +208,7 @@ public abstract class AbstractBrowser implements Browser {
 		byte[] response;
 		try {
 			response = content.getBytes("UTF-8");
-		}
-		catch (UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException e) {
 			// Cannot happen. UTF-8 is part of the character sets that must be supported by any implementation of java
 			throw new RuntimeException(e);
 		}

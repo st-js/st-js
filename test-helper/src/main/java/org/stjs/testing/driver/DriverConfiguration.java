@@ -30,11 +30,13 @@ import org.stjs.testing.driver.browser.ChromeBrowser;
 import org.stjs.testing.driver.browser.DesktopDefaultBrowser;
 import org.stjs.testing.driver.browser.FirefoxBrowser;
 import org.stjs.testing.driver.browser.PhantomjsBrowser;
+import org.stjs.testing.driver.browser.RemoteBrowser;
 
 import com.google.common.io.Closeables;
 
 /**
  * this is a wrapper around the configuration files stjs-test.properties.
+ * 
  * @author acraciun
  */
 public class DriverConfiguration {
@@ -77,11 +79,9 @@ public class DriverConfiguration {
 				props = new Properties();
 				props.load(in);
 			}
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			// silent
-		}
-		finally {
+		} finally {
 			Closeables.closeQuietly(in);
 		}
 
@@ -103,7 +103,8 @@ public class DriverConfiguration {
 			testTimeout = Integer.parseInt(props.getProperty(PROP_TEST_TIMEOUT));
 		}
 		if (props.get(PROP_BROWSER_COUNT) != null) {
-			System.out.println("Configuration property " + PROP_BROWSER_COUNT + " is now ignored, use " + PROP_BROWSERS + " instead");
+			System.out.println("Configuration property " + PROP_BROWSER_COUNT + " is now ignored, use " + PROP_BROWSERS
+					+ " instead");
 		}
 		if (props.get(PROP_DEBUG) != null) {
 			debugEnabled = Boolean.parseBoolean(props.getProperty(PROP_DEBUG));
@@ -116,7 +117,7 @@ public class DriverConfiguration {
 
 	private List<Browser> instantiateBrowsers() {
 		if (props.getProperty(PROP_BROWSERS) == null) {
-			return Arrays.asList(new Browser[] {new PhantomjsBrowser(this)});
+			return Arrays.asList(new Browser[] { new PhantomjsBrowser(this) });
 		}
 		String[] browserNames = props.getProperty(PROP_BROWSERS).split(",");
 		browsers = new ArrayList<Browser>(browserNames.length);
@@ -200,8 +201,7 @@ public class DriverConfiguration {
 	public URL getServerURL() {
 		try {
 			return new URL("http", "localhost", port, "/");
-		}
-		catch (MalformedURLException e) {
+		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -210,7 +210,8 @@ public class DriverConfiguration {
 		PHANTOMJS("phantomjs", PhantomjsBrowser.class), //
 		DESKTOP_DEFAULT("desktopDefault", DesktopDefaultBrowser.class), //
 		FIREFOX("firefox", FirefoxBrowser.class), //
-		CHROME("chrome", ChromeBrowser.class);
+		CHROME("chrome", ChromeBrowser.class), //
+		REMOTE("remote", RemoteBrowser.class);
 
 		String name;
 		Class<? extends Browser> clazz;
@@ -229,8 +230,7 @@ public class DriverConfiguration {
 			try {
 				Constructor<? extends Browser> cons = builder.clazz.getConstructor(DriverConfiguration.class);
 				return cons.newInstance(config);
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				System.out.println("Unable to create browser \"" + browserName + "\": " + e.getMessage());
 			}
 			return null;
