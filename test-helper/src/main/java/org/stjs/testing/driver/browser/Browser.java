@@ -3,10 +3,13 @@ package org.stjs.testing.driver.browser;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.Set;
 
+import org.junit.runners.model.InitializationError;
 import org.stjs.testing.driver.AsyncBrowserSession;
 import org.stjs.testing.driver.AsyncMethod;
 import org.stjs.testing.driver.DriverConfiguration;
+import org.stjs.testing.driver.SharedExternalProcess;
 import org.stjs.testing.driver.TestResult;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -22,7 +25,7 @@ public interface Browser {
 	 * Opens a new browser and makes it ready to accept unit tests for execution.
 	 * @param browserId the ID that the browser has to report to the HTTP server everytime it communicates with it.
 	 */
-	public void start(long browserId);
+	public void start(long browserId) throws InitializationError;
 
 	public DriverConfiguration getConfig();
 
@@ -49,4 +52,10 @@ public interface Browser {
 	 * @param browserId the ID that the browser has to report to the HTTP server everytime it communicates with it.
 	 */
 	public void stop();
+
+	/**
+	 * Returns a list of SharedExternalProcess that the JUnit session must start before attempting to start this browser. If any of the
+	 * dependencies fails to start, the JUnit session fails.
+	 */
+	public Set<Class<? extends SharedExternalProcess>> getExternalProcessDependencies();
 }

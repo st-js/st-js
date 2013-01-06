@@ -1,9 +1,13 @@
 package org.stjs.testing.driver;
 
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
@@ -30,6 +34,7 @@ public class JUnitSession {
 	private List<AsyncBrowserSession> browserSessions;
 	private AsyncServerSession serverSession;
 	private Set<STJSAsyncTestDriverRunner> remainingRunners = new HashSet<STJSAsyncTestDriverRunner>();
+	private Set<SharedExternalProcess> dependentProcesses = new HashSet<SharedExternalProcess>();
 
 	public static JUnitSession getInstance() {
 		if (instance == null) {
@@ -48,26 +53,120 @@ public class JUnitSession {
 	 * @throws InitializationError
 	 */
 	private void init(Class<?> testClassSample) throws InitializationError {
+		if (config != null) {
+			// init has already been called, nothing to do
+			return;
+		}
 		System.out.println("initializing config");
-
 		config = new DriverConfiguration(testClassSample);
-		serverSession = new AsyncServerSession(config);
 
+		// initialize the browser sessions
+		initBrowserSessions();
+		initBrowserDependencies();
+		startBrowserDependencies();
+		startBrowserSessions();
+	}
+
+	private void initBrowserSessions() {
 		browserSessions = new CopyOnWriteArrayList<AsyncBrowserSession>();
 		List<Browser> browsers = config.getBrowsers();
 		for (int i = 0; i < browsers.size(); i++) {
-			final AsyncBrowserSession browser = new AsyncBrowserSession(browsers.get(i), i);
-			browserSessions.add(browser);
-			serverSession.addBrowserConnection(browser);
+			browserSessions.add(new AsyncBrowserSession(browsers.get(i), i));
+		}
+	}
 
-			// let's start the browserSessions asynchronously. Synchronization will
-			// be done later when the browser GET's and URL from the server
-			new Thread(new Runnable() {
+	private void initBrowserDependencies() throws InitializationError {
+		// Collect the dependencies of all browsers
+		Set<Class<? extends SharedExternalProcess>> deps = new HashSet<Class<? extends SharedExternalProcess>>();
+		for (Browser browser : config.getBrowsers()) {
+			deps.addAll(browser.getExternalProcessDependencies());
+		}
+
+		// Init the HTTP server
+		// TODO: this should be a dependency like any other
+		serverSession = new AsyncServerSession(config);
+
+		// Init all the dependencies
+		for (Class<? extends SharedExternalProcess> dep : deps) {
+			dependentProcesses.add(initBrowserDependency(dep));
+		}
+	}
+
+	private SharedExternalProcess initBrowserDependency(Class<? extends SharedExternalProcess> dep) throws InitializationError {
+
+		Constructor<? extends SharedExternalProcess> cons;
+		try {
+			cons = dep.getConstructor(DriverConfiguration.class);
+			return cons.newInstance(config);
+		}
+		catch (NoSuchMethodException e) {
+			// constructor with single DriverConfiguration argument cannot be found,
+			// try with the no-args constructor
+			try {
+				cons = dep.getConstructor();
+				return cons.newInstance();
+			}
+			catch (Exception e2) {
+				// proper constructor not found (or something else happened), 
+				// cannot instantiate dependency
+				throw new InitializationError(e2);
+			}
+		}
+		catch (Exception e) {
+			throw new InitializationError(e);
+		}
+	}
+
+	private void startBrowserDependencies() throws InitializationError {
+		List<AsyncProcess> allDeps = new ArrayList<AsyncProcess>(this.dependentProcesses);
+		allDeps.add(serverSession);
+		startInParallel(allDeps);
+	}
+
+	private void startBrowserSessions() throws InitializationError {
+		startInParallel(this.browserSessions);
+	}
+
+	private void startInParallel(Collection<? extends AsyncProcess> processes) throws InitializationError {
+		List<Thread> threads = new ArrayList<Thread>();
+		final AtomicReference<Throwable> firstError = new AtomicReference<Throwable>();
+
+		// start all the dependencies in parallel
+		for (final AsyncProcess proc : processes) {
+			Thread t = new Thread(new Runnable() {
 				@Override
 				public void run() {
-					browser.start();
+					try {
+						proc.start();
+						if (proc instanceof SharedExternalProcess) {
+							for (AsyncBrowserSession browserSession : browserSessions) {
+								((SharedExternalProcess) proc).addBrowserSession(browserSession);
+							}
+						}
+					}
+					catch (Exception e) {
+						firstError.compareAndSet(null, e);
+					}
 				}
-			}, "browser-" + i).start();
+			});
+			t.start();
+			threads.add(t);
+		}
+
+		// wait until all the started threads have completed, and therefore that all of the
+		// dependencies have started (or failed to start)
+		for (Thread t : threads) {
+			try {
+				t.join();
+			}
+			catch (InterruptedException e) {
+				throw new InitializationError(e);
+			}
+		}
+
+		// check if any of the dependencies has failed to start. If some did, throw an exception
+		if (firstError.get() != null) {
+			throw new InitializationError(firstError.get());
 		}
 	}
 
@@ -82,8 +181,13 @@ public class JUnitSession {
 		}
 		browserSessions.clear();
 		remainingRunners.clear();
+
 		serverSession.stop();
 		serverSession = null;
+		for (SharedExternalProcess p : dependentProcesses) {
+			p.stop();
+		}
+		dependentProcesses.clear();
 	}
 
 	/**

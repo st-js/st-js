@@ -3,6 +3,7 @@ package org.stjs.testing.driver;
 import java.util.Map;
 import java.util.concurrent.Exchanger;
 
+import org.junit.runners.model.InitializationError;
 import org.stjs.testing.driver.browser.Browser;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -17,7 +18,7 @@ import com.sun.net.httpserver.HttpExchange;
  * implementation of the Browser interface.
  * @author lordofthepigs
  */
-public class AsyncBrowserSession {
+public class AsyncBrowserSession implements AsyncProcess {
 
 	private final long id;
 	private final Exchanger<AsyncMethod> exchanger = new Exchanger<AsyncMethod>();
@@ -45,9 +46,10 @@ public class AsyncBrowserSession {
 	 * decision about exactly which browser binary is started, how it is started and which page is opened is delegated to the Browser
 	 * implementation that this AsynBrowserSession was constructed with.
 	 */
-	public void start() {
+	@Override
+	public void start() throws InitializationError {
 		if (browser.getConfig().isDebugEnabled()) {
-			System.out.println("Browser " + this.id + " starting");
+			System.out.println("Browser " + this.id + " starting (" + browser.getClass().getSimpleName() + ")");
 		}
 		// non-blocking, gets the browser to send the initial request to the
 		// server
@@ -152,6 +154,7 @@ public class AsyncBrowserSession {
 	 * Stops this browser session and performs cleanup operations. The details of whether or not the opened browser is actually closed is
 	 * delegated to the implementation of the Browser interface that this AsyncBrowserSession was created with.
 	 */
+	@Override
 	public void stop() {
 		browser.stop();
 		if (browser.getConfig().isDebugEnabled()) {

@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +27,7 @@ import org.stjs.testing.annotation.ScriptsBefore;
 import org.stjs.testing.driver.AsyncBrowserSession;
 import org.stjs.testing.driver.AsyncMethod;
 import org.stjs.testing.driver.DriverConfiguration;
+import org.stjs.testing.driver.SharedExternalProcess;
 import org.stjs.testing.driver.StreamUtils;
 import org.stjs.testing.driver.TestResult;
 
@@ -221,5 +223,11 @@ public class PhantomjsBrowser implements Browser {
 		}
 
 		return new TestResult(userAgent, result, location);
+	}
+
+	@Override
+	public Set<Class<? extends SharedExternalProcess>> getExternalProcessDependencies() {
+		// default implementation needs no external processes
+		return Collections.emptySet();
 	}
 }

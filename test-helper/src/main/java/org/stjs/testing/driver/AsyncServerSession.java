@@ -26,7 +26,7 @@ import com.sun.net.httpserver.HttpServer;
  * @author lordofthepigs
  */
 @SuppressWarnings("restriction")
-public class AsyncServerSession {
+public class AsyncServerSession implements SharedExternalProcess {
 
 	public static final String NEXT_TEST_URI = "/getNextTest";
 
@@ -70,10 +70,10 @@ public class AsyncServerSession {
 		if (config.isDebugEnabled()) {
 			System.out.println("Server session created");
 		}
-		this.start();
 	}
 
-	private void start() {
+	@Override
+	public void start() throws InitializationError {
 		httpServer.start();
 		if (config.isDebugEnabled()) {
 			System.out.println("Server session started");
@@ -85,7 +85,8 @@ public class AsyncServerSession {
 	 * specified session's id. This method is expected to be called many times in a row before any unit test is started, once per browser
 	 * session.
 	 */
-	public void addBrowserConnection(AsyncBrowserSession browserSession) {
+	@Override
+	public void addBrowserSession(AsyncBrowserSession browserSession) {
 		browsers.put(browserSession.getId(), browserSession);
 	}
 
@@ -230,6 +231,7 @@ public class AsyncServerSession {
 		}
 	}
 
+	@Override
 	public void stop() {
 		this.httpServer.stop(5);
 	}

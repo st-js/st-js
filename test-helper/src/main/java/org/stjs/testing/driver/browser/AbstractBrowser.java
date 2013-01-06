@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +24,7 @@ import org.stjs.testing.annotation.ScriptsBefore;
 import org.stjs.testing.driver.AsyncBrowserSession;
 import org.stjs.testing.driver.AsyncMethod;
 import org.stjs.testing.driver.DriverConfiguration;
+import org.stjs.testing.driver.SharedExternalProcess;
 import org.stjs.testing.driver.StreamUtils;
 import org.stjs.testing.driver.TestResult;
 
@@ -221,4 +223,18 @@ public abstract class AbstractBrowser implements Browser {
 		// default implementation does nothing
 	}
 
+	@Override
+	public Set<Class<? extends SharedExternalProcess>> getExternalProcessDependencies() {
+		// default implementation needs no external processes
+		return new HashSet<Class<? extends SharedExternalProcess>>();
+	}
+
+	protected Set<Class<? extends SharedExternalProcess>> getExternalProcessDependencies(
+			Class<? extends SharedExternalProcess>... extraDependencies) {
+		Set<Class<? extends SharedExternalProcess>> set = this.getExternalProcessDependencies();
+		for (Class<? extends SharedExternalProcess> dep : extraDependencies) {
+			set.add(dep);
+		}
+		return set;
+	}
 }
