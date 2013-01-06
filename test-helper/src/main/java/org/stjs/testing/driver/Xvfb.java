@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
  * class was shamelessly ripped from the selenium-maven-plugin (though the xauth stuff was intentionally left out)s
  * @author lordofthepigs
  */
-public class Xvfb implements SharedExternalProcess {
+public class Xvfb implements AsyncProcess {
 
 	/** The default display to use. SSH usualy eats up :10, so lets use :20. That starts at port 6020. */
 	private static final int DEFAULT_DISPLAY_NUMBER = 20;
@@ -170,10 +170,5 @@ public class Xvfb implements SharedExternalProcess {
 	@Override
 	public void stop() {
 		xvfbProcess.destroy();
-	}
-
-	@Override
-	public void addBrowserSession(AsyncBrowserSession browserSession) {
-		// xvfb doesn't care which browser sessions are active
 	}
 }

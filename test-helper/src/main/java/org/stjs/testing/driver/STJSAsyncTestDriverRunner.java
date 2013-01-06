@@ -37,8 +37,8 @@ public class STJSAsyncTestDriverRunner extends BlockJUnit4ClassRunner {
 
 				AsyncMethod aMethod = new AsyncMethod(getTestClass(), method, session.getConfig().getBrowserCount());
 
-				for (AsyncBrowserSession browser : session.getBrowsers()) {
-					session.getServer().queueTest(aMethod, browser);
+				for (AsyncBrowserSession browserSession : session.getBrowserSessions()) {
+					browserSession.executeTest(aMethod);
 				}
 
 				TestResultCollection results = aMethod.awaitExecutionResult();

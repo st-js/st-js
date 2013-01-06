@@ -26,7 +26,7 @@ import com.sun.net.httpserver.HttpServer;
  * @author lordofthepigs
  */
 @SuppressWarnings("restriction")
-public class AsyncServerSession implements SharedExternalProcess {
+public class AsyncServerSession implements AsyncProcess {
 
 	public static final String NEXT_TEST_URI = "/getNextTest";
 
@@ -85,21 +85,8 @@ public class AsyncServerSession implements SharedExternalProcess {
 	 * specified session's id. This method is expected to be called many times in a row before any unit test is started, once per browser
 	 * session.
 	 */
-	@Override
-	public void addBrowserSession(AsyncBrowserSession browserSession) {
+	public void registerBrowserSession(AsyncBrowserSession browserSession) {
 		browsers.put(browserSession.getId(), browserSession);
-	}
-
-	/**
-	 * Instructs the HTTP server to respond with the specified test to the specified browser session the next time that session asks for test to
-	 * run.
-	 */
-	public void queueTest(AsyncMethod method, AsyncBrowserSession browser) {
-		// notify the browser that a new test is ready to be executed. This will actually cause this
-		// server session to release the HTTP response to any previous request, thereby letting the
-		// actual browser know that a new test is ready, and providing it with the necessary instructions
-		// to run it.
-		browser.notifyNewTestReady(method);
 	}
 
 	private final class AsyncHttpHandler implements HttpHandler {

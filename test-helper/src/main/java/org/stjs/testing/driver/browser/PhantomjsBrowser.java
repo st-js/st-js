@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -26,8 +26,10 @@ import org.stjs.testing.annotation.ScriptsAfter;
 import org.stjs.testing.annotation.ScriptsBefore;
 import org.stjs.testing.driver.AsyncBrowserSession;
 import org.stjs.testing.driver.AsyncMethod;
+import org.stjs.testing.driver.AsyncProcess;
+import org.stjs.testing.driver.AsyncServerSession;
 import org.stjs.testing.driver.DriverConfiguration;
-import org.stjs.testing.driver.SharedExternalProcess;
+import org.stjs.testing.driver.JUnitSession;
 import org.stjs.testing.driver.StreamUtils;
 import org.stjs.testing.driver.TestResult;
 
@@ -46,8 +48,13 @@ public class PhantomjsBrowser implements Browser {
 		this.config = config;
 	}
 
+	protected void registerWithLongPollingServer(AsyncBrowserSession bs) {
+		JUnitSession.getInstance().getDependency(AsyncServerSession.class).registerBrowserSession(bs);
+	}
+
 	@Override
-	public void start(long browserId) {
+	public void start(AsyncBrowserSession session) {
+		this.registerWithLongPollingServer(session);
 		try {
 			// We first need to extract phantomjs-bootstrap.js to the temp directory, because phantomjs
 			// can only be started with a file on the local filesystem as argument
@@ -58,7 +65,7 @@ public class PhantomjsBrowser implements Browser {
 					executableName, //
 					"--web-security=no", //
 					tempBootstrapJs.getAbsolutePath(), //
-					Long.toString(browserId), //
+					Long.toString(session.getId()), //
 					config.getServerURL().toString()).start();
 
 			if (config.isDebugEnabled()) {
@@ -226,8 +233,9 @@ public class PhantomjsBrowser implements Browser {
 	}
 
 	@Override
-	public Set<Class<? extends SharedExternalProcess>> getExternalProcessDependencies() {
-		// default implementation needs no external processes
-		return Collections.emptySet();
+	public Set<Class<? extends AsyncProcess>> getSharedDependencies() {
+		Set<Class<? extends AsyncProcess>> dep = new HashSet<Class<? extends AsyncProcess>>();
+		dep.add(AsyncServerSession.class);
+		return dep;
 	}
 }

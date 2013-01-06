@@ -3,6 +3,7 @@ package org.stjs.testing.driver;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,9 +33,8 @@ public class JUnitSession {
 	private DriverConfiguration config;
 
 	private List<AsyncBrowserSession> browserSessions;
-	private AsyncServerSession serverSession;
 	private Set<STJSAsyncTestDriverRunner> remainingRunners = new HashSet<STJSAsyncTestDriverRunner>();
-	private Set<SharedExternalProcess> dependentProcesses = new HashSet<SharedExternalProcess>();
+	private HashMap<Class<? extends AsyncProcess>, AsyncProcess> sharedDependencies = new HashMap<Class<? extends AsyncProcess>, AsyncProcess>();
 
 	public static JUnitSession getInstance() {
 		if (instance == null) {
@@ -77,24 +77,20 @@ public class JUnitSession {
 
 	private void initBrowserDependencies() throws InitializationError {
 		// Collect the dependencies of all browsers
-		Set<Class<? extends SharedExternalProcess>> deps = new HashSet<Class<? extends SharedExternalProcess>>();
+		Set<Class<? extends AsyncProcess>> deps = new HashSet<Class<? extends AsyncProcess>>();
 		for (Browser browser : config.getBrowsers()) {
-			deps.addAll(browser.getExternalProcessDependencies());
+			deps.addAll(browser.getSharedDependencies());
 		}
 
-		// Init the HTTP server
-		// TODO: this should be a dependency like any other
-		serverSession = new AsyncServerSession(config);
-
 		// Init all the dependencies
-		for (Class<? extends SharedExternalProcess> dep : deps) {
-			dependentProcesses.add(initBrowserDependency(dep));
+		for (Class<? extends AsyncProcess> dep : deps) {
+			sharedDependencies.put(dep, initBrowserDependency(dep));
 		}
 	}
 
-	private SharedExternalProcess initBrowserDependency(Class<? extends SharedExternalProcess> dep) throws InitializationError {
+	private AsyncProcess initBrowserDependency(Class<? extends AsyncProcess> dep) throws InitializationError {
 
-		Constructor<? extends SharedExternalProcess> cons;
+		Constructor<? extends AsyncProcess> cons;
 		try {
 			cons = dep.getConstructor(DriverConfiguration.class);
 			return cons.newInstance(config);
@@ -118,9 +114,7 @@ public class JUnitSession {
 	}
 
 	private void startBrowserDependencies() throws InitializationError {
-		List<AsyncProcess> allDeps = new ArrayList<AsyncProcess>(this.dependentProcesses);
-		allDeps.add(serverSession);
-		startInParallel(allDeps);
+		startInParallel(this.sharedDependencies.values());
 	}
 
 	private void startBrowserSessions() throws InitializationError {
@@ -138,11 +132,6 @@ public class JUnitSession {
 				public void run() {
 					try {
 						proc.start();
-						if (proc instanceof SharedExternalProcess) {
-							for (AsyncBrowserSession browserSession : browserSessions) {
-								((SharedExternalProcess) proc).addBrowserSession(browserSession);
-							}
-						}
 					}
 					catch (Exception e) {
 						firstError.compareAndSet(null, e);
@@ -182,12 +171,10 @@ public class JUnitSession {
 		browserSessions.clear();
 		remainingRunners.clear();
 
-		serverSession.stop();
-		serverSession = null;
-		for (SharedExternalProcess p : dependentProcesses) {
-			p.stop();
+		for (AsyncProcess dep : sharedDependencies.values()) {
+			dep.stop();
 		}
-		dependentProcesses.clear();
+		sharedDependencies.clear();
 	}
 
 	/**
@@ -245,11 +232,12 @@ public class JUnitSession {
 		return this.config;
 	}
 
-	public List<AsyncBrowserSession> getBrowsers() {
+	public List<AsyncBrowserSession> getBrowserSessions() {
 		return this.browserSessions;
 	}
 
-	public AsyncServerSession getServer() {
-		return serverSession;
+	@SuppressWarnings("unchecked")
+	public <T> T getDependency(Class<T> depencencyType) {
+		return (T) this.sharedDependencies.get(depencencyType);
 	}
 }

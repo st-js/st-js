@@ -23,8 +23,10 @@ import org.stjs.testing.annotation.ScriptsAfter;
 import org.stjs.testing.annotation.ScriptsBefore;
 import org.stjs.testing.driver.AsyncBrowserSession;
 import org.stjs.testing.driver.AsyncMethod;
+import org.stjs.testing.driver.AsyncProcess;
+import org.stjs.testing.driver.AsyncServerSession;
 import org.stjs.testing.driver.DriverConfiguration;
-import org.stjs.testing.driver.SharedExternalProcess;
+import org.stjs.testing.driver.JUnitSession;
 import org.stjs.testing.driver.StreamUtils;
 import org.stjs.testing.driver.TestResult;
 
@@ -38,6 +40,10 @@ public abstract class AbstractBrowser implements Browser {
 
 	public AbstractBrowser(DriverConfiguration config) {
 		this.config = config;
+	}
+
+	protected void registerWithLongPollingServer(AsyncBrowserSession bs) {
+		JUnitSession.getInstance().getDependency(AsyncServerSession.class).registerBrowserSession(bs);
 	}
 
 	protected void startProcess(String defaultBinaryName, String binPropertyName, String url) {
@@ -224,15 +230,15 @@ public abstract class AbstractBrowser implements Browser {
 	}
 
 	@Override
-	public Set<Class<? extends SharedExternalProcess>> getExternalProcessDependencies() {
-		// default implementation needs no external processes
-		return new HashSet<Class<? extends SharedExternalProcess>>();
+	public Set<Class<? extends AsyncProcess>> getSharedDependencies() {
+		Set<Class<? extends AsyncProcess>> deps = new HashSet<Class<? extends AsyncProcess>>();
+		deps.add(AsyncServerSession.class);
+		return deps;
 	}
 
-	protected Set<Class<? extends SharedExternalProcess>> getExternalProcessDependencies(
-			Class<? extends SharedExternalProcess>... extraDependencies) {
-		Set<Class<? extends SharedExternalProcess>> set = this.getExternalProcessDependencies();
-		for (Class<? extends SharedExternalProcess> dep : extraDependencies) {
+	protected Set<Class<? extends AsyncProcess>> getSharedDependencies(Class<? extends AsyncProcess>... extraDependencies) {
+		Set<Class<? extends AsyncProcess>> set = this.getSharedDependencies();
+		for (Class<? extends AsyncProcess> dep : extraDependencies) {
 			set.add(dep);
 		}
 		return set;

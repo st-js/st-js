@@ -1,5 +1,6 @@
 package org.stjs.testing.driver.browser;
 
+import org.stjs.testing.driver.AsyncBrowserSession;
 import org.stjs.testing.driver.DriverConfiguration;
 
 public class ChromeBrowser extends AbstractBrowser {
@@ -11,7 +12,8 @@ public class ChromeBrowser extends AbstractBrowser {
 	}
 
 	@Override
-	public void start(long browserId) {
-		this.startProcess("google-chrome", PROP_CHROME_BIN, getStartPageUrl(browserId));
+	public void start(AsyncBrowserSession session) {
+		this.registerWithLongPollingServer(session);
+		this.startProcess("google-chrome", PROP_CHROME_BIN, getStartPageUrl(session.getId()));
 	}
 }

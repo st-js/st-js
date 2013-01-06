@@ -53,7 +53,7 @@ public class AsyncBrowserSession implements AsyncProcess {
 		}
 		// non-blocking, gets the browser to send the initial request to the
 		// server
-		this.browser.start(this.id);
+		this.browser.start(this);
 	}
 
 	/**
@@ -82,11 +82,12 @@ public class AsyncBrowserSession implements AsyncProcess {
 	}
 
 	/**
-	 * Notifies this browser that the specified test must be executed. This method blocks until this browser picks up the test by calling
-	 * awaitNewTestReady().
+	 * Executes the specified test method, possibly asynchronously. // TODO: this is the description of the previous method. Needs to be moved
+	 * somewhere elseNotifies this browser that the specified test must be executed. This method blocks until this browser picks up the test by
+	 * calling awaitNewTestReady().
 	 * @param method The test to execute.
 	 */
-	public void notifyNewTestReady(AsyncMethod method) {
+	public void executeTest(AsyncMethod method) {
 		try {
 			if (browser.getConfig().isDebugEnabled()) {
 				System.out.println("Test " + method.getMethod().getMethod() + " is available for browser " + this.id);
