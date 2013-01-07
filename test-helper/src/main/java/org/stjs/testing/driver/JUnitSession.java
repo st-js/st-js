@@ -198,9 +198,12 @@ public class JUnitSession {
 	}
 
 	/**
-	 * Called when a runner has been instantiated. This method is expected to be called many times in a row right after the session has started,
-	 * once per STJSMultiTestDriverRunner. The first time this method is called, the HTTP server and the browsers are configured and started.
-	 * This method counts the number of times it has been called.
+	 * <<<<<<< HEAD Called when a runner has been instantiated. This method is expected to be called many times in a row right after the session
+	 * has started, once per STJSMultiTestDriverRunner. The first time this method is called, the HTTP server and the browsers are configured and
+	 * started. This method counts the number of times it has been called. ======= Called when a runner has been instantiated. This method is
+	 * expected to be called many times in a row right after the session has started, once per STJSAsyncTestDriverRunner. The first time this
+	 * method is called, the HTTP server and the browsers are configured and started. This method counts the number of times it has been called.
+	 * >>>>>>> refs/remotes/st-js/master
 	 */
 	public void runnerInstantiated(STJSMultiTestDriverRunner runner) throws InitializationError {
 		if (this.config == null) {

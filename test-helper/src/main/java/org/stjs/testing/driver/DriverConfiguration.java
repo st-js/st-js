@@ -32,6 +32,7 @@ import org.stjs.testing.driver.browser.FirefoxBrowser;
 import org.stjs.testing.driver.browser.HeadlessChromeBrowser;
 import org.stjs.testing.driver.browser.HeadlessFirefoxBrowser;
 import org.stjs.testing.driver.browser.PhantomjsBrowser;
+import org.stjs.testing.driver.browser.RemoteBrowser;
 import org.stjs.testing.driver.browser.RhinoBrowser;
 
 import com.google.common.io.Closeables;
@@ -216,6 +217,7 @@ public class DriverConfiguration {
 		CHROME("chrome", ChromeBrowser.class), //
 		HEADLESS_FIREFOX("headlessFirefox", HeadlessFirefoxBrowser.class), //
 		HEADLESS_CHROME("headlessChrome", HeadlessChromeBrowser.class), //
+		REMOTE("remote", RemoteBrowser.class), //
 		RHINO("rhino", RhinoBrowser.class);
 
 		String name;

@@ -11,12 +11,11 @@ import java.util.Set;
 import org.junit.runners.model.InitializationError;
 import org.stjs.testing.driver.AsyncProcess;
 import org.stjs.testing.driver.DriverConfiguration;
-import org.stjs.testing.driver.HttpLongPollingServer;
 import org.stjs.testing.driver.TestResult;
 
 import com.sun.net.httpserver.HttpExchange;
 
-@SuppressWarnings({"restriction", "deprecation"})
+@SuppressWarnings({"restriction"})
 public abstract class AbstractBrowser implements Browser {
 
 	private DriverConfiguration config;
@@ -107,12 +106,6 @@ public abstract class AbstractBrowser implements Browser {
 	@Override
 	public void stop() {
 		// default implementation does nothing
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public Set<Class<? extends AsyncProcess>> getSharedDependencies() {
-		return processSet(HttpLongPollingServer.class);
 	}
 
 	protected static Set<Class<? extends AsyncProcess>> processSet(Class<? extends AsyncProcess>... clazz) {

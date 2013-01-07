@@ -1,15 +1,17 @@
 package org.stjs.testing.driver.browser;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Exchanger;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.stjs.generator.BridgeClass;
 import org.stjs.generator.ClassWithJavascript;
@@ -19,6 +21,7 @@ import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.Scripts;
 import org.stjs.testing.annotation.ScriptsAfter;
 import org.stjs.testing.annotation.ScriptsBefore;
+import org.stjs.testing.driver.AsyncProcess;
 import org.stjs.testing.driver.DriverConfiguration;
 import org.stjs.testing.driver.HttpLongPollingServer;
 import org.stjs.testing.driver.JUnitSession;
@@ -150,6 +153,9 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		Method method = meth.getMethod().getMethod();
 		ClassWithJavascript stjsClass = new Generator().getExistingStjsClass(getConfig().getClassLoader(), testClass);
 
+		List<FrameworkMethod> beforeMethods = meth.getTestClass().getAnnotatedMethods(Before.class);
+		List<FrameworkMethod> afterMethods = meth.getTestClass().getAnnotatedMethods(After.class);
+
 		final HTMLFixture htmlFixture = testClass.getAnnotation(HTMLFixture.class);
 
 		final Scripts addedScripts = testClass.getAnnotation(Scripts.class);
@@ -204,20 +210,32 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		}
 		resp.append("<script language='javascript'>\n");
 		resp.append("  onload=function(){\n");
-		resp.append("    console.error(document.getElementsByTagName('html')[0].innerHTML);\n");
+		// resp.append("    console.error(document.getElementsByTagName('html')[0].innerHTML);\n");
 
 		// Adapter between generated assert (not global) and JS-test-driver assert (which is a
 		// set of global methods)
 		resp.append("    Assert=window;\n");
 
 		String testedClassName = testClass.getSimpleName();
-		resp.append("    parent.log('<b>" + testedClassName + "</b>." + method.getName() + "');");
+		resp.append("    parent.startingTest('" + testedClassName + "', '" + method.getName() + "');");
+		resp.append("    var stjsTest = new " + testedClassName + "();\n");
+		resp.append("    var stjsResult = 'OK';\n");
 		resp.append("    try{\n");
-		resp.append("      new " + testedClassName + "()." + method.getName() + "();\n");
-		resp.append("      parent.reportResultAndRunNextTest('OK');\n");
+		// call before methods
+		for (FrameworkMethod beforeMethod : beforeMethods) {
+			resp.append("      stjsTest." + beforeMethod.getName() + "();\n");
+		}
+		// call the test's method
+		resp.append("      stjsTest." + method.getName() + "();\n");
 		resp.append("    }catch(ex){\n");
-		resp.append("      parent.reportResultAndRunNextTest(ex, ex.location);\n");
-		resp.append("    }\n");
+		resp.append("      stjsResult = ex;\n");
+		resp.append("    }finally{\n");
+		// call after methods
+		for (FrameworkMethod afterMethod : afterMethods) {
+			resp.append("     stjsTest." + afterMethod.getName() + "();\n");
+		}
+		resp.append("      parent.reportResultAndRunNextTest(stjsResult, stjsResult.location);\n");
+		resp.append("     }\n");
 		resp.append("  }\n");
 		resp.append("</script>\n");
 		resp.append("</head>\n");
@@ -235,12 +253,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		resp.append("</body>\n");
 		resp.append("</html>\n");
 
-		byte[] response = resp.toString().getBytes("UTF-8");
-		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-
-		OutputStream output = exchange.getResponseBody();
-		output.write(response);
-		output.flush();
+		sendResponse(resp.toString(), exchange);
 	}
 
 	/**
@@ -251,6 +264,12 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	 */
 	public void sendNoMoreTestFixture(HttpExchange exchange) throws IOException {
 		sendResponse("<html><body><h1>Tests completed!</h1></body></html>", exchange);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Set<Class<? extends AsyncProcess>> getSharedDependencies() {
+		return processSet(HttpLongPollingServer.class);
 	}
 
 	public void markAsDead(Throwable throwable, String userAgent) {

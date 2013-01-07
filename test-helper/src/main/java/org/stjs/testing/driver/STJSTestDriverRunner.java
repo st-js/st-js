@@ -21,8 +21,11 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.URI;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.internal.runners.model.EachTestNotifier;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
@@ -107,6 +110,9 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 
 				ClassWithJavascript stjsClass = new Generator().getExistingStjsClass(config.getClassLoader(), getTestClass().getJavaClass());
 
+				List<FrameworkMethod> beforeMethods = getTestClass().getAnnotatedMethods(Before.class);
+				List<FrameworkMethod> afterMethods = getTestClass().getAnnotatedMethods(After.class);
+
 				final HTMLFixture htmlFixture = getTestClass().getJavaClass().getAnnotation(HTMLFixture.class);
 
 				final Scripts addedScripts = getTestClass().getJavaClass().getAnnotation(Scripts.class);
@@ -169,17 +175,28 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 
 					// Adapter between generated assert (not global) and JS-test-driver assert (which is a
 					// set of global methods)
-					writer.append("Assert=window;");
+					writer.append("Assert=window;\n");
 
 					String testedClassName = getTestClass().getJavaClass().getSimpleName();
 
-					writer.append("try{");
-					writer.append("new " + testedClassName + "()." + method.getName() + "();");
-					writer.append("parent.sendOK('" + testedClassName + "." + method.getName() + "');");
-					writer.append("}catch(ex){");
-					writer.append("parent.sendError('" + testedClassName + "." + method.getName() + "', ex);");
-					writer.append("}");
-					writer.append("}");
+					writer.append("var stjsTest = new " + testedClassName + "();\n");
+					writer.append("try{\n");
+					// call before methods
+					for (FrameworkMethod beforeMethod : beforeMethods) {
+						writer.append("stjsTest." + beforeMethod.getName() + "();\n");
+					}
+					// call the test's method
+					writer.append("stjsTest." + method.getName() + "();\n");
+					writer.append("parent.sendOK('" + testedClassName + "." + method.getName() + "');\n");
+					writer.append("}catch(ex){\n");
+					writer.append("parent.sendError('" + testedClassName + "." + method.getName() + "', ex);\n");
+					writer.append("} finally{\n");
+					// call after methods
+					for (FrameworkMethod afterMethod : afterMethods) {
+						writer.append("stjsTest." + afterMethod.getName() + "();\n");
+					}
+					writer.append("}\n");
+					writer.append("}\n");
 					writer.append("</script>");
 					writer.append("</head>");
 					writer.append("<body>");
