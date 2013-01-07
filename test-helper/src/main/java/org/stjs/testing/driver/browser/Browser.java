@@ -1,56 +1,46 @@
 package org.stjs.testing.driver.browser;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.runners.model.InitializationError;
-import org.stjs.testing.driver.AsyncBrowserSession;
-import org.stjs.testing.driver.MultiTestMethod;
 import org.stjs.testing.driver.AsyncProcess;
 import org.stjs.testing.driver.DriverConfiguration;
-import org.stjs.testing.driver.TestResult;
-
-import com.sun.net.httpserver.HttpExchange;
+import org.stjs.testing.driver.MultiTestMethod;
 
 /**
- * Handles all the details of starting, stopping and communicating with a specific browser through HTTP or other means.
+ * Handles all the details of starting and stopping a testing session as well as executing individual tests for the specific browser represented
+ * by the implementation of this interface. Implementations will typically start an internal HTTP server and an external browsers, instruct that
+ * browser and instruct the browser how to communicate with the HTTP server.
  * @author lordofthepigs
  */
 @SuppressWarnings("restriction")
-public interface Browser {
+public interface Browser extends AsyncProcess {
 
 	/**
-	 * Opens a new browser and makes it ready to accept unit tests for execution.
-	 * @param browserId the ID that the browser has to report to the HTTP server everytime it communicates with it.
+	 * Starts the browser session. This will open a browser and navigate it to some page where the unit testing procedure can be started. The
+	 * decision about exactly which browser binary is started, how it is started and which page is opened is delegated to the Browser
+	 * implementation that this AsynBrowserSession was constructed with. This method is non-blocking and returns as soon as possible.
 	 */
-	public void start(AsyncBrowserSession session) throws InitializationError;
+	@Override
+	public void start() throws InitializationError;
 
 	public DriverConfiguration getConfig();
 
 	/**
-	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser to execute the specified test.
-	 * @param meth The test to send to the browser
-	 * @param browserSession The session to which the test is sent
-	 * @param exchange contains the HTTP response that must be written to
+	 * Executes the specified test method on this browser, possibly asynchronously.
+	 * @param method The test to execute.
 	 */
-	public void sendTestFixture(MultiTestMethod meth, AsyncBrowserSession browserSession, HttpExchange exchange) throws IOException,
-			URISyntaxException;
+	public void executeTest(MultiTestMethod method);
 
 	/**
-	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser understand that there will be no more tests.
-	 * @param browserSession The session to be notified
-	 * @param exchange contains the HTTP response that must be written to
+	 * Notifies this browser that there are no more tests to execute.
 	 */
-	public void sendNoMoreTestFixture(AsyncBrowserSession browser, HttpExchange exchange) throws IOException, URISyntaxException;
-
-	public TestResult buildResult(Map<String, String> queryStringParameters, HttpExchange exchange);
+	public void notifyNoMoreTests();
 
 	/**
-	 * Opens a new browser and makes it ready to accept unit tests for execution.
-	 * @param browserId the ID that the browser has to report to the HTTP server everytime it communicates with it.
+	 * Stops this browsers and performs cleanup operations, if any.
 	 */
+	@Override
 	public void stop();
 
 	/**

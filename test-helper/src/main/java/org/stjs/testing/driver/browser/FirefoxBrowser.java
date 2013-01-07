@@ -1,10 +1,9 @@
 package org.stjs.testing.driver.browser;
 
 import org.junit.runners.model.InitializationError;
-import org.stjs.testing.driver.AsyncBrowserSession;
 import org.stjs.testing.driver.DriverConfiguration;
 
-public class FirefoxBrowser extends AbstractBrowser {
+public class FirefoxBrowser extends LongPollingBrowser {
 
 	public static final String PROP_FIREFOX_BIN = "firefox.bin";
 
@@ -13,9 +12,8 @@ public class FirefoxBrowser extends AbstractBrowser {
 	}
 
 	@Override
-	public void start(AsyncBrowserSession session) throws InitializationError {
-		this.registerWithLongPollingServer(session);
-		this.startProcess("firefox", PROP_FIREFOX_BIN, getStartPageUrl(session.getId()));
+	public void start() throws InitializationError {
+		this.registerWithLongPollingServer();
+		this.startProcess("firefox", PROP_FIREFOX_BIN, getStartPageUrl(getId()));
 	}
-
 }

@@ -16,6 +16,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.runners.model.InitializationError;
+import org.stjs.testing.driver.browser.LongPollingBrowser;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -32,7 +33,7 @@ public class HttpLongPollingServer implements AsyncProcess {
 
 	private final DriverConfiguration config;
 	private final HttpServer httpServer;
-	private final Map<Long, AsyncBrowserSession> browsers = new ConcurrentHashMap<Long, AsyncBrowserSession>();
+	private final Map<Long, LongPollingBrowser> browsers = new ConcurrentHashMap<Long, LongPollingBrowser>();
 
 	/**
 	 * Configures and starts the HTTP server
@@ -85,8 +86,10 @@ public class HttpLongPollingServer implements AsyncProcess {
 	 * specified session's id. This method is expected to be called many times in a row before any unit test is started, once per browser
 	 * session.
 	 */
-	public void registerBrowserSession(AsyncBrowserSession browserSession) {
-		browsers.put(browserSession.getId(), browserSession);
+	public long registerBrowserSession(LongPollingBrowser browser) {
+		long id = browsers.size();
+		browsers.put(id, browser);
+		return id;
 	}
 
 	private final class AsyncHttpHandler implements HttpHandler {
@@ -135,7 +138,7 @@ public class HttpLongPollingServer implements AsyncProcess {
 		private void handleNextTest(Map<String, String> params, HttpExchange exchange) {
 			// Read the test results returned by the browser, if any
 			long browserId = parseLong(params.get("browserId"), -1);
-			AsyncBrowserSession browser = browsers.get(browserId);
+			LongPollingBrowser browser = browsers.get(browserId);
 			MultiTestMethod completedMethod = browser.getMethodUnderExecution();
 			if (completedMethod != null) {
 				// We only have a method under execution, if the HTTP request that is being
@@ -164,9 +167,25 @@ public class HttpLongPollingServer implements AsyncProcess {
 				if (config.isDebugEnabled()) {
 					System.out.println("Server is sending test for method " + nextMethod.toString() + " to browser " + browserId);
 				}
-				browser.sendTestFixture(nextMethod, exchange);
+				try {
+					browser.sendTestFixture(nextMethod, exchange);
+				}
+				catch (Exception e) {
+					// we failed to send the fixture. This means that the browser will not request the next test,
+					// it is therefore essentially dead. 
+					browser.markAsDead(e, exchange.getRequestHeaders().getFirst("User-Agent"));
+					throw new RuntimeException(e);
+				}
+
 			} else {
-				browser.sendNoMoreTestFixture(browser, exchange);
+				try {
+					browser.sendNoMoreTestFixture(exchange);
+				}
+				catch (IOException ioe) {
+					// sending a 500 error has basically the same effect as sending a proper response. The browser may
+					// not cleanup properly, but hey, this is disaster recovery
+					throw new RuntimeException(ioe);
+				}
 			}
 		}
 

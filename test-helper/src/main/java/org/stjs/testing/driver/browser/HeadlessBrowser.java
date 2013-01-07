@@ -9,11 +9,11 @@ import org.stjs.testing.driver.HttpLongPollingServer;
 import org.stjs.testing.driver.JUnitSession;
 import org.stjs.testing.driver.Xvfb;
 
-public abstract class AbstractHeadlessBrowser extends AbstractBrowser {
+public abstract class HeadlessBrowser extends LongPollingBrowser {
 
 	Process process;
 
-	public AbstractHeadlessBrowser(DriverConfiguration config) {
+	public HeadlessBrowser(DriverConfiguration config) {
 		super(config);
 	}
 

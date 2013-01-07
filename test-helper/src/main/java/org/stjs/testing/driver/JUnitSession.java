@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.runners.model.FrameworkMethod;
@@ -32,7 +31,7 @@ public class JUnitSession {
 
 	private DriverConfiguration config;
 
-	private List<AsyncBrowserSession> browserSessions;
+	private List<Browser> browsers;
 	private Set<STJSMultiTestDriverRunner> remainingRunners = new HashSet<STJSMultiTestDriverRunner>();
 	private HashMap<Class<? extends AsyncProcess>, AsyncProcess> sharedDependencies = new HashMap<Class<? extends AsyncProcess>, AsyncProcess>();
 
@@ -63,10 +62,10 @@ public class JUnitSession {
 			config = new DriverConfiguration(testClassSample);
 
 			// initialize the browser sessions
-			initBrowserSessions();
+			initBrowsers();
 			initBrowserDependencies();
 			startBrowserDependencies();
-			startBrowserSessions();
+			startBrowsers();
 
 		}
 		catch (Throwable e) {
@@ -77,12 +76,8 @@ public class JUnitSession {
 		}
 	}
 
-	private void initBrowserSessions() {
-		browserSessions = new CopyOnWriteArrayList<AsyncBrowserSession>();
-		List<Browser> browsers = config.getBrowsers();
-		for (int i = 0; i < browsers.size(); i++) {
-			browserSessions.add(new AsyncBrowserSession(browsers.get(i), i));
-		}
+	private void initBrowsers() {
+		browsers = new ArrayList<Browser>(config.getBrowsers());
 	}
 
 	private void initBrowserDependencies() throws InitializationError {
@@ -127,8 +122,8 @@ public class JUnitSession {
 		startInParallel(this.sharedDependencies.values());
 	}
 
-	private void startBrowserSessions() throws InitializationError {
-		startInParallel(this.browserSessions);
+	private void startBrowsers() throws InitializationError {
+		startInParallel(this.browsers);
 	}
 
 	private void startInParallel(Collection<? extends AsyncProcess> processes) throws InitializationError {
@@ -176,7 +171,7 @@ public class JUnitSession {
 		config = null;
 		remainingRunners.clear();
 
-		for (AsyncBrowserSession browser : browserSessions) {
+		for (Browser browser : browsers) {
 			try {
 				// FIXME: in some cases where initialization of some dependencies has failed, the fact that 
 				// this is a blocking method can lead to deadlocks. The case that caught me was the following:
@@ -189,7 +184,7 @@ public class JUnitSession {
 				printStackTrace(e);
 			}
 		}
-		browserSessions.clear();
+		browsers.clear();
 
 		for (AsyncProcess dep : sharedDependencies.values()) {
 			try {
@@ -257,8 +252,8 @@ public class JUnitSession {
 		return this.config;
 	}
 
-	public List<AsyncBrowserSession> getBrowserSessions() {
-		return this.browserSessions;
+	public List<Browser> getBrowsers() {
+		return this.browsers;
 	}
 
 	@SuppressWarnings("unchecked")

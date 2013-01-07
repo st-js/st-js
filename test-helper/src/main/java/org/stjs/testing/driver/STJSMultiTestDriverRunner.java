@@ -8,6 +8,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 import org.stjs.javascript.annotation.STJSBridge;
+import org.stjs.testing.driver.browser.Browser;
 
 @STJSBridge
 public class STJSMultiTestDriverRunner extends BlockJUnit4ClassRunner {
@@ -37,8 +38,8 @@ public class STJSMultiTestDriverRunner extends BlockJUnit4ClassRunner {
 
 				MultiTestMethod aMethod = new MultiTestMethod(getTestClass(), method, session.getConfig().getBrowserCount());
 
-				for (AsyncBrowserSession browserSession : session.getBrowserSessions()) {
-					browserSession.executeTest(aMethod);
+				for (Browser browser : session.getBrowsers()) {
+					browser.executeTest(aMethod);
 				}
 
 				TestResultCollection results = aMethod.awaitExecutionResult();

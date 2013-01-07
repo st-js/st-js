@@ -16,6 +16,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.runners.model.InitializationError;
 import org.stjs.generator.BridgeClass;
 import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
@@ -24,12 +25,10 @@ import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.Scripts;
 import org.stjs.testing.annotation.ScriptsAfter;
 import org.stjs.testing.annotation.ScriptsBefore;
-import org.stjs.testing.driver.AsyncBrowserSession;
-import org.stjs.testing.driver.MultiTestMethod;
 import org.stjs.testing.driver.AsyncProcess;
-import org.stjs.testing.driver.HttpLongPollingServer;
 import org.stjs.testing.driver.DriverConfiguration;
-import org.stjs.testing.driver.JUnitSession;
+import org.stjs.testing.driver.HttpLongPollingServer;
+import org.stjs.testing.driver.MultiTestMethod;
 import org.stjs.testing.driver.StreamUtils;
 import org.stjs.testing.driver.TestResult;
 
@@ -37,57 +36,47 @@ import com.google.common.base.Strings;
 import com.sun.net.httpserver.HttpExchange;
 
 @SuppressWarnings({"restriction" /* for HttpExchange */, "deprecation" /* for @Scripts */})
-public class PhantomjsBrowser implements Browser {
+public class PhantomjsBrowser extends LongPollingBrowser {
 
 	public static final String PROP_PHANTOMJS_BIN = "phantomjs.bin";
 
-	private final DriverConfiguration config;
 	private File tempBootstrapJs;
 
 	public PhantomjsBrowser(DriverConfiguration config) {
-		this.config = config;
-	}
-
-	protected void registerWithLongPollingServer(AsyncBrowserSession bs) {
-		JUnitSession.getInstance().getDependency(HttpLongPollingServer.class).registerBrowserSession(bs);
+		super(config);
 	}
 
 	@Override
-	public void start(AsyncBrowserSession session) {
-		this.registerWithLongPollingServer(session);
+	public void start() throws InitializationError {
+		this.registerWithLongPollingServer();
 		try {
 			// We first need to extract phantomjs-bootstrap.js to the temp directory, because phantomjs
 			// can only be started with a file on the local filesystem as argument
 			tempBootstrapJs = unpackBootstrap();
 
-			String executableName = config.getProperty(PROP_PHANTOMJS_BIN, "phantomjs");
+			String executableName = getConfig().getProperty(PROP_PHANTOMJS_BIN, "phantomjs");
 			new ProcessBuilder( //
 					executableName, //
 					"--web-security=no", //
 					tempBootstrapJs.getAbsolutePath(), //
-					Long.toString(session.getId()), //
-					config.getServerURL().toString()).start();
+					Long.toString(getId()), //
+					getConfig().getServerURL().toString()).start();
 
-			if (config.isDebugEnabled()) {
+			if (getConfig().isDebugEnabled()) {
 				System.out.println("Started phantomjs");
 			}
 		}
 		catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new InitializationError(e);
 		}
 	}
 
 	@Override
-	public DriverConfiguration getConfig() {
-		return config;
-	}
-
-	@Override
-	public void sendTestFixture(MultiTestMethod meth, AsyncBrowserSession browser, HttpExchange exchange) throws IOException, URISyntaxException {
+	public void sendTestFixture(MultiTestMethod meth, HttpExchange exchange) throws IOException, URISyntaxException {
 
 		Class<?> testClass = meth.getTestClass().getJavaClass();
 		Method method = meth.getMethod().getMethod();
-		ClassWithJavascript stjsClass = new Generator().getExistingStjsClass(config.getClassLoader(), testClass);
+		ClassWithJavascript stjsClass = new Generator().getExistingStjsClass(getConfig().getClassLoader(), testClass);
 
 		final HTMLFixture htmlFixture = testClass.getAnnotation(HTMLFixture.class);
 
@@ -117,7 +106,7 @@ public class PhantomjsBrowser implements Browser {
 		}
 
 		Set<URI> jsFiles = new LinkedHashSet<URI>();
-		for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(config.getClassLoader())) {
+		for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(getConfig().getClassLoader())) {
 
 			if (addedScripts != null && dep instanceof BridgeClass) {
 				// bridge dependencies are not added when using @Scripts
@@ -167,7 +156,7 @@ public class PhantomjsBrowser implements Browser {
 
 			} else if (!Strings.isNullOrEmpty(htmlFixture.url())) {
 				StringWriter writer = new StringWriter();
-				StreamUtils.copy(config.getClassLoader(), htmlFixture.url(), writer);
+				StreamUtils.copy(getConfig().getClassLoader(), htmlFixture.url(), writer);
 				resp.append(writer.toString());
 			}
 		}
@@ -183,7 +172,7 @@ public class PhantomjsBrowser implements Browser {
 	}
 
 	@Override
-	public void sendNoMoreTestFixture(AsyncBrowserSession browser, HttpExchange exchange) throws IOException, URISyntaxException {
+	public void sendNoMoreTestFixture(HttpExchange exchange) throws IOException {
 		byte[] response = "<html><head><script language='javascript'>parent.phantom.exit()</script></head></html>".getBytes("UTF-8");
 		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
 
@@ -225,7 +214,7 @@ public class PhantomjsBrowser implements Browser {
 		String result = queryStringParameters.get("result");
 		String location = queryStringParameters.get("location");
 
-		if (config.isDebugEnabled()) {
+		if (getConfig().isDebugEnabled()) {
 			System.out.println("Result was: " + result + ", at " + location + ", from " + userAgent);
 		}
 
