@@ -10,10 +10,10 @@ import org.stjs.javascript.functions.Callback3;
 import org.stjs.javascript.jquery.JQueryXHR;
 import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.ScriptsAfter;
-import org.stjs.testing.driver.STJSAsyncTestDriverRunner;
+import org.stjs.testing.driver.STJSMultiTestDriverRunner;
 import org.stjs.testing.jquery.MockjaxOptions;
 
-@RunWith(STJSAsyncTestDriverRunner.class)
+@RunWith(STJSMultiTestDriverRunner.class)
 @HTMLFixture(" <div id='fortune'></div>")
 @ScriptsAfter({ "/jquery.mockjax.js", "/json2.js" })
 public class MockjaxExampleTest {

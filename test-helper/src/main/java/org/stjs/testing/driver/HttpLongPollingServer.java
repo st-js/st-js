@@ -26,7 +26,7 @@ import com.sun.net.httpserver.HttpServer;
  * @author lordofthepigs
  */
 @SuppressWarnings("restriction")
-public class AsyncServerSession implements AsyncProcess {
+public class HttpLongPollingServer implements AsyncProcess {
 
 	public static final String NEXT_TEST_URI = "/getNextTest";
 
@@ -37,7 +37,7 @@ public class AsyncServerSession implements AsyncProcess {
 	/**
 	 * Configures and starts the HTTP server
 	 */
-	public AsyncServerSession(DriverConfiguration config) throws InitializationError {
+	public HttpLongPollingServer(DriverConfiguration config) throws InitializationError {
 		this.config = config;
 		// create the HttpServer
 		InetSocketAddress address = new InetSocketAddress(config.getPort());
@@ -136,7 +136,7 @@ public class AsyncServerSession implements AsyncProcess {
 			// Read the test results returned by the browser, if any
 			long browserId = parseLong(params.get("browserId"), -1);
 			AsyncBrowserSession browser = browsers.get(browserId);
-			AsyncMethod completedMethod = browser.getMethodUnderExecution();
+			MultiTestMethod completedMethod = browser.getMethodUnderExecution();
 			if (completedMethod != null) {
 				// We only have a method under execution, if the HTTP request that is being
 				// handled is not the first one the server has received
@@ -145,7 +145,7 @@ public class AsyncServerSession implements AsyncProcess {
 				}
 
 				// notify JUnit of the result of this test. When the last browser notifies
-				// the AsyncMethod, the JUnit thread will become unblocked and the test result
+				// the MultiTestMethod, the JUnit thread will become unblocked and the test result
 				// will be reported
 				TestResult result = browser.buildResult(params, exchange);
 				completedMethod.notifyExecutionResult(result);
@@ -159,7 +159,7 @@ public class AsyncServerSession implements AsyncProcess {
 			// until we have a new test to send to the browser or the server is shutdown,
 			// whichever comes first. Basically, we are not sending the HTTP response to the
 			// browser until we have received a new test
-			AsyncMethod nextMethod = browser.awaitNewTestReady();
+			MultiTestMethod nextMethod = browser.awaitNewTestReady();
 			if (nextMethod != null) {
 				if (config.isDebugEnabled()) {
 					System.out.println("Server is sending test for method " + nextMethod.toString() + " to browser " + browserId);

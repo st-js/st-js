@@ -22,9 +22,9 @@ import org.stjs.testing.annotation.Scripts;
 import org.stjs.testing.annotation.ScriptsAfter;
 import org.stjs.testing.annotation.ScriptsBefore;
 import org.stjs.testing.driver.AsyncBrowserSession;
-import org.stjs.testing.driver.AsyncMethod;
+import org.stjs.testing.driver.MultiTestMethod;
 import org.stjs.testing.driver.AsyncProcess;
-import org.stjs.testing.driver.AsyncServerSession;
+import org.stjs.testing.driver.HttpLongPollingServer;
 import org.stjs.testing.driver.DriverConfiguration;
 import org.stjs.testing.driver.JUnitSession;
 import org.stjs.testing.driver.StreamUtils;
@@ -43,7 +43,7 @@ public abstract class AbstractBrowser implements Browser {
 	}
 
 	protected void registerWithLongPollingServer(AsyncBrowserSession bs) {
-		JUnitSession.getInstance().getDependency(AsyncServerSession.class).registerBrowserSession(bs);
+		JUnitSession.getInstance().getDependency(HttpLongPollingServer.class).registerBrowserSession(bs);
 	}
 
 	protected void startProcess(String defaultBinaryName, String binPropertyName, String url) {
@@ -69,7 +69,7 @@ public abstract class AbstractBrowser implements Browser {
 	}
 
 	protected String getStartPageUri(long browserId) {
-		return "start-nopoll.html?browserId=" + browserId;
+		return "start-longPolling.html?browserId=" + browserId;
 	}
 
 	protected String getStartPageUrl(long browserId) {
@@ -82,7 +82,7 @@ public abstract class AbstractBrowser implements Browser {
 	}
 
 	@Override
-	public void sendTestFixture(AsyncMethod meth, AsyncBrowserSession browserSession, HttpExchange exchange) throws IOException,
+	public void sendTestFixture(MultiTestMethod meth, AsyncBrowserSession browserSession, HttpExchange exchange) throws IOException,
 			URISyntaxException {
 		Class<?> testClass = meth.getTestClass().getJavaClass();
 		Method method = meth.getMethod().getMethod();
@@ -240,7 +240,7 @@ public abstract class AbstractBrowser implements Browser {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Set<Class<? extends AsyncProcess>> getSharedDependencies() {
-		return processSet(AsyncServerSession.class);
+		return processSet(HttpLongPollingServer.class);
 	}
 
 	protected static Set<Class<? extends AsyncProcess>> processSet(Class<? extends AsyncProcess>... clazz) {

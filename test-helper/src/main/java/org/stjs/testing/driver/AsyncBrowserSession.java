@@ -10,8 +10,8 @@ import com.sun.net.httpserver.HttpExchange;
 
 /**
  * Represents a testing session opened with one instance of some browser. AsyncBrowserSession is responsible for the communication between JUnit
- * (via STJSAsyncTestDriverRunner) and the HTTP server (via AsyncBrowserSession). JUnit notifies each browser that it needs a new test method to
- * be executed by calling notifyNewTestReady(AsyncMethod), or that it has finished executing all the tests by calling notifyNoMoreTests(). The
+ * (via STJSMultiTestDriverRunner) and the HTTP server (via AsyncBrowserSession). JUnit notifies each browser that it needs a new test method to
+ * be executed by calling notifyNewTestReady(MultiTestMethod), or that it has finished executing all the tests by calling notifyNoMoreTests(). The
  * HTTP server waits for a new test to send to the browser by calling awaitNewTestReady(). <br>
  * <br>
  * On top of that, AsyncBrowserSession delegates the details of starting, stopping and communicating with the actual browser instance to an
@@ -21,9 +21,9 @@ import com.sun.net.httpserver.HttpExchange;
 public class AsyncBrowserSession implements AsyncProcess {
 
 	private final long id;
-	private final Exchanger<AsyncMethod> exchanger = new Exchanger<AsyncMethod>();
+	private final Exchanger<MultiTestMethod> exchanger = new Exchanger<MultiTestMethod>();
 	private final Browser browser;
-	private volatile AsyncMethod methodUnderExecution = null;
+	private volatile MultiTestMethod methodUnderExecution = null;
 
 	/**
 	 * Creates a new browser session using the specified browser and id.
@@ -61,7 +61,7 @@ public class AsyncBrowserSession implements AsyncProcess {
 	 * test to execute, then this method returns it. If there are no more tests, this method returns null.
 	 * @return The next test to execute, or null if there isn't any
 	 */
-	public AsyncMethod awaitNewTestReady() {
+	public MultiTestMethod awaitNewTestReady() {
 		try {
 			if (browser.getConfig().isDebugEnabled()) {
 				System.out.println("Browser " + this.id + " is waiting for a new test");
@@ -87,7 +87,7 @@ public class AsyncBrowserSession implements AsyncProcess {
 	 * calling awaitNewTestReady().
 	 * @param method The test to execute.
 	 */
-	public void executeTest(AsyncMethod method) {
+	public void executeTest(MultiTestMethod method) {
 		try {
 			if (browser.getConfig().isDebugEnabled()) {
 				System.out.println("Test " + method.getMethod().getMethod() + " is available for browser " + this.id);
@@ -121,15 +121,15 @@ public class AsyncBrowserSession implements AsyncProcess {
 	/**
 	 * Returns the test is currently being executed by this browser.
 	 */
-	public AsyncMethod getMethodUnderExecution() {
+	public MultiTestMethod getMethodUnderExecution() {
 		return methodUnderExecution;
 	}
 
 	/**
-	 * @see Browser.sendTestFixture(AsyncMethod, HttpExchange)
+	 * @see Browser.sendTestFixture(MultiTestMethod, HttpExchange)
 	 */
 	@SuppressWarnings("restriction")
-	public void sendTestFixture(AsyncMethod nextMethod, HttpExchange exchange) {
+	public void sendTestFixture(MultiTestMethod nextMethod, HttpExchange exchange) {
 		try {
 			this.browser.sendTestFixture(nextMethod, this, exchange);
 		}

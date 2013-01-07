@@ -12,7 +12,7 @@ import org.junit.runners.model.TestClass;
  * notifiyExecutionResult() is called.
  * @author lordofthepigs
  */
-public class AsyncMethod {
+public class MultiTestMethod {
 
 	private final TestClass testClass;
 	private final FrameworkMethod meth;
@@ -20,10 +20,10 @@ public class AsyncMethod {
 	private final TestResultCollection results;
 
 	/**
-	 * Creates a new AsyncMethod that reprents the specified unit test of the specified class, executed on the specified number of browsers.
+	 * Creates a new MultiTestMethod that reprents the specified unit test of the specified class, executed on the specified number of browsers.
 	 * @param nBrowsers
 	 */
-	public AsyncMethod(TestClass testClass, FrameworkMethod meth, int nBrowsers) {
+	public MultiTestMethod(TestClass testClass, FrameworkMethod meth, int nBrowsers) {
 		this.latch = new CountDownLatch(nBrowsers);
 		this.meth = meth;
 		this.testClass = testClass;

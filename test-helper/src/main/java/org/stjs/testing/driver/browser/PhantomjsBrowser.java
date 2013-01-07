@@ -25,9 +25,9 @@ import org.stjs.testing.annotation.Scripts;
 import org.stjs.testing.annotation.ScriptsAfter;
 import org.stjs.testing.annotation.ScriptsBefore;
 import org.stjs.testing.driver.AsyncBrowserSession;
-import org.stjs.testing.driver.AsyncMethod;
+import org.stjs.testing.driver.MultiTestMethod;
 import org.stjs.testing.driver.AsyncProcess;
-import org.stjs.testing.driver.AsyncServerSession;
+import org.stjs.testing.driver.HttpLongPollingServer;
 import org.stjs.testing.driver.DriverConfiguration;
 import org.stjs.testing.driver.JUnitSession;
 import org.stjs.testing.driver.StreamUtils;
@@ -49,7 +49,7 @@ public class PhantomjsBrowser implements Browser {
 	}
 
 	protected void registerWithLongPollingServer(AsyncBrowserSession bs) {
-		JUnitSession.getInstance().getDependency(AsyncServerSession.class).registerBrowserSession(bs);
+		JUnitSession.getInstance().getDependency(HttpLongPollingServer.class).registerBrowserSession(bs);
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class PhantomjsBrowser implements Browser {
 	}
 
 	@Override
-	public void sendTestFixture(AsyncMethod meth, AsyncBrowserSession browser, HttpExchange exchange) throws IOException, URISyntaxException {
+	public void sendTestFixture(MultiTestMethod meth, AsyncBrowserSession browser, HttpExchange exchange) throws IOException, URISyntaxException {
 
 		Class<?> testClass = meth.getTestClass().getJavaClass();
 		Method method = meth.getMethod().getMethod();
@@ -235,7 +235,7 @@ public class PhantomjsBrowser implements Browser {
 	@Override
 	public Set<Class<? extends AsyncProcess>> getSharedDependencies() {
 		Set<Class<? extends AsyncProcess>> dep = new HashSet<Class<? extends AsyncProcess>>();
-		dep.add(AsyncServerSession.class);
+		dep.add(HttpLongPollingServer.class);
 		return dep;
 	}
 }

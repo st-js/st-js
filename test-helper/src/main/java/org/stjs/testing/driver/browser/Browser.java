@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.junit.runners.model.InitializationError;
 import org.stjs.testing.driver.AsyncBrowserSession;
-import org.stjs.testing.driver.AsyncMethod;
+import org.stjs.testing.driver.MultiTestMethod;
 import org.stjs.testing.driver.AsyncProcess;
 import org.stjs.testing.driver.DriverConfiguration;
 import org.stjs.testing.driver.TestResult;
@@ -35,7 +35,7 @@ public interface Browser {
 	 * @param browserSession The session to which the test is sent
 	 * @param exchange contains the HTTP response that must be written to
 	 */
-	public void sendTestFixture(AsyncMethod meth, AsyncBrowserSession browserSession, HttpExchange exchange) throws IOException,
+	public void sendTestFixture(MultiTestMethod meth, AsyncBrowserSession browserSession, HttpExchange exchange) throws IOException,
 			URISyntaxException;
 
 	/**

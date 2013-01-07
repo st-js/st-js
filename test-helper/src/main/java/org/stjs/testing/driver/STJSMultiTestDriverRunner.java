@@ -10,9 +10,9 @@ import org.junit.runners.model.Statement;
 import org.stjs.javascript.annotation.STJSBridge;
 
 @STJSBridge
-public class STJSAsyncTestDriverRunner extends BlockJUnit4ClassRunner {
+public class STJSMultiTestDriverRunner extends BlockJUnit4ClassRunner {
 
-	public STJSAsyncTestDriverRunner(Class<?> klass) throws InitializationError, IOException {
+	public STJSMultiTestDriverRunner(Class<?> klass) throws InitializationError, IOException {
 		super(klass);
 		JUnitSession.getInstance().runnerInstantiated(this);
 	}
@@ -29,20 +29,20 @@ public class STJSAsyncTestDriverRunner extends BlockJUnit4ClassRunner {
 			@Override
 			public void evaluate() throws Throwable {
 				JUnitSession session = JUnitSession.getInstance();
-				session.testStarting(STJSAsyncTestDriverRunner.this, method);
+				session.testStarting(STJSMultiTestDriverRunner.this, method);
 
 				if (session.getConfig().isDebugEnabled()) {
 					System.out.println("Executing Statement for " + method.getMethod().toString());
 				}
 
-				AsyncMethod aMethod = new AsyncMethod(getTestClass(), method, session.getConfig().getBrowserCount());
+				MultiTestMethod aMethod = new MultiTestMethod(getTestClass(), method, session.getConfig().getBrowserCount());
 
 				for (AsyncBrowserSession browserSession : session.getBrowserSessions()) {
 					browserSession.executeTest(aMethod);
 				}
 
 				TestResultCollection results = aMethod.awaitExecutionResult();
-				session.testCompleted(STJSAsyncTestDriverRunner.this, method, results);
+				session.testCompleted(STJSMultiTestDriverRunner.this, method, results);
 
 				if (!results.isOk()) {
 					// take the first wrong result

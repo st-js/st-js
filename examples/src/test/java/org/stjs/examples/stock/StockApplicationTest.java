@@ -9,10 +9,10 @@ import org.junit.runner.RunWith;
 import org.stjs.javascript.jquery.JQueryCore;
 import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.ScriptsAfter;
-import org.stjs.testing.driver.STJSAsyncTestDriverRunner;
+import org.stjs.testing.driver.STJSMultiTestDriverRunner;
 import org.stjs.testing.jquery.MockjaxOptions;
 
-@RunWith(STJSAsyncTestDriverRunner.class)
+@RunWith(STJSMultiTestDriverRunner.class)
 @HTMLFixture("<form id='form'>" + //
 		"			<table>" + //
 		"				<tbody>" + //
