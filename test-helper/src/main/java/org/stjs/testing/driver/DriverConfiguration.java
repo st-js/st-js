@@ -29,6 +29,8 @@ import org.stjs.testing.driver.browser.Browser;
 import org.stjs.testing.driver.browser.ChromeBrowser;
 import org.stjs.testing.driver.browser.DesktopDefaultBrowser;
 import org.stjs.testing.driver.browser.FirefoxBrowser;
+import org.stjs.testing.driver.browser.HeadlessChromeBrowser;
+import org.stjs.testing.driver.browser.HeadlessFirefoxBrowser;
 import org.stjs.testing.driver.browser.PhantomjsBrowser;
 
 import com.google.common.io.Closeables;
@@ -210,7 +212,9 @@ public class DriverConfiguration {
 		PHANTOMJS("phantomjs", PhantomjsBrowser.class), //
 		DESKTOP_DEFAULT("desktopDefault", DesktopDefaultBrowser.class), //
 		FIREFOX("firefox", FirefoxBrowser.class), //
-		CHROME("chrome", ChromeBrowser.class);
+		CHROME("chrome", ChromeBrowser.class), //
+		HEADLESS_FIREFOX("headlessFirefox", HeadlessFirefoxBrowser.class), //
+		HEADLESS_CHROME("headlessChrome", HeadlessChromeBrowser.class);
 
 		String name;
 		Class<? extends Browser> clazz;

@@ -47,17 +47,25 @@ public abstract class AbstractBrowser implements Browser {
 	}
 
 	protected void startProcess(String defaultBinaryName, String binPropertyName, String url) {
-		String executableName = config.getProperty(binPropertyName, defaultBinaryName);
+		startProcess(buildProcess(defaultBinaryName, binPropertyName, url));
+	}
+
+	protected void startProcess(ProcessBuilder builder) {
 		try {
-			new ProcessBuilder(executableName, url).start();
+			builder.start();
 
 			if (config.isDebugEnabled()) {
-				System.out.println("Started " + executableName);
+				System.out.println("Started " + builder.command().get(0));
 			}
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	protected ProcessBuilder buildProcess(String defaultBinaryName, String binPropertyName, String url) {
+		String executableName = config.getProperty(binPropertyName, defaultBinaryName);
+		return new ProcessBuilder(executableName, url);
 	}
 
 	protected String getStartPageUri(long browserId) {
@@ -230,17 +238,16 @@ public abstract class AbstractBrowser implements Browser {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Set<Class<? extends AsyncProcess>> getSharedDependencies() {
-		Set<Class<? extends AsyncProcess>> deps = new HashSet<Class<? extends AsyncProcess>>();
-		deps.add(AsyncServerSession.class);
-		return deps;
+		return processSet(AsyncServerSession.class);
 	}
 
-	protected Set<Class<? extends AsyncProcess>> getSharedDependencies(Class<? extends AsyncProcess>... extraDependencies) {
-		Set<Class<? extends AsyncProcess>> set = this.getSharedDependencies();
-		for (Class<? extends AsyncProcess> dep : extraDependencies) {
-			set.add(dep);
+	protected static Set<Class<? extends AsyncProcess>> processSet(Class<? extends AsyncProcess>... clazz) {
+		Set<Class<? extends AsyncProcess>> deps = new HashSet<Class<? extends AsyncProcess>>();
+		for (Class<? extends AsyncProcess> c : clazz) {
+			deps.add(c);
 		}
-		return set;
+		return deps;
 	}
 }

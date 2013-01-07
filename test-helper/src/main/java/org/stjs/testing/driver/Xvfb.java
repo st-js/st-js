@@ -23,15 +23,18 @@ public class Xvfb implements AsyncProcess {
 	private static final Pattern DISPLAY_EXP = Pattern.compile("[^:]*:([0-9]*)(\\.([0-9]*))?");
 
 	/** The 'Xvfb' command to execute. */
-	private String xvfbExecutable;
+	// TODO: read this from the configuration file
+	private String xvfbExecutable = "Xvfb";
 
 	/** The X11 display to use. Default value is <tt>:20</tt>. */
 	private String display;
 
 	/** A list of additional options to pass to the Xvfb process. */
-	private String[] options;
+	// TODO: read this from the configuration file
+	private String[] options = new String[0];
 
 	/** The file that Xvfb output will be written to. */
+	// TODO: not implemented yet
 	private File logFile;
 
 	private final DriverConfiguration config;
@@ -170,5 +173,9 @@ public class Xvfb implements AsyncProcess {
 	@Override
 	public void stop() {
 		xvfbProcess.destroy();
+	}
+
+	public String getDisplay() {
+		return this.display;
 	}
 }

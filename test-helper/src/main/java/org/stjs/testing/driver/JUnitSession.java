@@ -57,14 +57,24 @@ public class JUnitSession {
 			// init has already been called, nothing to do
 			return;
 		}
-		System.out.println("initializing config");
-		config = new DriverConfiguration(testClassSample);
 
-		// initialize the browser sessions
-		initBrowserSessions();
-		initBrowserDependencies();
-		startBrowserDependencies();
-		startBrowserSessions();
+		try {
+			System.out.println("initializing config");
+			config = new DriverConfiguration(testClassSample);
+
+			// initialize the browser sessions
+			initBrowserSessions();
+			initBrowserDependencies();
+			startBrowserDependencies();
+			startBrowserSessions();
+
+		}
+		catch (Throwable e) {
+			printStackTrace(e);
+			reset();
+			// sometimes, JUnit doesn't display the exception, so let's print it out
+			throw new InitializationError(e);
+		}
 	}
 
 	private void initBrowserSessions() {
@@ -164,15 +174,30 @@ public class JUnitSession {
 	 */
 	private void reset() {
 		config = null;
-		for (AsyncBrowserSession browser : browserSessions) {
-			browser.notifyNoMoreTests();
-			browser.stop();
-		}
-		browserSessions.clear();
 		remainingRunners.clear();
 
+		for (AsyncBrowserSession browser : browserSessions) {
+			try {
+				// FIXME: in some cases where initialization of some dependencies has failed, the fact that 
+				// this is a blocking method can lead to deadlocks. The case that caught me was the following:
+				// This method blocks until the HTTP server claims the next text, but the HTTP server was never
+				// started
+				browser.notifyNoMoreTests();
+				browser.stop();
+			}
+			catch (Throwable e) {
+				printStackTrace(e);
+			}
+		}
+		browserSessions.clear();
+
 		for (AsyncProcess dep : sharedDependencies.values()) {
-			dep.stop();
+			try {
+				dep.stop();
+			}
+			catch (Throwable e) {
+				printStackTrace(e);
+			}
 		}
 		sharedDependencies.clear();
 	}
@@ -239,5 +264,24 @@ public class JUnitSession {
 	@SuppressWarnings("unchecked")
 	public <T> T getDependency(Class<T> depencencyType) {
 		return (T) this.sharedDependencies.get(depencencyType);
+	}
+
+	private static void printStackTrace(Throwable t) {
+		if (t instanceof InitializationError) {
+			// Initilization error does not use the standard way to report causes, and therefore
+			// printStackTrace() on InitializationError does not print causes. Let's try to fix that
+			InitializationError ie = (InitializationError) t;
+			ie.printStackTrace(System.out);
+			List<Throwable> causes = ie.getCauses();
+			if (causes != null && !causes.isEmpty()) {
+				System.out.println("Caused by " + causes.size() + " exceptions:");
+				for (Throwable c : causes) {
+					c.printStackTrace(System.out);
+				}
+			}
+		} else {
+			t.printStackTrace(System.out);
+		}
+
 	}
 }
