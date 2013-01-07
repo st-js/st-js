@@ -13,6 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.runners.model.InitializationError;
 import org.stjs.generator.BridgeClass;
 import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
@@ -22,11 +23,11 @@ import org.stjs.testing.annotation.Scripts;
 import org.stjs.testing.annotation.ScriptsAfter;
 import org.stjs.testing.annotation.ScriptsBefore;
 import org.stjs.testing.driver.AsyncBrowserSession;
-import org.stjs.testing.driver.MultiTestMethod;
 import org.stjs.testing.driver.AsyncProcess;
-import org.stjs.testing.driver.HttpLongPollingServer;
 import org.stjs.testing.driver.DriverConfiguration;
+import org.stjs.testing.driver.HttpLongPollingServer;
 import org.stjs.testing.driver.JUnitSession;
+import org.stjs.testing.driver.MultiTestMethod;
 import org.stjs.testing.driver.StreamUtils;
 import org.stjs.testing.driver.TestResult;
 
@@ -46,20 +47,21 @@ public abstract class AbstractBrowser implements Browser {
 		JUnitSession.getInstance().getDependency(HttpLongPollingServer.class).registerBrowserSession(bs);
 	}
 
-	protected void startProcess(String defaultBinaryName, String binPropertyName, String url) {
+	protected void startProcess(String defaultBinaryName, String binPropertyName, String url) throws InitializationError {
 		startProcess(buildProcess(defaultBinaryName, binPropertyName, url));
 	}
 
-	protected void startProcess(ProcessBuilder builder) {
+	protected Process startProcess(ProcessBuilder builder) throws InitializationError {
 		try {
-			builder.start();
+			Process p = builder.start();
 
 			if (config.isDebugEnabled()) {
 				System.out.println("Started " + builder.command().get(0));
 			}
+			return p;
 		}
 		catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new InitializationError(e);
 		}
 	}
 
