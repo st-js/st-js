@@ -1,6 +1,7 @@
 package org.stjs.testing.driver;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 import java.text.DateFormat;
@@ -30,6 +31,7 @@ import com.sun.net.httpserver.HttpServer;
 public class HttpLongPollingServer implements AsyncProcess {
 
 	public static final String NEXT_TEST_URI = "/getNextTest";
+	public static final String BLANK_URI = "/about:blank";
 
 	private final DriverConfiguration config;
 	private final HttpServer httpServer;
@@ -112,6 +114,8 @@ public class HttpLongPollingServer implements AsyncProcess {
 				String path = exchange.getRequestURI().getPath();
 				if (NEXT_TEST_URI.equals(path)) {
 					handleNextTest(params, exchange);
+				} else if (BLANK_URI.equals(path)) {
+					handleAboutBlank(exchange);
 				} else {
 					handleResource(path, exchange);
 				}
@@ -123,6 +127,13 @@ public class HttpLongPollingServer implements AsyncProcess {
 			finally {
 				exchange.close();
 			}
+		}
+
+		private void handleAboutBlank(HttpExchange exchange) throws IOException {
+			byte[] response = "<html></html>".getBytes("UTF-8");
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+			exchange.getResponseBody().write(response);
+			exchange.getResponseBody().flush();
 		}
 
 		/**
