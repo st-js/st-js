@@ -12,7 +12,7 @@ public class HeadlessChromeBrowser extends HeadlessBrowser {
 	@Override
 	public void start() throws InitializationError {
 		this.registerWithLongPollingServer();
-		this.startProcess("google-chrome", ChromeBrowser.PROP_CHROME_BIN, getStartPageUrl(getId()));
+		this.startProcess("google-chrome", ChromeBrowser.PROP_CHROME_BIN, getStartPageUrl(getId(), false));
 	}
 
 }

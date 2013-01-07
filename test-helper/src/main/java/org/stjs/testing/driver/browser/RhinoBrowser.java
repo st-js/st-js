@@ -39,7 +39,7 @@ public class RhinoBrowser extends LongPollingBrowser {
 					cx.evaluateReader(scope,
 							new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream("env.rhino.js")),
 							"env.rhino.js", 1, null);
-					cx.evaluateString(scope, "window.location='" + getStartPageUrl(getId()) + "';", "eval", 1, null);
+					cx.evaluateString(scope, "window.location='" + getStartPageUrl(getId(), true) + "';", "eval", 1, null);
 				}
 				catch (IOException e) {
 					throw new RuntimeException(e);
@@ -48,10 +48,5 @@ public class RhinoBrowser extends LongPollingBrowser {
 		}, "rhino-context");
 		t.setDaemon(true);
 		t.start();
-	}
-
-	@Override
-	protected String getStartPageUri(long browserId) {
-		return "start-longPolling-persistent.html?browserId=" + browserId;
 	}
 }

@@ -47,14 +47,6 @@ public abstract class AbstractBrowser implements Browser {
 		return new ProcessBuilder(executableName, url);
 	}
 
-	protected String getStartPageUri(long browserId) {
-		return "start-longPolling.html?browserId=" + browserId;
-	}
-
-	protected String getStartPageUrl(long browserId) {
-		return getConfig().getServerURL() + getStartPageUri(browserId);
-	}
-
 	@Override
 	public DriverConfiguration getConfig() {
 		return config;

@@ -7,6 +7,7 @@
 	var logDiv, statusDiv;
 	var iframe;
 	var queryStringParameters;
+	var persistent;
 
 	function status(s){
 		statusDiv.innerHTML = s;
@@ -40,7 +41,9 @@
 		if(!firstTest){
 			log(result);
 		}
-		setTimeout(checkLoad, 500);
+		if(persistent){
+			setTimeout(checkLoad, 500);
+		}
 		iframe.src = '/getNextTest' +
 				'?browserId=' + browserId +
 				'&result=' + result +
@@ -74,6 +77,7 @@
 		statusDiv = document.getElementById("status");
 		queryStringParameters = decodeParameters();
 		browserId = queryStringParameters['browserId'];
+		persistent = queryStringParameters['persistent'] === 'true';
 		runFirstTest();
 	}
 </script>

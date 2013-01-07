@@ -14,6 +14,6 @@ public class FirefoxBrowser extends LongPollingBrowser {
 	@Override
 	public void start() throws InitializationError {
 		this.registerWithLongPollingServer();
-		this.startProcess("firefox", PROP_FIREFOX_BIN, getStartPageUrl(getId()));
+		this.startProcess("firefox", PROP_FIREFOX_BIN, getStartPageUrl(getId(), false));
 	}
 }

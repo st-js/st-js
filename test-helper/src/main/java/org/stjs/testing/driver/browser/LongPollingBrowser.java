@@ -53,6 +53,14 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		super(config);
 	}
 
+	protected String getStartPageUri(long browserId, boolean persistent) {
+		return "start-longPolling-persistent.html?browserId=" + browserId + "&persistent=" + persistent;
+	}
+
+	protected String getStartPageUrl(long browserId, boolean persistent) {
+		return getConfig().getServerURL() + getStartPageUri(browserId, persistent);
+	}
+
 	protected void registerWithLongPollingServer() {
 		this.id = JUnitSession.getInstance().getDependency(HttpLongPollingServer.class).registerBrowserSession(this);
 		if (getConfig().isDebugEnabled()) {
