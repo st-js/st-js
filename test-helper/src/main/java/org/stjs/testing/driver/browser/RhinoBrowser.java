@@ -50,7 +50,8 @@ public class RhinoBrowser extends LongPollingBrowser {
 		t.start();
 	}
 
-	private void startContext() throws Exception {
-
+	@Override
+	protected String getStartPageUri(long browserId) {
+		return "start-longPolling-persistent.html?browserId=" + browserId;
 	}
 }

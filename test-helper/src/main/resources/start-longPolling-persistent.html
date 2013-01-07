@@ -3,19 +3,36 @@
 <script>
 	var browserId = -1;
 	var lastTestSrc = null;
+	var lastTestStarted = new Date();
 	var logDiv, statusDiv;
 	var iframe;
 	var queryStringParameters;
 
-	function status(s, msg){
-		state = s;
-		statusDiv.innerHTML = "#" + count + " " + state + ":" + (msg || "") ;
+	function status(s){
+		statusDiv.innerHTML = s;
 	}
 
 	function log(s){
 		logDiv.innerHTML += "<span class='time'>" + new Date().toLocaleTimeString() + "</span> " + s + "<br>";
 	}
-	
+
+	function startingTest(testedClassName, methodName){
+		log('<b>' + testedClassName + '</b>.' + methodName);
+		lastTestStarted = new Date();
+	}
+
+	function checkLoad(){
+		//after a browser was disconnected
+		var now = new Date();
+		if (now.getTime() - lastTestStarted.getTime() >= 2000) {
+			status("DISCONNECTED");
+			runFirstTest();
+			lastTestStarted = now;
+		} else {
+			setTimeout(checkLoad, 500);
+		}
+	}
+
 	function reportResultAndRunNextTest(result, stacktrace, firstTest){
 		if (result != "OK" && console) {
 			console.error(result + '\n' + stacktrace);
@@ -23,18 +40,19 @@
 		if(!firstTest){
 			log(result);
 		}
-		iframe.src = '/getNextTest' + 
-				'?browserId=' + browserId + 
-				'&result=' + result + 
-				'&location=' + stacktrace + 
+		setTimeout(checkLoad, 500);
+		iframe.src = '/getNextTest' +
+				'?browserId=' + browserId +
+				'&result=' + result +
+				'&location=' + stacktrace +
 				'&rand=' + Math.random();
 	}
-	
+
 	function runFirstTest(){
 		reportResultAndRunNextTest("OK", null, true);
 	}
-	
-	// Shamelessly lifted from 
+
+	// Shamelessly lifted from
 	// http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values
 	function decodeParameters(){
 		var match,
@@ -42,14 +60,14 @@
 	        search = /([^&=]+)=?([^&]*)/g,
 	        decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
 	        query  = window.location.search.substring(1);
-		
+
 		var params = {};
 	    while (match = search.exec(query)){
 	       params[decode(match[1])] = decode(match[2]);
 	    }
 	    return params;
 	}
-	
+
 	onload = function() {
 		iframe = document.getElementById("iframe");
 		logDiv = document.getElementById("log");
