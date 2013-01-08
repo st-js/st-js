@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.script.ScriptException;
@@ -50,6 +51,16 @@ public class GeneratorTestHelper {
 	 */
 	public static Object execute(Class<?> clazz) {
 		return convert(executeOrGenerate(clazz, true));
+	}
+	
+	public static Object execute(String preGeneratedJs){
+		try {
+			File jsfile = new File(preGeneratedJs);
+			ExecutionResult execResult = new RhinoExecutor().run(Collections.singletonList(jsfile), false);
+			return convert(execResult.getResult());
+		}catch(ScriptException se){
+			throw new RuntimeException(se);
+		}
 	}
 
 	private static Object convert(Object result) {

@@ -17,4 +17,12 @@ public class InheritanceTest {
 		assertEquals(2.0, GeneratorTestHelper.execute(Inheritance2.class));
 	}
 
+	/** 
+	 * Verifies that .js files generated with ST-JS 1.2 (and therefore using the 1.2 version 
+	 * of stjs.extends) will still run correctly when executed with the current version. 
+	 */
+	@Test
+	public void testExtendCompatibilityWith12() {
+		assertEquals("4 2", GeneratorTestHelper.execute("src/test/resources/javascript/Inheritance-generated-with-1.2.js"));
+	}
 }
