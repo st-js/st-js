@@ -239,6 +239,12 @@ stjs.copyProps=function(from, to){
 };
 
 stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescription){
+	if(_typeDescription === undefined){
+		// stjs 1.3+ always passes a value to _typeDescription. The code calling stjs.extend
+		// was generated with version 1.2 or earlier, so let's call the 1.2 version of stjs.extend
+		return stjs.extend12(_constructor, _super, _implements);
+	}
+	
 	var key, a;
 	if(_super != null){
 		// I is used as a no-op constructor that has the same prototype as _super
@@ -270,6 +276,27 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 	}
 
 	_constructor.$typeDescription = _typeDescription;
+
+	// build package and assign
+	return	_constructor;
+};
+
+/**
+ * 1.2 and earlier version of stjs.extend. Included for backwards compatibility
+ */
+stjs.extend12=function( _constructor,  _super, _implements){
+	var key, a;
+	var I = function(){};
+	I.prototype	= _super.prototype;
+	_constructor.prototype	= new I();
+
+	//copy static properties for super and interfaces
+	// assign every method from proto instance
+	for(a = 1; a < arguments.length; ++a){
+		stjs.copyProps(arguments[a], _constructor);
+	}
+	// remember the correct constructor
+	_constructor.prototype.constructor	= _constructor;
 
 	// build package and assign
 	return	_constructor;

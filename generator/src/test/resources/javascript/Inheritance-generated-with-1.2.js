@@ -36,3 +36,5 @@ Inheritance.C.$typeDescription=stjs.copyProps(Inheritance.B.$typeDescription, {}
 
 Inheritance.$typeDescription={};
 
+if (!stjs.mainCallDisabled) Inheritance.main();
+
