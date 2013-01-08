@@ -1,10 +1,24 @@
 var Inheritance = function(){};
 
-Inheritance.main = function(args) {
-    var b = new Inheritance.B();
-	var c = new Inheritance.C();
-    return b.method2(1) + " " + c.method1(1);
-};
+Inheritance.W = function(){};
+
+Inheritance.W.W = "W";
+Inheritance.W.$typeDescription={};
+
+Inheritance.X = function(){};
+
+Inheritance.X.X = "X";
+Inheritance.X.$typeDescription={};
+
+Inheritance.Y = function(){};
+
+Inheritance.Y.Y = "Y";
+Inheritance.Y.$typeDescription={};
+
+Inheritance.Z = function(){};
+
+Inheritance.Z.Z = "Z";
+Inheritance.Z.$typeDescription={};
 
 Inheritance.A = function(){};
 
@@ -30,11 +44,16 @@ Inheritance.B.$typeDescription=stjs.copyProps(Inheritance.A.$typeDescription, {}
 
 Inheritance.C = function(){Inheritance.B.call(this);};
 
-stjs.extend(Inheritance.C, Inheritance.B);
+stjs.extend(Inheritance.C, Inheritance.B, Inheritance.W, Inheritance.X, Inheritance.Y, Inheritance.Z);
 
 Inheritance.C.$typeDescription=stjs.copyProps(Inheritance.B.$typeDescription, {});
 
+//
+Inheritance.main = function(args) {
+    var b = new Inheritance.B();
+    var c = new Inheritance.C();
+    return b.method2(1) + " " + c.method1(1) + " " + Inheritance.C.W + Inheritance.C.X + Inheritance.Y.Y + Inheritance.Z.Z + " " + c.W;
+};
 Inheritance.$typeDescription={};
 
 if (!stjs.mainCallDisabled) Inheritance.main();
-

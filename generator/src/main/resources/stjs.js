@@ -239,10 +239,10 @@ stjs.copyProps=function(from, to){
 };
 
 stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescription){
-	if(_typeDescription === undefined){
-		// stjs 1.3+ always passes a value to _typeDescription. The code calling stjs.extend
+	if(typeof(_typeDescription) !== "object"){
+		// stjs 1.3+ always passes an non-null object to _typeDescription => The code calling stjs.extend
 		// was generated with version 1.2 or earlier, so let's call the 1.2 version of stjs.extend
-		return stjs.extend12(_constructor, _super, _implements);
+		return stjs.extend12.apply(this, arguments);
 	}
 	
 	var key, a;
