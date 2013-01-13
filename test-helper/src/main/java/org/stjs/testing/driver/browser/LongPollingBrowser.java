@@ -33,15 +33,18 @@ import com.google.common.base.Strings;
 import com.sun.net.httpserver.HttpExchange;
 
 /**
- * Represents a testing session opened with one instance of a browser that uses long-polling to fetch new tests to execute from the HTTP server.
- * LongPollingBrowser handles multithreading synchronization between the browser, the HTTP server and the JUnit runner. The JUnit runner notifies
- * this browser that a new test method must be executed by calling executeTest(MultiTestMethod), or that it has finished executing all the tests
- * by calling notifyNoMoreTests(). The HTTP server waits for a new test to send to the browser by calling awaitNewTestReady(). <br>
+ * Represents a testing session opened with one instance of a browser that uses long-polling to fetch new tests to
+ * execute from the HTTP server. LongPollingBrowser handles multithreading synchronization between the browser, the HTTP
+ * server and the JUnit runner. The JUnit runner notifies this browser that a new test method must be executed by
+ * calling executeTest(MultiTestMethod), or that it has finished executing all the tests by calling notifyNoMoreTests().
+ * The HTTP server waits for a new test to send to the browser by calling awaitNewTestReady(). <br>
  * <br>
- * On top of that, LongPollinBrowser delegates the details of starting and stopping the browser itself to its concrete subclasses.
+ * On top of that, LongPollinBrowser delegates the details of starting and stopping the browser itself to its concrete
+ * subclasses.
+ * 
  * @author lordofthepigs
  */
-@SuppressWarnings({"restriction", "deprecation"})
+@SuppressWarnings({ "restriction", "deprecation" })
 public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	private final Exchanger<MultiTestMethod> exchanger = new Exchanger<MultiTestMethod>();
@@ -69,16 +72,18 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	}
 
 	/**
-	 * Starts the browser session. This will open a browser and navigate it to some page where the unit testing procedure can be started. The
-	 * decision about exactly which browser binary is started, how it is started and which page is opened is delegated to the Browser
-	 * implementation that this AsynBrowserSession was constructed with.
+	 * Starts the browser session. This will open a browser and navigate it to some page where the unit testing
+	 * procedure can be started. The decision about exactly which browser binary is started, how it is started and which
+	 * page is opened is delegated to the Browser implementation that this AsynBrowserSession was constructed with.
 	 */
 	@Override
 	public abstract void start() throws InitializationError;
 
 	/**
-	 * Blocks until JUnit notifies this browser session that either a new test must be executed, or there are no more tests. If there is a new
-	 * test to execute, then this method returns it. If there are no more tests, this method returns null.
+	 * Blocks until JUnit notifies this browser session that either a new test must be executed, or there are no more
+	 * tests. If there is a new test to execute, then this method returns it. If there are no more tests, this method
+	 * returns null.
+	 * 
 	 * @return The next test to execute, or null if there isn't any
 	 */
 	public MultiTestMethod awaitNewTestReady() {
@@ -89,22 +94,24 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 			methodUnderExecution = exchanger.exchange(null);
 			if (getConfig().isDebugEnabled()) {
 				if (methodUnderExecution != null) {
-					System.out.println("Browser " + this.id + " has picked up the test " + methodUnderExecution.getMethod().getMethod());
+					System.out.println("Browser " + this.id + " has picked up the test "
+							+ methodUnderExecution.getMethod().getMethod());
 				} else {
 					System.out.println("Browser " + this.id + " has no more tests");
 				}
 			}
 			return methodUnderExecution;
-		}
-		catch (InterruptedException e) {
+		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	/**
-	 * Notifies this browser that the specified test must be executed. This method blocks until this browser picks up the test by calling
-	 * awaitNewTestReady().
-	 * @param method The test to execute.
+	 * Notifies this browser that the specified test must be executed. This method blocks until this browser picks up
+	 * the test by calling awaitNewTestReady().
+	 * 
+	 * @param method
+	 *            The test to execute.
 	 */
 	@Override
 	public void executeTest(MultiTestMethod method) {
@@ -120,15 +127,14 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 			if (getConfig().isDebugEnabled()) {
 				System.out.println("Browser " + this.id + " has picked up the new test");
 			}
-		}
-		catch (InterruptedException e) {
+		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	/**
-	 * Notifies this browser that there are no more tests to execute. This method blocks until this browser attempts to pick up a new test by
-	 * calling awaitNewTestReady().
+	 * Notifies this browser that there are no more tests to execute. This method blocks until this browser attempts to
+	 * pick up a new test by calling awaitNewTestReady().
 	 */
 	@Override
 	public void notifyNoMoreTests() {
@@ -137,8 +143,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 				System.out.println("Browser " + this.id + " has been notified that no more tests are coming");
 			}
 			exchanger.exchange(null);
-		}
-		catch (InterruptedException e) {
+		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -151,10 +156,15 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	}
 
 	/**
-	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser to execute the specified test.
-	 * @param meth The test to send to the browser
-	 * @param browserSession The session to which the test is sent
-	 * @param exchange contains the HTTP response that must be written to
+	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser to execute the
+	 * specified test.
+	 * 
+	 * @param meth
+	 *            The test to send to the browser
+	 * @param browserSession
+	 *            The session to which the test is sent
+	 * @param exchange
+	 *            contains the HTTP response that must be written to
 	 */
 	public void sendTestFixture(MultiTestMethod meth, HttpExchange exchange) throws Exception {
 		Class<?> testClass = meth.getTestClass().getJavaClass();
@@ -192,7 +202,8 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		}
 
 		Set<URI> jsFiles = new LinkedHashSet<URI>();
-		for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(getConfig().getClassLoader())) {
+		for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(getConfig()
+				.getClassLoader())) {
 
 			if (addedScripts != null && dep instanceof BridgeClass) {
 				// bridge dependencies are not added when using @Scripts
@@ -217,7 +228,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 			}
 		}
 		resp.append("<script language='javascript'>\n");
-		resp.append("  onload=function(){\n");
+		resp.append("  window.onload=function(){\n");
 		// resp.append("    console.error(document.getElementsByTagName('html')[0].innerHTML);\n");
 
 		// Adapter between generated assert (not global) and JS-test-driver assert (which is a
@@ -265,9 +276,13 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	}
 
 	/**
-	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser understand that there will be no more tests.
-	 * @param browserSession The session to be notified
-	 * @param exchange contains the HTTP response that must be written to
+	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser understand that
+	 * there will be no more tests.
+	 * 
+	 * @param browserSession
+	 *            The session to be notified
+	 * @param exchange
+	 *            contains the HTTP response that must be written to
 	 * @throws IOException
 	 */
 	public void sendNoMoreTestFixture(HttpExchange exchange) throws IOException {

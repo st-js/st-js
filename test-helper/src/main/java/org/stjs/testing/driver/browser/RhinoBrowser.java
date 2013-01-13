@@ -2,6 +2,7 @@ package org.stjs.testing.driver.browser;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 
 import org.junit.runners.model.InitializationError;
 import org.mozilla.javascript.Context;
@@ -11,6 +12,7 @@ import org.stjs.testing.driver.DriverConfiguration;
 
 /**
  * This browser uses Rhino Javascript engine and env.js to run a headless browser inside the virtual machine.
+ *
  * @author acraciun
  */
 public class RhinoBrowser extends LongPollingBrowser {
@@ -36,12 +38,11 @@ public class RhinoBrowser extends LongPollingBrowser {
 					final ScriptableObject scope = cx.initStandardObjects();
 					String printFunction = "function print(message) {java.lang.System.out.println(message);}";
 					cx.evaluateString(scope, printFunction, "print", 1, null);
-					cx.evaluateReader(scope,
-							new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream("env.rhino.js")),
-							"env.rhino.js", 1, null);
-					cx.evaluateString(scope, "window.location='" + getStartPageUrl(getId(), true) + "';", "eval", 1, null);
-				}
-				catch (IOException e) {
+					cx.evaluateReader(scope, new InputStreamReader(Thread.currentThread().getContextClassLoader()
+							.getResourceAsStream("env.rhino.js")), "env.rhino.js", 1, null);
+					cx.evaluateString(scope, "window.location='" + getStartPageUrl(getId(), false) + "';", "eval", 1,
+							null);
+				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
 			}
@@ -49,4 +50,5 @@ public class RhinoBrowser extends LongPollingBrowser {
 		t.setDaemon(true);
 		t.start();
 	}
+
 }

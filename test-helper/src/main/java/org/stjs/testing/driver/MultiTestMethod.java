@@ -6,10 +6,11 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.TestClass;
 
 /**
- * Coordinates the execution of one unit test across several browsers. The JUnit runner creates one instance of this class for each unit test,
- * specifying how many browsers are expected to execute this test. The JUnit runner then sends this test to all browsers and waits for all
- * browsers to return the execution results by calling awaitExecutionresult(). When a browser has finished executing a test,
- * notifiyExecutionResult() is called.
+ * Coordinates the execution of one unit test across several browsers. The JUnit runner creates one instance of this
+ * class for each unit test, specifying how many browsers are expected to execute this test. The JUnit runner then sends
+ * this test to all browsers and waits for all browsers to return the execution results by calling
+ * awaitExecutionresult(). When a browser has finished executing a test, notifiyExecutionResult() is called.
+ * 
  * @author lordofthepigs
  */
 public class MultiTestMethod {
@@ -20,7 +21,9 @@ public class MultiTestMethod {
 	private final TestResultCollection results;
 
 	/**
-	 * Creates a new MultiTestMethod that reprents the specified unit test of the specified class, executed on the specified number of browsers.
+	 * Creates a new MultiTestMethod that reprents the specified unit test of the specified class, executed on the
+	 * specified number of browsers.
+	 * 
 	 * @param nBrowsers
 	 */
 	public MultiTestMethod(TestClass testClass, FrameworkMethod meth, int nBrowsers) {
@@ -39,14 +42,13 @@ public class MultiTestMethod {
 	}
 
 	/**
-	 * Blocks until all browsers have called notifyExecutionResult() and returns a TestResultCollection containing all the results from all the
-	 * browsers.
+	 * Blocks until all browsers have called notifyExecutionResult() and returns a TestResultCollection containing all
+	 * the results from all the browsers.
 	 */
 	public TestResultCollection awaitExecutionResult() {
 		try {
 			latch.await();
-		}
-		catch (InterruptedException e) {
+		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
 		return this.results;
@@ -58,5 +60,10 @@ public class MultiTestMethod {
 
 	public TestClass getTestClass() {
 		return this.testClass;
+	}
+
+	@Override
+	public String toString() {
+		return "MultiTestMethod [method=" + meth.getMethod() + "]";
 	}
 }
