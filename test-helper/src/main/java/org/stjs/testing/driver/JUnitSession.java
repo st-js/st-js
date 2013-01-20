@@ -176,10 +176,6 @@ public class JUnitSession {
 
 		for (Browser browser : browsers) {
 			try {
-				// FIXME: in some cases where initialization of some dependencies has failed, the fact that
-				// this is a blocking method can lead to deadlocks. The case that caught me was the following:
-				// This method blocks until the HTTP server claims the next text, but the HTTP server was never
-				// started
 				browser.notifyNoMoreTests();
 				browser.stop();
 			} catch (Throwable e) {
