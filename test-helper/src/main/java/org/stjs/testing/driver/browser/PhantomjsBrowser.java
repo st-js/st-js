@@ -37,7 +37,7 @@ import org.stjs.testing.driver.TestResult;
 import com.google.common.base.Strings;
 import com.sun.net.httpserver.HttpExchange;
 
-@SuppressWarnings({"restriction" /* for HttpExchange */, "deprecation" /* for @Scripts */})
+@SuppressWarnings({ "restriction" /* for HttpExchange */, "deprecation" /* for @Scripts */})
 public class PhantomjsBrowser extends LongPollingBrowser {
 
 	public static final String PROP_PHANTOMJS_BIN = "phantomjs.bin";
@@ -49,7 +49,7 @@ public class PhantomjsBrowser extends LongPollingBrowser {
 	}
 
 	@Override
-	public void start() throws InitializationError {
+	public void doStart() throws InitializationError {
 		this.registerWithLongPollingServer();
 		try {
 			// We first need to extract phantomjs-bootstrap.js to the temp directory, because phantomjs
@@ -57,14 +57,14 @@ public class PhantomjsBrowser extends LongPollingBrowser {
 			tempBootstrapJs = unpackBootstrap();
 
 			String executableName = getConfig().getProperty(PROP_PHANTOMJS_BIN);
-			if(executableName == null){
+			if (executableName == null) {
 				BrowserInstallation installation = new Locator().findBrowserLocation();
-				if(installation == null){
+				if (installation == null) {
 					throw new InitializationError( //
-							"phantomjs could not be found in the path!\n" +
-					        "Please add the directory containing 'phantomjs' or 'phantomjs.exe' to your PATH environment\n" +
-					        "variable, or explicitly specify a path to phantomjs in stjs-test.properties like this:\n" +
-					        PROP_PHANTOMJS_BIN + "=/blah/blah/phantomjs");
+							"phantomjs could not be found in the path!\n"
+									+ "Please add the directory containing 'phantomjs' or 'phantomjs.exe' to your PATH environment\n"
+									+ "variable, or explicitly specify a path to phantomjs in stjs-test.properties like this:\n"
+									+ PROP_PHANTOMJS_BIN + "=/blah/blah/phantomjs");
 				}
 				executableName = installation.launcherFilePath();
 			}
@@ -78,8 +78,7 @@ public class PhantomjsBrowser extends LongPollingBrowser {
 			if (getConfig().isDebugEnabled()) {
 				System.out.println("Started phantomjs");
 			}
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new InitializationError(e);
 		}
 	}
@@ -119,7 +118,8 @@ public class PhantomjsBrowser extends LongPollingBrowser {
 		}
 
 		Set<URI> jsFiles = new LinkedHashSet<URI>();
-		for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(getConfig().getClassLoader())) {
+		for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(getConfig()
+				.getClassLoader())) {
 
 			if (addedScripts != null && dep instanceof BridgeClass) {
 				// bridge dependencies are not added when using @Scripts
@@ -186,7 +186,8 @@ public class PhantomjsBrowser extends LongPollingBrowser {
 
 	@Override
 	public void sendNoMoreTestFixture(HttpExchange exchange) throws IOException {
-		byte[] response = "<html><head><script language='javascript'>parent.phantom.exit()</script></head></html>".getBytes("UTF-8");
+		byte[] response = "<html><head><script language='javascript'>parent.phantom.exit()</script></head></html>"
+				.getBytes("UTF-8");
 		exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
 
 		OutputStream output = exchange.getResponseBody();
@@ -240,12 +241,12 @@ public class PhantomjsBrowser extends LongPollingBrowser {
 		dep.add(HttpLongPollingServer.class);
 		return dep;
 	}
-	
+
 	private static class Locator extends SingleBrowserLocator {
 
 		@Override
 		protected String[] standardlauncherFilenames() {
-			return new String[]{"phantomjs", "phantomjs.exe"};
+			return new String[] { "phantomjs", "phantomjs.exe" };
 		}
 
 		@Override
@@ -253,9 +254,8 @@ public class PhantomjsBrowser extends LongPollingBrowser {
 			// phantomjs doesn't have a proper installer, so there really isn't any usual
 			// location where it would be. Except maybe on linux versions that use package
 			// managers
-			return new String[]{"/usr/bin"};
+			return new String[] { "/usr/bin" };
 		}
-
 
 		@Override
 		protected String seleniumBrowserName() {

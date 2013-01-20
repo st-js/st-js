@@ -11,7 +11,7 @@ public class HeadlessChromeBrowser extends HeadlessBrowser {
 	}
 
 	@Override
-	public void start() throws InitializationError {
+	public void doStart() throws InitializationError {
 		this.registerWithLongPollingServer();
 		this.startProcess(new GoogleChromeLocator(), ChromeBrowser.PROP_CHROME_BIN, getStartPageUrl(getId(), false));
 	}

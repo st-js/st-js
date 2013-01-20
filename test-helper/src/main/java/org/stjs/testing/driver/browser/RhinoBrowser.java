@@ -2,7 +2,6 @@ package org.stjs.testing.driver.browser;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
 
 import org.junit.runners.model.InitializationError;
 import org.mozilla.javascript.Context;
@@ -12,7 +11,7 @@ import org.stjs.testing.driver.DriverConfiguration;
 
 /**
  * This browser uses Rhino Javascript engine and env.js to run a headless browser inside the virtual machine.
- *
+ * 
  * @author acraciun
  */
 public class RhinoBrowser extends LongPollingBrowser {
@@ -22,7 +21,7 @@ public class RhinoBrowser extends LongPollingBrowser {
 	}
 
 	@Override
-	public void start() throws InitializationError {
+	public void doStart() throws InitializationError {
 		this.registerWithLongPollingServer();
 
 		// start evaluating the tests by loading the page. Since page load happens inside the current thread

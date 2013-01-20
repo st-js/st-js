@@ -173,7 +173,7 @@ public class HttpLongPollingServer implements AsyncProcess {
 			// until we have a new test to send to the browser or the server is shutdown,
 			// whichever comes first. Basically, we are not sending the HTTP response to the
 			// browser until we have received a new test
-			MultiTestMethod nextMethod = browser.awaitNewTestReady();
+			MultiTestMethod nextMethod = browser.awaitNextTest();
 			if (nextMethod != null) {
 				if (config.isDebugEnabled()) {
 					System.out.println("Server is sending test for method " + nextMethod.toString() + " to browser " + browserId);

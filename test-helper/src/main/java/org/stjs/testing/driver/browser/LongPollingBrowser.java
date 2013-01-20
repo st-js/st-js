@@ -74,19 +74,33 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	/**
 	 * Starts the browser session. This will open a browser and navigate it to some page where the unit testing
 	 * procedure can be started. The decision about exactly which browser binary is started, how it is started and which
-	 * page is opened is delegated to the Browser implementation that this AsynBrowserSession was constructed with.
+	 * page is opened is delegated to the Browser implementation that this AsynBrowserSession was constructed with. This
+	 * method performs some error handling, and the real implementation of the browser starting procedure is delegated
+	 * to doStart().
 	 */
 	@Override
-	public abstract void start() throws InitializationError;
+	public void start() throws InitializationError {
+		try {
+			this.doStart();
+		} catch (InitializationError ie) {
+			this.markAsDead();
+			throw ie;
+		} catch (Throwable t) {
+			this.markAsDead();
+			throw new InitializationError(t);
+		}
+	}
+
+	protected abstract void doStart() throws InitializationError;
 
 	/**
-	 * Blocks until JUnit notifies this browser session that either a new test must be executed, or there are no more
-	 * tests. If there is a new test to execute, then this method returns it. If there are no more tests, this method
-	 * returns null.
+	 * Blocks until JUnit notifies this browser session that either a new test must be executed (ie: executeTest() is
+	 * called), or there are no more tests (ie: notifyNoMoreTests() is called). If there is a new test to execute, then
+	 * this method returns it. If there are no more tests, this method returns null.
 	 * 
 	 * @return The next test to execute, or null if there isn't any
 	 */
-	public MultiTestMethod awaitNewTestReady() {
+	public MultiTestMethod awaitNextTest() {
 		try {
 			if (getConfig().isDebugEnabled()) {
 				System.out.println("Browser " + this.id + " is waiting for a new test");
@@ -108,7 +122,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	/**
 	 * Notifies this browser that the specified test must be executed. This method blocks until this browser picks up
-	 * the test by calling awaitNewTestReady().
+	 * the test by calling awaitNextTest().
 	 * 
 	 * @param method
 	 *            The test to execute.
@@ -138,6 +152,9 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	 */
 	@Override
 	public void notifyNoMoreTests() {
+		if (this.isDead) {
+			return;
+		}
 		try {
 			if (getConfig().isDebugEnabled()) {
 				System.out.println("Browser " + this.id + " has been notified that no more tests are coming");
@@ -293,6 +310,10 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	@SuppressWarnings("unchecked")
 	public Set<Class<? extends AsyncProcess>> getSharedDependencies() {
 		return processSet(HttpLongPollingServer.class);
+	}
+
+	protected void markAsDead() {
+		this.isDead = true;
 	}
 
 	public void markAsDead(Throwable throwable, String userAgent) {

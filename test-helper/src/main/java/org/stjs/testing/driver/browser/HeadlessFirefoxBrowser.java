@@ -11,9 +11,10 @@ public class HeadlessFirefoxBrowser extends HeadlessBrowser {
 	}
 
 	@Override
-	public void start() throws InitializationError {
+	public void doStart() throws InitializationError {
 		this.registerWithLongPollingServer();
-		this.startProcess(new CombinedFirefoxLocator(), FirefoxBrowser.PROP_FIREFOX_BIN, getStartPageUrl(getId(), false));
+		this.startProcess(new CombinedFirefoxLocator(), FirefoxBrowser.PROP_FIREFOX_BIN,
+				getStartPageUrl(getId(), false));
 	}
 
 }

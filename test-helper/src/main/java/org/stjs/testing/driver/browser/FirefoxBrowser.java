@@ -13,7 +13,7 @@ public class FirefoxBrowser extends LongPollingBrowser {
 	}
 
 	@Override
-	public void start() throws InitializationError {
+	public void doStart() throws InitializationError {
 		this.registerWithLongPollingServer();
 		this.startProcess(new CombinedFirefoxLocator(), PROP_FIREFOX_BIN, getStartPageUrl(getId(), false));
 	}

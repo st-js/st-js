@@ -48,7 +48,6 @@ public class JUnitSession {
 
 	private JUnitSession() {
 		super();
-		System.out.println("Creating JUnitSession");
 	}
 
 	/**
@@ -63,7 +62,6 @@ public class JUnitSession {
 		}
 
 		try {
-			System.out.println("initializing config");
 			config = new DriverConfiguration(testClassSample);
 
 			// initialize the browser sessions
