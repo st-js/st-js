@@ -578,7 +578,7 @@ function compareDelta_(expected, actual, epsilon) {
   var compareDouble = function(e,a,d) {
     return Math.abs(e - a) <= d;
   }
-  if (expected === actual) {
+  if (expected === actual || (expected != null && expected.equals(actual))) {
     return true;
   }
 

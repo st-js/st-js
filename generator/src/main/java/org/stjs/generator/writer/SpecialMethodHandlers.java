@@ -198,22 +198,6 @@ public class SpecialMethodHandlers {
 			}
 		});
 
-		// equals -> ==
-		methodHandlers.put("equals", new SpecialMethodHandler() {
-			@Override
-			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
-				if ((n.getArgs() == null) || (n.getArgs().size() != 1)) {
-					return false;
-				}
-				currentHandler.printer.print("(");
-				printScope(currentHandler, n, context, false);
-				currentHandler.printer.print(" == ");
-				n.getArgs().get(0).accept(currentHandler, context);
-				currentHandler.printer.print(")");
-				return true;
-			}
-		});
-
 		// $properties(obj) -> obj
 		methodHandlers.put("$properties", new SpecialMethodHandler() {
 			@Override

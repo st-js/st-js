@@ -25,6 +25,7 @@ import com.sun.net.httpserver.HttpServer;
 
 /**
  * Manages the HTTP server that is used to send tests to the browsers.
+ * 
  * @author lordofthepigs
  */
 @SuppressWarnings("restriction")
@@ -46,14 +47,13 @@ public class HttpLongPollingServer implements AsyncProcess {
 		InetSocketAddress address = new InetSocketAddress(config.getPort());
 		try {
 			httpServer = HttpServer.create(address, 0);
-		}
-		catch (IOException e) {
-			throw new InitializationError(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 
-		// by default, the HttpServer uses a single thread to respond to all requests given that we block responses 
+		// by default, the HttpServer uses a single thread to respond to all requests given that we block responses
 		// to tests requests while waiting for new tests, and that the new tests are only sent when all browsers have
-		// responded, one thread is not enough to handle multiple browsers. 
+		// responded, one thread is not enough to handle multiple browsers.
 		// Let's give him an executor that is a bit more flexible
 		httpServer.setExecutor(Executors.newFixedThreadPool(config.getBrowserCount() * 2, new ThreadFactory() {
 			private AtomicInteger i = new AtomicInteger(0);
@@ -84,9 +84,9 @@ public class HttpLongPollingServer implements AsyncProcess {
 	}
 
 	/**
-	 * Registers the specified browser session with this HTTP server, so that this server knows how to respond to HTTP requests containing the
-	 * specified session's id. This method is expected to be called many times in a row before any unit test is started, once per browser
-	 * session.
+	 * Registers the specified browser session with this HTTP server, so that this server knows how to respond to HTTP
+	 * requests containing the specified session's id. This method is expected to be called many times in a row before
+	 * any unit test is started, once per browser session.
 	 */
 	public long registerBrowserSession(LongPollingBrowser browser) {
 		long id = browsers.size();
@@ -119,12 +119,10 @@ public class HttpLongPollingServer implements AsyncProcess {
 				} else {
 					handleResource(path, exchange);
 				}
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				System.err.println("Error processing request:" + ex);
 				ex.printStackTrace();
-			}
-			finally {
+			} finally {
 				exchange.close();
 			}
 		}
@@ -137,14 +135,15 @@ public class HttpLongPollingServer implements AsyncProcess {
 		}
 
 		/**
-		 * Called when this HTTP server receives a request for the next test from a browser. This method blocks until one of these to conditions
-		 * are met:<br>
+		 * Called when this HTTP server receives a request for the next test from a browser. This method blocks until
+		 * one of these to conditions are met:<br>
 		 * <ol>
-		 * <li>This server receives a new test to send to the browser session that made the request (via the queueTest()) method.
+		 * <li>This server receives a new test to send to the browser session that made the request (via the
+		 * queueTest()) method.
 		 * <li>This server is notified that no more tests are remaining (via AsyncBrowserSession.notifyNoMoreTest())
 		 * </ol>
-		 * Once one of these events has happened, this HTTP server sends the appropriate HTML/javascript response before returning from this
-		 * method.
+		 * Once one of these events has happened, this HTTP server sends the appropriate HTML/javascript response before
+		 * returning from this method.
 		 */
 		private void handleNextTest(Map<String, String> params, HttpExchange exchange) {
 			// Read the test results returned by the browser, if any
@@ -155,7 +154,8 @@ public class HttpLongPollingServer implements AsyncProcess {
 				// We only have a method under execution, if the HTTP request that is being
 				// handled is not the first one the server has received
 				if (config.isDebugEnabled()) {
-					System.out.println("Server received test results for method " + completedMethod.toString() + " from browser " + browserId);
+					System.out.println("Server received test results for method " + completedMethod.toString()
+							+ " from browser " + browserId);
 				}
 
 				// notify JUnit of the result of this test. When the last browser notifies
@@ -176,14 +176,14 @@ public class HttpLongPollingServer implements AsyncProcess {
 			MultiTestMethod nextMethod = browser.awaitNewTestReady();
 			if (nextMethod != null) {
 				if (config.isDebugEnabled()) {
-					System.out.println("Server is sending test for method " + nextMethod.toString() + " to browser " + browserId);
+					System.out.println("Server is sending test for method " + nextMethod.toString() + " to browser "
+							+ browserId);
 				}
 				try {
 					browser.sendTestFixture(nextMethod, exchange);
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					// we failed to send the fixture. This means that the browser will not request the next test,
-					// it is therefore essentially dead. 
+					// it is therefore essentially dead.
 					browser.markAsDead(e, exchange.getRequestHeaders().getFirst("User-Agent"));
 					throw new RuntimeException(e);
 				}
@@ -191,8 +191,7 @@ public class HttpLongPollingServer implements AsyncProcess {
 			} else {
 				try {
 					browser.sendNoMoreTestFixture(exchange);
-				}
-				catch (IOException ioe) {
+				} catch (IOException ioe) {
 					// sending a 500 error has basically the same effect as sending a proper response. The browser may
 					// not cleanup properly, but hey, this is disaster recovery
 					throw new RuntimeException(ioe);
@@ -200,7 +199,8 @@ public class HttpLongPollingServer implements AsyncProcess {
 			}
 		}
 
-		private synchronized void handleResource(String path, HttpExchange exchange) throws IOException, URISyntaxException {
+		private synchronized void handleResource(String path, HttpExchange exchange) throws IOException,
+				URISyntaxException {
 			if (path.endsWith(".js")) {
 				exchange.getResponseHeaders().add("Content-Type", "text/javascript");
 			} else if (path.endsWith(".html")) {
@@ -241,8 +241,7 @@ public class HttpLongPollingServer implements AsyncProcess {
 			}
 			try {
 				return Long.parseLong(s);
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				return defaultValue;
 			}
 		}
