@@ -1,5 +1,6 @@
 package org.stjs.testing.driver;
 
+import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,15 +15,18 @@ import org.junit.runners.model.InitializationError;
 import org.stjs.testing.driver.browser.Browser;
 
 /**
- * Represents one session of unit testing that may span multiple tests in multiple classes, and performs startup and cleanup actions based on the
- * JUnit lifecycle.<br>
+ * Represents one session of unit testing that may span multiple tests in multiple classes, and performs startup and
+ * cleanup actions based on the JUnit lifecycle.<br>
  * <br>
- * Since JUnit itself does not provide any easy way to hook into its lifecycle, this class relies on STJSMultiTestDriverRunner to gather hints
- * about the lifecyle. The JUnit lifecycle has been experimentally determined to be as follows:
+ * Since JUnit itself does not provide any easy way to hook into its lifecycle, this class relies on
+ * STJSMultiTestDriverRunner to gather hints about the lifecyle. The JUnit lifecycle has been experimentally determined
+ * to be as follows:
  * <ol>
  * <li>The test classes are scanned, and one instance of Runner is created per class
- * <li>run() is called sequentially on each Runner instance. The unit tests are executed sequentially from within the run() method
+ * <li>run() is called sequentially on each Runner instance. The unit tests are executed sequentially from within the
+ * run() method
  * </ol>
+ * 
  * @author lordofthepigs
  */
 public class JUnitSession {
@@ -49,6 +53,7 @@ public class JUnitSession {
 
 	/**
 	 * Starts all the browser and server sessions. If the sessions are already started, this method has no effect.
+	 * 
 	 * @throws InitializationError
 	 */
 	private void init(Class<?> testClassSample) throws InitializationError {
@@ -67,8 +72,7 @@ public class JUnitSession {
 			startBrowserDependencies();
 			startBrowsers();
 
-		}
-		catch (Throwable e) {
+		} catch (Throwable e) {
 			printStackTrace(e);
 			reset();
 			// sometimes, JUnit doesn't display the exception, so let's print it out
@@ -99,21 +103,18 @@ public class JUnitSession {
 		try {
 			cons = dep.getConstructor(DriverConfiguration.class);
 			return cons.newInstance(config);
-		}
-		catch (NoSuchMethodException e) {
+		} catch (NoSuchMethodException e) {
 			// constructor with single DriverConfiguration argument cannot be found,
 			// try with the no-args constructor
 			try {
 				cons = dep.getConstructor();
 				return cons.newInstance();
-			}
-			catch (Exception e2) {
-				// proper constructor not found (or something else happened), 
+			} catch (Exception e2) {
+				// proper constructor not found (or something else happened),
 				// cannot instantiate dependency
 				throw new InitializationError(e2);
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new InitializationError(e);
 		}
 	}
@@ -137,8 +138,7 @@ public class JUnitSession {
 				public void run() {
 					try {
 						proc.start();
-					}
-					catch (Exception e) {
+					} catch (Exception e) {
 						firstError.compareAndSet(null, e);
 					}
 				}
@@ -152,8 +152,7 @@ public class JUnitSession {
 		for (Thread t : threads) {
 			try {
 				t.join();
-			}
-			catch (InterruptedException e) {
+			} catch (InterruptedException e) {
 				throw new InitializationError(e);
 			}
 		}
@@ -173,14 +172,13 @@ public class JUnitSession {
 
 		for (Browser browser : browsers) {
 			try {
-				// FIXME: in some cases where initialization of some dependencies has failed, the fact that 
+				// FIXME: in some cases where initialization of some dependencies has failed, the fact that
 				// this is a blocking method can lead to deadlocks. The case that caught me was the following:
 				// This method blocks until the HTTP server claims the next text, but the HTTP server was never
 				// started
 				browser.notifyNoMoreTests();
 				browser.stop();
-			}
-			catch (Throwable e) {
+			} catch (Throwable e) {
 				printStackTrace(e);
 			}
 		}
@@ -189,8 +187,7 @@ public class JUnitSession {
 		for (AsyncProcess dep : sharedDependencies.values()) {
 			try {
 				dep.stop();
-			}
-			catch (Throwable e) {
+			} catch (Throwable e) {
 				printStackTrace(e);
 			}
 		}
@@ -198,12 +195,9 @@ public class JUnitSession {
 	}
 
 	/**
-	 * <<<<<<< HEAD Called when a runner has been instantiated. This method is expected to be called many times in a row right after the session
-	 * has started, once per STJSMultiTestDriverRunner. The first time this method is called, the HTTP server and the browsers are configured and
-	 * started. This method counts the number of times it has been called. ======= Called when a runner has been instantiated. This method is
-	 * expected to be called many times in a row right after the session has started, once per STJSAsyncTestDriverRunner. The first time this
-	 * method is called, the HTTP server and the browsers are configured and started. This method counts the number of times it has been called.
-	 * >>>>>>> refs/remotes/st-js/master
+	 * Called when a runner has been instantiated. This method is expected to be called many times in a row right after
+	 * the session has started, once per STJSMultiTestDriverRunner. The first time this method is called, the HTTP
+	 * server and the browsers are configured and started. This method counts the number of times it has been called.
 	 */
 	public void runnerInstantiated(STJSMultiTestDriverRunner runner) throws InitializationError {
 		if (this.config == null) {
@@ -237,9 +231,10 @@ public class JUnitSession {
 	}
 
 	/**
-	 * Called when the specified runner has finished executing all of its tests. When this method is called for the last time, the HTTP server
-	 * and all browsers are stopped and cleaned up. This method can figure out when it i being invoked for the last time by comparing the number
-	 * of times it was invoked with the number of times runnerInstantiated() was invoked.
+	 * Called when the specified runner has finished executing all of its tests. When this method is called for the last
+	 * time, the HTTP server and all browsers are stopped and cleaned up. This method can figure out when it i being
+	 * invoked for the last time by comparing the number of times it was invoked with the number of times
+	 * runnerInstantiated() was invoked.
 	 */
 	public void runnerCompleted(STJSMultiTestDriverRunner runner) {
 		if (config.isDebugEnabled()) {
@@ -264,22 +259,68 @@ public class JUnitSession {
 		return (T) this.sharedDependencies.get(depencencyType);
 	}
 
+	/**
+	 * Prints the stack trace of the specified throwable. This method is required because JUnits InitializationError
+	 * makes it pretty much impossible to print nice looking stack traces using the standard printStackTrace() method
+	 * 
+	 * @param t
+	 */
 	private static void printStackTrace(Throwable t) {
+		printStackTrace(t, System.err);
+	}
+
+	private static void printStackTrace(Throwable t, PrintStream out) {
 		if (t instanceof InitializationError) {
-			// Initilization error does not use the standard way to report causes, and therefore
+			out.println(t);
+
+		} else {
+			// "Normal" Throwable, code is pretty much equivalent to Throwable.printStackTrace();
+			out.println(t);
+			for (StackTraceElement elem : t.getStackTrace()) {
+				out.println("\tat " + elem);
+			}
+		}
+		printCauses(t, "", out);
+	}
+
+	private static void printCauses(Throwable caused, String prefix, PrintStream out) {
+		if (caused instanceof InitializationError) {
+			// Initialization error does not use the standard way to report causes, and therefore
 			// printStackTrace() on InitializationError does not print causes. Let's try to fix that
-			InitializationError ie = (InitializationError) t;
-			ie.printStackTrace(System.out);
+			InitializationError ie = (InitializationError) caused;
 			List<Throwable> causes = ie.getCauses();
 			if (causes != null && !causes.isEmpty()) {
-				System.out.println("Caused by " + causes.size() + " exceptions:");
-				for (Throwable c : causes) {
-					c.printStackTrace(System.out);
+				System.err.println(prefix + "Caused by " + causes.size() + " exceptions:");
+				for (Throwable cause : causes) {
+					printCauseStackTrace(cause, caused.getStackTrace(), "\t" + prefix, out);
 				}
 			}
-		} else {
-			t.printStackTrace(System.out);
+
+		} else if (caused.getCause() != null) {
+			printCauseStackTrace(caused.getCause(), caused.getStackTrace(), prefix, out);
+		}
+	}
+
+	private static void printCauseStackTrace(Throwable cause, StackTraceElement[] causedTrace, String prefix,
+			PrintStream out) {
+		// Compute number of frames in common between cause and caused
+		StackTraceElement[] trace = cause.getStackTrace();
+		int m = trace.length - 1, n = causedTrace.length - 1;
+		while (m >= 0 && n >= 0 && trace[m].equals(causedTrace[n])) {
+			m--;
+			n--;
+		}
+		int framesInCommon = trace.length - 1 - m;
+
+		out.println(prefix + "Caused by: " + cause);
+		for (int i = 0; i <= m; i++) {
+			out.println(prefix + "\tat " + trace[i]);
+		}
+		if (framesInCommon != 0) {
+			out.println(prefix + "\t... " + framesInCommon + " more");
 		}
 
+		printCauses(cause, prefix, out);
 	}
+
 }
