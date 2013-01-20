@@ -34,6 +34,7 @@ public class JUnitSession {
 	private static JUnitSession instance = null;
 
 	private DriverConfiguration config;
+	private volatile boolean initFailed = false;
 
 	private List<Browser> browsers;
 	private Set<STJSMultiTestDriverRunner> remainingRunners = new HashSet<STJSMultiTestDriverRunner>();
@@ -61,6 +62,10 @@ public class JUnitSession {
 			return;
 		}
 
+		if (this.initFailed) {
+			throw new InitializationError("Session initialization failed previously. Not trying again.");
+		}
+
 		try {
 			config = new DriverConfiguration(testClassSample);
 
@@ -73,6 +78,7 @@ public class JUnitSession {
 		} catch (Throwable e) {
 			printStackTrace(e);
 			reset();
+			this.initFailed = true;
 			// sometimes, JUnit doesn't display the exception, so let's print it out
 			throw new InitializationError(e);
 		}
