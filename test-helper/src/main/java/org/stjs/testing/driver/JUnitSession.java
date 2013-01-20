@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
@@ -133,7 +133,7 @@ public class JUnitSession {
 
 	private void startInParallel(Collection<? extends AsyncProcess> processes) throws InitializationError {
 		List<Thread> threads = new ArrayList<Thread>();
-		final AtomicReference<Throwable> firstError = new AtomicReference<Throwable>();
+		final List<Throwable> errors = new CopyOnWriteArrayList<Throwable>();
 
 		// start all the dependencies in parallel
 		for (final AsyncProcess proc : processes) {
@@ -143,7 +143,7 @@ public class JUnitSession {
 					try {
 						proc.start();
 					} catch (Exception e) {
-						firstError.compareAndSet(null, e);
+						errors.add(e);
 					}
 				}
 			});
@@ -162,8 +162,8 @@ public class JUnitSession {
 		}
 
 		// check if any of the dependencies has failed to start. If some did, throw an exception
-		if (firstError.get() != null) {
-			throw new InitializationError(firstError.get());
+		if (!errors.isEmpty()) {
+			throw new InitializationError(errors);
 		}
 	}
 
