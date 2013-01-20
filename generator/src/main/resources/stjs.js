@@ -20,8 +20,24 @@
 var NOT_IMPLEMENTED = function(){
 	throw "This method is not implemented in Javascript.";
 }
-/* String */
 
+JavalikeEquals = function(value){
+	if (value == null)
+		return false;
+	if (value.valueOf)
+		return this.valueOf() === value.valueOf();
+	return this === value;
+}
+
+/* Object */
+//if (!Object.prototype.equals) {
+	//Object.prototype.equals=JavalikeEquals //disabled as it breaks some jQuery code
+//}
+
+/* String */
+if (!String.prototype.equals) {
+	String.prototype.equals=JavalikeEquals;
+}
 if (!String.prototype.getBytes) {
 	String.prototype.getBytes=NOT_IMPLEMENTED;
 }
@@ -126,6 +142,8 @@ if (!String.prototype.regionMatches){
 	}
 }
 
+
+
 //force valueof to match the Java's behavior
 String.valueOf=function(value){
 	return new String(value);
@@ -201,6 +219,9 @@ if (!Number.isNaN) {
 if (!Number.prototype.isNaN) {
 	Number.prototype.isNaN = isNaN;
 }
+if (!Number.prototype.equals) {
+	Number.prototype.equals=JavalikeEquals;
+}
 
 //force valueof to match approximately the Java's behavior (for Integer.valueOf it returns in fact a double)
 Number.valueOf=function(value){
@@ -208,10 +229,15 @@ Number.valueOf=function(value){
 }
 
 /* Boolean */
+if (!Boolean.prototype.equals) {
+	Boolean.prototype.equals=JavalikeEquals;
+}
+
 //force valueof to match the Java's behavior
 Boolean.valueOf=function(value){
 	return new Boolean(value).valueOf();
 }
+
 
 
 /************* STJS helper functions ***************/
@@ -244,7 +270,7 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 		// was generated with version 1.2 or earlier, so let's call the 1.2 version of stjs.extend
 		return stjs.extend12.apply(this, arguments);
 	}
-	
+
 	var key, a;
 	if(_super != null){
 		// I is used as a no-op constructor that has the same prototype as _super

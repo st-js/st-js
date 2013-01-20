@@ -82,14 +82,26 @@ public class SpecialMethodGeneratorTest {
 
 	@Test
 	public void testSpecialEquals() {
-		// x.equals(y) -> x == y
-		assertCodeContains(SpecialMethod10.class, "(x == 2)");
+		// no longer [x.equals(y) -> x == y], but keep equals as is
+		assertCodeContains(SpecialMethod10.class, "x.equals(2)");
 	}
 
 	@Test
 	public void testSpecialNotEquals() {
-		// !x.equals(y) -> !(x == y)
-		assertCodeContains(SpecialMethod11.class, "!(x == 2)");
+		// no longer [!x.equals(y) -> !(x == y)], but keep equals as is
+		assertCodeContains(SpecialMethod11.class, "!x.equals(2)");
+	}
+
+	@Test
+	public void testSpecialEquals2() {
+		// x == y -> x === y
+		assertCodeContains(SpecialMethod10a.class, "x === 2");
+	}
+
+	@Test
+	public void testSpecialNotEquals2() {
+		// x != y -> x !== 2
+		assertCodeContains(SpecialMethod11a.class, "x !== 2");
 	}
 
 	@Test
