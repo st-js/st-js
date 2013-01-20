@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.runners.model.InitializationError;
+import org.openqa.selenium.browserlaunchers.locators.BrowserInstallation;
+import org.openqa.selenium.browserlaunchers.locators.SingleBrowserLocator;
 import org.stjs.generator.BridgeClass;
 import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
@@ -54,7 +56,18 @@ public class PhantomjsBrowser extends LongPollingBrowser {
 			// can only be started with a file on the local filesystem as argument
 			tempBootstrapJs = unpackBootstrap();
 
-			String executableName = getConfig().getProperty(PROP_PHANTOMJS_BIN, "phantomjs");
+			String executableName = getConfig().getProperty(PROP_PHANTOMJS_BIN);
+			if(executableName == null){
+				BrowserInstallation installation = new Locator().findBrowserLocation();
+				if(installation == null){
+					throw new InitializationError( //
+							"phantomjs could not be found in the path!\n" +
+					        "Please add the directory containing 'phantomjs' or 'phantomjs.exe' to your PATH environment\n" +
+					        "variable, or explicitly specify a path to phantomjs in stjs-test.properties like this:\n" +
+					        PROP_PHANTOMJS_BIN + "=/blah/blah/phantomjs");
+				}
+				executableName = installation.launcherFilePath();
+			}
 			new ProcessBuilder( //
 					executableName, //
 					"--web-security=no", //
@@ -226,5 +239,40 @@ public class PhantomjsBrowser extends LongPollingBrowser {
 		Set<Class<? extends AsyncProcess>> dep = new HashSet<Class<? extends AsyncProcess>>();
 		dep.add(HttpLongPollingServer.class);
 		return dep;
+	}
+	
+	private static class Locator extends SingleBrowserLocator {
+
+		@Override
+		protected String[] standardlauncherFilenames() {
+			return new String[]{"phantomjs", "phantomjs.exe"};
+		}
+
+		@Override
+		protected String[] usualLauncherLocations() {
+			// phantomjs doesn't have a proper installer, so there really isn't any usual
+			// location where it would be. Except maybe on linux versions that use package
+			// managers
+			return new String[]{"/usr/bin"};
+		}
+
+
+		@Override
+		protected String seleniumBrowserName() {
+			// not useful in stjs, but required by selenium
+			return "phantomjs";
+		}
+
+		@Override
+		protected String browserPathOverridePropertyName() {
+			// not useful in stjs, but required by selenium
+			return "phantomjs";
+		}
+
+		@Override
+		protected String browserName() {
+			// not useful in stjs, but required by selenium
+			return "phantomjs";
+		}
 	}
 }

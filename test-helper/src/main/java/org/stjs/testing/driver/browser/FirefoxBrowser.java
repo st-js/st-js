@@ -1,6 +1,7 @@
 package org.stjs.testing.driver.browser;
 
 import org.junit.runners.model.InitializationError;
+import org.openqa.selenium.browserlaunchers.locators.CombinedFirefoxLocator;
 import org.stjs.testing.driver.DriverConfiguration;
 
 public class FirefoxBrowser extends LongPollingBrowser {
@@ -14,6 +15,6 @@ public class FirefoxBrowser extends LongPollingBrowser {
 	@Override
 	public void start() throws InitializationError {
 		this.registerWithLongPollingServer();
-		this.startProcess("firefox", PROP_FIREFOX_BIN, getStartPageUrl(getId(), false));
+		this.startProcess(new CombinedFirefoxLocator(), PROP_FIREFOX_BIN, getStartPageUrl(getId(), false));
 	}
 }

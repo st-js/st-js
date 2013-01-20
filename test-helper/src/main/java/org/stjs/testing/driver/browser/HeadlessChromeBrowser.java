@@ -1,6 +1,7 @@
 package org.stjs.testing.driver.browser;
 
 import org.junit.runners.model.InitializationError;
+import org.openqa.selenium.browserlaunchers.locators.GoogleChromeLocator;
 import org.stjs.testing.driver.DriverConfiguration;
 
 public class HeadlessChromeBrowser extends HeadlessBrowser {
@@ -12,7 +13,7 @@ public class HeadlessChromeBrowser extends HeadlessBrowser {
 	@Override
 	public void start() throws InitializationError {
 		this.registerWithLongPollingServer();
-		this.startProcess("google-chrome", ChromeBrowser.PROP_CHROME_BIN, getStartPageUrl(getId(), false));
+		this.startProcess(new GoogleChromeLocator(), ChromeBrowser.PROP_CHROME_BIN, getStartPageUrl(getId(), false));
 	}
 
 }

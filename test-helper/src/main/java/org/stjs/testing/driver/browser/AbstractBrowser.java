@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.runners.model.InitializationError;
+import org.openqa.selenium.browserlaunchers.locators.BrowserLocator;
 import org.stjs.testing.driver.AsyncProcess;
 import org.stjs.testing.driver.DriverConfiguration;
 import org.stjs.testing.driver.TestResult;
@@ -24,8 +25,8 @@ public abstract class AbstractBrowser implements Browser {
 		this.config = config;
 	}
 
-	protected void startProcess(String defaultBinaryName, String binPropertyName, String url) throws InitializationError {
-		startProcess(buildProcess(defaultBinaryName, binPropertyName, url));
+	protected void startProcess(BrowserLocator locator, String binPropertyName, String url) throws InitializationError {
+		startProcess(buildProcess(locator, binPropertyName, url));
 	}
 
 	protected Process startProcess(ProcessBuilder builder) throws InitializationError {
@@ -42,8 +43,11 @@ public abstract class AbstractBrowser implements Browser {
 		}
 	}
 
-	protected ProcessBuilder buildProcess(String defaultBinaryName, String binPropertyName, String url) {
-		String executableName = config.getProperty(binPropertyName, defaultBinaryName);
+	protected ProcessBuilder buildProcess(BrowserLocator locator, String binPropertyName, String url) {
+		String executableName = config.getProperty(binPropertyName);
+		if(executableName == null){
+			executableName = locator.findBrowserLocationOrFail().launcherFilePath();
+		}
 		return new ProcessBuilder(executableName, url);
 	}
 

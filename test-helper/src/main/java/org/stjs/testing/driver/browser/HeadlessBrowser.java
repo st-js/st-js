@@ -3,6 +3,7 @@ package org.stjs.testing.driver.browser;
 import java.util.Set;
 
 import org.junit.runners.model.InitializationError;
+import org.openqa.selenium.browserlaunchers.locators.BrowserLocator;
 import org.stjs.testing.driver.AsyncProcess;
 import org.stjs.testing.driver.DriverConfiguration;
 import org.stjs.testing.driver.HttpLongPollingServer;
@@ -18,9 +19,9 @@ public abstract class HeadlessBrowser extends LongPollingBrowser {
 	}
 
 	@Override
-	protected void startProcess(String defaultBinaryName, String binPropertyName, String url) throws InitializationError {
+	protected void startProcess(BrowserLocator locator, String binPropertyName, String url) throws InitializationError {
 		Xvfb xvfb = JUnitSession.getInstance().getDependency(Xvfb.class);
-		ProcessBuilder builder = buildProcess(defaultBinaryName, binPropertyName, url);
+		ProcessBuilder builder = buildProcess(locator, binPropertyName, url);
 		builder.environment().put("DISPLAY", xvfb.getDisplay());
 		this.process = startProcess(builder);
 	}

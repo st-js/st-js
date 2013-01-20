@@ -1,6 +1,8 @@
 package org.stjs.testing.driver.browser;
 
 import org.junit.runners.model.InitializationError;
+import org.openqa.selenium.browserlaunchers.locators.BrowserInstallation;
+import org.openqa.selenium.browserlaunchers.locators.GoogleChromeLocator;
 import org.stjs.testing.driver.DriverConfiguration;
 
 public class ChromeBrowser extends LongPollingBrowser {
@@ -14,6 +16,6 @@ public class ChromeBrowser extends LongPollingBrowser {
 	@Override
 	public void start() throws InitializationError {
 		this.registerWithLongPollingServer();
-		this.startProcess("google-chrome", PROP_CHROME_BIN, getStartPageUrl(getId(), false));
+		this.startProcess(new GoogleChromeLocator(), PROP_CHROME_BIN, getStartPageUrl(getId(), false));
 	}
 }
