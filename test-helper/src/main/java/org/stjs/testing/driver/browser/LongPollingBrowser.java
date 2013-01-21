@@ -11,6 +11,7 @@ import java.util.concurrent.Exchanger;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.stjs.generator.BridgeClass;
@@ -196,6 +197,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		final Scripts addedScripts = testClass.getAnnotation(Scripts.class);
 		final ScriptsBefore addedScriptsBefore = testClass.getAnnotation(ScriptsBefore.class);
 		final ScriptsAfter addedScriptsAfter = testClass.getAnnotation(ScriptsAfter.class);
+		final Test test = meth.getMethod().getAnnotation(Test.class);
 
 		StringBuilder resp = new StringBuilder(8192);
 		resp.append("<html>\n");
@@ -256,6 +258,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		resp.append("    parent.startingTest('" + testedClassName + "', '" + method.getName() + "');");
 		resp.append("    var stjsTest = new " + testedClassName + "();\n");
 		resp.append("    var stjsResult = 'OK';\n");
+		resp.append("    var expectedException = " + (test.expected() != Test.None.class) + ";\n");
 		resp.append("    try{\n");
 		// call before methods
 		for (FrameworkMethod beforeMethod : beforeMethods) {
@@ -263,8 +266,15 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		}
 		// call the test's method
 		resp.append("      stjsTest." + method.getName() + "();\n");
+		resp.append("      if(expectedException){\n");
+		resp.append("        stjsResult = 'Expected an exception, but none was thrown';\n");
+		resp.append("      }\n");
 		resp.append("    }catch(ex){\n");
-		resp.append("      stjsResult = ex;\n");
+
+		// an exception was caught while executing the test method
+		resp.append("      if(!expectedException){\n");
+		resp.append("        stjsResult = ex;\n");
+		resp.append("      }\n");
 		resp.append("    }finally{\n");
 		// call after methods
 		for (FrameworkMethod afterMethod : afterMethods) {
