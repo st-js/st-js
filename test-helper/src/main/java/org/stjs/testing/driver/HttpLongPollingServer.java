@@ -37,6 +37,7 @@ public class HttpLongPollingServer implements AsyncProcess {
 	private final DriverConfiguration config;
 	private final HttpServer httpServer;
 	private final Map<Long, LongPollingBrowser> browsers = new ConcurrentHashMap<Long, LongPollingBrowser>();
+	private final Map<Long, Long> selfAssignedBrowserIds = new ConcurrentHashMap<Long, Long>();
 
 	/**
 	 * Configures and starts the HTTP server
@@ -149,6 +150,9 @@ public class HttpLongPollingServer implements AsyncProcess {
 			// Read the test results returned by the browser, if any
 			long browserId = parseLong(params.get("browserId"), -1);
 			LongPollingBrowser browser = browsers.get(browserId);
+			if (browser == null) {
+				browser = selfAssignedBrowser(browserId);
+			}
 			MultiTestMethod completedMethod = browser.getMethodUnderExecution();
 			if (completedMethod != null) {
 				// We only have a method under execution, if the HTTP request that is being
@@ -197,6 +201,28 @@ public class HttpLongPollingServer implements AsyncProcess {
 					throw new RuntimeException(ioe);
 				}
 			}
+		}
+
+		/**
+		 * this method returns an id of a registered browser when the id received from the client does not correspond to
+		 * an existing one - i.e. it's randomly generated on the client.
+		 * 
+		 * @param browserId
+		 * @return
+		 */
+		private synchronized LongPollingBrowser selfAssignedBrowser(long browserId) {
+			Long correspondingId = selfAssignedBrowserIds.get(browserId);
+			if (correspondingId != null) {
+				return browsers.get(correspondingId);
+			}
+			// find a browser that does not have yet an ID assigned
+			for (LongPollingBrowser browser : browsers.values()) {
+				if (!selfAssignedBrowserIds.containsValue(browser.getId())) {
+					selfAssignedBrowserIds.put(browserId, browser.getId());
+					return browser;
+				}
+			}
+			throw new RuntimeException("More browser connections than configured browsers");
 		}
 
 		private synchronized void handleResource(String path, HttpExchange exchange) throws IOException,
