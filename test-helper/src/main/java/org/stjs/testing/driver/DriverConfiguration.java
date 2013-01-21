@@ -75,10 +75,10 @@ public class DriverConfiguration {
 	public DriverConfiguration(Class<?> klass) {
 
 		InputStream in = null;
+		props = new Properties();
 		try {
 			in = klass.getResourceAsStream(FILE_NAME);
 			if (in != null) {
-				props = new Properties();
 				props.load(in);
 			}
 		}
