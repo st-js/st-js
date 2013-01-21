@@ -120,7 +120,7 @@ public class DriverConfiguration {
 
 	private List<Browser> instantiateBrowsers() {
 		if (props.getProperty(PROP_BROWSERS) == null) {
-			return Arrays.asList(new Browser[] {new PhantomjsBrowser(this)});
+			return Arrays.asList(new Browser[] {new DesktopDefaultBrowser(this)});
 		}
 		String[] browserNames = props.getProperty(PROP_BROWSERS).split(",");
 		browsers = new ArrayList<Browser>(browserNames.length);
