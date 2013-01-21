@@ -39,25 +39,20 @@ import com.google.common.io.Closeables;
 
 /**
  * this is a wrapper around the configuration files stjs-test.properties.
+ * 
  * @author acraciun
  */
 public class DriverConfiguration {
 	private static final String FILE_NAME = "/stjs-test.properties";
 
+	private static final String PROP_CONFIG = "stjs.test.config";
 	private static final String PROP_PORT = "stjs.test.port";
-
 	private static final String PROP_WAIT_FOR_BROWSER = "stjs.test.wait";
-
 	private static final String PROP_SKIP_IF_NO_BROWSER = "stjs.test.skipIfNoBrowser";
-
 	private static final String PROP_START_BROWSER = "stjs.test.startBrowser";
-
 	private static final String PROP_BROWSER_COUNT = "stjs.test.browserCount";
-
 	private static final String PROP_BROWSERS = "stjs.test.browsers";
-
 	private static final String PROP_TEST_TIMEOUT = "stjs.test.testTimeout";
-
 	private static final String PROP_DEBUG = "stjs.test.debug";
 
 	private int port = 8055;
@@ -77,15 +72,13 @@ public class DriverConfiguration {
 		InputStream in = null;
 		props = new Properties();
 		try {
-			in = klass.getResourceAsStream(FILE_NAME);
+			in = klass.getResourceAsStream(getConfigFileLocation());
 			if (in != null) {
 				props.load(in);
 			}
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			// silent
-		}
-		finally {
+		} finally {
 			Closeables.closeQuietly(in);
 		}
 
@@ -107,7 +100,8 @@ public class DriverConfiguration {
 			testTimeout = Integer.parseInt(props.getProperty(PROP_TEST_TIMEOUT));
 		}
 		if (props.get(PROP_BROWSER_COUNT) != null) {
-			System.out.println("Configuration property " + PROP_BROWSER_COUNT + " is now ignored, use " + PROP_BROWSERS + " instead");
+			System.out.println("Configuration property " + PROP_BROWSER_COUNT + " is now ignored, use " + PROP_BROWSERS
+					+ " instead");
 		}
 		if (props.get(PROP_DEBUG) != null) {
 			debugEnabled = Boolean.parseBoolean(props.getProperty(PROP_DEBUG));
@@ -118,9 +112,17 @@ public class DriverConfiguration {
 		browsers = instantiateBrowsers();
 	}
 
+	private String getConfigFileLocation() {
+		String location = System.getProperties().getProperty(PROP_CONFIG);
+		if (location == null) {
+			location = FILE_NAME;
+		}
+		return location;
+	}
+
 	private List<Browser> instantiateBrowsers() {
 		if (props.getProperty(PROP_BROWSERS) == null) {
-			return Arrays.asList(new Browser[] {new DesktopDefaultBrowser(this)});
+			return Arrays.asList(new Browser[] { new DesktopDefaultBrowser(this) });
 		}
 		String[] browserNames = props.getProperty(PROP_BROWSERS).split(",");
 		browsers = new ArrayList<Browser>(browserNames.length);
@@ -204,8 +206,7 @@ public class DriverConfiguration {
 	public URL getServerURL() {
 		try {
 			return new URL("http", "localhost", port, "/");
-		}
-		catch (MalformedURLException e) {
+		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -237,8 +238,7 @@ public class DriverConfiguration {
 			try {
 				Constructor<? extends Browser> cons = builder.clazz.getConstructor(DriverConfiguration.class);
 				return cons.newInstance(config);
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				System.out.println("Unable to create browser \"" + browserName + "\": " + e.getMessage());
 			}
 			return null;
