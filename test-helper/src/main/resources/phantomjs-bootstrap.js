@@ -19,4 +19,8 @@ function runFirstTest(){
 	reportResultAndRunNextTest("OK");
 }
 
+function startingTest(){
+	// empty for phantomjs
+}
+
 runFirstTest();
