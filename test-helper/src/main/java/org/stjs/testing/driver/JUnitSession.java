@@ -37,7 +37,7 @@ public class JUnitSession {
 	private volatile boolean initFailed = false;
 
 	private List<Browser> browsers;
-	private Set<STJSMultiTestDriverRunner> remainingRunners = new HashSet<STJSMultiTestDriverRunner>();
+	private Set<STJSTestDriverRunner> remainingRunners = new HashSet<STJSTestDriverRunner>();
 	private HashMap<Class<? extends AsyncProcess>, AsyncProcess> sharedDependencies = new HashMap<Class<? extends AsyncProcess>, AsyncProcess>();
 
 	public static JUnitSession getInstance() {
@@ -216,7 +216,7 @@ public class JUnitSession {
 	 * the session has started, once per STJSMultiTestDriverRunner. The first time this method is called, the HTTP
 	 * server and the browsers are configured and started. This method counts the number of times it has been called.
 	 */
-	public void runnerInstantiated(STJSMultiTestDriverRunner runner) throws InitializationError {
+	public void runnerInstantiated(STJSTestDriverRunner runner) throws InitializationError {
 		if (this.config == null) {
 			// session not initialized yet
 			init(runner.getTestClass().getJavaClass());
@@ -232,7 +232,7 @@ public class JUnitSession {
 	/**
 	 * Called before a JUnit test is dispatched to the browsers.
 	 */
-	public void testStarting(STJSMultiTestDriverRunner runner, FrameworkMethod method) {
+	public void testStarting(STJSTestDriverRunner runner, FrameworkMethod method) {
 		if (config.isDebugEnabled()) {
 			System.out.println("test " + method.getMethod() + " is starting");
 		}
@@ -241,7 +241,7 @@ public class JUnitSession {
 	/**
 	 * Called after a JUnit test has been executed by all the browsers
 	 */
-	public void testCompleted(STJSMultiTestDriverRunner runner, FrameworkMethod method, TestResultCollection result) {
+	public void testCompleted(STJSTestDriverRunner runner, FrameworkMethod method, TestResultCollection result) {
 		if (config.isDebugEnabled()) {
 			System.out.println("test " + method.getMethod() + " is completed");
 		}
@@ -253,7 +253,7 @@ public class JUnitSession {
 	 * invoked for the last time by comparing the number of times it was invoked with the number of times
 	 * runnerInstantiated() was invoked.
 	 */
-	public void runnerCompleted(STJSMultiTestDriverRunner runner) {
+	public void runnerCompleted(STJSTestDriverRunner runner) {
 		if (config.isDebugEnabled()) {
 			System.out.println("Runner for class " + runner.getTestClass().getJavaClass().getName() + " has completed");
 		}
