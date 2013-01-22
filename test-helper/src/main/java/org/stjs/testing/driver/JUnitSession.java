@@ -69,6 +69,8 @@ public class JUnitSession {
 		try {
 			config = new DriverConfiguration(testClassSample);
 
+			addShutdownHook();
+
 			// initialize the browser sessions
 			initBrowsers();
 			initBrowserDependencies();
@@ -82,6 +84,20 @@ public class JUnitSession {
 			// sometimes, JUnit doesn't display the exception, so let's print it out
 			throw new InitializationError(e);
 		}
+	}
+
+	/**
+	 * Adds a shutdown hook to the JVM so that if it is terminated before all the unit tests have had the chance to run
+	 * the cleanup operations are executed anyway. Abrupt JVM shutdown is how Eclipse and its RemoteTestRunner implement
+	 * their "Stop JUnit test run" feature.
+	 */
+	private void addShutdownHook() {
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			@Override
+			public void run() {
+				reset();
+			}
+		}));
 	}
 
 	private void initBrowsers() {
@@ -168,7 +184,8 @@ public class JUnitSession {
 	}
 
 	/**
-	 * Stops the HTTP server and closes all the browsers.
+	 * Stops the HTTP server and closes all the browsers. This method can be called multiple times in a row without
+	 * adverse effect.
 	 */
 	private void reset() {
 		config = null;
