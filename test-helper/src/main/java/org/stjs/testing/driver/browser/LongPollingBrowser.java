@@ -8,6 +8,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Exchanger;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -97,7 +99,9 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	/**
 	 * Blocks until JUnit notifies this browser session that either a new test must be executed (ie: executeTest() is
 	 * called), or there are no more tests (ie: notifyNoMoreTests() is called). If there is a new test to execute, then
-	 * this method returns it. If there are no more tests, this method returns null.
+	 * this method returns it. If there are no more tests, this method returns null.<br>
+	 * <br>
+	 * This method is typically called right after the results of the previous test were reported.
 	 * 
 	 * @return The next test to execute, or null if there isn't any
 	 */
@@ -106,7 +110,13 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 			if (getConfig().isDebugEnabled()) {
 				System.out.println("Browser " + this.id + " is waiting for a new test");
 			}
+
+			// We now wait for the JUnit thread to supply our thread with the next test.
+			// there is no need to put a timeout here, because if JUnit fails to deliver a new test,
+			// this means that something really bad has happened and that the JUnit JVM will probably terminate very
+			// soon, executing all cleanup actions.
 			methodUnderExecution = exchanger.exchange(null);
+
 			if (getConfig().isDebugEnabled()) {
 				if (methodUnderExecution != null) {
 					System.out.println("Browser " + this.id + " has picked up the test "
@@ -123,7 +133,9 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	/**
 	 * Notifies this browser that the specified test must be executed. This method blocks until this browser picks up
-	 * the test by calling awaitNextTest().
+	 * the test by calling awaitNextTest(). If the browser does not pick up the test within the timeout specified in
+	 * DriverConfiguration.getTestTimeout(), then the browser is assumed to be dead. The test is failed, and the browser
+	 * does not receive any more tests at all.
 	 * 
 	 * @param method
 	 *            The test to execute.
@@ -131,25 +143,37 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	@Override
 	public void executeTest(MultiTestMethod method) {
 		if (this.isDead) {
-			method.notifyExecutionResult(new TestResult(this.getClass().getSimpleName(), "Browser is dead", null));
+			this.reportAsDead(method);
 			return;
 		}
 		try {
 			if (getConfig().isDebugEnabled()) {
 				System.out.println("Test " + method.getMethod().getMethod() + " is available for browser " + this.id);
 			}
-			exchanger.exchange(method);
+			exchanger.exchange(method, getConfig().getTestTimeout(), TimeUnit.SECONDS);
 			if (getConfig().isDebugEnabled()) {
 				System.out.println("Browser " + this.id + " has picked up the new test");
 			}
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
+		} catch (TimeoutException e) {
+			// the browser failed to pick up the test in time.
+			this.markAsDead();
+			this.reportAsDead(method);
 		}
 	}
 
 	/**
+	 * Reports this browser as dead to the specified test method. The test will be failed.
+	 */
+	private void reportAsDead(MultiTestMethod method) {
+		method.notifyExecutionResult(new TestResult(this.getClass().getSimpleName(), "Browser is dead", null));
+	}
+
+	/**
 	 * Notifies this browser that there are no more tests to execute. This method blocks until this browser attempts to
-	 * pick up a new test by calling awaitNewTestReady().
+	 * pick up a new test by calling awaitNewTestReady(). If the browser does not attempt to pick up a new test within
+	 * the timeout specified in DriverConfiguration.getTestTimeout(), then the browser is assumed to be dead.
 	 */
 	@Override
 	public void notifyNoMoreTests() {
@@ -160,9 +184,12 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 			if (getConfig().isDebugEnabled()) {
 				System.out.println("Browser " + this.id + " has been notified that no more tests are coming");
 			}
-			exchanger.exchange(null);
+			exchanger.exchange(null, getConfig().getTestTimeout(), TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
+		} catch (TimeoutException e) {
+			// the browser failed to pick up the test in time.
+			this.markAsDead();
 		}
 	}
 
