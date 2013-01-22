@@ -5,9 +5,9 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.stjs.testing.driver.STJSMultiTestDriverRunner;
+import org.stjs.testing.driver.STJSTestDriverRunner;
 
-@RunWith(STJSMultiTestDriverRunner.class)
+@RunWith(STJSTestDriverRunner.class)
 public class TestHelperExampleTest {
 
 	@Test
