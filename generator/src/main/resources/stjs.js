@@ -29,11 +29,6 @@ JavalikeEquals = function(value){
 	return this === value;
 }
 
-/* Object */
-//if (!Object.prototype.equals) {
-	//Object.prototype.equals=JavalikeEquals //disabled as it breaks some jQuery code
-//}
-
 /* String */
 if (!String.prototype.equals) {
 	String.prototype.equals=JavalikeEquals;
@@ -302,6 +297,11 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 	}
 
 	_constructor.$typeDescription = _typeDescription;
+	
+	// add the default equals method if it is not present yet, and we don't have a superclass
+	if(_super == null && !_constructor.prototype.equals){
+		_constructor.prototype.equals = JavalikeEquals;
+	}
 
 	// build package and assign
 	return	_constructor;
@@ -323,6 +323,14 @@ stjs.extend12=function( _constructor,  _super, _implements){
 	}
 	// remember the correct constructor
 	_constructor.prototype.constructor	= _constructor;
+	
+	// add the default equals method if we don't have a superclass. Code generated with version 1.2 will
+	// override this method is equals() is present in the original java code.
+	// this was not part of the original 1.2 version of extends, however forward compatibility
+	// with 1.3 requires it
+	if(_super == null){
+		_constructor.prototype.equals = JavalikeEquals;
+	}
 
 	// build package and assign
 	return	_constructor;
@@ -342,6 +350,7 @@ stjs.enumEntry.prototype.ordinal=function(){
 stjs.enumEntry.prototype.toString=function(){
 	return this._name;
 };
+stjs.enumEntry.prototype.equals=JavalikeEquals;
 
 stjs.enumeration=function(){
 	var i;
