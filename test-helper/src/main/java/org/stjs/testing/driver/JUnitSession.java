@@ -19,14 +19,11 @@ import org.stjs.testing.driver.browser.Browser;
  * cleanup actions based on the JUnit lifecycle.<br>
  * <br>
  * Since JUnit itself does not provide any easy way to hook into its lifecycle, this class relies on
- * STJSMultiTestDriverRunner to gather hints about the lifecyle. The JUnit lifecycle has been experimentally determined
- * to be as follows:
- * <ol>
- * <li>The test classes are scanned, and one instance of Runner is created per class
- * <li>run() is called sequentially on each Runner instance. The unit tests are executed sequentially from within the
- * run() method
+ * STJSTestDriverRunner to gather hints about the lifecyle. The lifecycle of the JUnitSession is the following:<ol>
+ * <li>It starts when the first STJSTestDriverRunner is instantiated</li>
+ * <li>It ends when the JVM shuts down.</li>
  * </ol>
- * 
+ * This lifecycle has been successfully tested again both Eclipses and maven-surefire-plugins test harnesses.   
  * @author lordofthepigs
  */
 public class JUnitSession {
@@ -211,7 +208,7 @@ public class JUnitSession {
 
 	/**
 	 * Called when a runner has been instantiated. This method is expected to be called many times in a row right after
-	 * the session has started, once per STJSMultiTestDriverRunner. The first time this method is called, the HTTP
+	 * the session has started, once per STJSTestDriverRunner. The first time this method is called, the HTTP
 	 * server and the browsers are configured and started. This method counts the number of times it has been called.
 	 */
 	public void runnerInstantiated(STJSTestDriverRunner runner) throws InitializationError {
@@ -244,10 +241,7 @@ public class JUnitSession {
 	}
 
 	/**
-	 * Called when the specified runner has finished executing all of its tests. When this method is called for the last
-	 * time, the HTTP server and all browsers are stopped and cleaned up. This method can figure out when it i being
-	 * invoked for the last time by comparing the number of times it was invoked with the number of times
-	 * runnerInstantiated() was invoked.
+	 * Called when the specified runner has finished executing all of its tests.
 	 */
 	public void runnerCompleted(STJSTestDriverRunner runner) {
 		if (config.isDebugEnabled()) {
@@ -270,9 +264,7 @@ public class JUnitSession {
 
 	/**
 	 * Prints the stack trace of the specified throwable. This method is required because JUnits InitializationError
-	 * makes it pretty much impossible to print nice looking stack traces using the standard printStackTrace() method
-	 * 
-	 * @param t
+	 * makes it pretty much impossible to print nice looking stack traces using the standard printStackTrace() method.
 	 */
 	private static void printStackTrace(Throwable t) {
 		printStackTrace(t, System.err);
