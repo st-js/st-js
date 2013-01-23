@@ -1326,10 +1326,10 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printer.print("^");
 			break;
 		case equals:
-			printer.print("===");
+			printer.print("==");
 			break;
 		case notEquals:
-			printer.print("!==");
+			printer.print("!=");
 			break;
 		case less:
 			printer.print("<");

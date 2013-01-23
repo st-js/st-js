@@ -94,14 +94,14 @@ public class SpecialMethodGeneratorTest {
 
 	@Test
 	public void testSpecialEquals2() {
-		// x == y -> x === y
-		assertCodeContains(SpecialMethod10a.class, "x === 2");
+		// x == y -> x == y
+		assertCodeContains(SpecialMethod10a.class, "x == 2");
 	}
 
 	@Test
 	public void testSpecialNotEquals2() {
-		// x != y -> x !== 2
-		assertCodeContains(SpecialMethod11a.class, "x !== 2");
+		// x != y -> x != 2
+		assertCodeContains(SpecialMethod11a.class, "x != 2");
 	}
 
 	@Test
