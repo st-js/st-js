@@ -34,7 +34,8 @@ public class InheritanceGeneratorTest {
 
 	@Test
 	public void testImplementsSyntheticType() {
-		assertCodeContains(Inheritance6.class, "stjs.extend(Inheritance6, null, [], null, {});");
+		assertCodeContains(Inheritance6.class, "stjs.extend(Inheritance6, null, [], function(constructor, prototype){" + //
+				"prototype.equals=JavalikeEquals;}, {});");
 	}
 
 	@Test

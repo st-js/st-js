@@ -1,6 +1,7 @@
 package org.stjs.generator.writer.specialMethods;
 
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
+import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
@@ -160,5 +161,20 @@ public class SpecialMethodGeneratorTest {
 	@Test
 	public void testTemplateNode() {
 		assertCodeContains(SpecialMethod22.class, "n = m.$get(0)");
+	}
+
+	@Test
+	public void testGenerateEqualsMethodForBaseClasses() {
+		assertCodeContains(SpecialMethod23.class, "prototype.equals=JavalikeEquals;");
+	}
+
+	@Test
+	public void testDontGenerateEqualsMethodForChildrenClasses() {
+		assertCodeDoesNotContain(SpecialMethod24.class, "prototype.equals=JavalikeEquals;");
+	}
+
+	@Test
+	public void testDontGenerateEqualsMethodForBaseClassesWithEqualsImplemented() {
+		assertCodeDoesNotContain(SpecialMethod25.class, "prototype.equals=JavalikeEquals;");
 	}
 }

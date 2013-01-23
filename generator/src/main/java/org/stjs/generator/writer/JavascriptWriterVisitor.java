@@ -885,8 +885,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 		printer.print("], ");
 
-		printMembers(n.getMembers(), context);
+		printMembers(n, n.getMembers(), context);
 		printer.print(", ");
+
 		printTypeDescription(n, context);
 		printer.print(")");
 
@@ -900,6 +901,40 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		} else {
 			printer.print(")");
 		}
+	}
+
+	/**
+	 * add the equals method for all base class to prevent the usage of equals somewhere in the code, when no equals is
+	 * defined in the hierarchy. The method could no be added by default to Object's prototype as it breaks several
+	 * Javascript libraries.
+	 * 
+	 * @param n
+	 * @param context
+	 */
+	private boolean needsEqualsMethod(ClassOrInterfaceDeclaration n) {
+		ClassWrapper type = (ClassWrapper) resolvedType(n);
+		if (type.isAnonymousClass()) {
+			return false;
+		}
+		if (type.getSuperClass() != null && !type.getSuperClass().getType().equals(Object.class)) {
+			return false;
+		}
+		List<MethodWrapper> equalsMethods = type.findMethods("equals");
+
+		if (equalsMethods.isEmpty()) {
+			return true;
+		}
+		for (MethodWrapper method : equalsMethods) {
+			if (method.isDeclared()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private void printEqualsMethod(ClassOrInterfaceDeclaration n, GenerationContext context) {
+		// the function name is defined in stjs.js
+		printer.print("prototype.equals=JavalikeEquals;");
 	}
 
 	private List<BodyDeclaration> filterGlobals(ClassOrInterfaceDeclaration n, ClassWrapper outerType) {
@@ -1032,7 +1067,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printer.print("}");
 	}
 
-	private void printMembers(List<BodyDeclaration> members, GenerationContext context) {
+	private void printMembers(ClassOrInterfaceDeclaration typeNode, List<BodyDeclaration> members,
+			GenerationContext context) {
 		// the following members must not appear in the initializer function:
 		// - constructors (they are printed elsewhere)
 		// - abstract methods (they should be omitted)
@@ -1044,7 +1080,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			}
 		}
 
-		if (nonConstructors.size() > 0) {
+		boolean needsEqualsMethod = needsEqualsMethod(typeNode);
+		if (nonConstructors.size() > 0 || needsEqualsMethod) {
 			printer.print("function(constructor, prototype){");
 			printer.indent();
 			for (BodyDeclaration member : nonConstructors) {
@@ -1052,6 +1089,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				member.accept(this, context);
 			}
 			printer.printLn();
+			if (needsEqualsMethod) {
+				printEqualsMethod(typeNode, context);
+			}
 			printer.unindent();
 			printer.print("}");
 		} else {
