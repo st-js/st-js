@@ -37,7 +37,6 @@ public class JUnitSession {
 	private volatile boolean initFailed = false;
 
 	private List<Browser> browsers;
-	private Set<STJSTestDriverRunner> remainingRunners = new HashSet<STJSTestDriverRunner>();
 	private HashMap<Class<? extends AsyncProcess>, AsyncProcess> sharedDependencies = new HashMap<Class<? extends AsyncProcess>, AsyncProcess>();
 
 	public static JUnitSession getInstance() {
@@ -189,7 +188,6 @@ public class JUnitSession {
 	 */
 	private void reset() {
 		config = null;
-		remainingRunners.clear();
 
 		for (Browser browser : browsers) {
 			try {
@@ -225,8 +223,6 @@ public class JUnitSession {
 		if (config.isDebugEnabled()) {
 			System.out.println("Runner for class " + runner.getTestClass().getJavaClass().getName() + " is starting");
 		}
-
-		remainingRunners.add(runner);
 	}
 
 	/**
@@ -256,10 +252,6 @@ public class JUnitSession {
 	public void runnerCompleted(STJSTestDriverRunner runner) {
 		if (config.isDebugEnabled()) {
 			System.out.println("Runner for class " + runner.getTestClass().getJavaClass().getName() + " has completed");
-		}
-		this.remainingRunners.remove(runner);
-		if (this.remainingRunners.isEmpty()) {
-			reset();
 		}
 	}
 
