@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.st-js</groupId>
 		<artifactId>stjs</artifactId>
-		<version>1.3.0-SNAPSHOT</version>
+		<version>1.3.0-SNAPSHOT-SNAPSHOT</version>
 	</parent>
 
 
