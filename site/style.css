@@ -1,0 +1,134 @@
+body {
+	font-family: "Verdana", Helvetica, Arial, sans-serif;
+	font-size:14px;
+}
+#header {
+	position: fixed;
+	top:0px;
+	height:50px;
+	width:100%;
+	border-bottom:1px solid #ccc;
+	background-color: #fff;
+	padding-bottom: 20px;
+}
+
+.title {
+	font-weight: bold;
+	font-size: 1.6em;
+	color: #2F2E84;
+}
+
+.sf {
+	float:right;
+	margin-top: 6px;
+	margin-right:20px;
+}
+
+
+.menu {
+	text-align: center;
+	margin-bottom:10px;
+}
+
+.menu a {
+	text-decoration: none;
+	padding: 3px 15px;
+}
+
+.menu a:ACTIVE {
+	text-decoration: none;
+}
+
+#content {
+	width: 800px;
+	margin-top: 80px;
+	margin-left: auto;
+	margin-right : auto;
+	margin-bottom: 20px;
+	text-align: justify;
+
+}
+
+.code {
+	width:900px;
+	text-align:left;
+	border: solid 1px #ccc;
+	background-color: #ddd;
+	padding-left:5px;
+}
+
+.code.short {
+	width:600px;
+}
+.code .left{
+	float:left;
+	width: 450px;
+}
+
+.code .right {
+	width: 440px;
+	border-left: solid 1px #ccc;
+	padding-left:5px;
+	float:right;
+}
+
+.code .key {
+	color:blue;
+}
+
+pre {
+	font-size: .9em;
+	font-family: Monaco, Consolas, "Lucida Console", monospace;
+}
+
+.xmlcode {
+	width:600px;
+	text-align:left;
+	border: solid 1px #ccc;
+	background-color: #ddd;
+	padding-left:5px;
+}
+
+.xmlcode .comment {
+	color: #00ff00;
+}
+
+h1 {
+	border-bottom:1px solid #333399;
+	color:#333399;
+	font-size:1.5em;
+	font-weight:bold;
+	margin:15px 5px 5px;
+	width:100%;
+}
+
+h2 {
+	font-size:1.1em;
+}
+
+.news .release {
+	font-weight: bold;
+	font-size:1.2em;
+}
+
+.news .date {
+	font-weight: bold;
+	font-size:1.2em;
+	color:#333399;
+	margin:15px 5px 5px;
+}
+
+table.methods {
+	border-collapse: collapse;
+	margin:15px 2px;
+}
+table.methods td,table.methods th{
+	border:solid 1px #bbb;
+}
+table.methods th{
+	background-color:#ddd;
+}
+
+ol.tutorial li {
+	padding:10px 0 5px 0;
+}

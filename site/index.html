@@ -1,0 +1,662 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF8">
+
+  <title>STJS - open source Java to Javascript generator</title>
+  <link href="style.css" rel="stylesheet">
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-26575460-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</head><body>
+<div id="header">
+  <div class="sf">
+	<a href="http://sourceforge.net/projects/st-js"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=559485&amp;type=8" width="80" height="15" alt="Get Strongly-Typed Javascript at SourceForge.net. Fast, secure and Free Open Source software downloads" /></a>
+  </div>
+  <div class="title">Strongly-Typed Javascript</div>
+  <div class="menu">
+  	<a href="index.html">Home</a>
+  	<a href="news.html">News</a>
+  	<a href="tutorial.html">Tutorial</a>
+  	<a href="reference.html">Documentation</a>
+  	<a href="download.html">Download</a>
+  	<a href="team.html">Team</a>
+ 	<a href="http://axcraciun.wordpress.com">Blog</a>
+  </div>
+</div>
+
+<div id="content">
+<!-- ------------------------------------------------  -->
+<h1>Strongly-Typed Javascript (STJS)</h1>
+<p>
+STJS is an open source (Apache 2.0 licensed) Javascript code generator
+from a Java source. It is built as a Maven plugin that can be executed after the compilation of your Java code.
+</p>
+
+<h2>Why we built it</h2>
+<p>
+Dynamically typed languages are good for small to medium projects.
+But when the size of the project grows and handled data becomes complex
+a strongly typed language gives you an extra guarantee that your
+changes won&#8217;t break your code.
+</p>
+<p>
+ The current trend is to build very rich web interfaces.
+The problem is that the only option all the browsers offer is Javascript, that is dynamically typed language.
+Even if the support from IDEs and browsers keeps growing, you'll find out pretty soon that a Javascript line of code
+gets quite expensive in a big (2000+ Javascript LOC) project.
+</p>
+<p>If you landed to our project&#8217;s page, it&#8217;s almost sure you already
+have experience with GWT or at least you heard about it.
+Even though as a Java developer we are naturally attracted by their
+philosophy, it bothered us that their solution is too intrusive:
+it imposes you a new framework, new tools, when we were only looking
+for something that can add a strongly typed dimension to our Javascript
+code.
+</p>
+
+<!-- ------------------------------------------------  -->
+<h1>An example</h1>
+<p>Here is an example of a code written in Java and the corresponding generated
+Javascript.
+The Java code may seem a bit longer and possibly more complicated at a
+first glance, but it provides you with all the advantages of a typed
+language, while preserving as much as possible the resemblance to the
+javascript style of programming. The visual resemblance is crucial
+here since it allows for faster learning and easier transition. This
+visual resemblance maintained throughout the library design
+</p>
+
+<div class="code">
+  <div class="left">
+  <pre>$("#form").submit(new EventHandler() {
+  <span class="key">public</span> <span class="key">void</span> onEvent(Event ev, <span class="key">final</span> HTMLElement THIS) {
+    StockData stockData =
+          that.updateStock($("#newStock").val());
+    $(that.row(stockData)).appendTo("table tbody");
+    that.stocks.push(stockData.stock);
+    }
+  });
+  </pre>
+  </div>
+  <div class="right">
+  <pre>$("#form").submit(<span class="key">function</span>(ev) {
+
+  <span class="key">var</span> stockData =
+          that.updateStock($("#newStock").val());
+  $(that.row(stockData)).appendTo("table tbody");
+  that.stocks.push(stockData.stock);
+
+});
+    </pre>
+    </div>
+    <div style="clear: both;"></div>
+</div>
+
+<!-- ------------------------------------------------  -->
+<h1>How does it work</h1>
+<p>STJS does not try to hide from you how Javascript works.
+STJS addresses Java developers that are comfortable with a regular
+Javascript way of building application usually using a component
+library (jQuery or others).
+We don&#8217;t believe in generated Javascript that is unreadable and
+impossible to debug.
+</p>
+<p>
+So we limited STJS to only generate Javascript from a Java code that is as close as possible to the original code.
+We&#8217;d like to believe that the generated Javascript code is as we&#8217;d of write it ourselves.
+</p>
+<p>The only dependency STJS requires at runtime is a small Javascript library
+(that basically provides the function to simulate inheritance in
+Javascript). That&#8217;s it!
+STJS imposes no java dependency, no visual component, no AJAX framework.
+You can feel free to use the Javascript libraries and components you
+like.
+We&#8217;d like to believe that if one day you&#8217;ll stop using STJS (!?), you
+just take the generated Javascript code and continue building your
+project.</p>
+
+<p>
+The Java code you write (with the purpose to generate
+Javascript) will not be executed as such. You can only use in this code
+the Java classes that have their Javascript counterpart when you
+launch it in your browser. So you CANNOT use typical Java classes like
+Java util or other JDK packages.
+
+Please note that you need at least <b>Java 6</b> to have ST-JS compiling your projects.
+</p>
+<p>
+If we managed to convince you, please continue further for a few
+minutes tutorial.
+</p>
+
+<!-- ------------------------------------------------  -->
+<h1>Other Javascript constructions</h1>
+<p>
+The problem with having Javascript code generated from Java is that
+Java is less rich than Javascript. There are Javascript constructions
+that do not have
+their corresponding in Java (or they are different) like object (map)
+constructors, array constructors, inline functions.
+We tried to provide constructions that may look unusual for a Java
+developer but somehow familiar to a Javascript developer.
+</p>
+
+<h2>Map / Object</h2>
+<p>In Javascript as an object may have dynamic properties it can be used also as a map.</p>
+In Java we&#8217;d prefer the typed version.
+<div class="code">
+<div class="left">
+<pre>StockData stock = <span class="key">new</span> StockData() {{
+   last=10.0;
+   close = 2.0;
+   stock = "ABC";
+}};
+</pre>
+</div>
+
+<div class="right">
+<pre><span class="key">var</span> stock = {
+  &#8220;last&#8221;:10,
+  &#8220;close&#8221; : 2,
+  &#8220;stock&#8221;:&#8221;ABC&#8221;
+};
+</pre>
+</div>
+<div style="clear: both;"></div>
+</div>
+
+<br>
+But if you prefer the dynamic (map-like version) you can do, we created a class <b>Map</b> that provides the same methods and access mode as the Javascript counterpart.
+
+<div class="code">
+<div class="left">
+<pre>Map&lt;String, Object&gt; stock = $map(
+  "last", 2,
+  "close", 3,
+  "stock", "ABC"
+);
+</pre>
+</div>
+<div class="right">
+<pre><span class="key">var</span> stock = {
+  &#8220;last&#8221;:10,
+  &#8220;close&#8221; : 2,
+  &#8220;stock&#8221;:&#8221;ABC&#8221;
+};
+</pre>
+</div>
+<div style="clear: both;"></div>
+</div>
+
+<br>
+Both codes will generate the same Javascript!
+
+<br>To access a map element:
+<div class="code">
+<div class="left">
+<pre>Double value = map.$get("key");
+map.$set("key", 4);
+map.$delete("key");
+</pre>
+</div>
+<div class="right">
+<pre><span class="key">var</span> value = map["key"];
+map["key"] = 4;
+delete map["key"];
+</pre>
+</div>
+<div style="clear: both;"></div>
+</div>
+
+<h2>Array</h2>
+<p>The array in Javascript has looks a lot like a List in Java, but the
+access to its elements is done more like a Java array. So we provided a
+class <b>Array</b>
+that offers the same methods as the Javascript counterpart. as the
+bracket ([]) construction can only be used in Java with a regular
+array, we added $get/$set methods
+that will generate the expected code in Javascript</p>
+Here is an example
+
+<div class="code">
+<div class="left">
+<pre>Array&lt;Integer&gt; array = $array(1, 5, 10);
+Integer value = array.$get(2);
+array.$set(2, 4);
+</pre>
+</div>
+<div class="right">
+<pre><span class="key">var</span> array = [1, 5, 10];
+<span class="key">var</span> value = array[2];
+array[2] = 4;
+</pre>
+</div>
+<div style="clear: both;"></div>
+</div>
+
+<h2>Inheritance</h2>
+<p>The class inheritance is a common construction in Java, but less common in Javascript. We simulate the inheritance in Javascript by using the prototypes.
+With this type of inheritance, we simulate instance and static fields and methods. We currently don't support private, protected and final modifiers.
+</p>
+
+<p>Here is an example</p>
+
+<div class="code">
+<div class="left">
+<pre>
+<span class="key">public</span> <span class="key">class</span> Child <span class="key">extends</span> Parent {
+	<span class="key">public</span> Child(String test) {
+		<span class="key">super</span>(test);
+	}
+
+
+	<span class="key">public</span> <span class="key">static</span> <span class="key">int</span> staticField = 1;
+	<span class="key">public</span> <span class="key">int</span> instanceField = 2;
+
+	@Override
+	<span class="key">public</span> <span class="key">void</span> instanceMethod(String n) {
+		<span class="key">super</span>.instanceMethod(n + "-");
+	}
+
+	<span class="key">public</span> <span class="key">static</span> <span class="key">void</span> staticMethod() {
+		staticField += 1;
+	}
+}
+</pre>
+</div>
+<div class="right">
+<pre>
+
+Child = <span class="key">function</span>(test) {
+    <span class="key">this</span>._super(<span class="key">null</span>, test);
+}
+stjs.extend(Child, Parent);
+
+Child.staticField = 1;
+Child.<span class="key">prototype</span>.instanceField = 2;
+
+
+Child.<span class="key">prototype</span>.instanceMethod = <span class="key">function</span>(n) {
+     <span class="key">this</span>._super("instanceMethod", n + "-");
+}
+
+Child.staticMethod = <span class="key">function</span>() {
+    Child.staticField += 1;
+}
+</pre>
+</div>
+<div style="clear: both;"></div>
+</div>
+
+<h2>Comparison</h2>
+<p>The comparison of objects or primitives is slightly different between Java and Javscript. For example <i>equals</i> method does not exist in Javascript (and there is no way to influence how egality operators behave in Javascript).<br/>
+Conversely the triple "=" (===) does not exist in Java. And the "==" sign has a slighty different meaning: in Javascript it may be accompanied by a type conversion!<br/>
+To have a predictable behaviour of the generated Javascript, the <i>equals</i> method is generated as-is. The equals method was added to all primitive types wrappers in Javascript. More
+all generated classes will have an equals method defined in their hierarchy.
+The "==" sign is left untouched as there is basically no automatic type conversion involved (because the initial Java code wouldn't allow it).
+</p>
+
+<h2>AJAX/JSON</h2>
+<p>When you transfer objects between the server and the client, your Data Transfer Objects are usually serialized on the server side (using Gson, Jackson or other library)
+and deserialized on the browser usualy using Javascript <i>eval</i> function (or safer equivalents). The problem with this approach is that all the type information
+is lost, because what you'll get will be regular objects (built with {}) without any type conversion for dates or enums or your own types. So you'll be unable to use correctly your
+data model inside your Javascript.</p>
+<p>STJS comes with a "type-safe" JSON parser, that will use the type definition stored with the class during the Javascript generation to re-create back
+the serialized object hierarchy. Here is how to use it:
+</p>
+
+<div class="code short">
+<pre>
+<span class="key">import</span> <span class="key">static</span> org.stjs.javascript.Global.stjs;
+
+<span class="key">public</span> <span class="key">class</span> Bean{
+	<span class="key">public</span> <span class="key">enum</span> MyEnum {a,b,c};
+
+	<span class="key">public</span> Date date;
+	<span class="key">public</span> MyEnum enum;
+
+	<span class="key">public</span> <span class="key">void</span> method(){
+	}
+}
+
+...
+Bean b = stjs.parseJSON("{\"date\":\"2011-11-10 10:20:22\", \"enum\":\"a\"}", Bean.class);
+</pre>
+</div>
+
+<h2>jQuery</h2>
+<p>As the first projects where we wanted to use STJS uses jQuery, we had to include right in our first support for this Javascript library</p>
+<p>jQuery has an interesting plugin design: each plugin adds some methods to the jQuery element wrapper. In order to have this behavior in Java
+we propose one interface for the jQuery core (<b>org.stjs.javascript.jquery.JQueryCore</b>) and one per plugin (ex: <b>org.stjs.javascript.jquery.plugins.Accordion</b>)
+</p>
+<div class="code short">
+<pre>
+<span class="key">public</span> <span class="key">interface</span> Accordion&lt;FullJQuery <span class="key">extends</span> JQueryCore&lt;?&gt;&gt; {
+	<span class="key">public</span> FullJQuery accordion();
+
+	<span class="key">public</span> FullJQuery accordion(AccordionOptions&lt;FullJQuery&gt; options);
+...
+</pre>
+</div>
+<p>
+To be able to use jQuery's methods chain (ex. <i>$(".css").accordion().show()</i>), all the plugin methods return a <b>FullJQuery</b> type the is received as generic parameter by the class.
+This type will give access to all the methods jQuery and the desired plugins offer. We propose already an interface that combine jQuery core and all the UI plugins:
+<b>JQueryAndPlugins</b>. This interface is used when you want to extend it with other plugins (use <b>org.stjs.javascript.jquery.JQuery</b> if you don't plan to other other jQuery plugins).
+ But if you want to add your own plugin, create the plugin's interface (like Accordion) and create your own interface that will combine your
+plugin's interface and the <b>JQueryAndPlugins</b> interface.
+</p>
+
+<div class="code short">
+<pre>
+<span class="key">public</span> <span class="key">interface</span> MyJQueryLib&lt;FullJQuery <span class="key">extends</span> MyJQueryLib&lt;?&gt;&gt;
+	<span class="key">extends</span> MyPlugin&lt;FullJQuery&gt;,
+	JQueryAndPlugins&lt;FullJQuery&gt;{
+}
+</pre>
+</div>
+
+
+<h2>Global Objects</h2>
+<p>In Javascript several objects are accessible as global objects, like <i>window, $</i> (for jQuery). To simulate this in Java we added all these objects
+as static fields in the <i>Global</i> object or <i>GlobalJQuery</i> object.
+We preferred not to add all the fields and methods of the <i>window</i> object - that in Javascript are directly accessible. Please use the <i>window</i> object to access them.
+</p>
+
+<div class="code short">
+<pre>
+<span class="key">import</span> <span class="key">static</span> org.stjs.javascript.Global.window;
+<span class="key">import</span> <span class="key">static</span> org.stjs.javascript.jquery.GlobalJQuery.$;
+</pre>
+</div>
+<!-- ------------------------------------------------  -->
+<h1>A web page</h1>
+<div class="xmlcode">
+<pre>
+&lt;head&gt;
+  &lt;script src="${pageContext.request.contextPath}/generated-js/stjs.js"
+      type="text/javascript"&gt;&lt;/script&gt;
+  &lt;script src="${pageContext.request.contextPath}/generated-js/StockApplication.js"
+      type="text/javascript"&gt;&lt;/script&gt;
+&lt;/head&gt;
+
+</pre>
+</div>
+<!-- ------------------------------------------------  -->
+<h1>Modules</h1>
+<p>
+STJS has mainly three modules each of which is used in different phases of your development. As you'll remark we used the property
+<b>stjs.version</b> to specify the version of STJS to use (the modules are released together).
+</p>
+<div class="xmlcode">
+<pre>
+&lt;properties&gt;
+  &lt;stjs.version&gt;1.1.4&lt;/stjs.version&gt;
+&lt;/properties&gt;
+</pre>
+</div>
+<p><b>The current STJS version is 1.3.0</b></p>
+
+<h2>The generator</h2>
+<p>This is a maven plugin that takes the sources of your project that
+you indicate and generate the corresponding javascript files in the
+target folder
+</p>
+<div class="xmlcode">
+<pre>
+&lt;plugin&gt;
+  &lt;groupId&gt;org.st-js&lt;/groupId&gt;
+  &lt;artifactId&gt;maven-plugin&lt;/artifactId&gt;
+  &lt;version&gt;${stjs.version}&lt;/version&gt;
+  &lt;executions&gt;
+    &lt;execution&gt;
+      &lt;id&gt;main&lt;/id&gt;
+      &lt;goals&gt;
+        &lt;goal&gt;generate&lt;/goal&gt;
+      &lt;/goals&gt;
+    &lt;/execution&gt;
+    &lt;!-- if you use the test helper --&gt;
+    &lt;execution&gt;
+      &lt;id&gt;test&lt;/id&gt;
+      &lt;goals&gt;
+        &lt;goal&gt;generate-test&lt;/goal&gt;
+      &lt;/goals&gt;
+    &lt;/execution&gt;
+  &lt;/executions&gt;
+  &lt;configuration&gt;
+    &lt;rootPackage&gt;auto&lt;/rootPackage&gt;
+  &lt;/configuration&gt;
+&lt;/plugin&gt;
+</pre>
+</div>
+
+<h2>The Javascript library</h2>
+<p>The Javascript library (js-lib) is a library that you need as
+dependency for the Java code (that will be transformed in Javascript)
+you write.
+The purpose of this library is to offer bridges to all the Javascript
+objects defined by the browsers.
+</p>
+<div class="xmlcode">
+<pre>&lt;dependency&gt;
+  &lt;groupId&gt;org.st-js&lt;/groupId&gt;
+  &lt;artifactId&gt;js-lib&lt;/artifactId&gt;
+  &lt;version&gt;${stjs.version}&lt;/version&gt;
+&lt;/dependency&gt;
+</pre>
+</div>
+<p>
+As a convenience we added as well
+a bridge for the jQuery library and jQuery UI plugins. </p>
+<div class="xmlcode">
+<pre>&lt;dependency&gt;
+  &lt;groupId&gt;org.st-js&lt;/groupId&gt;
+  &lt;artifactId&gt;jquery&lt;/artifactId&gt;
+  &lt;version&gt;${stjs.version}&lt;/version&gt;
+&lt;/dependency&gt;
+</pre>
+</div>
+
+ <p> If in your code you&#8217;d like to use
+other Javascript libraries not already provided by js-lib, you should
+build bridges for them following our model.
+</p>
+
+<p>
+If you'd like to share objects between the client and the server, on the server side you should add the following dependency:
+</p>
+<div class="xmlcode">
+<pre>&lt;dependency&gt;
+  &lt;groupId&gt;org.st-js&lt;/groupId&gt;
+  &lt;artifactId&gt;server&lt;/artifactId&gt;
+  &lt;version&gt;${stjs.version}&lt;/version&gt;
+&lt;/dependency&gt;
+</pre>
+</div>
+<p>
+This dependency allows you to create maps and arrays and to serialize them (as JSON for example).
+</p>
+
+<h2>The test helper</h2>
+<p>This modules can be used for your unit tests.
+You&#8217;ll be able to write unit tests also in Java.
+When executed, the unit tests Java code will be converted to Javascript
+and together with the Javascript code generated from the tested classes
+will be executed in a browser via the our internal JUnit test driver.</a> </p>
+
+<div class="xmlcode">
+<pre>
+&lt;dependency&gt;
+  &lt;groupId&gt;org.st-js&lt;/groupId&gt;
+  &lt;artifactId&gt;test-helper&lt;/artifactId&gt;
+  &lt;version&gt;${stjs.version}&lt;/version&gt;
+  &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;
+</pre>
+</div>
+
+<!-- ------------------------------------------------  -->
+<h1>Maven</h1>
+
+<h2>Repository</h2>
+<p>The artifacts are deployed to the central Maven repository.</p>
+
+
+
+<h2>Maven configuration for auto-generation in Eclipse</h2>
+<p>If you use Eclipse you can take advantage of the Maven / Eclipse integration.
+The Javascript code is generated each time the corresponding Java class is modified and saved.
+This way any modification you bring to your code will be instantly observed on the browser!
+Note: you need the at least the 1.0 version of the <a href="http://wiki.eclipse.org/M2E_updatesite_and_gittags" target="_blank">Eclipse plugin for Maven</a>.
+</p>
+
+<div class="xmlcode">
+<pre>&lt;plugin&gt;
+  &lt;groupId&gt;org.eclipse.m2e&lt;/groupId&gt;
+  &lt;artifactId&gt;lifecycle-mapping&lt;/artifactId&gt;
+  &lt;version&gt;1.0.0&lt;/version&gt;
+  &lt;configuration&gt;
+    &lt;lifecycleMappingMetadata&gt;
+      &lt;pluginExecutions&gt;
+        &lt;pluginExecution&gt;
+          &lt;pluginExecutionFilter&gt;
+            &lt;groupId&gt;org.st-js&lt;/groupId&gt;
+            &lt;artifactId&gt;
+              maven-plugin
+            &lt;/artifactId&gt;
+            &lt;versionRange&gt;
+              [${stjs.version},)
+            &lt;/versionRange&gt;
+            &lt;goals&gt;
+              &lt;goal&gt;generate&lt;/goal&gt;
+              &lt;!-- if you use the test helper --&gt;
+              &lt;goal&gt;generate-test&lt;/goal&gt;
+            &lt;/goals&gt;
+          &lt;/pluginExecutionFilter&gt;
+          &lt;action&gt;
+             &lt;execute /&gt;
+          &lt;/action&gt;
+        &lt;/pluginExecution&gt;
+      &lt;/pluginExecutions&gt;
+    &lt;/lifecycleMappingMetadata&gt;
+  &lt;/configuration&gt;
+&lt;/plugin&gt;
+</pre>
+</div>
+
+<!-- ------------------------------------------------  -->
+<h1>What you cannot do in STJS</h1>
+<p>Even though Javascript looks to be more flexible than Java, there are things that you can do in Java but you cannot do (at least directly) in Javascript.
+Of course, during the Javascript generation, we could've add some Javascript constructions to go around these limitations. But again our philosophy is to alter
+as little as possible the Java code during the transformation. That's why we prefer to generate errors and to ask the user to find a compatible alternative.
+So here is the list (that keeps growing - unfortunately):
+<ul>
+<li>you cannot have two methods with the same name (overloading is not possible - overriding is)</li>
+<li>you cannot have a method and a field with the same name within the class and its parents!</li>
+<li>you cannot have more than one constructor</li>
+<li>you cannot use as field or method name Javascript keywords (that are not Java keywords) like: function, prototype, var</li>
+<li>you can only have one form of variable arguments method: one argument only that should be called "arguments" (like the variable available in each Javascript function)</li>
+<li>you cannot initialize inline the instance fields - with the exception of primitive types (and their wrappers) and String</li>
+<li>you cannot use Java arrays (for example String[]) - they are not compatible with the Javascript arrays as they don't have the methods like push, slice, etc.
+More, the iteration in Java is done on values (<i>for(String s : array)</i>) while the iteration in Javascript is done on indexes (<i>for(var idx : array)</i>). Please use the org.stjs.javascript.Array instead.</li>
+</ul>
+</p>
+
+<p>
+In all these cases the alternative is prety simple and it doesn't require you to weird workarounds.
+</p>
+
+<!-- ------------------------------------------------  -->
+<h1>STJS bridge libraries</h1>
+<p>
+As specified before, STJS is NOT a web framework, so no visual components or other components come with STJS. So you should rely on existing components coming
+with different Javascript frameworks like jQuery, DOJO, etc. There are basically two ways to combine the STJS-generated code depending on were do you
+want to make the integration:
+<ol>
+<li>in Javacript - by using both the components and the STJS generated code</li>
+<li>in Java - by building a Java bridge to the component libraries</li>
+</ol>
+</p>
+<p>
+We believe the second option brings you the best of both worlds. In fact STJS already provides bridges to the DOM object, jQuery and jQuery UI plugins.
+The bridge is composed mostly of Java interfaces that have the same name as their Javascript counterpart. Sometimes you may also need to provide global
+objects or functions (that will be implemented as static fields or methods of the object). In the case of a static method, the method should throw
+UnsupportedOperationException - to indicate it's a method to be used in the Javascript code (not in some server-side Java code).
+</p>
+
+<p>
+One interesting feature of the bridges is that they are not submitted to the same list of constrains as the regular STJS Java code. This means that
+you can overload methods in order to provide more clarity to the user. A good example is the way plugins are built in jQuery where the same function (usually the plugin's name)
+has many different usages: activate the plugin, change an option, get a state value, call a method, etc.
+</p>
+
+<!-- ------------------------------------------------  -->
+<h1>Testing (experimental)</h1>
+
+<p>To take even more advantage of the strongly-typed code, we added a <a href="http://junit.sourceforge.net/javadoc/org/junit/runner/Runner.html" target="_blank">JUnit runner</a> that
+allow you to execute the generated Javascript (for both the main code and the unit test) in a browser and display back the assert errors as any JUnit test.
+</p>
+<p>
+The test driver is somehow inspired by Selenium and JSTestDriver, but it aims to be lighter and easier to use. For the moment the driver does not handle
+AJAX callbacks (so you have to mock your server's response).<br/>
+But it comes with an integration with the <a href="https://github.com/appendto/jquery-mockjax">Mockjax</a> plugin that mocks jQuery AJAX calls.
+Have a look on the <a href="reference.html">documentation</a> page for more details.
+</p>
+
+<p>Here is an example (taken from Mockjax site and re-wrote with STJS):</p>
+
+<div class="code short">
+<pre>
+@RunWith(STJSTestDriverRunner.class)
+@HTMLFixture(&quot;&lt;div id='fortune'&gt;&lt;/div&gt;&quot;)
+
+@Scripts({ "/jquery.js",
+       "/jquery.mockjax.js", "/json2.js" })
+<span class="key">public</span> <span class="key">class</span> MockjaxExampleTest {
+  @Test
+  <span class="key">public</span> <span class="key">void</span> myTest() {
+    $.ajaxSetup($map("async", <span class="key">false</span>));
+    $.mockjax(<span class="key">new</span> MockjaxOptions() {
+      {
+        url = "/restful/fortune";
+        responseText = <span class="key">new</span> Fortune() {
+          {
+            status = "success";
+            fortune = "Are you a turtle?";
+          }
+        };
+      }
+    });
+
+    $.getJSON("/restful/fortune", <span class="key">null</span>, <span class="key">new</span> Callback3&lt;Fortune, String, JQueryXHR&gt;() {
+      @Override
+      <span class="key">public</span> <span class="key">void</span> $invoke(Fortune response, String p2, JQueryXHR p3) {
+        if (response.status.equals("success")) {
+          $("#fortune").html("Your fortune is: " + response.fortune);
+        } else {
+          $("#fortune").html("Things do not look good, no fortune was told");
+        }
+
+      }
+    });
+    assertEquals("Your fortune is: Are you a turtle?", $("#fortune").html());
+  }
+
+  <span class="key">private</span> <span class="key">static</span> <span class="key">class</span> Fortune {
+    <span class="key">public</span> String status;
+    <span class="key">public</span> String fortune;
+  }
+}
+</pre>
+</div>
+</div>
+</body></html>
