@@ -15,6 +15,10 @@
  */
 package org.stjs.javascript.dom;
 
+import org.stjs.javascript.StyleSheet;
+import org.stjs.javascript.Window;
+import org.stjs.javascript.annotation.BrowserCompatibility;
+import org.stjs.javascript.annotation.Compatibility;
 import org.stjs.javascript.functions.Function1;
 
 abstract public class Element extends Node {
@@ -25,6 +29,19 @@ abstract public class Element extends Node {
 	public String title;
 	public String tagName;
 	public String innerHTML;
+
+	//TODO :: check the support
+	@BrowserCompatibility({ @Compatibility(browser = org.stjs.javascript.annotation.Compatibility.Browser.MSIE, from = 6.0, to = 8.0) })
+	public StyleSheet sheet;
+
+	//TODO :: check the support
+	public Window contentWindow;
+
+	//TODO :: check the support
+	public Document document;
+
+	//TODO :: check the support
+	public StyleSheet styleSheet;
 
 	public int clientHeight;
 	public int clientWidth;

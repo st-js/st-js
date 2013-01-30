@@ -33,6 +33,15 @@ import org.stjs.javascript.utils.NameValue;
 @SyntheticType
 public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 	/************* ajax ***************/
+	//since 1.5
+	public JQueryXHR ajax(String url);
+
+	//since 1.5
+	public JQueryXHR ajax(String url, AjaxParams ajaxParams);
+
+	//since 1.0
+	public JQueryXHR ajax(AjaxParams ajaxParams);
+
 	public FullJQuery ajaxStart(Callback3<Event, JQueryXHR, AjaxParams> handler);
 
 	public FullJQuery ajaxStop(Callback3<Event, JQueryXHR, AjaxParams> handler);
@@ -137,13 +146,21 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	public FullJQuery toggleClass(String className, boolean on);
 
-	public FullJQuery val(Object d);
-
 	public Object val();
 
+	public FullJQuery val(Object d);
+
+	//since 1.0
+	public Object attr(String attrName);
+
+	//since 1.0
 	public FullJQuery attr(String name, Object value);
 
-	public Object attr(String attrName);
+	//since 1.0
+	public FullJQuery attr(Map<String, String> $map);
+
+	//since 1.1
+	//public FullJQuery attr(String attrName, Function2<Integer, Object, Object>);
 
 	public FullJQuery removeAttr(String name);
 
@@ -377,12 +394,22 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	public FullJQuery unbind(Event event);
 
+	//since 1.4.2
 	public FullJQuery undelegate();
 
+	//since 1.6
+	public FullJQuery undelegate(String namespace);
+
+	//since 1.4.2
+	public FullJQuery undelegate(String selector, String eventType);
+
+	//since 1.4.2
 	public FullJQuery undelegate(String selector, String eventType, EventHandler handler);
 
+	//since 1.4.2
 	public FullJQuery undelegate(String selector, String eventType, Map<String, Object> eventData, EventHandler handler);
 
+	//since 1.4.3
 	public FullJQuery undelegate(String selector, Map<String, EventHandler> handlers);
 
 	public FullJQuery unload(EventHandler handler);
@@ -539,6 +566,8 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	public FullJQuery last();
 
+	public FullJQuery map(Function2<Integer, Element, Element> callback);
+
 	public FullJQuery next();
 
 	public FullJQuery next(String selector);
@@ -565,11 +594,23 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	public FullJQuery parents(String selector);
 
+	//since 1.4
 	public FullJQuery parentsUntil(String selector);
 
+	//since 1.4
+	public FullJQuery parentsUntil(String selector, String filter);
+
+	//since 1.6
 	public FullJQuery parentsUntil(JQueryCore<?> jq);
 
+	//since 1.6
+	public FullJQuery parentsUntil(JQueryCore<?> jq, String filter);
+
+	//since 1.6
 	public FullJQuery parentsUntil(Element element);
+
+	//since 1.6
+	public FullJQuery parentsUntil(Element element, String filter);
 
 	public FullJQuery prev();
 
@@ -594,4 +635,104 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery slice(int start);
 
 	public FullJQuery slice(int start, int end);
+
+	/************* properties ***************/
+
+	public Map<String, Object> fn = null;
+
+	//since 1.3
+	public Element context = null;
+
+	//since 1.0
+	public int length = 0;
+
+	//since 1.3
+	public String selector = "";
+
+	//since 1.0
+	public String version = "";
+
+	/************* utilities ***************/
+
+	public static class Browser {
+		public static boolean msie;
+		public static boolean safari;
+		public static boolean webkit;
+		public static boolean opera;
+		public static boolean mozilla;
+		public static String version;
+	}
+
+	//since 1.0, deprecated 1.3, removed 1.9
+	public static Browser browser = new Browser();
+
+	public static class Support {
+		public static boolean ajax;
+		public static boolean appendChecked;
+		public static boolean boxModel;
+		public static boolean changeBubbles;
+		public static boolean checkClone;
+		public static boolean checkOn;
+		public static boolean cors;
+		public static boolean cssFloat;
+		public static boolean deleteExpando;
+		public static boolean doesAddBorderForTableAndCells;
+		public static boolean doesNotAddBorder;
+		public static boolean doesNotIncludeMarginInBodyOffset;
+		public static boolean enctype;
+		public static boolean fixedPosition;
+		public static boolean focusinBubbles;
+		public static boolean getSetAttribute;
+		public static boolean hrefNormalized;
+		public static boolean html5Clone;
+		public static boolean htmlSerialize;
+		public static boolean inlineBlockNeedsLayout;
+		public static boolean leadingWhitespace;
+		public static boolean minHeight;
+		public static boolean noCloneChecked;
+		public static boolean noCloneEvent;
+		public static boolean opacity;
+		public static boolean optDisabled;
+		public static boolean optSelected;
+		public static boolean pixelMargin;
+		public static boolean radioValue;
+		public static boolean reliableHiddenOffsets;
+		public static boolean reliableMarginRight;
+		public static boolean selectstart;
+		public static boolean shrinkWrapBlocks;
+		public static boolean style;
+		public static boolean submitBubbles;
+		public static boolean subtractsBorderForOverflowNotVisible;
+		public static boolean tbody;
+	}
+
+	//since 1.3
+	public static Support support = new Support();
+
+	//since 1.4 -> TODO :: static
+	public boolean contains(Element container, Element contained);
+
+	//since 1.0
+	public void each(Object o, Callback2<Integer, Object> callback2);
+
+	//TODO :: static -> the 4 objects are the same type
+	//since 1.0
+	public Array<Object> map(Array<Object> array, Function2<Integer, Object, Object> callback);
+
+	//TODO :: static -> the 4 objects are the same type
+	//since 1.6
+	public Map<String, Object> map(Map<String, Object> arrayOrObject, Function2<String, Object, Object> callback);
+
+	//since 1.2
+	public int inArray(Object value, Array<Object> array);
+
+	//since 1.2
+	public int inArray(Object value, Array<Object> array, Integer fromIndex);
+
+	//since 1.2
+	public boolean isFunction(Object object);
+
+	//since 1.0 -> TODO :: static
+	public String trim(String str);
+
 }
