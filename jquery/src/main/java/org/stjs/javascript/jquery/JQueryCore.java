@@ -71,16 +71,34 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	public FullJQuery dequeue(String queueName);
 
+	//since 1.0
+	public FullJQuery fadeIn();
+
+	//since 1.0
 	public FullJQuery fadeIn(Object duration);
 
+	//since 1.0
+	public FullJQuery fadeIn(Object duration, Callback1<Element> complete);
+
+	//since 1.4.3
 	public FullJQuery fadeIn(Object duration, String easing);
 
+	//since 1.4.3
 	public FullJQuery fadeIn(Object duration, String easing, Callback1<Element> complete);
 
+	//since 1.0
+	public FullJQuery fadeOut();
+
+	//since 1.0
 	public FullJQuery fadeOut(Object duration);
 
+	//since 1.0
+	public FullJQuery fadeOut(Object duration, Callback1<Element> complete);
+
+	//since 1.4.3
 	public FullJQuery fadeOut(Object duration, String easing);
 
+	//since 1.4.3
 	public FullJQuery fadeOut(Object duration, String easing, Callback1<Element> complete);
 
 	public FullJQuery fadeTo(Object duration, double opacity);
@@ -105,22 +123,49 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	public FullJQuery queue(String queueName);
 
+	//since 1.0
 	public FullJQuery slideDown();
 
+	//since 1.0
 	public FullJQuery slideDown(Object duration);
 
+	//since 1.0
+	public FullJQuery slideDown(Object duration, Callback1<Element> complete);
+
+	//since 1.4.3
+	public FullJQuery slideDown(Object duration, String easing);
+
+	//since 1.4.3
 	public FullJQuery slideDown(Object duration, String easing, Callback1<Element> complete);
 
+	//since 1.0
 	public FullJQuery slideToggle();
 
+	//since 1.0
 	public FullJQuery slideToggle(Object duration);
 
+	//since 1.0
+	public FullJQuery slideToggle(Object duration, Callback1<Element> complete);
+
+	//since 1.4.3
+	public FullJQuery slideToggle(Object duration, String easing);
+
+	//since 1.4.3
 	public FullJQuery slideToggle(Object duration, String easing, Callback1<Element> complete);
 
+	//since 1.0
 	public FullJQuery slideUp();
 
+	//since 1.0
 	public FullJQuery slideUp(Object duration);
 
+	//since 1.0
+	public FullJQuery slideUp(Object duration, Callback1<Element> complete);
+
+	//since 1.4.3
+	public FullJQuery slideUp(Object duration, String easing);
+
+	//since 1.4.3
 	public FullJQuery slideUp(Object duration, String easing, Callback1<Element> complete);
 
 	public FullJQuery stop();
@@ -638,8 +683,6 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	/************* properties ***************/
 
-	public Map<String, Object> fn = null;
-
 	//since 1.3
 	public Element context = null;
 
@@ -651,88 +694,5 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	//since 1.0
 	public String version = "";
-
-	/************* utilities ***************/
-
-	public static class Browser {
-		public static boolean msie;
-		public static boolean safari;
-		public static boolean webkit;
-		public static boolean opera;
-		public static boolean mozilla;
-		public static String version;
-	}
-
-	//since 1.0, deprecated 1.3, removed 1.9
-	public static Browser browser = new Browser();
-
-	public static class Support {
-		public static boolean ajax;
-		public static boolean appendChecked;
-		public static boolean boxModel;
-		public static boolean changeBubbles;
-		public static boolean checkClone;
-		public static boolean checkOn;
-		public static boolean cors;
-		public static boolean cssFloat;
-		public static boolean deleteExpando;
-		public static boolean doesAddBorderForTableAndCells;
-		public static boolean doesNotAddBorder;
-		public static boolean doesNotIncludeMarginInBodyOffset;
-		public static boolean enctype;
-		public static boolean fixedPosition;
-		public static boolean focusinBubbles;
-		public static boolean getSetAttribute;
-		public static boolean hrefNormalized;
-		public static boolean html5Clone;
-		public static boolean htmlSerialize;
-		public static boolean inlineBlockNeedsLayout;
-		public static boolean leadingWhitespace;
-		public static boolean minHeight;
-		public static boolean noCloneChecked;
-		public static boolean noCloneEvent;
-		public static boolean opacity;
-		public static boolean optDisabled;
-		public static boolean optSelected;
-		public static boolean pixelMargin;
-		public static boolean radioValue;
-		public static boolean reliableHiddenOffsets;
-		public static boolean reliableMarginRight;
-		public static boolean selectstart;
-		public static boolean shrinkWrapBlocks;
-		public static boolean style;
-		public static boolean submitBubbles;
-		public static boolean subtractsBorderForOverflowNotVisible;
-		public static boolean tbody;
-	}
-
-	//since 1.3
-	public static Support support = new Support();
-
-	//since 1.4 -> TODO :: static
-	public boolean contains(Element container, Element contained);
-
-	//since 1.0
-	public void each(Object o, Callback2<Integer, Object> callback2);
-
-	//TODO :: static -> the 4 objects are the same type
-	//since 1.0
-	public Array<Object> map(Array<Object> array, Function2<Integer, Object, Object> callback);
-
-	//TODO :: static -> the 4 objects are the same type
-	//since 1.6
-	public Map<String, Object> map(Map<String, Object> arrayOrObject, Function2<String, Object, Object> callback);
-
-	//since 1.2
-	public int inArray(Object value, Array<Object> array);
-
-	//since 1.2
-	public int inArray(Object value, Array<Object> array, Integer fromIndex);
-
-	//since 1.2
-	public boolean isFunction(Object object);
-
-	//since 1.0 -> TODO :: static
-	public String trim(String str);
 
 }
