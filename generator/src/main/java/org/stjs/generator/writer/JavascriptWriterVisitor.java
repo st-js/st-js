@@ -1400,17 +1400,12 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(InstanceOfExpr n, GenerationContext context) {
+		printer.print("stjs.isInstanceOf(");
 		n.getExpr().accept(this, context);
-		printer.print(".constructor ==  ");
-		if (n.getType() instanceof ReferenceType) {
-			// TODO : could be more generic
-			TypeWrapper type = scope(n).resolveType(((ReferenceType) n.getType()).getType().toString()).getType();
-			printer.print(names.getTypeName(type));
-		} else {
-			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
-					"Do not know how to handle instanceof statement");
-		}
-		// n.getType().accept(this, context);
+		printer.print(".constructor,");
+		TypeWrapper type = scope(n).resolveType(((ReferenceType) n.getType()).getType().toString()).getType();
+		printer.print(names.getTypeName(type));
+		printer.print(")");
 	}
 
 	@Override
