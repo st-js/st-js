@@ -44,7 +44,7 @@ import org.codehaus.plexus.util.DirectoryScanner;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.traverse.DepthFirstIterator;
+import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.sonatype.plexus.build.incremental.BuildContext;
 import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.GenerationDirectory;
@@ -294,7 +294,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			}
 
 			// dump all the files in the dependency order in the pack file
-			Iterator<String> it = new DepthFirstIterator<String, DefaultEdge>(dependencyGraph);
+			Iterator<String> it = new TopologicalOrderIterator<String, DefaultEdge>(dependencyGraph);
 			while (it.hasNext()) {
 				File targetFile = currentProjectsFiles.get(it.next());
 				if (targetFile != null) {
