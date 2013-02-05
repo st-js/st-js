@@ -161,4 +161,9 @@ public class SpecialMethodGeneratorTest {
 	public void testTemplateNode() {
 		assertCodeContains(SpecialMethod22.class, "n = m.$get(0)");
 	}
+
+	@Test
+	public void testTypeOf() {
+		assertCodeContains(SpecialMethod23.class, "n = (typeof \"abc\")");
+	}
 }
