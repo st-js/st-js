@@ -60,7 +60,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	}
 
 	protected String getStartPageUri(long browserId, boolean persistent) {
-		return "start-longPolling-persistent.html?browserId=" + browserId + "&persistent=" + persistent;
+		return "start.html?browserId=" + browserId + "&persistent=" + persistent;
 	}
 
 	protected String getStartPageUrl(long browserId, boolean persistent) {

@@ -1,90 +1,88 @@
 <html>
 <head>
 <script>
-	var STATE = {WAITING:"WAITING", TESTING:"TESTING", DISCONNECTED:"DISCONNECTED"};
-
-	var id = -1;
-	var count = 0;
+	var browserId = -1;
 	var lastTestSrc = null;
+	var lastTestStarted = new Date();
 	var logDiv, statusDiv;
-	var testId = 0;
-	var state = STATE.WAITING;
+	var iframe;
+	var queryStringParameters;
+	var persistent;
 
-	function status(s, msg){
-		state = s;
-		statusDiv.innerHTML = "#" + count + " " + state + ":" + (msg || "") ;
-	}
-
-	function timeout(){
-		return state == STATE.DISCONNECTED ? 2000 : 100;
+	function status(s){
+		statusDiv.innerHTML = s;
 	}
 
 	function log(s){
 		logDiv.innerHTML += "<span class='time'>" + new Date().toLocaleTimeString() + "</span> " + s + "<br>";
 	}
-	function retrieve() {
-		var xmlhttp = new XMLHttpRequest();
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState == 4) {
-				try{
-					if (xmlhttp.status == 200) {
-						var response = eval("(" + xmlhttp.responseText + ")");
-						id = response.id;
-						if (response.src != null && response.src != lastTestSrc) {
-							testId = response.testId;
-							count++;
-							log("<b>" + response.className + "</b>." + response.methodName);
-							status(STATE.TESTING);
-							document.getElementById("iframe").src = response.src;
-							lastTestSrc = response.src;
-						} else {
-							status(STATE.WAITING, xmlhttp.status);
-							setTimeout(retrieve, timeout());
-						}
-					} else if (xmlhttp.status == 0){
-						status(STATE.DISCONNECTED);
-						setTimeout(retrieve, timeout());
-					}
-				} catch(ex){
-					console.error("error:" + ex);
-				}
-			}
-		}
-		try {
-			xmlhttp.open("GET", "/check?id=" + id, true);
-			xmlhttp.send();
-		} catch (ex) {
-			console.error("error:" + ex);
-			status(STATE.DISCONNECTED);
-			setTimeout(retrieve, timeout());
+
+	function startingTest(testedClassName, methodName){
+		log('<b>' + testedClassName + '</b>.' + methodName);
+		lastTestStarted = new Date();
+	}
+
+	function checkLoad(){
+		//after a browser was disconnected
+		var now = new Date();
+		if (now.getTime() - lastTestStarted.getTime() >= 2000) {
+			status("DISCONNECTED");
+			runFirstTest();
+			lastTestStarted = now;
+		} else {
+			setTimeout(checkLoad, 500);
 		}
 	}
 
+	function reportResultAndRunNextTest(result, stacktrace, firstTest){
+		if (result != "OK" && console) {
+			console.error(result + '\n' + stacktrace);
+		}
+		if(!firstTest){
+			log(result);
+		}
+		if(persistent){
+			setTimeout(checkLoad, 500);
+		}
+		iframe.src = '/getNextTest' +
+				'?browserId=' + browserId +
+				'&result=' + result +
+				'&location=' + stacktrace +
+				'&rand=' + Math.random();
+	}
 
-	function sendError(method, ex){
-		if (ex != "OK") {
-			console.error(ex);
-			//console.error(stacktrace());
-		}
-		log("" + ex);
-		var xmlhttp = new XMLHttpRequest();
-		try {
-			var result = ex.message || ex;
-			xmlhttp.open("POST", "/result?id=" + id + "&result=" + result + "&testId=" + testId + "&method=" + method + "&location=" + ex.location, true);
-			xmlhttp.send();
-		} catch (ex) {
-			console.error("error:" + ex);
-		}
-		status(STATE.WAITING);
-		setTimeout(retrieve, timeout());
+	function runFirstTest(){
+		reportResultAndRunNextTest("OK", null, true);
 	}
-	function sendOK(method){
-		sendError(method, "OK");
+
+	// Shamelessly lifted from
+	// http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values
+	function decodeParameters(){
+		var match,
+	        pl     = /\+/g,  // Regex for replacing addition symbol with a space
+	        search = /([^&=]+)=?([^&]*)/g,
+	        decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+	        query  = window.location.search.substring(1);
+
+		var params = {};
+	    while (match = search.exec(query)){
+	       params[decode(match[1])] = decode(match[2]);
+	    }
+	    return params;
 	}
+
 	onload = function() {
+		iframe = document.getElementById("iframe");
 		logDiv = document.getElementById("log");
 		statusDiv = document.getElementById("status");
-		retrieve();
+		queryStringParameters = decodeParameters();
+		browserId = queryStringParameters['browserId'];
+		persistent = queryStringParameters['persistent'] !== 'false';
+		if (browserId == null){
+			//self assign a browser id
+			browserId = Math.floor((Math.random()*10000000)+1);
+		}
+		runFirstTest();
 	}
 </script>
 <style>
