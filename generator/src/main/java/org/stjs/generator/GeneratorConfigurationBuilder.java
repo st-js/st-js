@@ -75,6 +75,7 @@ public class GeneratorConfigurationBuilder {
 		allowedJavaLangClasses.add("Byte");
 		allowedJavaLangClasses.add("Void");
 
+		allowedJavaLangClasses.add("Throwable");
 		allowedJavaLangClasses.add("Exception");
 		allowedJavaLangClasses.add("RuntimeException");
 

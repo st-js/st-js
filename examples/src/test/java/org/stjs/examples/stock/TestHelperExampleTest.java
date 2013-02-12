@@ -32,4 +32,14 @@ public class TestHelperExampleTest {
 		assertEquals("shoud be equals", 1.0, 1.0, 0.01);
 	}
 
+	@Test(expected = RuntimeException.class)
+	public void exceptionTest() {
+		throw new RuntimeException("abc");
+	}
+
+	@Test(expected = Exception.class)
+	public void exceptionTestParent() {
+		throw new RuntimeException("abc");
+	}
+
 }

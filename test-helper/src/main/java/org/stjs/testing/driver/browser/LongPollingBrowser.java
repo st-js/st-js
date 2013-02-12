@@ -20,6 +20,10 @@ import org.stjs.generator.BridgeClass;
 import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
 import org.stjs.generator.Generator;
+import org.stjs.generator.name.DefaultNameProvider;
+import org.stjs.generator.name.NameProvider;
+import org.stjs.generator.type.TypeWrapper;
+import org.stjs.generator.type.TypeWrappers;
 import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.Scripts;
 import org.stjs.testing.annotation.ScriptsAfter;
@@ -200,6 +204,13 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		return methodUnderExecution;
 	}
 
+	private String getTypeName(Class<?> clazz) {
+		// TODO have it inject it here
+		NameProvider names = new DefaultNameProvider();
+		TypeWrapper type = TypeWrappers.wrap(clazz);
+		return names.getTypeName(type);
+	}
+
 	/**
 	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser to execute the
 	 * specified test.
@@ -285,7 +296,8 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		resp.append("    parent.startingTest('" + testedClassName + "', '" + method.getName() + "');");
 		resp.append("    var stjsTest = new " + testedClassName + "();\n");
 		resp.append("    var stjsResult = 'OK';\n");
-		resp.append("    var expectedException = " + (test.expected() != Test.None.class) + ";\n");
+		resp.append("    var expectedException = "
+				+ (test.expected() != Test.None.class ? getTypeName(test.expected()) : null) + ";\n");
 		resp.append("    try{\n");
 		// call before methods
 		for (FrameworkMethod beforeMethod : beforeMethods) {
@@ -300,6 +312,8 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 		// an exception was caught while executing the test method
 		resp.append("      if(!expectedException){\n");
+		resp.append("        stjsResult = ex;\n");
+		resp.append("      } else if (!stjs.isInstanceOf(ex.constructor,expectedException)){\n");
 		resp.append("        stjsResult = ex;\n");
 		resp.append("      }\n");
 		resp.append("    }finally{\n");

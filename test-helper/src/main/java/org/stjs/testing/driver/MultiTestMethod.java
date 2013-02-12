@@ -5,7 +5,6 @@ import java.util.concurrent.CountDownLatch;
 import org.junit.Test;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.TestClass;
-import org.stjs.testing.JSException;
 
 /**
  * Coordinates the execution of one unit test across several browsers. The JUnit runner creates one instance of this
@@ -30,13 +29,6 @@ public class MultiTestMethod {
 	 */
 	public MultiTestMethod(TestClass testClass, FrameworkMethod meth, int nBrowsers) {
 		// Do some validation
-		Class<? extends Throwable> expectedExceptionType = meth.getAnnotation(Test.class).expected();
-		if (!expectedExceptionType.equals(Test.None.class) && !expectedExceptionType.equals(JSException.class)) {
-			throw new IllegalStateException( //
-					"The only valid value for the @Test.expected annotation field is JSException.class.\n" + /**/
-					"This is caused by the fact that STJS cannot currently handle typed exceptions.\n" + /**/
-					"Please replace the current value with JSException.class, or do your own error handling.");
-		}
 		this.latch = new CountDownLatch(nBrowsers);
 		this.meth = meth;
 		this.testClass = testClass;

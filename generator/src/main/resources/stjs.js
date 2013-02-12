@@ -659,3 +659,56 @@ function assertStateTrue(position, code, condition) {
 	if (!condition && stjsAssertHandler)
 		stjsAssertHandler(position, code, "Wrong state. Condition is false");
 }
+/** exception **/
+var Throwable = function(message, cause){
+	if (typeof message === "string"){
+		this.detailMessage  = message;
+		this.message = message;
+		this.cause = cause;
+	} else {
+		this.cause = message;
+	}
+};
+stjs.extend(Throwable, Error, [], function(constructor, prototype){
+	prototype.detailMessage = null;
+	prototype.cause = null;
+	prototype.getMessage = function() {
+        return this.detailMessage;
+    };
+
+	prototype.getLocalizedMessage = function() {
+        return this.getMessage();
+    };
+
+	prototype.getCause = function() {
+        return (this.cause==this ? null : this.cause);
+    };
+
+	prototype.toString = function() {
+	        var s = "Exception";//TODO should get the exception's type name here
+	        var message = this.getLocalizedMessage();
+	        return (message != null) ? (s + ": " + message) : s;
+	 };
+
+	 //TODO use stacktrace.js script
+	 prototype.getStackTrace = function() {
+		 return this.stack;
+	 };
+
+	 //TODO use stacktrace.js script
+	 prototype.printStackTrace = function(){
+		 console.error(this.getStackTrace());
+	 };
+}, {});
+
+var Exception = function(message, cause){
+	Throwable.call(this, message, cause);
+};
+stjs.extend(Exception, Throwable, [], function(constructor, prototype){
+}, {});
+
+var RuntimeException = function(message, cause){
+	Exception.call(this, message, cause);
+};
+stjs.extend(RuntimeException, Exception, [], function(constructor, prototype){
+}, {});
