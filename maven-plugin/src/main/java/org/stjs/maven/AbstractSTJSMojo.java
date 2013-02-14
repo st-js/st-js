@@ -42,6 +42,7 @@ import org.codehaus.plexus.compiler.util.scan.mapping.SourceMapping;
 import org.codehaus.plexus.compiler.util.scan.mapping.SuffixMapping;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.alg.CycleDetector;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
@@ -293,6 +294,13 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				}
 			}
 
+			// check for cycles
+			Set<String> cycles = new CycleDetector<String, DefaultEdge>(dependencyGraph).findCycles();
+			if (!cycles.isEmpty()) {
+				throw new Exception("Cycles are detected in the dependency graph:\n"
+						+ cycles.toString().replace(',', '\n')
+						+ "\n Please fix the problem before continuing or disable the packing");
+			}
 			// dump all the files in the dependency order in the pack file
 			Iterator<String> it = new TopologicalOrderIterator<String, DefaultEdge>(dependencyGraph);
 			while (it.hasNext()) {
