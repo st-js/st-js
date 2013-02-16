@@ -193,7 +193,7 @@ don't have a method that their Javascript counterpart has. For example for Numbe
 <!-- ------------------------  -->
 <h2>Test helper configuration</h2>
 <p>
-	Before using the test helper you have to add the dependency:
+	Before using the test helper you have to add the dependency to your projects pom.xml:
 </p>
 
 <div class="xmlcode">
@@ -209,21 +209,189 @@ don't have a method that their Javascript counterpart has. For example for Numbe
 
 <p>
 	To activate the STJS test helper you have to annotate your JUnit test classes this way:
-	<b>@RunWith(STJSTestDriverRunner.class)</b>. This annotation will transfer to the STJS test helper the execution of easy unit test method.
-
-	You can configure some of the test driver's parameters in a file called <b>stjs-test.properties</b> that is somewhere in your class path. You can also
-	overwrite this values using the System properties (for example when launching the tests via Maven).<br/>
-	<ul>
-<li><b>stjs.test.port</b> - the port opened by the test driver waiting for connection from the browsers. Default value is 8055</li>
-<li><b>stjs.test.browserCount</b> - the minimum number of browsers the test driver has to wait to connect before launching the tests. Default value is 1</li>
-<li><b>stjs.test.wait</b> - the time (in seconds) the test driver waits for the number of configured browsers to connect. Default value is 10</li>
-<li><b>stjs.test.skipIfNoBrowser</b> - if this is true, if no browser was connected that it considers the tests as ignored (can be used in some batch processing, without failing completely the tests). Default value is false</li>
-<li><b>stjs.test.startBrowser</b> - if true, if after 2 seconds (normally check of the client's code check is 1 second) no browser connected to the test driver,
-	it tries to start the system's default browser. This can only work is the Desktop.isDesktopSupported() check return true (so usually a developer's machine). Default value is true</li>
-<li><b>stjs.test.testTimeout</b> - the time (in seconds) the test driver waits for a test to return a result from the browser. Passed this time the test is considered failed. Default value is 2 seconds</li>
-	</ul>
-<li><b>stjs.test.debug</b> - if this is true, debug information is displayed. Default value is false</li>
+	<b>@RunWith(STJSTestDriverRunner.class)</b>. This annotation will transfer to the STJS 
+	test helper the execution of easy unit test method.
 </p>
+<p>
+	You can configure some of the test driver's parameters in a file called <b>stjs-test.properties</b> that must be placed the root of your class path. The properties supported by this file are the following:
+</p>
+
+<table class="methods">
+	<tr>
+		<th>property</th>
+		<th>description</th>
+	</tr>
+	<tr>
+		<td><b>stjs.test.config</b></td>
+		<td>The classpath location of properties file that contains the stjs test driver configuration. Default value is "/stjs-test.properties"</td>
+	</tr>
+	<tr>
+		<td><b>stjs.test.browsers</b></td>
+		<td>
+			A comma separated list of browsers on which to run the tests. A test is successful only if it has
+			been run successfully on all the browsers in this list. See the table below for a description of 
+			the supported browsers. The default value is "desktopDefault".
+		</td>
+	</tr>
+	<tr>
+		<td><b>stjs.test.port</b></td>
+		<td>the port opened by the test driver waiting for connection from the browsers. Default value is 8055</td>
+	</tr>
+	<tr>
+		<td><b>stjs.test.wait</b></td>
+		<td>the time (in seconds) the test driver waits for the number of configured browsers to connect. Default value is 10</td>
+	</tr>
+	<tr>
+		<td><b>stjs.test.skipIfNoBrowser</b></td>
+		<td>if this is true, if no browser was connected that it considers the tests as ignored (can be used in some batch processing, without failing completely the tests). Default value is false</td>
+	</tr>
+	<tr>
+		<td><b>stjs.test.startBrowser</b></td>
+		<td>
+			if true, if after 2 seconds (normally check of the client's code check is 1 second) no browser connected to the test driver,
+			it tries to start the system's default browser. This can only work is the Desktop.isDesktopSupported() check return true (so usually a developer's machine). Default value is true
+		</td>
+	</tr>
+	<tr>
+		<td><b>stjs.test.testTimeout</b></td>
+		<td>the time (in seconds) the test driver waits for a test to return a result from the browser. Passed this time the test is considered failed. Default value is 2 seconds</td>
+	</tr>
+	<tr>
+		<td><b>stjs.test.debug</b></td>
+		<td>if this is true, debug information is displayed. Default value is false</td>
+	</tr>
+	<tr>
+		<td><b>firefox.bin</b></td>
+		<td>the path to the binary of firefox (see "firefox" in the table below)</td>
+	</tr>
+	<tr>
+		<td><b>chrome.bin</b></td>
+		<td>the path to the binary of Google Chrome or chromium (see "chrome" in the table below)</td>
+	</tr>
+	<tr>
+		<td><b>phantomjs.bin</b></td>
+		<td>the path to the binary of phantomjs (see "phantomjs" in the table below)</td>
+	</tr>
+</table>
+<p>
+	All these properties can be overridden by specifying them as system properties when launching the java vm. For example to force debug mode when 
+	launching the tests via Maven you can run `mvn test -Dstjs.test.debug=true`.
+</p>
+<p>
+	The browsers that can be added to the stjs.test.browsers property are the following.
+</p>
+
+<table class="methods">
+	<tr>
+		<th colspan="2">Browsers that require a graphics system</th>
+	</tr>
+	<tr>
+		<th>Name</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td><b>desktopDefault</b></td>
+		<td>
+			<p>Launches whichever browser is the default for the desktop on which the tests are running.</p> 
+			<p>
+				On windows the browser is launched using Desktop.getDesktop().browse(). On other systems
+				it is launched using the "xdg-open" utility. This browser might fail to launch on headless
+				machines in some operating systems, for example a linux server without an X11 server.
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<td><b>firefox</b></td>
+		<td>
+			<p>Launches firefox.</p>
+			<p>
+				STJS will look in the common firefox installation directories to find the
+				binary. If firefox is not installed in the standard location on your target system, you can
+				specify the path of the binary in the firefox.bin property in "stjs-test.properties", in
+				whichever file you specified in the stjs.test.config system property or on the command line.
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<td><b>chrome</b></td>
+		<td>	
+			<p>Launches Goole Chrome (or chromium).</p>
+			<p>
+				STJS will look in the common chrome installation directories
+				to find the binary. If chrome is not installed in the standard location on your target system, you
+				can specify the path of the binary in the chrome.bin property in "stjs-test.properties", in
+				whichever file you specified in the stjs.test.config system property or on the command line.
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<th colspan="2">Browsers that can run on headless systems</th>
+	</tr>
+	<tr>
+		<th>Name</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td><b>rhino</b></td>
+		<td>
+			<p>Runs the tests in an instance of Rhino that is embedded in stjs' test runner.</p>
+			<p>No additional software needs to be installed on the target system for this browser to run.</p>
+		</td>
+	</tr>
+	<tr>
+		<td><b>remote</b></td>
+		<td>
+			<p>Doesn't launch any browsers.</p>
+			<p>
+				It assumes that a browser is already running somewhere (potentially
+				on a remote machine), and that this browsers periodically polls the stjs test runners HTTP port to
+				fetch unit tests to run.
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<td><b>phantomjs</b></td>
+		<td>
+			<p>Launches all the tests in phantomjs.</p>
+			<p>
+				Phantomjs is a lightweight, headless browser based on webkit
+				and V8. Phantomjs needs to be installed on the target system for this browser to run.
+			</p>
+			<p>
+				STJS will 
+				look in the common phantomjs installation directories to find the binary. If phantomjs is not 
+				installed in the standard location on your target system, you can specify the path of the binary 
+				in the phantomjs.bin property in "stjs-test.properties", in whichever file you specified in the 
+				stjs.test.config system property or on the command line.
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<td><b>headlessFirefox</b></td>
+		<td>
+			<p>Only supported on systems that use an X11 server.</p>
+			<p>
+				This browser needs Xvfb and firefox to be installed
+				on the target system. Xvfb (X Virutal Frame Buffer) is an X11 server that doesn't need any real 
+				graphics capability to run, and will happily run on servers that do not have a graphics card.
+			</p>
+			<p>
+				This browser will first launch an instance of Xvfb, and then launch a firefox instance instructing it
+				to use Xvfb as its display.
+			</p>
+			<p>
+				Xvfb is expcted to be in your PATH. The path to the firefox binary can be configured in the same
+				way as for the "firefox" browser.
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<td><b>headlessChrome</b></td>
+		<td>
+			Same as headlessFirefox but starts Google Chrome instead.
+		</td>
+	</tr>
+</table>
 
 <!-- ------------------------  -->
 <h2>Javascript, DOM and jQuery documentation</h2>
