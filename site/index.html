@@ -618,9 +618,7 @@ Have a look on the <a href="reference.html">documentation</a> page for more deta
 <pre>
 @RunWith(STJSTestDriverRunner.class)
 @HTMLFixture(&quot;&lt;div id='fortune'&gt;&lt;/div&gt;&quot;)
-
-@Scripts({ "/jquery.js",
-       "/jquery.mockjax.js", "/json2.js" })
+@ScriptsAfter({"/jquery.mockjax.js", "/json2.js" })
 <span class="key">public</span> <span class="key">class</span> MockjaxExampleTest {
   @Test
   <span class="key">public</span> <span class="key">void</span> myTest() {
