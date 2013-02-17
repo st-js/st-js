@@ -2,7 +2,7 @@
 <html><head>
 <meta http-equiv="content-type" content="text/html; charset=UTF8">
 
-  <title>STJS - open source Java to Javascript generator</title>
+  <title>STJS - open source Java to JavaScript generator</title>
   <link href="style.css" rel="stylesheet">
 <script type="text/javascript">
 
@@ -20,10 +20,10 @@
 </head><body>
 <div id="header">
   <div class="sf">
-	<a href="http://sourceforge.net/projects/st-js"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=559485&amp;type=8" width="80" height="15" alt="Get Strongly-Typed Javascript at SourceForge.net. Fast, secure and Free Open Source software downloads" /></a>
+	<a href="http://sourceforge.net/projects/st-js"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=559485&amp;type=8" width="80" height="15" alt="Get Strongly-Typed JavaScript at SourceForge.net. Fast, secure and Free Open Source software downloads" /></a>
   </div>
 
-  <div class="title">Strongly-Typed Javascript</div>
+  <div class="title">Strongly-Typed JavaScript</div>
   <div class="menu">
   	<a href="index.html">Home</a>
   	<a href="news.html">News</a>
@@ -38,35 +38,35 @@
 <h1>Documentation</h1>
 
 <h2>Maven plugin</h2>
-<p>You can activate separately the Javascript generation for main sources and tests. Here are the goals of the maven plugin:
+<p>You can activate separately the JavaScript generation for main sources and tests. Here are the goals of the maven plugin:
 <ul>
 	<li><b>generate</b> - activate the generation for the main sources (in the "process-sources" phase)</li>
 	<li><b>generate-test</b> - activate the generation for the test sources (in the "process-test-classes" phase)</li>
-	<li><b>copy-js</b> - copies the Javascript files (either generated or just bridged) from the dependencies to the final artifact (war file), so that they
+	<li><b>copy-js</b> - copies the JavaScript files (either generated or just bridged) from the dependencies to the final artifact (war file), so that they
 	can be used in the web pages</li>
 </ul>
 There are some parameters that can be used to configure the plugin:
 <ul>
-	<li><b>includes/include</b> - the path specifier describing for what Java source you want to generate Javascript. It's the standard path Maven/Ant specifiers. Defaults to **.</li>
-	<li><b>excludes/excludes</b> - the path specifier describing what Java source you want to exclude from the Javascript generate. It's the standard path Maven/Ant specifiers. Defaults to "" (nothing).</li>
+	<li><b>includes/include</b> - the path specifier describing for what Java source you want to generate JavaScript. It's the standard path Maven/Ant specifiers. Defaults to **.</li>
+	<li><b>excludes/excludes</b> - the path specifier describing what Java source you want to exclude from the JavaScript generate. It's the standard path Maven/Ant specifiers. Defaults to "" (nothing).</li>
 	<li><b>allowedPackages</b> - it's a list of Java packages that are allowed to be used inside the Java sources used for generation.
-	A common usage is when you reserved in the Java sources a package for bridges to some Javascript libraries. This package should than be excluded from the generation process.</li>
+	A common usage is when you reserved in the Java sources a package for bridges to some JavaScript libraries. This package should than be excluded from the generation process.</li>
 	<li><b>generateArrayHasOwnProperty</b> - true to generate inside each array iteration if (!array.hasOwnProperty(index)) continue; in order to protect array iteration from the inclusion of the
 	methods added to Array's prototype. Default value if true</li>
-	<li><b>pack</b> - if true, a single Javascript will be created containing all the generated Javascript files in a correct order (follows the dependencies)</li>
+	<li><b>pack</b> - if true, a single JavaScript will be created containing all the generated JavaScript files in a correct order (follows the dependencies)</li>
 </ul>
 </p>
 
 <!-- ------------------------  -->
 <h2>Special methods and constructions</h2>
 <p>
-	Most of the Java code you write will be translated basically as-is to its Javascript counterpart (following some basic rules like for example no type accompanies
-	variables, fields or parameters declarations). But there are cases where Javascript constructions could not have a Java counterpart. In all cases
-	where a method starts with the dollar sign ($) you should expect a generated Javascript code that looks slighty different than the corresponding Java construction.
+	Most of the Java code you write will be translated basically as-is to its JavaScript counterpart (following some basic rules like for example no type accompanies
+	variables, fields or parameters declarations). But there are cases where JavaScript constructions could not have a Java counterpart. In all cases
+	where a method starts with the dollar sign ($) you should expect a generated JavaScript code that looks slighty different than the corresponding Java construction.
 	Here is the list of these constructions and methods (Note: in the basic usage they apply to very specific classes (like Map). But for these methodes, STJS
 	does not check the owner type also, so you can use it with your own types, if you see fit):
 	<table class="methods">
-		<tr><th>Method</th><th>Java</th><th>Javascript</th><th>Description</th></tr>
+		<tr><th>Method</th><th>Java</th><th>JavaScript</th><th>Description</th></tr>
 		<tr><td><b>JSCollections.$map</b></td><td> $map(k1,v1,k2,v2) </td><td>{k1:v1, k2:v2}</td><td>Create a map with the given keys and values</td></tr>
 		<tr><td><b>Map.$put</b></td><td>x.$put(a, b)</td><td>x[a] = b</td><td>Put a key and a value in a map</td></tr>
 		<tr><td><b>Map.$get</b></td><td> x.$get(a)</td><td> x[a]</td><td>Retrieve a value from a map</td></tr>
@@ -75,16 +75,16 @@ There are some parameters that can be used to configure the plugin:
 		<tr><td><b>JSCollections.$castArray</b></td><td> Array&lt;T&gt; a = $castArray(T[]b) </td><td>var a=b</td><td>See a java array as the org.stjs.javascript.Array type</td></tr>
 		<tr><td><b>Array.$get</b></td><td> x.$get(a) </td><td> x[a]</td><td>Retrieve an item from an array </td></tr>
 		<tr><td><b>Array.$set</b></td><td> x.$set(index, val) </td><td> x[index] = val</td><td>Modify an item in an array</td></tr>
-		<tr><td><b>Global.$or</b></td><td> $or(a,b,c)</td><td> a || b || c</td><td>Return first value the is equivalent to true in Javascript</td></tr>
+		<tr><td><b>Global.$or</b></td><td> $or(a,b,c)</td><td> a || b || c</td><td>Return first value the is equivalent to true in JavaScript</td></tr>
 		<tr><td><b>JsObjectAdapter.$properties</b></td><td>Map&lt;String,Object&gt; map = $properties(obj)</td><td>var map =  obj </td><td> see an object as a map of its properties</td></tr>
 		<tr><td><b>JsObjectAdapter.$object</b</td><td>T obj = $object(map) </td><td> var obj = map</td><td> see map as an object of a given type with the same properties</td></tr>
-		<tr><td><b>JsObjectAdapter.$prototype</b></td><td>$prototype(obj)</td><td> obj.prototype</td><td>Return the prototype of a Javascript object</td></tr>
-		<tr><td><b>JsObjectAdapter.$constructor</b></td><td> $constructor(obj) </td><td> obj.constructor</td><td>Return the constructor of a Javascript object</td></tr>
+		<tr><td><b>JsObjectAdapter.$prototype</b></td><td>$prototype(obj)</td><td> obj.prototype</td><td>Return the prototype of a JavaScript object</td></tr>
+		<tr><td><b>JsObjectAdapter.$constructor</b></td><td> $constructor(obj) </td><td> obj.constructor</td><td>Return the constructor of a JavaScript object</td></tr>
 		<tr><td><b>JsObjectAdapter.$js</b></td><td> $js(javascriptCode)</td><td> javascriptCode </td><td> Replaces with the given javascriptCode (only String literals accepted).
 			Use it only in extreme cases as it makes it impossible to minimize the code. </td></tr>
 </table>
 	When writing STJS bridges as Java interfaces (like the jQuery one is done), you have sometimes the need to expose a field, thing that is not possible with Java interfaces.
-	So imagine you have a Javascript code:
+	So imagine you have a JavaScript code:
 <div class="xmlcode">
 <pre>
 var A = {
@@ -152,19 +152,19 @@ In the next major version we'd like to use the @Template mechanism instead of th
 
 	<li><b>@STJSBridge</b> - mark a type as STJS bridge, so it can be used in the code for generation.</li>
 
-	<li><b>@Adapter</b> - useful when writing bridges for existent Javascript types. These are classes that are used to supply methods for Java types when they
-don't have a method that their Javascript counterpart has. For example for Number in Javascript you can do
+	<li><b>@Adapter</b> - useful when writing bridges for existent JavaScript types. These are classes that are used to supply methods for Java types when they
+don't have a method that their JavaScript counterpart has. For example for Number in JavaScript you can do
   number.toFixed(2). As in Java this method does not exist and as the Java Number-derived classes are all final, the
   only alternative is to put this method in another class - an adapter class. All the methods of an adapter class must
   have their first parameter the object to which the method is applied. The other parameters are the parameters
-  normally supplied to the Javascript method.</li>
+  normally supplied to the JavaScript method.</li>
 
   <li><b>@GlobalScope</b> - use this annotation in both the code for generation and in the bridges to specify types of which the static methods and fields are generated
-  as belonging directly to the global Javascript scope. An example is org.stjs.javascript.Global class that proposes the <i>window</i> global object and some other
-  functions globally available in Javascript</li>
+  as belonging directly to the global JavaScript scope. An example is org.stjs.javascript.Global class that proposes the <i>window</i> global object and some other
+  functions globally available in JavaScript</li>
 
-  <li><b>@JavascriptFunction</b> - use this annotation to mark an interface that is used to simulate Javascript functions. When implementing inline one of
-  those interfaces, the generated Javascript code will be an anonymous function. Consequently whenever in the code the
+  <li><b>@JavascriptFunction</b> - use this annotation to mark an interface that is used to simulate JavaScript functions. When implementing inline one of
+  those interfaces, the generated JavaScript code will be an anonymous function. Consequently whenever in the code the
   unique method of this interface is called, it will be generated a direct call to the function.</li>
 
   <li><b>@Namespace</b> - use this annotation to add a namespace for a class or an entire package (annotation is on package-info class within the package).
@@ -183,10 +183,10 @@ don't have a method that their Javascript counterpart has. For example for Numbe
 <!-- ------------------------  -->
 <h2>STJS helper</h2>
 <p>
-	The org.stjs.javascript.stjs.STJS interface is the bridge to the Javascript code coming with the generator. It offers some helpers for different type inexistent in Javascript:
+	The org.stjs.javascript.stjs.STJS interface is the bridge to the JavaScript code coming with the generator. It offers some helpers for different type inexistent in JavaScript:
 	<ul>
-		<li><b>boolean isEnum(obj)</b> - return true if the given Javascript object is an enum entry (the Javascript wrapper needed to allow the usage of Java enums)</li>
-		<li><b>Exception exception(Object obj)</b> - allows you in Java to use any object as an exception. At runtime, the executed Javascript code will return exactly the received parameter</li>
+		<li><b>boolean isEnum(obj)</b> - return true if the given JavaScript object is an enum entry (the JavaScript wrapper needed to allow the usage of Java enums)</li>
+		<li><b>Exception exception(Object obj)</b> - allows you in Java to use any object as an exception. At runtime, the executed JavaScript code will return exactly the received parameter</li>
 		<li><b>public &lt;T&gt; T parseJSON(String json, Class&lt;T&gt; clazz)</b> - parses a JSON string in a "type-safe" manner by creating the object hierarchy using the given type definition</li>
 	</ul>
 </p>
@@ -226,17 +226,17 @@ don't have a method that their Javascript counterpart has. For example for Numbe
 </p>
 
 <!-- ------------------------  -->
-<h2>Javascript, DOM and jQuery documentation</h2>
+<h2>JavaScript, DOM and jQuery documentation</h2>
 <p>
-	STJS provides bridges for the basic Javascript objects, the DOM objects, jQuery (1.6) and jQuery UI (1.8). The bridges follow as closely as possible their
-	Javascript counterpart. So for the moment, please use the documentation provided by other reference websites:
+	STJS provides bridges for the basic JavaScript objects, the DOM objects, jQuery (1.6) and jQuery UI (1.8). The bridges follow as closely as possible their
+	JavaScript counterpart. So for the moment, please use the documentation provided by other reference websites:
 	<ul>
-		<li>Javascript and DOM - <a href="http://www.w3schools.com/jsref/default.asp" target="_blank">w3schools</a></li>
+		<li>JavaScript and DOM - <a href="http://www.w3schools.com/jsref/default.asp" target="_blank">w3schools</a></li>
 		<li>jQuery - <a href="http://docs.jquery.com" target="_blank">jQuery</a></li>
 		<li>jQuery UI - <a href="http://jqueryui.com/demos/" target="_blank">jQuery UI</a></li>
 	</ul>
 
-	For Javascript and DOM the global functions and objects (like setInterval or window) are found in the <b>org.stjs.javascript.Global</b> class.<br/>
+	For JavaScript and DOM the global functions and objects (like setInterval or window) are found in the <b>org.stjs.javascript.Global</b> class.<br/>
 	For jQuery, the $ object and function are found in the <b>org.stjs.javascript.jquery.GlobalJQuery</b> class.
 </p>
 
