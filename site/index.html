@@ -300,15 +300,15 @@ Child.staticMethod = <span class="key">function</span>() {
 
 <h2>Comparison</h2>
 <p>The comparison of objects or primitives is slightly different between Java and Javscript. For example <i>equals</i> method does not exist in JavaScript (and there is no way to influence how egality operators behave in JavaScript).<br/>
-Conversely the triple "=" (===) does not exist in Java. And the "==" sign has a slighty different meaning: in JavaScript it may be accompanied by a type conversion!<br/>
-To have a predictable behaviour of the generated JavaScript, the <i>equals</i> method is generated as-is. The equals method was added to all primitive types wrappers in JavaScript. More
+Conversely the triple "=" (===) does not exist in Java. And the "==" sign has a slightly different meaning: in JavaScript it may be accompanied by a type conversion!<br/>
+To have a predictable behavior of the generated JavaScript, the <i>equals</i> method is generated as-is. The equals method was added to all primitive types wrappers in JavaScript. More
 all generated classes will have an equals method defined in their hierarchy.
 The "==" sign is left untouched as there is basically no automatic type conversion involved (because the initial Java code wouldn't allow it).
 </p>
 
 <h2>AJAX/JSON</h2>
 <p>When you transfer objects between the server and the client, your Data Transfer Objects are usually serialized on the server side (using Gson, Jackson or other library)
-and deserialized on the browser usualy using JavaScript <i>eval</i> function (or safer equivalents). The problem with this approach is that all the type information
+and deserialized on the browser usually using JavaScript <i>eval</i> function (or safer equivalents). The problem with this approach is that all the type information
 is lost, because what you'll get will be regular objects (built with {}) without any type conversion for dates or enums or your own types. So you'll be unable to use correctly your
 data model inside your JavaScript.</p>
 <p>STJS comes with a "type-safe" JSON parser, that will use the type definition stored with the class during the JavaScript generation to re-create back
@@ -400,7 +400,7 @@ STJS has mainly three modules each of which is used in different phases of your 
 <div class="xmlcode">
 <pre>
 &lt;properties&gt;
-  &lt;stjs.version&gt;1.1.4&lt;/stjs.version&gt;
+  &lt;stjs.version&gt;1.3.1&lt;/stjs.version&gt;
 &lt;/properties&gt;
 </pre>
 </div>
@@ -433,7 +433,9 @@ target folder
     &lt;/execution&gt;
   &lt;/executions&gt;
   &lt;configuration&gt;
-    &lt;rootPackage&gt;auto&lt;/rootPackage&gt;
+    &lt;includes&gt;
+       &lt;include&gt;**/*.java&lt;/include&gt;
+    &lt;/includes&gt;
   &lt;/configuration&gt;
 &lt;/plugin&gt;
 </pre>
