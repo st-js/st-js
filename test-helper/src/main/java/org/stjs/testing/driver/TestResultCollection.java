@@ -53,12 +53,15 @@ public class TestResultCollection {
 	/**
 	 * @param className
 	 * @param methodName
+	 * @param testClassLoader
+	 *            - the classloader that "knows" about all the resources involved in the test. See
+	 *            {@link WebAppClassLoader}
 	 * @return the exception for the first wrong result
 	 */
-	public synchronized AssertionError buildException() {
+	public synchronized Throwable buildException(ClassLoader testClassLoader) {
 		for (TestResult result : results) {
 			if (!result.isOk()) {
-				return result.buildException(testClassName, testMethodName);
+				return result.buildException(testClassLoader);
 			}
 		}
 		return null;

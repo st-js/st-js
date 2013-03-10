@@ -102,25 +102,15 @@ public class Generator {
 
 		FileWriter writer = null;
 		FileWriter sourceMapWriter = null;
+		JavascriptWriterVisitor generatorVisitor = new JavascriptWriterVisitor(configuration.isGenerateSourceMap());
 
 		try {
 			// generate the javascript code
-			JavascriptWriterVisitor generatorVisitor = new JavascriptWriterVisitor(configuration.isGenerateSourceMap());
 			generatorVisitor.visit(cu, context);
 
 			writer = new FileWriter(outputFile);
 			writer.write(generatorVisitor.getGeneratedSource());
 			writer.flush();
-
-			if (configuration.isGenerateSourceMap()) {
-				// write the source map
-				sourceMapWriter = new FileWriter(getSourceMapFile(generationFolder.getAbsolutePath(), className));
-				generatorVisitor.writeSourceMap(context, sourceMapWriter);
-				sourceMapWriter.flush();
-
-				// copy the source aside the generated js to be able to have it delivered to the browser for debugging
-				Files.copy(inputFile, new File(outputFile.getParentFile(), inputFile.getName()));
-			}
 
 		} catch (IOException e1) {
 			throw new RuntimeException("Could not open output file " + outputFile + ":" + e1, e1);
@@ -136,6 +126,30 @@ public class Generator {
 		stjsClass.setDependencies(resolvedClasses);
 		stjsClass.setGeneratedJavascriptFile(relative(generationFolder, className));
 		stjsClass.store();
+
+		if (configuration.isGenerateSourceMap()) {
+			try {
+				// write the source map
+				sourceMapWriter = new FileWriter(getSourceMapFile(generationFolder.getAbsolutePath(), className));
+				generatorVisitor.writeSourceMap(context, sourceMapWriter);
+				sourceMapWriter.flush();
+
+				// copy the source aside the generated js to be able to have it delivered to the browser for debugging
+				Files.copy(inputFile, new File(outputFile.getParentFile(), inputFile.getName()));
+				// copy the STJS properties file in the same folder as the Javascript file (if this folder is different
+				// to be
+				// able to do backward analysis: i.e fine the class name corresponding to a JS)
+				File stjsPropFile = stjsClass.getStjsPropertiesFile();
+				File copyStjsPropFile = new File(generationFolder.getAbsolutePath(),
+						ClassUtils.getPropertiesFileName(className));
+				if (!stjsClass.equals(copyStjsPropFile)) {
+					Files.copy(stjsPropFile, copyStjsPropFile);
+				}
+			} catch (IOException e) {
+				throw new RuntimeException("Could generate source map:" + e, e);
+			}
+
+		}
 		return stjsClass;
 	}
 

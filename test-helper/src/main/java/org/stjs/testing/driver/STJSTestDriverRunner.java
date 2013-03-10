@@ -71,7 +71,7 @@ public class STJSTestDriverRunner extends BlockJUnit4ClassRunner {
 
 				if (!results.isOk()) {
 					// take the first wrong result
-					throw results.buildException();
+					throw results.buildException(session.getConfig().getClassLoader());
 				}
 			}
 		};

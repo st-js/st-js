@@ -16,7 +16,7 @@ import org.stjs.testing.driver.TestResult;
 
 import com.sun.net.httpserver.HttpExchange;
 
-@SuppressWarnings({"restriction"})
+@SuppressWarnings({ "restriction" })
 public abstract class AbstractBrowser implements Browser {
 
 	private DriverConfiguration config;
@@ -37,15 +37,14 @@ public abstract class AbstractBrowser implements Browser {
 				System.out.println("Started " + builder.command().get(0));
 			}
 			return p;
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new InitializationError(e);
 		}
 	}
 
 	protected ProcessBuilder buildProcess(BrowserLocator locator, String binPropertyName, String url) {
 		String executableName = config.getProperty(binPropertyName);
-		if(executableName == null){
+		if (executableName == null) {
 			executableName = locator.findBrowserLocationOrFail().launcherFilePath();
 		}
 		return new ProcessBuilder(executableName, url);
@@ -71,8 +70,7 @@ public abstract class AbstractBrowser implements Browser {
 		byte[] response;
 		try {
 			response = content.getBytes("UTF-8");
-		}
-		catch (UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException e) {
 			// Cannot happen. UTF-8 is part of the character sets that must be supported by any implementation of java
 			throw new RuntimeException(e);
 		}
@@ -84,19 +82,20 @@ public abstract class AbstractBrowser implements Browser {
 	}
 
 	/**
-	 * Reads the result of the last unit test from the specified HTTP request. The default implementation builds the test result by reading the
-	 * "result" and "location" query string parameters
+	 * Reads the result of the last unit test from the specified HTTP request. The default implementation builds the
+	 * test result by reading the "result" and "location" query string parameters
 	 */
 	public TestResult buildResult(Map<String, String> queryStringParameters, HttpExchange exchange) {
 		String userAgent = exchange.getRequestHeaders().getFirst("User-Agent");
 		String result = queryStringParameters.get("result");
 		String location = queryStringParameters.get("location");
+		String isAssert = queryStringParameters.get("isAssert");
 
 		if (getConfig().isDebugEnabled()) {
 			System.out.println("Result was: " + result + ", at " + location + ", from " + userAgent);
 		}
 
-		return new TestResult(userAgent, result, location);
+		return new TestResult(userAgent, result, location, "true".equals(isAssert));
 	}
 
 	@Override

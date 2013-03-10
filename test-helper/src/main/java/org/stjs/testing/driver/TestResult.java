@@ -15,40 +15,35 @@
  */
 package org.stjs.testing.driver;
 
-public class TestResult {
-	private final String message;
-	private final int line;
-	private final String file;
-	private final String userAgent;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-	public TestResult(String userAgent, String message, String location) {
+import org.stjs.generator.STJSClass;
+import org.stjs.generator.sourcemap.JavascriptToJava;
+
+import com.google.common.io.Closeables;
+
+public class TestResult {
+	private final static Pattern STACKTRACE_JS_PATTERN = Pattern.compile("\\s*at(.+)\\.(.+)\\((.+)\\)");
+	private final String message;
+	private final String location;
+	private final String userAgent;
+	private final boolean isAssert;
+
+	public TestResult(String userAgent, String message, String location, boolean isAssert) {
 		this.userAgent = userAgent;
 		this.message = message;
-		if ((location != null) && !location.isEmpty()) {
-			String[] locData = location.split(":");
-			if (locData.length == 2) {
-				file = locData[0];
-				line = Integer.parseInt(locData[1]);
-			} else {
-				file = "none";
-				line = -1;
-			}
-		} else {
-			file = "none";
-			line = -1;
-		}
+		this.location = location;
+		this.isAssert = isAssert;
 	}
 
 	public String getMessage() {
 		return message;
-	}
-
-	public int getLine() {
-		return line;
-	}
-
-	public String getFile() {
-		return file;
 	}
 
 	public String getUserAgent() {
@@ -59,20 +54,62 @@ public class TestResult {
 		return "OK".equals(message);
 	}
 
-	public AssertionError buildException(String className, String methodName) {
-		AssertionError ex = new AssertionError(message + ", user agent: " + userAgent);
-		if (line >= 0) {
-			StackTraceElement[] stackTrace = new StackTraceElement[1];
-			stackTrace[0] = new StackTraceElement(className, methodName, file, line);
-			ex.setStackTrace(stackTrace);
+	private String getClassName(ClassLoader testClassLoader, String propertiesFile) {
+		InputStream in = null;
+		try {
+			in = testClassLoader.getResourceAsStream(propertiesFile.substring(1));
+			if (in == null) {
+				throw new RuntimeException("Cannot find STJS properties file:" + propertiesFile);
+			}
+			Properties p = new Properties();
+			p.load(in);
+			return p.getProperty(STJSClass.CLASS_PROP);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} finally {
+			Closeables.closeQuietly(in);
 		}
+	}
+
+	public Throwable buildException(ClassLoader testClassLoader) {
+		String sourceFile;
+		int line;
+		String className;
+		String methodName;
+		// the format is the one given by stacktrace.js:
+		// at prototype.method (url)
+		// where url is http://localhost:xxxx/org/stjs/TestClass.js:row:col
+		Matcher m = STACKTRACE_JS_PATTERN.matcher(location);
+		if (!m.matches()) {
+			// wrong pattern !?
+			throw new RuntimeException("Unknown location format:" + location);
+		}
+		methodName = m.group(2);
+		try {
+			URL url = new URL(m.group(3));
+			String file = url.getFile();
+			String[] fileParts = file.split(":");
+			sourceFile = fileParts[0].replaceAll("\\.js$", ".java");
+			String cleanJsPath = url.getPath().split(":")[0];
+			int jsLineNumber = Integer.valueOf(fileParts[1]);
+			line = new JavascriptToJava(testClassLoader).getJavaLine(cleanJsPath, jsLineNumber);
+			String stjsPropertyFile = cleanJsPath.replaceAll("\\.js$", ".stjs");
+			className = getClassName(testClassLoader, stjsPropertyFile);
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e);
+		}
+
+		Throwable ex = isAssert ? new AssertionError(message + ", user agent: " + userAgent) : new RuntimeException(
+				message + ", user agent: " + userAgent);
+		StackTraceElement[] stackTrace = new StackTraceElement[1];
+		stackTrace[0] = new StackTraceElement(className, methodName, sourceFile, line);
+		ex.setStackTrace(stackTrace);
 		return ex;
 	}
 
 	@Override
 	public String toString() {
-		return "TestResult [message=" + message + ", line=" + line + ", file=" + file + ", userAgent=" + userAgent
-				+ "]";
+		return "TestResult [message=" + message + ", location=" + location + ", userAgent=" + userAgent + "]";
 	}
 
 }

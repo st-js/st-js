@@ -1,5 +1,6 @@
 <html>
 <head>
+<script language="javascript" src="/stacktrace.js"></script>
 <script>
 	var browserId = -1;
 	var lastTestSrc = null;
@@ -35,8 +36,19 @@
 	}
 
 	function reportResultAndRunNextTest(result, stacktrace, firstTest){
+		var location = stacktrace;
+		var isAssert = false;
 		if (result != "OK" && console) {
-			console.error(result + '\n' + stacktrace);
+			var errorStack = printStackTrace({e:result});
+			console.error(errorStack.join("\n"));
+			//take first non-junit stack trace element
+			for(var i = 1; 1 < errorStack.length; ++i){
+				if (errorStack[i].indexOf("junit.js") < 0) {
+					location = errorStack[i];
+					isAssert = (i > 1);
+					break;
+				}
+			}
 		}
 		if(!firstTest){
 			log(result);
@@ -47,7 +59,9 @@
 		iframe.src = '/getNextTest' +
 				'?browserId=' + browserId +
 				'&result=' + result +
-				'&location=' + stacktrace +
+				'&location=' + location +
+				'&location=' + location +
+				'&isAssert=' + isAssert +
 				'&rand=' + Math.random();
 	}
 

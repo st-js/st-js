@@ -171,7 +171,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	 * Reports this browser as dead to the specified test method. The test will be failed.
 	 */
 	private void reportAsDead(MultiTestMethod method) {
-		method.notifyExecutionResult(new TestResult(this.getClass().getSimpleName(), "Browser is dead", null));
+		method.notifyExecutionResult(new TestResult(this.getClass().getSimpleName(), "Browser is dead", null, false));
 	}
 
 	/**
@@ -369,7 +369,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	public void markAsDead(Throwable throwable, String userAgent) {
 		this.isDead = true;
-		this.methodUnderExecution.notifyExecutionResult(new TestResult(userAgent, throwable.getMessage(), null));
+		this.methodUnderExecution.notifyExecutionResult(new TestResult(userAgent, throwable.getMessage(), null, false));
 	}
 
 	public long getId() {
