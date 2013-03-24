@@ -42,9 +42,10 @@
 			var errorStack = printStackTrace({e:result});
 			console.error(errorStack.join("\n"));
 			//take first non-junit stack trace element
-			for(var i = 1; 1 < errorStack.length; ++i){
+			errorStack.splice(0,1);
+			location = encodeURIComponent(errorStack.join(";"));
+			for(var i = 0; 1 < errorStack.length; ++i){
 				if (errorStack[i].indexOf("junit.js") < 0) {
-					location = errorStack[i];
 					isAssert = (i > 1);
 					break;
 				}
@@ -59,7 +60,6 @@
 		iframe.src = '/getNextTest' +
 				'?browserId=' + browserId +
 				'&result=' + result +
-				'&location=' + location +
 				'&location=' + location +
 				'&isAssert=' + isAssert +
 				'&rand=' + Math.random();
