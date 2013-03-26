@@ -6,7 +6,7 @@ import org.apache.maven.it.Verifier;
 import org.apache.maven.it.util.ResourceExtractor;
 import org.junit.Test;
 
-public class DepencyCycleTest {
+public class DependencyCycleTest {
 	@Test
 	public void testPackageIt() throws Exception {
 

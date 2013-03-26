@@ -142,7 +142,7 @@ public class Generator {
 				File stjsPropFile = stjsClass.getStjsPropertiesFile();
 				File copyStjsPropFile = new File(generationFolder.getAbsolutePath(),
 						ClassUtils.getPropertiesFileName(className));
-				if (!stjsClass.equals(copyStjsPropFile)) {
+				if (!stjsPropFile.equals(copyStjsPropFile)) {
 					Files.copy(stjsPropFile, copyStjsPropFile);
 				}
 			} catch (IOException e) {

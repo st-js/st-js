@@ -159,9 +159,10 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		getLog().info("Generating javascript files");
-
 		GenerationDirectory gendir = getGeneratedSourcesDirectory();
+
+		getLog().info("Generating JavaScript files to " + gendir.getAbsolutePath());
+
 		// clear cache before each execution
 		TypeWrappers.clearCache();
 
@@ -186,7 +187,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			configBuilder.allowedPackages(packages);
 		}
 
-		boolean atLeastOneFileGenerated = false;
+		int generatedFiles = 0;
 		boolean hasFailures = false;
 		// scan the modified sources
 		for (String sourceRoot : getCompileSourceRoots()) {
@@ -205,7 +206,9 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				try {
 					File absoluteTarget = (File) mapping.getTargetFiles(gendir.getAbsolutePath(), source.getPath())
 							.iterator().next();
-					getLog().info("Generating " + absoluteTarget);
+					if (getLog().isDebugEnabled()) {
+						getLog().debug("Generating " + absoluteTarget);
+					}
 					buildContext.removeMessages(absoluteSource);
 
 					if (!absoluteTarget.getParentFile().exists() && !absoluteTarget.getParentFile().mkdirs()) {
@@ -215,7 +218,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 					String className = getClassNameForSource(source.getPath());
 					generator.generateJavascript(builtProjectClassLoader, className, sourceDir, gendir,
 							getBuildOutputDirectory(), configBuilder.build());
-					atLeastOneFileGenerated = true;
+					++generatedFiles;
 
 				} catch (InclusionScanException e) {
 					throw new MojoExecutionException("Cannot scan the source directory:" + e, e);
@@ -233,12 +236,13 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			}
 		}
 
-		if (atLeastOneFileGenerated) {
+		getLog().info("Generated " + generatedFiles + " JavaScript files");
+		if (generatedFiles > 0) {
 			filesGenerated(generator, gendir);
 		}
 
 		if (hasFailures) {
-			throw new MojoFailureException("Errors generating javascript");
+			throw new MojoFailureException("Errors generating JavaScript");
 		}
 	}
 
