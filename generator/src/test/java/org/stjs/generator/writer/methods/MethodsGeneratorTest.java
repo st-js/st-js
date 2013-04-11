@@ -11,7 +11,7 @@ public class MethodsGeneratorTest {
 	public void testPublicInstanceMethod() {
 		assertCodeContains(Methods1.class, //
 				"stjs.extend(Methods1, null, [], function(constructor, prototype){" + //
-						"prototype.method = function(arg1,arg2){return 0;}");
+				"prototype.method = function(arg1,arg2){return 0;}");
 	}
 
 	@Test
@@ -19,21 +19,21 @@ public class MethodsGeneratorTest {
 		// same as public
 		assertCodeContains(Methods2.class, //
 				"stjs.extend(Methods2, null, [], function(constructor, prototype){" + //
-						"prototype.method = function(arg1,arg2){");
+				"prototype.method = function(arg1,arg2){");
 	}
 
 	@Test
 	public void testPublicStaticMethod() {
-		assertCodeContains(Methods3.class, //
+		assertCodeContains(Methods3.class, // 
 				"stjs.extend(Methods3, null, [], function(constructor, prototype){" + //
-						"constructor.method = function(arg1,arg2){");
+				"constructor.method = function(arg1,arg2){");
 	}
 
 	@Test
 	public void testPrivateStaticMethod() {
 		assertCodeContains(Methods4.class, //
 				"stjs.extend(Methods4, null, [], function(constructor, prototype){" + //
-						"constructor.method = function(arg1,arg2){");
+				"constructor.method = function(arg1,arg2){");
 	}
 
 	@Test
@@ -93,8 +93,7 @@ public class MethodsGeneratorTest {
 
 	@Test
 	public void testAbstractMethod() {
-		// the class only contains abstract methods, therefore nothing must be generated excepting equals method
-		assertCodeContains(Methods15.class, "stjs.extend(Methods15, null, [], function(constructor, prototype){" + //
-				"prototype.equals=JavalikeEquals;}, {});");
+		// the class only contains abstract methods, therefore nothing must be generated
+		assertCodeContains(Methods15.class, "stjs.extend(Methods15, null, [], null, {});");
 	}
 }

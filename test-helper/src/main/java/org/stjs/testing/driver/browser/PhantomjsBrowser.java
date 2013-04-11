@@ -103,12 +103,13 @@ public class PhantomjsBrowser extends LongPollingBrowser {
 		String userAgent = exchange.getRequestHeaders().getFirst("User-Agent");
 		String result = queryStringParameters.get("result");
 		String location = queryStringParameters.get("location");
+		String isAssert = queryStringParameters.get("isAssert");
 
 		if (getConfig().isDebugEnabled()) {
 			System.out.println("Result was: " + result + ", at " + location + ", from " + userAgent);
 		}
 
-		return new TestResult(userAgent, result, location);
+		return new TestResult(userAgent, result, location, "true".equals(isAssert));
 	}
 
 	@Override

@@ -11,6 +11,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,7 +43,16 @@ public class GeneratorTestHelper {
 	 * @return the javascript code generator from the given class
 	 */
 	public static String generate(Class<?> clazz) {
-		return (String) executeOrGenerate(clazz, false);
+		return (String) executeOrGenerate(clazz, false, false);
+	}
+
+	/**
+	 * 
+	 * @param clazz
+	 * @return the javascript code generator from the given class
+	 */
+	public static String generateWithSourcemap(Class<?> clazz) {
+		return (String) executeOrGenerate(clazz, false, true);
 	}
 
 	/**
@@ -50,15 +61,15 @@ public class GeneratorTestHelper {
 	 * @return the javascript code generator from the given class
 	 */
 	public static Object execute(Class<?> clazz) {
-		return convert(executeOrGenerate(clazz, true));
+		return convert(executeOrGenerate(clazz, true, false));
 	}
-	
-	public static Object execute(String preGeneratedJs){
+
+	public static Object execute(String preGeneratedJs) {
 		try {
 			File jsfile = new File(preGeneratedJs);
 			ExecutionResult execResult = new RhinoExecutor().run(Collections.singletonList(jsfile), false);
 			return convert(execResult.getResult());
-		}catch(ScriptException se){
+		} catch (ScriptException se) {
 			throw new RuntimeException(se);
 		}
 	}
@@ -122,7 +133,7 @@ public class GeneratorTestHelper {
 	 * @param clazz
 	 * @return the javascript code generator from the given class
 	 */
-	private static Object executeOrGenerate(Class<?> clazz, boolean execute) {
+	private static Object executeOrGenerate(Class<?> clazz, boolean execute, boolean withSourceMap) {
 		Generator gen = new Generator();
 
 		File generationPath = new File("target", TEMP_GENERATION_PATH);
@@ -136,7 +147,7 @@ public class GeneratorTestHelper {
 				generationFolder,
 				new File("target", "test-classes"),
 				new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript")
-						.allowedPackage("org.stjs.generator").build());
+						.allowedPackage("org.stjs.generator").generateSourceMap(withSourceMap).build());
 
 		File jsFile = new File(generationPath, stjsClass.getJavascriptFiles().get(0).getPath());
 		try {
@@ -223,6 +234,16 @@ public class GeneratorTestHelper {
 				// silent
 			}
 
+		}
+	}
+
+	public static ClassLoader buildClassLoader() {
+		File generationPath = new File("target", TEMP_GENERATION_PATH);
+		try {
+			URL[] urls = { generationPath.toURI().toURL() };
+			return new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 }

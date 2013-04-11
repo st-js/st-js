@@ -239,7 +239,7 @@ Boolean.valueOf=function(value){
 var stjs={};
 
 stjs.global=this;
-stjs.skipCopy = {"prototype":true, "constructor": true, "$typeDescription":true};
+stjs.skipCopy = {"prototype":true, "constructor": true, "$typeDescription":true, "$inherit" : true};
 
 stjs.ns=function(path){
 	var p = path.split(".");
@@ -266,6 +266,7 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 		return stjs.extend12.apply(this, arguments);
 	}
 
+	_constructor.$inherit=[];
 	var key, a;
 	if(_super != null){
 		// I is used as a no-op constructor that has the same prototype as _super
@@ -281,11 +282,15 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 		// assign every method from proto instance
 		stjs.copyProps(_super, _constructor);
 		stjs.copyProps(_super.$typeDescription, _typeDescription);
+
+		//add the super class to inherit array
+		_constructor.$inherit.push(_super);
 	}
 
 	// copy static properties for interfaces
 	for(a = 0; a < _implements.length; ++a){
 		stjs.copyProps(_implements[a], _constructor);
+		_constructor.$inherit.push(_implements[a]);
 	}
 
 	// remember the correct constructor
@@ -297,7 +302,7 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 	}
 
 	_constructor.$typeDescription = _typeDescription;
-	
+
 	// add the default equals method if it is not present yet, and we don't have a superclass
 	if(_super == null && !_constructor.prototype.equals){
 		_constructor.prototype.equals = JavalikeEquals;
@@ -323,7 +328,7 @@ stjs.extend12=function( _constructor,  _super, _implements){
 	}
 	// remember the correct constructor
 	_constructor.prototype.constructor	= _constructor;
-	
+
 	// add the default equals method if we don't have a superclass. Code generated with version 1.2 will
 	// override this method is equals() is present in the original java code.
 	// this was not part of the original 1.2 version of extends, however forward compatibility
@@ -336,6 +341,21 @@ stjs.extend12=function( _constructor,  _super, _implements){
 	return	_constructor;
 };
 
+/**
+ * checks if the child is an instanceof parent. it checks recursively if "parent" is the child itself or it's found somewhere in the $inherit array
+ */
+stjs.isInstanceOf=function(child, parent){
+	if (child === parent)
+		return true;
+	if (!child.$inherit)
+		return false;
+	for(var i in child.$inherit){
+		if (stjs.isInstanceOf(child.$inherit[i], parent)) {
+			return true;
+		}
+	}
+	return false;
+}
 stjs.enumEntry=function(idx, name){
 	this._name = name;
 	this._ordinal = idx;
@@ -639,3 +659,56 @@ function assertStateTrue(position, code, condition) {
 	if (!condition && stjsAssertHandler)
 		stjsAssertHandler(position, code, "Wrong state. Condition is false");
 }
+/** exception **/
+var Throwable = function(message, cause){
+	if (typeof message === "string"){
+		this.detailMessage  = message;
+		this.message = message;
+		this.cause = cause;
+	} else {
+		this.cause = message;
+	}
+};
+stjs.extend(Throwable, Error, [], function(constructor, prototype){
+	prototype.detailMessage = null;
+	prototype.cause = null;
+	prototype.getMessage = function() {
+        return this.detailMessage;
+    };
+
+	prototype.getLocalizedMessage = function() {
+        return this.getMessage();
+    };
+
+	prototype.getCause = function() {
+        return (this.cause==this ? null : this.cause);
+    };
+
+	prototype.toString = function() {
+	        var s = "Exception";//TODO should get the exception's type name here
+	        var message = this.getLocalizedMessage();
+	        return (message != null) ? (s + ": " + message) : s;
+	 };
+
+	 //TODO use stacktrace.js script
+	 prototype.getStackTrace = function() {
+		 return this.stack;
+	 };
+
+	 //TODO use stacktrace.js script
+	 prototype.printStackTrace = function(){
+		 console.error(this.getStackTrace());
+	 };
+}, {});
+
+var Exception = function(message, cause){
+	Throwable.call(this, message, cause);
+};
+stjs.extend(Exception, Throwable, [], function(constructor, prototype){
+}, {});
+
+var RuntimeException = function(message, cause){
+	Exception.call(this, message, cause);
+};
+stjs.extend(RuntimeException, Exception, [], function(constructor, prototype){
+}, {});

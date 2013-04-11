@@ -20,6 +20,10 @@ import org.stjs.generator.BridgeClass;
 import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
 import org.stjs.generator.Generator;
+import org.stjs.generator.name.DefaultNameProvider;
+import org.stjs.generator.name.NameProvider;
+import org.stjs.generator.type.TypeWrapper;
+import org.stjs.generator.type.TypeWrappers;
 import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.Scripts;
 import org.stjs.testing.annotation.ScriptsAfter;
@@ -60,7 +64,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	}
 
 	protected String getStartPageUri(long browserId, boolean persistent) {
-		return "start-longPolling-persistent.html?browserId=" + browserId + "&persistent=" + persistent;
+		return "start.html?browserId=" + browserId + "&persistent=" + persistent;
 	}
 
 	protected String getStartPageUrl(long browserId, boolean persistent) {
@@ -167,7 +171,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	 * Reports this browser as dead to the specified test method. The test will be failed.
 	 */
 	private void reportAsDead(MultiTestMethod method) {
-		method.notifyExecutionResult(new TestResult(this.getClass().getSimpleName(), "Browser is dead", null));
+		method.notifyExecutionResult(new TestResult(this.getClass().getSimpleName(), "Browser is dead", null, false));
 	}
 
 	/**
@@ -198,6 +202,13 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	 */
 	public MultiTestMethod getMethodUnderExecution() {
 		return methodUnderExecution;
+	}
+
+	private String getTypeName(Class<?> clazz) {
+		// TODO have it inject it here
+		NameProvider names = new DefaultNameProvider();
+		TypeWrapper type = TypeWrappers.wrap(clazz);
+		return names.getTypeName(type);
 	}
 
 	/**
@@ -285,7 +296,8 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		resp.append("    parent.startingTest('" + testedClassName + "', '" + method.getName() + "');");
 		resp.append("    var stjsTest = new " + testedClassName + "();\n");
 		resp.append("    var stjsResult = 'OK';\n");
-		resp.append("    var expectedException = " + (test.expected() != Test.None.class) + ";\n");
+		resp.append("    var expectedException = "
+				+ (test.expected() != Test.None.class ? getTypeName(test.expected()) : null) + ";\n");
 		resp.append("    try{\n");
 		// call before methods
 		for (FrameworkMethod beforeMethod : beforeMethods) {
@@ -300,6 +312,8 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 		// an exception was caught while executing the test method
 		resp.append("      if(!expectedException){\n");
+		resp.append("        stjsResult = ex;\n");
+		resp.append("      } else if (!stjs.isInstanceOf(ex.constructor,expectedException)){\n");
 		resp.append("        stjsResult = ex;\n");
 		resp.append("      }\n");
 		resp.append("    }finally{\n");
@@ -355,7 +369,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	public void markAsDead(Throwable throwable, String userAgent) {
 		this.isDead = true;
-		this.methodUnderExecution.notifyExecutionResult(new TestResult(userAgent, throwable.getMessage(), null));
+		this.methodUnderExecution.notifyExecutionResult(new TestResult(userAgent, throwable.getMessage(), null, false));
 	}
 
 	public long getId() {

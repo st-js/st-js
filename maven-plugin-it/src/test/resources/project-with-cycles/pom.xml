@@ -1,0 +1,64 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>project-with-cycles</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0.0-SNAPSHOT</version>
+
+	<parent>
+		<groupId>org.st-js</groupId>
+		<artifactId>stjs</artifactId>
+		<version>1.3.2-SNAPSHOT</version>
+	</parent>
+
+
+	<dependencies>
+		<!-- for the java libraries -->
+		<dependency>
+			<groupId>org.st-js</groupId>
+			<artifactId>js-lib</artifactId>
+			<version>${parent.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+
+	</dependencies>
+
+	<build>
+
+		<plugins>
+			<!-- STJS -->
+			<plugin>
+				<groupId>org.st-js</groupId>
+				<artifactId>maven-plugin</artifactId>
+				<version>${parent.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<generateSourceMap>true</generateSourceMap>
+					<pack>true</pack>
+				</configuration>
+			</plugin>
+
+			<!-- put in the manifest file that this is a STJS lib (bridge or not)  -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<STJS-Library>true</STJS-Library>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

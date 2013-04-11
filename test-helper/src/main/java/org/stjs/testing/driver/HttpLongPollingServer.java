@@ -1,9 +1,11 @@
 package org.stjs.testing.driver;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.runners.model.InitializationError;
 import org.stjs.testing.driver.browser.LongPollingBrowser;
 
+import com.google.common.base.Charsets;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -111,7 +114,7 @@ public class HttpLongPollingServer implements AsyncProcess {
 				exchange.getResponseHeaders().add("Server", "STJS");
 
 				// now really handle the request
-				Map<String, String> params = parseQueryString(exchange.getRequestURI().getQuery());
+				Map<String, String> params = parseQueryString(exchange.getRequestURI().getRawQuery());
 				String path = exchange.getRequestURI().getPath();
 				if (NEXT_TEST_URI.equals(path)) {
 					handleNextTest(params, exchange);
@@ -249,7 +252,11 @@ public class HttpLongPollingServer implements AsyncProcess {
 			for (String nv : nameValues) {
 				String[] x = nv.split("=");
 				if (x.length == 2) {
-					params.put(x[0], x[1]);
+					try {
+						params.put(x[0], URLDecoder.decode(x[1], Charsets.UTF_8.name()));
+					} catch (UnsupportedEncodingException e) {
+						throw new RuntimeException(e);
+					}
 				}
 			}
 			return params;

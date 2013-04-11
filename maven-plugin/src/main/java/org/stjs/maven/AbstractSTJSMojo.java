@@ -42,9 +42,10 @@ import org.codehaus.plexus.compiler.util.scan.mapping.SourceMapping;
 import org.codehaus.plexus.compiler.util.scan.mapping.SuffixMapping;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.jgrapht.DirectedGraph;
+import org.jgrapht.alg.CycleDetector;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.traverse.DepthFirstIterator;
+import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.sonatype.plexus.build.incremental.BuildContext;
 import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.GenerationDirectory;
@@ -158,9 +159,10 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		getLog().info("Generating javascript files");
-
 		GenerationDirectory gendir = getGeneratedSourcesDirectory();
+
+		getLog().info("Generating JavaScript files to " + gendir.getAbsolutePath());
+
 		// clear cache before each execution
 		TypeWrappers.clearCache();
 
@@ -185,7 +187,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			configBuilder.allowedPackages(packages);
 		}
 
-		boolean atLeastOneFileGenerated = false;
+		int generatedFiles = 0;
 		boolean hasFailures = false;
 		// scan the modified sources
 		for (String sourceRoot : getCompileSourceRoots()) {
@@ -204,7 +206,9 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				try {
 					File absoluteTarget = (File) mapping.getTargetFiles(gendir.getAbsolutePath(), source.getPath())
 							.iterator().next();
-					getLog().info("Generating " + absoluteTarget);
+					if (getLog().isDebugEnabled()) {
+						getLog().debug("Generating " + absoluteTarget);
+					}
 					buildContext.removeMessages(absoluteSource);
 
 					if (!absoluteTarget.getParentFile().exists() && !absoluteTarget.getParentFile().mkdirs()) {
@@ -214,7 +218,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 					String className = getClassNameForSource(source.getPath());
 					generator.generateJavascript(builtProjectClassLoader, className, sourceDir, gendir,
 							getBuildOutputDirectory(), configBuilder.build());
-					atLeastOneFileGenerated = true;
+					++generatedFiles;
 
 				} catch (InclusionScanException e) {
 					throw new MojoExecutionException("Cannot scan the source directory:" + e, e);
@@ -232,12 +236,13 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			}
 		}
 
-		if (atLeastOneFileGenerated) {
+		getLog().info("Generated " + generatedFiles + " JavaScript files");
+		if (generatedFiles > 0) {
 			filesGenerated(generator, gendir);
 		}
 
 		if (hasFailures) {
-			throw new MojoFailureException("Errors generating javascript");
+			throw new MojoFailureException("Errors generating JavaScript");
 		}
 	}
 
@@ -293,8 +298,15 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				}
 			}
 
+			// check for cycles
+			Set<String> cycles = new CycleDetector<String, DefaultEdge>(dependencyGraph).findCycles();
+			if (!cycles.isEmpty()) {
+				throw new Exception("Cycles are detected in the dependency graph:\n"
+						+ cycles.toString().replace(',', '\n')
+						+ "\n Please fix the problem before continuing or disable the packing");
+			}
 			// dump all the files in the dependency order in the pack file
-			Iterator<String> it = new DepthFirstIterator<String, DefaultEdge>(dependencyGraph);
+			Iterator<String> it = new TopologicalOrderIterator<String, DefaultEdge>(dependencyGraph);
 			while (it.hasNext()) {
 				File targetFile = currentProjectsFiles.get(it.next());
 				if (targetFile != null) {

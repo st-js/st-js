@@ -230,6 +230,17 @@ public class SpecialMethodHandlers {
 			}
 		});
 
+		methodHandlers.put("org.stjs.javascript.Global.typeof", new SpecialMethodHandler() {
+			@Override
+			public boolean handle(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
+				// add parentheses around
+				currentHandler.printer.print("(typeof ");
+				n.getArgs().get(0).accept(currentHandler, context);
+				currentHandler.printer.print(")");
+				return true;
+			}
+		});
+
 		assertHandler = new AssertHandler();
 		methodToPropertyHandler = new MethodToPropertyHandler();
 		invokeHandler = new $InvokeHandler();

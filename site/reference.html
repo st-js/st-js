@@ -2,8 +2,13 @@
 <html><head>
 <meta http-equiv="content-type" content="text/html; charset=UTF8">
 
-  <title>STJS - open source Java to Javascript generator</title>
+  <title>STJS - open source Java to JavaScript generator</title>
   <link href="style.css" rel="stylesheet">
+  <link href="http://alexgorbatchev.com/pub/sh/current/styles/shThemeDefault.css" rel="stylesheet" type="text/css" />
+  <link href="http://alexgorbatchev.com/pub/sh/current/styles/shCore.css" rel="stylesheet" type="text/css" />
+  <script src="http://alexgorbatchev.com/pub/sh/current/scripts/shCore.js" type="text/javascript"></script>
+  <script src="http://alexgorbatchev.com/pub/sh/current/scripts/shBrushJava.js" type="text/javascript"></script>
+  <script src="http://alexgorbatchev.com/pub/sh/current/scripts/shBrushXml.js" type="text/javascript"></script>
 <script type="text/javascript">
 
   var _gaq = _gaq || [];
@@ -15,15 +20,19 @@
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
+  
+  SyntaxHighlighter.defaults['auto-links'] = false;
+  SyntaxHighlighter.defaults['toolbar'] = false;
+  SyntaxHighlighter.all();
 
 </script>
 </head><body>
 <div id="header">
   <div class="sf">
-	<a href="http://sourceforge.net/projects/st-js"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=559485&amp;type=8" width="80" height="15" alt="Get Strongly-Typed Javascript at SourceForge.net. Fast, secure and Free Open Source software downloads" /></a>
+	<a href="http://sourceforge.net/projects/st-js"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=559485&amp;type=8" width="80" height="15" alt="Get Strongly-Typed JavaScript at SourceForge.net. Fast, secure and Free Open Source software downloads" /></a>
   </div>
 
-  <div class="title">Strongly-Typed Javascript</div>
+  <div class="title">Strongly-Typed JavaScript</div>
   <div class="menu">
   	<a href="index.html">Home</a>
   	<a href="news.html">News</a>
@@ -38,32 +47,35 @@
 <h1>Documentation</h1>
 
 <h2>Maven plugin</h2>
-<p>You can activate separately the Javascript generation for main sources and tests. Here are the goals of the maven plugin:
+<p>You can activate separately the JavaScript generation for main sources and tests. Here are the goals of the maven plugin:
 <ul>
 	<li><b>generate</b> - activate the generation for the main sources (in the "process-sources" phase)</li>
 	<li><b>generate-test</b> - activate the generation for the test sources (in the "process-test-classes" phase)</li>
+	<li><b>copy-js</b> - copies the JavaScript files (either generated or just bridged) from the dependencies to the final artifact (war file), so that they
+	can be used in the web pages</li>
 </ul>
 There are some parameters that can be used to configure the plugin:
 <ul>
-	<li><b>includes/include</b> - the path specifier describing for what Java source you want to generate Javascript. It's the standard path Maven/Ant specifiers. Defaults to **.</li>
-	<li><b>excludes/excludes</b> - the path specifier describing what Java source you want to exclude from the Javascript generate. It's the standard path Maven/Ant specifiers. Defaults to "" (nothing).</li>
+	<li><b>includes/include</b> - the path specifier describing for what Java source you want to generate JavaScript. It's the standard path Maven/Ant specifiers. Defaults to **.</li>
+	<li><b>excludes/excludes</b> - the path specifier describing what Java source you want to exclude from the JavaScript generate. It's the standard path Maven/Ant specifiers. Defaults to "" (nothing).</li>
 	<li><b>allowedPackages</b> - it's a list of Java packages that are allowed to be used inside the Java sources used for generation.
-	A common usage is when you reserved in the Java sources a package for bridges to some Javascript libraries. This package should than be excluded from the generation process.</li>
+	A common usage is when you reserved in the Java sources a package for bridges to some JavaScript libraries. This package should than be excluded from the generation process.</li>
 	<li><b>generateArrayHasOwnProperty</b> - true to generate inside each array iteration if (!array.hasOwnProperty(index)) continue; in order to protect array iteration from the inclusion of the
 	methods added to Array's prototype. Default value if true</li>
+	<li><b>pack</b> - if true, a single JavaScript will be created containing all the generated JavaScript files in a correct order (follows the dependencies)</li>
 </ul>
 </p>
 
 <!-- ------------------------  -->
 <h2>Special methods and constructions</h2>
 <p>
-	Most of the Java code you write will be translated basically as-is to its Javascript counterpart (following some basic rules like for example no type accompanies
-	variables, fields or parameters declarations). But there are cases where Javascript constructions could not have a Java counterpart. In all cases
-	where a method starts with the dollar sign ($) you should expect a generated Javascript code that looks slighty different than the corresponding Java construction.
+	Most of the Java code you write will be translated basically as-is to its JavaScript counterpart (following some basic rules like for example no type accompanies
+	variables, fields or parameters declarations). But there are cases where JavaScript constructions could not have a Java counterpart. In all cases
+	where a method starts with the dollar sign ($) you should expect a generated JavaScript code that looks slighty different than the corresponding Java construction.
 	Here is the list of these constructions and methods (Note: in the basic usage they apply to very specific classes (like Map). But for these methodes, STJS
 	does not check the owner type also, so you can use it with your own types, if you see fit):
 	<table class="methods">
-		<tr><th>Method</th><th>Java</th><th>Javascript</th><th>Description</th></tr>
+		<tr><th>Method</th><th>Java</th><th>JavaScript</th><th>Description</th></tr>
 		<tr><td><b>JSCollections.$map</b></td><td> $map(k1,v1,k2,v2) </td><td>{k1:v1, k2:v2}</td><td>Create a map with the given keys and values</td></tr>
 		<tr><td><b>Map.$put</b></td><td>x.$put(a, b)</td><td>x[a] = b</td><td>Put a key and a value in a map</td></tr>
 		<tr><td><b>Map.$get</b></td><td> x.$get(a)</td><td> x[a]</td><td>Retrieve a value from a map</td></tr>
@@ -72,54 +84,47 @@ There are some parameters that can be used to configure the plugin:
 		<tr><td><b>JSCollections.$castArray</b></td><td> Array&lt;T&gt; a = $castArray(T[]b) </td><td>var a=b</td><td>See a java array as the org.stjs.javascript.Array type</td></tr>
 		<tr><td><b>Array.$get</b></td><td> x.$get(a) </td><td> x[a]</td><td>Retrieve an item from an array </td></tr>
 		<tr><td><b>Array.$set</b></td><td> x.$set(index, val) </td><td> x[index] = val</td><td>Modify an item in an array</td></tr>
-		<tr><td><b>Global.$or</b></td><td> $or(a,b,c)</td><td> a || b || c</td><td>Return first value the is equivalent to true in Javascript</td></tr>
+		<tr><td><b>Global.$or</b></td><td> $or(a,b,c)</td><td> a || b || c</td><td>Return first value the is equivalent to true in JavaScript</td></tr>
 		<tr><td><b>JsObjectAdapter.$properties</b></td><td>Map&lt;String,Object&gt; map = $properties(obj)</td><td>var map =  obj </td><td> see an object as a map of its properties</td></tr>
 		<tr><td><b>JsObjectAdapter.$object</b</td><td>T obj = $object(map) </td><td> var obj = map</td><td> see map as an object of a given type with the same properties</td></tr>
-		<tr><td><b>JsObjectAdapter.$prototype</b></td><td>$prototype(obj)</td><td> obj.prototype</td><td>Return the prototype of a Javascript object</td></tr>
-		<tr><td><b>JsObjectAdapter.$constructor</b></td><td> $constructor(obj) </td><td> obj.constructor</td><td>Return the constructor of a Javascript object</td></tr>
+		<tr><td><b>JsObjectAdapter.$prototype</b></td><td>$prototype(obj)</td><td> obj.prototype</td><td>Return the prototype of a JavaScript object</td></tr>
+		<tr><td><b>JsObjectAdapter.$constructor</b></td><td> $constructor(obj) </td><td> obj.constructor</td><td>Return the constructor of a JavaScript object</td></tr>
 		<tr><td><b>JsObjectAdapter.$js</b></td><td> $js(javascriptCode)</td><td> javascriptCode </td><td> Replaces with the given javascriptCode (only String literals accepted).
 			Use it only in extreme cases as it makes it impossible to minimize the code. </td></tr>
 </table>
 	When writing STJS bridges as Java interfaces (like the jQuery one is done), you have sometimes the need to expose a field, thing that is not possible with Java interfaces.
-	So imagine you have a Javascript code:
-<div class="xmlcode">
-<pre>
+	So imagine you have a JavaScript code:
+<pre class="brush: java">
 var A = {
 	field: null,
 	method: function(){
 	}
 }
 </pre>
-</div>
 
 and you'd like to create an STJS bridge (so that you can use it in Java) and you want to do it as Java interface (you can also do it as a normal class).
 As you cannot have:
-<div class="xmlcode">
-<pre>
-public interface A{
-	public String <span style="color:red">field</span>;
+<pre class="brush: java">
+public interface A {
+	public String field;
 	public String method();
 }
 </pre>
-</div>
 
 what you can do is:
-<div class="xmlcode">
-<pre>
+<pre class="brush: java">
 public interface A{
 	public String $field();
 	public void $field(String s); //don't add, if the field is read-only
 	public String method();
 }
 </pre>
-</div>
 
 The code <i>a.$field("abc")</i> will be correctly translated to <i>a.field = "abc"</i>
 <br/>
 If you wanted, for example to keep the call to the <i>field</i> method as is, you could've used the @Template("none") annotation on the method, like the following code:
 
-<div class="xmlcode">
-<pre>
+<pre class="brush: java">
 public interface A{
 	public String $field();
 	@Template("none")
@@ -127,7 +132,6 @@ public interface A{
 	public String method();
 }
 </pre>
-</div>
 
 So now the code <i>a.$field("abc")</i> will be translated to <i>a.$field("abc")</i>
 
@@ -142,26 +146,26 @@ In the next major version we'd like to use the @Template mechanism instead of th
 <p>There are several annotations that can be used to control how the is generated.</p>
 
 <ul>
-	<li><b><s>@DataType</s> - @SyntheticType</b> - use this annotation in both the code for generation and in the bridges to specify types for which the instances are
+	<li><b>@SyntheticType</b> - use this annotation in both the code for generation and in the bridges to specify types for which the instances are
 	built with the standard object constructor - {} - rather than with type's constructor. For bridges this is useful when you want to provide a type
 	where the bridged library didn't have one. An example is DialogOptions (for jQuery dialog plugin) that does not exist in the jQuery library, but it shows you the options
 	supported by the plugin</li>
 
 	<li><b>@STJSBridge</b> - mark a type as STJS bridge, so it can be used in the code for generation.</li>
 
-	<li><b>@Adapter</b> - useful when writing bridges for existent Javascript types. These are classes that are used to supply methods for Java types when they
-don't have a method that their Javascript counterpart has. For example for Number in Javascript you can do
+	<li><b>@Adapter</b> - useful when writing bridges for existent JavaScript types. These are classes that are used to supply methods for Java types when they
+don't have a method that their JavaScript counterpart has. For example for Number in JavaScript you can do
   number.toFixed(2). As in Java this method does not exist and as the Java Number-derived classes are all final, the
   only alternative is to put this method in another class - an adapter class. All the methods of an adapter class must
   have their first parameter the object to which the method is applied. The other parameters are the parameters
-  normally supplied to the Javascript method.</li>
+  normally supplied to the JavaScript method.</li>
 
   <li><b>@GlobalScope</b> - use this annotation in both the code for generation and in the bridges to specify types of which the static methods and fields are generated
-  as belonging directly to the global Javascript scope. An example is org.stjs.javascript.Global class that proposes the <i>window</i> global object and some other
-  functions globally available in Javascript</li>
+  as belonging directly to the global JavaScript scope. An example is org.stjs.javascript.Global class that proposes the <i>window</i> global object and some other
+  functions globally available in JavaScript</li>
 
-  <li><b>@JavascriptFunction</b> - use this annotation to mark an interface that is used to simulate Javascript functions. When implementing inline one of
-  those interfaces, the generated Javascript code will be an anonymous function. Consequently whenever in the code the
+  <li><b>@JavascriptFunction</b> - use this annotation to mark an interface that is used to simulate JavaScript functions. When implementing inline one of
+  those interfaces, the generated JavaScript code will be an anonymous function. Consequently whenever in the code the
   unique method of this interface is called, it will be generated a direct call to the function.</li>
 
   <li><b>@Namespace</b> - use this annotation to add a namespace for a class or an entire package (annotation is on package-info class within the package).
@@ -170,9 +174,6 @@ don't have a method that their Javascript counterpart has. For example for Numbe
   recursive! So you to annotate sub-packages as well.)
   </li>
 
-  <li><b>@HtmlFixture</b> - this annotation is used in the unit test to add to the page that is created for the test HTML code.
-  You can also refer an external file (in the classpath) this way: @HtmlFixture(url="/myfile.html"")</li>
-
    <li><b>@Template</b> - this annotation can be used on a method to control how the call to this method will be generated. The parameter taken by this annotation
    is a name of a defined template. Currently only @Template("none") is defined, that leaves a method call as-is. object.$get(i) for example will generate object.$get(i) instead of object[i].</li>
 </ul>
@@ -180,21 +181,42 @@ don't have a method that their Javascript counterpart has. For example for Numbe
 <!-- ------------------------  -->
 <h2>STJS helper</h2>
 <p>
-	The org.stjs.javascript.stjs.STJS interface is the bridge to the Javascript code coming with the generator. It offers some helpers for different type inexistent in Javascript:
+	The org.stjs.javascript.stjs.STJS interface is the bridge to the JavaScript code coming with the generator. It offers some helpers for different type inexistent in JavaScript:
 	<ul>
-		<li><b>boolean isEnum(obj)</b> - return true if the given Javascript object is an enum entry (the Javascript wrapper needed to allow the usage of Java enums)</li>
-		<li><b>Exception exception(Object obj)</b> - allows you in Java to use any object as an exception. At runtime, the executed Javascript code will return exactly the received parameter</li>
+		<li><b>boolean isEnum(obj)</b> - return true if the given JavaScript object is an enum entry (the JavaScript wrapper needed to allow the usage of Java enums)</li>
+		<li><b>Exception exception(Object obj)</b> - allows you in Java to use any object as an exception. At runtime, the executed JavaScript code will return exactly the received parameter</li>
 		<li><b>public &lt;T&gt; T parseJSON(String json, Class&lt;T&gt; clazz)</b> - parses a JSON string in a "type-safe" manner by creating the object hierarchy using the given type definition</li>
 	</ul>
 </p>
 <!-- ------------------------  -->
-<h2>Test helper configuration</h2>
+<h2>JUnit runner configuration</h2>
+
 <p>
-	Before using the test helper you have to add the dependency:
+	The STJS JUnit runner runs your unit tests in one or multiple browsers of your chosing. To do so, it builds an HTML page that includes all the 
+	necessary HTML and javascript necessary to execute your tests and return the result to JUnit. The HTML page that will be sent to the browser 
+	includes the following things:
+	<ul>
+		<li>
+			The javascript version of all the classes that are being tested, as well as that of all classes they depend on.
+		</li>
+		<li>
+			If any bridge class or interface is used, the javascript code that corresponds. For example, if the classes under test use jQuery 1.7.1,
+			then jQuery-1.7.1.js is imported in the HTML page that is sent to the browser. 
+		</li>
+		<li>
+			If specified with the <b>@ScriptsBefore</b> or <b>@ScriptsAfter</b> annotations, a set of javascript files that are required for the
+			tests to pass but that are not declared as a STJS bridge class or interface.
+		</li>
+		<li>
+			If specified with the <b>@HtmlFixture</b> annotation, a fragment of HTML that is required for the tests to pass.
+		</li>
+	</ul>
 </p>
 
-<div class="xmlcode">
-<pre>
+<p>
+	Before using the JUnit runner you have to add the dependency to your projects pom.xml:
+</p>
+<pre class="brush: xml">
 &lt;dependency&gt;
   &lt;groupId&gt;org.st-js&lt;/groupId&gt;
   &lt;artifactId&gt;test-helper&lt;/artifactId&gt;
@@ -202,38 +224,278 @@ don't have a method that their Javascript counterpart has. For example for Numbe
   &lt;scope&gt;test&lt;/scope&gt;
 &lt;/dependency&gt;
 </pre>
-</div>
 
 <p>
-	To activate the STJS test helper you have to annotate your JUnit test classes this way:
-	<b>@RunWith(STJSTestDriverRunner.class)</b>. This annotation will transfer to the STJS test helper the execution of easy unit test method.
-
-	You can configure some of the test driver's parameters in a file called <b>stjs-test.properties</b> that is somewhere in your class path. You can also
-	overwrite this values using the System properties (for example when launching the tests via Maven).<br/>
-	<ul>
-<li><b>stjs.test.port</b> - the port opened by the test driver waiting for connection from the browsers. Default value is 8055</li>
-<li><b>stjs.test.browserCount</b> - the minimum number of browsers the test driver has to wait to connect before launching the tests. Default value is 1</li>
-<li><b>stjs.test.wait</b> - the time (in seconds) the test driver waits for the number of configured browsers to connect. Default value is 10</li>
-<li><b>stjs.test.skipIfNoBrowser</b> - if this is true, if no browser was connected that it considers the tests as ignored (can be used in some batch processing, without failing completely the tests). Default value is false</li>
-<li><b>stjs.test.startBrowser</b> - if true, if after 2 seconds (normally check of the client's code check is 1 second) no browser connected to the test driver,
-	it tries to start the system's default browser. This can only work is the Desktop.isDesktopSupported() check return true (so usually a developer's machine). Default value is true</li>
-<li><b>stjs.test.testTimeout</b> - the time (in seconds) the test driver waits for a test to return a result from the browser. Passed this time the test is considered failed. Default value is 2 seconds</li>
-	</ul>
-<li><b>stjs.test.debug</b> - if this is true, debug information is displayed. Default value is false</li>
+	To activate the STJS JUnit runner you have to annotate your JUnit test classes this way:
+	<b>@RunWith(STJSTestDriverRunner.class)</b>.
 </p>
 
-<!-- ------------------------  -->
-<h2>Javascript, DOM and jQuery documentation</h2>
 <p>
-	STJS provides bridges for the basic Javascript objects, the DOM objects, jQuery (1.6) and jQuery UI (1.8). The bridges follow as closely as possible their
-	Javascript counterpart. So for the moment, please use the documentation provided by other reference websites:
+	Besides the standard JUnit annotations such as <b>@Test</b>, <b>@Before</b>, <b>@After</b>, the STJSTestDriverRunner supports several other
+	custom annotations.
+</p>
+
+<ul>
+	<li>
+		<p>
+			<b>@HtmlFixture</b> is an optional annotation that can be applied to your test class, and is used to force the STJSTestDriverRunner to include a
+			specific HTML fragment on the page. If the fragment is short enough, it can be specified verbatim in the annotation.
+		</p> 
+<pre class="brush: java">
+@RunWith(STJSTestDriverRunner.class)
+@HtmlFixture("&lt;div id='importantContainer'&gt;&lt;/div&gt;")
+public class TestSimpleFixture {
+	...
+}</pre>
+		<p>
+			If the fragment is longer the annotation can specify a path to a classpath resource that contains the HTML code. Then html fragment file
+			will be looked up using ClassLoader.getResourceAsStream(). This means that STJSTestDriverRunner (trough the ClassLoader) will first
+			attempt to find the file in your class path. If the file cannot be found in your classpath, then STJSTestDriverRunner will look for the
+			file starting at the "document root" or your webapp, if any. For a typical maven project, this means it will first look in 
+			/target/WEB-INF/classes, and then in /target.
+		</p> 
+<pre class="brush: java">
+@RunWith(STJSTestDriverRunner.class)
+@HtmlFixture(url = "/SomeComplexHtmlFragment.html")
+public class TestSimpleFixture {
+	...
+}</pre>
+	</li>
+	<li>
+		<p>
+			<b>@ScriptsBefore</b> and <b>@ScriptsAfter</b> are optional annotations that can be applied to your test class, and are used to force the
+			STJSTestDriverRunner to include extra javascript files in the &lt;head&gt; section of the HTML page that is sent to the browser. Script files
+			specified in <b>@ScriptsBefore</b> will be included in the HTML page before the class under test and all its dependencies. Script files 
+			specifed in <b>@ScriptsAfter</b> will be included in the HTML page after the class under test and all its dependencies.
+		</p>
+		<p>
+			Each of the strings passed as a value to these annotations will be used verbatim in the generated HTML. This means that you can pass either
+			a path to a javascript file that exists within your project, or one that resides on another domain.
+		</p>
+<pre class="brush: java">
+@RunWith(STJSTestDriverRunner.class)
+@ScriptsBefore({"/someLibBefore.js"})
+@ScriptsAfter({"http://example.com/someLibAfter.js"})
+public class TestHelloWorld {
+	...
+}</pre> 
+		<p>Will generate the following fragment of HTML</p>
+<pre class="brush: xml">
+&lt;head&gt;
+  &lt;!-- contents of @ScriptsBefore --&gt;
+  &lt;script src="/someLibBefore.js" type="text/javascript"&gt;&lt;/script&gt;
+  
+  &lt;!-- Class under test plus other stuff required by stjs  --&gt;
+  &lt;script src="/stjs.js" type="text/javascript"&gt;&lt;/script&gt;
+  &lt;script src="/HelloWorld.js" type="text/javascript"&gt;&lt;/script&gt;
+  
+  &lt;!-- contents of @ScriptsAfter --&gt;
+  &lt;script src="http://example.com/someLibAfter.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;/head&gt;
+</pre>
+		<p>
+			If the script passed to this annotation is a reference to a file defined in your project (ie: it doesn't start with a protocol handler 
+			such as http:, file:, ftp:, https:, etc...), then the script file will be looked up using ClassLoader.getResourceAsStream(). This means
+			that STJSTestDriverRunner (trough the ClassLoader) will first attempt to find the file in your class path. If the file cannot be found 
+			in your classpath, then STJSTestDriverRunner will look for the file starting at the "document root" or your webapp, if any. For a typical
+			maven project, this means it will first look in /target/WEB-INF/classes, and then in /target.
+		</p>
+	</li>
+</ul>
+
+<p>
+	You can configure some of the test driver's parameters in a file called <b>stjs-test.properties</b> that must be placed the root of your class path. The properties supported by this file are the following:
+</p>
+
+<table class="methods">
+	<tr>
+		<th>property</th>
+		<th>description</th>
+	</tr>
+	<tr>
+		<td><b>stjs.test.config</b></td>
+		<td>The classpath location of properties file that contains the stjs test driver configuration. Default value is "/stjs-test.properties"</td>
+	</tr>
+	<tr>
+		<td><b>stjs.test.browsers</b></td>
+		<td>
+			A comma separated list of browsers on which to run the tests. A test is successful only if it has
+			been run successfully on all the browsers in this list. See the table below for a description of 
+			the supported browsers. The default value is "desktopDefault".
+		</td>
+	</tr>
+	<tr>
+		<td><b>stjs.test.port</b></td>
+		<td>the port opened by the test driver waiting for connection from the browsers. Default value is 8055</td>
+	</tr>
+	<tr>
+		<td><b>stjs.test.wait</b></td>
+		<td>the time (in seconds) the test driver waits for the number of configured browsers to connect. Default value is 10</td>
+	</tr>
+	<tr>
+		<td><b>stjs.test.skipIfNoBrowser</b></td>
+		<td>if this is true, if no browser was connected that it considers the tests as ignored (can be used in some batch processing, without failing completely the tests). Default value is false</td>
+	</tr>
+	<tr>
+		<td><b>stjs.test.startBrowser</b></td>
+		<td>
+			if true, if after 2 seconds (normally check of the client's code check is 1 second) no browser connected to the test driver,
+			it tries to start the system's default browser. This can only work is the Desktop.isDesktopSupported() check return true (so usually a developer's machine). Default value is true
+		</td>
+	</tr>
+	<tr>
+		<td><b>stjs.test.testTimeout</b></td>
+		<td>the time (in seconds) the test driver waits for a test to return a result from the browser. Passed this time the test is considered failed. Default value is 2 seconds</td>
+	</tr>
+	<tr>
+		<td><b>stjs.test.debug</b></td>
+		<td>if this is true, debug information is displayed. Default value is false</td>
+	</tr>
+	<tr>
+		<td><b>firefox.bin</b></td>
+		<td>the path to the binary of firefox (see "firefox" in the table below)</td>
+	</tr>
+	<tr>
+		<td><b>chrome.bin</b></td>
+		<td>the path to the binary of Google Chrome or chromium (see "chrome" in the table below)</td>
+	</tr>
+	<tr>
+		<td><b>phantomjs.bin</b></td>
+		<td>the path to the binary of phantomjs (see "phantomjs" in the table below)</td>
+	</tr>
+</table>
+<p>
+	All these properties can be overridden by specifying them as system properties when launching the java vm. For example to force debug mode when 
+	launching the tests via Maven you can run `mvn test -Dstjs.test.debug=true`.
+</p>
+<p>
+	The browsers that can be added to the stjs.test.browsers property are the following.
+</p>
+
+<table class="methods">
+	<tr>
+		<th colspan="2">Browsers that require a graphics system</th>
+	</tr>
+	<tr>
+		<th>Name</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td><b>desktopDefault</b></td>
+		<td>
+			<p>Launches whichever browser is the default for the desktop on which the tests are running.</p> 
+			<p>
+				On windows the browser is launched using Desktop.getDesktop().browse(). On other systems
+				it is launched using the "xdg-open" utility. This browser might fail to launch on headless
+				machines in some operating systems, for example a linux server without an X11 server.
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<td><b>firefox</b></td>
+		<td>
+			<p>Launches firefox.</p>
+			<p>
+				STJS will look in the common firefox installation directories to find the
+				binary. If firefox is not installed in the standard location on your target system, you can
+				specify the path of the binary in the firefox.bin property in "stjs-test.properties", in
+				whichever file you specified in the stjs.test.config system property or on the command line.
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<td><b>chrome</b></td>
+		<td>	
+			<p>Launches Goole Chrome (or chromium).</p>
+			<p>
+				STJS will look in the common chrome installation directories
+				to find the binary. If chrome is not installed in the standard location on your target system, you
+				can specify the path of the binary in the chrome.bin property in "stjs-test.properties", in
+				whichever file you specified in the stjs.test.config system property or on the command line.
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<th colspan="2">Browsers that can run on headless systems</th>
+	</tr>
+	<tr>
+		<th>Name</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td><b>rhino</b></td>
+		<td>
+			<p>Runs the tests in an instance of Rhino that is embedded in stjs' test runner.</p>
+			<p>No additional software needs to be installed on the target system for this browser to run.</p>
+		</td>
+	</tr>
+	<tr>
+		<td><b>remote</b></td>
+		<td>
+			<p>Doesn't launch any browsers.</p>
+			<p>
+				It assumes that a browser is already running somewhere (potentially
+				on a remote machine), and that this browsers periodically polls the stjs test runners HTTP port to
+				fetch unit tests to run.
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<td><b>phantomjs</b></td>
+		<td>
+			<p>Launches all the tests in phantomjs.</p>
+			<p>
+				Phantomjs is a lightweight, headless browser based on webkit
+				and V8. Phantomjs needs to be installed on the target system for this browser to run.
+			</p>
+			<p>
+				STJS will 
+				look in the common phantomjs installation directories to find the binary. If phantomjs is not 
+				installed in the standard location on your target system, you can specify the path of the binary 
+				in the phantomjs.bin property in "stjs-test.properties", in whichever file you specified in the 
+				stjs.test.config system property or on the command line.
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<td><b>headlessFirefox</b></td>
+		<td>
+			<p>Only supported on systems that use an X11 server.</p>
+			<p>
+				This browser needs Xvfb and firefox to be installed
+				on the target system. Xvfb (X Virutal Frame Buffer) is an X11 server that doesn't need any real 
+				graphics capability to run, and will happily run on servers that do not have a graphics card.
+			</p>
+			<p>
+				This browser will first launch an instance of Xvfb, and then launch a firefox instance instructing it
+				to use Xvfb as its display.
+			</p>
+			<p>
+				Xvfb is expcted to be in your PATH. The path to the firefox binary can be configured in the same
+				way as for the "firefox" browser.
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<td><b>headlessChrome</b></td>
+		<td>
+			Same as headlessFirefox but starts Google Chrome instead.
+		</td>
+	</tr>
+</table>
+
+<!-- ------------------------  -->
+<h2>JavaScript, DOM and jQuery documentation</h2>
+<p>
+	STJS provides bridges for the basic JavaScript objects, the DOM objects, jQuery (1.6) and jQuery UI (1.8). The bridges follow as closely as possible their
+	JavaScript counterpart. So for the moment, please use the documentation provided by other reference websites:
 	<ul>
-		<li>Javascript and DOM - <a href="http://www.w3schools.com/jsref/default.asp" target="_blank">w3schools</a></li>
+		<li>JavaScript and DOM - <a href="http://www.w3schools.com/jsref/default.asp" target="_blank">w3schools</a></li>
 		<li>jQuery - <a href="http://docs.jquery.com" target="_blank">jQuery</a></li>
 		<li>jQuery UI - <a href="http://jqueryui.com/demos/" target="_blank">jQuery UI</a></li>
 	</ul>
 
-	For Javascript and DOM the global functions and objects (like setInterval or window) are found in the <b>org.stjs.javascript.Global</b> class.<br/>
+	For JavaScript and DOM the global functions and objects (like setInterval or window) are found in the <b>org.stjs.javascript.Global</b> class.<br/>
 	For jQuery, the $ object and function are found in the <b>org.stjs.javascript.jquery.GlobalJQuery</b> class.
 </p>
 

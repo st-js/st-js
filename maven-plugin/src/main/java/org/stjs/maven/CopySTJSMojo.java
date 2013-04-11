@@ -30,9 +30,7 @@ import org.apache.maven.project.MavenProject;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
 /**
- * This is the Maven plugin that launches the Javascript generator. The plugin needs a list of packages containing the
- * Java classes that will processed to generate the corresponding Javascript classes. The Javascript files are generated
- * in a configured target folder.
+ * This Maven plugin copies the Javascript (generated or bridged) from dependencies to the final artifact
  * 
  * @goal copy-js
  * @phase prepare-package
