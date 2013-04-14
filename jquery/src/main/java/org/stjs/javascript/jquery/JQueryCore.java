@@ -33,6 +33,15 @@ import org.stjs.javascript.utils.NameValue;
 @SyntheticType
 public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 	/************* ajax ***************/
+	//since 1.5
+	public JQueryXHR ajax(String url);
+
+	//since 1.5
+	public JQueryXHR ajax(String url, AjaxParams ajaxParams);
+
+	//since 1.0
+	public JQueryXHR ajax(AjaxParams ajaxParams);
+
 	public FullJQuery ajaxStart(Callback3<Event, JQueryXHR, AjaxParams> handler);
 
 	public FullJQuery ajaxStop(Callback3<Event, JQueryXHR, AjaxParams> handler);
@@ -62,16 +71,34 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	public FullJQuery dequeue(String queueName);
 
+	//since 1.0
+	public FullJQuery fadeIn();
+
+	//since 1.0
 	public FullJQuery fadeIn(Object duration);
 
+	//since 1.0
+	public FullJQuery fadeIn(Object duration, Callback1<Element> complete);
+
+	//since 1.4.3
 	public FullJQuery fadeIn(Object duration, String easing);
 
+	//since 1.4.3
 	public FullJQuery fadeIn(Object duration, String easing, Callback1<Element> complete);
 
+	//since 1.0
+	public FullJQuery fadeOut();
+
+	//since 1.0
 	public FullJQuery fadeOut(Object duration);
 
+	//since 1.0
+	public FullJQuery fadeOut(Object duration, Callback1<Element> complete);
+
+	//since 1.4.3
 	public FullJQuery fadeOut(Object duration, String easing);
 
+	//since 1.4.3
 	public FullJQuery fadeOut(Object duration, String easing, Callback1<Element> complete);
 
 	public FullJQuery fadeTo(Object duration, double opacity);
@@ -96,22 +123,49 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	public FullJQuery queue(String queueName);
 
+	//since 1.0
 	public FullJQuery slideDown();
 
+	//since 1.0
 	public FullJQuery slideDown(Object duration);
 
+	//since 1.0
+	public FullJQuery slideDown(Object duration, Callback1<Element> complete);
+
+	//since 1.4.3
+	public FullJQuery slideDown(Object duration, String easing);
+
+	//since 1.4.3
 	public FullJQuery slideDown(Object duration, String easing, Callback1<Element> complete);
 
+	//since 1.0
 	public FullJQuery slideToggle();
 
+	//since 1.0
 	public FullJQuery slideToggle(Object duration);
 
+	//since 1.0
+	public FullJQuery slideToggle(Object duration, Callback1<Element> complete);
+
+	//since 1.4.3
+	public FullJQuery slideToggle(Object duration, String easing);
+
+	//since 1.4.3
 	public FullJQuery slideToggle(Object duration, String easing, Callback1<Element> complete);
 
+	//since 1.0
 	public FullJQuery slideUp();
 
+	//since 1.0
 	public FullJQuery slideUp(Object duration);
 
+	//since 1.0
+	public FullJQuery slideUp(Object duration, Callback1<Element> complete);
+
+	//since 1.4.3
+	public FullJQuery slideUp(Object duration, String easing);
+
+	//since 1.4.3
 	public FullJQuery slideUp(Object duration, String easing, Callback1<Element> complete);
 
 	public FullJQuery stop();
@@ -137,13 +191,21 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	public FullJQuery toggleClass(String className, boolean on);
 
-	public FullJQuery val(Object d);
-
 	public Object val();
 
+	public FullJQuery val(Object d);
+
+	//since 1.0
+	public Object attr(String attrName);
+
+	//since 1.0
 	public FullJQuery attr(String name, Object value);
 
-	public Object attr(String attrName);
+	//since 1.0
+	public FullJQuery attr(Map<String, String> $map);
+
+	//since 1.1
+	//public FullJQuery attr(String attrName, Function2<Integer, Object, Object>);
 
 	public FullJQuery removeAttr(String name);
 
@@ -377,12 +439,22 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	public FullJQuery unbind(Event event);
 
+	//since 1.4.2
 	public FullJQuery undelegate();
 
+	//since 1.6
+	public FullJQuery undelegate(String namespace);
+
+	//since 1.4.2
+	public FullJQuery undelegate(String selector, String eventType);
+
+	//since 1.4.2
 	public FullJQuery undelegate(String selector, String eventType, EventHandler handler);
 
+	//since 1.4.2
 	public FullJQuery undelegate(String selector, String eventType, Map<String, Object> eventData, EventHandler handler);
 
+	//since 1.4.3
 	public FullJQuery undelegate(String selector, Map<String, EventHandler> handlers);
 
 	public FullJQuery unload(EventHandler handler);
@@ -539,6 +611,8 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	public FullJQuery last();
 
+	public FullJQuery map(Function2<Integer, Element, Element> callback);
+
 	public FullJQuery next();
 
 	public FullJQuery next(String selector);
@@ -565,11 +639,23 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 
 	public FullJQuery parents(String selector);
 
+	//since 1.4
 	public FullJQuery parentsUntil(String selector);
 
+	//since 1.4
+	public FullJQuery parentsUntil(String selector, String filter);
+
+	//since 1.6
 	public FullJQuery parentsUntil(JQueryCore<?> jq);
 
+	//since 1.6
+	public FullJQuery parentsUntil(JQueryCore<?> jq, String filter);
+
+	//since 1.6
 	public FullJQuery parentsUntil(Element element);
+
+	//since 1.6
+	public FullJQuery parentsUntil(Element element, String filter);
 
 	public FullJQuery prev();
 
@@ -594,4 +680,19 @@ public interface JQueryCore<FullJQuery extends JQueryCore<?>> {
 	public FullJQuery slice(int start);
 
 	public FullJQuery slice(int start, int end);
+
+	/************* properties ***************/
+
+	//since 1.3
+	public Element context = null;
+
+	//since 1.0
+	public int length = 0;
+
+	//since 1.3
+	public String selector = "";
+
+	//since 1.0
+	public String version = "";
+
 }

@@ -19,6 +19,7 @@ import org.stjs.javascript.dom.DOMEvent;
 import org.stjs.javascript.dom.Document;
 import org.stjs.javascript.functions.Callback1;
 import org.stjs.javascript.functions.Function1;
+import org.w3c.dom.events.Event;
 
 abstract public class Window {
 	public boolean closed;
@@ -46,6 +47,7 @@ abstract public class Window {
 	public Window self;
 	public String status;
 	public Window top;
+	public Event event;// maybe has to be extended, TODO :: check the support
 
 	public Function1<DOMEvent, String> onbeforeunload;
 	public Callback1<DOMEvent> onload;
