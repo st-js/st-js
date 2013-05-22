@@ -16,6 +16,7 @@
 package org.stjs.javascript;
 
 import org.stjs.javascript.annotation.Adapter;
+import org.stjs.javascript.annotation.Template;
 import org.stjs.javascript.functions.Function1;
 
 /**
@@ -26,82 +27,102 @@ import org.stjs.javascript.functions.Function1;
  */
 @Adapter
 public class JSStringAdapter {
+	@Template("adapter")
 	public static String anchor(String applyTo, String anchor) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String big(String applyTo) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String blink(String applyTo) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String bold(String applyTo) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String fixed(String applyTo) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String fontcolor(String applyTo, String color) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String fontsize(String applyTo, int size) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String italics(String applyTo) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String link(String applyTo, String url) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String small(String applyTo) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String strike(String applyTo) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String sub(String applyTo) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String sup(String applyTo) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static Array<String> match(String applyTo, RegExp re) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static Array<String> split(String applyTo, String re) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static Array<String> split(String applyTo, String re, int limit) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String replace(String applyTo, RegExp re, String repl) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String replace(String applyTo, RegExp re, Function1<String, String> replaceFunction) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static int charCodeAt(String applyTo, int x) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String fromCharCode(Class<? extends String> applyTo, int... codes) {
 		throw new UnsupportedOperationException();
 	}

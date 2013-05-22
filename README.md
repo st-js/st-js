@@ -46,5 +46,5 @@ The Java code you write (with the purpose to generate Javascript) will not be ex
 
 Please note that you need at least *Java 6* to have ST-JS compiling your projects.
 
-You can find the documentation, a tutorial, the change log and how to get in contact with us on the site's website [http://www.st-js.org](http://www.st-js.org).
+You can find the documentation, a tutorial, the change log and how to get in contact with us on the project's website [http://www.st-js.org](http://www.st-js.org).
 

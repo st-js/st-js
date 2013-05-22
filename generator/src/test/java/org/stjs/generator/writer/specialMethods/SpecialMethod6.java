@@ -1,6 +1,9 @@
 package org.stjs.generator.writer.specialMethods;
 
+import org.stjs.javascript.annotation.Template;
+
 public class SpecialMethod6 {
+	@Template("array")
 	public static Object $array(Object... arguments) {
 		return 0;
 	}

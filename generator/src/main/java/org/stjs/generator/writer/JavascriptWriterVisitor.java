@@ -151,7 +151,7 @@ import org.stjs.javascript.annotation.GlobalScope;
  */
 public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
-	private final SpecialMethodHandlers specialMethodHandlers;
+	private final MethodCallTemplates specialMethodHandlers;
 
 	private final NameProvider names;
 
@@ -162,7 +162,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	private int currentComment = 0;
 
 	public JavascriptWriterVisitor(boolean generateSourceMap) {
-		specialMethodHandlers = new SpecialMethodHandlers();
+		specialMethodHandlers = new MethodCallTemplates();
 		names = new DefaultNameProvider();
 		printer = new JavascriptWriter(generateSourceMap);
 	}
@@ -1819,4 +1819,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	}
 
+	public JavascriptWriter getPrinter() {
+		return printer;
+	}
 }

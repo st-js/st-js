@@ -16,6 +16,7 @@
 package org.stjs.javascript;
 
 import org.stjs.javascript.annotation.Adapter;
+import org.stjs.javascript.annotation.Template;
 
 /**
  * here are the methods existent in Javascript for number objects and inexistent in the Java counterpart. The generator
@@ -25,18 +26,22 @@ import org.stjs.javascript.annotation.Adapter;
  */
 @Adapter
 public class JSNumberAdapter {
+	@Template("adapter")
 	public static String toFixed(Number n, int positions) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String toFixed(String n, int positions) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String toExponential(Number n, int positions) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static String toPrecision(Number n, int positions) {
 		throw new UnsupportedOperationException();
 	}

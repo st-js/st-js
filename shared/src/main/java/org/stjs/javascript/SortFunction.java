@@ -16,8 +16,10 @@
 package org.stjs.javascript;
 
 import org.stjs.javascript.annotation.JavascriptFunction;
+import org.stjs.javascript.annotation.Template;
 
 @JavascriptFunction
 public interface SortFunction<V> {
+	@Template("invoke")
 	public int $invoke(V a, V b);
 }

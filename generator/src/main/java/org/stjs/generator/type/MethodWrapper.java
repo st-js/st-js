@@ -19,6 +19,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.stjs.generator.utils.AnnotationUtils;
+
 /**
  * 
  * This is a wrapper around a method, but with the correct type for a generic type for example
@@ -132,7 +134,6 @@ public class MethodWrapper {
 	}
 
 	public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-		return method.getAnnotation(annotationClass);
+		return AnnotationUtils.getAnnotation(ownerType.getType(), method, annotationClass);
 	}
-
 }

@@ -16,6 +16,7 @@
 package org.stjs.javascript;
 
 import org.stjs.javascript.annotation.GlobalScope;
+import org.stjs.javascript.annotation.Template;
 import org.stjs.javascript.functions.Callback0;
 import org.stjs.javascript.stjs.STJS;
 
@@ -67,6 +68,7 @@ public class Global {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("typeOf")
 	public static String typeof(Object obj) {
 		throw new UnsupportedOperationException();
 	}
@@ -76,6 +78,7 @@ public class Global {
 	 * 
 	 * @return
 	 */
+	@Template("or")
 	public static <T> T $or(T value, T... otherValues) {
 		throw new UnsupportedOperationException();
 	}

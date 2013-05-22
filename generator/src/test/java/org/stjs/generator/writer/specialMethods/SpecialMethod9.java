@@ -1,6 +1,9 @@
 package org.stjs.generator.writer.specialMethods;
 
+import org.stjs.javascript.annotation.Template;
+
 public class SpecialMethod9 {
+	@Template("or")
 	public static Object $or(Object... arguments) {
 		return 0;
 	}

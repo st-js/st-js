@@ -16,6 +16,7 @@
 package org.stjs.javascript;
 
 import org.stjs.javascript.annotation.Adapter;
+import org.stjs.javascript.annotation.Template;
 
 /**
  * here are the methods existent in Javascript for objects and inexistent in the Java counterpart. The generator should
@@ -25,35 +26,42 @@ import org.stjs.javascript.annotation.Adapter;
  */
 @Adapter
 public class JSObjectAdapter {
-
+	@Template("get")
 	public static Object $get(Object obj, String property) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("put")
 	public static void $put(Object obj, String property, Object value) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static boolean hasOwnProperty(Object obj, String property) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("toProperty")
 	public static Map<String, Object> $prototype(Object obj) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("toProperty")
 	public static Object $constructor(Object obj) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("properties")
 	public static Map<String, Object> $properties(Object obj) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("properties")
 	public static <T> T $object(Map<String, Object> properties) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("js")
 	public static <T> T $js(String code) {
 		throw new UnsupportedOperationException();
 	}

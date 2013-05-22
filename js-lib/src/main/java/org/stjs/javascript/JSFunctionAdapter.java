@@ -16,6 +16,7 @@
 package org.stjs.javascript;
 
 import org.stjs.javascript.annotation.Adapter;
+import org.stjs.javascript.annotation.Template;
 import org.stjs.javascript.functions.Callback0;
 import org.stjs.javascript.functions.Callback1;
 import org.stjs.javascript.functions.Callback2;
@@ -36,52 +37,64 @@ import org.stjs.javascript.functions.Function4;
  */
 @Adapter
 public class JSFunctionAdapter {
+	@Template("adapter")
 	public static void call(Callback0 function, Object receiver) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static <P1> void call(Callback1<P1> function, Object receiver, P1 p1) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static <P1, P2> void call(Callback2<P1, P2> function, Object receiver, P1 p1, P2 p2) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static <P1, P2, P3> void call(Callback3<P1, P2, P3> function, Object receiver, P1 p1, P2 p2, P3 p3) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static <P1, P2, P3, P4> void call(Callback4<P1, P2, P3, P4> function, Object receiver, P1 p1, P2 p2, P3 p3,
 			P4 p4) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static <R> R call(Function0<R> function, Object receiver) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static <P1, R> void call(Function1<P1, R> function, Object receiver, P1 p1) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static <P1, P2, R> void call(Function2<P1, P2, R> function, Object receiver, P1 p1, P2 p2) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static <P1, P2, P3, R> void call(Function3<P1, P2, P3, R> function, Object receiver, P1 p1, P2 p2, P3 p3) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static <P1, P2, P3, P4, R> void call(Function4<P1, P2, P3, P4, R> function, Object receiver, P1 p1, P2 p2,
 			P3 p3, P4 p4) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static <T> T call(Object function, Object receiver, Object... args) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("adapter")
 	public static <T> T apply(Object function, Object receiver, Array<?> args) {
 		throw new UnsupportedOperationException();
 	}
