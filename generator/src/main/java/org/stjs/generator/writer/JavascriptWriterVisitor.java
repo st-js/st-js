@@ -1300,7 +1300,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(BinaryExpr n, GenerationContext context) {
 		TypeWrapper leftType = ASTNodeData.resolvedType(n.getLeft());
-		TypeWrapper rightType = ASTNodeData.resolvedType(n.getLeft());
+		TypeWrapper rightType = ASTNodeData.resolvedType(n.getRight());
 		boolean integerDivision = n.getOperator() == Operator.divide && ClassUtils.isIntegerType(leftType)
 				&& ClassUtils.isIntegerType(rightType);
 

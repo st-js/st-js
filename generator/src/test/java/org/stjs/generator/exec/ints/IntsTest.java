@@ -23,8 +23,12 @@ public class IntsTest {
 	}
 
 	@Test
-	public void testDoubleDivision() {
+	public void testDoubleDivision1() {
 		assertEquals(2.5, GeneratorTestHelper.execute(Ints4.class));
 	}
 
+	@Test
+	public void testDoubleDivision2() {
+		assertEquals(2.5, GeneratorTestHelper.execute(Ints5.class));
+	}
 }
