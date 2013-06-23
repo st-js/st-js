@@ -98,7 +98,7 @@ public class Generator {
 		File outputFile = getOutputFile(generationFolder.getAbsolutePath(), className);
 		GenerationContext context = new GenerationContext(inputFile, configuration);
 
-		CompilationUnit cu = parseAndResolve(classLoaderWrapper, inputFile, context);
+		CompilationUnit cu = parseAndResolve(classLoaderWrapper, inputFile, context, configuration.getSourceEncoding());
 
 		FileWriter writer = null;
 		FileWriter sourceMapWriter = null;
@@ -178,7 +178,7 @@ public class Generator {
 	}
 
 	private CompilationUnit parseAndResolve(ClassLoaderWrapper builtProjectClassLoader, File inputFile,
-			GenerationContext context) {
+			GenerationContext context, String sourceEncoding) {
 		CompilationUnitScope unitScope = new CompilationUnitScope(builtProjectClassLoader, context);
 		CompilationUnit cu = null;
 		InputStream in = null;

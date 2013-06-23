@@ -134,6 +134,11 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	 */
 	protected boolean pack;
 
+	/**
+	 * @parameter expression="${sourceEncoding}" default-value="${project.build.sourceEncoding}"
+	 */
+	private String sourceEncoding;
+
 	abstract protected List<String> getCompileSourceRoots();
 
 	abstract protected GenerationDirectory getGeneratedSourcesDirectory();
@@ -172,6 +177,9 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		GeneratorConfigurationBuilder configBuilder = new GeneratorConfigurationBuilder();
 		configBuilder.generateArrayHasOwnProperty(generateArrayHasOwnProperty);
 		configBuilder.generateSourceMap(generateSourceMap);
+		if (sourceEncoding != null) {
+			configBuilder.sourceEncoding(sourceEncoding);
+		}
 		// configBuilder.allowedPackage("org.stjs.javascript");
 		configBuilder.allowedPackage("org.junit");
 		// configBuilder.allowedPackage("org.stjs.testing");

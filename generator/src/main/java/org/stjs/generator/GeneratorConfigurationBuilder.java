@@ -15,6 +15,7 @@
  */
 package org.stjs.generator;
 
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,6 +31,7 @@ public class GeneratorConfigurationBuilder {
 	private Set<String> allowedJavaLangClasses = new HashSet<String>();
 	private boolean generateArrayHasOwnProperty = true;
 	private boolean generateSourceMap = false;
+	private String sourceEncoding = Charset.defaultCharset().name();
 
 	public GeneratorConfigurationBuilder allowedPackage(String packageName) {
 		allowedPackages.add(packageName);
@@ -61,6 +63,11 @@ public class GeneratorConfigurationBuilder {
 		return this;
 	}
 
+	public GeneratorConfigurationBuilder sourceEncoding(String sourceEncoding) {
+		this.sourceEncoding = sourceEncoding;
+		return this;
+	}
+
 	public GeneratorConfiguration build() {
 		allowedJavaLangClasses.add("Object");
 		allowedJavaLangClasses.add("String");
@@ -82,7 +89,7 @@ public class GeneratorConfigurationBuilder {
 		allowedPackages.add("java.lang");
 
 		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, generateArrayHasOwnProperty,
-				generateSourceMap);
+				generateSourceMap, sourceEncoding);
 	}
 
 }

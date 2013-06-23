@@ -23,13 +23,15 @@ public class GeneratorConfiguration {
 	private final Set<String> allowedJavaLangClasses;
 	private final boolean generateArrayHasOwnProperty;
 	private final boolean generateSourceMap;
+	private final String sourceEncoding;
 
 	GeneratorConfiguration(Collection<String> allowedPackages, Set<String> allowedJavaLangClasses,
-			boolean generateArrayHasOwnProperty, boolean generateSourceMap) {
+			boolean generateArrayHasOwnProperty, boolean generateSourceMap, String sourceEncoding) {
 		this.allowedPackages = allowedPackages;
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
 		this.generateArrayHasOwnProperty = generateArrayHasOwnProperty;
 		this.generateSourceMap = generateSourceMap;
+		this.sourceEncoding = sourceEncoding;
 	}
 
 	/**
@@ -51,6 +53,10 @@ public class GeneratorConfiguration {
 
 	public boolean isGenerateSourceMap() {
 		return generateSourceMap;
+	}
+
+	public String getSourceEncoding() {
+		return sourceEncoding;
 	}
 
 }
