@@ -40,14 +40,16 @@ public abstract class AnnotationUtils {
 		}
 
 		// find a method with the same signature in the new class
+		Method methodInAnnotatedClass;
 		try {
-			Method methodInAnnotatedClass = annotatedHelperClass.getDeclaredMethod(origMethod.getName(),
+			methodInAnnotatedClass = annotatedHelperClass.getDeclaredMethod(origMethod.getName(),
 					origMethod.getParameterTypes());
-			return methodInAnnotatedClass.getAnnotation(annotationClass);
-		} catch (Exception e) {
-			// method not found or security exception
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		} catch (NoSuchMethodException e) {
 			return null;
 		}
+		return methodInAnnotatedClass.getAnnotation(annotationClass);
 
 	}
 

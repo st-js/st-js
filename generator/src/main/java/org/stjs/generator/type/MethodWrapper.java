@@ -19,7 +19,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import javax.annotation.concurrent.Immutable;
+
 import org.stjs.generator.utils.AnnotationUtils;
+
+import com.google.common.base.Preconditions;
 
 /**
  * 
@@ -28,7 +32,8 @@ import org.stjs.generator.utils.AnnotationUtils;
  * @author acraciun
  * 
  */
-public class MethodWrapper {
+@Immutable
+public final class MethodWrapper {
 	private final Method method;
 	private final TypeWrapper returnType;
 	private final TypeWrapper[] parameterTypes;
@@ -39,13 +44,19 @@ public class MethodWrapper {
 
 	public MethodWrapper(Method method, TypeWrapper returnType, TypeWrapper[] parameterTypes, int modifiers,
 			TypeVariableWrapper<Method>[] typeParameters, TypeWrapper ownerType, boolean declared) {
+		Preconditions.checkNotNull(method);
+		Preconditions.checkNotNull(returnType);
+		Preconditions.checkNotNull(parameterTypes);
+		Preconditions.checkNotNull(typeParameters);
+		// Preconditions.checkNotNull(ownerType);
+
 		this.method = method;
 		this.returnType = returnType;
-		this.parameterTypes = parameterTypes;
+		this.parameterTypes = Arrays.copyOf(parameterTypes, parameterTypes.length);
 		this.modifiers = modifiers;
 		this.ownerType = ownerType;
 		this.declared = declared;
-		this.typeParameters = typeParameters;
+		this.typeParameters = Arrays.copyOf(typeParameters, typeParameters.length);
 	}
 
 	public String getName() {
@@ -57,7 +68,7 @@ public class MethodWrapper {
 	}
 
 	public TypeWrapper[] getParameterTypes() {
-		return parameterTypes;
+		return Arrays.copyOf(parameterTypes, parameterTypes.length);
 	}
 
 	public int getModifiers() {
@@ -69,7 +80,7 @@ public class MethodWrapper {
 	}
 
 	public TypeVariableWrapper<Method>[] getTypeParameters() {
-		return typeParameters;
+		return Arrays.copyOf(typeParameters, typeParameters.length);
 	}
 
 	/**

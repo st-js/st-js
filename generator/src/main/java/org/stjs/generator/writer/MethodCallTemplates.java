@@ -47,27 +47,35 @@ public class MethodCallTemplates {
 
 		// methodHandlers.put("java.lang.String.length", methodToPropertyHandler);
 
+		Enumeration<URL> configFiles;
 		try {
-			Enumeration<URL> configFiles = Thread.currentThread().getContextClassLoader()
-					.getResources(STJS_TEMPLATES_CONFIG_FILE);
-			while (configFiles.hasMoreElements()) {
-				loadConfigFile(configFiles.nextElement());
-			}
-		} catch (Exception e) {
+			configFiles = Thread.currentThread().getContextClassLoader().getResources(STJS_TEMPLATES_CONFIG_FILE);
+		} catch (IOException e) {
 			throw new RuntimeException(e);
+		}
+		while (configFiles.hasMoreElements()) {
+			loadConfigFile(configFiles.nextElement());
 		}
 	}
 
-	private void loadConfigFile(URL configFile) throws IOException, InstantiationException, IllegalAccessException,
-			ClassNotFoundException {
-		InputStream input = configFile.openStream();
+	private void loadConfigFile(URL configFile) {
+		InputStream input = null;
 		try {
+			input = configFile.openStream();
 			Properties props = new Properties();
 			props.load(input);
 			for (Map.Entry<Object, Object> entry : props.entrySet()) {
 				methodTemplates.put(entry.getKey().toString(),
 						(MethodCallTemplate) Class.forName(entry.getValue().toString()).newInstance());
 			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} catch (InstantiationException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
 		} finally {
 			Closeables.closeQuietly(input);
 		}

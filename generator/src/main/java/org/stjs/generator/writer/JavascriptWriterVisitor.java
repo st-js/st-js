@@ -112,8 +112,8 @@ import japa.parser.ast.type.VoidType;
 import japa.parser.ast.type.WildcardType;
 import japa.parser.ast.visitor.VoidVisitor;
 
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1585,6 +1585,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		case preDecrement:
 			printer.print("--");
 			break;
+		default:
+			break;
 		}
 
 		n.getExpr().accept(this, context);
@@ -1595,6 +1597,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			break;
 		case posDecrement:
 			printer.print("--");
+			break;
+		default:
 			break;
 		}
 	}
@@ -1814,7 +1818,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		n.getCatchBlock().accept(this, context);
 	}
 
-	public void writeSourceMap(GenerationContext context, FileWriter sourceMapWriter) throws IOException {
+	public void writeSourceMap(GenerationContext context, Writer sourceMapWriter) throws IOException {
 		printer.writeSourceMap(context, sourceMapWriter);
 
 	}

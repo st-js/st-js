@@ -55,7 +55,9 @@ public class JavascriptToJava {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} finally {
-			Closeables.closeQuietly(in);
+			if (in != null) {
+				Closeables.closeQuietly(in);
+			}
 		}
 	}
 

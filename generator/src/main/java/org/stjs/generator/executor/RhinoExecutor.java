@@ -17,23 +17,26 @@ package org.stjs.generator.executor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
+import com.google.common.io.Files;
 
 public class RhinoExecutor {
 	private Object addScript(ScriptEngine engine, File scriptFile) throws ScriptException {
-		FileReader input = null;
+		Reader input = null;
 		try {
-			input = new FileReader(scriptFile);
+			// XXX: here i may need to get the charset from configuration
+			input = Files.newReader(scriptFile, Charsets.UTF_8);
 			return engine.eval(input);
 		} catch (FileNotFoundException e) {
 			throw new ScriptException(e);
@@ -54,7 +57,7 @@ public class RhinoExecutor {
 		Reader reader = null;
 		try {
 			reader = new InputStreamReader(Thread.currentThread().getContextClassLoader()
-					.getResourceAsStream("stjs.js"));
+					.getResourceAsStream("stjs.js"), "UTF-8");
 			engine.eval(reader);
 			if (mainClassDisabled) {
 				engine.eval("stjs.mainCallDisabled=true;");
@@ -65,6 +68,8 @@ public class RhinoExecutor {
 				result = addScript(engine, srcFile);
 			}
 			return new ExecutionResult(result, null, null, 0);
+		} catch (UnsupportedEncodingException e) {
+			throw new ScriptException(e);
 		} finally {
 			Closeables.closeQuietly(reader);
 		}

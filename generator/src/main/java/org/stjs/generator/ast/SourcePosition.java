@@ -17,13 +17,20 @@ package org.stjs.generator.ast;
 
 import japa.parser.ast.Node;
 
+import java.io.Serializable;
+
 /**
  * This class indicated a position in a source file (line, column) where the given identifier starts.
  * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  * 
  */
-public class SourcePosition {
+public class SourcePosition implements Serializable {
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private final int line;
 	private final int column;
 

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.st-js</groupId>
@@ -38,6 +39,7 @@
 	</parent>
 
 	<modules>
+		<module>code-analysis</module>
 		<module>generator</module>
 		<module>shared</module>
 		<module>js-lib</module>
@@ -59,6 +61,12 @@
 		<maven-scm-manager-plexus.version>1.1</maven-scm-manager-plexus.version>
 		<maven-scm-provider-svnexe.version>1.1</maven-scm-provider-svnexe.version>
 
+		<!-- code analysis plugins -->
+		<findbugs-maven-plugin.version>2.5.2</findbugs-maven-plugin.version>
+
+		<maven-pmd-plugin.version>3.0.1</maven-pmd-plugin.version>
+		<maven-checkstyle-plugin.version>2.10</maven-checkstyle-plugin.version>
+		<findbugs.fork>false</findbugs.fork>
 	</properties>
 
 
@@ -93,6 +101,98 @@
 
 	</build>
 
+	<profiles>
+		<profile>
+			<id>code-analysis</id>
+			<activation>
+				<file>
+					<exists>.code-analysis.enabled</exists>
+				</file>
+			</activation>
+			<build>
+				<plugins>
+					<!-- static code analysis -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>findbugs-maven-plugin</artifactId>
+						<version>${findbugs-maven-plugin.version}</version>
+						<configuration>
+							<effort>Max</effort>
+							<threshold>Low</threshold>
+							<includeFilterFile>code-analysis/findbugs.xml</includeFilterFile>
+							<fork>${findbugs.fork}</fork>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>org.st-js</groupId>
+								<artifactId>code-analysis</artifactId>
+								<version>${project.version}</version>
+							</dependency>
+						</dependencies>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-pmd-plugin</artifactId>
+						<version>${maven-pmd-plugin.version}</version>
+
+						<configuration>
+							<linkXref>false</linkXref>
+							<printFailingErrors>true</printFailingErrors>
+							<rulesets>
+								<ruleset>/code-analysis/pmd.xml</ruleset>
+							</rulesets>
+							<failurePriority>3</failurePriority>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>org.st-js</groupId>
+								<artifactId>code-analysis</artifactId>
+								<version>${project.version}</version>
+							</dependency>
+						</dependencies>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<version>${maven-checkstyle-plugin.version}</version>
+						<configuration>
+							<configLocation>/code-analysis/checkstyle.xml</configLocation>
+							<logViolationsToConsole>true</logViolationsToConsole>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>org.st-js</groupId>
+								<artifactId>code-analysis</artifactId>
+								<version>${project.version}</version>
+							</dependency>
+						</dependencies>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 	<scm>
 		<connection>scm:git:git@github.com:st-js/st-js.git</connection>

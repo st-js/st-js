@@ -34,12 +34,10 @@ import org.stjs.javascript.annotation.STJSBridge;
  */
 public class BridgeClass implements ClassWithJavascript {
 	private final Class<?> clazz;
-	private final DependencyResolver dependencyResolver;
 
 	public BridgeClass(DependencyResolver dependencyResolver, Class<?> clazz) {
 		PreConditions.checkNotNull(dependencyResolver);
 		PreConditions.checkNotNull(clazz);
-		this.dependencyResolver = dependencyResolver;
 		this.clazz = clazz;
 	}
 

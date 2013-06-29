@@ -20,6 +20,10 @@ import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 
+import javax.annotation.Nonnull;
+
+import com.google.common.base.Preconditions;
+
 /**
  * The {@link WildcardTypeImpl} is an implementation of the {@link WildcardType} interface.
  * <p>
@@ -41,19 +45,21 @@ public final class WildcardTypeImpl implements WildcardType {
 	 * @throws NullPointerException
 	 *             if any argument is {@code null}
 	 */
-	public WildcardTypeImpl(final Type[] lowerBounds, final Type[] upperBounds) {
-		this.lowerBounds = lowerBounds;
-		this.upperBounds = upperBounds;
+	public WildcardTypeImpl(@Nonnull final Type[] lowerBounds, @Nonnull final Type[] upperBounds) {
+		Preconditions.checkNotNull(lowerBounds);
+		Preconditions.checkNotNull(upperBounds);
+		this.lowerBounds = Arrays.copyOf(lowerBounds, lowerBounds.length);
+		this.upperBounds = Arrays.copyOf(upperBounds, upperBounds.length);
 	}
 
 	@Override
 	public Type[] getLowerBounds() {
-		return lowerBounds;
+		return Arrays.copyOf(lowerBounds, lowerBounds.length);
 	}
 
 	@Override
 	public Type[] getUpperBounds() {
-		return upperBounds;
+		return Arrays.copyOf(upperBounds, upperBounds.length);
 	}
 
 	@Override

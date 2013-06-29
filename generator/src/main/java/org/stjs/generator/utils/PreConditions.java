@@ -32,6 +32,13 @@ public class PreConditions {
 		}
 	}
 
+	public static void checkStateNodeNodeNull(Node node, Object toTest, String message, Object... args) {
+		if (toTest == null) {
+			throw new NullPointerException("Line " + node.getBeginLine() + ":" + format(message, args));
+		}
+
+	}
+
 	public static <T> T checkNotNull(T obj) {
 		return checkNotNull(obj, "");
 	}
@@ -42,4 +49,5 @@ public class PreConditions {
 		}
 		return obj;
 	}
+
 }

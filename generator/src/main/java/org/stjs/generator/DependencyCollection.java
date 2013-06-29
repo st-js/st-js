@@ -24,6 +24,8 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
 
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
+
 /**
  * This class is used to arrange the list of all dependencies coming from the root classes, such that classes depend on
  * other classes found in the dependency list before they appear. This can be used for example to build the include list
@@ -96,7 +98,7 @@ public class DependencyCollection {
 		}
 	}
 
-	public static Comparator<Class<?>> dependencyComparator = new Comparator<Class<?>>() {
+	public static final Comparator<Class<?>> dependencyComparator = new Comparator<Class<?>>() {
 
 		/**
 		 * -1: if "b" or any child type of "b" (at any level) extends from "a" or any of "a"'s child type <br>
@@ -111,10 +113,10 @@ public class DependencyCollection {
 		 */
 		@Override
 		public int compare(Class<?> a, Class<?> b) {
-			return compare(a, b, true);
+			return tryCompare(a, b, true);
 		}
 
-		private int compare(Class<?> a, Class<?> b, boolean checkInverse) {
+		private int tryCompare(Class<?> a, Class<?> b, boolean checkInverse) {
 			if (a == b) {
 				return 0;
 			}
@@ -132,7 +134,7 @@ public class DependencyCollection {
 			if (!checkInverse) {
 				return direct;
 			}
-			int inverse = compare(b, a, false);
+			int inverse = tryCompare(b, a, false);
 
 			if (direct == -1 && inverse == -1) {
 				throw new IllegalArgumentException("Cannot decide the dependency order between the types:" + a
@@ -158,7 +160,9 @@ public class DependencyCollection {
 		}
 	};
 
-	public static class ClassWithJavascriptComparator implements Comparator<ClassWithJavascript> {
+	@SuppressWarnings(value = "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", justification = "This comparator will not be used with Serializable lists")
+	private static class ClassWithJavascriptComparator implements Comparator<ClassWithJavascript> {
+
 		private final ClassLoader classLoader;
 
 		public ClassWithJavascriptComparator(ClassLoader classLoader) {

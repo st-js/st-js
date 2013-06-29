@@ -18,6 +18,7 @@ package org.stjs.generator.utils;
 import static java.lang.String.format;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public abstract class Option<T> implements Iterable<T> {
 
@@ -87,12 +88,12 @@ public abstract class Option<T> implements Iterable<T> {
 
 				@Override
 				public Object next() {
-					throw new UnsupportedOperationException();
+					throw new NoSuchElementException();
 				}
 
 				@Override
 				public void remove() {
-					throw new UnsupportedOperationException();
+					throw new NoSuchElementException();
 				}
 			};
 		}
@@ -183,12 +184,12 @@ public abstract class Option<T> implements Iterable<T> {
 						produce = false;
 						return u;
 					}
-					throw new UnsupportedOperationException();
+					throw new NoSuchElementException();
 				}
 
 				@Override
 				public void remove() {
-					throw new UnsupportedOperationException();
+					throw new NoSuchElementException();
 				}
 			};
 		}

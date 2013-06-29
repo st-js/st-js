@@ -1,0 +1,30 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.st-js</groupId>
+	<artifactId>code-analysis</artifactId>
+
+	<parent>
+		<groupId>org.st-js</groupId>
+		<artifactId>stjs</artifactId>
+		<version>1.4.0-SNAPSHOT</version>
+	</parent>
+
+	<properties>
+		<!-- Maven extensions versions -->
+		<wagon-webdav.version>1.0-beta-2</wagon-webdav.version>
+	</properties>
+	<build>
+		<extensions>
+			<!-- Default extension for deploying the Artifacts -->
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-webdav</artifactId>
+				<version>${wagon-webdav.version}</version>
+			</extension>
+		</extensions>
+
+	</build>
+
+
+</project>

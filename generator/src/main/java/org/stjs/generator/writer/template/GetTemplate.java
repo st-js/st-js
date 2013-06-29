@@ -28,7 +28,7 @@ public class GetTemplate implements MethodCallTemplate {
 		}
 
 		currentHandler.getPrinter().print("[");
-		n.getArgs().get(arg++).accept(currentHandler, context);
+		n.getArgs().get(arg).accept(currentHandler, context);
 		currentHandler.getPrinter().print("]");
 		return true;
 	}

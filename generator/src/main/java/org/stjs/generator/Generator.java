@@ -19,14 +19,15 @@ import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -63,7 +64,9 @@ public class Generator {
 	public File getOutputFile(File generationFolder, String className, boolean generateDirectory) {
 		File output = new File(generationFolder, className.replace('.', File.separatorChar) + ".js");
 		if (generateDirectory) {
-			output.getParentFile().mkdirs();
+			if (!output.getParentFile().exists() && !output.getParentFile().mkdirs()) {
+				throw new RuntimeException("Unable to create parent folder for the output file:" + output);
+			}
 		}
 		return output;
 	}
@@ -100,15 +103,14 @@ public class Generator {
 
 		CompilationUnit cu = parseAndResolve(classLoaderWrapper, inputFile, context, configuration.getSourceEncoding());
 
-		FileWriter writer = null;
-		FileWriter sourceMapWriter = null;
+		BufferedWriter writer = null;
 		JavascriptWriterVisitor generatorVisitor = new JavascriptWriterVisitor(configuration.isGenerateSourceMap());
 
 		try {
 			// generate the javascript code
 			generatorVisitor.visit(cu, context);
 
-			writer = new FileWriter(outputFile);
+			writer = Files.newWriter(outputFile, Charset.forName(configuration.getSourceEncoding()));
 			writer.write(generatorVisitor.getGeneratedSource());
 			writer.flush();
 
@@ -116,7 +118,6 @@ public class Generator {
 			throw new RuntimeException("Could not open output file " + outputFile + ":" + e1, e1);
 		} finally {
 			Closeables.closeQuietly(writer);
-			Closeables.closeQuietly(sourceMapWriter);
 		}
 
 		// write properties
@@ -128,9 +129,12 @@ public class Generator {
 		stjsClass.store();
 
 		if (configuration.isGenerateSourceMap()) {
+			BufferedWriter sourceMapWriter = null;
+
 			try {
 				// write the source map
-				sourceMapWriter = new FileWriter(getSourceMapFile(generationFolder.getAbsolutePath(), className));
+				sourceMapWriter = Files.newWriter(getSourceMapFile(generationFolder.getAbsolutePath(), className),
+						Charset.forName(configuration.getSourceEncoding()));
 				generatorVisitor.writeSourceMap(context, sourceMapWriter);
 				sourceMapWriter.flush();
 
@@ -147,6 +151,10 @@ public class Generator {
 				}
 			} catch (IOException e) {
 				throw new RuntimeException("Could generate source map:" + e, e);
+			} finally {
+				if (sourceMapWriter != null) {
+					Closeables.closeQuietly(sourceMapWriter);
+				}
 			}
 
 		}
@@ -224,18 +232,27 @@ public class Generator {
 		}
 		File outputFile = new File(folder, STJS_FILE);
 		try {
-			Files.copy(new InputSupplier<InputStream>() {
-				@Override
-				public InputStream getInput() throws IOException {
-					return stjs;
-				}
-			}, outputFile);
+			Files.copy(new InputStreamSupplier(stjs), outputFile);
 		} catch (IOException e) {
 			throw new RuntimeException("Could not copy the " + STJS_FILE + " file to the folder " + folder + ":"
 					+ e.getMessage(), e);
 		} finally {
 			Closeables.closeQuietly(stjs);
 		}
+	}
+
+	private static final class InputStreamSupplier implements InputSupplier<InputStream> {
+		private final InputStream input;
+
+		public InputStreamSupplier(InputStream input) {
+			this.input = input;
+		}
+
+		@Override
+		public InputStream getInput() throws IOException {
+			return input;
+		}
+
 	}
 
 	/**

@@ -35,6 +35,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
+
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.Option;
@@ -53,7 +56,9 @@ import com.google.common.collect.Multimap;
  * @author acraciun,ekaspi
  * 
  */
+@Immutable
 public class ClassWrapper implements TypeWrapper {
+
 	private final Class<?> clazz;
 
 	private Map<String, FieldWrapper> fields = null;
@@ -71,7 +76,7 @@ public class ClassWrapper implements TypeWrapper {
 				ownerClass == clazz);
 	}
 
-	private TypeWrapper substituteType(TypeWrapper origType, Class<?> ownerClass, TypeWrapper[] typeArguments) {
+	private TypeWrapper substituteType(TypeWrapper origType, Class<?> ownerClass, @Nullable TypeWrapper[] typeArguments) {
 		if (typeArguments == null) {
 			return origType;
 		}
@@ -140,6 +145,7 @@ public class ClassWrapper implements TypeWrapper {
 				parameterTypes, ownerClass, actualTypeArgs), modifiers, typeParameters, this, ownerClass == clazz);
 	}
 
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "PZLA_PREFER_ZERO_LENGTH_ARRAYS", justification = "null is actually for a raw class")
 	private TypeWrapper[] getActualTypeArgs(Type type, Class<?> subTypeClass, TypeWrapper[] subTypeActualTypeArgs) {
 		if (type instanceof Class<?>) {
 			return null;
@@ -247,11 +253,11 @@ public class ClassWrapper implements TypeWrapper {
 	public String getSimpleName() {
 		return clazz.getSimpleName();
 	}
-	
+
 	/**
 	 * Returns the binary name of the wrapped classed (as defined in JLS §13.1) excluding the package name.
 	 */
-	public String getSimpleBinaryName(){
+	public String getSimpleBinaryName() {
 		String packageName = clazz.getPackage().getName();
 		return clazz.getName().substring(packageName.length() + 1);
 	}
@@ -420,19 +426,24 @@ public class ClassWrapper implements TypeWrapper {
 		return clazz == other.clazz;
 	}
 
+	@Override
+	public int hashCode() {
+		return clazz.hashCode();
+	}
+
 	public boolean isInnerType() {
 		return clazz.getDeclaringClass() != null;
 	}
-	
-	public boolean isAnonymousClass(){
+
+	public boolean isAnonymousClass() {
 		return clazz.isAnonymousClass();
 	}
-	
-	public boolean hasAnonymousDeclaringClass(){
-		if(clazz.getDeclaringClass() == null){
+
+	public boolean hasAnonymousDeclaringClass() {
+		if (clazz.getDeclaringClass() == null) {
 			return false;
 		}
-		if(clazz.getDeclaringClass().isAnonymousClass()){
+		if (clazz.getDeclaringClass().isAnonymousClass()) {
 			return true;
 		}
 		return this.getDeclaringClass().getOrNull().hasAnonymousDeclaringClass();

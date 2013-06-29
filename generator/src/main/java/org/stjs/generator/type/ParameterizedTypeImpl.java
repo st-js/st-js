@@ -4,15 +4,24 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
+import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
+
+import com.google.common.base.Preconditions;
+
+@Immutable
 public final class ParameterizedTypeImpl implements ParameterizedType {
 
 	private final Type rawType;
 	private final Type[] actualTypeArguments;
 	private final Type owner;
 
-	public ParameterizedTypeImpl(Type rawType, Type[] actualTypeArguments, Type owner) {
+	public ParameterizedTypeImpl(@Nonnull Type rawType, @Nonnull Type[] actualTypeArguments, Type owner) {
+		Preconditions.checkNotNull(rawType);
+		Preconditions.checkNotNull(actualTypeArguments);
+		// Preconditions.checkNotNull(owner);
 		this.rawType = rawType;
-		this.actualTypeArguments = actualTypeArguments;
+		this.actualTypeArguments = Arrays.copyOf(actualTypeArguments, actualTypeArguments.length);
 		this.owner = owner;
 	}
 
@@ -21,7 +30,7 @@ public final class ParameterizedTypeImpl implements ParameterizedType {
 	}
 
 	public Type[] getActualTypeArguments() {
-		return actualTypeArguments;
+		return Arrays.copyOf(actualTypeArguments, actualTypeArguments.length);
 	}
 
 	public Type getOwnerType() {

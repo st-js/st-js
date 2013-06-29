@@ -30,6 +30,44 @@ public class GenericArrayTypeWrapper extends ClassWrapper {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((componentType == null) ? 0 : componentType.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		GenericArrayTypeWrapper other = (GenericArrayTypeWrapper) obj;
+		if (componentType == null) {
+			if (other.componentType != null) {
+				return false;
+			}
+		} else if (!componentType.equals(other.componentType)) {
+			return false;
+		}
+		if (type == null) {
+			if (other.type != null) {
+				return false;
+			}
+		} else if (!type.equals(other.type)) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
 	public Type getType() {
 		return type;
 	}

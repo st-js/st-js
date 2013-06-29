@@ -17,8 +17,8 @@ package org.stjs.generator.writer;
 
 import japa.parser.ast.Node;
 
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 
 import org.stjs.generator.GenerationContext;
 
@@ -150,7 +150,7 @@ public class JavascriptWriter {
 		}
 	}
 
-	public void writeSourceMap(GenerationContext context, FileWriter sourceMapWriter) throws IOException {
+	public void writeSourceMap(GenerationContext context, Writer sourceMapWriter) throws IOException {
 		if (!generateSourceMap) {
 			throw new IllegalStateException("Cannot call this method for writer that do not generate source maps");
 		}

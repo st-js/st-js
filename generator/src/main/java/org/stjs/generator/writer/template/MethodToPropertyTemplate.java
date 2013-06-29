@@ -36,7 +36,7 @@ public class MethodToPropertyTemplate implements MethodCallTemplate {
 		} else {
 			currentHandler.getPrinter().print(n.getName().substring(start));
 			currentHandler.getPrinter().print(" = ");
-			n.getArgs().get(arg++).accept(currentHandler, context);
+			n.getArgs().get(arg).accept(currentHandler, context);
 		}
 		return true;
 	}

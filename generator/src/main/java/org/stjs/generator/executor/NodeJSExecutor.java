@@ -21,9 +21,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
+
 public class NodeJSExecutor {
 	private static final String nodeJS = "node";
 
+	@SuppressWarnings(value = "REC_CATCH_EXCEPTION")
 	public ExecutionResult run(File srcFile) {
 		try {
 			Process p = Runtime.getRuntime().exec(new String[] { nodeJS, srcFile.getAbsolutePath() });
@@ -42,7 +45,8 @@ public class NodeJSExecutor {
 
 	private String readStream(InputStream errStream) throws IOException {
 		StringBuilder builder = new StringBuilder();
-		BufferedReader in = new BufferedReader(new InputStreamReader(errStream));
+		// XXX: here i may need to get the charset from configuration
+		BufferedReader in = new BufferedReader(new InputStreamReader(errStream, "UTF-8"));
 		String line;
 		while ((line = in.readLine()) != null) {
 			builder.append(line);
