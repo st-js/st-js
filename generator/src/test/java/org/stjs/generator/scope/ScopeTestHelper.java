@@ -42,7 +42,7 @@ public class ScopeTestHelper {
 	}
 
 	public static CompilationUnit resolveName(Class<?> clazz) {
-		return resolveName(clazz, Collections.<String> emptyList());
+		return resolveName(clazz, Collections.<String>emptyList());
 	}
 
 	public static CompilationUnit resolveName(Class<?> clazz, Collection<String> packages) {

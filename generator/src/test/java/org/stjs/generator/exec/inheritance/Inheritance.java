@@ -1,6 +1,5 @@
 package org.stjs.generator.exec.inheritance;
 
-
 public class Inheritance {
 	public static class A {
 		public int method1(int n) {
@@ -26,7 +25,7 @@ public class Inheritance {
 
 	public static class C extends B {//
 	}
-	
+
 	public static class D extends C {
 		@Override
 		public int method1(int n) {

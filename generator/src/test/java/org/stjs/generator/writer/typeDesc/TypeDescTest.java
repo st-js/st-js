@@ -22,14 +22,12 @@ public class TypeDescTest {
 
 	@Test
 	public void testArrayOfNonBasicField() {
-		assertCodeContains(TypeDesc4.class,
-				"{\"x\":{name:\"Array\", arguments:[\"Date\"]}});");
+		assertCodeContains(TypeDesc4.class, "{\"x\":{name:\"Array\", arguments:[\"Date\"]}});");
 	}
 
 	@Test
 	public void testMapOfNonBasicField() {
-		assertCodeContains(TypeDesc5.class,
-				"{\"x\":{name:\"Map\", arguments:[null,\"Date\"]}});");
+		assertCodeContains(TypeDesc5.class, "{\"x\":{name:\"Map\", arguments:[null,\"Date\"]}});");
 	}
 
 }

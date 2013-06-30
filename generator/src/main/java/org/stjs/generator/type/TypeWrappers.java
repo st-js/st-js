@@ -24,11 +24,15 @@ import java.lang.reflect.WildcardType;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TypeWrappers {
-	private static final Map<Type, TypeWrapper> cache = new HashMap<Type, TypeWrapper>();
+public final class TypeWrappers {
+	private TypeWrappers() {
+		//
+	}
+
+	private static final Map<Type, TypeWrapper> CACHE = new HashMap<Type, TypeWrapper>();
 
 	public static void clearCache() {
-		cache.clear();
+		CACHE.clear();
 	}
 
 	public static TypeWrapper[] wrap(Type[] types) {
@@ -53,7 +57,7 @@ public class TypeWrappers {
 		if (type == null) {
 			return null;
 		}
-		TypeWrapper w = cache.get(type);
+		TypeWrapper w = CACHE.get(type);
 		if (w != null) {
 			return w;
 		}
@@ -70,7 +74,7 @@ public class TypeWrappers {
 		} else {
 			throw new IllegalArgumentException("Cannot handle the type:" + type);
 		}
-		cache.put(type, w);
+		CACHE.put(type, w);
 		return w;
 	}
 

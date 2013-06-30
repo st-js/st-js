@@ -1,6 +1,5 @@
 package org.stjs.generator.scope.inner;
 
-
 @SuppressWarnings("unused")
 public class AnonymousInnerClass {
 

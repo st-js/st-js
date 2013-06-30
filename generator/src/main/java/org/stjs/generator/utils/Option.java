@@ -264,6 +264,6 @@ public abstract class Option<T> implements Iterable<T> {
 	 * @return if null, none(), some(t) otherwise
 	 */
 	public static <T> Option<T> of(T t) {
-		return t == null ? Option.<T> none() : some(t);
+		return t == null ? Option.<T>none() : some(t);
 	}
 }

@@ -27,7 +27,7 @@ import org.stjs.generator.ast.ASTNodeData;
  * 
  */
 public class SetParentVisitor extends ForEachNodeVisitor<GenerationContext> {
-	private Node currentParent = null;
+	private Node currentParent;
 
 	@Override
 	protected void before(Node node, GenerationContext arg) {

@@ -10,7 +10,11 @@ import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.writer.JavascriptWriterVisitor;
 
-public class TemplateUtils {
+public final class TemplateUtils {
+	private TemplateUtils() {
+		//
+	}
+
 	public static void printScope(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context,
 			boolean withDot) {
 		MethodWrapper method = resolvedMethod(n);

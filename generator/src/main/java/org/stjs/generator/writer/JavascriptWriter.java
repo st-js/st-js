@@ -31,17 +31,17 @@ public class JavascriptWriter {
 	private static final String NUMERIC_LITERAL_ENDING = "[a-zA-Z]$";
 
 	private static final String INDENT = "    ";
-	private int level = 0;
+	private int level;
 
-	private boolean indented = false;
+	private boolean indented;
 
 	private final StringBuilder buf = new StringBuilder();
 
 	private final SourceMapGenerator sourceMapGenerator;
 	private final boolean generateSourceMap;
 
-	private int currentLine = 0;
-	private int currentColumn = 0;
+	private int currentLine;
+	private int currentColumn;
 
 	private FilePosition sourcePosition;
 	private FilePosition startOutputPosition;

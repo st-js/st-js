@@ -17,7 +17,7 @@ package org.stjs.generator;
 
 import java.util.regex.Pattern;
 
-public class GeneratorConstants {
+public final class GeneratorConstants {
 	public static final String SPECIAL_THIS = "THIS";
 
 	/**
@@ -45,4 +45,8 @@ public class GeneratorConstants {
 	 * this folder is used by the test runner to write temporary files. the CLASSPATH_FILE is also put in this directory
 	 */
 	public static final String STJS_TEST_TEMP_FOLDER = "stjs-test";
+
+	private GeneratorConstants() {
+		//
+	}
 }

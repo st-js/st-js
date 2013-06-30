@@ -61,9 +61,9 @@ public class ClassWrapper implements TypeWrapper {
 
 	private final Class<?> clazz;
 
-	private Map<String, FieldWrapper> fields = null;
-	private Map<String, TypeWrapper> types = null;
-	private Multimap<String, MethodWrapper> methods = null;
+	private Map<String, FieldWrapper> fields;
+	private Map<String, TypeWrapper> types;
+	private Multimap<String, MethodWrapper> methods;
 
 	public ClassWrapper(Class<?> clazz) {
 		this.clazz = clazz;
@@ -145,7 +145,8 @@ public class ClassWrapper implements TypeWrapper {
 				parameterTypes, ownerClass, actualTypeArgs), modifiers, typeParameters, this, ownerClass == clazz);
 	}
 
-	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "PZLA_PREFER_ZERO_LENGTH_ARRAYS", justification = "null is actually for a raw class")
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+			value = "PZLA_PREFER_ZERO_LENGTH_ARRAYS", justification = "null is actually for a raw class")
 	private TypeWrapper[] getActualTypeArgs(Type type, Class<?> subTypeClass, TypeWrapper[] subTypeActualTypeArgs) {
 		if (type instanceof Class<?>) {
 			return null;
@@ -175,7 +176,9 @@ public class ClassWrapper implements TypeWrapper {
 		addFieldsMethodsAndTypes(getType(), null, null);
 	}
 
-	private void addFieldsMethodsAndTypes(Type type, Class<?> rawClass, TypeWrapper[] actualTypeArgs) {
+	private void addFieldsMethodsAndTypes(Type type, Class<?> aRawClass, TypeWrapper[] someActualTypeArgs) {
+		TypeWrapper[] actualTypeArgs = someActualTypeArgs;
+		Class<?> rawClass = aRawClass;
 		boolean seenObjectClass = false;
 		for (Type c = type; c != null; c = rawClass.getGenericSuperclass()) {
 			actualTypeArgs = getActualTypeArgs(c, rawClass, actualTypeArgs);
@@ -276,7 +279,7 @@ public class ClassWrapper implements TypeWrapper {
 
 	public Option<ClassWrapper> getDeclaringClass() {
 		Class<?> declaringClass = clazz.getDeclaringClass();
-		return declaringClass != null ? Option.some(new ClassWrapper(declaringClass)) : Option.<ClassWrapper> none();
+		return declaringClass != null ? Option.some(new ClassWrapper(declaringClass)) : Option.<ClassWrapper>none();
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -299,7 +302,7 @@ public class ClassWrapper implements TypeWrapper {
 	public Option<FieldWrapper> findField(String name) {
 		prepareFieldsMethodsAndTypes();
 		FieldWrapper f = fields.get(name);
-		return f != null ? Option.some(f) : Option.<FieldWrapper> none();
+		return f != null ? Option.some(f) : Option.<FieldWrapper>none();
 	}
 
 	public List<MethodWrapper> findMethods(final String name) {
@@ -350,7 +353,7 @@ public class ClassWrapper implements TypeWrapper {
 
 	public Option<ClassWrapper> getSuperclass() {
 		Class<?> superClass = clazz.getSuperclass();
-		return superClass != null ? Option.some(new ClassWrapper(superClass)) : Option.<ClassWrapper> none();
+		return superClass != null ? Option.some(new ClassWrapper(superClass)) : Option.<ClassWrapper>none();
 	}
 
 	public String getName() {
@@ -384,7 +387,7 @@ public class ClassWrapper implements TypeWrapper {
 		}));
 	}
 
-	private static final Function<Class<?>, ClassWrapper> WrapClass = new Function<Class<?>, ClassWrapper>() {
+	private static final Function<Class<?>, ClassWrapper> WRAP_CLASS = new Function<Class<?>, ClassWrapper>() {
 		@Override
 		public ClassWrapper apply(Class<?> clazz) {
 			return new ClassWrapper(clazz);
@@ -398,7 +401,7 @@ public class ClassWrapper implements TypeWrapper {
 			public boolean apply(Class<?> clazz) {
 				return isStaticButNotPrivate(clazz.getModifiers());
 			}
-		}), WrapClass));
+		}), WRAP_CLASS));
 	}
 
 	public List<TypeWrapper> getDeclaredClasses() {

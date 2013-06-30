@@ -5,6 +5,7 @@ import static org.stjs.generator.scope.methodDeclarations.ClassDefiningStaticMet
 public class ClassUsingStaticMethod {
 
 	static int classSth() {
-		return org.stjs.generator.scope.methodDeclarations.ClassDefiningStaticMethod.doSth() + ClassDefiningStaticMethod.doSth() + doSth();
+		return org.stjs.generator.scope.methodDeclarations.ClassDefiningStaticMethod.doSth()
+				+ ClassDefiningStaticMethod.doSth() + doSth();
 	}
 }

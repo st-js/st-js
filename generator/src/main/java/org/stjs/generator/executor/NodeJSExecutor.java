@@ -24,12 +24,13 @@ import java.io.InputStreamReader;
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
 public class NodeJSExecutor {
-	private static final String nodeJS = "node";
+	private static final String NODE_JS = "node";
 
-	@SuppressWarnings(value = "REC_CATCH_EXCEPTION")
+	@SuppressWarnings(
+			value = "REC_CATCH_EXCEPTION")
 	public ExecutionResult run(File srcFile) {
 		try {
-			Process p = Runtime.getRuntime().exec(new String[] { nodeJS, srcFile.getAbsolutePath() });
+			Process p = Runtime.getRuntime().exec(new String[]{ NODE_JS, srcFile.getAbsolutePath() });
 			int exitValue = p.waitFor();
 			return new ExecutionResult(null, readStream(p.getInputStream()), readStream(p.getErrorStream()), exitValue);
 		} catch (Exception e) {

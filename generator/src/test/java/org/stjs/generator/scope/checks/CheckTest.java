@@ -6,22 +6,26 @@ import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
 
 public class CheckTest {
-	@Test(expected = JavascriptGenerationException.class)
+	@Test(
+			expected = JavascriptGenerationException.class)
 	public void testFieldAndMethodTheSameName() {
 		generate(Checks1.class);
 	}
 
-	@Test(expected = JavascriptGenerationException.class)
+	@Test(
+			expected = JavascriptGenerationException.class)
 	public void testFieldTheSameInSuper() {
 		generate(Checks2.class);
 	}
 
-	@Test(expected = JavascriptGenerationException.class)
+	@Test(
+			expected = JavascriptGenerationException.class)
 	public void testFieldTheSameMethoInSuper() {
 		generate(Checks3.class);
 	}
 
-	@Test(expected = JavascriptGenerationException.class)
+	@Test(
+			expected = JavascriptGenerationException.class)
 	public void testMethodOverwritePrivate() {
 		generate(Checks4.class);
 	}
@@ -31,7 +35,8 @@ public class CheckTest {
 		generate(Checks5.class);
 	}
 
-	@Test(expected = JavascriptGenerationException.class)
+	@Test(
+			expected = JavascriptGenerationException.class)
 	public void testMethodOverload() {
 		generate(Checks6.class);
 	}
@@ -46,7 +51,8 @@ public class CheckTest {
 		generate(Checks8a.class);
 	}
 
-	@Test(expected = JavascriptGenerationException.class)
+	@Test(
+			expected = JavascriptGenerationException.class)
 	public void testFinalNotAtMethodLevel() {
 		generate(Checks8b.class);
 	}

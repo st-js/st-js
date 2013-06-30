@@ -11,7 +11,7 @@ public class MethodsGeneratorTest {
 	public void testPublicInstanceMethod() {
 		assertCodeContains(Methods1.class, //
 				"stjs.extend(Methods1, null, [], function(constructor, prototype){" + //
-				"prototype.method = function(arg1,arg2){return 0;}");
+						"prototype.method = function(arg1,arg2){return 0;}");
 	}
 
 	@Test
@@ -19,21 +19,21 @@ public class MethodsGeneratorTest {
 		// same as public
 		assertCodeContains(Methods2.class, //
 				"stjs.extend(Methods2, null, [], function(constructor, prototype){" + //
-				"prototype.method = function(arg1,arg2){");
+						"prototype.method = function(arg1,arg2){");
 	}
 
 	@Test
 	public void testPublicStaticMethod() {
-		assertCodeContains(Methods3.class, // 
+		assertCodeContains(Methods3.class, //
 				"stjs.extend(Methods3, null, [], function(constructor, prototype){" + //
-				"constructor.method = function(arg1,arg2){");
+						"constructor.method = function(arg1,arg2){");
 	}
 
 	@Test
 	public void testPrivateStaticMethod() {
 		assertCodeContains(Methods4.class, //
 				"stjs.extend(Methods4, null, [], function(constructor, prototype){" + //
-				"constructor.method = function(arg1,arg2){");
+						"constructor.method = function(arg1,arg2){");
 	}
 
 	@Test
@@ -63,13 +63,15 @@ public class MethodsGeneratorTest {
 		assertCodeContains(Methods14.class, "var x = (String).fromCharCode(65,66,67)");
 	}
 
-	@Test(expected = JavascriptGenerationException.class)
+	@Test(
+			expected = JavascriptGenerationException.class)
 	public void testVarArgsMethod1() {
 		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
 		generate(Methods9.class);
 	}
 
-	@Test(expected = JavascriptGenerationException.class)
+	@Test(
+			expected = JavascriptGenerationException.class)
 	public void testVarArgsMethod2() {
 		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
 		generate(Methods10.class);

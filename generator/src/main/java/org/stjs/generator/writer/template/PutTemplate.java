@@ -13,9 +13,11 @@ import org.stjs.generator.writer.JavascriptWriterVisitor;
  */
 public class PutTemplate implements MethodCallTemplate {
 
+	private final static int MIN_ARGS_COUNT = 2;
+
 	@Override
 	public boolean write(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
-		if ((n.getArgs() == null) || (n.getArgs().size() < 2) || (n.getArgs().size() > 3)) {
+		if ((n.getArgs() == null) || (n.getArgs().size() < MIN_ARGS_COUNT) || (n.getArgs().size() > MIN_ARGS_COUNT + 1)) {
 			return false;
 		}
 		int arg = 0;

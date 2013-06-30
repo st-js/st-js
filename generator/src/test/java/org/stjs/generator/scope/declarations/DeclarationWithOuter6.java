@@ -15,7 +15,6 @@
  */
 package org.stjs.generator.scope.declarations;
 
-
 @SuppressWarnings("unused")
 public class DeclarationWithOuter6 extends ParentDeclaration1 {
 	int type() {

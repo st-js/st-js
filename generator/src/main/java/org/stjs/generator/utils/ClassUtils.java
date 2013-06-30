@@ -46,21 +46,26 @@ import org.stjs.javascript.annotation.SyntheticType;
 import com.google.common.base.Strings;
 import com.google.common.primitives.Primitives;
 
-public class ClassUtils {
+public final class ClassUtils {
+	private ClassUtils() {
+		//
+	}
+
 	/**
 	 * these are packages that don't have the annotation but are considered as bridges
 	 */
-	private static final Pattern implicitBridge = Pattern.compile("java\\.lang.*|org\\.junit.*");
+	private static final Pattern IMPLICIT_BRIDGE = Pattern.compile("java\\.lang.*|org\\.junit.*");
 
-	private static final Set<String> basicTypeNames = new HashSet<String>();
+	private static final Set<String> BASIC_TYPE_NAMES = new HashSet<String>();
 	static {
 		for (Class<?> clazz : Primitives.allWrapperTypes()) {
-			basicTypeNames.add(clazz.getName());
+			BASIC_TYPE_NAMES.add(clazz.getName());
 		}
-		basicTypeNames.add(String.class.getName());
+		BASIC_TYPE_NAMES.add(String.class.getName());
 	}
 
-	private static final Set<String> integerTypeNames = new HashSet<String>(Arrays.asList("int", "long", "short", "byte"));
+	private static final Set<String> INTEGER_TYPE_NAMES = new HashSet<String>(Arrays.asList("int", "long", "short",
+			"byte"));
 
 	// private static Map<Class<?>, String> primitiveArrayId;
 
@@ -72,7 +77,7 @@ public class ClassUtils {
 		if (!typeName.contains(".")) {
 			typeName = "java.lang." + typeName;
 		}
-		return basicTypeNames.contains(typeName);
+		return BASIC_TYPE_NAMES.contains(typeName);
 	}
 
 	public static boolean isBasicType(TypeWrapper type) {
@@ -84,17 +89,17 @@ public class ClassUtils {
 		}
 		String typeName = type.getName();
 
-		return basicTypeNames.contains(typeName);
+		return BASIC_TYPE_NAMES.contains(typeName);
 	}
 
 	public static boolean isIntegerType(TypeWrapper type) {
 		String typeName = type.toString();
-		return integerTypeNames.contains(typeName);
+		return INTEGER_TYPE_NAMES.contains(typeName);
 	}
 
 	public static boolean isIntegerType(Type type) {
 		String typeName = type.toString();
-		return integerTypeNames.contains(typeName);
+		return INTEGER_TYPE_NAMES.contains(typeName);
 	}
 
 	public static boolean isBridge(Class<?> clazz) {
@@ -102,14 +107,15 @@ public class ClassUtils {
 		if (ok) {
 			return ok;
 		}
-		if (implicitBridge.matcher(clazz.getName()).matches()) {
+		if (IMPLICIT_BRIDGE.matcher(clazz.getName()).matches()) {
 			return true;
 		}
 		return false;
 	}
 
 	/**
-	 * @return true if the type does not have a super class (or that the super class is java.lang.Object). It returns true also for null types
+	 * @return true if the type does not have a super class (or that the super class is java.lang.Object). It returns
+	 *         true also for null types
 	 */
 	public static boolean isRootType(TypeWrapper type) {
 		if (type == null) {
@@ -141,7 +147,8 @@ public class ClassUtils {
 
 	@SuppressWarnings("deprecation")
 	public static boolean isSyntheticType(Class<?> clazz) {
-		return hasAnnotation(clazz, org.stjs.javascript.annotation.DataType.class) || hasAnnotation(clazz, SyntheticType.class);
+		return hasAnnotation(clazz, org.stjs.javascript.annotation.DataType.class)
+				|| hasAnnotation(clazz, SyntheticType.class);
 	}
 
 	public static boolean hasAnnotation(ClassWrapper clazz, Class<? extends Annotation> annotation) {
@@ -157,6 +164,7 @@ public class ClassUtils {
 
 	/**
 	 * the namespace is taken from the outermost declaring class
+	 * 
 	 * @param type
 	 * @return
 	 */
@@ -227,7 +235,8 @@ public class ClassUtils {
 	 */
 	public static TypeWrapper arrayOf(TypeWrapper resolvedType, int arrayCount) {
 		if (resolvedType.getClass() == ClassWrapper.class) {
-			return new ClassWrapper(Array.newInstance((Class<?>) resolvedType.getType(), new int[arrayCount]).getClass());
+			return new ClassWrapper(Array.newInstance((Class<?>) resolvedType.getType(), new int[arrayCount])
+					.getClass());
 		}
 		TypeWrapper returnType = resolvedType;
 		for (int i = 0; i < arrayCount; ++i) {
@@ -295,7 +304,8 @@ public class ClassUtils {
 		return isAssignableFromType(cls.getComponentType(), componentType);
 	}
 
-	private static boolean isAssignableFromParameterizedType(final Class<?> cls, final ParameterizedType parameterizedType) {
+	private static boolean isAssignableFromParameterizedType(final Class<?> cls,
+			final ParameterizedType parameterizedType) {
 		return isAssignableFromType(cls, parameterizedType.getRawType());
 	}
 

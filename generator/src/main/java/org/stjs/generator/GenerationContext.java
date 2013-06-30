@@ -31,7 +31,7 @@ public class GenerationContext {
 
 	private final GeneratorConfiguration configuration;
 
-	private ClassOrInterfaceDeclaration currentType = null;
+	private ClassOrInterfaceDeclaration currentType;
 
 	public GenerationContext(File inputFile, GeneratorConfiguration configuration) {
 		this.inputFile = inputFile;

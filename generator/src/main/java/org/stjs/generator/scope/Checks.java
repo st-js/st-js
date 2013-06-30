@@ -65,7 +65,10 @@ import org.stjs.javascript.annotation.JavascriptFunction;
  * @author acraciun
  * 
  */
-public class Checks {
+public final class Checks {
+	private Checks() {
+		//
+	}
 
 	/**
 	 * check a method declaration
@@ -242,8 +245,8 @@ public class Checks {
 		}
 
 	}
-	
-	private static void checkNamespace(BodyDeclaration n, GenerationContext context){
+
+	private static void checkNamespace(BodyDeclaration n, GenerationContext context) {
 		String ns = ClassUtils.getNamespace(ASTNodeData.resolvedType(n));
 		if (ns != null) {
 			if (!GeneratorConstants.NAMESPACE_PATTERN.matcher(ns).matches()) {
@@ -251,11 +254,11 @@ public class Checks {
 						"The namespace must be in the form <identifier>[.<identifier>]..");
 			}
 			String[] identifiers = ns.split("\\.");
-			for(String identifier : identifiers){
-				if(JavascriptKeywords.isReservedWord(identifier)){
-					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n), 
-						"Identifier \"" + identifier + "\" cannot be used as part of a namespace, " +
-						"because it is a javascript keyword or a javascript reserved word");
+			for (String identifier : identifiers) {
+				if (JavascriptKeywords.isReservedWord(identifier)) {
+					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+							"Identifier \"" + identifier + "\" cannot be used as part of a namespace, "
+									+ "because it is a javascript keyword or a javascript reserved word");
 				}
 			}
 		}
@@ -274,7 +277,7 @@ public class Checks {
 		}
 
 	}
-	
+
 	public static void postCheckEnumDeclaration(EnumDeclaration n, GenerationContext context) {
 		checkNamespace(n, context);
 	}
@@ -317,11 +320,10 @@ public class Checks {
 	public static void checkScope(MethodCallExpr n, GenerationContext context) {
 		if (n.getScope() == null) {
 			if (!isAccessInCorrectScope(n)) {
-				throw new JavascriptGenerationException(
-						context.getInputFile(),
-						new SourcePosition(n),
+				throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 						"In Javascript you cannot call methods or fields from the outer type. "
-								+ "You should define a variable var that=this outside your function definition and call the methods on this object");
+								+ "You should define a variable var that=this outside your function "
+								+ "definition and call the methods on this object");
 			}
 		}
 
@@ -387,7 +389,8 @@ public class Checks {
 			for (int i = 0; i < n.getArgs().size(); i += 2) {
 				if (!(n.getArgs().get(i) instanceof LiteralExpr)) {
 					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
-							"The key of a map built this way can only be a literal. Use map.$put(variable) if you want to use variables as keys");
+							"The key of a map built this way can only be a literal. "
+									+ "Use map.$put(variable) if you want to use variables as keys");
 				}
 
 			}

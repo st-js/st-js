@@ -21,7 +21,11 @@ import java.util.Map;
  * @author acraciun
  * 
  */
-public class MethodSelector {
+public final class MethodSelector {
+	private MethodSelector() {
+		//
+	}
+
 	private static Comparator<MethodWrapper> methodSpecificityComparator = new Comparator<MethodWrapper>() {
 		@Override
 		public int compare(MethodWrapper m1, MethodWrapper m2) {

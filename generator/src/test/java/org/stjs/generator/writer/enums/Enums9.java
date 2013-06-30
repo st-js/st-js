@@ -1,6 +1,5 @@
 package org.stjs.generator.writer.enums;
 
-
 public enum Enums9 {
 	a(1), b(2), c(3);
 
@@ -13,5 +12,5 @@ public enum Enums9 {
 	public int getValue() {
 		return value;
 	}
-	
+
 }

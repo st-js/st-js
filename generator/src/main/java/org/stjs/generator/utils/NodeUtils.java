@@ -34,23 +34,29 @@ import org.stjs.generator.visitor.ForEachNodeVisitor;
  * @author acraciun
  * 
  */
-public class NodeUtils {
+public final class NodeUtils {
+	private NodeUtils() {
+		//
+	}
+
 	public static boolean isMainMethod(MethodDeclaration methodDeclaration) {
 		boolean isMainMethod = false;
 		if (isStatic(methodDeclaration.getModifiers()) && "main".equals(methodDeclaration.getName())) {
 			List<Parameter> parameters = methodDeclaration.getParameters();
-			if ((parameters != null) && (parameters.size() == 1)) {
-				Parameter parameter = parameters.get(0);
-				if (parameter.getType() instanceof ReferenceType) {
-					ReferenceType refType = (ReferenceType) parameter.getType();
-					if ((refType.getArrayCount() == 1) && (refType.getType() instanceof ClassOrInterfaceType)) {
-						String typeName = ((ClassOrInterfaceType) refType.getType()).getName();
-						if ("String".equals(typeName) || "java.lang.String".equals(typeName)) {
-							isMainMethod = true;
-						}
+			if ((parameters == null) || (parameters.size() > 1)) {
+				return false;
+			}
+			Parameter parameter = parameters.get(0);
+			if (parameter.getType() instanceof ReferenceType) {
+				ReferenceType refType = (ReferenceType) parameter.getType();
+				if ((refType.getArrayCount() == 1) && (refType.getType() instanceof ClassOrInterfaceType)) {
+					String typeName = ((ClassOrInterfaceType) refType.getType()).getName();
+					if ("String".equals(typeName) || "java.lang.String".equals(typeName)) {
+						isMainMethod = true;
 					}
 				}
 			}
+
 		}
 		return isMainMethod;
 	}
@@ -61,7 +67,7 @@ public class NodeUtils {
 	 * @param type
 	 * @return the list of all the descendants of the given code that are of the given type (or a subclass of it)
 	 */
-	public static final <T extends Node> List<T> findDescendantsOfType(Node parent, final Class<T> type) {
+	public static <T extends Node> List<T> findDescendantsOfType(Node parent, final Class<T> type) {
 		final List<T> children = new ArrayList<T>();
 		VoidVisitor<Boolean> visitor = new ForEachNodeVisitor<Boolean>() {
 			@SuppressWarnings("unchecked")

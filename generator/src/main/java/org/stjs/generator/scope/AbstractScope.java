@@ -81,10 +81,10 @@ public abstract class AbstractScope implements Scope {
 		String[] components = name.split("\\.");
 		TypeWrapper classWrapper = types.get(components[0]);
 		if (classWrapper != null) {
-			if(components.length == 1){
+			if (components.length == 1) {
 				return new TypeWithScope(this, classWrapper);
-			}else{
-				ClassWrapper inner = resolveInnerType(components, (ClassWrapper)classWrapper, 1);
+			} else {
+				ClassWrapper inner = resolveInnerType(components, (ClassWrapper) classWrapper, 1);
 				return new TypeWithScope(this, inner);
 			}
 		}
@@ -93,14 +93,14 @@ public abstract class AbstractScope implements Scope {
 		}
 		return null;
 	}
-	
-	private ClassWrapper resolveInnerType(String[] innerTypeName, ClassWrapper outerType, int index){
+
+	private ClassWrapper resolveInnerType(String[] innerTypeName, ClassWrapper outerType, int index) {
 		Option<ClassWrapper> inner = outerType.getDeclaredClass(innerTypeName[index]);
-		if(inner.isEmpty()){
+		if (inner.isEmpty()) {
 			// failed to resolve;
 			return null;
 		}
-		if(index >= innerTypeName.length - 1){
+		if (index >= innerTypeName.length - 1) {
 			// successfully resolved
 			return inner.getOrNull();
 		}

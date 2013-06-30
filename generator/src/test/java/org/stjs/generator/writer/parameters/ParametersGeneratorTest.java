@@ -6,7 +6,6 @@ import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
 
-
 public class ParametersGeneratorTest {
 	@Test
 	public void testSimpleParam() {
@@ -18,7 +17,8 @@ public class ParametersGeneratorTest {
 		assertCodeContains(Parameters2.class, "function(arg1, arg2, arg3)");
 	}
 
-	@Test(expected = JavascriptGenerationException.class)
+	@Test(
+			expected = JavascriptGenerationException.class)
 	public void testParamWrongName() {
 		// "var" is a wrong name
 		generate(Parameters4.class);

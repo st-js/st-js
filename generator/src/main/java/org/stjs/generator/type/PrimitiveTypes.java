@@ -24,17 +24,29 @@ import org.stjs.generator.utils.ClassUtils;
 
 import com.google.common.primitives.Primitives;
 
-public class PrimitiveTypes {
-	private final static Map<Class<?>, Integer> coercionOrder = new HashMap<Class<?>, Integer>();
+public final class PrimitiveTypes {
+	private static final int BYTE_ORDER = 1;
+	private static final int SHORT_ORDER = 2;
+	private static final int INT_ORDER = 3;
+	private static final int LONG_ORDER = 4;
+	private static final int FLOAT_ORDER = 5;
+	private static final int DOUBLE_ORDER = 6;
+
+	private PrimitiveTypes() {
+		//
+	}
+
+	private final static Map<Class<?>, Integer> COERCION_ORDER = new HashMap<Class<?>, Integer>();
 	static {
-		coercionOrder.put(char.class, 1);
-		coercionOrder.put(byte.class, 1);// but char and byte are incompatible !
-		coercionOrder.put(short.class, 2);
-		coercionOrder.put(int.class, 3);
-		coercionOrder.put(long.class, 4);
-		coercionOrder.put(float.class, 5);
-		coercionOrder.put(double.class, 6);
-		coercionOrder.put(String.class, 6);
+		COERCION_ORDER.put(char.class, BYTE_ORDER);
+		// but char and byte are incompatible !
+		COERCION_ORDER.put(byte.class, BYTE_ORDER);
+		COERCION_ORDER.put(short.class, SHORT_ORDER);
+		COERCION_ORDER.put(int.class, INT_ORDER);
+		COERCION_ORDER.put(long.class, LONG_ORDER);
+		COERCION_ORDER.put(float.class, FLOAT_ORDER);
+		COERCION_ORDER.put(double.class, DOUBLE_ORDER);
+		COERCION_ORDER.put(String.class, DOUBLE_ORDER);
 	}
 
 	public static ClassWrapper primitiveReflectionType(PrimitiveType type) {
@@ -61,11 +73,12 @@ public class PrimitiveTypes {
 	}
 
 	public static java.lang.reflect.Type expressionResultType(java.lang.reflect.Type left, java.lang.reflect.Type right) {
-		Integer orderLeft = left != null ? coercionOrder.get(Primitives.unwrap(ClassUtils.getRawClazz(left))) : null;
+		Integer orderLeft = left != null ? COERCION_ORDER.get(Primitives.unwrap(ClassUtils.getRawClazz(left))) : null;
 		if (orderLeft == null) {
 			return String.class;
 		}
-		Integer orderRight = right != null ? coercionOrder.get(Primitives.unwrap(ClassUtils.getRawClazz(right))) : null;
+		Integer orderRight = right != null ? COERCION_ORDER.get(Primitives.unwrap(ClassUtils.getRawClazz(right)))
+				: null;
 		if (orderRight == null) {
 			return String.class;
 		}
@@ -80,11 +93,11 @@ public class PrimitiveTypes {
 	 * @return
 	 */
 	public static boolean isAssignableFrom(java.lang.reflect.Type t1, java.lang.reflect.Type t2) {
-		Integer order1 = t1 != null ? coercionOrder.get(Primitives.unwrap(ClassUtils.getRawClazz(t1))) : null;
+		Integer order1 = t1 != null ? COERCION_ORDER.get(Primitives.unwrap(ClassUtils.getRawClazz(t1))) : null;
 		if (order1 == null) {
 			return false;
 		}
-		Integer order2 = t2 != null ? coercionOrder.get(Primitives.unwrap(ClassUtils.getRawClazz(t2))) : null;
+		Integer order2 = t2 != null ? COERCION_ORDER.get(Primitives.unwrap(ClassUtils.getRawClazz(t2))) : null;
 		if (order2 == null) {
 			return false;
 		}

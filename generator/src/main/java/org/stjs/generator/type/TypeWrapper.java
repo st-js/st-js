@@ -21,41 +21,41 @@ import java.lang.reflect.Type;
 import org.stjs.generator.utils.Option;
 
 public interface TypeWrapper {
-	public Type getType();
+	Type getType();
 
-	public Option<FieldWrapper> findField(String name);
+	Option<FieldWrapper> findField(String name);
 
-	public Option<MethodWrapper> findMethod(String name, TypeWrapper... paramTypes);
+	Option<MethodWrapper> findMethod(String name, TypeWrapper... paramTypes);
 
 	/**
 	 * @return the last part of the type's name (ex: the Class name)
 	 */
-	public String getSimpleName();
+	String getSimpleName();
 
 	/**
 	 * @return the full name of a class (package and outer classes included)
 	 */
-	public String getName();
+	String getName();
 
 	/**
 	 * @return the last part of the type's name (but outer classes simple name included - if any)
 	 */
-	public String getExternalName();
+	String getExternalName();
 
 	/**
 	 * 
 	 * @return is this type can be used in an import declaration
 	 */
-	public boolean isImportable();
+	boolean isImportable();
 
-	public boolean isInnerType();
+	boolean isInnerType();
 
-	public boolean hasAnnotation(Class<? extends Annotation> class1);
+	boolean hasAnnotation(Class<? extends Annotation> class1);
 
-	public boolean isAssignableFrom(TypeWrapper typeWrapper);
+	boolean isAssignableFrom(TypeWrapper typeWrapper);
 
-	public TypeWrapper getComponentType();
+	TypeWrapper getComponentType();
 
-	public TypeWrapper getSuperClass();
+	TypeWrapper getSuperClass();
 
 }

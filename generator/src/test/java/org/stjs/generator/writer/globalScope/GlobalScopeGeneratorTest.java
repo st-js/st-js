@@ -9,7 +9,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.stjs.generator.utils.GeneratorTestHelper;
 
-
 public class GlobalScopeGeneratorTest {
 	@Test
 	public void testGlobalScopeGeneration() {
@@ -57,12 +56,12 @@ public class GlobalScopeGeneratorTest {
 	public void testMethodWithStarImport() {
 		assertCodeContains(GlobalScope7.class, "n = method()");
 	}
-	
+
 	@Test
-	public void testGlobalMainMethod(){
+	public void testGlobalMainMethod() {
 		Object result = execute(GlobalScope8.class);
 		// We must do the weird (Number).intValue() because for some reason the execution returns the
 		// integer 2 when run from eclipse, but return the double 2.0 when run from maven...
-		assertEquals(2, ((Number)result).intValue());
+		assertEquals(2, ((Number) result).intValue());
 	}
 }

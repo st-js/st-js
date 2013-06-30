@@ -121,6 +121,7 @@
 							<threshold>Low</threshold>
 							<includeFilterFile>code-analysis/findbugs.xml</includeFilterFile>
 							<fork>${findbugs.fork}</fork>
+							<includeTests>false</includeTests>
 						</configuration>
 						<executions>
 							<execution>
@@ -150,6 +151,7 @@
 								<ruleset>/code-analysis/pmd.xml</ruleset>
 							</rulesets>
 							<failurePriority>3</failurePriority>
+							<includeTests>false</includeTests>
 						</configuration>
 						<executions>
 							<execution>
@@ -173,6 +175,7 @@
 						<configuration>
 							<configLocation>/code-analysis/checkstyle.xml</configLocation>
 							<logViolationsToConsole>true</logViolationsToConsole>
+							<includeTestSourceDirectory>false</includeTestSourceDirectory>
 						</configuration>
 						<executions>
 							<execution>

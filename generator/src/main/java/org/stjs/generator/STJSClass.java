@@ -54,7 +54,7 @@ public class STJSClass implements ClassWithJavascript {
 
 	private final DependencyResolver dependencyResolver;
 	private List<String> dependencies = Collections.emptyList();
-	private List<ClassWithJavascript> directDependencies = null;
+	private List<ClassWithJavascript> directDependencies;
 
 	private URI generatedJavascriptFile;
 
@@ -100,7 +100,7 @@ public class STJSClass implements ClassWithJavascript {
 						+ classLoader.getResource(ClassUtils.getPropertiesFileName(className)));
 			}
 		} catch (IOException e) {
-			// maybe it does not exist
+			throw new RuntimeException(e);
 		} finally {
 			Closeables.closeQuietly(inputStream);
 		}

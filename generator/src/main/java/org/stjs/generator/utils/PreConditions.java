@@ -18,7 +18,10 @@ package org.stjs.generator.utils;
 import static java.lang.String.format;
 import japa.parser.ast.Node;
 
-public class PreConditions {
+public final class PreConditions {
+	private PreConditions() {
+		//
+	}
 
 	public static void checkState(boolean check, String message, Object... args) {
 		if (!check) {

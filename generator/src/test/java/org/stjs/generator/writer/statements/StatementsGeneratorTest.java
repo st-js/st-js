@@ -89,7 +89,8 @@ public class StatementsGeneratorTest {
 				"}");
 	}
 
-	@Test(expected = JavascriptGenerationException.class)
+	@Test(
+			expected = JavascriptGenerationException.class)
 	public void testInstanceInitializer() {
 		generate(Statements15.class);
 	}

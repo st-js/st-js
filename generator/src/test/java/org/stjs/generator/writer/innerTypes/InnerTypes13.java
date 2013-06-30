@@ -7,7 +7,7 @@ public class InnerTypes13 {
 
 	private final Button plusBtn;
 
-	//private final Button minusBtn;
+	// private final Button minusBtn;
 
 	public InnerTypes13(String id, String name, String labelText, final int decimals) {
 		plusBtn = new Button("+", new Callback0() {

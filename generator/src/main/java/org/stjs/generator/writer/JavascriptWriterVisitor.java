@@ -130,7 +130,6 @@ import org.stjs.generator.name.DefaultNameProvider;
 import org.stjs.generator.name.NameProvider;
 import org.stjs.generator.scope.ClassScope;
 import org.stjs.generator.scope.Scope;
-import org.stjs.generator.scope.ScopeBuilder;
 import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.type.FieldWrapper;
 import org.stjs.generator.type.MethodWrapper;
@@ -147,7 +146,8 @@ import org.stjs.javascript.annotation.GlobalScope;
 
 /**
  * This class visits the AST corresponding to a Java file and generates the corresponding Javascript code. It presumes
- * the {@link ScopeBuilder} previously visited the tree and set the resolved name of certain nodes.
+ * the {@link org.stjs.generator.scope.ScopeBuilder} previously visited the tree and set the resolved name of certain
+ * nodes.
  */
 public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
@@ -155,11 +155,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	private final NameProvider names;
 
-	JavascriptWriter printer;
+	private final JavascriptWriter printer;
 
 	private List<Comment> comments;
 
-	private int currentComment = 0;
+	private int currentComment;
 
 	public JavascriptWriterVisitor(boolean generateSourceMap) {
 		specialMethodHandlers = new MethodCallTemplates();
@@ -503,8 +503,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 	}
 
+	// i need this method with more parameters than usual
+	// CHECKSTYLE:OFF
 	private void printMethod(String name, List<Parameter> parameters, int modifiers, BlockStmt body,
 			GenerationContext context, TypeWrapper type, boolean anonymous, boolean isInnerClassConstructor) {
+		// CHECKSTYLE:ON
 
 		if (ModifierSet.isAbstract(modifiers) || ModifierSet.isNative(modifiers)) {
 			return;
@@ -575,7 +578,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	public void printArguments(List<Expression> expressions, GenerationContext context) {
-		printArguments(Collections.<String> emptyList(), expressions, Collections.<String> emptyList(), context);
+		printArguments(Collections.<String>emptyList(), expressions, Collections.<String>emptyList(), context);
 	}
 
 	public void printArguments(Collection<String> beforeParams, Collection<Expression> expressions,
@@ -715,7 +718,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.print(".apply(this, arguments)");
 			} else {
 				printer.print(".call");
-				printArguments(Collections.singleton("this"), args, Collections.<String> emptyList(), context);
+				printArguments(Collections.singleton("this"), args, Collections.<String>emptyList(), context);
 			}
 			printer.print(";");
 
@@ -928,7 +931,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.print(type.getSimpleBinaryName());
 			}
 			printer.print("(){");
-			addCallToSuper(scope, context, Collections.<Expression> emptyList(), inlineType);
+			addCallToSuper(scope, context, Collections.<Expression>emptyList(), inlineType);
 			printer.print("}");
 		}
 	}
@@ -963,19 +966,19 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (typeWrapper instanceof ParameterizedTypeWrapper) {
 			ParameterizedTypeWrapper pt = (ParameterizedTypeWrapper) typeWrapper;
 			StringBuilder s = new StringBuilder();
-			s.append("{name:\"").append(pt.getExternalName()).append("\"");
+			s.append("{name:\"").append(pt.getExternalName()).append('\"');
 
 			s.append(", arguments:[");
 			boolean first = true;
 			for (TypeWrapper arg : pt.getActualTypeArguments()) {
 				if (!first) {
-					s.append(",");
+					s.append(',');
 				}
 				s.append(stjsNameInfo(arg));
 				first = false;
 			}
-			s.append("]");
-			s.append("}");
+			s.append(']');
+			s.append('}');
 			return s.toString();
 		}
 
@@ -984,8 +987,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			s.append("{name:\"Enum\"");
 			s.append(", arguments:[");
 			s.append("\"" + names.getTypeName(typeWrapper) + "\"");
-			s.append("]");
-			s.append("}");
+			s.append(']');
+			s.append('}');
 			return s.toString();
 		}
 		if (ClassUtils.isBasicType(typeWrapper)) {
@@ -1044,7 +1047,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			}
 		}
 
-		if (nonConstructors.size() > 0) {
+		if (!nonConstructors.isEmpty()) {
 			printer.print("function(constructor, prototype){");
 			printer.indent();
 			for (BodyDeclaration member : nonConstructors) {
@@ -1219,11 +1222,12 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (!(n instanceof BlockStmt)) {
 			return false;
 		}
-		Node p = null;
-		if ((p = checkParent(n, InitializerDeclaration.class)) == null) {
+		Node p = checkParent(n, InitializerDeclaration.class);
+		if (p == null) {
 			return false;
 		}
-		if ((p = checkParent(p, ObjectCreationExpr.class)) == null) {
+		p = checkParent(p, ObjectCreationExpr.class);
+		if (p == null) {
 			return false;
 		}
 		return true;
@@ -1239,11 +1243,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				n.getTarget().accept(this, context);
 			}
 			printer.print(" ");
-			switch (n.getOperator()) {
-			case assign:
+			if (n.getOperator() == AssignExpr.Operator.assign) {
 				printer.print(":");
-				break;
-			default:
+			} else {
 				throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
 						"Cannot have this assign operator inside an inline object creation block");
 			}
@@ -1290,6 +1292,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			break;
 		case rUnsignedShift:
 			printer.print(">>>=");
+			break;
+		default:
 			break;
 		}
 		printer.print(" ");
@@ -1366,6 +1370,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			break;
 		case remainder:
 			printer.print("%");
+			break;
+		default:
 			break;
 		}
 		printer.print(" ");
@@ -1465,7 +1471,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				// Non static reference to parent type
 				printer.print(names.getTypeName(method.getOwnerType()));
 				printer.print(".prototype.").print(names.getMethodName(method)).print(".call");
-				printArguments(Collections.singleton("this"), n.getArgs(), Collections.<String> emptyList(), context);
+				printArguments(Collections.singleton("this"), n.getArgs(), Collections.<String>emptyList(), context);
 				return;
 			}
 			printer.print(names.getMethodName(method));
@@ -1526,9 +1532,10 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (var != null) {
 			if (var instanceof FieldWrapper) {
 				FieldWrapper field = (FieldWrapper) var;
+				final int parentLevel = 3;
 				if (Modifier.isStatic(field.getModifiers())) {
 					printStaticFieldOrMethodAccessPrefix(field.getOwnerType(), true);
-				} else if (!isInlineObjectCreationChild(n, 3)) {
+				} else if (!isInlineObjectCreationChild(n, parentLevel)) {
 					printer.print("this.");
 				}
 			}

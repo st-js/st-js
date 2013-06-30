@@ -177,21 +177,19 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			for (ImportDeclaration importDecl : n.getImports()) {
 				NameExpr name = importDecl.getName();
 				if (!importDecl.isAsterisk()) {
-					if (importDecl.isStatic()) {
-						if (name instanceof QualifiedNameExpr) {
-							QualifiedNameExpr expr = (QualifiedNameExpr) name;
-							for (ClassWrapper clazz : identifyQualifiedNameExprClass(expr.getQualifier())) {
-								String fieldOrTypeOrMethodName = name.getName();
-								for (FieldWrapper field : clazz.findField(fieldOrTypeOrMethodName)) {
-									scope.addField(field);
-								}
-								List<MethodWrapper> methods = clazz.findMethods(fieldOrTypeOrMethodName);
-								if (!methods.isEmpty()) {
-									scope.addMethods(fieldOrTypeOrMethodName, methods);
-								}
-								for (ClassWrapper innerClass : clazz.getDeclaredClass(fieldOrTypeOrMethodName)) {
-									scope.addType(innerClass);
-								}
+					if (importDecl.isStatic() && (name instanceof QualifiedNameExpr)) {
+						QualifiedNameExpr expr = (QualifiedNameExpr) name;
+						for (ClassWrapper clazz : identifyQualifiedNameExprClass(expr.getQualifier())) {
+							String fieldOrTypeOrMethodName = name.getName();
+							for (FieldWrapper field : clazz.findField(fieldOrTypeOrMethodName)) {
+								scope.addField(field);
+							}
+							List<MethodWrapper> methods = clazz.findMethods(fieldOrTypeOrMethodName);
+							if (!methods.isEmpty()) {
+								scope.addMethods(fieldOrTypeOrMethodName, methods);
+							}
+							for (ClassWrapper innerClass : clazz.getDeclaredClass(fieldOrTypeOrMethodName)) {
+								scope.addType(innerClass);
 							}
 						}
 					}
@@ -257,10 +255,9 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			AnonymousClassesHelper helper = new AnonymousClassesHelper(clazz);
 			anonymousClassHelpers.put(clazz, helper);
 			if (count != helper.getAnonymousClassesCount()) {
-				throw new JavascriptGenerationException(
-						context.getInputFile(),
-						new SourcePosition(n),
-						"The code for some anonymous inner classes was not generated. Please check if you don't have any dead code in your class and remove it"
+				throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+						"The code for some anonymous inner classes was not generated. "
+								+ "Please check if you don't have any dead code in your class and remove it"
 								+ " (for example an 'if' statement on a final boolean variable that yields false). ");
 			}
 		}
@@ -324,7 +321,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		return s.toString();
 	}
 
-	TypeWrapper resolveType(Scope scope, Type type) {
+	TypeWrapper resolveType(Scope scope, Type aType) {
+		Type type = aType;
 		try {
 			int arrayCount = 0;
 			if (type instanceof ReferenceType) {
@@ -336,7 +334,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 							new SourcePosition(type),
 							"You cannot use Java arrays because they are incompatible with Javascript arrays. "
 									+ "Use org.stjs.javascript.Array<T> instead. "
-									+ "You can use also the method org.stjs.javascript.Global.$castArray to convert an existent Java array to the corresponding Array type."
+									+ "You can use also the method org.stjs.javascript.Global.$castArray to convert an "
+									+ "existent Java array to the corresponding Array type."
 									+ "The only exception is void main(String[] args).");
 				}
 				type = refType.getType(); // type is a primitive or class
@@ -369,10 +368,10 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 				}
 			} else if (type instanceof WildcardType) {
 				WildcardType wildcardType = (WildcardType) type;
-				java.lang.reflect.Type[] upperBound = wildcardType.getExtends() != null ? new java.lang.reflect.Type[] { resolveType(
+				java.lang.reflect.Type[] upperBound = wildcardType.getExtends() != null ? new java.lang.reflect.Type[]{ resolveType(
 						scope, wildcardType.getExtends()).getType() }
 						: new java.lang.reflect.Type[0];
-				java.lang.reflect.Type[] lowerBound = wildcardType.getSuper() != null ? new java.lang.reflect.Type[] { resolveType(
+				java.lang.reflect.Type[] lowerBound = wildcardType.getSuper() != null ? new java.lang.reflect.Type[]{ resolveType(
 						scope, wildcardType.getSuper()).getType() }
 						: new java.lang.reflect.Type[0];
 				resolvedType = new WildcardTypeWrapper(new WildcardTypeImpl(lowerBound, upperBound));
@@ -395,11 +394,12 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	 * @return
 	 */
 	private boolean isMainArgs(Type type) {
-		Node n;
-		if (!((n = parent(type)) instanceof Parameter)) {
+		Node n = parent(type);
+		if (!(n instanceof Parameter)) {
 			return false;
 		}
-		if (!((n = parent(n)) instanceof MethodDeclaration)) {
+		n = parent(n);
+		if (!(n instanceof MethodDeclaration)) {
 			return false;
 		}
 		return NodeUtils.isMainMethod((MethodDeclaration) n);
@@ -646,7 +646,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	public void visit(ClassExpr n, Scope arg) {
 		super.visit(n, arg);
 		TypeWrapper type = resolvedType(n.getType());
-		resolvedType(n, TypeWrappers.wrap(new ParameterizedTypeImpl(Class.class, new java.lang.reflect.Type[] { type
+		resolvedType(n, TypeWrappers.wrap(new ParameterizedTypeImpl(Class.class, new java.lang.reflect.Type[]{ type
 				.getType() }, null)));
 	}
 

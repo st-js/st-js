@@ -60,7 +60,7 @@ public class BridgeClass implements ClassWithJavascript {
 					files.add(new URI(src));
 				}
 			} catch (URISyntaxException e) {
-				throw new RuntimeException(src + " is not a well-formed URI", e);
+				throw new RuntimeException(e);
 			}
 		}
 		return files;
@@ -78,6 +78,10 @@ public class BridgeClass implements ClassWithJavascript {
 		int result = 1;
 		result = (prime * result) + clazz.getName().hashCode();
 		return result;
+	}
+
+	public Class<?> getClazz() {
+		return clazz;
 	}
 
 	@Override

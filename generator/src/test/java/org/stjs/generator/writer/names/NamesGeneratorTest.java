@@ -4,7 +4,6 @@ import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 
 import org.junit.Test;
 
-
 public class NamesGeneratorTest {
 	@Test
 	public void testQualifyStaticField() {

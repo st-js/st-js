@@ -19,6 +19,8 @@ import com.google.debugging.sourcemap.SourceMapping;
 
 public class JavascriptToJava {
 	private final static Pattern STACKTRACE_JS_PATTERN = Pattern.compile("\\s*at\\s*(?:(.+)\\.)?(\\w+)\\s*\\((.+)\\)");
+	private final static int STACKTRACE_GROUP_METHOD = 2;
+	private final static int STACKTRACE_GROUP_LOCATION = 3;
 
 	private final ClassLoader classLoader;
 
@@ -78,9 +80,9 @@ public class JavascriptToJava {
 		}
 		try {
 
-			String methodName = m.group(2);
+			String methodName = m.group(STACKTRACE_GROUP_METHOD);
 
-			URL url = new URL(m.group(3));
+			URL url = new URL(m.group(STACKTRACE_GROUP_LOCATION));
 			String file = url.getFile();
 			String[] fileParts = file.split(":");
 

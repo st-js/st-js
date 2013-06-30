@@ -37,68 +37,7 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 public class DependencyCollection {
 	private final List<ClassWithJavascript> roots;
 
-	public DependencyCollection(List<ClassWithJavascript> roots) {
-		this.roots = ImmutableList.copyOf(roots);
-	}
-
-	public DependencyCollection(ClassWithJavascript root) {
-		this.roots = ImmutableList.of(root);
-	}
-
-	public List<ClassWithJavascript> orderAllDependencies(ClassLoader classLoader) {
-		List<ClassWithJavascript> deps = new ArrayList<ClassWithJavascript>();
-		Set<ClassWithJavascript> visited = new HashSet<ClassWithJavascript>();
-		for (ClassWithJavascript root : roots) {
-			visit(visited, new LinkedHashSet<ClassWithJavascript>(), deps, root);
-		}
-
-		Comparator<ClassWithJavascript> comparator = new ClassWithJavascriptComparator(classLoader);
-		List<ClassWithJavascript> orderedDeps = new ArrayList<ClassWithJavascript>();
-		while (deps.size() > 0) {
-			// add to orderedDeps only the classes that have no "extends" dependency to any of the other from the
-			// remaining list.
-			// i.e. the result of the comparison is <= 0
-			outer: for (int i = 0; i < deps.size(); ++i) {
-				for (int j = 0; j < deps.size(); ++j) {
-					if (i != j) {
-						int cmp = comparator.compare(deps.get(i), deps.get(j));
-						if (cmp > 0) {
-							continue outer;
-						}
-					}
-				}
-				orderedDeps.add(deps.remove(i));
-				i--;
-			}
-		}
-
-		return orderedDeps;
-	}
-
-	/**
-	 * use topological sort to find the order of processing cells
-	 */
-	private void visit(Set<ClassWithJavascript> visited, Set<ClassWithJavascript> path, List<ClassWithJavascript> deps,
-			ClassWithJavascript cj) {
-		if (path.contains(cj)) {
-			// cyclic dependency here
-			return;
-		}
-		if (!visited.contains(cj)) {
-			visited.add(cj);
-			path.add(cj);
-
-			for (ClassWithJavascript dep : cj.getDirectDependencies()) {
-				visit(visited, path, deps, dep);
-				path.remove(dep);
-			}
-
-			deps.add(cj);
-
-		}
-	}
-
-	public static final Comparator<Class<?>> dependencyComparator = new Comparator<Class<?>>() {
+	public static final Comparator<Class<?>> DEPENDENCY_COMPARATOR = new Comparator<Class<?>>() {
 
 		/**
 		 * -1: if "b" or any child type of "b" (at any level) extends from "a" or any of "a"'s child type <br>
@@ -160,7 +99,70 @@ public class DependencyCollection {
 		}
 	};
 
-	@SuppressWarnings(value = "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", justification = "This comparator will not be used with Serializable lists")
+	public DependencyCollection(List<ClassWithJavascript> roots) {
+		this.roots = ImmutableList.copyOf(roots);
+	}
+
+	public DependencyCollection(ClassWithJavascript root) {
+		this.roots = ImmutableList.of(root);
+	}
+
+	public List<ClassWithJavascript> orderAllDependencies(ClassLoader classLoader) {
+		List<ClassWithJavascript> deps = new ArrayList<ClassWithJavascript>();
+		Set<ClassWithJavascript> visited = new HashSet<ClassWithJavascript>();
+		for (ClassWithJavascript root : roots) {
+			visit(visited, new LinkedHashSet<ClassWithJavascript>(), deps, root);
+		}
+
+		Comparator<ClassWithJavascript> comparator = new ClassWithJavascriptComparator(classLoader);
+		List<ClassWithJavascript> orderedDeps = new ArrayList<ClassWithJavascript>();
+		while (deps.size() > 0) {
+			// add to orderedDeps only the classes that have no "extends" dependency to any of the other from the
+			// remaining list.
+			// i.e. the result of the comparison is <= 0
+			outer: for (int i = 0; i < deps.size(); ++i) {
+				for (int j = 0; j < deps.size(); ++j) {
+					if (i != j) {
+						int cmp = comparator.compare(deps.get(i), deps.get(j));
+						if (cmp > 0) {
+							continue outer;
+						}
+					}
+				}
+				orderedDeps.add(deps.remove(i));
+				i--;
+			}
+		}
+
+		return orderedDeps;
+	}
+
+	/**
+	 * use topological sort to find the order of processing cells
+	 */
+	private void visit(Set<ClassWithJavascript> visited, Set<ClassWithJavascript> path, List<ClassWithJavascript> deps,
+			ClassWithJavascript cj) {
+		if (path.contains(cj)) {
+			// cyclic dependency here
+			return;
+		}
+		if (!visited.contains(cj)) {
+			visited.add(cj);
+			path.add(cj);
+
+			for (ClassWithJavascript dep : cj.getDirectDependencies()) {
+				visit(visited, path, deps, dep);
+				path.remove(dep);
+			}
+
+			deps.add(cj);
+
+		}
+	}
+
+	@SuppressWarnings(
+			value = "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE",
+			justification = "This comparator will not be used with Serializable lists")
 	private static class ClassWithJavascriptComparator implements Comparator<ClassWithJavascript> {
 
 		private final ClassLoader classLoader;
@@ -175,7 +177,7 @@ public class DependencyCollection {
 			try {
 				Class<?> c1 = classLoader.loadClass(o1.getClassName());
 				Class<?> c2 = classLoader.loadClass(o2.getClassName());
-				return dependencyComparator.compare(c1, c2);
+				return DEPENDENCY_COMPARATOR.compare(c1, c2);
 			} catch (ClassNotFoundException e) {
 				throw new RuntimeException(e);
 			}

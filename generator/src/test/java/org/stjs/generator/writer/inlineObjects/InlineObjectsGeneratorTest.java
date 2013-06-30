@@ -7,14 +7,14 @@ import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 import org.junit.Test;
 import org.stjs.generator.JavascriptGenerationException;
 
-
 public class InlineObjectsGeneratorTest {
 	@Test
 	public void testInlineObject() {
 		assertCodeContains(InlineObjects1.class, "o = {a:1, b:\"x\"}");
 	}
 
-	@Test(expected = JavascriptGenerationException.class)
+	@Test(
+			expected = JavascriptGenerationException.class)
 	public void testInlineObjectAndOtherStatements() {
 		// other statements cannot be put inside the initializing blocks
 		generate(InlineObjects2.class);

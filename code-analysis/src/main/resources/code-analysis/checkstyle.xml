@@ -4,8 +4,9 @@
           "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
 
 <module name="Checker">
-	<!-- If you set the basedir property below, then all reported file names will be relative to the specified
-		directory. See http://checkstyle.sourceforge.net/5.x/config.html#Checker <property name="basedir" value="${basedir}"/> -->
+	<!-- If you set the basedir property below, then all reported file names
+		will be relative to the specified directory. See http://checkstyle.sourceforge.net/5.x/config.html#Checker
+		<property name="basedir" value="${basedir}"/> -->
 
 	<metadata name="com.atlas-sw.eclipse" value="I like Sydney" />
 
@@ -15,9 +16,9 @@
 	<!-- <property name="file" value="${checkstyle.suppressions.file}"/> -->
 	<!-- </module> -->
 
-<!-- 	<module name="JavadocPackage"> -->
-<!-- 		<property name="allowLegacy" value="false" /> -->
-<!-- 	</module> -->
+	<!-- <module name="JavadocPackage"> -->
+	<!-- <property name="allowLegacy" value="false" /> -->
+	<!-- </module> -->
 
 	<!-- <module name="Translation"> -->
 	<!-- <property name="severity" value="${translation.severity}"/> -->
@@ -49,7 +50,7 @@
 		<property name="tabWidth" value="4" />
 
 		<module name="AvoidStarImport" />
-		<module name="ConstantName" >
+		<module name="ConstantName">
 			<property name="format" value="^([_A-Z0-9]+|logger)$" />
 		</module>
 		<module name="EmptyBlock" />
@@ -106,9 +107,9 @@
 			<property name="ignorePattern" value="^\t*\* *[^ ]+$" />
 			<property name="max" value="145" />
 		</module>
-		<module name="MethodCount">
-			<property name="maxTotal" value="30" />
-		</module>
+		<!-- <module name="MethodCount"> -->
+		<!-- <property name="maxTotal" value="30" /> -->
+		<!-- </module> -->
 
 		<module name="LocalFinalVariableName">
 			<property name="format" value="^[a-z0-9]+[a-zA-Z0-9]*$" />
@@ -124,10 +125,9 @@
 			<property name="format" value="^[a-z0-9]+[a-zA-Z0-9]*$" />
 		</module>
 		<module name="MethodParamPad" />
-<!-- 		<module name="ModifierOrder" /> -->
+		<!-- <module name="ModifierOrder" /> -->
 		<module name="NeedBraces" />
 		<module name="NoWhitespaceAfter">
-			<property name="tokens" value="ARRAY_INIT" />
 			<property name="tokens" value="BNOT" />
 			<property name="tokens" value="DEC" />
 			<property name="tokens" value="DOT" />
@@ -199,8 +199,8 @@
 				value="Line has leading space characters; indentation should be performed with tabs only." />
 			<property name="ignoreComments" value="true" />
 		</module>
-		<module name="ArrayTrailingComma" />
-<!-- 		<module name="FinalLocalVariable" /> -->
+		<!-- <module name="ArrayTrailingComma" /> -->
+		<!-- <module name="FinalLocalVariable" /> -->
 		<module name="EqualsAvoidNull" />
 		<module name="ParameterAssignment" />
 
@@ -222,9 +222,15 @@
 		<module name="MissingOverride">
 			<property name="javaFiveCompatibility" value="true" />
 		</module>
-<!-- 		<module name="PackageAnnotation" /> -->
-		<module name="SuppressWarnings" />
+		<!-- <module name="PackageAnnotation" /> -->
+		<!-- <module name="SuppressWarnings" /> -->
 		<module name="OuterTypeFilename" />
 		<module name="HideUtilityClassConstructor" />
+
+		<module name="FileContentsHolder" />
+
+
 	</module>
+
+	<module name="SuppressionCommentFilter"/>
 </module>

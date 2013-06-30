@@ -17,7 +17,6 @@ package org.stjs.generator.executor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
@@ -41,13 +40,7 @@ public class RhinoExecutor {
 		} catch (FileNotFoundException e) {
 			throw new ScriptException(e);
 		} finally {
-			try {
-				if (input != null) {
-					input.close();
-				}
-			} catch (IOException e) {
-				// silent
-			}
+			Closeables.closeQuietly(input);
 		}
 	}
 

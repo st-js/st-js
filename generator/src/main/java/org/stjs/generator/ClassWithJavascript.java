@@ -27,10 +27,10 @@ import java.util.List;
  * 
  */
 public interface ClassWithJavascript {
-	public String getClassName();
+	String getClassName();
 
-	public List<URI> getJavascriptFiles();
+	List<URI> getJavascriptFiles();
 
-	public List<ClassWithJavascript> getDirectDependencies();
+	List<ClassWithJavascript> getDirectDependencies();
 
 }

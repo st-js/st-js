@@ -27,9 +27,9 @@ import org.stjs.generator.type.TypeWrapper;
  *         elements.
  */
 public interface NameProvider {
-	public String getTypeName(TypeWrapper type);
+	String getTypeName(TypeWrapper type);
 
-	public String getVariableName(VariableWithScope name);
+	String getVariableName(VariableWithScope name);
 
-	public String getMethodName(MethodWrapper method);
+	String getMethodName(MethodWrapper method);
 }

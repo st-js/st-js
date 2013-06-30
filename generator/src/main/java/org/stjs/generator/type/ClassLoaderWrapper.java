@@ -45,7 +45,8 @@ public class ClassLoaderWrapper {
 	}
 
 	private Class<?> getTopDeclaringClass(Class<?> clazz) throws ClassNotFoundException {
-		if (clazz.getSimpleName().isEmpty()) {// anonymous class
+		if (clazz.getSimpleName().isEmpty()) {
+			// anonymous class
 			String cleanedClassName = clazz.getName().replaceAll(ANONYMOUS_CLASS_NAME, "");
 			return classLoader.loadClass(cleanedClassName);
 		}
@@ -60,17 +61,16 @@ public class ClassLoaderWrapper {
 			Class<?> clazz = classLoader.loadClass(name);
 			Class<?> topDeclaringClass = getTopDeclaringClass(clazz);
 			checkAndAddResolvedClass(topDeclaringClass);
-			return Option.<ClassWrapper> some(new ClassWrapper(clazz));
+			return Option.<ClassWrapper>some(new ClassWrapper(clazz));
 		} catch (ClassNotFoundException e) {
 			return Option.none();
 		}
 	}
 
 	private IllegalArgumentException typeNotAllowedException(Class<?> clazz) {
-		return new IllegalArgumentException(
-				"The usage of the class "
-						+ clazz.getName()
-						+ " is not allowed. If it's one of your own bridge types, please add the annotation @STJSBridge to the class or to its package.");
+		return new IllegalArgumentException("The usage of the class " + clazz.getName()
+				+ " is not allowed. If it's one of your own bridge types, "
+				+ "please add the annotation @STJSBridge to the class or to its package.");
 	}
 
 	private void checkAndAddResolvedClass(Class<?> clazz) {
@@ -109,7 +109,8 @@ public class ClassLoaderWrapper {
 		return classLoader.getResource(stjsPropertiesName) != null;
 	}
 
-	public Option<ClassWrapper> loadClassOrInnerClass(String classLoaderCompatibleName) {
+	public Option<ClassWrapper> loadClassOrInnerClass(String aClassLoaderCompatibleName) {
+		String classLoaderCompatibleName = aClassLoaderCompatibleName;
 		while (true) {
 			Option<ClassWrapper> clazz = loadClass(classLoaderCompatibleName);
 			if (clazz.isDefined()) {

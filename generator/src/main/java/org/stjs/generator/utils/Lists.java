@@ -22,7 +22,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-public class Lists {
+public final class Lists {
+	private Lists() {
+		//
+	}
 
 	public static <T> T getOnlyElement(Iterable<T> elems) {
 		if (elems instanceof List<?>) {

@@ -21,7 +21,7 @@ import org.stjs.generator.type.TypeWrapper;
 
 public interface Scope {
 
-	public interface ScopeVisitor<T> {
+	interface ScopeVisitor<T> {
 		T apply(CompilationUnitScope scope);
 
 		T apply(ClassScope classScope);
@@ -31,11 +31,11 @@ public interface Scope {
 
 	<T> T apply(ScopeVisitor<T> visitor);
 
-	public TypeWithScope resolveType(String name);
+	TypeWithScope resolveType(String name);
 
-	public VariableWithScope resolveVariable(String string);
+	VariableWithScope resolveVariable(String string);
 
-	public MethodsWithScope resolveMethod(String name, TypeWrapper... paramTypes);
+	MethodsWithScope resolveMethod(String name, TypeWrapper... paramTypes);
 
 	Scope addChild(Scope abstractScope);
 

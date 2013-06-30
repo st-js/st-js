@@ -12,5 +12,5 @@ import org.stjs.generator.writer.JavascriptWriterVisitor;
  * 
  */
 public interface MethodCallTemplate {
-	public boolean write(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context);
+	boolean write(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context);
 }

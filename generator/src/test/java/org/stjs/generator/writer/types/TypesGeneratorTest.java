@@ -12,7 +12,8 @@ public class TypesGeneratorTest {
 		assertCodeContains(Types1.class, "var Types1 = function(){};");
 	}
 
-	@Test(expected = JavascriptGenerationException.class)
+	@Test(
+			expected = JavascriptGenerationException.class)
 	public void testForbidArrays() {
 		generate(Types2.class);
 	}

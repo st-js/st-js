@@ -25,7 +25,11 @@ import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 
-public class ASTUtils {
+public final class ASTUtils {
+	private ASTUtils() {
+		//
+	}
+
 	public static void dumpXML(CompilationUnit cu) throws IOException {
 		// create the DOM
 		Document dom = DocumentHelper.createDocument();

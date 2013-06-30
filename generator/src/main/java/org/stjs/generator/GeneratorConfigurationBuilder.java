@@ -30,7 +30,7 @@ public class GeneratorConfigurationBuilder {
 	private Collection<String> allowedPackages = new HashSet<String>();
 	private Set<String> allowedJavaLangClasses = new HashSet<String>();
 	private boolean generateArrayHasOwnProperty = true;
-	private boolean generateSourceMap = false;
+	private boolean generateSourceMap;
 	private String sourceEncoding = Charset.defaultCharset().name();
 
 	public GeneratorConfigurationBuilder allowedPackage(String packageName) {

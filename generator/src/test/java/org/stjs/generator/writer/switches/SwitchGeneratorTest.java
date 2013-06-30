@@ -7,7 +7,6 @@ import org.stjs.generator.writer.enums.Enums3;
 import org.stjs.generator.writer.enums.Enums4Switch;
 import org.stjs.generator.writer.enums.Enums7;
 
-
 public class SwitchGeneratorTest {
 
 	@Test

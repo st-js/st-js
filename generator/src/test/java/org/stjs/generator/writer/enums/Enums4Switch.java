@@ -11,5 +11,5 @@ public class Enums4Switch {
 			break;
 		}
 	}
-	
+
 }
