@@ -51,6 +51,7 @@ local.properties
 .classpath
 .settings/
 .loadpath
+.checkstyle
 
 # External tool builders
 .externalToolBuilders/

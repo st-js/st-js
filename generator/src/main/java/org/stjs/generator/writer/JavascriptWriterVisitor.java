@@ -123,7 +123,7 @@ import java.util.List;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
-import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.ast.ASTNodeData;
 import org.stjs.generator.ast.SourcePosition;
 import org.stjs.generator.name.DefaultNameProvider;
@@ -213,7 +213,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(SynchronizedStmt n, GenerationContext context) {
-		throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+		throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 				"synchronized blocks are not supported by Javascript");
 	}
 
@@ -1074,7 +1074,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		for (BodyDeclaration member : members) {
 			if (member instanceof ConstructorDeclaration) {
 				if (constr != null) {
-					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(member),
+					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
 							"Only maximum one constructor is allowed");
 				} else {
 					constr = (ConstructorDeclaration) member;
@@ -1144,7 +1144,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	public void visit(InitializerDeclaration n, GenerationContext context) {
 		if (!n.isStatic()) {
 			// should find a way to implement these blocks. For the moment forbid them
-			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 					"Initializing blocks are not supported by Javascript");
 		}
 		// the static initializers are treated inside the class declaration to be able to execute them at the end of
@@ -1246,7 +1246,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			if (n.getOperator() == AssignExpr.Operator.assign) {
 				printer.print(":");
 			} else {
-				throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 						"Cannot have this assign operator inside an inline object creation block");
 			}
 			printer.print(" ");
@@ -1631,7 +1631,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	public void visit(ExplicitConstructorInvocationStmt n, GenerationContext context) {
 		if (n.isThis()) {
 			// This should not happen as another constructor is forbidden
-			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 					"Only one constructor is allowed");
 		}
 
@@ -1646,7 +1646,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(AssertStmt n, GenerationContext context) {
-		throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+		throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 				"Assert statement is not supported by Javascript");
 	}
 
@@ -1656,7 +1656,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				return;
 			}
 		}
-		throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(s),
+		throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(s),
 				"Only assign expression are allowed in an object creation block");
 	}
 

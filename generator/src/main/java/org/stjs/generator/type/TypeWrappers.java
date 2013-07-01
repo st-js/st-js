@@ -25,11 +25,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class TypeWrappers {
+
+	private static final Map<Type, TypeWrapper> CACHE = new HashMap<Type, TypeWrapper>();
+
 	private TypeWrappers() {
 		//
 	}
-
-	private static final Map<Type, TypeWrapper> CACHE = new HashMap<Type, TypeWrapper>();
 
 	public static void clearCache() {
 		CACHE.clear();
@@ -53,6 +54,25 @@ public final class TypeWrappers {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static TypeWrapper wrapNoCache(Type type) {
+		if (type instanceof TypeVariable) {
+			return new TypeVariableWrapper((TypeVariable) type);
+		}
+		if (type instanceof ParameterizedType) {
+			return new ParameterizedTypeWrapper((ParameterizedType) type);
+		}
+		if (type instanceof WildcardType) {
+			return new WildcardTypeWrapper((WildcardType) type);
+		}
+		if (type instanceof GenericArrayType) {
+			return new GenericArrayTypeWrapper((GenericArrayType) type);
+		}
+		if (type instanceof Class) {
+			return new ClassWrapper((Class) type);
+		}
+		throw new IllegalArgumentException("Cannot handle the type:" + type);
+	}
+
 	public static TypeWrapper wrap(Type type) {
 		if (type == null) {
 			return null;
@@ -61,19 +81,7 @@ public final class TypeWrappers {
 		if (w != null) {
 			return w;
 		}
-		if (type instanceof TypeVariable) {
-			w = new TypeVariableWrapper((TypeVariable) type);
-		} else if (type instanceof ParameterizedType) {
-			w = new ParameterizedTypeWrapper((ParameterizedType) type);
-		} else if (type instanceof WildcardType) {
-			w = new WildcardTypeWrapper((WildcardType) type);
-		} else if (type instanceof GenericArrayType) {
-			w = new GenericArrayTypeWrapper((GenericArrayType) type);
-		} else if (type instanceof Class) {
-			return new ClassWrapper((Class) type);
-		} else {
-			throw new IllegalArgumentException("Cannot handle the type:" + type);
-		}
+		w = wrapNoCache(type);
 		CACHE.put(type, w);
 		return w;
 	}

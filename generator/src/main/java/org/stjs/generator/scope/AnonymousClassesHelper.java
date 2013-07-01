@@ -34,6 +34,7 @@ import org.apache.bcel.generic.ClassGen;
 import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.MethodGen;
 import org.apache.bcel.generic.NEW;
+import org.stjs.generator.JavascriptClassGenerationException;
 import org.stjs.generator.ast.ASTNodeData;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -64,7 +65,8 @@ public class AnonymousClassesHelper {
 			Repository.clearCache();
 			clazz = Repository.lookupClass(ownerClass);
 		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("Cannot load BCEL wrapper for the class:" + ownerClass);
+			throw new JavascriptClassGenerationException(ownerClass.getName(),
+					"Cannot load BCEL wrapper for the class:" + ownerClass, e);
 		}
 		ClassGen g = new ClassGen(clazz);
 		for (Method m : clazz.getMethods()) {
@@ -93,23 +95,30 @@ public class AnonymousClassesHelper {
 		return ANONYMOUS_CLASS_PATTERN.matcher(typeName).find();
 	}
 
+	private String getMethodNameFromNode(Node node) {
+		if (node instanceof MethodDeclaration) {
+			return ((MethodDeclaration) node).getName();
+		}
+		if (node instanceof ConstructorDeclaration) {
+			return CONSTRUCTOR_METHOD;
+		}
+		if (node instanceof FieldDeclaration) {
+			FieldDeclaration field = (FieldDeclaration) node;
+			return Modifier.isStatic(field.getModifiers()) ? STATIC_INIT_METHOD : CONSTRUCTOR_METHOD;
+		}
+		if (node instanceof InitializerDeclaration) {
+			InitializerDeclaration init = (InitializerDeclaration) node;
+			return init.isStatic() ? STATIC_INIT_METHOD : CONSTRUCTOR_METHOD;
+		}
+		return null;
+	}
+
 	private String getMethodName(ObjectCreationExpr node) {
 		for (Node parent = ASTNodeData.parent(node); parent != null; parent = ASTNodeData.parent(parent)) {
-			if (parent instanceof MethodDeclaration) {
-				return ((MethodDeclaration) parent).getName();
+			String name = getMethodNameFromNode(parent);
+			if (name != null) {
+				return name;
 			}
-			if (parent instanceof ConstructorDeclaration) {
-				return CONSTRUCTOR_METHOD;
-			}
-			if (parent instanceof FieldDeclaration) {
-				FieldDeclaration field = (FieldDeclaration) parent;
-				return Modifier.isStatic(field.getModifiers()) ? STATIC_INIT_METHOD : CONSTRUCTOR_METHOD;
-			}
-			if (parent instanceof InitializerDeclaration) {
-				InitializerDeclaration init = (InitializerDeclaration) parent;
-				return init.isStatic() ? STATIC_INIT_METHOD : CONSTRUCTOR_METHOD;
-			}
-
 		}
 		return STATIC_INIT_METHOD;
 	}

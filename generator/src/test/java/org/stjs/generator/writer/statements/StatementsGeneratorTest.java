@@ -8,7 +8,7 @@ import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.JavascriptFileGenerationException;
 
 public class StatementsGeneratorTest {
 	@Test
@@ -90,7 +90,7 @@ public class StatementsGeneratorTest {
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testInstanceInitializer() {
 		generate(Statements15.class);
 	}

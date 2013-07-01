@@ -4,7 +4,7 @@ import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
-import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.JavascriptFileGenerationException;
 
 public class MethodsGeneratorTest {
 	@Test
@@ -64,14 +64,14 @@ public class MethodsGeneratorTest {
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testVarArgsMethod1() {
 		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
 		generate(Methods9.class);
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testVarArgsMethod2() {
 		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
 		generate(Methods10.class);

@@ -20,15 +20,17 @@ public final class TemplateUtils {
 		MethodWrapper method = resolvedMethod(n);
 		boolean withScopeThis = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.THIS);
 		boolean withScopeSuper = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.SUPER);
-		if (n.getScope() != null && !withScopeSuper && !withScopeThis) {
-			n.getScope().accept(currentHandler, context);
-			if (withDot) {
-				currentHandler.getPrinter().print(".");
-			}
-		} else if (!withScopeSuper && !Modifier.isStatic(method.getModifiers())) {
-			currentHandler.getPrinter().print("this");
-			if (withDot) {
-				currentHandler.getPrinter().print(".");
+		if (!withScopeSuper) {
+			if (n.getScope() != null && !withScopeThis) {
+				n.getScope().accept(currentHandler, context);
+				if (withDot) {
+					currentHandler.getPrinter().print(".");
+				}
+			} else if (!Modifier.isStatic(method.getModifiers())) {
+				currentHandler.getPrinter().print("this");
+				if (withDot) {
+					currentHandler.getPrinter().print(".");
+				}
 			}
 		}
 	}

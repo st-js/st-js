@@ -4,7 +4,7 @@ import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
-import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.JavascriptFileGenerationException;
 
 public class SpecialMethodGeneratorTest {
 
@@ -45,7 +45,7 @@ public class SpecialMethodGeneratorTest {
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testWrongMapKey() {
 		// $map(k,v) -> {k:v}
 		generate(SpecialMethod5b.class);

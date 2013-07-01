@@ -9,7 +9,7 @@ import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 import junit.framework.Assert;
 
 import org.junit.Test;
-import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.utils.GeneratorTestHelper;
 
 public class InnerTypesGeneratorTest {
@@ -46,7 +46,7 @@ public class InnerTypesGeneratorTest {
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testCallToQualifiedOuterType() {
 		generate(InnerTypes6.class);
 	}
@@ -80,7 +80,7 @@ public class InnerTypesGeneratorTest {
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testDeadCode() {
 		// the compiler will not generate the code inside the if (dead code), so the inner type may not be found
 		generate(InnerTypes12.class);

@@ -63,10 +63,8 @@ public class Generator {
 
 	public File getOutputFile(File generationFolder, String className, boolean generateDirectory) {
 		File output = new File(generationFolder, className.replace('.', File.separatorChar) + ".js");
-		if (generateDirectory) {
-			if (!output.getParentFile().exists() && !output.getParentFile().mkdirs()) {
-				throw new RuntimeException("Unable to create parent folder for the output file:" + output);
-			}
+		if (generateDirectory && !output.getParentFile().exists() && !output.getParentFile().mkdirs()) {
+			throw new STJSRuntimeException("Unable to create parent folder for the output file:" + output);
 		}
 		return output;
 	}
@@ -85,7 +83,7 @@ public class Generator {
 	 */
 	public ClassWithJavascript generateJavascript(ClassLoader builtProjectClassLoader, String className,
 			File sourceFolder, GenerationDirectory generationFolder, File targetFolder,
-			GeneratorConfiguration configuration) throws JavascriptGenerationException {
+			GeneratorConfiguration configuration) throws JavascriptFileGenerationException {
 
 		ClassLoaderWrapper classLoaderWrapper = new ClassLoaderWrapper(builtProjectClassLoader,
 				configuration.getAllowedPackages(), configuration.getAllowedJavaLangClasses());
@@ -115,7 +113,7 @@ public class Generator {
 			writer.flush();
 
 		} catch (IOException e1) {
-			throw new RuntimeException("Could not open output file " + outputFile + ":" + e1, e1);
+			throw new STJSRuntimeException("Could not open output file " + outputFile + ":" + e1, e1);
 		} finally {
 			Closeables.closeQuietly(writer);
 		}
@@ -129,36 +127,45 @@ public class Generator {
 		stjsClass.store();
 
 		if (configuration.isGenerateSourceMap()) {
-			BufferedWriter sourceMapWriter = null;
-
-			try {
-				// write the source map
-				sourceMapWriter = Files.newWriter(getSourceMapFile(generationFolder.getAbsolutePath(), className),
-						Charset.forName(configuration.getSourceEncoding()));
-				generatorVisitor.writeSourceMap(context, sourceMapWriter);
-				sourceMapWriter.flush();
-
-				// copy the source aside the generated js to be able to have it delivered to the browser for debugging
-				Files.copy(inputFile, new File(outputFile.getParentFile(), inputFile.getName()));
-				// copy the STJS properties file in the same folder as the Javascript file (if this folder is different
-				// to be
-				// able to do backward analysis: i.e fine the class name corresponding to a JS)
-				File stjsPropFile = stjsClass.getStjsPropertiesFile();
-				File copyStjsPropFile = new File(generationFolder.getAbsolutePath(),
-						ClassUtils.getPropertiesFileName(className));
-				if (!stjsPropFile.equals(copyStjsPropFile)) {
-					Files.copy(stjsPropFile, copyStjsPropFile);
-				}
-			} catch (IOException e) {
-				throw new RuntimeException("Could generate source map:" + e, e);
-			} finally {
-				if (sourceMapWriter != null) {
-					Closeables.closeQuietly(sourceMapWriter);
-				}
-			}
-
+			generateSourceMap(generationFolder, configuration, context, generatorVisitor, outputFile, stjsClass);
 		}
 		return stjsClass;
+	}
+
+	/**
+	 * generate the source map for the given class
+	 * 
+	 */
+	private void generateSourceMap(GenerationDirectory generationFolder, GeneratorConfiguration configuration,
+			GenerationContext context, JavascriptWriterVisitor generatorVisitor, File outputFile, STJSClass stjsClass) {
+		BufferedWriter sourceMapWriter = null;
+
+		try {
+			// write the source map
+			sourceMapWriter = Files.newWriter(
+					getSourceMapFile(generationFolder.getAbsolutePath(), stjsClass.getClassName()),
+					Charset.forName(configuration.getSourceEncoding()));
+			generatorVisitor.writeSourceMap(context, sourceMapWriter);
+			sourceMapWriter.flush();
+
+			// copy the source aside the generated js to be able to have it delivered to the browser for debugging
+			Files.copy(context.getInputFile(), new File(outputFile.getParentFile(), context.getInputFile().getName()));
+			// copy the STJS properties file in the same folder as the Javascript file (if this folder is different
+			// to be
+			// able to do backward analysis: i.e fine the class name corresponding to a JS)
+			File stjsPropFile = stjsClass.getStjsPropertiesFile();
+			File copyStjsPropFile = new File(generationFolder.getAbsolutePath(),
+					ClassUtils.getPropertiesFileName(stjsClass.getClassName()));
+			if (!stjsPropFile.equals(copyStjsPropFile)) {
+				Files.copy(stjsPropFile, copyStjsPropFile);
+			}
+		} catch (IOException e) {
+			throw new STJSRuntimeException("Could generate source map:" + e, e);
+		} finally {
+			if (sourceMapWriter != null) {
+				Closeables.closeQuietly(sourceMapWriter);
+			}
+		}
 	}
 
 	private URI relative(GenerationDirectory generationFolder, String className) {
@@ -181,7 +188,7 @@ public class Generator {
 			// }
 			// return getOutputFile(generationFolder, className).toURI();
 		} catch (URISyntaxException e) {
-			throw new RuntimeException(e);
+			throw new JavascriptClassGenerationException(className, e);
 		}
 	}
 
@@ -195,11 +202,11 @@ public class Generator {
 			try {
 				in = new FileInputStream(inputFile);
 			} catch (FileNotFoundException e) {
-				throw new JavascriptGenerationException(inputFile, null, e);
+				throw new JavascriptFileGenerationException(inputFile, null, e);
 			}
 
 			// parse the file
-			cu = JavaParser.parse(in);
+			cu = JavaParser.parse(in, sourceEncoding);
 
 			// set the parent of each node
 			cu.accept(new SetParentVisitor(), context);
@@ -212,7 +219,7 @@ public class Generator {
 			// rootScope.dump(" ");
 
 		} catch (ParseException e) {
-			throw new RuntimeException(e);
+			throw new JavascriptFileGenerationException(inputFile, null, e);
 		} finally {
 			Closeables.closeQuietly(in);
 		}
@@ -228,13 +235,13 @@ public class Generator {
 	public void copyJavascriptSupport(File folder) {
 		final InputStream stjs = Thread.currentThread().getContextClassLoader().getResourceAsStream(STJS_FILE);
 		if (stjs == null) {
-			throw new RuntimeException(STJS_FILE + " is missing from the Generator's classpath");
+			throw new STJSRuntimeException(STJS_FILE + " is missing from the Generator's classpath");
 		}
 		File outputFile = new File(folder, STJS_FILE);
 		try {
 			Files.copy(new InputStreamSupplier(stjs), outputFile);
 		} catch (IOException e) {
-			throw new RuntimeException("Could not copy the " + STJS_FILE + " file to the folder " + folder + ":"
+			throw new STJSRuntimeException("Could not copy the " + STJS_FILE + " file to the folder " + folder + ":"
 					+ e.getMessage(), e);
 		} finally {
 			Closeables.closeQuietly(stjs);
@@ -288,7 +295,7 @@ public class Generator {
 			try {
 				clazz = builtProjectClassLoader.loadClass(parentClassName);
 			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(e);
+				throw new STJSRuntimeException(e);
 			}
 			if (ClassUtils.isBridge(clazz)) {
 				return new BridgeClass(this, clazz);
@@ -318,6 +325,7 @@ public class Generator {
 		return new GeneratorDependencyResolver(classLoader, null, null, null, null).resolve(testClass.getName());
 	}
 
+	@SuppressWarnings("PMD.SystemPrintln")
 	public static void main(String[] args) throws URISyntaxException {
 		if (args.length == 0) {
 			System.out.println("Usage: Generator <class.name> [<allow package>] [<allow package>] .. ");

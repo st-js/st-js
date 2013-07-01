@@ -47,10 +47,6 @@ import com.google.common.base.Strings;
 import com.google.common.primitives.Primitives;
 
 public final class ClassUtils {
-	private ClassUtils() {
-		//
-	}
-
 	/**
 	 * these are packages that don't have the annotation but are considered as bridges
 	 */
@@ -68,6 +64,10 @@ public final class ClassUtils {
 			"byte"));
 
 	// private static Map<Class<?>, String> primitiveArrayId;
+
+	private ClassUtils() {
+		//
+	}
 
 	public static boolean isBasicType(Type type) {
 		if (type instanceof PrimitiveType) {
@@ -131,7 +131,7 @@ public final class ClassUtils {
 	 * @return true if the given type is defined within another type
 	 */
 	public static boolean isInnerType(TypeWrapper type) {
-		if (type == null || !(type instanceof ClassWrapper)) {
+		if (!(type instanceof ClassWrapper)) {
 			return false;
 		}
 		ClassWrapper classWrapper = (ClassWrapper) type;
@@ -139,7 +139,7 @@ public final class ClassUtils {
 	}
 
 	public static boolean isSyntheticType(TypeWrapper clazz) {
-		if (clazz == null || !(clazz instanceof ClassWrapper)) {
+		if (!(clazz instanceof ClassWrapper)) {
 			return false;
 		}
 		return isSyntheticType(((ClassWrapper) clazz).getClazz());
@@ -169,7 +169,7 @@ public final class ClassUtils {
 	 * @return
 	 */
 	public static String getNamespace(TypeWrapper type) {
-		if (type == null || !(type instanceof ClassWrapper)) {
+		if (!(type instanceof ClassWrapper)) {
 			return null;
 		}
 		ClassWrapper outermost = (ClassWrapper) type;
@@ -184,7 +184,7 @@ public final class ClassUtils {
 	}
 
 	public static <T extends Annotation> T getAnnotation(TypeWrapper clazz, Class<T> annotationClass) {
-		if (clazz == null || !(clazz instanceof ClassWrapper)) {
+		if (!(clazz instanceof ClassWrapper)) {
 			return null;
 		}
 		return getAnnotation(((ClassWrapper) clazz).getClazz(), annotationClass);
@@ -318,7 +318,7 @@ public final class ClassUtils {
 	}
 
 	private static boolean isAssignableFromUpperBounds(final Class<?> cls, final java.lang.reflect.Type[] bounds) {
-		for (final java.lang.reflect.Type bound : bounds) {
+		for (java.lang.reflect.Type bound : bounds) {
 			if (isAssignableFromType(cls, bound)) {
 				return true;
 			}

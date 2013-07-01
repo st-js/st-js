@@ -49,7 +49,7 @@ public class ExecutionResult {
 		if (stdOut.isEmpty() && stdErr.isEmpty()) {
 			return "Execution was sucessful";
 		}
-		return String.format("result: %s, exitValue : %s%nstdout : %s%nstderr :%s", result != null ? result.toString()
-				: "null", exitValue, stdOut, stdErr);
+		return String.format("result: %s, exitValue : %s%nstdout : %s%nstderr :%s",
+				result == null ? "null" : result.toString(), exitValue, stdOut, stdErr);
 	}
 }

@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.stjs.generator.STJSClass;
+import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.utils.PreConditions;
 
 import com.google.common.base.Charsets;
@@ -40,7 +41,7 @@ public class JavascriptToJava {
 			SourceMapping mapping = SourceMapConsumerFactory.parse(contents);
 			return mapping.getMappingForLine(lineNumber, 1).getLineNumber();
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new STJSRuntimeException(e);
 		}
 	}
 
@@ -55,7 +56,7 @@ public class JavascriptToJava {
 			p.load(in);
 			return p.getProperty(STJSClass.CLASS_PROP);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new STJSRuntimeException(e);
 		} finally {
 			if (in != null) {
 				Closeables.closeQuietly(in);
@@ -76,7 +77,7 @@ public class JavascriptToJava {
 		Matcher m = STACKTRACE_JS_PATTERN.matcher(stacktraceLine);
 		if (!m.matches()) {
 			// wrong pattern !?
-			throw new RuntimeException("Unknown location format:" + stacktraceLine);
+			throw new STJSRuntimeException("Unknown location format:" + stacktraceLine);
 		}
 		try {
 
@@ -105,7 +106,7 @@ public class JavascriptToJava {
 			return new StackTraceElement(className, methodName, sourceFile, line);
 
 		} catch (MalformedURLException e) {
-			throw new RuntimeException(e);
+			throw new STJSRuntimeException(e);
 		}
 	}
 

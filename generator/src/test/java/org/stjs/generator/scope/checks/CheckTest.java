@@ -3,29 +3,29 @@ package org.stjs.generator.scope.checks;
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
-import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.JavascriptFileGenerationException;
 
 public class CheckTest {
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testFieldAndMethodTheSameName() {
 		generate(Checks1.class);
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testFieldTheSameInSuper() {
 		generate(Checks2.class);
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testFieldTheSameMethoInSuper() {
 		generate(Checks3.class);
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testMethodOverwritePrivate() {
 		generate(Checks4.class);
 	}
@@ -36,7 +36,7 @@ public class CheckTest {
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testMethodOverload() {
 		generate(Checks6.class);
 	}
@@ -52,7 +52,7 @@ public class CheckTest {
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testFinalNotAtMethodLevel() {
 		generate(Checks8b.class);
 	}

@@ -7,7 +7,7 @@ import static org.stjs.generator.utils.GeneratorTestHelper.execute;
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
-import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.JavascriptFileGenerationException;
 
 public class FieldsGeneratorTest {
 	@Test
@@ -36,7 +36,7 @@ public class FieldsGeneratorTest {
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testForbidInstanceFieldInit() {
 		generate(Fields6.class);
 	}
@@ -47,7 +47,7 @@ public class FieldsGeneratorTest {
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testForbidInstanceFieldInitWithNonLiterals() {
 		generate(Fields8.class);
 	}

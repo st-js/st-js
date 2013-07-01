@@ -46,7 +46,7 @@ import java.util.Set;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
-import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.ast.ASTNodeData;
 import org.stjs.generator.ast.SourcePosition;
 import org.stjs.generator.type.ClassWrapper;
@@ -81,12 +81,12 @@ public final class Checks {
 			for (Parameter p : n.getParameters()) {
 				if (p.isVarArgs()) {
 					if (!p.getId().getName().equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
-						throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(n),
+						throw new JavascriptFileGenerationException(arg.getInputFile(), new SourcePosition(n),
 								"You can only have a vararg parameter that has to be called 'arguments'");
 
 					}
 					if (n.getParameters().size() != 1) {
-						throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(n),
+						throw new JavascriptFileGenerationException(arg.getInputFile(), new SourcePosition(n),
 								"You can only have a vararg parameter that has to be called 'arguments'");
 
 					}
@@ -107,7 +107,7 @@ public final class Checks {
 			JavascriptKeywords.checkIdentifier(arg.getInputFile(), new SourcePosition(v), v.getId().getName());
 			if (!ModifierSet.isStatic(n.getModifiers()) && v.getInit() != null) {
 				if (!ClassUtils.isBasicType(n.getType())) {
-					throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(v),
+					throw new JavascriptFileGenerationException(arg.getInputFile(), new SourcePosition(v),
 							"Instance field inline initialization is allowed only for string and number field types");
 				}
 				// allowed x = 1 and x = -1
@@ -119,7 +119,7 @@ public final class Checks {
 						return;
 					}
 				}
-				throw new JavascriptGenerationException(arg.getInputFile(), new SourcePosition(v),
+				throw new JavascriptFileGenerationException(arg.getInputFile(), new SourcePosition(v),
 						"Instance field inline initialization can only done with literal constants");
 			}
 		}
@@ -141,7 +141,7 @@ public final class Checks {
 		for (BodyDeclaration member : n.getMembers()) {
 			if (member instanceof ConstructorDeclaration) {
 				if (constr != null) {
-					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(member),
+					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
 							"Only maximum one constructor is allowed");
 				} else {
 					constr = (ConstructorDeclaration) member;
@@ -149,7 +149,7 @@ public final class Checks {
 			} else if (member instanceof MethodDeclaration) {
 				String name = ((MethodDeclaration) member).getName();
 				if (!names.add(name)) {
-					throw new JavascriptGenerationException(
+					throw new JavascriptFileGenerationException(
 							context.getInputFile(),
 							new SourcePosition(member),
 							"The type contains already a method or a field called ["
@@ -160,7 +160,7 @@ public final class Checks {
 				for (VariableDeclarator var : ((FieldDeclaration) member).getVariables()) {
 					String name = var.getId().getName();
 					if (!names.add(name)) {
-						throw new JavascriptGenerationException(
+						throw new JavascriptFileGenerationException(
 								context.getInputFile(),
 								new SourcePosition(member),
 								"The type contains already a method or a field called ["
@@ -185,7 +185,7 @@ public final class Checks {
 				TypeWrapper type = ASTNodeData.resolvedType(impl);
 				if (type instanceof ClassWrapper
 						&& ClassUtils.hasAnnotation((ClassWrapper) type, JavascriptFunction.class)) {
-					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 							"You cannot implement intefaces annotated with @JavascriptFunction. "
 									+ "You can only have inline object creation with this type of interfaces");
 				}
@@ -210,15 +210,15 @@ public final class Checks {
 							resolvedMethod.getParameterTypes());
 					if (overrideMethod.isDefined()) {
 						if (Modifier.isPrivate(overrideMethod.getOrThrow().getModifiers())) {
-							throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(member),
-									"One of the parent types contains already a private method called [" + name
-											+ "]. Javascript cannot distinguish methods/fields with the same name");
+							throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(
+									member), "One of the parent types contains already a private method called ["
+									+ name + "]. Javascript cannot distinguish methods/fields with the same name");
 						}
 						continue;
 					}
 
 					if (superClass.findField(name).isDefined() || !superClass.findMethods(name).isEmpty()) {
-						throw new JavascriptGenerationException(
+						throw new JavascriptFileGenerationException(
 								context.getInputFile(),
 								new SourcePosition(member),
 								"One of the parent types contains already a method or a field called ["
@@ -232,7 +232,7 @@ public final class Checks {
 					for (VariableDeclarator var : ((FieldDeclaration) member).getVariables()) {
 						String name = var.getId().getName();
 						if (superClass.findField(name).isDefined() || !superClass.findMethods(name).isEmpty()) {
-							throw new JavascriptGenerationException(
+							throw new JavascriptFileGenerationException(
 									context.getInputFile(),
 									new SourcePosition(member),
 									"One of the parent types contains already a method or a field called ["
@@ -250,13 +250,13 @@ public final class Checks {
 		String ns = ClassUtils.getNamespace(ASTNodeData.resolvedType(n));
 		if (ns != null) {
 			if (!GeneratorConstants.NAMESPACE_PATTERN.matcher(ns).matches()) {
-				throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 						"The namespace must be in the form <identifier>[.<identifier>]..");
 			}
 			String[] identifiers = ns.split("\\.");
 			for (String identifier : identifiers) {
 				if (JavascriptKeywords.isReservedWord(identifier)) {
-					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 							"Identifier \"" + identifier + "\" cannot be used as part of a namespace, "
 									+ "because it is a javascript keyword or a javascript reserved word");
 				}
@@ -272,7 +272,7 @@ public final class Checks {
 	 */
 	public static void checkEnumDeclaration(EnumDeclaration n, GenerationContext context) {
 		if (n.getMembers() != null && n.getMembers().size() > 0) {
-			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 					"Enums with fields or methods are not supported");
 		}
 
@@ -298,7 +298,7 @@ public final class Checks {
 
 	public static void checkThisExpr(ThisExpr n, GenerationContext context) {
 		if (n.getClassExpr() != null) {
-			throw new JavascriptGenerationException(
+			throw new JavascriptFileGenerationException(
 					context.getInputFile(),
 					new SourcePosition(n),
 					"In Javascript you cannot call methods or fields from the outer type. "
@@ -309,7 +309,7 @@ public final class Checks {
 
 	public static void checkSuperExpr(SuperExpr n, GenerationContext context) {
 		if (n.getClassExpr() != null) {
-			throw new JavascriptGenerationException(
+			throw new JavascriptFileGenerationException(
 					context.getInputFile(),
 					new SourcePosition(n),
 					"In Javascript you cannot call methods or fields from the outer type. "
@@ -320,7 +320,7 @@ public final class Checks {
 	public static void checkScope(MethodCallExpr n, GenerationContext context) {
 		if (n.getScope() == null) {
 			if (!isAccessInCorrectScope(n)) {
-				throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 						"In Javascript you cannot call methods or fields from the outer type. "
 								+ "You should define a variable var that=this outside your function "
 								+ "definition and call the methods on this object");
@@ -331,7 +331,7 @@ public final class Checks {
 
 	public static void checkScope(NameExpr n, GenerationContext context) {
 		if (!isAccessInCorrectScope(n)) {
-			throw new JavascriptGenerationException(
+			throw new JavascriptFileGenerationException(
 					context.getInputFile(),
 					new SourcePosition(n),
 					"In Javascript you cannot call methods or fields from the outer type. "
@@ -372,7 +372,7 @@ public final class Checks {
 			return;
 		}
 		if (n.getAnonymousClassBody() != null && n.getAnonymousClassBody().size() > 1) {
-			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 					"Initialization block for a Javascript function must contain exactly one method");
 		}
 
@@ -388,7 +388,7 @@ public final class Checks {
 		if (n.getArgs() != null) {
 			for (int i = 0; i < n.getArgs().size(); i += 2) {
 				if (!(n.getArgs().get(i) instanceof LiteralExpr)) {
-					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 							"The key of a map built this way can only be a literal. "
 									+ "Use map.$put(variable) if you want to use variables as keys");
 				}
@@ -412,7 +412,7 @@ public final class Checks {
 		}
 		for (Node p = n; p != null; p = ASTNodeData.parent(p)) {
 			if (isLoop(p)) {
-				throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 						"To prevent unexpected behaviour in Javascript, final variables must be declared at method level and not inside loops");
 			}
 			if (isMethodOrClassDeclaration(p)) {

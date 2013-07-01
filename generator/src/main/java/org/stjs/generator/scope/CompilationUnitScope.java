@@ -23,6 +23,7 @@ import java.util.Set;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.type.ClassLoaderWrapper;
 import org.stjs.generator.type.ClassWrapper;
+import org.stjs.generator.utils.Option;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
@@ -73,6 +74,15 @@ public class CompilationUnitScope extends AbstractScope {
 		return typeImportOnDemandSet;
 	}
 
+	private TypeWithScope addTypeWithScope(String name) {
+		Option<ClassWrapper> foundClass = classLoaderWrapper.loadClassOrInnerClass(name);
+		if (foundClass.isEmpty()) {
+			return null;
+		}
+		super.addType(foundClass.getOrNull());
+		return new TypeWithScope(this, foundClass.getOrNull());
+	}
+
 	@Override
 	public TypeWithScope resolveType(String name) {
 		TypeWithScope type = super.resolveType(name);
@@ -80,28 +90,28 @@ public class CompilationUnitScope extends AbstractScope {
 			return type;
 		}
 		// try in package
-		for (ClassWrapper packageClass : classLoaderWrapper.loadClassOrInnerClass(packageName + "." + name)) {
-			super.addType(packageClass);
-			return new TypeWithScope(this, packageClass);
+		type = addTypeWithScope(packageName + "." + name);
+		if (type != null) {
+			return type;
 		}
 
 		// fully qualified
-		for (ClassWrapper qualifiedClass : classLoaderWrapper.loadClassOrInnerClass(name)) {
-			super.addType(qualifiedClass);
-			return new TypeWithScope(this, qualifiedClass);
+		type = addTypeWithScope(name);
+		if (type != null) {
+			return type;
 		}
 
 		// try java.lang
-		for (ClassWrapper qualifiedClass : classLoaderWrapper.loadClassOrInnerClass("java.lang." + name)) {
-			super.addType(qualifiedClass);
-			return new TypeWithScope(this, qualifiedClass);
+		type = addTypeWithScope("java.lang." + name);
+		if (type != null) {
+			return type;
 		}
 
 		// try on demand
 		for (String pack : typeImportOnDemandSet) {
-			for (ClassWrapper qualifiedClass : classLoaderWrapper.loadClassOrInnerClass(pack + "." + name)) {
-				super.addType(qualifiedClass);
-				return new TypeWithScope(this, qualifiedClass);
+			type = addTypeWithScope(pack + "." + name);
+			if (type != null) {
+				return type;
 			}
 		}
 
@@ -112,10 +122,9 @@ public class CompilationUnitScope extends AbstractScope {
 			String inner = name.substring(pos + 1, name.length());
 			TypeWithScope ts = resolveType(parent);
 			if (ts != null) {
-				for (ClassWrapper qualifiedClass : classLoaderWrapper.loadClassOrInnerClass(ts.getType().getName()
-						+ "." + inner)) {
-					super.addType(qualifiedClass);
-					return new TypeWithScope(this, qualifiedClass);
+				type = addTypeWithScope(ts.getType().getName() + "." + inner);
+				if (type != null) {
+					return type;
 				}
 			}
 		}

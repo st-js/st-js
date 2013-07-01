@@ -7,7 +7,7 @@ import static org.stjs.generator.scope.ScopeTestHelper.assertResolvedName;
 import static org.stjs.generator.scope.ScopeTestHelper.resolveName;
 
 import org.junit.Test;
-import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.scope.BasicScope;
 import org.stjs.generator.scope.ClassScope;
 import org.stjs.generator.scope.CompilationUnitScope;
@@ -34,8 +34,8 @@ public class DeclarationsTest {
 	public void testScopeInnerOuter() {
 		try {
 			resolveName(DeclarationWithOuter1.class);
-			fail("Expected " + JavascriptGenerationException.class);
-		} catch (JavascriptGenerationException ex) {
+			fail("Expected " + JavascriptFileGenerationException.class);
+		} catch (JavascriptFileGenerationException ex) {
 			assertEquals(29, ex.getSourcePosition().getLine());
 		}
 	}
@@ -50,8 +50,8 @@ public class DeclarationsTest {
 	public void testScopeInnerOuterParent() {
 		try {
 			resolveName(DeclarationWithOuter2.class);
-			fail("Expected " + JavascriptGenerationException.class);
-		} catch (JavascriptGenerationException ex) {
+			fail("Expected " + JavascriptFileGenerationException.class);
+		} catch (JavascriptFileGenerationException ex) {
 			assertEquals(26, ex.getSourcePosition().getLine());
 		}
 	}
@@ -60,8 +60,8 @@ public class DeclarationsTest {
 	public void testScopeInnerOuterParentQualified() {
 		try {
 			resolveName(DeclarationWithOuter2b.class);
-			fail("Expected " + JavascriptGenerationException.class);
-		} catch (JavascriptGenerationException ex) {
+			fail("Expected " + JavascriptFileGenerationException.class);
+		} catch (JavascriptFileGenerationException ex) {
 			assertEquals(26, ex.getSourcePosition().getLine());
 		}
 	}
@@ -70,9 +70,9 @@ public class DeclarationsTest {
 	public void testScopeInnerOuterQualified() {
 		try {
 			resolveName(DeclarationWithOuter3.class);
-			fail("Expected " + JavascriptGenerationException.class);
-		} catch (JavascriptGenerationException ex) {
-			assertEquals(29, ex.getSourcePosition().getLine());
+			fail("Expected " + JavascriptFileGenerationException.class);
+		} catch (JavascriptFileGenerationException ex) {
+			assertEquals(28, ex.getSourcePosition().getLine());
 		}
 	}
 
@@ -80,8 +80,8 @@ public class DeclarationsTest {
 	public void testScopeInnerOuterMethod() {
 		try {
 			resolveName(DeclarationWithOuter4.class);
-			fail("Expected " + JavascriptGenerationException.class);
-		} catch (JavascriptGenerationException ex) {
+			fail("Expected " + JavascriptFileGenerationException.class);
+		} catch (JavascriptFileGenerationException ex) {
 			assertEquals(31, ex.getSourcePosition().getLine());
 		}
 	}
@@ -96,8 +96,8 @@ public class DeclarationsTest {
 	public void testScopeInnerOuterParentMethod() {
 		try {
 			resolveName(DeclarationWithOuter5.class);
-			fail("Expected " + JavascriptGenerationException.class);
-		} catch (JavascriptGenerationException ex) {
+			fail("Expected " + JavascriptFileGenerationException.class);
+		} catch (JavascriptFileGenerationException ex) {
 			assertEquals(26, ex.getSourcePosition().getLine());
 		}
 	}
@@ -106,9 +106,9 @@ public class DeclarationsTest {
 	public void testScopeInnerOuterQualifiedMethod() {
 		try {
 			resolveName(DeclarationWithOuter6.class);
-			fail("Expected " + JavascriptGenerationException.class);
-		} catch (JavascriptGenerationException ex) {
-			assertEquals(33, ex.getSourcePosition().getLine());
+			fail("Expected " + JavascriptFileGenerationException.class);
+		} catch (JavascriptFileGenerationException ex) {
+			assertEquals(32, ex.getSourcePosition().getLine());
 		}
 	}
 

@@ -42,6 +42,12 @@ public abstract class AbstractScope implements Scope {
 
 	private final GenerationContext context;
 
+	private final Map<String, Variable> variables = Maps.newHashMap();
+
+	private final Multimap<String, MethodWrapper> methods = ArrayListMultimap.create();
+
+	private final Map<String, TypeWrapper> types = Maps.newHashMap();
+
 	AbstractScope(Scope parent, GenerationContext context) {
 		this.parent = parent;
 		if (parent != null) {
@@ -50,12 +56,6 @@ public abstract class AbstractScope implements Scope {
 		children = Lists.newArrayList();
 		this.context = context;
 	}
-
-	private Map<String, Variable> variables = Maps.newHashMap();
-
-	private Multimap<String, MethodWrapper> methods = ArrayListMultimap.create();
-
-	private Map<String, TypeWrapper> types = Maps.newHashMap();
 
 	protected GenerationContext getContext() {
 		return context;
@@ -128,7 +128,7 @@ public abstract class AbstractScope implements Scope {
 
 	public MethodsWithScope resolveMethod(final String name, TypeWrapper... paramTypes) {
 		Collection<MethodWrapper> methodList = methods.get(name);
-		if (methodList != null && methodList.size() > 0) {
+		if (methodList != null && !methodList.isEmpty()) {
 			MethodWrapper w = MethodSelector.resolveMethod(methodList, paramTypes);
 			if (w != null) {
 				return new MethodsWithScope(this, w);

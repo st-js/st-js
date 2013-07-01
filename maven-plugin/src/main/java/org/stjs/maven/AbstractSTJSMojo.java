@@ -51,7 +51,7 @@ import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.GenerationDirectory;
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfigurationBuilder;
-import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.STJSClass;
 import org.stjs.generator.type.TypeWrappers;
 
@@ -230,7 +230,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 				} catch (InclusionScanException e) {
 					throw new MojoExecutionException("Cannot scan the source directory:" + e, e);
-				} catch (JavascriptGenerationException e) {
+				} catch (JavascriptFileGenerationException e) {
 					buildContext.addMessage(e.getInputFile(), e.getSourcePosition().getLine(), e.getSourcePosition()
 							.getColumn(), e.getMessage(), BuildContext.SEVERITY_ERROR, null);
 					hasFailures = true;

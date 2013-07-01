@@ -26,7 +26,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.ast.ASTNodeData;
 import org.stjs.generator.ast.SourcePosition;
 import org.stjs.generator.type.MethodWrapper;
@@ -51,7 +52,7 @@ public class MethodCallTemplates {
 		try {
 			configFiles = Thread.currentThread().getContextClassLoader().getResources(STJS_TEMPLATES_CONFIG_FILE);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new STJSRuntimeException(e);
 		}
 		while (configFiles.hasMoreElements()) {
 			loadConfigFile(configFiles.nextElement());
@@ -69,13 +70,13 @@ public class MethodCallTemplates {
 						(MethodCallTemplate) Class.forName(entry.getValue().toString()).newInstance());
 			}
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new STJSRuntimeException(e);
 		} catch (InstantiationException e) {
-			throw new RuntimeException(e);
+			throw new STJSRuntimeException(e);
 		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
+			throw new STJSRuntimeException(e);
 		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
+			throw new STJSRuntimeException(e);
 		} finally {
 			Closeables.closeQuietly(input);
 		}
@@ -88,7 +89,7 @@ public class MethodCallTemplates {
 		if (templateAnn != null) {
 			MethodCallTemplate handler = methodTemplates.get(templateAnn.value());
 			if (handler == null) {
-				throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 						"The template named '" + templateAnn.value() + " was not found");
 			}
 			if (handler.write(currentHandler, n, context)) {

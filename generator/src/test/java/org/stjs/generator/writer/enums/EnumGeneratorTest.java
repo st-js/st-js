@@ -4,7 +4,7 @@ import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
-import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.JavascriptFileGenerationException;
 
 public class EnumGeneratorTest {
 	@Test
@@ -19,7 +19,7 @@ public class EnumGeneratorTest {
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testEnumWithFieldsDeclaration() {
 		// fields are not supported
 		generate(Enums9.class);

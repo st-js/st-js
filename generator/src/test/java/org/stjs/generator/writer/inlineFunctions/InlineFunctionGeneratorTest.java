@@ -4,7 +4,7 @@ import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
-import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.JavascriptFileGenerationException;
 
 public class InlineFunctionGeneratorTest {
 	@Test
@@ -13,7 +13,7 @@ public class InlineFunctionGeneratorTest {
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testInterfaceAndParamForbidden() {
 		assertCodeContains(InlineFunctions2.class, "stjs.extend(function(){}, null, [FunctionInterface],");
 	}
@@ -44,7 +44,7 @@ public class InlineFunctionGeneratorTest {
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testImplementInlinefunction() {
 		// implement is forbidden
 		generate(InlineFunctions6.class);

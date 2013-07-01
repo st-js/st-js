@@ -35,6 +35,7 @@ public class JavascriptWriter {
 
 	private boolean indented;
 
+	@SuppressWarnings("PMD.AvoidStringBufferField")
 	private final StringBuilder buf = new StringBuilder();
 
 	private final SourceMapGenerator sourceMapGenerator;
@@ -113,7 +114,7 @@ public class JavascriptWriter {
 	}
 
 	public JavascriptWriter printLn() {
-		buf.append("\n");
+		buf.append('\n');
 		indented = false;
 		currentLine++;
 		currentColumn = 0;
@@ -146,7 +147,7 @@ public class JavascriptWriter {
 
 	public void addSourceMapURL(GenerationContext context) {
 		if (generateSourceMap) {
-			buf.append("//@ sourceMappingURL=" + context.getInputFile().getName().replaceAll("\\.java$", ".map"));
+			buf.append("//@ sourceMappingURL=").append(context.getInputFile().getName().replaceAll("\\.java$", ".map"));
 		}
 	}
 

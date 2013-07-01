@@ -19,13 +19,16 @@ import japa.parser.ast.Node;
 
 import java.io.Serializable;
 
+import javax.annotation.concurrent.Immutable;
+
 /**
  * This class indicated a position in a source file (line, column) where the given identifier starts.
  * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  * 
  */
-public class SourcePosition implements Serializable {
+@Immutable
+public final class SourcePosition implements Serializable {
 	/**
 	 *
 	 */

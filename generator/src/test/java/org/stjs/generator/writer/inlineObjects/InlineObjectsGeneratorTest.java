@@ -5,7 +5,7 @@ import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotCont
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
-import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.JavascriptFileGenerationException;
 
 public class InlineObjectsGeneratorTest {
 	@Test
@@ -14,7 +14,7 @@ public class InlineObjectsGeneratorTest {
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testInlineObjectAndOtherStatements() {
 		// other statements cannot be put inside the initializing blocks
 		generate(InlineObjects2.class);

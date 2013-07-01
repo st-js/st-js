@@ -6,7 +6,7 @@ import static org.stjs.generator.scope.ScopeTestHelper.assertResolvedMethod;
 import static org.stjs.generator.scope.ScopeTestHelper.resolveName;
 
 import org.junit.Test;
-import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.scope.methodDeclarations.sub.MethodDeclarations2;
 
 public class MethodDeclarationsTest {
@@ -23,8 +23,8 @@ public class MethodDeclarationsTest {
 	public void testMethodsSameName() {
 		try {
 			resolveName(SameNameMethods.class);
-			fail("Expected " + JavascriptGenerationException.class);
-		} catch (JavascriptGenerationException ex) {
+			fail("Expected " + JavascriptFileGenerationException.class);
+		} catch (JavascriptFileGenerationException ex) {
 			assertEquals(23, ex.getSourcePosition().getLine());
 			assertEquals(9, ex.getSourcePosition().getColumn());
 		}

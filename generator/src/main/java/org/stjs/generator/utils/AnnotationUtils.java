@@ -3,9 +3,16 @@ package org.stjs.generator.utils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Locale;
 
-public abstract class AnnotationUtils {
+import org.stjs.generator.STJSRuntimeException;
+
+public final class AnnotationUtils {
 	private static final String ANNOTATED_PACKAGE = "annotation.";
+
+	private AnnotationUtils() {
+		//
+	}
 
 	private static Class<?> findClass(ClassLoader classLoader, String name) {
 		try {
@@ -20,9 +27,9 @@ public abstract class AnnotationUtils {
 			return null;
 		}
 		if (s.length() == 1) {
-			return s.toUpperCase();
+			return s.toUpperCase(Locale.getDefault());
 		}
-		return s.substring(0, 1).toUpperCase() + s.substring(1);
+		return s.substring(0, 1).toUpperCase(Locale.getDefault()) + s.substring(1);
 	}
 
 	private static <T extends Annotation> T getAnnotationInHelperClass(String helperClassName, Method origMethod,
@@ -45,7 +52,7 @@ public abstract class AnnotationUtils {
 			methodInAnnotatedClass = annotatedHelperClass.getDeclaredMethod(origMethod.getName(),
 					origMethod.getParameterTypes());
 		} catch (SecurityException e) {
-			throw new RuntimeException(e);
+			throw new STJSRuntimeException(e);
 		} catch (NoSuchMethodException e) {
 			return null;
 		}

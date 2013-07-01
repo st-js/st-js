@@ -87,7 +87,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.ast.ASTNodeData;
 import org.stjs.generator.ast.SourcePosition;
 import org.stjs.generator.type.ClassLoaderWrapper;
@@ -255,7 +255,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			AnonymousClassesHelper helper = new AnonymousClassesHelper(clazz);
 			anonymousClassHelpers.put(clazz, helper);
 			if (count != helper.getAnonymousClassesCount()) {
-				throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 						"The code for some anonymous inner classes was not generated. "
 								+ "Please check if you don't have any dead code in your class and remove it"
 								+ " (for example an 'if' statement on a final boolean variable that yields false). ");
@@ -329,7 +329,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 				ReferenceType refType = (ReferenceType) type;
 				arrayCount = refType.getArrayCount();
 				if (arrayCount > 0 && !isMainArgs(type)) {
-					throw new JavascriptGenerationException(
+					throw new JavascriptFileGenerationException(
 							context.getInputFile(),
 							new SourcePosition(type),
 							"You cannot use Java arrays because they are incompatible with Javascript arrays. "
@@ -383,7 +383,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			}
 			return ClassUtils.arrayOf(resolvedType, arrayCount);
 		} catch (IllegalArgumentException ex) {
-			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(type), ex.getMessage());
+			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(type), ex.getMessage());
 		}
 	}
 
@@ -550,7 +550,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		try {
 			return classLoader.loadClassOrInnerClass(expr.toString());
 		} catch (IllegalArgumentException ex) {
-			throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(expr), ex.getMessage());
+			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(expr), ex.getMessage());
 		}
 	}
 
@@ -829,7 +829,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 						resolvedType(n, type.getType());
 					}
 				} catch (IllegalArgumentException ex) {
-					throw new JavascriptGenerationException(context.getInputFile(), new SourcePosition(n),
+					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 							ex.getMessage());
 				}
 			}

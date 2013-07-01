@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.stjs.generator.STJSRuntimeException;
+
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
 public class NodeJSExecutor {
@@ -33,14 +35,16 @@ public class NodeJSExecutor {
 			Process p = Runtime.getRuntime().exec(new String[]{ NODE_JS, srcFile.getAbsolutePath() });
 			int exitValue = p.waitFor();
 			return new ExecutionResult(null, readStream(p.getInputStream()), readStream(p.getErrorStream()), exitValue);
-		} catch (Exception e) {
+		} catch (IOException e) {
 			// TODO : this is not really going to be working on all OS!
 			if (e.getMessage().contains("Cannot run program")) {
 				String errMsg = "Please install node.js to use this feature https://github.com/joyent/node/wiki/Installation";
 				System.err.println(errMsg);
-				throw new RuntimeException(errMsg);
+				throw new STJSRuntimeException(errMsg);
 			}
-			throw new RuntimeException(e);
+			throw new STJSRuntimeException(e);
+		} catch (InterruptedException e) {
+			throw new STJSRuntimeException(e);
 		}
 	}
 

@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.concurrent.Immutable;
+
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.PreConditions;
 import org.stjs.javascript.annotation.STJSBridge;
@@ -32,6 +34,7 @@ import org.stjs.javascript.annotation.STJSBridge;
  * @author acraciun
  * 
  */
+@Immutable
 public class BridgeClass implements ClassWithJavascript {
 	private final Class<?> clazz;
 
@@ -46,10 +49,14 @@ public class BridgeClass implements ClassWithJavascript {
 		return clazz.getName();
 	}
 
+	private boolean hasSourceAnnotation(STJSBridge bridgeAnnotation) {
+		return bridgeAnnotation != null && bridgeAnnotation.sources() != null && bridgeAnnotation.sources().length > 0;
+	}
+
 	@Override
 	public List<URI> getJavascriptFiles() {
 		STJSBridge bridgeAnnotation = ClassUtils.getAnnotation(clazz, STJSBridge.class);
-		if (bridgeAnnotation == null || bridgeAnnotation.sources() == null || bridgeAnnotation.sources().length == 0) {
+		if (!hasSourceAnnotation(bridgeAnnotation)) {
 			return Collections.emptyList();
 		}
 
@@ -60,7 +67,7 @@ public class BridgeClass implements ClassWithJavascript {
 					files.add(new URI(src));
 				}
 			} catch (URISyntaxException e) {
-				throw new RuntimeException(e);
+				throw new JavascriptClassGenerationException(getClassName(), e);
 			}
 		}
 		return files;

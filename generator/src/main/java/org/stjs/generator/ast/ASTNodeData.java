@@ -49,7 +49,7 @@ public class ASTNodeData {
 	private Scope resolvedVariableScope;
 
 	public ASTNodeData() {
-
+		//
 	}
 
 	public ASTNodeData(Node parent) {

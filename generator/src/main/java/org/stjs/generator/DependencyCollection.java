@@ -56,9 +56,31 @@ public class DependencyCollection {
 		}
 
 		private int tryCompare(Class<?> a, Class<?> b, boolean checkInverse) {
-			if (a == b) {
+			if (a.equals(b)) {
 				return 0;
 			}
+			int direct = getAssignationDirection(a, b);
+
+			if (!checkInverse) {
+				return direct;
+			}
+			// check both directions to see if there is any contradiction
+			int inverse = tryCompare(b, a, false);
+
+			if (direct == -1 && inverse == -1) {
+				throw new IllegalArgumentException("Cannot decide the dependency order between the types:" + a
+						+ " and " + b);
+			}
+			if (direct != 0) {
+				return direct;
+			}
+			return -inverse;
+		}
+
+		/**
+		 * @return -1 of a (or any of the a declared classes is assignable from b), or 0 otherwise
+		 */
+		private int getAssignationDirection(Class<?> a, Class<?> b) {
 			int direct = 0;
 			if (isAssignableFromTypeOrChildTypes(a, b)) {
 				direct = -1;
@@ -70,19 +92,7 @@ public class DependencyCollection {
 					}
 				}
 			}
-			if (!checkInverse) {
-				return direct;
-			}
-			int inverse = tryCompare(b, a, false);
-
-			if (direct == -1 && inverse == -1) {
-				throw new IllegalArgumentException("Cannot decide the dependency order between the types:" + a
-						+ " and " + b);
-			}
-			if (direct != 0) {
-				return direct;
-			}
-			return -inverse;
+			return direct;
 		}
 
 		private boolean isAssignableFromTypeOrChildTypes(Class<?> a, Class<?> b) {
@@ -116,7 +126,7 @@ public class DependencyCollection {
 
 		Comparator<ClassWithJavascript> comparator = new ClassWithJavascriptComparator(classLoader);
 		List<ClassWithJavascript> orderedDeps = new ArrayList<ClassWithJavascript>();
-		while (deps.size() > 0) {
+		while (!deps.isEmpty()) {
 			// add to orderedDeps only the classes that have no "extends" dependency to any of the other from the
 			// remaining list.
 			// i.e. the result of the comparison is <= 0
@@ -179,7 +189,7 @@ public class DependencyCollection {
 				Class<?> c2 = classLoader.loadClass(o2.getClassName());
 				return DEPENDENCY_COMPARATOR.compare(c1, c2);
 			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(e);
+				throw new STJSRuntimeException(e);
 			}
 		}
 

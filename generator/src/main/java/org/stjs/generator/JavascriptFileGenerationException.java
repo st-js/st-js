@@ -25,26 +25,27 @@ import org.stjs.generator.ast.SourcePosition;
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  * 
  */
-public class JavascriptGenerationException extends RuntimeException {
+public class JavascriptFileGenerationException extends STJSRuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	private final File inputFile;
 
 	private final SourcePosition sourcePosition;
 
-	public JavascriptGenerationException(File inputFile, SourcePosition sourcePosition, String message, Throwable cause) {
+	public JavascriptFileGenerationException(File inputFile, SourcePosition sourcePosition, String message,
+			Throwable cause) {
 		super(message, cause);
 		this.inputFile = inputFile;
 		this.sourcePosition = sourcePosition;
 	}
 
-	public JavascriptGenerationException(File inputFile, SourcePosition sourcePosition, String message) {
+	public JavascriptFileGenerationException(File inputFile, SourcePosition sourcePosition, String message) {
 		super(message);
 		this.inputFile = inputFile;
 		this.sourcePosition = sourcePosition;
 	}
 
-	public JavascriptGenerationException(File inputFile, SourcePosition sourcePosition, Throwable cause) {
+	public JavascriptFileGenerationException(File inputFile, SourcePosition sourcePosition, Throwable cause) {
 		super(cause);
 		this.inputFile = inputFile;
 		this.sourcePosition = sourcePosition;
@@ -62,11 +63,11 @@ public class JavascriptGenerationException extends RuntimeException {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(super.toString());
-		sb.append("(").append(inputFile.getName());
+		sb.append('(').append(inputFile.getName());
 		if (sourcePosition != null) {
-			sb.append(":").append(sourcePosition.getLine());
+			sb.append(':').append(sourcePosition.getLine());
 		}
-		sb.append(")");
+		sb.append(')');
 
 		return sb.toString();
 	}

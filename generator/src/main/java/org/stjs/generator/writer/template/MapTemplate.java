@@ -16,8 +16,8 @@ public class MapTemplate implements MethodCallTemplate {
 
 	@Override
 	public boolean write(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
-		if ((n.getArgs() != null) && (n.getArgs().size() > 1)) {
-			// currentHandler.getPrinter().printLn();
+		boolean hasArgs = (n.getArgs() != null) && (n.getArgs().size() > 1);
+		if (hasArgs) {
 			currentHandler.getPrinter().indent();
 		}
 		currentHandler.getPrinter().print("{");
@@ -35,7 +35,7 @@ public class MapTemplate implements MethodCallTemplate {
 				first = false;
 			}
 		}
-		if ((n.getArgs() != null) && (n.getArgs().size() > 1)) {
+		if (hasArgs) {
 			currentHandler.getPrinter().unindent();
 		}
 

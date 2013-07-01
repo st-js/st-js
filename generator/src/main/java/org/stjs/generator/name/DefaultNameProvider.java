@@ -32,7 +32,7 @@ public class DefaultNameProvider implements NameProvider {
 	public String getTypeName(TypeWrapper typeWrapper) {
 		if (typeWrapper instanceof ClassWrapper) {
 			String namespace = ClassUtils.getNamespace(typeWrapper);
-			String prefix = namespace != null ? namespace + "." : "";
+			String prefix = namespace == null ? "" : namespace + ".";
 			return prefix + ((ClassWrapper) typeWrapper).getExternalName();
 		}
 		// XXX: should this appear?!

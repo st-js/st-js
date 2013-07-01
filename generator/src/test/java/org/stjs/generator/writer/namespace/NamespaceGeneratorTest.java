@@ -5,7 +5,7 @@ import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotCont
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
-import org.stjs.generator.JavascriptGenerationException;
+import org.stjs.generator.JavascriptFileGenerationException;
 
 public class NamespaceGeneratorTest {
 	@Test
@@ -48,7 +48,7 @@ public class NamespaceGeneratorTest {
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testWrongNs() {
 		generate(Namespace6.class);
 	}
@@ -65,7 +65,7 @@ public class NamespaceGeneratorTest {
 	}
 
 	@Test(
-			expected = JavascriptGenerationException.class)
+			expected = JavascriptFileGenerationException.class)
 	public void testReservedWordsInNamespace() {
 		generate(Namespace9.class);
 	}

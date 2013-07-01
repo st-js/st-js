@@ -97,11 +97,14 @@ import japa.parser.ast.type.VoidType;
 import japa.parser.ast.type.WildcardType;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
 
+@SuppressWarnings("PMD.ExcessivePublicCount")
 public class ForEachNodeVisitor<V> extends VoidVisitorAdapter<V> {
 	protected void before(Node node, V arg) {
+		// to be overriden
 	}
 
 	protected void after(Node node, V arg) {
+		// to be overriden
 	}
 
 	@Override

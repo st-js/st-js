@@ -27,8 +27,8 @@ import java.util.Set;
  * 
  */
 public class GeneratorConfigurationBuilder {
-	private Collection<String> allowedPackages = new HashSet<String>();
-	private Set<String> allowedJavaLangClasses = new HashSet<String>();
+	private final Collection<String> allowedPackages = new HashSet<String>();
+	private final Set<String> allowedJavaLangClasses = new HashSet<String>();
 	private boolean generateArrayHasOwnProperty = true;
 	private boolean generateSourceMap;
 	private String sourceEncoding = Charset.defaultCharset().name();
