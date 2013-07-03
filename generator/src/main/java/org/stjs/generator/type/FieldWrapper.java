@@ -19,9 +19,7 @@ import org.stjs.generator.variable.Variable;
 
 /**
  * This class wrapps a class field to use the type wrappers.
- * 
  * @author acraciun
- * 
  */
 public class FieldWrapper implements Variable {
 	private final String name;
@@ -38,10 +36,12 @@ public class FieldWrapper implements Variable {
 		this.declared = declared;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public TypeWrapper getType() {
 		return type;
 	}
@@ -55,7 +55,6 @@ public class FieldWrapper implements Variable {
 	}
 
 	/**
-	 * 
 	 * @return true if the field was declared in the owner class, false if it was inherited
 	 */
 	public boolean isDeclared() {
@@ -66,13 +65,14 @@ public class FieldWrapper implements Variable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((ownerType == null) ? 0 : ownerType.hashCode());
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + (name == null ? 0 : name.hashCode());
+		result = prime * result + (ownerType == null ? 0 : ownerType.hashCode());
+		result = prime * result + (type == null ? 0 : type.hashCode());
 		return result;
 	}
 
 	@Override
+	@SuppressWarnings({ "PMD.CyclomaticComplexity", "PMD.NPathComplexity" })
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;

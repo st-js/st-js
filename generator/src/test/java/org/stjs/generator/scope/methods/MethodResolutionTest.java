@@ -1,6 +1,7 @@
 package org.stjs.generator.scope.methods;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -27,6 +28,15 @@ public class MethodResolutionTest {
 	}
 
 	@Test
+	public void testVarargNotGood() {
+		//it should not match the first parameter
+		TypeWrapper type = TypeWrappers.wrap(MethodResolution2a.class);
+		Option<MethodWrapper> w =
+				type.findMethod("method", TypeWrappers.wrap(Double.class), TypeWrappers.wrap(Double.class));
+		assertFalse(w.isDefined());
+	}
+
+	@Test
 	public void testGenericVarargNoParam() {
 		TypeWrapper type = TypeWrappers.wrap(MethodResolution3.class);
 		Option<MethodWrapper> w = type.findMethod("method");
@@ -36,8 +46,8 @@ public class MethodResolutionTest {
 	@Test
 	public void testGenericVarargTwoParam() {
 		TypeWrapper type = TypeWrappers.wrap(MethodResolution3.class);
-		Option<MethodWrapper> w = type.findMethod("method", TypeWrappers.wrap(Double.class),
-				TypeWrappers.wrap(Double.class));
+		Option<MethodWrapper> w =
+				type.findMethod("method", TypeWrappers.wrap(Double.class), TypeWrappers.wrap(Double.class));
 		assertTrue(w.isDefined());
 	}
 
@@ -66,16 +76,17 @@ public class MethodResolutionTest {
 	@Test
 	public void testVarArgAndNull() {
 		TypeWrapper type = TypeWrappers.wrap(MethodResolution7.class);
-		Option<MethodWrapper> w = type.findMethod("method", TypeWrappers.wrap(Double.class), null,
-				TypeWrappers.wrap(boolean.class));
+		Option<MethodWrapper> w =
+				type.findMethod("method", TypeWrappers.wrap(Double.class), null, TypeWrappers.wrap(boolean.class));
 		assertTrue(w.isDefined());
 	}
 
 	@Test
 	public void testCallFunc() {
 		TypeWrapper type = TypeWrappers.wrap(JSFunctionAdapter.class);
-		Option<MethodWrapper> w = type.findMethod("call", TypeWrappers.wrap(Object.class),
-				TypeWrappers.wrap(Object.class), TypeWrappers.wrap(int.class), TypeWrappers.wrap(int.class));
+		Option<MethodWrapper> w =
+				type.findMethod("call", TypeWrappers.wrap(Object.class), TypeWrappers.wrap(Object.class),
+						TypeWrappers.wrap(int.class), TypeWrappers.wrap(int.class));
 		assertTrue(w.isDefined());
 	}
 

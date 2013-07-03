@@ -61,4 +61,8 @@ public final class Lists {
 	public static <T> List<T> append(List<T> coll, T appendee) {
 		return union(coll, Collections.singletonList(appendee));
 	}
+
+	public static <T> boolean isNullOrEmpty(List<T> list) {
+		return list == null || list.isEmpty();
+	}
 }

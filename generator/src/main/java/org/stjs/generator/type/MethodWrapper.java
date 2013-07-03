@@ -26,11 +26,8 @@ import org.stjs.generator.utils.AnnotationUtils;
 import com.google.common.base.Preconditions;
 
 /**
- * 
  * This is a wrapper around a method, but with the correct type for a generic type for example
- * 
  * @author acraciun
- * 
  */
 @Immutable
 public final class MethodWrapper {
@@ -41,6 +38,10 @@ public final class MethodWrapper {
 	private final int modifiers;
 	private final TypeWrapper ownerType;
 	private final boolean declared;
+
+	private enum ParamMatch {
+		no, yes, maybeVarargs
+	}
 
 	public MethodWrapper(Method method, TypeWrapper returnType, TypeWrapper[] parameterTypes, int modifiers,
 			TypeVariableWrapper<Method>[] typeParameters, TypeWrapper ownerType, boolean declared) {
@@ -84,7 +85,6 @@ public final class MethodWrapper {
 	}
 
 	/**
-	 * 
 	 * @return true if the method was declared in the owner class, false if it was inherited
 	 */
 	public boolean isDeclared() {
@@ -95,7 +95,7 @@ public final class MethodWrapper {
 		return parameterTypes.length > 0 ? parameterTypes[parameterTypes.length - 1].getComponentType() : null;
 	}
 
-	public boolean isCompatibleParameterTypes(TypeWrapper[] paramTypes) {
+	private ParamMatch matchExact(TypeWrapper[] paramTypes) {
 		int i = 0;
 		for (i = 0; i < paramTypes.length && i < parameterTypes.length; ++i) {
 			if (!parameterTypes[i].isAssignableFrom(paramTypes[i])) {
@@ -103,15 +103,20 @@ public final class MethodWrapper {
 			}
 		}
 		if (i == paramTypes.length) {
-			return true;
+			return ParamMatch.yes;
 		}
+		if (i >= parameterTypes.length - 1) {
+			return ParamMatch.maybeVarargs;
+		}
+		return ParamMatch.no;
+	}
+
+	private boolean matchVarargs(TypeWrapper[] paramTypes) {
 		TypeWrapper varArgParamType = getVarargParamType();
 		if (varArgParamType == null) {
 			return false;
 		}
-		// try a varargs match
-		i = parameterTypes.length - 1;
-		for (; i < paramTypes.length; ++i) {
+		for (int i = parameterTypes.length - 1; i < paramTypes.length; ++i) {
 			if (!varArgParamType.isAssignableFrom(paramTypes[i])) {
 				return false;
 			}
@@ -119,12 +124,24 @@ public final class MethodWrapper {
 		return true;
 	}
 
+	public boolean isCompatibleParameterTypes(TypeWrapper[] paramTypes) {
+		ParamMatch match = matchExact(paramTypes);
+		if (match == ParamMatch.yes) {
+			return true;
+		}
+		if (match == ParamMatch.no) {
+			return false;
+		}
+		// try a varargs match
+		return matchVarargs(paramTypes);
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder();
-		s.append(returnType).append(" ").append(getName()).append(" (");
+		s.append(returnType).append(' ').append(getName()).append(" (");
 		s.append(Arrays.toString(parameterTypes));
-		s.append(")");
+		s.append(')');
 		return s.toString();
 	}
 

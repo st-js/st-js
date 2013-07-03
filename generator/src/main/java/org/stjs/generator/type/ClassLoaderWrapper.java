@@ -61,8 +61,9 @@ public class ClassLoaderWrapper {
 			Class<?> clazz = classLoader.loadClass(name);
 			Class<?> topDeclaringClass = getTopDeclaringClass(clazz);
 			checkAndAddResolvedClass(topDeclaringClass);
-			return Option.<ClassWrapper>some(new ClassWrapper(clazz));
-		} catch (ClassNotFoundException e) {
+			return Option.<ClassWrapper> some(new ClassWrapper(clazz));
+		}
+		catch (ClassNotFoundException e) {
 			return Option.none();
 		}
 	}
@@ -71,6 +72,22 @@ public class ClassLoaderWrapper {
 		return new IllegalArgumentException("The usage of the class " + clazz.getName()
 				+ " is not allowed. If it's one of your own bridge types, "
 				+ "please add the annotation @STJSBridge to the class or to its package.");
+	}
+
+	private void checkPackageAllowed(Class<?> clazz) {
+		if (!ClassUtils.isBridge(clazz)) {
+			boolean found = false;
+			for (String packageName : allowedPackages) {
+				if (clazz.getName().startsWith(packageName)) {
+					found = true;
+					break;
+				}
+			}
+
+			if (!found && !isImportedStjsClass(clazz)) {
+				throw typeNotAllowedException(clazz);
+			}
+		}
 	}
 
 	private void checkAndAddResolvedClass(Class<?> clazz) {
@@ -87,20 +104,8 @@ public class ClassLoaderWrapper {
 			// no need to store java lang classes
 			return;
 		}
-		if (!ClassUtils.isBridge(clazz)) {
-			boolean found = false;
-			for (String packageName : allowedPackages) {
-				if (clazz.getName().startsWith(packageName)) {
-					found = true;
-					break;
-				}
-			}
 
-			if (!found && !isImportedStjsClass(clazz)) {
-				throw typeNotAllowedException(clazz);
-			}
-		}
-
+		checkPackageAllowed(clazz);
 		resolvedClasses.add(clazz.getName());
 	}
 

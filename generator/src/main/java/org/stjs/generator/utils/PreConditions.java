@@ -35,7 +35,8 @@ public final class PreConditions {
 		}
 	}
 
-	public static void checkStateNodeNodeNull(Node node, Object toTest, String message, Object... args) {
+	@SuppressWarnings("PMD.AvoidThrowingNullPointerException")
+	public static void checkStateNodeNotNull(Node node, Object toTest, String message, Object... args) {
 		if (toTest == null) {
 			throw new NullPointerException("Line " + node.getBeginLine() + ":" + format(message, args));
 		}
@@ -46,6 +47,7 @@ public final class PreConditions {
 		return checkNotNull(obj, "");
 	}
 
+	@SuppressWarnings("PMD.AvoidThrowingNullPointerException")
 	public static <T> T checkNotNull(T obj, String message, Object... args) {
 		if (obj == null) {
 			throw new NullPointerException(format(message, args));

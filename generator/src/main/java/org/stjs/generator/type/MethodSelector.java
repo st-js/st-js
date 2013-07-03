@@ -11,20 +11,13 @@ import java.util.Map;
 
 /**
  * This class tries to implement the algorithm to select the matching method given a list of parameter types. The
- * complete algorithm is described here: http://java.sun.com/docs/books/jls/third_edition/html/expressions.html#292575
- * 
- * <br>
+ * complete algorithm is described here: http://java.sun.com/docs/books/jls/third_edition/html/expressions.html#292575 <br>
  * Given the main purpose of this class, here is presented a simpler version of this algorithm. It takes into account
  * that there should be exactly one match as the checked code is already compiled and it's working! So for example if in
  * the given list there is only one method (or one with the correct number of parameters) it returns it right away.
- * 
  * @author acraciun
- * 
  */
 public final class MethodSelector {
-	private MethodSelector() {
-		//
-	}
 
 	private static Comparator<MethodWrapper> methodSpecificityComparator = new Comparator<MethodWrapper>() {
 		@Override
@@ -37,13 +30,14 @@ public final class MethodSelector {
 		}
 	};
 
+	private MethodSelector() {
+		//
+	}
+
 	/**
 	 * chooses from the list of candidates the method that matches the given argument types. if none is found, null is
-	 * returned.
-	 * 
-	 * if the chosen method has type parameters, the returned method wrapper contains the resolved type for the return
-	 * type
-	 * 
+	 * returned. if the chosen method has type parameters, the returned method wrapper contains the resolved type for
+	 * the return type
 	 * @param candidates
 	 * @param argumentTypes
 	 * @return
@@ -62,7 +56,7 @@ public final class MethodSelector {
 			}
 		}
 
-		if (matching.size() == 0) {
+		if (matching.isEmpty()) {
 			return null;
 		}
 
@@ -84,8 +78,8 @@ public final class MethodSelector {
 
 		for (int i = 0; i < argumentTypes.length; ++i) {
 			TypeWrapper argumentType = argumentTypes[i];
-			TypeWrapper paramType = i < found.getParameterTypes().length ? found.getParameterTypes()[i] : found
-					.getVarargParamType();
+			TypeWrapper paramType =
+					i < found.getParameterTypes().length ? found.getParameterTypes()[i] : found.getVarargParamType();
 			Map<String, TypeWrapper> inferredTypesForParam = resolveTypeVariables(paramType, argumentType);
 			for (Map.Entry<String, TypeWrapper> e : inferredTypesForParam.entrySet()) {
 				TypeWrapper existing = inferredTypes.get(e.getKey());

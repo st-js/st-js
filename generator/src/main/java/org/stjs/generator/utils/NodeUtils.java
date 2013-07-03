@@ -30,28 +30,34 @@ import org.stjs.generator.visitor.ForEachNodeVisitor;
 
 /**
  * different methods to work with AST nodes.
- * 
  * @author acraciun
- * 
  */
 public final class NodeUtils {
 	private NodeUtils() {
 		//
 	}
 
+	private static <T> boolean hasSize(List<T> list, int size) {
+		return list != null && list.size() == size;
+	}
+
+	private static boolean isString(ClassOrInterfaceType type) {
+		String typeName = type.getName();
+		return "String".equals(typeName) || "java.lang.String".equals(typeName);
+	}
+
 	public static boolean isMainMethod(MethodDeclaration methodDeclaration) {
 		boolean isMainMethod = false;
 		if (isStatic(methodDeclaration.getModifiers()) && "main".equals(methodDeclaration.getName())) {
 			List<Parameter> parameters = methodDeclaration.getParameters();
-			if ((parameters == null) || (parameters.size() > 1)) {
+			if (!hasSize(parameters, 1)) {
 				return false;
 			}
 			Parameter parameter = parameters.get(0);
 			if (parameter.getType() instanceof ReferenceType) {
 				ReferenceType refType = (ReferenceType) parameter.getType();
-				if ((refType.getArrayCount() == 1) && (refType.getType() instanceof ClassOrInterfaceType)) {
-					String typeName = ((ClassOrInterfaceType) refType.getType()).getName();
-					if ("String".equals(typeName) || "java.lang.String".equals(typeName)) {
+				if (refType.getArrayCount() == 1 && refType.getType() instanceof ClassOrInterfaceType) {
+					if (isString((ClassOrInterfaceType) refType.getType())) {
 						isMainMethod = true;
 					}
 				}
@@ -62,7 +68,6 @@ public final class NodeUtils {
 	}
 
 	/**
-	 * 
 	 * @param parent
 	 * @param type
 	 * @return the list of all the descendants of the given code that are of the given type (or a subclass of it)

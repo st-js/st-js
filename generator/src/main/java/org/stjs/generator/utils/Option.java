@@ -108,6 +108,7 @@ public abstract class Option<T> implements Iterable<T> {
 		private final U u;
 
 		private Some(U u) {
+			super();
 			PreConditions.checkNotNull(u);
 			this.u = u;
 		}
@@ -239,10 +240,8 @@ public abstract class Option<T> implements Iterable<T> {
 	}
 
 	/**
-	 * Gets the none object for the given type.
-	 * 
-	 * Note: using a freely parameterized type {@code T} with an unchecked warning allows to simulate a bottom type in
-	 * Java.
+	 * Gets the none object for the given type. Note: using a freely parameterized type {@code T} with an unchecked
+	 * warning allows to simulate a bottom type in Java.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> Option<T> none() {
@@ -258,12 +257,11 @@ public abstract class Option<T> implements Iterable<T> {
 
 	/**
 	 * Wraps anything.
-	 * 
 	 * @param <T>
 	 * @param t
 	 * @return if null, none(), some(t) otherwise
 	 */
 	public static <T> Option<T> of(T t) {
-		return t == null ? Option.<T>none() : some(t);
+		return t == null ? Option.<T> none() : some(t);
 	}
 }
