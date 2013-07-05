@@ -23,11 +23,11 @@ import javax.annotation.concurrent.Immutable;
 
 /**
  * This class indicated a position in a source file (line, column) where the given identifier starts.
- * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
- * 
  */
 @Immutable
+//PMD cannot correctly handle final fields
+@SuppressWarnings("PMD.BeanMembersShouldSerialize")
 public final class SourcePosition implements Serializable {
 	/**
 	 *

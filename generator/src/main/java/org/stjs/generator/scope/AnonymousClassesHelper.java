@@ -47,9 +47,7 @@ import com.google.common.collect.Multimap;
  * strange order number given to inline types in the same statement. the numbers are assigned backwards. it looks like
  * the Eclipse incremental builder assigns the numbers in the correct order, but the command line compiler assigns them
  * the other way around
- * 
  * @author acraciun
- * 
  */
 public class AnonymousClassesHelper {
 	private final static String STATIC_INIT_METHOD = "<clinit>";
@@ -57,42 +55,50 @@ public class AnonymousClassesHelper {
 	private final static Pattern ANONYMOUS_CLASS_PATTERN = Pattern.compile("\\$\\d+$");
 	private final Multimap<String, String> classesByMethod = ArrayListMultimap.create();
 
-	@SuppressWarnings("unchecked")
 	public AnonymousClassesHelper(Class<?> ownerClass) {
 		JavaClass clazz;
 		try {
 			// XXX: should put this somewhere else
 			Repository.clearCache();
 			clazz = Repository.lookupClass(ownerClass);
-		} catch (ClassNotFoundException e) {
+		}
+		catch (ClassNotFoundException e) {
 			throw new JavascriptClassGenerationException(ownerClass.getName(),
 					"Cannot load BCEL wrapper for the class:" + ownerClass, e);
 		}
 		ClassGen g = new ClassGen(clazz);
 		for (Method m : clazz.getMethods()) {
-			MethodGen mg = new MethodGen(m, g.getClassName(), g.getConstantPool());
-			String methodName = mg.getName();
+			addAnonymousClassInMethod(m, g);
+		}
+	}
 
-			if (mg.getInstructionList() == null) {
-				continue;
-			}
-			Iterator<InstructionHandle> it = mg.getInstructionList().iterator();
-			while (it.hasNext()) {
-				InstructionHandle h = it.next();
-				if (h.getInstruction() instanceof NEW) {
-					NEW newInstr = (NEW) h.getInstruction();
-					String typeName = newInstr.getType(g.getConstantPool()).toString();
-					if (isAnonymousClass(typeName)) {
-						classesByMethod.put(methodName, typeName);
-					}
+	@SuppressWarnings("unchecked")
+	private void addAnonymousClassInMethod(Method m, ClassGen g) {
+		MethodGen mg = new MethodGen(m, g.getClassName(), g.getConstantPool());
+		if (mg.getInstructionList() == null) {
+			return;
+		}
+
+		String methodName = mg.getName();
+		Iterator<InstructionHandle> it = mg.getInstructionList().iterator();
+		while (it.hasNext()) {
+			InstructionHandle h = it.next();
+			if (h.getInstruction() instanceof NEW) {
+				NEW newInstr = (NEW) h.getInstruction();
+				String typeName = newInstr.getType(g.getConstantPool()).toString();
+				if (isAnonymousClass(typeName)) {
+					classesByMethod.put(methodName, typeName);
 				}
 			}
 		}
-
 	}
 
 	private boolean isAnonymousClass(String typeName) {
 		return ANONYMOUS_CLASS_PATTERN.matcher(typeName).find();
+	}
+
+	private String getInitMethodName(boolean isStatic) {
+		return isStatic ? STATIC_INIT_METHOD : CONSTRUCTOR_METHOD;
 	}
 
 	private String getMethodNameFromNode(Node node) {
@@ -104,11 +110,11 @@ public class AnonymousClassesHelper {
 		}
 		if (node instanceof FieldDeclaration) {
 			FieldDeclaration field = (FieldDeclaration) node;
-			return Modifier.isStatic(field.getModifiers()) ? STATIC_INIT_METHOD : CONSTRUCTOR_METHOD;
+			return getInitMethodName(Modifier.isStatic(field.getModifiers()));
 		}
 		if (node instanceof InitializerDeclaration) {
 			InitializerDeclaration init = (InitializerDeclaration) node;
-			return init.isStatic() ? STATIC_INIT_METHOD : CONSTRUCTOR_METHOD;
+			return getInitMethodName(init.isStatic());
 		}
 		return null;
 	}
@@ -124,7 +130,6 @@ public class AnonymousClassesHelper {
 	}
 
 	/**
-	 * 
 	 * @param node
 	 * @param scopeBuilder
 	 * @param scope
@@ -136,7 +141,7 @@ public class AnonymousClassesHelper {
 		// for the moment static blocks are forbidden but they alter the order of nodes
 		String method = getMethodName(node);
 		Collection<String> classes = classesByMethod.get(method);
-		if ((classes == null) || classes.isEmpty()) {
+		if (classes == null || classes.isEmpty()) {
 			return null;
 		}
 		// remove first because the calls will come ordered

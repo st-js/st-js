@@ -98,27 +98,43 @@ public final class MethodSelector {
 		return found.withReturnType(inferredType);
 	}
 
-	private static Map<String, TypeWrapper> resolveTypeVariables(TypeWrapper paramType, TypeWrapper argumentType) {
+	private static Map<String, TypeWrapper> resolveVariablesForParameterizedTypeWrapper(
+			ParameterizedTypeWrapper paramType, TypeWrapper argumentType) {
 		Map<String, TypeWrapper> inferredTypes = new HashMap<String, TypeWrapper>();
-		if (paramType instanceof TypeVariableWrapper) {
-			inferredTypes.put(((TypeVariable<?>) paramType.getType()).getName(), argumentType);
-		} else if (paramType instanceof ParameterizedTypeWrapper) {
-			if (argumentType instanceof ParameterizedTypeWrapper) {
-				// let's hope the sizes are similar
-				TypeWrapper[] paramTypeArgs = ((ParameterizedTypeWrapper) paramType).getActualTypeArguments();
-				TypeWrapper[] argumentTypeArgs = ((ParameterizedTypeWrapper) argumentType).getActualTypeArguments();
-				for (int i = 0; i < paramTypeArgs.length; ++i) {
-					// TODO keep also the most specific
-					inferredTypes.putAll(resolveTypeVariables(paramTypeArgs[i], argumentTypeArgs[i]));
-				}
-			}
-		} else if (paramType instanceof GenericArrayTypeWrapper) {
-			if (argumentType instanceof ParameterizedTypeWrapper) {
-				inferredTypes
-						.putAll(resolveTypeVariables(paramType.getComponentType(), argumentType.getComponentType()));
+		if (argumentType instanceof ParameterizedTypeWrapper) {
+			// let's hope the sizes are similar
+			TypeWrapper[] paramTypeArgs = paramType.getActualTypeArguments();
+			TypeWrapper[] argumentTypeArgs = ((ParameterizedTypeWrapper) argumentType).getActualTypeArguments();
+			for (int i = 0; i < paramTypeArgs.length; ++i) {
+				// TODO keep also the most specific
+				inferredTypes.putAll(resolveTypeVariables(paramTypeArgs[i], argumentTypeArgs[i]));
 			}
 		}
-
 		return inferredTypes;
+	}
+
+	private static Map<String, TypeWrapper> resolveVariablesForGenericArrayTypeWrapper(
+			GenericArrayTypeWrapper paramType, TypeWrapper argumentType) {
+		if (argumentType instanceof ParameterizedTypeWrapper) {
+			return resolveTypeVariables(paramType.getComponentType(), argumentType.getComponentType());
+		}
+		return Collections.emptyMap();
+	}
+
+	private static Map<String, TypeWrapper> resolveVariablesForTypeVariableWrapper(TypeVariableWrapper<?> paramType,
+			TypeWrapper argumentType) {
+		return Collections.singletonMap(((TypeVariable<?>) paramType.getType()).getName(), argumentType);
+	}
+
+	private static Map<String, TypeWrapper> resolveTypeVariables(TypeWrapper paramType, TypeWrapper argumentType) {
+		if (paramType instanceof TypeVariableWrapper) {
+			return resolveVariablesForTypeVariableWrapper((TypeVariableWrapper<?>) paramType, argumentType);
+		} else if (paramType instanceof ParameterizedTypeWrapper) {
+			return resolveVariablesForParameterizedTypeWrapper((ParameterizedTypeWrapper) paramType, argumentType);
+		} else if (paramType instanceof GenericArrayTypeWrapper) {
+			return resolveVariablesForGenericArrayTypeWrapper((GenericArrayTypeWrapper) paramType, argumentType);
+		}
+
+		return Collections.emptyMap();
 	}
 }
