@@ -341,9 +341,10 @@ public class ClassWrapper implements TypeWrapper {
 					return Option.some(new ClassWrapper(innerClass));
 				}
 			}
-		} catch (SecurityException e) {
+		}
+		catch (SecurityException e) {
 			throw new JavascriptClassGenerationException(name, e);
-			}
+		}
 		return Option.none();
 	}
 
