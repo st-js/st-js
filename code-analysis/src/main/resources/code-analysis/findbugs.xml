@@ -2,7 +2,8 @@
 	<Match>
 		<Not>
 			<Bug pattern="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE,
-			DM_CONVERT_CASE" />
+			DM_CONVERT_CASE,
+			SIC_INNER_SHOULD_BE_STATIC" />
 		</Not>
 	</Match>
 

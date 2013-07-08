@@ -149,6 +149,7 @@ import org.stjs.javascript.annotation.GlobalScope;
  * the {@link org.stjs.generator.scope.ScopeBuilder} previously visited the tree and set the resolved name of certain
  * nodes.
  */
+@SuppressWarnings("PMD.ExcessivePublicCount")
 public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	private final MethodCallTemplates specialMethodHandlers;
@@ -270,6 +271,18 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printer.printLiteral(n.getValue());
 	}
 
+	private void printEnumEntries(EnumDeclaration n) {
+		if (n.getEntries() != null) {
+			for (Iterator<EnumConstantDeclaration> i = n.getEntries().iterator(); i.hasNext();) {
+				EnumConstantDeclaration e = i.next();
+				printer.printStringLiteral(e.getName());
+				if (i.hasNext()) {
+					printer.printLn(", ");
+				}
+			}
+		}
+	}
+
 	@Override
 	public void visit(EnumDeclaration n, GenerationContext context) {
 
@@ -299,15 +312,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		// TODO implements not considered
 		printer.printLn("stjs.enumeration(");
 		printer.indent();
-		if (n.getEntries() != null) {
-			for (Iterator<EnumConstantDeclaration> i = n.getEntries().iterator(); i.hasNext();) {
-				EnumConstantDeclaration e = i.next();
-				printer.printStringLiteral(e.getName());
-				if (i.hasNext()) {
-					printer.printLn(", ");
-				}
-			}
-		}
+		printEnumEntries(n);
+
 		// TODO members not considered
 		printer.printLn("");
 		printer.unindent();
@@ -438,8 +444,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		throw new IllegalStateException("Unexpected visit in a VariableDeclarator node:" + n);
 	}
 
-	private void printVariableDeclarator(VariableDeclarator n, GenerationContext context, boolean forceInitNull,
-			boolean isProperty) {
+	private void printVariableDeclarator(VariableDeclarator n, GenerationContext context, boolean forceInitNull) {
 		n.getId().accept(this, context);
 		if (n.getInit() != null) {
 			printer.print(" = ");
@@ -457,7 +462,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 		for (Iterator<VariableDeclarator> i = n.getVars().iterator(); i.hasNext();) {
 			VariableDeclarator v = i.next();
-			printVariableDeclarator(v, context, false, false);
+			printVariableDeclarator(v, context, false);
 			if (i.hasNext()) {
 				printer.print(", ");
 			}
@@ -471,12 +476,12 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		for (VariableDeclarator v : n.getVariables()) {
 			if (!global) {
 				if (isStatic(n.getModifiers())) {
-					printer.print("constructor.");
+					printer.print(JavascriptKeywords.CONSTRUCTOR).print(".");
 				} else {
-					printer.print("prototype.");
+					printer.print(JavascriptKeywords.PROTOTYPE).print(".");
 				}
 			}
-			printVariableDeclarator(v, context, true, !global || isInstanceField(n));
+			printVariableDeclarator(v, context, true);
 			printer.print(";");
 		}
 	}
@@ -1048,7 +1053,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 
 		if (!nonConstructors.isEmpty()) {
-			printer.print("function(constructor, prototype){");
+			printer.print("function(").print(JavascriptKeywords.CONSTRUCTOR).print(",")
+					.print(JavascriptKeywords.PROTOTYPE).print("){");
 			printer.indent();
 			for (BodyDeclaration member : nonConstructors) {
 				printer.printLn();
@@ -1466,12 +1472,14 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.print(".");
 			} else if (!withScopeSuper) {
 				// Non static reference to current enclosing type.
-				printer.print("this.");
+				printer.print(JavascriptKeywords.THIS).print(".");
 			} else {
 				// Non static reference to parent type
 				printer.print(names.getTypeName(method.getOwnerType()));
-				printer.print(".prototype.").print(names.getMethodName(method)).print(".call");
-				printArguments(Collections.singleton("this"), n.getArgs(), Collections.<String>emptyList(), context);
+				printer.print(".").print(JavascriptKeywords.PROTOTYPE).print(".").print(names.getMethodName(method))
+						.print(".call");
+				printArguments(Collections.singleton(JavascriptKeywords.THIS), n.getArgs(),
+						Collections.<String>emptyList(), context);
 				return;
 			}
 			printer.print(names.getMethodName(method));

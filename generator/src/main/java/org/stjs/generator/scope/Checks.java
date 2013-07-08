@@ -61,18 +61,27 @@ import org.stjs.javascript.annotation.JavascriptFunction;
 
 /**
  * this class generate different checks made on the Java statements before they are converted to Javascript
- * 
  * @author acraciun
- * 
  */
 public final class Checks {
 	private Checks() {
 		//
 	}
 
+	private static void checkVarArgs(MethodDeclaration n, Parameter p, GenerationContext arg) {
+		if (!p.getId().getName().equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
+			throw new JavascriptFileGenerationException(arg.getInputFile(), new SourcePosition(n),
+					"You can only have a vararg parameter that has to be called 'arguments'");
+
+		}
+		if (n.getParameters().size() != 1) {
+			throw new JavascriptFileGenerationException(arg.getInputFile(), new SourcePosition(n),
+					"You can only have a vararg parameter that has to be called 'arguments'");
+		}
+	}
+
 	/**
 	 * check a method declaration
-	 * 
 	 * @param n
 	 * @param arg
 	 */
@@ -80,25 +89,32 @@ public final class Checks {
 		if (n.getParameters() != null) {
 			for (Parameter p : n.getParameters()) {
 				if (p.isVarArgs()) {
-					if (!p.getId().getName().equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
-						throw new JavascriptFileGenerationException(arg.getInputFile(), new SourcePosition(n),
-								"You can only have a vararg parameter that has to be called 'arguments'");
-
-					}
-					if (n.getParameters().size() != 1) {
-						throw new JavascriptFileGenerationException(arg.getInputFile(), new SourcePosition(n),
-								"You can only have a vararg parameter that has to be called 'arguments'");
-
-					}
+					checkVarArgs(n, p, arg);
 				}
 			}
 		}
 
 	}
 
+	private static void checkInitializedInstanceField(VariableDeclarator v, FieldDeclaration n, GenerationContext arg) {
+		if (!ClassUtils.isBasicType(n.getType())) {
+			throw new JavascriptFileGenerationException(arg.getInputFile(), new SourcePosition(v),
+					"Instance field inline initialization is allowed only for string and number field types");
+		}
+		// allowed x = 1
+		if (v.getInit() instanceof LiteralExpr) {
+			return;
+		}
+		// allowed  x = -1
+		if (v.getInit() instanceof UnaryExpr && ((UnaryExpr) v.getInit()).getExpr() instanceof LiteralExpr) {
+			return;
+		}
+		throw new JavascriptFileGenerationException(arg.getInputFile(), new SourcePosition(v),
+				"Instance field inline initialization can only done with literal constants");
+	}
+
 	/**
 	 * check a field declaration
-	 * 
 	 * @param n
 	 * @param arg
 	 */
@@ -106,28 +122,56 @@ public final class Checks {
 		for (VariableDeclarator v : n.getVariables()) {
 			JavascriptKeywords.checkIdentifier(arg.getInputFile(), new SourcePosition(v), v.getId().getName());
 			if (!ModifierSet.isStatic(n.getModifiers()) && v.getInit() != null) {
-				if (!ClassUtils.isBasicType(n.getType())) {
-					throw new JavascriptFileGenerationException(arg.getInputFile(), new SourcePosition(v),
-							"Instance field inline initialization is allowed only for string and number field types");
+				checkInitializedInstanceField(v, n, arg);
+			}
+		}
+	}
+
+	private static void checkConstructor(ClassOrInterfaceDeclaration n, GenerationContext context) {
+		ConstructorDeclaration constr = null;
+		for (BodyDeclaration member : n.getMembers()) {
+			if (member instanceof ConstructorDeclaration) {
+				if (constr != null) {
+					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
+							"Only maximum one constructor is allowed");
 				}
-				// allowed x = 1 and x = -1
-				if (v.getInit() instanceof LiteralExpr) {
-					return;
+				constr = (ConstructorDeclaration) member;
+			}
+		}
+	}
+
+	private static void checkMethod(BodyDeclaration member, GenerationContext context, Set<String> existingNames) {
+		if (member instanceof MethodDeclaration) {
+			String name = ((MethodDeclaration) member).getName();
+			if (!existingNames.add(name)) {
+				throw new JavascriptFileGenerationException(
+						context.getInputFile(),
+						new SourcePosition(member),
+						"The type contains already a method or a field called ["
+								+ name
+								+ "] with a different signature. Javascript cannot distinguish methods/fields with the same name");
+			}
+		}
+	}
+
+	private static void checkField(BodyDeclaration member, GenerationContext context, Set<String> existingNames) {
+		if (member instanceof FieldDeclaration) {
+			for (VariableDeclarator var : ((FieldDeclaration) member).getVariables()) {
+				String name = var.getId().getName();
+				if (!existingNames.add(name)) {
+					throw new JavascriptFileGenerationException(
+							context.getInputFile(),
+							new SourcePosition(member),
+							"The type contains already a method or a field called ["
+									+ name
+									+ "] with a different signature. Javascript cannot distinguish methods/fields with the same name");
 				}
-				if (v.getInit() instanceof UnaryExpr) {
-					if (((UnaryExpr) v.getInit()).getExpr() instanceof LiteralExpr) {
-						return;
-					}
-				}
-				throw new JavascriptFileGenerationException(arg.getInputFile(), new SourcePosition(v),
-						"Instance field inline initialization can only done with literal constants");
 			}
 		}
 	}
 
 	/**
 	 * check a class declaration
-	 * 
 	 * @param n
 	 * @param context
 	 * @param scope
@@ -136,50 +180,15 @@ public final class Checks {
 		if (n.getMembers() == null) {
 			return;
 		}
-		ConstructorDeclaration constr = null;
+		checkConstructor(n, context);
 		Set<String> names = new HashSet<String>();
 		for (BodyDeclaration member : n.getMembers()) {
-			if (member instanceof ConstructorDeclaration) {
-				if (constr != null) {
-					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
-							"Only maximum one constructor is allowed");
-				} else {
-					constr = (ConstructorDeclaration) member;
-				}
-			} else if (member instanceof MethodDeclaration) {
-				String name = ((MethodDeclaration) member).getName();
-				if (!names.add(name)) {
-					throw new JavascriptFileGenerationException(
-							context.getInputFile(),
-							new SourcePosition(member),
-							"The type contains already a method or a field called ["
-									+ name
-									+ "] with a different signature. Javascript cannot distinguish methods/fields with the same name");
-				}
-			} else if (member instanceof FieldDeclaration) {
-				for (VariableDeclarator var : ((FieldDeclaration) member).getVariables()) {
-					String name = var.getId().getName();
-					if (!names.add(name)) {
-						throw new JavascriptFileGenerationException(
-								context.getInputFile(),
-								new SourcePosition(member),
-								"The type contains already a method or a field called ["
-										+ name
-										+ "] with a different signature. Javascript cannot distinguish methods/fields with the same name");
-					}
-				}
-			}
+			checkMethod(member, context, names);
+			checkField(member, context, names);
 		}
-
 	}
 
-	/**
-	 * other checks after the types were set
-	 * 
-	 * @param n
-	 * @param context
-	 */
-	public static void postCheckClassDeclaration(ClassOrInterfaceDeclaration n, GenerationContext context) {
+	private static void checkImplements(ClassOrInterfaceDeclaration n, GenerationContext context) {
 		if (n.getImplements() != null) {
 			for (ClassOrInterfaceType impl : n.getImplements()) {
 				TypeWrapper type = ASTNodeData.resolvedType(impl);
@@ -191,6 +200,64 @@ public final class Checks {
 				}
 			}
 		}
+	}
+
+	private static void checkExistentFieldOrMethod(String name, BodyDeclaration member, ClassWrapper superClass,
+			GenerationContext context) {
+		if (superClass.findField(name).isDefined() || !superClass.findMethods(name).isEmpty()) {
+			throw new JavascriptFileGenerationException(
+					context.getInputFile(),
+					new SourcePosition(member),
+					"One of the parent types contains already a method or a field called ["
+							+ name
+							+ "] with a different signature. Javascript cannot distinguish methods/fields with the same name");
+		}
+	}
+
+	private static void postCheckMethod(BodyDeclaration member, ClassWrapper superClass, GenerationContext context) {
+		if (!(member instanceof MethodDeclaration)) {
+			return;
+		}
+		MethodDeclaration methodDeclaration = (MethodDeclaration) member;
+		MethodWrapper resolvedMethod = ASTNodeData.resolvedMethod(methodDeclaration);
+		if (Modifier.isStatic(resolvedMethod.getModifiers())) {
+			return;
+		}
+		String name = methodDeclaration.getName();
+		Option<MethodWrapper> overrideMethod = superClass.findMethod(name, resolvedMethod.getParameterTypes());
+		if (overrideMethod.isDefined()) {
+			if (Modifier.isPrivate(overrideMethod.getOrThrow().getModifiers())) {
+				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
+						"One of the parent types contains already a private method called [" + name
+								+ "]. Javascript cannot distinguish methods/fields with the same name");
+			}
+			return;
+		}
+
+		checkExistentFieldOrMethod(name, member, superClass, context);
+	}
+
+	private static void postCheckField(BodyDeclaration member, ClassWrapper superClass, GenerationContext context) {
+		if (!(member instanceof FieldDeclaration)) {
+			return;
+		}
+		FieldDeclaration fieldDeclaration = (FieldDeclaration) member;
+		if (Modifier.isStatic(fieldDeclaration.getModifiers())) {
+			return;
+		}
+		for (VariableDeclarator var : fieldDeclaration.getVariables()) {
+			String name = var.getId().getName();
+			checkExistentFieldOrMethod(name, member, superClass, context);
+		}
+	}
+
+	/**
+	 * other checks after the types were set
+	 * @param n
+	 * @param context
+	 */
+	public static void postCheckClassDeclaration(ClassOrInterfaceDeclaration n, GenerationContext context) {
+		checkImplements(n, context);
 		checkNamespace(n, context);
 		if (n.getExtends() != null && !n.isInterface()) {
 			TypeWrapper superType = ASTNodeData.resolvedType(n).getSuperClass();
@@ -200,47 +267,8 @@ public final class Checks {
 			ClassWrapper superClass = (ClassWrapper) superType;
 
 			for (BodyDeclaration member : n.getMembers()) {
-				if (member instanceof MethodDeclaration) {
-					String name = ((MethodDeclaration) member).getName();
-					MethodWrapper resolvedMethod = ASTNodeData.resolvedMethod(member);
-					if (Modifier.isStatic(resolvedMethod.getModifiers())) {
-						continue;
-					}
-					Option<MethodWrapper> overrideMethod = superClass.findMethod(name,
-							resolvedMethod.getParameterTypes());
-					if (overrideMethod.isDefined()) {
-						if (Modifier.isPrivate(overrideMethod.getOrThrow().getModifiers())) {
-							throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(
-									member), "One of the parent types contains already a private method called ["
-									+ name + "]. Javascript cannot distinguish methods/fields with the same name");
-						}
-						continue;
-					}
-
-					if (superClass.findField(name).isDefined() || !superClass.findMethods(name).isEmpty()) {
-						throw new JavascriptFileGenerationException(
-								context.getInputFile(),
-								new SourcePosition(member),
-								"One of the parent types contains already a method or a field called ["
-										+ name
-										+ "] with a different signature. Javascript cannot distinguish methods/fields with the same name");
-					}
-				} else if (member instanceof FieldDeclaration) {
-					if (Modifier.isStatic(((FieldDeclaration) member).getModifiers())) {
-						continue;
-					}
-					for (VariableDeclarator var : ((FieldDeclaration) member).getVariables()) {
-						String name = var.getId().getName();
-						if (superClass.findField(name).isDefined() || !superClass.findMethods(name).isEmpty()) {
-							throw new JavascriptFileGenerationException(
-									context.getInputFile(),
-									new SourcePosition(member),
-									"One of the parent types contains already a method or a field called ["
-											+ name
-											+ "] with a different signature. Javascript cannot distinguish methods/fields with the same name");
-						}
-					}
-				}
+				postCheckMethod(member, superClass, context);
+				postCheckField(member, superClass, context);
 			}
 		}
 
@@ -266,7 +294,6 @@ public final class Checks {
 
 	/**
 	 * check enum declaration
-	 * 
 	 * @param n
 	 * @param context
 	 */
@@ -284,7 +311,6 @@ public final class Checks {
 
 	/**
 	 * check a name expression
-	 * 
 	 * @param n
 	 * @param context
 	 */
@@ -296,63 +322,53 @@ public final class Checks {
 		JavascriptKeywords.checkIdentifier(context.getInputFile(), new SourcePosition(n), n.getName());
 	}
 
+	private static void throwCannotCallOuterType(Node n, GenerationContext context) {
+		throw new JavascriptFileGenerationException(
+				context.getInputFile(),
+				new SourcePosition(n),
+				"In Javascript you cannot call methods or fields from the outer type. "
+						+ "You should define a variable var that=this outside your function definition and call the methods on this object");
+
+	}
+
 	public static void checkThisExpr(ThisExpr n, GenerationContext context) {
 		if (n.getClassExpr() != null) {
-			throw new JavascriptFileGenerationException(
-					context.getInputFile(),
-					new SourcePosition(n),
-					"In Javascript you cannot call methods or fields from the outer type. "
-							+ "You should define a variable var that=this outside your function definition and call the methods on this object");
+			throwCannotCallOuterType(n, context);
 		}
 
 	}
 
 	public static void checkSuperExpr(SuperExpr n, GenerationContext context) {
 		if (n.getClassExpr() != null) {
-			throw new JavascriptFileGenerationException(
-					context.getInputFile(),
-					new SourcePosition(n),
-					"In Javascript you cannot call methods or fields from the outer type. "
-							+ "You should define a variable var that=this outside your function definition and call the methods on this object");
+			throwCannotCallOuterType(n, context);
 		}
 	}
 
 	public static void checkScope(MethodCallExpr n, GenerationContext context) {
-		if (n.getScope() == null) {
-			if (!isAccessInCorrectScope(n)) {
-				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
-						"In Javascript you cannot call methods or fields from the outer type. "
-								+ "You should define a variable var that=this outside your function "
-								+ "definition and call the methods on this object");
-			}
+		if (n.getScope() == null && !isAccessInCorrectScope(n)) {
+			throwCannotCallOuterType(n, context);
 		}
-
 	}
 
 	public static void checkScope(NameExpr n, GenerationContext context) {
 		if (!isAccessInCorrectScope(n)) {
-			throw new JavascriptFileGenerationException(
-					context.getInputFile(),
-					new SourcePosition(n),
-					"In Javascript you cannot call methods or fields from the outer type. "
-							+ "You should define a variable var that=this outside your function definition and call the methods on this object");
+			throwCannotCallOuterType(n, context);
 		}
 
 	}
 
 	private static boolean isAccessInCorrectScope(MethodCallExpr n) {
-		Scope scope = ASTNodeData.scope(n);
 		MethodWrapper method = ASTNodeData.resolvedMethod(n);
 		if (Modifier.isStatic(method.getModifiers())) {
 			return true;
 		}
 		TypeWrapper methodDeclaringClass = method.getOwnerType();
+		Scope scope = ASTNodeData.scope(n);
 		ClassScope thisClassScope = scope.closest(ClassScope.class);
 		return thisClassScope.getClazz().equals(methodDeclaringClass);
 	}
 
 	private static boolean isAccessInCorrectScope(NameExpr n) {
-		Scope scope = ASTNodeData.scope(n);
 		Variable var = ASTNodeData.resolvedVariable(n);
 		if (!(var instanceof FieldWrapper)) {
 			return true;
@@ -362,6 +378,7 @@ public final class Checks {
 			return true;
 		}
 		TypeWrapper declaringClass = field.getOwnerType();
+		Scope scope = ASTNodeData.scope(n);
 		ClassScope thisClassScope = scope.closest(ClassScope.class);
 		return thisClassScope.getClazz().equals(declaringClass);
 	}
@@ -380,7 +397,6 @@ public final class Checks {
 
 	/**
 	 * makes sure only literals can be used as keys (so the even arguments)
-	 * 
 	 * @param n
 	 * @param context
 	 */

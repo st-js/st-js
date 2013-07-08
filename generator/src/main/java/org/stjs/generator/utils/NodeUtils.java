@@ -30,6 +30,7 @@ import org.stjs.generator.visitor.ForEachNodeVisitor;
 
 /**
  * different methods to work with AST nodes.
+ * 
  * @author acraciun
  */
 public final class NodeUtils {
@@ -46,23 +47,26 @@ public final class NodeUtils {
 		return "String".equals(typeName) || "java.lang.String".equals(typeName);
 	}
 
+	private static boolean isStringArray(List<Parameter> parameters) {
+		if (!hasSize(parameters, 1)) {
+			return false;
+		}
+		Parameter parameter = parameters.get(0);
+		if (!(parameter.getType() instanceof ReferenceType)) {
+			return false;
+		}
+		ReferenceType refType = (ReferenceType) parameter.getType();
+		if (refType.getArrayCount() != 1) {
+			return false;
+		}
+		return (refType.getType() instanceof ClassOrInterfaceType)
+				&& isString((ClassOrInterfaceType) refType.getType());
+	}
+
 	public static boolean isMainMethod(MethodDeclaration methodDeclaration) {
 		boolean isMainMethod = false;
 		if (isStatic(methodDeclaration.getModifiers()) && "main".equals(methodDeclaration.getName())) {
-			List<Parameter> parameters = methodDeclaration.getParameters();
-			if (!hasSize(parameters, 1)) {
-				return false;
-			}
-			Parameter parameter = parameters.get(0);
-			if (parameter.getType() instanceof ReferenceType) {
-				ReferenceType refType = (ReferenceType) parameter.getType();
-				if (refType.getArrayCount() == 1 && refType.getType() instanceof ClassOrInterfaceType) {
-					if (isString((ClassOrInterfaceType) refType.getType())) {
-						isMainMethod = true;
-					}
-				}
-			}
-
+			isMainMethod = isStringArray(methodDeclaration.getParameters());
 		}
 		return isMainMethod;
 	}

@@ -28,22 +28,23 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 public class NodeJSExecutor {
 	private static final String NODE_JS = "node";
 
-	@SuppressWarnings(
-			value = "REC_CATCH_EXCEPTION")
+	@SuppressWarnings(value = "REC_CATCH_EXCEPTION")
 	public ExecutionResult run(File srcFile) {
 		try {
-			Process p = Runtime.getRuntime().exec(new String[]{ NODE_JS, srcFile.getAbsolutePath() });
+			Process p = Runtime.getRuntime().exec(new String[] { NODE_JS, srcFile.getAbsolutePath() });
 			int exitValue = p.waitFor();
 			return new ExecutionResult(null, readStream(p.getInputStream()), readStream(p.getErrorStream()), exitValue);
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			// TODO : this is not really going to be working on all OS!
 			if (e.getMessage().contains("Cannot run program")) {
-				String errMsg = "Please install node.js to use this feature https://github.com/joyent/node/wiki/Installation";
-				System.err.println(errMsg);
-				throw new STJSRuntimeException(errMsg);
+				String errMsg =
+						"Please install node.js to use this feature https://github.com/joyent/node/wiki/Installation";
+				throw new STJSRuntimeException(errMsg, e);
 			}
 			throw new STJSRuntimeException(e);
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			throw new STJSRuntimeException(e);
 		}
 	}
@@ -52,10 +53,9 @@ public class NodeJSExecutor {
 		StringBuilder builder = new StringBuilder();
 		// XXX: here i may need to get the charset from configuration
 		BufferedReader in = new BufferedReader(new InputStreamReader(errStream, "UTF-8"));
-		String line;
-		while ((line = in.readLine()) != null) {
+		for (String line = in.readLine(); line != null; line = in.readLine()) {
 			builder.append(line);
-			builder.append("\n");
+			builder.append('\n');
 		}
 		return builder.toString();
 	}

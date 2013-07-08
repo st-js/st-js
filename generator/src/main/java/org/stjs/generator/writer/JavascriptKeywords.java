@@ -32,6 +32,11 @@ import org.stjs.generator.ast.SourcePosition;
 
 public final class JavascriptKeywords {
 
+	public static final String PROTOTYPE = "prototype";
+	public static final String CONSTRUCTOR = "constructor";
+	public static final String VAR = "var";
+	public static final String THIS = "this";
+
 	private static final Set<String> KEYWORDS = new HashSet<String>(Arrays.asList(new String[]{ "break", "case",
 			"catch", "continue", "debugger", "default", "delete", "do", "else", "finally", "for", "function", "if",
 			"in", "instanceof", "new", "return", "switch", "this", "throw", "try", "typeof", "var", "void", "while",

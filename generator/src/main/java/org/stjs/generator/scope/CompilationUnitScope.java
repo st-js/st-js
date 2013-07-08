@@ -83,6 +83,20 @@ public class CompilationUnitScope extends AbstractScope {
 		return new TypeWithScope(this, foundClass.getOrNull());
 	}
 
+	private TypeWithScope resolveInnerType(String name) {
+		// could be A.B.C and part of the path to be imported
+		int pos = name.lastIndexOf('.');
+		if (pos >= 0) {
+			String parent = name.substring(0, pos);
+			String inner = name.substring(pos + 1, name.length());
+			TypeWithScope ts = resolveType(parent);
+			if (ts != null) {
+				return addTypeWithScope(ts.getType().getName() + "." + inner);
+			}
+		}
+		return null;
+	}
+
 	@Override
 	public TypeWithScope resolveType(String name) {
 		TypeWithScope type = super.resolveType(name);
@@ -115,21 +129,9 @@ public class CompilationUnitScope extends AbstractScope {
 			}
 		}
 
-		// could be A.B.C and part of the path to be imported
-		int pos = name.lastIndexOf('.');
-		if (pos >= 0) {
-			String parent = name.substring(0, pos);
-			String inner = name.substring(pos + 1, name.length());
-			TypeWithScope ts = resolveType(parent);
-			if (ts != null) {
-				type = addTypeWithScope(ts.getType().getName() + "." + inner);
-				if (type != null) {
-					return type;
-				}
-			}
-		}
+		type = resolveInnerType(name);
 
-		return null;
+		return type;
 	}
 
 }
