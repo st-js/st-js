@@ -15,23 +15,27 @@ public final class TemplateUtils {
 		//
 	}
 
+	private static void printDot(JavascriptWriterVisitor currentHandler, boolean withDot) {
+		if (withDot) {
+			currentHandler.getPrinter().print(".");
+		}
+	}
+
 	public static void printScope(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context,
 			boolean withDot) {
+		boolean withScopeSuper = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.SUPER);
+		if (withScopeSuper) {
+			return;
+		}
 		MethodWrapper method = resolvedMethod(n);
 		boolean withScopeThis = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.THIS);
-		boolean withScopeSuper = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.SUPER);
-		if (!withScopeSuper) {
-			if (n.getScope() != null && !withScopeThis) {
-				n.getScope().accept(currentHandler, context);
-				if (withDot) {
-					currentHandler.getPrinter().print(".");
-				}
-			} else if (!Modifier.isStatic(method.getModifiers())) {
-				currentHandler.getPrinter().print("this");
-				if (withDot) {
-					currentHandler.getPrinter().print(".");
-				}
-			}
+		boolean withOtherScope = n.getScope() != null && !withScopeThis;
+		if (withOtherScope) {
+			n.getScope().accept(currentHandler, context);
+			printDot(currentHandler, withDot);
+		} else if (!Modifier.isStatic(method.getModifiers())) {
+			currentHandler.getPrinter().print(GeneratorConstants.THIS);
+			printDot(currentHandler, withDot);
 		}
 	}
 }

@@ -1505,10 +1505,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		return decl instanceof FieldDeclaration && isStatic(((FieldDeclaration) decl).getModifiers());
 	}
 
-	private boolean isInstanceField(BodyDeclaration decl) {
-		return decl instanceof FieldDeclaration && !isStatic(((FieldDeclaration) decl).getModifiers());
-	}
-
 	private boolean isStaticMethod(BodyDeclaration decl) {
 		return decl instanceof MethodDeclaration && isStatic(((MethodDeclaration) decl).getModifiers());
 	}

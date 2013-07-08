@@ -18,6 +18,7 @@ package org.stjs.generator.utils;
 import static org.stjs.generator.utils.PreConditions.checkState;
 
 import java.util.AbstractList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -62,7 +63,7 @@ public final class Lists {
 		return union(coll, Collections.singletonList(appendee));
 	}
 
-	public static <T> boolean isNullOrEmpty(List<T> list) {
+	public static <T> boolean isNullOrEmpty(Collection<T> list) {
 		return list == null || list.isEmpty();
 	}
 }

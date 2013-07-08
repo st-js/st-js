@@ -97,6 +97,17 @@ public class CompilationUnitScope extends AbstractScope {
 		return null;
 	}
 
+	private TypeWithScope resolveTypeWithImports(String name) {
+		TypeWithScope type = null;
+		for (String pack : typeImportOnDemandSet) {
+			type = addTypeWithScope(pack + "." + name);
+			if (type != null) {
+				return type;
+			}
+		}
+		return type;
+	}
+
 	@Override
 	public TypeWithScope resolveType(String name) {
 		TypeWithScope type = super.resolveType(name);
@@ -122,11 +133,9 @@ public class CompilationUnitScope extends AbstractScope {
 		}
 
 		// try on demand
-		for (String pack : typeImportOnDemandSet) {
-			type = addTypeWithScope(pack + "." + name);
-			if (type != null) {
-				return type;
-			}
+		type = resolveTypeWithImports(name);
+		if (type != null) {
+			return type;
 		}
 
 		type = resolveInnerType(name);

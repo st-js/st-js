@@ -27,6 +27,7 @@ import com.google.common.base.Preconditions;
 
 /**
  * This is a wrapper around a method, but with the correct type for a generic type for example
+ * 
  * @author acraciun
  */
 @Immutable
@@ -82,6 +83,20 @@ public final class MethodWrapper {
 
 	public TypeVariableWrapper<Method>[] getTypeParameters() {
 		return Arrays.copyOf(typeParameters, typeParameters.length);
+	}
+
+	/**
+	 * 
+	 * @return true if the method has either the return type generic
+	 */
+	public boolean isGeneric() {
+		if (returnType instanceof TypeVariableWrapper) {
+			return true;
+		}
+		// if (typeParameters.length > 0) {
+		// return true;
+		// }
+		return false;
 	}
 
 	/**

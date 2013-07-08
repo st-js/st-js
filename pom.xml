@@ -67,6 +67,7 @@
 		<maven-pmd-plugin.version>3.0.1</maven-pmd-plugin.version>
 		<maven-checkstyle-plugin.version>2.10</maven-checkstyle-plugin.version>
 		<findbugs.fork>false</findbugs.fork>
+		<pmd.version>5.0.4</pmd.version>
 	</properties>
 
 
@@ -165,6 +166,19 @@
 								<groupId>org.st-js</groupId>
 								<artifactId>code-analysis</artifactId>
 								<version>${project.version}</version>
+							</dependency>
+
+							<dependency>
+								<groupId>net.sourceforge.pmd</groupId>
+								<artifactId>pmd</artifactId>
+								<version>${pmd.version}</version>
+								<!-- Workaround to fix http://jira.codehaus.org/browse/MPLUGIN-221 -->
+								<exclusions>
+									<exclusion>
+										<groupId>com.ibm.icu</groupId>
+										<artifactId>icu4j</artifactId>
+									</exclusion>
+								</exclusions>
 							</dependency>
 						</dependencies>
 					</plugin>

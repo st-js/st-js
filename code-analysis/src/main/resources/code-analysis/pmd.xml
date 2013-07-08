@@ -44,6 +44,13 @@
 	<rule ref="rulesets/java/codesize.xml/CyclomaticComplexity">
 		<properties>
 			<property name="reportLevel" value="7" />
+			<property name="violationSuppressXPath">
+				<value>
+                <![CDATA[
+ 			//MethodDeclaration[MethodDeclarator/@Image="equals"]
+                 ]]>
+            </value>
+			</property>
 		</properties>
 		<priority>2</priority>
 	</rule>
@@ -71,7 +78,17 @@
 	<rule ref="rulesets/java/braces.xml/ForLoopsMustUseBraces" />
 	<rule ref="rulesets/java/clone.xml/CloneThrowsCloneNotSupportedException" />
 	<rule ref="rulesets/java/clone.xml/CloneMethodMustImplementCloneable" />
-	<rule ref="rulesets/java/codesize.xml/NPathComplexity" />
+	<rule ref="rulesets/java/codesize.xml/NPathComplexity">
+		<properties>
+			<property name="violationSuppressXPath">
+				<value>
+                <![CDATA[
+ 			//MethodDeclaration[MethodDeclarator/@Image="equals"]
+                 ]]>
+            </value>
+			</property>
+		</properties>
+	</rule>
 	<rule ref="rulesets/java/codesize.xml/ExcessiveMethodLength" />
 	<rule ref="rulesets/java/codesize.xml/ExcessiveParameterList" />
 	<rule ref="rulesets/java/codesize.xml/ExcessiveClassLength" />
@@ -189,7 +206,13 @@
 	<rule ref="rulesets/java/finalizers.xml/FinalizeShouldBeProtected" />
 	<rule ref="rulesets/java/finalizers.xml/AvoidCallingFinalize" />
 	<rule ref="rulesets/java/imports.xml/ImportFromSamePackage" />
-	<rule ref="rulesets/java/imports.xml/TooManyStaticImports" />
+	<rule ref="rulesets/java/imports.xml/TooManyStaticImports">
+		<properties>
+			<property name="maximumStaticImports">
+				<value>10</value>
+			</property>
+		</properties>
+	</rule>
 	<rule ref="rulesets/java/j2ee.xml/UseProperClassLoader" />
 	<rule ref="rulesets/java/j2ee.xml/DoNotCallSystemExit" />
 	<rule ref="rulesets/java/j2ee.xml/StaticEJBFieldShouldBeFinal" />

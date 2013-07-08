@@ -16,6 +16,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
 import com.google.common.io.Resources;
 import com.google.debugging.sourcemap.SourceMapConsumerFactory;
+import com.google.debugging.sourcemap.SourceMapParseException;
 import com.google.debugging.sourcemap.SourceMapping;
 
 public class JavascriptToJava {
@@ -40,7 +41,9 @@ public class JavascriptToJava {
 			contents = Resources.toString(url, Charsets.UTF_8);
 			SourceMapping mapping = SourceMapConsumerFactory.parse(contents);
 			return mapping.getMappingForLine(lineNumber, 1).getLineNumber();
-		} catch (Exception e) {
+		} catch (IOException e) {
+			throw new STJSRuntimeException(e);
+		} catch (SourceMapParseException e) {
 			throw new STJSRuntimeException(e);
 		}
 	}

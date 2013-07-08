@@ -283,6 +283,13 @@ public class Generator {
 			this.configuration = configuration;
 		}
 
+		private void checkFolders(String parentClassName) {
+			if (generationFolder == null || sourceFolder == null || targetFolder == null) {
+				throw new IllegalStateException("This resolver assumed that the javascript for the class ["
+						+ parentClassName + "] was already generated");
+			}
+		}
+
 		@Override
 		public ClassWithJavascript resolve(String className) {
 			String parentClassName = className;
@@ -304,10 +311,7 @@ public class Generator {
 			// check if it has already generated
 			STJSClass stjsClass = new STJSClass(this, builtProjectClassLoader, parentClassName);
 			if (stjsClass.getJavascriptFiles().isEmpty()) {
-				if (generationFolder == null || sourceFolder == null || targetFolder == null) {
-					throw new IllegalStateException("This resolver assumed that the javascript for the class ["
-							+ parentClassName + "] was already generated");
-				}
+				checkFolders(parentClassName);
 				stjsClass = (STJSClass) generateJavascript(builtProjectClassLoader, parentClassName, sourceFolder,
 						generationFolder, targetFolder, configuration);
 			}

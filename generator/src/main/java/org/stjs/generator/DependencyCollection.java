@@ -117,6 +117,18 @@ public class DependencyCollection {
 		this.roots = ImmutableList.of(root);
 	}
 
+	private int compareDeps(int withIndex, List<ClassWithJavascript> deps, Comparator<ClassWithJavascript> comparator) {
+		for (int j = 0; j < deps.size(); ++j) {
+			if (withIndex != j) {
+				int cmp = comparator.compare(deps.get(withIndex), deps.get(j));
+				if (cmp > 0) {
+					return cmp;
+				}
+			}
+		}
+		return -1;
+	}
+
 	public List<ClassWithJavascript> orderAllDependencies(ClassLoader classLoader) {
 		List<ClassWithJavascript> deps = new ArrayList<ClassWithJavascript>();
 		Set<ClassWithJavascript> visited = new HashSet<ClassWithJavascript>();
@@ -130,17 +142,11 @@ public class DependencyCollection {
 			// add to orderedDeps only the classes that have no "extends" dependency to any of the other from the
 			// remaining list.
 			// i.e. the result of the comparison is <= 0
-			outer: for (int i = 0; i < deps.size(); ++i) {
-				for (int j = 0; j < deps.size(); ++j) {
-					if (i != j) {
-						int cmp = comparator.compare(deps.get(i), deps.get(j));
-						if (cmp > 0) {
-							continue outer;
-						}
-					}
+			for (int i = 0; i < deps.size(); ++i) {
+				if (compareDeps(i, deps, comparator) <= 0) {
+					orderedDeps.add(deps.remove(i));
+					i--;
 				}
-				orderedDeps.add(deps.remove(i));
-				i--;
 			}
 		}
 

@@ -136,7 +136,7 @@ public class STJSClass implements ClassWithJavascript {
 			try {
 				return new URI(jsFile);
 			} catch (URISyntaxException e) {
-				System.err.println("Could not load URI from " + jsFile);
+				throw new JavascriptClassGenerationException(className, "Could not load URI from " + jsFile, e);
 			}
 		}
 		return null;
