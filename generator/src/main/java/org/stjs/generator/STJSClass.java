@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.PreConditions;
@@ -45,6 +46,8 @@ import com.google.common.io.Files;
  * 
  */
 public class STJSClass implements ClassWithJavascript {
+	private static final Logger LOG = Logger.getLogger(STJSClass.class.getName());
+
 	private static final String DEPENDENCIES_PROP = "dependencies";
 	public static final String CLASS_PROP = "class";
 
@@ -104,7 +107,7 @@ public class STJSClass implements ClassWithJavascript {
 		try {
 			inputStream = classLoader.getResourceAsStream(ClassUtils.getPropertiesFileName(className));
 			if (inputStream == null) {
-				System.err.println("CANNOT find:" + ClassUtils.getPropertiesFileName(className) + " clazz:"
+				LOG.severe("CANNOT find:" + ClassUtils.getPropertiesFileName(className) + " clazz:"
 						+ classLoader.getResource(ClassUtils.getPropertiesFileName(className)));
 			} else {
 				props.load(inputStream);

@@ -149,8 +149,12 @@ import org.stjs.javascript.annotation.GlobalScope;
  * the {@link org.stjs.generator.scope.ScopeBuilder} previously visited the tree and set the resolved name of certain
  * nodes.
  */
-@SuppressWarnings("PMD.ExcessivePublicCount")
+// PMD mistakes AST.Statement for jdbc.Statement (WTF!)
+// for excessive long class -> a whole new design is need
+@SuppressWarnings({ "PMD.ExcessivePublicCount", "PMD.ExcessiveClassLength", "PMD.CloseResource" })
 public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
+
+	private static final int INLINE_CREATION_PARENT_LEVEL = 3;
 
 	private final MethodCallTemplates specialMethodHandlers;
 
@@ -398,10 +402,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printer.print(");");
 	}
 
-	@Override
-	public void visit(ForStmt n, GenerationContext context) {
-		printer.setSourceNode(n);
-		printer.print("for (");
+	private void printForInit(ForStmt n, GenerationContext context) {
 		if (n.getInit() != null) {
 			for (Iterator<Expression> i = n.getInit().iterator(); i.hasNext();) {
 				Expression e = i.next();
@@ -411,11 +412,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				}
 			}
 		}
-		printer.print("; ");
-		if (n.getCompare() != null) {
-			n.getCompare().accept(this, context);
-		}
-		printer.print("; ");
+	}
+
+	private void printForUpdate(ForStmt n, GenerationContext context) {
 		if (n.getUpdate() != null) {
 			for (Iterator<Expression> i = n.getUpdate().iterator(); i.hasNext();) {
 				Expression e = i.next();
@@ -425,6 +424,20 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				}
 			}
 		}
+
+	}
+
+	@Override
+	public void visit(ForStmt n, GenerationContext context) {
+		printer.setSourceNode(n);
+		printer.print("for (");
+		printForInit(n, context);
+		printer.print("; ");
+		if (n.getCompare() != null) {
+			n.getCompare().accept(this, context);
+		}
+		printer.print("; ");
+		printForUpdate(n, context);
 		printer.print(") ");
 		printer.addSouceMapping(context);
 		n.getBody().accept(this, context);
@@ -446,12 +459,14 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	private void printVariableDeclarator(VariableDeclarator n, GenerationContext context, boolean forceInitNull) {
 		n.getId().accept(this, context);
-		if (n.getInit() != null) {
+		if (n.getInit() == null) {
+			if (forceInitNull) {
+				printer.print(" = ");
+				printer.print("null");
+			}
+		} else {
 			printer.print(" = ");
 			n.getInit().accept(this, context);
-		} else if (forceInitNull) {
-			printer.print(" = ");
-			printer.print("null");
 		}
 	}
 
@@ -508,19 +523,10 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 	}
 
-	// i need this method with more parameters than usual
-	// CHECKSTYLE:OFF
-	private void printMethod(String name, List<Parameter> parameters, int modifiers, BlockStmt body,
-			GenerationContext context, TypeWrapper type, boolean anonymous, boolean isInnerClassConstructor) {
-		// CHECKSTYLE:ON
-
-		if (ModifierSet.isAbstract(modifiers) || ModifierSet.isNative(modifiers)) {
-			return;
-		}
-
+	private void printMethodName(String name, int modifiers, TypeWrapper type, boolean anonymous,
+			boolean isInnerClassConstructor) {
 		// no type appears for global scopes
 		boolean global = isGlobal(type) && isStatic(modifiers);
-
 		if (!anonymous) {
 			if (!global) {
 				if (isStatic(modifiers)) {
@@ -537,7 +543,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printer.print(" ");
 			printer.print(name);
 		}
-		printer.print("(");
+	}
+
+	private void printMethodParameters(List<Parameter> parameters, GenerationContext context) {
 		if (parameters != null) {
 			boolean first = true;
 			for (Parameter p : parameters) {
@@ -552,6 +560,21 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				first = false;
 			}
 		}
+	}
+
+	// i need this method with more parameters than usual
+	// CHECKSTYLE:OFF
+	private void printMethod(String name, List<Parameter> parameters, int modifiers, BlockStmt body,
+			GenerationContext context, TypeWrapper type, boolean anonymous, boolean isInnerClassConstructor) {
+		// CHECKSTYLE:ON
+
+		if (ModifierSet.isAbstract(modifiers) || ModifierSet.isNative(modifiers)) {
+			return;
+		}
+
+		printMethodName(name, modifiers, type, anonymous, isInnerClassConstructor);
+		printer.print("(");
+		printMethodParameters(parameters, context);
 		printer.print(")");
 		// skip throws
 		if (body == null) {
@@ -589,14 +612,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	public void printArguments(Collection<String> beforeParams, Collection<Expression> expressions,
 			Collection<String> afterParams, GenerationContext context) {
 		printer.print("(");
-		boolean first = true;
-		for (String param : beforeParams) {
-			if (!first) {
-				printer.print(", ");
-			}
-			printer.print(param);
-			first = false;
-		}
+		printer.printList(beforeParams);
+		boolean first = beforeParams.isEmpty();
 		if (expressions != null) {
 			for (Expression e : expressions) {
 				if (!first) {
@@ -606,13 +623,10 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				first = false;
 			}
 		}
-		for (String param : afterParams) {
-			if (!first) {
-				printer.print(", ");
-			}
-			printer.print(param);
-			first = false;
+		if (!first) {
+			printer.print(", ");
 		}
+		printer.printList(afterParams);
 		printer.print(")");
 	}
 
@@ -629,7 +643,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	private ClassOrInterfaceDeclaration buildClassDeclaration(String className, ClassOrInterfaceType extendsFrom,
-			List<BodyDeclaration> members, List<Expression> constructorArguments) {
+			List<BodyDeclaration> members) {
 		ClassOrInterfaceDeclaration decl = new ClassOrInterfaceDeclaration();
 		decl.setName(className);
 		ClassWrapper baseClass = (ClassWrapper) resolvedType(extendsFrom);
@@ -639,7 +653,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			decl.setExtends(Collections.singletonList(extendsFrom));
 		}
 		decl.setMembers(members);
-		// TODO add constructor if needed to call the super with the constructorscopeWalkers
+		// TODO add constructor if needed to call the super with the constructorArguments
 		return decl;
 	}
 
@@ -669,7 +683,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			// special construction to handle the inline body
 			printer.print("new ");
 			ClassOrInterfaceDeclaration inlineFakeClass = buildClassDeclaration(GeneratorConstants.SPECIAL_INLINE_TYPE,
-					n.getType(), n.getAnonymousClassBody(), n.getArgs());
+					n.getType(), n.getAnonymousClassBody());
 			inlineFakeClass.setData(n.getData());
 			inlineFakeClass.accept(this, context);
 
@@ -815,6 +829,50 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		return types;
 	}
 
+	private String printNamespace(ClassWrapper type) {
+		String namespace = null;
+		if (!ClassUtils.isInnerType(type)) {
+			namespace = ClassUtils.getNamespace(type);
+			if (namespace != null) {
+				printer.printLn("stjs.ns(\"" + namespace + "\");");
+			}
+		}
+		return namespace;
+	}
+
+	private void printIntefaces(ClassOrInterfaceDeclaration n) {
+		// print the implemented interfaces
+		List<TypeWrapper> interfaces;
+		if (n.isInterface()) {
+			interfaces = getExtends(n);
+		} else {
+			interfaces = getImplements(n);
+		}
+		printer.print("[");
+		for (int i = 0; i < interfaces.size(); i++) {
+			if (i > 0) {
+				printer.print(", ");
+			}
+			printer.print(names.getTypeName(interfaces.get(i)));
+		}
+		printer.print("]");
+	}
+
+	private void printSuperClass(ClassOrInterfaceDeclaration n) {
+		if (n.isInterface()) {
+			// interfaces do not have super classes. For interfaces, extends actually means implements
+			printer.print("null, ");
+		} else {
+			List<TypeWrapper> superClass = getExtends(n);
+			if (!superClass.isEmpty()) {
+				printer.print("null");
+			} else {
+				printer.print(names.getTypeName(superClass.get(0)));
+			}
+			printer.print(", ");
+		}
+	}
+
 	@Override
 	public void visit(ClassOrInterfaceDeclaration n, GenerationContext context) {
 		printComments(n, context);
@@ -827,18 +885,13 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 
 		ClassWrapper type = (ClassWrapper) resolvedType(n);
-		String namespace = null;
-
-		if (!ClassUtils.isInnerType(type)) {
-			namespace = ClassUtils.getNamespace(type);
-			if (namespace != null) {
-				printer.printLn("stjs.ns(\"" + namespace + "\");");
-			}
-		}
+		String namespace = printNamespace(type);
 
 		String className = null;
-		if (!type.isAnonymousClass()) {
-			if (!type.isInnerType() && !type.isAnonymousClass() && namespace == null) {
+		if (type.isAnonymousClass()) {
+			printer.print("(");
+		} else {
+			if (!type.isInnerType() && namespace == null) {
 				printer.print("var ");
 			}
 			className = names.getTypeName(type);
@@ -854,8 +907,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printConstructorImplementation(n, context, scope, type.isAnonymousClass());
 				printer.printLn(";");
 			}
-		} else {
-			printer.print("(");
 		}
 
 		printer.print("stjs.extend(");
@@ -867,47 +918,29 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printer.print(", ");
 
 		// print the super class
-		List<TypeWrapper> interfaces;
-		if (n.isInterface()) {
-			// interfaces do not have super classes. For interfaces, extends actually means implements
-			printer.print("null, ");
-			interfaces = getExtends(n);
-		} else {
-			List<TypeWrapper> superClass = getExtends(n);
-			if (superClass.size() > 0) {
-				printer.print(names.getTypeName(superClass.get(0)));
-			} else {
-				printer.print("null");
-			}
-			printer.print(", ");
-			interfaces = getImplements(n);
-		}
-
-		// print the implemented interfaces
-		printer.print("[");
-		for (int i = 0; i < interfaces.size(); i++) {
-			if (i > 0) {
-				printer.print(", ");
-			}
-			printer.print(names.getTypeName(interfaces.get(i)));
-		}
-		printer.print("], ");
+		printSuperClass(n);
+		printIntefaces(n);
+		printer.print(", ");
 
 		printMembers(n.getMembers(), context);
 		printer.print(", ");
-		printTypeDescription(n, context);
+		printTypeDescription(n);
 		printer.print(")");
 
-		if (!type.isAnonymousClass()) {
+		if (type.isAnonymousClass()) {
+			printer.print(")");
+		} else {
 			printer.printLn(";");
 			if (!type.isInnerType()) {
 				printGlobals(filterGlobals(n, type), context);
 				printStaticInitializers(n, context);
 				printMainMethodCall(n, type);
 			}
-		} else {
-			printer.print(")");
 		}
+	}
+
+	private boolean isTypeOrStaticMember(BodyDeclaration decl) {
+		return isClassOrInterface(decl) || isEnum(decl) || isStaticField(decl) || isStaticMethod(decl);
 	}
 
 	private List<BodyDeclaration> filterGlobals(ClassOrInterfaceDeclaration n, ClassWrapper outerType) {
@@ -916,7 +949,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 		List<BodyDeclaration> decls = new ArrayList<BodyDeclaration>();
 		for (BodyDeclaration decl : n.getMembers()) {
-			if (isClassOrInterface(decl) || isEnum(decl) || isStaticField(decl) || isStaticMethod(decl)) {
+			if (isTypeOrStaticMember(decl)) {
 				decls.add(decl);
 			}
 		}
@@ -926,9 +959,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	private void printConstructorImplementation(ClassOrInterfaceDeclaration n, GenerationContext context,
 			ClassScope scope, boolean inlineType) {
 		ConstructorDeclaration constr = getConstructor(n.getMembers(), context);
-		if (constr != null) {
-			constr.accept(this, context);
-		} else {
+		if (constr == null) {
 			ClassWrapper type = (ClassWrapper) resolvedType(n);
 			printer.print("function");
 			if (type.isInnerType() || type.isAnonymousClass()) {
@@ -938,6 +969,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printer.print("(){");
 			addCallToSuper(scope, context, Collections.<Expression>emptyList(), inlineType);
 			printer.print("}");
+		} else {
+			constr.accept(this, context);
 		}
 	}
 
@@ -961,6 +994,17 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printer.printLn(")();");
 	}
 
+	private void appendTypeArguments(StringBuilder s, ParameterizedTypeWrapper pt) {
+		boolean first = true;
+		for (TypeWrapper arg : pt.getActualTypeArguments()) {
+			if (!first) {
+				s.append(',');
+			}
+			s.append(stjsNameInfo(arg));
+			first = false;
+		}
+	}
+
 	/**
 	 * @param typeWrapper
 	 * @return the name of the given type. if the type is a parameterized type it returns {name:"type-name",
@@ -974,14 +1018,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			s.append("{name:\"").append(pt.getExternalName()).append('\"');
 
 			s.append(", arguments:[");
-			boolean first = true;
-			for (TypeWrapper arg : pt.getActualTypeArguments()) {
-				if (!first) {
-					s.append(',');
-				}
-				s.append(stjsNameInfo(arg));
-				first = false;
-			}
+			appendTypeArguments(s, pt);
 			s.append(']');
 			s.append('}');
 			return s.toString();
@@ -1002,13 +1039,31 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		return "\"" + names.getTypeName(typeWrapper) + "\"";
 	}
 
+	private boolean printFieldDescription(FieldDeclaration field, boolean prevFirst) {
+		TypeWrapper fieldType = resolvedType(field.getType());
+
+		if (ClassUtils.isBasicType(fieldType)) {
+			return prevFirst;
+		}
+		boolean first = prevFirst;
+		for (VariableDeclarator v : field.getVariables()) {
+			if (!first) {
+				printer.print(", ");
+			}
+			printer.print("\"").print(v.getId().getName()).print("\":");
+			printer.print(stjsNameInfo(fieldType));
+			first = false;
+		}
+		return first;
+	}
+
 	/**
 	 * print the information needed to deserialize type-safe from json
 	 * 
 	 * @param n
 	 * @param context
 	 */
-	private void printTypeDescription(ClassOrInterfaceDeclaration n, GenerationContext context) {
+	private void printTypeDescription(ClassOrInterfaceDeclaration n) {
 		TypeWrapper type = resolvedType(n);
 		if (isGlobal(type)) {
 			printer.print("null");
@@ -1021,19 +1076,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			for (BodyDeclaration member : n.getMembers()) {
 				if (member instanceof FieldDeclaration) {
 					FieldDeclaration field = (FieldDeclaration) member;
-					TypeWrapper fieldType = resolvedType(field.getType());
-
-					if (ClassUtils.isBasicType(fieldType)) {
-						continue;
-					}
-					for (VariableDeclarator v : field.getVariables()) {
-						if (!first) {
-							printer.print(", ");
-						}
-						printer.print("\"").print(v.getId().getName()).print("\":");
-						printer.print(stjsNameInfo(fieldType));
-						first = false;
-					}
+					first = printFieldDescription(field, first);
 				}
 			}
 		}
@@ -1052,7 +1095,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			}
 		}
 
-		if (!nonConstructors.isEmpty()) {
+		if (nonConstructors.isEmpty()) {
+			printer.print("null");
+		} else {
 			printer.print("function(").print(JavascriptKeywords.CONSTRUCTOR).print(",")
 					.print(JavascriptKeywords.PROTOTYPE).print("){");
 			printer.indent();
@@ -1063,8 +1108,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printer.printLn();
 			printer.unindent();
 			printer.print("}");
-		} else {
-			printer.print("null");
 		}
 	}
 
@@ -1079,11 +1122,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		ConstructorDeclaration constr = null;
 		for (BodyDeclaration member : members) {
 			if (member instanceof ConstructorDeclaration) {
-				if (constr != null) {
+				if (constr == null) {
+					constr = (ConstructorDeclaration) member;
+				} else {
 					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
 							"Only maximum one constructor is allowed");
-				} else {
-					constr = (ConstructorDeclaration) member;
 				}
 			}
 		}
@@ -1239,69 +1282,34 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		return true;
 	}
 
+	private void printSpecialMapAssign(AssignExpr n, GenerationContext context) {
+		if (n.getTarget() instanceof FieldAccessExpr) {
+			// in inline object creation "this." should be removed
+			printer.print(((FieldAccessExpr) n.getTarget()).getField());
+		} else {
+			n.getTarget().accept(this, context);
+		}
+		printer.print(" ");
+		if (n.getOperator() == AssignExpr.Operator.assign) {
+			printer.print(":");
+		} else {
+			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
+					"Cannot have this assign operator inside an inline object creation block");
+		}
+		printer.print(" ");
+		n.getValue().accept(this, context);
+	}
+
 	@Override
 	public void visit(AssignExpr n, GenerationContext context) {
 		if (isInlineObjectCreationChild(n, 2)) {
-			if (n.getTarget() instanceof FieldAccessExpr) {
-				// in inline object creation "this." should be removed
-				printer.print(((FieldAccessExpr) n.getTarget()).getField());
-			} else {
-				n.getTarget().accept(this, context);
-			}
-			printer.print(" ");
-			if (n.getOperator() == AssignExpr.Operator.assign) {
-				printer.print(":");
-			} else {
-				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
-						"Cannot have this assign operator inside an inline object creation block");
-			}
-			printer.print(" ");
-			n.getValue().accept(this, context);
+			printSpecialMapAssign(n, context);
 			return;
 		}
 
 		n.getTarget().accept(this, context);
 		printer.print(" ");
-		switch (n.getOperator()) {
-		case assign:
-			printer.print("=");
-			break;
-		case and:
-			printer.print("&=");
-			break;
-		case or:
-			printer.print("|=");
-			break;
-		case xor:
-			printer.print("^=");
-			break;
-		case plus:
-			printer.print("+=");
-			break;
-		case minus:
-			printer.print("-=");
-			break;
-		case rem:
-			printer.print("%=");
-			break;
-		case slash:
-			printer.print("/=");
-			break;
-		case star:
-			printer.print("*=");
-			break;
-		case lShift:
-			printer.print("<<=");
-			break;
-		case rSignedShift:
-			printer.print(">>=");
-			break;
-		case rUnsignedShift:
-			printer.print(">>>=");
-			break;
-		default:
-			break;
-		}
+		printer.print(n.getOperator());
 		printer.print(" ");
 		n.getValue().accept(this, context);
 
@@ -1319,67 +1327,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 		n.getLeft().accept(this, context);
 		printer.print(" ");
-		switch (n.getOperator()) {
-		case or:
-			printer.print("||");
-			break;
-		case and:
-			printer.print("&&");
-			break;
-		case binOr:
-			printer.print("|");
-			break;
-		case binAnd:
-			printer.print("&");
-			break;
-		case xor:
-			printer.print("^");
-			break;
-		case equals:
-			printer.print("==");
-			break;
-		case notEquals:
-			printer.print("!=");
-			break;
-		case less:
-			printer.print("<");
-			break;
-		case greater:
-			printer.print(">");
-			break;
-		case lessEquals:
-			printer.print("<=");
-			break;
-		case greaterEquals:
-			printer.print(">=");
-			break;
-		case lShift:
-			printer.print("<<");
-			break;
-		case rSignedShift:
-			printer.print(">>");
-			break;
-		case rUnsignedShift:
-			printer.print(">>>");
-			break;
-		case plus:
-			printer.print("+");
-			break;
-		case minus:
-			printer.print("-");
-			break;
-		case times:
-			printer.print("*");
-			break;
-		case divide:
-			printer.print("/");
-			break;
-		case remainder:
-			printer.print("%");
-			break;
-		default:
-			break;
-		}
+		printer.print(n.getOperator());
 		printer.print(" ");
 		n.getRight().accept(this, context);
 		if (integerDivision) {
@@ -1456,36 +1404,42 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(final MethodCallExpr n, final GenerationContext context) {
+		if (specialMethodHandlers.handleMethodCall(this, n, context)) {
+			// already handled by a special handler
+			return;
+		}
 		MethodWrapper method = resolvedMethod(n);
-		if (!specialMethodHandlers.handleMethodCall(this, n, context)) {
-			TypeWrapper methodDeclaringClass = method.getOwnerType();
-			if (Modifier.isStatic(method.getModifiers())) {
-				printStaticFieldOrMethodAccessPrefix(methodDeclaringClass, true);
-				printer.print(names.getMethodName(method));
-				printArguments(n.getArgs(), context);
-				return;
-			}
-			boolean withScopeThis = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.THIS);
-			boolean withScopeSuper = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.SUPER);
-			if (n.getScope() != null && !withScopeSuper && !withScopeThis) {
-				n.getScope().accept(this, context);
-				printer.print(".");
-			} else if (!withScopeSuper) {
-				// Non static reference to current enclosing type.
-				printer.print(JavascriptKeywords.THIS).print(".");
-			} else {
-				// Non static reference to parent type
-				printer.print(names.getTypeName(method.getOwnerType()));
-				printer.print(".").print(JavascriptKeywords.PROTOTYPE).print(".").print(names.getMethodName(method))
-						.print(".call");
-				printArguments(Collections.singleton(JavascriptKeywords.THIS), n.getArgs(),
-						Collections.<String>emptyList(), context);
-				return;
-			}
+		TypeWrapper methodDeclaringClass = method.getOwnerType();
+		if (Modifier.isStatic(method.getModifiers())) {
+			printStaticFieldOrMethodAccessPrefix(methodDeclaringClass, true);
 			printer.print(names.getMethodName(method));
 			printArguments(n.getArgs(), context);
-
+			return;
 		}
+		// this scope is either implicit (no scope at all) or explicit "this."
+		boolean withScopeThis = n.getScope() == null || n.getScope() != null
+				&& n.getScope().toString().equals(GeneratorConstants.THIS);
+		boolean withScopeSuper = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.SUPER);
+		boolean withOtherScope = !withScopeSuper && !withScopeThis;
+
+		if (withOtherScope) {
+			n.getScope().accept(this, context);
+			printer.print(".");
+		} else if (withScopeThis) {
+			// Non static reference to current enclosing type.
+			printer.print(JavascriptKeywords.THIS).print(".");
+		} else {
+			// Non static reference to parent type
+			printer.print(names.getTypeName(method.getOwnerType()));
+			printer.print(".").print(JavascriptKeywords.PROTOTYPE).print(".").print(names.getMethodName(method))
+					.print(".call");
+			printArguments(Collections.singleton(JavascriptKeywords.THIS), n.getArgs(),
+					Collections.<String>emptyList(), context);
+			return;
+		}
+		printer.print(names.getMethodName(method));
+		printArguments(n.getArgs(), context);
+
 	}
 
 	private void printStaticFieldOrMethodAccessPrefix(TypeWrapper type, boolean addDot) {
@@ -1526,28 +1480,32 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		return decl instanceof EnumDeclaration;
 	}
 
+	private void visitField(FieldWrapper field, NameExpr n) {
+		if (Modifier.isStatic(field.getModifiers())) {
+			printStaticFieldOrMethodAccessPrefix(field.getOwnerType(), true);
+		} else if (!isInlineObjectCreationChild(n, INLINE_CREATION_PARENT_LEVEL)) {
+			printer.print("this.");
+		}
+	}
+
 	@Override
 	public void visit(NameExpr n, GenerationContext context) {
 		if (GeneratorConstants.SPECIAL_THIS.equals(n.getName())) {
-			printer.print("this");
+			printer.print(GeneratorConstants.SPECIAL_THIS);
 			return;
 		}
 		Variable var = resolvedVariable(n);
-		if (var != null) {
-			if (var instanceof FieldWrapper) {
-				FieldWrapper field = (FieldWrapper) var;
-				final int parentLevel = 3;
-				if (Modifier.isStatic(field.getModifiers())) {
-					printStaticFieldOrMethodAccessPrefix(field.getOwnerType(), true);
-				} else if (!isInlineObjectCreationChild(n, parentLevel)) {
-					printer.print("this.");
+		if (var == null) {
+			if (!(parent(n) instanceof SwitchEntryStmt)) {
+				TypeWrapper type = resolvedType(n);
+				if (type != null) {
+					printStaticFieldOrMethodAccessPrefix(type, false);
+					return;
 				}
 			}
-		} else if (!(parent(n) instanceof SwitchEntryStmt)) {
-			TypeWrapper type = resolvedType(n);
-			if (type != null) {
-				printStaticFieldOrMethodAccessPrefix(type, false);
-				return;
+		} else {
+			if (var instanceof FieldWrapper) {
+				visitField((FieldWrapper) var, n);
 			}
 		}
 
@@ -1576,6 +1534,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	@Override
+	@SuppressWarnings("PMD.CyclomaticComplexity")
 	public void visit(UnaryExpr n, GenerationContext context) {
 		switch (n.getOperator()) {
 		case positive:
@@ -1655,10 +1614,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	private void checkAssignStatement(Statement s, GenerationContext context) {
-		if (s instanceof ExpressionStmt) {
-			if (((ExpressionStmt) s).getExpression() instanceof AssignExpr) {
-				return;
-			}
+		if (s instanceof ExpressionStmt && ((ExpressionStmt) s).getExpression() instanceof AssignExpr) {
+			return;
 		}
 		throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(s),
 				"Only assign expression are allowed in an object creation block");
@@ -1694,10 +1651,12 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printComments(s, context);
 				if (isInlineObjectCreationChild(s, 1)) {
 					checkAssignStatement(s, context);
-				}
-				s.accept(this, context);
-				if (isInlineObjectCreationChild(s, 1) && i < n.getStmts().size() - 1 && n.getStmts().size() > 1) {
-					printer.print(",");
+					s.accept(this, context);
+					if (i < n.getStmts().size() - 1) {
+						printer.print(",");
+					}
+				} else {
+					s.accept(this, context);
 				}
 				printer.printLn();
 			}
@@ -1748,7 +1707,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(SwitchEntryStmt n, GenerationContext context) {
-		if (n.getLabel() != null) {
+		if (n.getLabel() == null) {
+			printer.print("default:");
+		} else {
 			printer.print("case ");
 			TypeWrapper selectorType = resolvedType(((SwitchStmt) parent(n)).getSelector());
 			PreConditions.checkState(selectorType != null, "The selector of the switch %s should have a type",
@@ -1759,8 +1720,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			}
 			n.getLabel().accept(this, context);
 			printer.print(":");
-		} else {
-			printer.print("default:");
 		}
 		printer.printLn();
 		printer.indent();

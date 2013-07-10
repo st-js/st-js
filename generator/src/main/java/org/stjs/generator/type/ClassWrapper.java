@@ -72,8 +72,7 @@ public class ClassWrapper implements TypeWrapper {
 	private Map<String, TypeWrapper> types;
 	private Multimap<String, MethodWrapper> methods;
 
-	public ClassWrapper(@Nonnull
-	Class<?> clazz) {
+	public ClassWrapper(@Nonnull Class<?> clazz) {
 		Preconditions.checkNotNull(clazz);
 		this.clazz = clazz;
 	}
@@ -86,8 +85,7 @@ public class ClassWrapper implements TypeWrapper {
 	}
 
 	private TypeWrapper substituteTypeInParameterizedType(ParameterizedTypeWrapper origParamType, Class<?> ownerClass,
-			@Nullable
-			TypeWrapper[] typeArguments) {
+			@Nullable TypeWrapper[] typeArguments) {
 		TypeWrapper[] argumentTypes = origParamType.getActualTypeArguments();
 		TypeWrapper[] modifiedArgumentTypes = new TypeWrapper[argumentTypes.length];
 		boolean modified = false;
@@ -101,8 +99,7 @@ public class ClassWrapper implements TypeWrapper {
 	/**
 	 * @return a TypeWrapper with the parameters replaced by the given arguments
 	 */
-	private TypeWrapper substituteType(TypeWrapper origType, Class<?> ownerClass, @Nullable
-	TypeWrapper[] typeArguments) {
+	private TypeWrapper substituteType(TypeWrapper origType, Class<?> ownerClass, @Nullable TypeWrapper[] typeArguments) {
 		if (typeArguments == null) {
 			return origType;
 		}
@@ -124,6 +121,7 @@ public class ClassWrapper implements TypeWrapper {
 
 	/**
 	 * when the a type variable T is replaced by a simple wildcard (?), it in fact inherits the extends of the type var
+	 * 
 	 * @param typeWrapper
 	 * @param typeVar
 	 * @return
@@ -136,9 +134,8 @@ public class ClassWrapper implements TypeWrapper {
 			return typeWrapper;
 		}
 		WildcardType wctype = (WildcardType) typeWrapper.getType();
-		boolean unbounded =
-				wctype.getUpperBounds().length == 0 || wctype.getUpperBounds().length == 1
-						&& wctype.getUpperBounds()[0] == Object.class;
+		boolean unbounded = wctype.getUpperBounds().length == 0 || wctype.getUpperBounds().length == 1
+				&& wctype.getUpperBounds()[0] == Object.class;
 		if (!unbounded) {
 			// already bounded with something else
 			return typeWrapper;
@@ -164,7 +161,8 @@ public class ClassWrapper implements TypeWrapper {
 				parameterTypes, ownerClass, actualTypeArgs), modifiers, typeParameters, this, clazz.equals(ownerClass));
 	}
 
-	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "PZLA_PREFER_ZERO_LENGTH_ARRAYS", justification = "null is actually for a raw class")
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+			value = "PZLA_PREFER_ZERO_LENGTH_ARRAYS", justification = "null is actually for a raw class")
 	private TypeWrapper[] getActualTypeArgs(Type type, Class<?> subTypeClass, TypeWrapper[] subTypeActualTypeArgs) {
 		if (type instanceof Class<?>) {
 			return null;
@@ -298,7 +296,7 @@ public class ClassWrapper implements TypeWrapper {
 
 	public Option<ClassWrapper> getDeclaringClass() {
 		Class<?> declaringClass = clazz.getDeclaringClass();
-		return declaringClass == null ? Option.<ClassWrapper> none() : Option.some(new ClassWrapper(declaringClass));
+		return declaringClass == null ? Option.<ClassWrapper>none() : Option.some(new ClassWrapper(declaringClass));
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -322,7 +320,7 @@ public class ClassWrapper implements TypeWrapper {
 	public Option<FieldWrapper> findField(String name) {
 		prepareFieldsMethodsAndTypes();
 		FieldWrapper f = fields.get(name);
-		return f == null ? Option.<FieldWrapper> none() : Option.some(f);
+		return f == null ? Option.<FieldWrapper>none() : Option.some(f);
 	}
 
 	public List<MethodWrapper> findMethods(final String name) {
@@ -341,8 +339,7 @@ public class ClassWrapper implements TypeWrapper {
 					return Option.some(new ClassWrapper(innerClass));
 				}
 			}
-		}
-		catch (SecurityException e) {
+		} catch (SecurityException e) {
 			throw new JavascriptClassGenerationException(name, e);
 		}
 		return Option.none();
@@ -375,7 +372,7 @@ public class ClassWrapper implements TypeWrapper {
 
 	public Option<ClassWrapper> getSuperclass() {
 		Class<?> superClass = clazz.getSuperclass();
-		return superClass == null ? Option.<ClassWrapper> none() : Option.some(new ClassWrapper(superClass));
+		return superClass == null ? Option.<ClassWrapper>none() : Option.some(new ClassWrapper(superClass));
 	}
 
 	@Override

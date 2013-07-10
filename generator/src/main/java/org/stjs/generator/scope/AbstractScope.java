@@ -65,12 +65,30 @@ public abstract class AbstractScope implements Scope {
 		variables.put(field.getName(), field);
 	}
 
+	public void addFields(Iterable<FieldWrapper> fields) {
+		for (FieldWrapper field : fields) {
+			addField(field);
+		}
+	}
+
 	public void addMethods(String alias, List<MethodWrapper> methods) {
 		this.methods.putAll(alias, methods);
 	}
 
 	public void addMethod(MethodWrapper method) {
 		methods.put(method.getName(), method);
+	}
+
+	public void addMethods(Iterable<MethodWrapper> methods) {
+		for (MethodWrapper method : methods) {
+			addMethod(method);
+		}
+	}
+
+	public void addTypes(Iterable<? extends TypeWrapper> types) {
+		for (TypeWrapper type : types) {
+			addType(type);
+		}
 	}
 
 	public void addType(TypeWrapper clazz) {

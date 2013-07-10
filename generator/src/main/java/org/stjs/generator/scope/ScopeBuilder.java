@@ -154,15 +154,9 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			if (importDecl.isAsterisk()) {
 				if (importDecl.isStatic()) {
 					for (ClassWrapper clazz : identifyQualifiedNameExprClass(name)) {
-						for (FieldWrapper field : clazz.getDeclaredNonPrivateStaticFields()) {
-							scope.addField(field);
-						}
-						for (MethodWrapper method : clazz.getDeclaredNonPrivateStaticMethods()) {
-							scope.addMethod(method);
-						}
-						for (ClassWrapper type : clazz.getDeclaredNonPrivateStaticClasses()) {
-							scope.addType(type);
-						}
+						scope.addFields(clazz.getDeclaredNonPrivateStaticFields());
+						scope.addMethods(clazz.getDeclaredNonPrivateStaticMethods());
+						scope.addTypes(clazz.getDeclaredNonPrivateStaticClasses());
 					}
 				} else {
 					scope.addTypeImportOnDemand(name);
@@ -179,22 +173,12 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 					QualifiedNameExpr expr = (QualifiedNameExpr) name;
 					for (ClassWrapper clazz : identifyQualifiedNameExprClass(expr.getQualifier())) {
 						String fieldOrTypeOrMethodName = name.getName();
-						for (FieldWrapper field : clazz.findField(fieldOrTypeOrMethodName)) {
-							scope.addField(field);
-						}
-						List<MethodWrapper> methods = clazz.findMethods(fieldOrTypeOrMethodName);
-						if (!methods.isEmpty()) {
-							scope.addMethods(fieldOrTypeOrMethodName, methods);
-						}
-						for (ClassWrapper innerClass : clazz.getDeclaredClass(fieldOrTypeOrMethodName)) {
-							scope.addType(innerClass);
-						}
+						scope.addFields(clazz.findField(fieldOrTypeOrMethodName));
+						scope.addMethods(fieldOrTypeOrMethodName, clazz.findMethods(fieldOrTypeOrMethodName));
+						scope.addTypes(clazz.getDeclaredClass(fieldOrTypeOrMethodName));
 					}
 				}
-				for (ClassWrapper clazz : identifyQualifiedNameExprClass(name)) {
-					scope.addType(clazz);
-
-				}
+				scope.addTypes(identifyQualifiedNameExprClass(name));
 			}
 		}
 	}
@@ -415,9 +399,6 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 						"Unexpected type:" + type);
 			}
 			int arrayCount = getArrayCount(aType);
-			if (arrayCount == 0) {
-				return resolvedType;
-			}
 			return ClassUtils.arrayOf(resolvedType, arrayCount);
 		} catch (IllegalArgumentException ex) {
 			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(type),
@@ -531,22 +512,31 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		Checks.postCheckEnumDeclaration(n, context);
 	}
 
-	@Override
-	public void visit(ObjectCreationExpr n, Scope scope) {
-		if (n.getScope() != null) {
-			n.getScope().accept(this, scope);
-		}
+	private void visitTypeArgs(ObjectCreationExpr n, Scope scope) {
 		if (n.getTypeArgs() != null) {
 			for (Type t : n.getTypeArgs()) {
 				t.accept(this, scope);
 			}
 		}
-		n.getType().accept(this, scope);
+	}
+
+	private void visitArgs(ObjectCreationExpr n, Scope scope) {
 		if (n.getArgs() != null) {
 			for (Expression e : n.getArgs()) {
 				e.accept(this, scope);
 			}
 		}
+	}
+
+	@Override
+	public void visit(ObjectCreationExpr n, Scope scope) {
+		if (n.getScope() != null) {
+			n.getScope().accept(this, scope);
+		}
+		visitTypeArgs(n, scope);
+		n.getType().accept(this, scope);
+		visitArgs(n, scope);
+
 		Checks.checkObjectCreationExpr(n, context);
 
 		if (n.getAnonymousClassBody() == null) {
@@ -834,13 +824,17 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	}
 
+	private boolean isClassNamePart(Node parent) {
+		return parent instanceof QualifiedNameExpr || parent instanceof ImportDeclaration
+				|| parent instanceof PackageDeclaration;
+	}
+
 	@Override
 	public void visit(NameExpr n, Scope arg) {
 		Checks.checkNameExpr(n, context);
 		super.visit(n, arg);
 		Node parent = parent(n);
-		if (parent instanceof QualifiedNameExpr || parent instanceof ImportDeclaration
-				|| parent instanceof PackageDeclaration) {
+		if (isClassNamePart(parent)) {
 			// don't bother as is only part of a package or import declaration
 			resolvedType(n, null);
 		} else if (parent instanceof SwitchEntryStmt) {

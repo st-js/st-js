@@ -53,15 +53,16 @@ public final class ClassUtils {
 	private static final Pattern IMPLICIT_BRIDGE = Pattern.compile("java\\.lang.*|org\\.junit.*");
 
 	private static final Set<String> BASIC_TYPE_NAMES = new HashSet<String>();
+
+	private static final Set<String> INTEGER_TYPE_NAMES = new HashSet<String>(Arrays.asList("int", "long", "short",
+			"byte"));
+
 	static {
 		for (Class<?> clazz : Primitives.allWrapperTypes()) {
 			BASIC_TYPE_NAMES.add(clazz.getName());
 		}
 		BASIC_TYPE_NAMES.add(String.class.getName());
 	}
-
-	private static final Set<String> INTEGER_TYPE_NAMES = new HashSet<String>(Arrays.asList("int", "long", "short",
-			"byte"));
 
 	// private static Map<Class<?>, String> primitiveArrayId;
 
@@ -238,6 +239,7 @@ public final class ClassUtils {
 			return new ClassWrapper(Array.newInstance((Class<?>) resolvedType.getType(), new int[arrayCount])
 					.getClass());
 		}
+
 		TypeWrapper returnType = resolvedType;
 		for (int i = 0; i < arrayCount; ++i) {
 			returnType = new GenericArrayTypeWrapper(new GenericArrayTypeImpl(returnType.getType()));
@@ -263,21 +265,7 @@ public final class ClassUtils {
 
 	public static boolean isAssignableFromType(final Class<?> cls, final java.lang.reflect.Type type) {
 		if (type instanceof Class<?>) {
-			Class<?> otherClass = (Class<?>) type;
-			if (cls.isAssignableFrom(otherClass)) {
-				return true;
-			}
-			// try primitives
-			if (Primitives.wrap(cls).isAssignableFrom(Primitives.wrap(otherClass))) {
-				return true;
-			}
-
-			// go on with primitive rules double/float -> accept long/int -> accept byte/char (but this only if there is
-			// none more specific!)
-			if (PrimitiveTypes.isAssignableFrom(cls, otherClass)) {
-				return true;
-			}
-			return false;
+			return isAssignableFromClass(cls, (Class<?>) type);
 		}
 		if (type instanceof GenericArrayType) {
 			return isAssignableFromGenericArrayType(cls, (GenericArrayType) type);
@@ -293,6 +281,23 @@ public final class ClassUtils {
 		}
 
 		throw new IllegalArgumentException("Unsupported type: " + type);
+	}
+
+	private static boolean isAssignableFromClass(final Class<?> cls, final Class<?> otherClass) {
+		if (cls.isAssignableFrom(otherClass)) {
+			return true;
+		}
+		// try primitives
+		if (Primitives.wrap(cls).isAssignableFrom(Primitives.wrap(otherClass))) {
+			return true;
+		}
+
+		// go on with primitive rules double/float -> accept long/int -> accept byte/char (but this only if there is
+		// none more specific!)
+		if (PrimitiveTypes.isAssignableFrom(cls, otherClass)) {
+			return true;
+		}
+		return false;
 	}
 
 	private static boolean isAssignableFromGenericArrayType(final Class<?> cls, final GenericArrayType genericArrayType) {

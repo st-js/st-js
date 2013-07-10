@@ -16,11 +16,14 @@
 package org.stjs.generator.writer;
 
 import japa.parser.ast.Node;
+import japa.parser.ast.expr.AssignExpr;
+import japa.parser.ast.expr.BinaryExpr;
 
 import java.io.IOException;
 import java.io.Writer;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.utils.Operators;
 
 import com.google.debugging.sourcemap.FilePosition;
 import com.google.debugging.sourcemap.SourceMapFormat;
@@ -93,6 +96,34 @@ public class JavascriptWriter {
 		print("'");
 		print(value);
 		print("'");
+		return this;
+	}
+
+	public JavascriptWriter printList(Iterable<String> args) {
+		boolean first = true;
+		for (String arg : args) {
+			if (!first) {
+				print(", ");
+			}
+			print(arg);
+			first = false;
+		}
+		return this;
+	}
+
+	public JavascriptWriter print(BinaryExpr.Operator op) {
+		String display = Operators.getDisplay(op);
+		if (display != null) {
+			print(display);
+		}
+		return this;
+	}
+
+	public JavascriptWriter print(AssignExpr.Operator op) {
+		String display = Operators.getDisplay(op);
+		if (display != null) {
+			print(display);
+		}
 		return this;
 	}
 
