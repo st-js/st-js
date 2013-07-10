@@ -14,8 +14,9 @@ import org.stjs.javascript.annotation.GlobalScope;
 public class WildcardTypeWrapperTest {
 	@Test
 	public void testRegularClass() throws SecurityException, NoSuchMethodException {
-		TypeWrapper wrapper = TypeWrappers.wrap(((ParameterizedType) WildcardTypeWrapper1.class
-				.getDeclaredMethod("get").getGenericReturnType()).getActualTypeArguments()[0]);
+		TypeWrapper wrapper =
+				TypeWrappers.wrap(((ParameterizedType) WildcardTypeWrapper1.class.getDeclaredMethod("get")
+						.getGenericReturnType()).getActualTypeArguments()[0]);
 		assertEquals("?", wrapper.getSimpleName());
 		assertEquals("?", wrapper.getExternalName());
 		assertEquals("?", wrapper.getName());
@@ -35,8 +36,9 @@ public class WildcardTypeWrapperTest {
 
 	@Test
 	public void testInnerClass() throws SecurityException, NoSuchMethodException {
-		TypeWrapper wrapper = TypeWrappers.wrap(((ParameterizedType) WildcardTypeWrapper2.class
-				.getDeclaredMethod("get").getGenericReturnType()).getActualTypeArguments()[0]);
+		TypeWrapper wrapper =
+				TypeWrappers.wrap(((ParameterizedType) WildcardTypeWrapper2.class.getDeclaredMethod("get")
+						.getGenericReturnType()).getActualTypeArguments()[0]);
 		assertEquals("?", wrapper.getSimpleName());
 		assertEquals("?", wrapper.getExternalName());
 		assertEquals("?", wrapper.getName());
@@ -57,8 +59,9 @@ public class WildcardTypeWrapperTest {
 
 	@Test
 	public void testGenericClass() throws SecurityException, NoSuchMethodException {
-		TypeWrapper wrapper = TypeWrappers.wrap(((ParameterizedType) WildcardTypeWrapper3.class
-				.getDeclaredMethod("get").getGenericReturnType()).getActualTypeArguments()[0]);
+		TypeWrapper wrapper =
+				TypeWrappers.wrap(((ParameterizedType) WildcardTypeWrapper3.class.getDeclaredMethod("get")
+						.getGenericReturnType()).getActualTypeArguments()[0]);
 		assertEquals("?", wrapper.getSimpleName());
 		assertEquals("?", wrapper.getExternalName());
 		assertEquals("?", wrapper.getName());

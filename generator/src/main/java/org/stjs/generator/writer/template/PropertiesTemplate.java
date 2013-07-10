@@ -7,9 +7,7 @@ import org.stjs.generator.writer.JavascriptWriterVisitor;
 
 /**
  * $properties(obj) -> obj
- * 
  * @author acraciun
- * 
  */
 public class PropertiesTemplate implements MethodCallTemplate {
 

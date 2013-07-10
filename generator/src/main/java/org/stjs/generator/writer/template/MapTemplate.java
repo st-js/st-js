@@ -8,9 +8,7 @@ import org.stjs.generator.writer.JavascriptWriterVisitor;
 
 /**
  * $map() -> {}
- * 
  * @author acraciun
- * 
  */
 public class MapTemplate implements MethodCallTemplate {
 

@@ -35,7 +35,6 @@ public class GeneratorConfiguration {
 	}
 
 	/**
-	 * 
 	 * @return the parent packages that contain the classes that can be called from the processed source file. Note that
 	 *         sub-packages of a package from this collection are also allowed. java.lang is implicit
 	 */

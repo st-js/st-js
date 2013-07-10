@@ -7,9 +7,7 @@ import org.stjs.generator.writer.JavascriptWriterVisitor;
 
 /**
  * $or(x, y, z) -> (x || y || z)
- * 
  * @author acraciun
- * 
  */
 public class OrTemplate implements MethodCallTemplate {
 

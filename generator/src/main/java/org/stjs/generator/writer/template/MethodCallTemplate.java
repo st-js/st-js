@@ -7,9 +7,7 @@ import org.stjs.generator.writer.JavascriptWriterVisitor;
 
 /**
  * This template is called to render the call of the given method.
- * 
  * @author acraciun
- * 
  */
 public interface MethodCallTemplate {
 	boolean write(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context);

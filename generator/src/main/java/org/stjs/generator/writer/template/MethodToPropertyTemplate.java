@@ -13,9 +13,7 @@ import org.stjs.generator.writer.JavascriptWriterVisitor;
  * $method() => $method and <br>
  * $method(x) => $method = x and $staticMethod(x) => x.$method and <br>
  * $staticMethod(x, y) => x.$method = y
- * 
  * @author acraciun
- * 
  */
 public class MethodToPropertyTemplate implements MethodCallTemplate {
 

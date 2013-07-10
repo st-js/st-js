@@ -18,8 +18,7 @@ public class EnumGeneratorTest {
 		assertCodeContains(Enums2.class, "Enums2.Value = stjs.enumeration(\"a\", \"b\", \"c\");");
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testEnumWithFieldsDeclaration() {
 		// fields are not supported
 		generate(Enums9.class);

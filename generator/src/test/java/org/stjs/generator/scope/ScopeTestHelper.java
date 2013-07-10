@@ -42,7 +42,7 @@ public class ScopeTestHelper {
 	}
 
 	public static CompilationUnit resolveName(Class<?> clazz) {
-		return resolveName(clazz, Collections.<String>emptyList());
+		return resolveName(clazz, Collections.<String> emptyList());
 	}
 
 	public static CompilationUnit resolveName(Class<?> clazz, Collection<String> packages) {
@@ -50,11 +50,13 @@ public class ScopeTestHelper {
 		try {
 			in = new FileInputStream(getSourceFile(clazz));
 			CompilationUnit cu = JavaParser.parse(in);
-			GeneratorConfiguration config = new GeneratorConfigurationBuilder().allowedPackages(packages)
-					.allowedPackage("org.stjs.javascript").allowedPackage("org.stjs.generator").build();
+			GeneratorConfiguration config =
+					new GeneratorConfigurationBuilder().allowedPackages(packages).allowedPackage("org.stjs.javascript")
+							.allowedPackage("org.stjs.generator").build();
 
-			ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader(),
-					config.getAllowedPackages(), config.getAllowedJavaLangClasses());
+			ClassLoaderWrapper classLoader =
+					new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader(), config.getAllowedPackages(),
+							config.getAllowedJavaLangClasses());
 			GenerationContext context = new GenerationContext(new File(getSourceFile(clazz)), config);
 			// set the parent of each node
 			cu.accept(new SetParentVisitor(), context);
@@ -63,15 +65,19 @@ public class ScopeTestHelper {
 
 			builder.visit(cu, scope);
 			return cu;
-		} catch (FileNotFoundException e) {
+		}
+		catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
-		} catch (ParseException e) {
+		}
+		catch (ParseException e) {
 			throw new RuntimeException(e);
-		} finally {
+		}
+		finally {
 			if (in != null) {
 				try {
 					in.close();
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 					// silent
 				}
 			}

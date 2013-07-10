@@ -20,11 +20,8 @@ import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.type.TypeWrapper;
 
 /**
- * 
- * @author acraciun
- * 
- *         the implementors should provide the names to be written in the generated Javascript file for the given
- *         elements.
+ * @author acraciun the implementors should provide the names to be written in the generated Javascript file for the
+ *         given elements.
  */
 public interface NameProvider {
 	String getTypeName(TypeWrapper type);

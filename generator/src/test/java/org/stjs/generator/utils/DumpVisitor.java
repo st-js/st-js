@@ -426,30 +426,30 @@ public class DumpVisitor<T> implements VoidVisitor<T> {
 	@Override
 	public void visit(PrimitiveType n, T arg) {
 		switch (n.getType()) {
-		case Boolean:
-			printer.print("boolean");
-			break;
-		case Byte:
-			printer.print("byte");
-			break;
-		case Char:
-			printer.print("char");
-			break;
-		case Double:
-			printer.print("double");
-			break;
-		case Float:
-			printer.print("float");
-			break;
-		case Int:
-			printer.print("int");
-			break;
-		case Long:
-			printer.print("long");
-			break;
-		case Short:
-			printer.print("short");
-			break;
+			case Boolean:
+				printer.print("boolean");
+				break;
+			case Byte:
+				printer.print("byte");
+				break;
+			case Char:
+				printer.print("char");
+				break;
+			case Double:
+				printer.print("double");
+				break;
+			case Float:
+				printer.print("float");
+				break;
+			case Int:
+				printer.print("int");
+				break;
+			case Long:
+				printer.print("long");
+				break;
+			case Short:
+				printer.print("short");
+				break;
 		}
 	}
 
@@ -568,42 +568,42 @@ public class DumpVisitor<T> implements VoidVisitor<T> {
 		n.getTarget().accept(this, arg);
 		printer.print(" ");
 		switch (n.getOperator()) {
-		case assign:
-			printer.print("=");
-			break;
-		case and:
-			printer.print("&=");
-			break;
-		case or:
-			printer.print("|=");
-			break;
-		case xor:
-			printer.print("^=");
-			break;
-		case plus:
-			printer.print("+=");
-			break;
-		case minus:
-			printer.print("-=");
-			break;
-		case rem:
-			printer.print("%=");
-			break;
-		case slash:
-			printer.print("/=");
-			break;
-		case star:
-			printer.print("*=");
-			break;
-		case lShift:
-			printer.print("<<=");
-			break;
-		case rSignedShift:
-			printer.print(">>=");
-			break;
-		case rUnsignedShift:
-			printer.print(">>>=");
-			break;
+			case assign:
+				printer.print("=");
+				break;
+			case and:
+				printer.print("&=");
+				break;
+			case or:
+				printer.print("|=");
+				break;
+			case xor:
+				printer.print("^=");
+				break;
+			case plus:
+				printer.print("+=");
+				break;
+			case minus:
+				printer.print("-=");
+				break;
+			case rem:
+				printer.print("%=");
+				break;
+			case slash:
+				printer.print("/=");
+				break;
+			case star:
+				printer.print("*=");
+				break;
+			case lShift:
+				printer.print("<<=");
+				break;
+			case rSignedShift:
+				printer.print(">>=");
+				break;
+			case rUnsignedShift:
+				printer.print(">>>=");
+				break;
 		}
 		printer.print(" ");
 		n.getValue().accept(this, arg);
@@ -614,63 +614,63 @@ public class DumpVisitor<T> implements VoidVisitor<T> {
 		n.getLeft().accept(this, arg);
 		printer.print(" ");
 		switch (n.getOperator()) {
-		case or:
-			printer.print("||");
-			break;
-		case and:
-			printer.print("&&");
-			break;
-		case binOr:
-			printer.print("|");
-			break;
-		case binAnd:
-			printer.print("&");
-			break;
-		case xor:
-			printer.print("^");
-			break;
-		case equals:
-			printer.print("==");
-			break;
-		case notEquals:
-			printer.print("!=");
-			break;
-		case less:
-			printer.print("<");
-			break;
-		case greater:
-			printer.print(">");
-			break;
-		case lessEquals:
-			printer.print("<=");
-			break;
-		case greaterEquals:
-			printer.print(">=");
-			break;
-		case lShift:
-			printer.print("<<");
-			break;
-		case rSignedShift:
-			printer.print(">>");
-			break;
-		case rUnsignedShift:
-			printer.print(">>>");
-			break;
-		case plus:
-			printer.print("+");
-			break;
-		case minus:
-			printer.print("-");
-			break;
-		case times:
-			printer.print("*");
-			break;
-		case divide:
-			printer.print("/");
-			break;
-		case remainder:
-			printer.print("%");
-			break;
+			case or:
+				printer.print("||");
+				break;
+			case and:
+				printer.print("&&");
+				break;
+			case binOr:
+				printer.print("|");
+				break;
+			case binAnd:
+				printer.print("&");
+				break;
+			case xor:
+				printer.print("^");
+				break;
+			case equals:
+				printer.print("==");
+				break;
+			case notEquals:
+				printer.print("!=");
+				break;
+			case less:
+				printer.print("<");
+				break;
+			case greater:
+				printer.print(">");
+				break;
+			case lessEquals:
+				printer.print("<=");
+				break;
+			case greaterEquals:
+				printer.print(">=");
+				break;
+			case lShift:
+				printer.print("<<");
+				break;
+			case rSignedShift:
+				printer.print(">>");
+				break;
+			case rUnsignedShift:
+				printer.print(">>>");
+				break;
+			case plus:
+				printer.print("+");
+				break;
+			case minus:
+				printer.print("-");
+				break;
+			case times:
+				printer.print("*");
+				break;
+			case divide:
+				printer.print("/");
+				break;
+			case remainder:
+				printer.print("%");
+				break;
 		}
 		printer.print(" ");
 		n.getRight().accept(this, arg);
@@ -825,35 +825,35 @@ public class DumpVisitor<T> implements VoidVisitor<T> {
 	@Override
 	public void visit(UnaryExpr n, T arg) {
 		switch (n.getOperator()) {
-		case positive:
-			printer.print("+");
-			break;
-		case negative:
-			printer.print("-");
-			break;
-		case inverse:
-			printer.print("~");
-			break;
-		case not:
-			printer.print("!");
-			break;
-		case preIncrement:
-			printer.print("++");
-			break;
-		case preDecrement:
-			printer.print("--");
-			break;
+			case positive:
+				printer.print("+");
+				break;
+			case negative:
+				printer.print("-");
+				break;
+			case inverse:
+				printer.print("~");
+				break;
+			case not:
+				printer.print("!");
+				break;
+			case preIncrement:
+				printer.print("++");
+				break;
+			case preDecrement:
+				printer.print("--");
+				break;
 		}
 
 		n.getExpr().accept(this, arg);
 
 		switch (n.getOperator()) {
-		case posIncrement:
-			printer.print("++");
-			break;
-		case posDecrement:
-			printer.print("--");
-			break;
+			case posIncrement:
+				printer.print("++");
+				break;
+			case posDecrement:
+				printer.print("--");
+				break;
 		}
 	}
 

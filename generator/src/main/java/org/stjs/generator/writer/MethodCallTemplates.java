@@ -37,7 +37,6 @@ import com.google.common.io.Closeables;
 
 /**
  * this is a handler to handle special method names (those starting with $).
- * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class MethodCallTemplates {
@@ -51,7 +50,8 @@ public class MethodCallTemplates {
 		Enumeration<URL> configFiles;
 		try {
 			configFiles = Thread.currentThread().getContextClassLoader().getResources(STJS_TEMPLATES_CONFIG_FILE);
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new STJSRuntimeException(e);
 		}
 		while (configFiles.hasMoreElements()) {
@@ -69,23 +69,28 @@ public class MethodCallTemplates {
 				methodTemplates.put(entry.getKey().toString(),
 						(MethodCallTemplate) Class.forName(entry.getValue().toString()).newInstance());
 			}
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new STJSRuntimeException(e);
-		} catch (InstantiationException e) {
+		}
+		catch (InstantiationException e) {
 			throw new STJSRuntimeException(e);
-		} catch (IllegalAccessException e) {
+		}
+		catch (IllegalAccessException e) {
 			throw new STJSRuntimeException(e);
-		} catch (ClassNotFoundException e) {
+		}
+		catch (ClassNotFoundException e) {
 			throw new STJSRuntimeException(e);
-		} finally {
+		}
+		finally {
 			Closeables.closeQuietly(input);
 		}
 	}
 
 	public boolean handleMethodCall(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
 		MethodWrapper method = ASTNodeData.resolvedMethod(n);
-		org.stjs.javascript.annotation.Template templateAnn = method
-				.getAnnotation(org.stjs.javascript.annotation.Template.class);
+		org.stjs.javascript.annotation.Template templateAnn =
+				method.getAnnotation(org.stjs.javascript.annotation.Template.class);
 		if (templateAnn != null) {
 			MethodCallTemplate handler = methodTemplates.get(templateAnn.value());
 			if (handler == null) {

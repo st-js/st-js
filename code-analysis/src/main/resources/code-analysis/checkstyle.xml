@@ -172,6 +172,14 @@
 		<module name="RedundantModifier" />
 		<module name="RightCurly">
 			<property name="option" value="same" />
+			<property name="tokens" value="LITERAL_IF"/>
+			<property name="tokens" value="LITERAL_ELSE"/>
+		</module>
+		<module name="RightCurly">
+			<property name="option" value="alone" />
+			<property name="tokens" value="LITERAL_TRY"/>
+			<property name="tokens" value="LITERAL_CATCH"/>
+			<property name="tokens" value="LITERAL_FINALLY"/>
 		</module>
 		<module name="SimplifyBooleanExpression" />
 		<module name="SimplifyBooleanReturn" />
@@ -184,7 +192,7 @@
 		<module name="VisibilityModifier" />
 		<module name="WhitespaceAfter" />
 		<module name="WhitespaceAround" />
-		<module name="GenericWhitespace" />
+<!-- 		<module name="GenericWhitespace" /> -->
 		<module name="FinalClass" />
 		<module name="MissingSwitchDefault" />
 		<module name="MagicNumber" />

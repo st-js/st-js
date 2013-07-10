@@ -17,7 +17,8 @@ public final class AnnotationUtils {
 	private static Class<?> findClass(ClassLoader classLoader, String name) {
 		try {
 			return classLoader.loadClass(name);
-		} catch (ClassNotFoundException e) {
+		}
+		catch (ClassNotFoundException e) {
 			return null;
 		}
 	}
@@ -49,11 +50,13 @@ public final class AnnotationUtils {
 		// find a method with the same signature in the new class
 		Method methodInAnnotatedClass;
 		try {
-			methodInAnnotatedClass = annotatedHelperClass.getDeclaredMethod(origMethod.getName(),
-					origMethod.getParameterTypes());
-		} catch (SecurityException e) {
+			methodInAnnotatedClass =
+					annotatedHelperClass.getDeclaredMethod(origMethod.getName(), origMethod.getParameterTypes());
+		}
+		catch (SecurityException e) {
 			throw new STJSRuntimeException(e);
-		} catch (NoSuchMethodException e) {
+		}
+		catch (NoSuchMethodException e) {
 			return null;
 		}
 		return methodInAnnotatedClass.getAnnotation(annotationClass);
@@ -74,8 +77,9 @@ public final class AnnotationUtils {
 		// 1. look for a class in the same package of the declaring class but with the name of the method (with the
 		// 1st letter capitalized) attached
 		// and the suffix "Annotated"
-		annotation = getAnnotationInHelperClass(
-				ANNOTATED_PACKAGE + ownerClass.getName() + capitalize(method.getName()), method, annotationClass);
+		annotation =
+				getAnnotationInHelperClass(ANNOTATED_PACKAGE + ownerClass.getName() + capitalize(method.getName()),
+						method, annotationClass);
 		if (annotation != null) {
 			return annotation;
 		}

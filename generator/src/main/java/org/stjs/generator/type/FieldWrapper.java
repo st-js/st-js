@@ -19,7 +19,6 @@ import org.stjs.generator.variable.Variable;
 
 /**
  * This class wrapps a class field to use the type wrappers.
- * 
  * @author acraciun
  */
 public class FieldWrapper implements Variable {

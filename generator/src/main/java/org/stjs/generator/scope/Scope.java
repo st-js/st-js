@@ -45,7 +45,6 @@ public interface Scope {
 
 	/**
 	 * Find the closest parent of type T
-	 * 
 	 * @param <T>
 	 * @param scopeType
 	 * @return

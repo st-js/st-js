@@ -12,8 +12,8 @@ import org.stjs.javascript.annotation.GlobalScope;
 public class GenericArrayTypeWrapperTest {
 	@Test
 	public void testWithTypeVariable() throws SecurityException, NoSuchMethodException {
-		TypeWrapper wrapper = TypeWrappers.wrap(GenericArrayTypeWrapper1.class.getDeclaredMethod("get")
-				.getGenericReturnType());
+		TypeWrapper wrapper =
+				TypeWrappers.wrap(GenericArrayTypeWrapper1.class.getDeclaredMethod("get").getGenericReturnType());
 		assertEquals("T[]", wrapper.getSimpleName());
 		assertEquals("T[]", wrapper.getExternalName());
 		assertEquals("T[]", wrapper.getName());
@@ -30,8 +30,8 @@ public class GenericArrayTypeWrapperTest {
 
 	@Test
 	public void testWithParameterizedType() throws SecurityException, NoSuchMethodException {
-		TypeWrapper wrapper = TypeWrappers.wrap(GenericArrayTypeWrapper2.class.getDeclaredMethod("get")
-				.getGenericReturnType());
+		TypeWrapper wrapper =
+				TypeWrappers.wrap(GenericArrayTypeWrapper2.class.getDeclaredMethod("get").getGenericReturnType());
 		assertEquals("GenericArrayTypeWrapper2[]", wrapper.getSimpleName());
 		assertEquals("GenericArrayTypeWrapper2[]", wrapper.getExternalName());
 		assertEquals("org.stjs.generator.type.GenericArrayTypeWrapper2[]", wrapper.getName());

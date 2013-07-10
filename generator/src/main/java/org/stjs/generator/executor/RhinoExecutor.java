@@ -37,9 +37,11 @@ public class RhinoExecutor {
 			// XXX: here i may need to get the charset from configuration
 			input = Files.newReader(scriptFile, Charsets.UTF_8);
 			return engine.eval(input);
-		} catch (FileNotFoundException e) {
+		}
+		catch (FileNotFoundException e) {
 			throw new ScriptException(e);
-		} finally {
+		}
+		finally {
 			Closeables.closeQuietly(input);
 		}
 	}
@@ -49,8 +51,9 @@ public class RhinoExecutor {
 		ScriptEngine engine = factory.getEngineByName("JavaScript");
 		Reader reader = null;
 		try {
-			reader = new InputStreamReader(Thread.currentThread().getContextClassLoader()
-					.getResourceAsStream("stjs.js"), "UTF-8");
+			reader =
+					new InputStreamReader(
+							Thread.currentThread().getContextClassLoader().getResourceAsStream("stjs.js"), "UTF-8");
 			engine.eval(reader);
 			if (mainClassDisabled) {
 				engine.eval("stjs.mainCallDisabled=true;");
@@ -61,9 +64,11 @@ public class RhinoExecutor {
 				result = addScript(engine, srcFile);
 			}
 			return new ExecutionResult(result, null, null, 0);
-		} catch (UnsupportedEncodingException e) {
+		}
+		catch (UnsupportedEncodingException e) {
 			throw new ScriptException(e);
-		} finally {
+		}
+		finally {
 			Closeables.closeQuietly(reader);
 		}
 	}

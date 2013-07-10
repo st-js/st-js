@@ -7,9 +7,7 @@ import org.stjs.generator.writer.JavascriptWriterVisitor;
 
 /**
  * array.$set(index, value) -> array[index] = value, or $set(obj, prop, value) -> obj[prop]=value
- * 
  * @author acraciun
- * 
  */
 public class PutTemplate implements MethodCallTemplate {
 

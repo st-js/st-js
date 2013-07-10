@@ -26,7 +26,6 @@ import org.stjs.generator.ast.SourcePosition;
 /**
  * This class checks if a method or a variable has the name of a Javascript keyword. Even though the Java compiler lets
  * the user use some of the keywords as variable names, the Generator should not generate code with these names.
- * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 
@@ -36,8 +35,9 @@ public final class JavascriptKeywords {
 	public static final String CONSTRUCTOR = "constructor";
 	public static final String VAR = "var";
 	public static final String THIS = "this";
+	public static final String NULL = "null";
 
-	private static final Set<String> KEYWORDS = new HashSet<String>(Arrays.asList(new String[]{ "break", "case",
+	private static final Set<String> KEYWORDS = new HashSet<String>(Arrays.asList(new String[] { "break", "case",
 			"catch", "continue", "debugger", "default", "delete", "do", "else", "finally", "for", "function", "if",
 			"in", "instanceof", "new", "return", "switch", "this", "throw", "try", "typeof", "var", "void", "while",
 			"with", "class", "enum", "export", "extends", "import", "super", "implements", "interface", "let",

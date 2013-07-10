@@ -36,10 +36,11 @@ public class SimpleScopeBuilderTest {
 		String path = ClassWithCrazyImports.class.getName().replace('.', File.separatorChar);
 		path = "src/test/java/" + path + ".java";
 		CompilationUnit compilationUnit = JavaParser.parse(new File(path));
-		GeneratorConfiguration config = new GeneratorConfigurationBuilder().allowedPackage("org.stjs.generator")
-				.build();
-		ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader(),
-				config.getAllowedPackages(), config.getAllowedJavaLangClasses());
+		GeneratorConfiguration config =
+				new GeneratorConfigurationBuilder().allowedPackage("org.stjs.generator").build();
+		ClassLoaderWrapper classLoader =
+				new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader(), config.getAllowedPackages(),
+						config.getAllowedJavaLangClasses());
 		GenerationContext context = new GenerationContext(new File(path), config);
 		// set the parent of each node
 		compilationUnit.accept(new SetParentVisitor(), context);

@@ -15,8 +15,8 @@ import org.stjs.javascript.annotation.GlobalScope;
 public class ParameterizedTypeWrapperTest {
 	@Test
 	public void testRegularClass() throws SecurityException, NoSuchMethodException, NoSuchFieldException {
-		TypeWrapper wrapper = TypeWrappers.wrap(ParameterizedTypeWrapper1.class.getDeclaredField("get")
-				.getGenericType());
+		TypeWrapper wrapper =
+				TypeWrappers.wrap(ParameterizedTypeWrapper1.class.getDeclaredField("get").getGenericType());
 		assertEquals("ParameterizedTypeWrapper1", wrapper.getSimpleName());
 		assertEquals("ParameterizedTypeWrapper1", wrapper.getExternalName());
 		assertEquals("org.stjs.generator.type.ParameterizedTypeWrapper1", wrapper.getName());
@@ -40,8 +40,8 @@ public class ParameterizedTypeWrapperTest {
 
 	@Test
 	public void testInnerClass() throws SecurityException, NoSuchMethodException, NoSuchFieldException {
-		TypeWrapper wrapper = TypeWrappers.wrap(ParameterizedTypeWrapper2.class.getDeclaredField("get")
-				.getGenericType());
+		TypeWrapper wrapper =
+				TypeWrappers.wrap(ParameterizedTypeWrapper2.class.getDeclaredField("get").getGenericType());
 		assertEquals("InnerType", wrapper.getSimpleName());
 		assertEquals("ParameterizedTypeWrapper2.InnerType", wrapper.getExternalName());
 		assertEquals("org.stjs.generator.type.ParameterizedTypeWrapper2$InnerType", wrapper.getName());
@@ -65,8 +65,8 @@ public class ParameterizedTypeWrapperTest {
 
 	@Test
 	public void testGenericClass() throws SecurityException, NoSuchMethodException, NoSuchFieldException {
-		TypeWrapper wrapper = TypeWrappers.wrap(ParameterizedTypeWrapper3.class.getDeclaredMethod("get")
-				.getGenericReturnType());
+		TypeWrapper wrapper =
+				TypeWrappers.wrap(ParameterizedTypeWrapper3.class.getDeclaredMethod("get").getGenericReturnType());
 		assertEquals("ParameterizedTypeWrapper3", wrapper.getSimpleName());
 		assertEquals("ParameterizedTypeWrapper3", wrapper.getExternalName());
 		assertEquals("org.stjs.generator.type.ParameterizedTypeWrapper3", wrapper.getName());
@@ -94,8 +94,8 @@ public class ParameterizedTypeWrapperTest {
 	@Test
 	public void testNormalClassInheritsGenericClass() throws SecurityException, NoSuchMethodException,
 			NoSuchFieldException {
-		TypeWrapper wrapper = TypeWrappers.wrap(ParameterizedTypeWrapper4.class.getDeclaredField("get")
-				.getGenericType());
+		TypeWrapper wrapper =
+				TypeWrappers.wrap(ParameterizedTypeWrapper4.class.getDeclaredField("get").getGenericType());
 		assertEquals("InnerType", wrapper.getSimpleName());
 		assertEquals("ParameterizedTypeWrapper4.InnerType", wrapper.getExternalName());
 		assertEquals("org.stjs.generator.type.ParameterizedTypeWrapper4$InnerType", wrapper.getName());
@@ -120,8 +120,8 @@ public class ParameterizedTypeWrapperTest {
 	@Test
 	public void testNormalClassInheritsGenericClassWithArray() throws SecurityException, NoSuchMethodException,
 			NoSuchFieldException {
-		TypeWrapper wrapper = TypeWrappers.wrap(ParameterizedTypeWrapper8a.class.getDeclaredField("get")
-				.getGenericType());
+		TypeWrapper wrapper =
+				TypeWrappers.wrap(ParameterizedTypeWrapper8a.class.getDeclaredField("get").getGenericType());
 		assertEquals("ParameterizedTypeWrapper8a", wrapper.getSimpleName());
 
 		assertTrue(wrapper.findField("field").isDefined());
@@ -134,8 +134,8 @@ public class ParameterizedTypeWrapperTest {
 	@Test
 	public void testGenericClassInheritsGenericClass() throws SecurityException, NoSuchMethodException,
 			NoSuchFieldException {
-		TypeWrapper wrapper = TypeWrappers.wrap(ParameterizedTypeWrapper5.class.getDeclaredField("get")
-				.getGenericType());
+		TypeWrapper wrapper =
+				TypeWrappers.wrap(ParameterizedTypeWrapper5.class.getDeclaredField("get").getGenericType());
 		assertEquals("InnerType", wrapper.getSimpleName());
 		assertEquals("ParameterizedTypeWrapper5.InnerType", wrapper.getExternalName());
 		assertEquals("org.stjs.generator.type.ParameterizedTypeWrapper5$InnerType", wrapper.getName());
@@ -159,8 +159,8 @@ public class ParameterizedTypeWrapperTest {
 
 	@Test
 	public void testCopyWildcardBound() throws SecurityException, NoSuchMethodException, NoSuchFieldException {
-		TypeWrapper wrapper = TypeWrappers.wrap(ParameterizedTypeWrapper6.class.getDeclaredField("get")
-				.getGenericType());
+		TypeWrapper wrapper =
+				TypeWrappers.wrap(ParameterizedTypeWrapper6.class.getDeclaredField("get").getGenericType());
 		assertEquals("ParameterizedTypeWrapper6", wrapper.getSimpleName());
 		assertEquals("ParameterizedTypeWrapper6", wrapper.getExternalName());
 		assertEquals("org.stjs.generator.type.ParameterizedTypeWrapper6", wrapper.getName());
@@ -177,8 +177,8 @@ public class ParameterizedTypeWrapperTest {
 
 	@Test
 	public void testAddWildcardBoundwhenRawCall() throws SecurityException, NoSuchMethodException, NoSuchFieldException {
-		TypeWrapper wrapper = TypeWrappers.wrap(ParameterizedTypeWrapper7.class.getDeclaredField("get")
-				.getGenericType());
+		TypeWrapper wrapper =
+				TypeWrappers.wrap(ParameterizedTypeWrapper7.class.getDeclaredField("get").getGenericType());
 		assertEquals("ParameterizedTypeWrapper7", wrapper.getSimpleName());
 		assertEquals("ParameterizedTypeWrapper7", wrapper.getExternalName());
 		assertEquals("org.stjs.generator.type.ParameterizedTypeWrapper7", wrapper.getName());

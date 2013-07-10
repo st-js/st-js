@@ -22,8 +22,7 @@ public class VariablesGeneratorTest {
 		assertCodeContains(Variables3.class, "var x = 2, y = 3;");
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testVariableWrongName() {
 		// "var" is a wrong name
 		generate(Variables4.class);

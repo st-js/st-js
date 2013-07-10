@@ -8,9 +8,7 @@ import org.stjs.generator.writer.JavascriptWriterVisitor;
 
 /**
  * $array() -> []
- * 
  * @author acraciun
- * 
  */
 public class ArrayTemplate implements MethodCallTemplate {
 

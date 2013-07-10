@@ -9,7 +9,6 @@ import org.stjs.generator.writer.JavascriptWriterVisitor;
 public class AdapterTemplate implements MethodCallTemplate {
 	/**
 	 * converts a toFixed(x, 2) => x.toFixed(2)
-	 * 
 	 * @param currentHandler
 	 * @param n
 	 * @param qname

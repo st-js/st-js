@@ -24,7 +24,8 @@ public class MethodDeclarationsTest {
 		try {
 			resolveName(SameNameMethods.class);
 			fail("Expected " + JavascriptFileGenerationException.class);
-		} catch (JavascriptFileGenerationException ex) {
+		}
+		catch (JavascriptFileGenerationException ex) {
 			assertEquals(23, ex.getSourcePosition().getLine());
 			assertEquals(9, ex.getSourcePosition().getColumn());
 		}

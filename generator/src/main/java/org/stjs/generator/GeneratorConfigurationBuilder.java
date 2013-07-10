@@ -22,9 +22,7 @@ import java.util.Set;
 
 /**
  * Use this class to build a configuration needed by the {@link Generator}
- * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
- * 
  */
 public class GeneratorConfigurationBuilder {
 	private final Collection<String> allowedPackages = new HashSet<String>();

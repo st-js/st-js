@@ -23,9 +23,7 @@ import org.stjs.generator.utils.ClassUtils;
 
 /**
  * this class provides the names directly without any transformation
- * 
  * @author acraciun
- * 
  */
 public class DefaultNameProvider implements NameProvider {
 

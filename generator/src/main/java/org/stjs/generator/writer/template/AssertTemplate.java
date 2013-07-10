@@ -16,7 +16,7 @@ public class AssertTemplate implements MethodCallTemplate {
 		currentHandler.getPrinter().print(n.getName());
 		String location = "\"" + context.getInputFile().getName() + ":" + n.getBeginLine() + "\"";
 		String params = "\"" + n.toString().replace("\"", "\\\"") + "\"";
-		currentHandler.printArguments(Arrays.asList(location, params), n.getArgs(), Collections.<String>emptyList(),
+		currentHandler.printArguments(Arrays.asList(location, params), n.getArgs(), Collections.<String> emptyList(),
 				context);
 		return true;
 	}

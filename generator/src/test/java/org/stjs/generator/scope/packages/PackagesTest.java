@@ -17,7 +17,8 @@ public class PackagesTest {
 		try {
 			ScopeTestHelper.resolveName(CheckPackages1.class, Collections.singleton("java.text"));
 			fail("Expected " + JavascriptFileGenerationException.class);
-		} catch (JavascriptFileGenerationException ex) {
+		}
+		catch (JavascriptFileGenerationException ex) {
 			assertEquals(19, ex.getSourcePosition().getLine());
 		}
 	}
@@ -27,7 +28,8 @@ public class PackagesTest {
 		try {
 			ScopeTestHelper.resolveName(CheckPackages2.class, Collections.singleton("java.text"));
 			fail("Expected " + JavascriptFileGenerationException.class);
-		} catch (JavascriptFileGenerationException ex) {
+		}
+		catch (JavascriptFileGenerationException ex) {
 			assertEquals(24, ex.getSourcePosition().getLine());
 		}
 	}
@@ -37,7 +39,8 @@ public class PackagesTest {
 		try {
 			ScopeTestHelper.resolveName(CheckPackages3.class, Collections.singleton("java.text"));
 			fail("Expected " + JavascriptFileGenerationException.class);
-		} catch (JavascriptFileGenerationException ex) {
+		}
+		catch (JavascriptFileGenerationException ex) {
 			assertEquals(21, ex.getSourcePosition().getLine());
 		}
 	}
@@ -47,7 +50,8 @@ public class PackagesTest {
 		try {
 			ScopeTestHelper.resolveName(CheckPackages4.class, Collections.singleton("java.text"));
 			fail("Expected " + JavascriptFileGenerationException.class);
-		} catch (JavascriptFileGenerationException ex) {
+		}
+		catch (JavascriptFileGenerationException ex) {
 			assertEquals(21, ex.getSourcePosition().getLine());
 		}
 	}
@@ -57,7 +61,8 @@ public class PackagesTest {
 		try {
 			ScopeTestHelper.resolveName(CheckPackages5.class, Collections.singleton("java.text"));
 			fail("Expected " + JavascriptFileGenerationException.class);
-		} catch (JavascriptFileGenerationException ex) {
+		}
+		catch (JavascriptFileGenerationException ex) {
 			assertEquals(26, ex.getSourcePosition().getLine());
 		}
 	}

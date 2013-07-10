@@ -24,9 +24,7 @@ import org.stjs.generator.variable.Variable;
 
 /**
  * this is the data associated to a node in the AST
- * 
  * @author acraciun
- * 
  */
 public class ASTNodeData {
 	private Scope scope;

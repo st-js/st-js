@@ -44,8 +44,7 @@ public class SpecialMethodGeneratorTest {
 		assertCodeContains(SpecialMethod5a.class, "{2:1}");
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testWrongMapKey() {
 		// $map(k,v) -> {k:v}
 		generate(SpecialMethod5b.class);

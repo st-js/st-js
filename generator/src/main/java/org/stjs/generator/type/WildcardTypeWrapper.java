@@ -22,9 +22,7 @@ import java.lang.reflect.WildcardType;
 import org.stjs.generator.utils.Option;
 
 /**
- * 
  * @author acraciun
- * 
  */
 public class WildcardTypeWrapper implements TypeWrapper {
 	private final WildcardType type;

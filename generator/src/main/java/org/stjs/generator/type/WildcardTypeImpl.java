@@ -36,16 +36,13 @@ public final class WildcardTypeImpl implements WildcardType {
 
 	/**
 	 * Creates a new {@link WildcardTypeImpl}.
-	 * 
-	 * @param lowerBounds
-	 *            the lower bounds
-	 * @param upperBounds
-	 *            the upper bounds
-	 * 
-	 * @throws NullPointerException
-	 *             if any argument is {@code null}
+	 * @param lowerBounds the lower bounds
+	 * @param upperBounds the upper bounds
+	 * @throws NullPointerException if any argument is {@code null}
 	 */
-	public WildcardTypeImpl(@Nonnull final Type[] lowerBounds, @Nonnull final Type[] upperBounds) {
+	public WildcardTypeImpl(@Nonnull
+	final Type[] lowerBounds, @Nonnull
+	final Type[] upperBounds) {
 		Preconditions.checkNotNull(lowerBounds);
 		Preconditions.checkNotNull(upperBounds);
 		this.lowerBounds = Arrays.copyOf(lowerBounds, lowerBounds.length);

@@ -17,7 +17,6 @@ import org.stjs.generator.utils.Lists;
  * Given the main purpose of this class, here is presented a simpler version of this algorithm. It takes into account
  * that there should be exactly one match as the checked code is already compiled and it's working! So for example if in
  * the given list there is only one method (or one with the correct number of parameters) it returns it right away.
- * 
  * @author acraciun
  */
 public final class MethodSelector {
@@ -59,8 +58,8 @@ public final class MethodSelector {
 
 		for (int i = 0; i < argumentTypes.length; ++i) {
 			TypeWrapper argumentType = argumentTypes[i];
-			TypeWrapper paramType = i < found.getParameterTypes().length ? found.getParameterTypes()[i] : found
-					.getVarargParamType();
+			TypeWrapper paramType =
+					i < found.getParameterTypes().length ? found.getParameterTypes()[i] : found.getVarargParamType();
 			Map<String, TypeWrapper> inferredTypesForParam = resolveTypeVariables(paramType, argumentType);
 			for (Map.Entry<String, TypeWrapper> e : inferredTypesForParam.entrySet()) {
 				TypeWrapper existing = inferredTypes.get(e.getKey());
@@ -90,7 +89,6 @@ public final class MethodSelector {
 	 * chooses from the list of candidates the method that matches the given argument types. if none is found, null is
 	 * returned. if the chosen method has type parameters, the returned method wrapper contains the resolved type for
 	 * the return type
-	 * 
 	 * @param candidates
 	 * @param argumentTypes
 	 * @return

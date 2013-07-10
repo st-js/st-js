@@ -95,7 +95,6 @@ public final class PrimitiveTypes {
 
 	/**
 	 * it only takes into consideration the coercion order!
-	 * 
 	 * @param left
 	 * @param right
 	 * @return

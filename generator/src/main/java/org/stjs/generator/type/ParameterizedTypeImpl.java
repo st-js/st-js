@@ -16,7 +16,9 @@ public final class ParameterizedTypeImpl implements ParameterizedType {
 	private final Type[] actualTypeArguments;
 	private final Type owner;
 
-	public ParameterizedTypeImpl(@Nonnull Type rawType, @Nonnull Type[] actualTypeArguments, Type owner) {
+	public ParameterizedTypeImpl(@Nonnull
+	Type rawType, @Nonnull
+	Type[] actualTypeArguments, Type owner) {
 		Preconditions.checkNotNull(rawType);
 		Preconditions.checkNotNull(actualTypeArguments);
 		// Preconditions.checkNotNull(owner);

@@ -21,7 +21,6 @@ import java.lang.reflect.Type;
 
 /**
  * simple implementation of GenericArrayType
- * 
  * @author acraciun
  */
 public final class GenericArrayTypeImpl implements GenericArrayType {

@@ -24,9 +24,7 @@ import org.stjs.generator.utils.Option;
 
 /**
  * this is a wrapper around a {@link TypeVariable} to allow the discovery of a field or a method
- * 
  * @author acraciun
- * 
  */
 public class TypeVariableWrapper<D extends GenericDeclaration> implements TypeWrapper {
 	private final TypeVariable<D> typeVariable;

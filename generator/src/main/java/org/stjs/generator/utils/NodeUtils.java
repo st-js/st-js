@@ -30,7 +30,6 @@ import org.stjs.generator.visitor.ForEachNodeVisitor;
 
 /**
  * different methods to work with AST nodes.
- * 
  * @author acraciun
  */
 public final class NodeUtils {

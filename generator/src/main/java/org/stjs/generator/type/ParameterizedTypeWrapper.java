@@ -22,9 +22,7 @@ import org.stjs.generator.utils.ClassUtils;
 
 /**
  * This is a wrapper around a parameterized type. Basically it was the same behavior as a regular class
- * 
  * @author acraciun
- * 
  */
 public class ParameterizedTypeWrapper extends ClassWrapper {
 	private final ParameterizedType type;
@@ -48,8 +46,8 @@ public class ParameterizedTypeWrapper extends ClassWrapper {
 		for (int i = 0; i < newArgumentTypes.length; ++i) {
 			newArgumentTypes[i] = newArgumentTypesWrappers[i].getType();
 		}
-		ParameterizedTypeImpl newType = new ParameterizedTypeImpl(type.getRawType(), newArgumentTypes,
-				type.getOwnerType());
+		ParameterizedTypeImpl newType =
+				new ParameterizedTypeImpl(type.getRawType(), newArgumentTypes, type.getOwnerType());
 		return new ParameterizedTypeWrapper(newType);
 	}
 

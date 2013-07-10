@@ -22,9 +22,7 @@ import org.stjs.generator.ast.ASTNodeData;
 
 /**
  * This visitor go to every node and sets it's parent
- * 
  * @author acraciun
- * 
  */
 public class SetParentVisitor extends ForEachNodeVisitor<GenerationContext> {
 	private Node currentParent;

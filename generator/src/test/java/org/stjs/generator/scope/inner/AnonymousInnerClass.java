@@ -3,8 +3,7 @@ package org.stjs.generator.scope.inner;
 @SuppressWarnings("unused")
 public class AnonymousInnerClass {
 
-	private static MyClass m2 = new MyClass(2) {
-	};
+	private static MyClass m2 = new MyClass(2) {};
 
 	public AnonymousInnerClass() {
 		MyClass m3 = new MyClass(3) {
@@ -32,12 +31,10 @@ public class AnonymousInnerClass {
 		return this;
 	}
 
-	private static MyClass m7 = new MyClass(7) {
-	};
+	private static MyClass m7 = new MyClass(7) {};
 
 	public static class InnerClass {
-		private static MyClass2 m8 = new MyClass2(8) {
-		};
+		private static MyClass2 m8 = new MyClass2(8) {};
 
 	}
 

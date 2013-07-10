@@ -45,8 +45,7 @@ public class InnerTypesGeneratorTest {
 		assertCodeContains(InnerTypes5.class, "stjs.extend(InnerTypes5.InnerType, MySuperClass, [], ");
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testCallToQualifiedOuterType() {
 		generate(InnerTypes6.class);
 	}
@@ -79,8 +78,7 @@ public class InnerTypesGeneratorTest {
 		generate(InnerTypes11.class);
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testDeadCode() {
 		// the compiler will not generate the code inside the if (dead code), so the inner type may not be found
 		generate(InnerTypes12.class);

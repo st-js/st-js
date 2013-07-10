@@ -137,6 +137,7 @@ import org.stjs.generator.type.ParameterizedTypeWrapper;
 import org.stjs.generator.type.TypeWrapper;
 import org.stjs.generator.type.TypeWrappers;
 import org.stjs.generator.utils.ClassUtils;
+import org.stjs.generator.utils.Lists;
 import org.stjs.generator.utils.NodeUtils;
 import org.stjs.generator.utils.Option;
 import org.stjs.generator.utils.PreConditions;
@@ -153,6 +154,8 @@ import org.stjs.javascript.annotation.GlobalScope;
 // for excessive long class -> a whole new design is need
 @SuppressWarnings({ "PMD.ExcessivePublicCount", "PMD.ExcessiveClassLength", "PMD.CloseResource" })
 public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
+
+	private static final String EQUALS = " = ";
 
 	private static final int INLINE_CREATION_PARENT_LEVEL = 3;
 
@@ -307,10 +310,10 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (isDeepInnerType) {
 			printer.print("constructor.");
 			printer.print(type.getSimpleName());
-			printer.print(" = ");
+			printer.print(EQUALS);
 		} else {
 			printer.print(names.getTypeName(type));
-			printer.print(" = ");
+			printer.print(EQUALS);
 		}
 
 		// TODO implements not considered
@@ -461,11 +464,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		n.getId().accept(this, context);
 		if (n.getInit() == null) {
 			if (forceInitNull) {
-				printer.print(" = ");
-				printer.print("null");
+				printer.print(EQUALS);
+				printer.print(JavascriptKeywords.NULL);
 			}
 		} else {
-			printer.print(" = ");
+			printer.print(EQUALS);
 			n.getInit().accept(this, context);
 		}
 	}
@@ -536,7 +539,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				}
 			}
 			printer.print(name);
-			printer.print(" = ");
+			printer.print(EQUALS);
 		}
 		printer.print("function");
 		if (isInnerClassConstructor) {
@@ -606,7 +609,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	public void printArguments(List<Expression> expressions, GenerationContext context) {
-		printArguments(Collections.<String>emptyList(), expressions, Collections.<String>emptyList(), context);
+		printArguments(Collections.<String> emptyList(), expressions, Collections.<String> emptyList(), context);
 	}
 
 	public void printArguments(Collection<String> beforeParams, Collection<Expression> expressions,
@@ -623,7 +626,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				first = false;
 			}
 		}
-		if (!first) {
+		if (!first && !afterParams.isEmpty()) {
 			printer.print(", ");
 		}
 		printer.printList(afterParams);
@@ -657,6 +660,15 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		return decl;
 	}
 
+	private void printInlineFunction(ObjectCreationExpr n, GenerationContext context) {
+		MethodDeclaration method = getMethodDeclaration(n);
+		PreConditions.checkStateNode(n, method != null, "A single method was expected for an inline function");
+		if (method != null) {
+			printMethod(method.getName(), method.getParameters(), method.getModifiers(), method.getBody(), context,
+					resolvedType(n), true, false);
+		}
+	}
+
 	@Override
 	public void visit(ObjectCreationExpr n, GenerationContext context) {
 		InitializerDeclaration block = getInitializerDeclaration(n);
@@ -668,32 +680,26 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 		TypeWrapper clazz = resolvedType(n.getType());
 
-		if (n.getAnonymousClassBody() != null && n.getAnonymousClassBody().size() >= 1) {
+		if (!Lists.isNullOrEmpty(n.getAnonymousClassBody())) {
 			// special construction for inline function definition
 			if (ClassUtils.isJavascriptFunction(clazz)) {
-				MethodDeclaration method = getMethodDeclaration(n);
-				PreConditions.checkStateNode(n, method != null, "A single method was expected for an inline function");
-				if (method != null) {
-					printMethod(method.getName(), method.getParameters(), method.getModifiers(), method.getBody(),
-							context, resolvedType(n), true, false);
-				}
+				printInlineFunction(n, context);
 				return;
 			}
 
 			// special construction to handle the inline body
 			printer.print("new ");
-			ClassOrInterfaceDeclaration inlineFakeClass = buildClassDeclaration(GeneratorConstants.SPECIAL_INLINE_TYPE,
-					n.getType(), n.getAnonymousClassBody());
+			ClassOrInterfaceDeclaration inlineFakeClass =
+					buildClassDeclaration(GeneratorConstants.SPECIAL_INLINE_TYPE, n.getType(),
+							n.getAnonymousClassBody());
 			inlineFakeClass.setData(n.getData());
 			inlineFakeClass.accept(this, context);
 
 			printArguments(n.getArgs(), context);
-
 			return;
-
 		}
 
-		if (clazz != null && clazz instanceof ClassWrapper && ClassUtils.isSyntheticType(clazz)) {
+		if (clazz instanceof ClassWrapper && ClassUtils.isSyntheticType(clazz)) {
 			// this is a call to an mock type
 			printer.print("{}");
 			return;
@@ -737,10 +743,35 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.print(".apply(this, arguments)");
 			} else {
 				printer.print(".call");
-				printArguments(Collections.singleton("this"), args, Collections.<String>emptyList(), context);
+				printArguments(Collections.singleton("this"), args, Collections.<String> emptyList(), context);
 			}
 			printer.print(";");
 
+		}
+	}
+
+	private void printCallToSuper(ConstructorDeclaration n) {
+		boolean addCallToSuper = false;
+		if (n.getBlock().getStmts() != null && n.getBlock().getStmts().size() > 0) {
+			Statement firstStatement = n.getBlock().getStmts().get(0);
+			if (!(firstStatement instanceof ExplicitConstructorInvocationStmt)) {
+				addCallToSuper = true;
+			}
+		} else {
+			// empty constructor
+			addCallToSuper = true;
+		}
+
+		if (addCallToSuper) {
+			// generate possibly missing super() call
+			Statement callSuper = new ExplicitConstructorInvocationStmt();
+			callSuper.setData(new ASTNodeData());
+			parent(callSuper, n.getBlock());
+			scope(callSuper, scope(n.getBlock()));
+			if (n.getBlock().getStmts() == null) {
+				n.getBlock().setStmts(new ArrayList<Statement>());
+			}
+			n.getBlock().getStmts().add(0, callSuper);
 		}
 	}
 
@@ -749,29 +780,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		printComments(n, context);
 		Option<ClassWrapper> superClass = scope(n).closest(ClassScope.class).getClazz().getSuperclass();
 		if (superClass.isDefined() && !ClassUtils.isSyntheticType(superClass.getOrThrow())) {
-			boolean addCallToSuper = false;
-			if (n.getBlock().getStmts() != null && n.getBlock().getStmts().size() > 0) {
-				Statement firstStatement = n.getBlock().getStmts().get(0);
-				if (!(firstStatement instanceof ExplicitConstructorInvocationStmt)) {
-					addCallToSuper = true;
-				}
-			} else {
-				// empty constructor
-				addCallToSuper = true;
-
-			}
-
-			if (addCallToSuper) {
-				// generate possibly missing super() call
-				Statement callSuper = new ExplicitConstructorInvocationStmt();
-				callSuper.setData(new ASTNodeData());
-				parent(callSuper, n.getBlock());
-				scope(callSuper, scope(n.getBlock()));
-				if (n.getBlock().getStmts() == null) {
-					n.getBlock().setStmts(new ArrayList<Statement>());
-				}
-				n.getBlock().getStmts().add(0, callSuper);
-			}
+			printCallToSuper(n);
 		}
 		ClassWrapper type = (ClassWrapper) resolvedType(parent(n));
 		printMethod(type.getSimpleBinaryName(), n.getParameters(), n.getModifiers(), n.getBlock(), context, type, true,
@@ -864,12 +873,37 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printer.print("null, ");
 		} else {
 			List<TypeWrapper> superClass = getExtends(n);
-			if (!superClass.isEmpty()) {
-				printer.print("null");
+			if (superClass.isEmpty()) {
+				printer.print(JavascriptKeywords.NULL);
 			} else {
 				printer.print(names.getTypeName(superClass.get(0)));
 			}
 			printer.print(", ");
+		}
+	}
+
+	private void printTypeName(ClassOrInterfaceDeclaration n, GenerationContext context, String namespace) {
+		ClassWrapper type = (ClassWrapper) resolvedType(n);
+		ClassScope scope = (ClassScope) scope(n);
+		String className = null;
+		if (type.isAnonymousClass()) {
+			printer.print("(");
+		} else {
+			if (!type.isInnerType() && namespace == null) {
+				printer.print("var ");
+			}
+			className = names.getTypeName(type);
+			if (type.isInnerType()) {
+				printer.print("constructor.");
+				printer.print(type.getSimpleName());
+			} else {
+				printer.print(className);
+			}
+			printer.print(EQUALS);
+			if (!type.hasAnonymousDeclaringClass()) {
+				printConstructorImplementation(n, context, scope, type.isAnonymousClass());
+				printer.printLn(";");
+			}
 		}
 	}
 
@@ -887,43 +921,24 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		ClassWrapper type = (ClassWrapper) resolvedType(n);
 		String namespace = printNamespace(type);
 
-		String className = null;
-		if (type.isAnonymousClass()) {
-			printer.print("(");
-		} else {
-			if (!type.isInnerType() && namespace == null) {
-				printer.print("var ");
-			}
-			className = names.getTypeName(type);
-			if (type.isInnerType()) {
-				printer.print("constructor.");
-				printer.print(type.getSimpleName());
-			} else {
-				className = names.getTypeName(type);
-				printer.print(className);
-			}
-			printer.print(" = ");
-			if (!type.hasAnonymousDeclaringClass()) {
-				printConstructorImplementation(n, context, scope, type.isAnonymousClass());
-				printer.printLn(";");
-			}
-		}
+		printTypeName(n, context, namespace);
 
 		printer.print("stjs.extend(");
 		if (type.isAnonymousClass() || type.hasAnonymousDeclaringClass()) {
 			printConstructorImplementation(n, context, scope, type.isAnonymousClass());
 		} else {
+			String className = names.getTypeName(type);
 			printer.print(className);
 		}
 		printer.print(", ");
 
-		// print the super class
 		printSuperClass(n);
 		printIntefaces(n);
 		printer.print(", ");
 
 		printMembers(n.getMembers(), context);
 		printer.print(", ");
+
 		printTypeDescription(n);
 		printer.print(")");
 
@@ -967,7 +982,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.print(type.getSimpleBinaryName());
 			}
 			printer.print("(){");
-			addCallToSuper(scope, context, Collections.<Expression>emptyList(), inlineType);
+			addCallToSuper(scope, context, Collections.<Expression> emptyList(), inlineType);
 			printer.print("}");
 		} else {
 			constr.accept(this, context);
@@ -1034,7 +1049,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			return s.toString();
 		}
 		if (ClassUtils.isBasicType(typeWrapper)) {
-			return "null";
+			return JavascriptKeywords.NULL;
 		}
 		return "\"" + names.getTypeName(typeWrapper) + "\"";
 	}
@@ -1059,14 +1074,13 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	/**
 	 * print the information needed to deserialize type-safe from json
-	 * 
 	 * @param n
 	 * @param context
 	 */
 	private void printTypeDescription(ClassOrInterfaceDeclaration n) {
 		TypeWrapper type = resolvedType(n);
 		if (isGlobal(type)) {
-			printer.print("null");
+			printer.print(JavascriptKeywords.NULL);
 			return;
 		}
 
@@ -1096,7 +1110,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 
 		if (nonConstructors.isEmpty()) {
-			printer.print("null");
+			printer.print(JavascriptKeywords.NULL);
 		} else {
 			printer.print("function(").print(JavascriptKeywords.CONSTRUCTOR).print(",")
 					.print(JavascriptKeywords.PROTOTYPE).print("){");
@@ -1319,8 +1333,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	public void visit(BinaryExpr n, GenerationContext context) {
 		TypeWrapper leftType = ASTNodeData.resolvedType(n.getLeft());
 		TypeWrapper rightType = ASTNodeData.resolvedType(n.getRight());
-		boolean integerDivision = n.getOperator() == Operator.divide && ClassUtils.isIntegerType(leftType)
-				&& ClassUtils.isIntegerType(rightType);
+		boolean integerDivision =
+				n.getOperator() == Operator.divide && ClassUtils.isIntegerType(leftType)
+						&& ClassUtils.isIntegerType(rightType);
 
 		if (integerDivision) {
 			printer.print("stjs.trunc(");
@@ -1380,7 +1395,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(NullLiteralExpr n, GenerationContext context) {
-		printer.print("null");
+		printer.print(JavascriptKeywords.NULL);
 	}
 
 	@Override
@@ -1417,8 +1432,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			return;
 		}
 		// this scope is either implicit (no scope at all) or explicit "this."
-		boolean withScopeThis = n.getScope() == null || n.getScope() != null
-				&& n.getScope().toString().equals(GeneratorConstants.THIS);
+		boolean withScopeThis =
+				n.getScope() == null || n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.THIS);
 		boolean withScopeSuper = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.SUPER);
 		boolean withOtherScope = !withScopeSuper && !withScopeThis;
 
@@ -1434,7 +1449,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printer.print(".").print(JavascriptKeywords.PROTOTYPE).print(".").print(names.getMethodName(method))
 					.print(".call");
 			printArguments(Collections.singleton(JavascriptKeywords.THIS), n.getArgs(),
-					Collections.<String>emptyList(), context);
+					Collections.<String> emptyList(), context);
 			return;
 		}
 		printer.print(names.getMethodName(method));
@@ -1491,7 +1506,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(NameExpr n, GenerationContext context) {
 		if (GeneratorConstants.SPECIAL_THIS.equals(n.getName())) {
-			printer.print(GeneratorConstants.SPECIAL_THIS);
+			printer.print(GeneratorConstants.THIS);
 			return;
 		}
 		Variable var = resolvedVariable(n);
@@ -1537,39 +1552,39 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	@SuppressWarnings("PMD.CyclomaticComplexity")
 	public void visit(UnaryExpr n, GenerationContext context) {
 		switch (n.getOperator()) {
-		case positive:
-			printer.print("+");
-			break;
-		case negative:
-			printer.print("-");
-			break;
-		case inverse:
-			printer.print("~");
-			break;
-		case not:
-			printer.print("!");
-			break;
-		case preIncrement:
-			printer.print("++");
-			break;
-		case preDecrement:
-			printer.print("--");
-			break;
-		default:
-			break;
+			case positive:
+				printer.print("+");
+				break;
+			case negative:
+				printer.print("-");
+				break;
+			case inverse:
+				printer.print("~");
+				break;
+			case not:
+				printer.print("!");
+				break;
+			case preIncrement:
+				printer.print("++");
+				break;
+			case preDecrement:
+				printer.print("--");
+				break;
+			default:
+				break;
 		}
 
 		n.getExpr().accept(this, context);
 
 		switch (n.getOperator()) {
-		case posIncrement:
-			printer.print("++");
-			break;
-		case posDecrement:
-			printer.print("--");
-			break;
-		default:
-			break;
+			case posIncrement:
+				printer.print("++");
+				break;
+			case posDecrement:
+				printer.print("--");
+				break;
+			default:
+				break;
 		}
 	}
 

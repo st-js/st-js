@@ -8,10 +8,10 @@ public class Enums3 {
 	public void main() {
 		Value x = null;
 		switch (x) {
-		case a:
-			break;
-		case b:
-			break;
+			case a:
+				break;
+			case b:
+				break;
 		}
 	}
 }

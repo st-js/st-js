@@ -7,9 +7,7 @@ import org.stjs.generator.writer.JavascriptWriterVisitor;
 
 /**
  * array.$get(x) -> array[x], or $get(obj, prop) -> obj[prop]
- * 
  * @author acraciun
- * 
  */
 public class GetTemplate implements MethodCallTemplate {
 

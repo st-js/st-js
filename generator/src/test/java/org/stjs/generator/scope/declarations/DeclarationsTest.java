@@ -35,7 +35,8 @@ public class DeclarationsTest {
 		try {
 			resolveName(DeclarationWithOuter1.class);
 			fail("Expected " + JavascriptFileGenerationException.class);
-		} catch (JavascriptFileGenerationException ex) {
+		}
+		catch (JavascriptFileGenerationException ex) {
 			assertEquals(29, ex.getSourcePosition().getLine());
 		}
 	}
@@ -51,7 +52,8 @@ public class DeclarationsTest {
 		try {
 			resolveName(DeclarationWithOuter2.class);
 			fail("Expected " + JavascriptFileGenerationException.class);
-		} catch (JavascriptFileGenerationException ex) {
+		}
+		catch (JavascriptFileGenerationException ex) {
 			assertEquals(26, ex.getSourcePosition().getLine());
 		}
 	}
@@ -61,7 +63,8 @@ public class DeclarationsTest {
 		try {
 			resolveName(DeclarationWithOuter2b.class);
 			fail("Expected " + JavascriptFileGenerationException.class);
-		} catch (JavascriptFileGenerationException ex) {
+		}
+		catch (JavascriptFileGenerationException ex) {
 			assertEquals(26, ex.getSourcePosition().getLine());
 		}
 	}
@@ -71,7 +74,8 @@ public class DeclarationsTest {
 		try {
 			resolveName(DeclarationWithOuter3.class);
 			fail("Expected " + JavascriptFileGenerationException.class);
-		} catch (JavascriptFileGenerationException ex) {
+		}
+		catch (JavascriptFileGenerationException ex) {
 			assertEquals(28, ex.getSourcePosition().getLine());
 		}
 	}
@@ -81,7 +85,8 @@ public class DeclarationsTest {
 		try {
 			resolveName(DeclarationWithOuter4.class);
 			fail("Expected " + JavascriptFileGenerationException.class);
-		} catch (JavascriptFileGenerationException ex) {
+		}
+		catch (JavascriptFileGenerationException ex) {
 			assertEquals(31, ex.getSourcePosition().getLine());
 		}
 	}
@@ -97,7 +102,8 @@ public class DeclarationsTest {
 		try {
 			resolveName(DeclarationWithOuter5.class);
 			fail("Expected " + JavascriptFileGenerationException.class);
-		} catch (JavascriptFileGenerationException ex) {
+		}
+		catch (JavascriptFileGenerationException ex) {
 			assertEquals(26, ex.getSourcePosition().getLine());
 		}
 	}
@@ -107,7 +113,8 @@ public class DeclarationsTest {
 		try {
 			resolveName(DeclarationWithOuter6.class);
 			fail("Expected " + JavascriptFileGenerationException.class);
-		} catch (JavascriptFileGenerationException ex) {
+		}
+		catch (JavascriptFileGenerationException ex) {
 			assertEquals(32, ex.getSourcePosition().getLine());
 		}
 	}

@@ -21,9 +21,7 @@ import org.stjs.generator.ast.SourcePosition;
 
 /**
  * This is the exception thrown by the Generator.
- * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
- * 
  */
 public class JavascriptFileGenerationException extends STJSRuntimeException {
 	private static final long serialVersionUID = 1L;

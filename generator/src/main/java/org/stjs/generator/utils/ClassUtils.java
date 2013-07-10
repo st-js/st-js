@@ -165,7 +165,6 @@ public final class ClassUtils {
 
 	/**
 	 * the namespace is taken from the outermost declaring class
-	 * 
 	 * @param type
 	 * @return
 	 */
@@ -235,6 +234,9 @@ public final class ClassUtils {
 	 * @return the ClassWrapper representing an array of the given type with the given number of dimensions
 	 */
 	public static TypeWrapper arrayOf(TypeWrapper resolvedType, int arrayCount) {
+		if (arrayCount == 0) {
+			return resolvedType;
+		}
 		if (resolvedType.getClass() == ClassWrapper.class) {
 			return new ClassWrapper(Array.newInstance((Class<?>) resolvedType.getType(), new int[arrayCount])
 					.getClass());

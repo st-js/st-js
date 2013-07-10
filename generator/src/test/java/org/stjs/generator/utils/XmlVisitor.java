@@ -132,7 +132,8 @@ public class XmlVisitor extends VoidVisitorAdapter<Element> implements VoidVisit
 					Object value = method.invoke(n);
 
 					elem.addAttribute(propertyName(method.getName()), value != null ? value.toString() : "");
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					e.printStackTrace();
 				}
 

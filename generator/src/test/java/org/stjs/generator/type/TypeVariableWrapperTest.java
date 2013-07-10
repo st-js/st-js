@@ -12,8 +12,8 @@ import org.stjs.javascript.annotation.GlobalScope;
 public class TypeVariableWrapperTest {
 	@Test
 	public void testRegularClass() throws SecurityException, NoSuchMethodException {
-		TypeWrapper wrapper = TypeWrappers.wrap(TypeVariableWrapper1.class.getDeclaredMethod("get")
-				.getGenericReturnType());
+		TypeWrapper wrapper =
+				TypeWrappers.wrap(TypeVariableWrapper1.class.getDeclaredMethod("get").getGenericReturnType());
 		assertEquals("T", wrapper.getSimpleName());
 		assertEquals("T", wrapper.getExternalName());
 		assertEquals("T", wrapper.getName());
@@ -33,8 +33,8 @@ public class TypeVariableWrapperTest {
 
 	@Test
 	public void testInnerClass() throws SecurityException, NoSuchMethodException {
-		TypeWrapper wrapper = TypeWrappers.wrap(TypeVariableWrapper2.class.getDeclaredMethod("get")
-				.getGenericReturnType());
+		TypeWrapper wrapper =
+				TypeWrappers.wrap(TypeVariableWrapper2.class.getDeclaredMethod("get").getGenericReturnType());
 		assertEquals("T", wrapper.getSimpleName());
 		assertEquals("T", wrapper.getExternalName());
 		assertEquals("T", wrapper.getName());
@@ -55,8 +55,8 @@ public class TypeVariableWrapperTest {
 
 	@Test
 	public void testGenericClass() throws SecurityException, NoSuchMethodException {
-		TypeWrapper wrapper = TypeWrappers.wrap(TypeVariableWrapper3.class.getDeclaredMethod("get")
-				.getGenericReturnType());
+		TypeWrapper wrapper =
+				TypeWrappers.wrap(TypeVariableWrapper3.class.getDeclaredMethod("get").getGenericReturnType());
 		assertEquals("T", wrapper.getSimpleName());
 		assertEquals("T", wrapper.getExternalName());
 		assertEquals("T", wrapper.getName());

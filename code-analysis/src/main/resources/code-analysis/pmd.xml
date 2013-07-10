@@ -187,7 +187,7 @@
 	<rule ref="rulesets/java/design.xml/SingularField" />
 	<rule ref="rulesets/java/design.xml/LogicInversion" />
 	<rule ref="rulesets/java/design.xml/FieldDeclarationsShouldBeAtStartOfClass" />
-	<rule ref="rulesets/java/design.xml/GodClass" />
+<!-- 	<rule ref="rulesets/java/design.xml/GodClass" /> -->
 	<rule ref="rulesets/java/empty.xml/EmptyCatchBlock" />
 	<rule ref="rulesets/java/empty.xml/EmptyIfStmt" />
 	<rule ref="rulesets/java/empty.xml/EmptyWhileStmt" />

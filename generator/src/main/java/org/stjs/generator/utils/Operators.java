@@ -24,7 +24,6 @@ import java.util.Map;
 
 /**
  * This class is a helper for the {@link japa.parser.ast.expr.BinaryExpr.Operator} class
- * 
  * @author acraciun
  */
 public final class Operators {
@@ -34,10 +33,10 @@ public final class Operators {
 			BinaryExpr.Operator.greaterEquals, BinaryExpr.Operator.less, BinaryExpr.Operator.lessEquals,
 			BinaryExpr.Operator.or, BinaryExpr.Operator.xor);
 
-	private static final Map<BinaryExpr.Operator, String> BINARY_OPERATOR_DISPLAY = new EnumMap<BinaryExpr.Operator, String>(
-			BinaryExpr.Operator.class);
-	private static final Map<AssignExpr.Operator, String> ASSIGN_OPERATOR_DISPLAY = new EnumMap<AssignExpr.Operator, String>(
-			AssignExpr.Operator.class);
+	private static final Map<BinaryExpr.Operator, String> BINARY_OPERATOR_DISPLAY =
+			new EnumMap<BinaryExpr.Operator, String>(BinaryExpr.Operator.class);
+	private static final Map<AssignExpr.Operator, String> ASSIGN_OPERATOR_DISPLAY =
+			new EnumMap<AssignExpr.Operator, String>(AssignExpr.Operator.class);
 
 	static {
 		BINARY_OPERATOR_DISPLAY.put(BinaryExpr.Operator.or, "||");

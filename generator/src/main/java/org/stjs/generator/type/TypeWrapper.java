@@ -43,7 +43,6 @@ public interface TypeWrapper {
 	String getExternalName();
 
 	/**
-	 * 
 	 * @return is this type can be used in an import declaration
 	 */
 	boolean isImportable();

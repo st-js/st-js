@@ -10,6 +10,6 @@ public class Statements6 {
 	}
 
 	public void main() {
-		method($castArray(new Integer[]{ 1, 2, 3 }));
+		method($castArray(new Integer[] { 1, 2, 3 }));
 	}
 }
