@@ -364,7 +364,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		ds.scan();
 		for (String fileName : ds.getIncludedFiles()) {
 			File file = new File(fileName);
-			result.add(file.getParent().replace(File.separatorChar, '.'));
+			//Supports classes without packages
+			result.add(file.getParent() == null ? "" : file.getParent().replace(File.separatorChar, '.'));
 		}
 
 		/*
