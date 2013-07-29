@@ -352,7 +352,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	 */
 	private Collection<String> accumulatePackages(File sourceDir) throws MojoExecutionException {
 		final Collection<String> result = new HashSet<String>();
-		if (sourceDir == null) {
+		if (sourceDir == null || !sourceDir.exists()) {
 			return result;
 		}
 
@@ -364,7 +364,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		ds.scan();
 		for (String fileName : ds.getIncludedFiles()) {
 			File file = new File(fileName);
-			result.add(file.getParent().replace(File.separatorChar, '.'));
+			//Supports classes without packages
+			result.add(file.getParent() == null ? "" : file.getParent().replace(File.separatorChar, '.'));
 		}
 
 		/*
@@ -388,7 +389,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	private List<File> accumulateSources(GenerationDirectory gendir, File sourceDir, SourceMapping jsMapping,
 			SourceMapping stjsMapping, int stale) throws MojoExecutionException {
 		final List<File> result = new ArrayList<File>();
-		if (sourceDir == null) {
+		if (sourceDir == null || !sourceDir.exists()) {
 			return result;
 		}
 		SourceInclusionScanner jsScanner = getSourceInclusionScanner(stale);
