@@ -35,6 +35,7 @@ public class STJSPackageJarTest {
 		assertContainsEntry(entryNames, "org/stjs/example/lib/stjs/STJSLibExample.js");
 		assertContainsEntry(entryNames, "org/stjs/example/lib/stjs/STJSLibExample.stjs");
 		assertContainsEntry(entryNames, "stjs/example/stjs-lib-example.js");
+		assertContainsEntry(entryNames, "DefaultPackageExample.js");
 		verifier.resetStreams();
 
 	}
