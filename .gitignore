@@ -53,6 +53,9 @@ local.properties
 .loadpath
 .checkstyle
 
+#IDEA
+*.iml
+.idea/
 # External tool builders
 .externalToolBuilders/
 
