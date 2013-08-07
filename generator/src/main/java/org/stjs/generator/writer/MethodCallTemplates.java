@@ -98,8 +98,8 @@ public class MethodCallTemplates {
 		if (templateName != null) {
 			MethodCallTemplate handler = methodTemplates.get(templateName);
 			if (handler == null) {
-				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n), "The template named '"
-						+ templateAnn.value() + " was not found");
+				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n), "The template named '" + templateName
+						+ " was not found");
 			}
 			if (handler.write(currentHandler, n, context)) {
 				return true;
