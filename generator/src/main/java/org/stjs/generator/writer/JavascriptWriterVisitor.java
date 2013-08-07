@@ -1112,7 +1112,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (nonConstructors.isEmpty()) {
 			printer.print(JavascriptKeywords.NULL);
 		} else {
-			printer.print("function(").print(JavascriptKeywords.CONSTRUCTOR).print(",")
+			printer.print("function(").print(JavascriptKeywords.CONSTRUCTOR).print(", ")
 					.print(JavascriptKeywords.PROTOTYPE).print("){");
 			printer.indent();
 			for (BodyDeclaration member : nonConstructors) {
