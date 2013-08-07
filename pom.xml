@@ -9,7 +9,7 @@
 	<packaging>pom</packaging>
 	<name>Strongly-typed Javascript</name>
 	<description>Javascript code generator from Java source code</description>
-	<url>http://st-js.sourceforge.net</url>
+	<url>http://www.st-js-org</url>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
