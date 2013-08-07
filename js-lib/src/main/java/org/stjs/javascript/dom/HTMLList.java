@@ -15,6 +15,8 @@
  */
 package org.stjs.javascript.dom;
 
+import org.stjs.javascript.annotation.Template;
+
 abstract public class HTMLList<T extends Node> {
 	public int length;
 
@@ -22,6 +24,7 @@ abstract public class HTMLList<T extends Node> {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("get")
 	public T $get(int index) {
 		throw new UnsupportedOperationException();
 	}

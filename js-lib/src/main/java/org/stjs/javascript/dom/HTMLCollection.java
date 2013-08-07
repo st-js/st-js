@@ -15,6 +15,8 @@
  */
 package org.stjs.javascript.dom;
 
+import org.stjs.javascript.annotation.Template;
+
 abstract public class HTMLCollection<T extends Node> {
 	public int length;
 
@@ -22,10 +24,12 @@ abstract public class HTMLCollection<T extends Node> {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("get")
 	public T $get(String name) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("get")
 	public T $get(int index) {
 		throw new UnsupportedOperationException();
 	}
@@ -34,10 +38,12 @@ abstract public class HTMLCollection<T extends Node> {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("set")
 	public void $set(int index, T node) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Template("set")
 	public void $set(String index, T node) {
 		throw new UnsupportedOperationException();
 	}
