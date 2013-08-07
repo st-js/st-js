@@ -33,11 +33,13 @@ import org.stjs.generator.ast.SourcePosition;
 import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.writer.template.MethodCallTemplate;
+import org.stjs.javascript.annotation.Template;
 
 import com.google.common.io.Closeables;
 
 /**
  * this is a handler to handle special method names (those starting with $).
+ * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class MethodCallTemplates {
@@ -67,7 +69,8 @@ public class MethodCallTemplates {
 			Properties props = new Properties();
 			props.load(input);
 			for (Map.Entry<Object, Object> entry : props.entrySet()) {
-				methodTemplates.put(entry.getKey().toString(), (MethodCallTemplate) Class.forName(entry.getValue().toString()).newInstance());
+				methodTemplates.put(entry.getKey().toString(),
+						(MethodCallTemplate) Class.forName(entry.getValue().toString()).newInstance());
 			}
 		}
 		catch (IOException e) {
@@ -87,19 +90,24 @@ public class MethodCallTemplates {
 		}
 	}
 
-	public boolean handleMethodCall(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
-		MethodWrapper method = ASTNodeData.resolvedMethod(n);
-		org.stjs.javascript.annotation.Template templateAnn = method.getAnnotation(org.stjs.javascript.annotation.Template.class);
+	private String getTemplateName(MethodWrapper method) {
+		Template templateAnn = method.getAnnotation(Template.class);
 		String templateName = templateAnn == null ? null : templateAnn.value();
 		if (templateName == null && ClassUtils.isJavascriptFunction(method.getOwnerType())) {
-			//backward compatibility for @JavascriptFunction
+			// backward compatibility for @JavascriptFunction
 			templateName = "invoke";
 		}
+		return templateName;
+	}
+
+	public boolean handleMethodCall(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
+		MethodWrapper method = ASTNodeData.resolvedMethod(n);
+		String templateName = getTemplateName(method);
 		if (templateName != null) {
 			MethodCallTemplate handler = methodTemplates.get(templateName);
 			if (handler == null) {
-				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n), "The template named '" + templateName
-						+ " was not found");
+				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
+						"The template named '" + templateName + " was not found");
 			}
 			if (handler.write(currentHandler, n, context)) {
 				return true;

@@ -212,9 +212,8 @@
 	</profiles>
 
 	<scm>
-		<connection>scm:git:git@github.com:st-js/st-js.git</connection>
-		<developerConnection>scm:git:git@github.com:st-js/st-js.git</developerConnection>
-		<url>scm:git:git@github.com:st-js/st-js</url>
+		<connection>scm:git:http://github.com/st-js/st-js.git</connection>
+		<developerConnection>scm:git:http://github.com/st-js/st-js.git</developerConnection>
+		<url>scm:git:https://github.com/st-js/st-js</url>
 	</scm>
-
 </project>
