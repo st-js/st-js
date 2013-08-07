@@ -33,6 +33,12 @@ public class SpecialMethodGeneratorTest {
 	}
 
 	@Test
+	public void testSpecialInvokeWiithJavascriptFunctionAnnotation() {
+		// x.$invoke(a) -> x(a)
+		assertCodeContains(SpecialMethod4a.class, "f(4)");
+	}
+
+	@Test
 	public void testSpecialMap() {
 		// $map(k,v) -> {k:v}
 		assertCodeContains(SpecialMethod5.class, "{\"key\":1}");
@@ -113,8 +119,7 @@ public class SpecialMethodGeneratorTest {
 	@Test
 	public void testAssertMethods() {
 		// the special parameter THIS should not be added
-		assertCodeContains(SpecialMethod14.class,
-				"assertArgEquals(\"SpecialMethod14.java:8\",\"assertArgEquals(\\\"123\\\", x)\", \"123\", x);");
+		assertCodeContains(SpecialMethod14.class, "assertArgEquals(\"SpecialMethod14.java:8\",\"assertArgEquals(\\\"123\\\", x)\", \"123\", x);");
 	}
 
 	@Test

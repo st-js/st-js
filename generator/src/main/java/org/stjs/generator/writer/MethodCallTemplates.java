@@ -31,6 +31,7 @@ import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.ast.ASTNodeData;
 import org.stjs.generator.ast.SourcePosition;
 import org.stjs.generator.type.MethodWrapper;
+import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.writer.template.MethodCallTemplate;
 
 import com.google.common.io.Closeables;
@@ -66,8 +67,7 @@ public class MethodCallTemplates {
 			Properties props = new Properties();
 			props.load(input);
 			for (Map.Entry<Object, Object> entry : props.entrySet()) {
-				methodTemplates.put(entry.getKey().toString(),
-						(MethodCallTemplate) Class.forName(entry.getValue().toString()).newInstance());
+				methodTemplates.put(entry.getKey().toString(), (MethodCallTemplate) Class.forName(entry.getValue().toString()).newInstance());
 			}
 		}
 		catch (IOException e) {
@@ -89,13 +89,17 @@ public class MethodCallTemplates {
 
 	public boolean handleMethodCall(JavascriptWriterVisitor currentHandler, MethodCallExpr n, GenerationContext context) {
 		MethodWrapper method = ASTNodeData.resolvedMethod(n);
-		org.stjs.javascript.annotation.Template templateAnn =
-				method.getAnnotation(org.stjs.javascript.annotation.Template.class);
-		if (templateAnn != null) {
-			MethodCallTemplate handler = methodTemplates.get(templateAnn.value());
+		org.stjs.javascript.annotation.Template templateAnn = method.getAnnotation(org.stjs.javascript.annotation.Template.class);
+		String templateName = templateAnn == null ? null : templateAnn.value();
+		if (templateName == null && ClassUtils.isJavascriptFunction(method.getOwnerType())) {
+			//backward compatibility for @JavascriptFunction
+			templateName = "invoke";
+		}
+		if (templateName != null) {
+			MethodCallTemplate handler = methodTemplates.get(templateName);
 			if (handler == null) {
-				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
-						"The template named '" + templateAnn.value() + " was not found");
+				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n), "The template named '"
+						+ templateAnn.value() + " was not found");
 			}
 			if (handler.write(currentHandler, n, context)) {
 				return true;
