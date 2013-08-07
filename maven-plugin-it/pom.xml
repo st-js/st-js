@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>stjs</artifactId>
 		<groupId>org.st-js</groupId>
-		<version>1.4.0</version>
+		<version>1.4.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>maven-plugin-it</artifactId>
