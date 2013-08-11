@@ -17,7 +17,7 @@ package org.stjs.testing.jquery;
 
 import org.stjs.javascript.annotation.GlobalScope;
 import org.stjs.javascript.jquery.GlobalJQuery;
-import org.stjs.javascript.jquery.JQueryAndPlugins;
+import org.stjs.javascript.jquery.JQueryCore;
 
 @GlobalScope
 abstract public class TestingGlobalJQuery extends GlobalJQuery {
@@ -26,15 +26,15 @@ abstract public class TestingGlobalJQuery extends GlobalJQuery {
 	/**
 	 * jquery constructors - copied to avoid collision
 	 */
-	public static <FullJQuery extends JQueryAndPlugins<?>> FullJQuery $(String path) {
+	public static <FullJQuery extends JQueryCore<?>> FullJQuery $(String path) {
 		return null;
 	}
 
-	public static <FullJQuery extends JQueryAndPlugins<?>> FullJQuery $(String path, Object context) {
+	public static <FullJQuery extends JQueryCore<?>> FullJQuery $(String path, Object context) {
 		return null;
 	}
 
-	public static <FullJQuery extends JQueryAndPlugins<?>> FullJQuery $(Object path) {
+	public static <FullJQuery extends JQueryCore<?>> FullJQuery $(Object path) {
 		return null;
 	}
 
