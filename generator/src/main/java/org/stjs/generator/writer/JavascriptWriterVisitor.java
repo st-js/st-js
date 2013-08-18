@@ -1406,12 +1406,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		boolean skipType = field != null && Modifier.isStatic(field.getModifiers()) && isGlobal(scopeType);
 
 		if (scopeType == null || !skipType) {
-			if (!withScopeSuper) {
-				n.getScope().accept(this, context);
-			}
 			if (withScopeSuper) {
 				// super.field does not make sense, so convert it to this
 				printer.print("this");
+			} else {
+				n.getScope().accept(this, context);
 			}
 			printer.print(".");
 		}
