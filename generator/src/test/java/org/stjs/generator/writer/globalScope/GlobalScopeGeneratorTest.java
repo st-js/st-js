@@ -5,9 +5,7 @@ import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
 import static org.stjs.generator.utils.GeneratorTestHelper.execute;
 
-import org.junit.Assert;
 import org.junit.Test;
-import org.stjs.generator.utils.GeneratorTestHelper;
 
 public class GlobalScopeGeneratorTest {
 	@Test
@@ -63,5 +61,10 @@ public class GlobalScopeGeneratorTest {
 		// We must do the weird (Number).intValue() because for some reason the execution returns the
 		// integer 2 when run from eclipse, but return the double 2.0 when run from maven...
 		assertEquals(2, ((Number) result).intValue());
+	}
+
+	@Test
+	public void testFullyQualifiedField() {
+		assertCodeContains(GlobalScope9.class, "s = field");
 	}
 }
