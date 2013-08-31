@@ -28,7 +28,8 @@ public class FileCopier {
 	public static boolean copyFile(final File toCopy, final File destFile) {
 		try {
 			return copyStream(new FileInputStream(toCopy), new FileOutputStream(destFile));
-		} catch (final FileNotFoundException e) {
+		}
+		catch (final FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		return false;
@@ -71,19 +72,18 @@ public class FileCopier {
 				final String filename = removeStart(entry.getName(), //
 						startName);
 
-				final File f = new File(destDir, filename);
 				if (!entry.isDirectory()) {
+					final File f = new File(destDir, filename);
 					final InputStream entryInputStream = jarFile.getInputStream(entry);
 					if (filter.accept(destDir, filename)) {
+						if (!ensureDirectoryExists(f.getParentFile())) {
+							throw new IOException("Could not create directory: " + f.getParentFile().getAbsolutePath());
+						}
 						if (!copyStream(entryInputStream, f)) {
 							return false;
 						}
 					}
 					entryInputStream.close();
-				} else {
-					if (!ensureDirectoryExists(f)) {
-						throw new IOException("Could not create directory: " + f.getAbsolutePath());
-					}
 				}
 			}
 		}
@@ -99,7 +99,8 @@ public class FileCopier {
 			} else {
 				return copyFilesRecusively(new File(originUrl.getPath()), destination, filter);
 			}
-		} catch (final IOException e) {
+		}
+		catch (final IOException e) {
 			e.printStackTrace();
 		}
 		return false;
@@ -108,7 +109,8 @@ public class FileCopier {
 	private static boolean copyStream(final InputStream is, final File f) {
 		try {
 			return copyStream(is, new FileOutputStream(f));
-		} catch (final FileNotFoundException e) {
+		}
+		catch (final FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		return false;
@@ -125,14 +127,15 @@ public class FileCopier {
 			is.close();
 			os.close();
 			return true;
-		} catch (final IOException e) {
+		}
+		catch (final IOException e) {
 			e.printStackTrace();
 		}
 		return false;
 	}
 
 	private static boolean ensureDirectoryExists(final File f) {
-		return f.exists() || f.mkdir();
+		return f.exists() || f.mkdirs();
 	}
 
 	public static String removeStart(String str, String remove) {
