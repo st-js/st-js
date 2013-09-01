@@ -157,7 +157,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				runtimeUrls[i] = new File(element).toURI().toURL();
 			}
 			return new URLClassLoader(runtimeUrls, Thread.currentThread().getContextClassLoader());
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			throw new MojoExecutionException("Cannot get builtProjectClassLoader " + ex, ex);
 		}
 	}
@@ -228,14 +229,17 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 							getBuildOutputDirectory(), configBuilder.build());
 					++generatedFiles;
 
-				} catch (InclusionScanException e) {
+				}
+				catch (InclusionScanException e) {
 					throw new MojoExecutionException("Cannot scan the source directory:" + e, e);
-				} catch (JavascriptFileGenerationException e) {
+				}
+				catch (JavascriptFileGenerationException e) {
 					buildContext.addMessage(e.getInputFile(), e.getSourcePosition().getLine(), e.getSourcePosition()
 							.getColumn(), e.getMessage(), BuildContext.SEVERITY_ERROR, null);
 					hasFailures = true;
 					// continue with the next file
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					// TODO - maybe should filter more here
 					buildContext.addMessage(absoluteSource, 1, 1, e.toString(), BuildContext.SEVERITY_ERROR, e);
 					hasFailures = true;
@@ -291,6 +295,10 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 							.iterator().next();
 
 					String className = getClassNameForSource(source.getPath());
+					if (!absoluteTarget.exists()) {
+						getLog().debug(className + " is a bridge. Don't add it to the pack file");
+						continue;
+					}
 					// add this file to the hashmap to know that this class is part of the project
 					currentProjectsFiles.put(className, absoluteTarget);
 					ClassWithJavascript cjs = generator.getExistingStjsClass(builtProjectClassLoader,
@@ -325,9 +333,11 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				}
 			}
 
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			throw new MojoFailureException("Error when packing files:" + ex.getMessage(), ex);
-		} finally {
+		}
+		finally {
 			Closeables.closeQuietly(allSourcesFile);
 		}
 
@@ -338,7 +348,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		// copy the javascript support
 		try {
 			generator.copyJavascriptSupport(getGeneratedSourcesDirectory().getAbsolutePath());
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			throw new MojoFailureException("Error when copying support files:" + ex.getMessage(), ex);
 		}
 
@@ -360,11 +371,11 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		ds.setFollowSymlinks(true);
 		ds.addDefaultExcludes();
 		ds.setBasedir(sourceDir);
-		ds.setIncludes(new String[] { "**/*.java" });
+		ds.setIncludes(new String[]{ "**/*.java" });
 		ds.scan();
 		for (String fileName : ds.getIncludedFiles()) {
 			File file = new File(fileName);
-			//Supports classes without packages
+			// Supports classes without packages
 			result.add(file.getParent() == null ? "" : file.getParent().replace(File.separatorChar, '.'));
 		}
 
@@ -408,7 +419,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			try {
 				staleFiles.addAll(jsScanner.getIncludedSources(f.getParentFile(), gendir.getAbsolutePath()));
 				staleFiles.addAll(stjsScanner.getIncludedSources(f.getParentFile(), getBuildOutputDirectory()));
-			} catch (InclusionScanException e) {
+			}
+			catch (InclusionScanException e) {
 				throw new MojoExecutionException("Error scanning source root: \'" + sourceDir.getPath() + "\' "
 						+ "for stale files to recompile.", e);
 			}

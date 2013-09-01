@@ -46,6 +46,7 @@
 				</executions>
 				<configuration>
 					<generateSourceMap>true</generateSourceMap>
+					<pack>true</pack>
 				</configuration>
 			</plugin>
 
