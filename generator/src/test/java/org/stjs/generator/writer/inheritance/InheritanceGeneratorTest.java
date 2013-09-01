@@ -42,4 +42,9 @@ public class InheritanceGeneratorTest {
 		// check that the super constructor is called for empty constructor in the child class
 		assertCodeContains(Inheritance7.class, "MySuperClass.call(this);");
 	}
+
+	@Test
+	public void testExtendsInnerClass() {
+		assertCodeContains(Inheritance8.class, "stjs.extend(Inheritance8, MyClass1.MyInnerClass, [],");
+	}
 }
