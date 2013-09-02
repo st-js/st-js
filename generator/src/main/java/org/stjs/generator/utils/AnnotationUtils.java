@@ -33,14 +33,8 @@ public final class AnnotationUtils {
 		return s.substring(0, 1).toUpperCase(Locale.getDefault()) + s.substring(1);
 	}
 
-	private static <T extends Annotation> T getAnnotationInHelperClass(String helperClassName, Method origMethod,
+	private static <T extends Annotation> T getAnnotationInHelperClass(ClassLoader classLoader, String helperClassName, Method origMethod,
 			Class<T> annotationClass) {
-		Class<?> declaringClass = origMethod.getDeclaringClass();
-		ClassLoader classLoader = declaringClass.getClassLoader();
-		if (classLoader == null) {
-			// XXX not sure what class loader should use here
-			classLoader = Thread.currentThread().getContextClassLoader();
-		}
 		Class<?> annotatedHelperClass = findClass(classLoader, helperClassName);
 
 		if (annotatedHelperClass == null) {
@@ -50,8 +44,7 @@ public final class AnnotationUtils {
 		// find a method with the same signature in the new class
 		Method methodInAnnotatedClass;
 		try {
-			methodInAnnotatedClass =
-					annotatedHelperClass.getDeclaredMethod(origMethod.getName(), origMethod.getParameterTypes());
+			methodInAnnotatedClass = annotatedHelperClass.getDeclaredMethod(origMethod.getName(), origMethod.getParameterTypes());
 		}
 		catch (SecurityException e) {
 			throw new STJSRuntimeException(e);
@@ -63,7 +56,11 @@ public final class AnnotationUtils {
 
 	}
 
-	public static <T extends Annotation> T getAnnotation(Type ownerType, Method method, Class<T> annotationClass) {
+	//	public static <T extends Annotation> T getAnnotation(Type ownerType, Method method, Class<T> annotationClass) {
+	//	}
+
+	public static <T extends Annotation> T getAnnotation(ClassLoader builtProjectClassLoader, Type ownerType, Method method,
+			Class<T> annotationClass) {
 		T annotation = method.getAnnotation(annotationClass);
 		if (annotation != null) {
 			return annotation;
@@ -78,14 +75,14 @@ public final class AnnotationUtils {
 		// 1st letter capitalized) attached
 		// and the suffix "Annotated"
 		annotation =
-				getAnnotationInHelperClass(ANNOTATED_PACKAGE + ownerClass.getName() + capitalize(method.getName()),
+				getAnnotationInHelperClass(builtProjectClassLoader, ANNOTATED_PACKAGE + ownerClass.getName() + capitalize(method.getName()),
 						method, annotationClass);
 		if (annotation != null) {
 			return annotation;
 		}
 
 		// 2. look for a class in the same package of the declaring class but with the suffix "Annotated"
-		annotation = getAnnotationInHelperClass(ANNOTATED_PACKAGE + ownerClass.getName(), method, annotationClass);
+		annotation = getAnnotationInHelperClass(builtProjectClassLoader, ANNOTATED_PACKAGE + ownerClass.getName(), method, annotationClass);
 		return annotation;
 	}
 }

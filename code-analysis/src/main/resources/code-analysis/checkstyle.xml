@@ -106,6 +106,7 @@
 		<module name="LineLength">
 			<property name="ignorePattern" value="^\t*\* *[^ ]+$" />
 			<property name="max" value="145" />
+			<property name="tabWidth" value="1" />
 		</module>
 		<!-- <module name="MethodCount"> -->
 		<!-- <property name="maxTotal" value="30" /> -->

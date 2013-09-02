@@ -174,7 +174,8 @@ public final class MethodWrapper {
 		return new MethodWrapper(method, newReturnType, parameterTypes, modifiers, typeParameters, ownerType, declared);
 	}
 
-	public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-		return AnnotationUtils.getAnnotation(ownerType.getType(), method, annotationClass);
+	public <T extends Annotation> T getAnnotation(ClassLoader builtProjectClassLoader, Class<T> annotationClass) {
+		return AnnotationUtils.getAnnotation(builtProjectClassLoader, ownerType.getType(), method, annotationClass);
 	}
+
 }

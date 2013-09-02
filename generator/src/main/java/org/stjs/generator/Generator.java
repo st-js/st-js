@@ -78,16 +78,14 @@ public class Generator {
 	 * @param configuration
 	 * @return the list of imports needed by the generated class
 	 */
-	public ClassWithJavascript generateJavascript(ClassLoader builtProjectClassLoader, String className,
-			File sourceFolder, GenerationDirectory generationFolder, File targetFolder,
-			GeneratorConfiguration configuration) throws JavascriptFileGenerationException {
+	public ClassWithJavascript generateJavascript(ClassLoader builtProjectClassLoader, String className, File sourceFolder,
+			GenerationDirectory generationFolder, File targetFolder, GeneratorConfiguration configuration)
+			throws JavascriptFileGenerationException {
 
 		ClassLoaderWrapper classLoaderWrapper =
-				new ClassLoaderWrapper(builtProjectClassLoader, configuration.getAllowedPackages(),
-						configuration.getAllowedJavaLangClasses());
+				new ClassLoaderWrapper(builtProjectClassLoader, configuration.getAllowedPackages(), configuration.getAllowedJavaLangClasses());
 		DependencyResolver dependencyResolver =
-				new GeneratorDependencyResolver(builtProjectClassLoader, sourceFolder, generationFolder, targetFolder,
-						configuration);
+				new GeneratorDependencyResolver(builtProjectClassLoader, sourceFolder, generationFolder, targetFolder, configuration);
 
 		ClassWrapper clazz = classLoaderWrapper.loadClass(className).getOrThrow();
 		if (ClassUtils.isBridge(clazz.getClazz())) {
@@ -101,7 +99,7 @@ public class Generator {
 		CompilationUnit cu = parseAndResolve(classLoaderWrapper, inputFile, context, configuration.getSourceEncoding());
 
 		BufferedWriter writer = null;
-		JavascriptWriterVisitor generatorVisitor = new JavascriptWriterVisitor(configuration.isGenerateSourceMap());
+		JavascriptWriterVisitor generatorVisitor = new JavascriptWriterVisitor(builtProjectClassLoader, configuration.isGenerateSourceMap());
 
 		try {
 			// generate the javascript code
@@ -136,8 +134,8 @@ public class Generator {
 	/**
 	 * generate the source map for the given class
 	 */
-	private void generateSourceMap(GenerationDirectory generationFolder, GeneratorConfiguration configuration,
-			GenerationContext context, JavascriptWriterVisitor generatorVisitor, File outputFile, STJSClass stjsClass) {
+	private void generateSourceMap(GenerationDirectory generationFolder, GeneratorConfiguration configuration, GenerationContext context,
+			JavascriptWriterVisitor generatorVisitor, File outputFile, STJSClass stjsClass) {
 		BufferedWriter sourceMapWriter = null;
 
 		try {
@@ -154,9 +152,7 @@ public class Generator {
 			// to be
 			// able to do backward analysis: i.e fine the class name corresponding to a JS)
 			File stjsPropFile = stjsClass.getStjsPropertiesFile();
-			File copyStjsPropFile =
-					new File(generationFolder.getAbsolutePath(), ClassUtils.getPropertiesFileName(stjsClass
-							.getClassName()));
+			File copyStjsPropFile = new File(generationFolder.getAbsolutePath(), ClassUtils.getPropertiesFileName(stjsClass.getClassName()));
 			if (!stjsPropFile.equals(copyStjsPropFile)) {
 				Files.copy(stjsPropFile, copyStjsPropFile);
 			}
@@ -196,8 +192,8 @@ public class Generator {
 		}
 	}
 
-	private CompilationUnit parseAndResolve(ClassLoaderWrapper builtProjectClassLoader, File inputFile,
-			GenerationContext context, String sourceEncoding) {
+	private CompilationUnit parseAndResolve(ClassLoaderWrapper builtProjectClassLoader, File inputFile, GenerationContext context,
+			String sourceEncoding) {
 		CompilationUnitScope unitScope = new CompilationUnitScope(builtProjectClassLoader, context);
 		CompilationUnit cu = null;
 		InputStream in = null;
@@ -248,8 +244,7 @@ public class Generator {
 			Files.copy(new InputStreamSupplier(stjs), outputFile);
 		}
 		catch (IOException e) {
-			throw new STJSRuntimeException("Could not copy the " + STJS_FILE + " file to the folder " + folder + ":"
-					+ e.getMessage(), e);
+			throw new STJSRuntimeException("Could not copy the " + STJS_FILE + " file to the folder " + folder + ":" + e.getMessage(), e);
 		}
 		finally {
 			Closeables.closeQuietly(stjs);
@@ -280,8 +275,8 @@ public class Generator {
 		private final File targetFolder;
 		private final GeneratorConfiguration configuration;
 
-		public GeneratorDependencyResolver(ClassLoader builtProjectClassLoader, File sourceFolder,
-				GenerationDirectory generationFolder, File targetFolder, GeneratorConfiguration configuration) {
+		public GeneratorDependencyResolver(ClassLoader builtProjectClassLoader, File sourceFolder, GenerationDirectory generationFolder,
+				File targetFolder, GeneratorConfiguration configuration) {
 			this.builtProjectClassLoader = builtProjectClassLoader;
 			this.sourceFolder = sourceFolder;
 			this.targetFolder = targetFolder;
@@ -291,8 +286,8 @@ public class Generator {
 
 		private void checkFolders(String parentClassName) {
 			if (generationFolder == null || sourceFolder == null || targetFolder == null) {
-				throw new IllegalStateException("This resolver assumed that the javascript for the class ["
-						+ parentClassName + "] was already generated");
+				throw new IllegalStateException("This resolver assumed that the javascript for the class [" + parentClassName
+						+ "] was already generated");
 			}
 		}
 
@@ -320,8 +315,8 @@ public class Generator {
 			if (stjsClass.getJavascriptFiles().isEmpty()) {
 				checkFolders(parentClassName);
 				stjsClass =
-						(STJSClass) generateJavascript(builtProjectClassLoader, parentClassName, sourceFolder,
-								generationFolder, targetFolder, configuration);
+						(STJSClass) generateJavascript(builtProjectClassLoader, parentClassName, sourceFolder, generationFolder, targetFolder,
+								configuration);
 			}
 			return stjsClass;
 		}

@@ -169,8 +169,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	private int currentComment;
 
-	public JavascriptWriterVisitor(boolean generateSourceMap) {
-		specialMethodHandlers = new MethodCallTemplates();
+	public JavascriptWriterVisitor(ClassLoader builtProjectClassLoader, boolean generateSourceMap) {
+		specialMethodHandlers = new MethodCallTemplates(builtProjectClassLoader);
 		names = new DefaultNameProvider();
 		printer = new JavascriptWriter(generateSourceMap);
 	}
@@ -526,8 +526,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 	}
 
-	private void printMethodName(String name, int modifiers, TypeWrapper type, boolean anonymous,
-			boolean isInnerClassConstructor) {
+	private void printMethodName(String name, int modifiers, TypeWrapper type, boolean anonymous, boolean isInnerClassConstructor) {
 		// no type appears for global scopes
 		boolean global = isGlobal(type) && isStatic(modifiers);
 		if (!anonymous) {
@@ -567,8 +566,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	// i need this method with more parameters than usual
 	// CHECKSTYLE:OFF
-	private void printMethod(String name, List<Parameter> parameters, int modifiers, BlockStmt body,
-			GenerationContext context, TypeWrapper type, boolean anonymous, boolean isInnerClassConstructor) {
+	private void printMethod(String name, List<Parameter> parameters, int modifiers, BlockStmt body, GenerationContext context,
+			TypeWrapper type, boolean anonymous, boolean isInnerClassConstructor) {
 		// CHECKSTYLE:ON
 
 		if (ModifierSet.isAbstract(modifiers) || ModifierSet.isNative(modifiers)) {
@@ -609,11 +608,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	public void printArguments(List<Expression> expressions, GenerationContext context) {
-		printArguments(Collections.<String>emptyList(), expressions, Collections.<String>emptyList(), context);
+		printArguments(Collections.<String> emptyList(), expressions, Collections.<String> emptyList(), context);
 	}
 
-	public void printArguments(Collection<String> beforeParams, Collection<Expression> expressions,
-			Collection<String> afterParams, GenerationContext context) {
+	public void printArguments(Collection<String> beforeParams, Collection<Expression> expressions, Collection<String> afterParams,
+			GenerationContext context) {
 		printer.print("(");
 		printer.printList(beforeParams);
 		boolean first = beforeParams.isEmpty();
@@ -645,8 +644,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		return null;
 	}
 
-	private ClassOrInterfaceDeclaration buildClassDeclaration(String className, ClassOrInterfaceType extendsFrom,
-			List<BodyDeclaration> members) {
+	private ClassOrInterfaceDeclaration buildClassDeclaration(String className, ClassOrInterfaceType extendsFrom, List<BodyDeclaration> members) {
 		ClassOrInterfaceDeclaration decl = new ClassOrInterfaceDeclaration();
 		decl.setName(className);
 		ClassWrapper baseClass = (ClassWrapper) resolvedType(extendsFrom);
@@ -664,8 +662,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		MethodDeclaration method = getMethodDeclaration(n);
 		PreConditions.checkStateNode(n, method != null, "A single method was expected for an inline function");
 		if (method != null) {
-			printMethod(method.getName(), method.getParameters(), method.getModifiers(), method.getBody(), context,
-					resolvedType(n), true, false);
+			printMethod(method.getName(), method.getParameters(), method.getModifiers(), method.getBody(), context, resolvedType(n), true, false);
 		}
 	}
 
@@ -689,8 +686,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 			// special construction to handle the inline body
 			printer.print("new ");
-			ClassOrInterfaceDeclaration inlineFakeClass = buildClassDeclaration(GeneratorConstants.SPECIAL_INLINE_TYPE,
-					n.getType(), n.getAnonymousClassBody());
+			ClassOrInterfaceDeclaration inlineFakeClass =
+					buildClassDeclaration(GeneratorConstants.SPECIAL_INLINE_TYPE, n.getType(), n.getAnonymousClassBody());
 			inlineFakeClass.setData(n.getData());
 			inlineFakeClass.accept(this, context);
 
@@ -717,12 +714,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	@Override
 	public void visit(MethodDeclaration n, GenerationContext context) {
 		printComments(n, context);
-		printMethod(names.getMethodName(resolvedMethod(n)), n.getParameters(), n.getModifiers(), n.getBody(), context,
-				resolvedType(parent(n)), false, false);
+		printMethod(names.getMethodName(resolvedMethod(n)), n.getParameters(), n.getModifiers(), n.getBody(), context, resolvedType(parent(n)),
+				false, false);
 	}
 
-	private void addCallToSuper(ClassScope classScope, GenerationContext context, Collection<Expression> args,
-			boolean apply) {
+	private void addCallToSuper(ClassScope classScope, GenerationContext context, Collection<Expression> args, boolean apply) {
 		PreConditions.checkNotNull(classScope);
 
 		Option<ClassWrapper> superClass = classScope.getClazz().getSuperclass();
@@ -742,7 +738,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.print(".apply(this, arguments)");
 			} else {
 				printer.print(".call");
-				printArguments(Collections.singleton("this"), args, Collections.<String>emptyList(), context);
+				printArguments(Collections.singleton("this"), args, Collections.<String> emptyList(), context);
 			}
 			printer.print(";");
 
@@ -782,8 +778,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			printCallToSuper(n);
 		}
 		ClassWrapper type = (ClassWrapper) resolvedType(parent(n));
-		printMethod(type.getSimpleBinaryName(), n.getParameters(), n.getModifiers(), n.getBlock(), context, type, true,
-				type.isInnerType() || type.isAnonymousClass());
+		printMethod(type.getSimpleBinaryName(), n.getParameters(), n.getModifiers(), n.getBlock(), context, type, true, type.isInnerType()
+				|| type.isAnonymousClass());
 	}
 
 	@Override
@@ -970,8 +966,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		return decls;
 	}
 
-	private void printConstructorImplementation(ClassOrInterfaceDeclaration n, GenerationContext context,
-			ClassScope scope, boolean inlineType) {
+	private void printConstructorImplementation(ClassOrInterfaceDeclaration n, GenerationContext context, ClassScope scope, boolean inlineType) {
 		ConstructorDeclaration constr = getConstructor(n.getMembers(), context);
 		if (constr == null) {
 			ClassWrapper type = (ClassWrapper) resolvedType(n);
@@ -981,7 +976,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.print(type.getSimpleBinaryName());
 			}
 			printer.print("(){");
-			addCallToSuper(scope, context, Collections.<Expression>emptyList(), inlineType);
+			addCallToSuper(scope, context, Collections.<Expression> emptyList(), inlineType);
 			printer.print("}");
 		} else {
 			constr.accept(this, context);
@@ -1073,7 +1068,6 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	/**
 	 * print the information needed to deserialize type-safe from json
-	 * 
 	 * @param n
 	 * @param context
 	 */
@@ -1112,8 +1106,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (nonConstructors.isEmpty()) {
 			printer.print(JavascriptKeywords.NULL);
 		} else {
-			printer.print("function(").print(JavascriptKeywords.CONSTRUCTOR).print(", ")
-					.print(JavascriptKeywords.PROTOTYPE).print("){");
+			printer.print("function(").print(JavascriptKeywords.CONSTRUCTOR).print(", ").print(JavascriptKeywords.PROTOTYPE).print("){");
 			printer.indent();
 			for (BodyDeclaration member : nonConstructors) {
 				printer.printLn();
@@ -1333,8 +1326,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	public void visit(BinaryExpr n, GenerationContext context) {
 		TypeWrapper leftType = ASTNodeData.resolvedType(n.getLeft());
 		TypeWrapper rightType = ASTNodeData.resolvedType(n.getRight());
-		boolean integerDivision = n.getOperator() == Operator.divide && ClassUtils.isIntegerType(leftType)
-				&& ClassUtils.isIntegerType(rightType);
+		boolean integerDivision =
+				n.getOperator() == Operator.divide && ClassUtils.isIntegerType(leftType) && ClassUtils.isIntegerType(rightType);
 
 		if (integerDivision) {
 			printer.print("stjs.trunc(");
@@ -1432,8 +1425,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			return;
 		}
 		// this scope is either implicit (no scope at all) or explicit "this."
-		boolean withScopeThis = n.getScope() == null || n.getScope() != null
-				&& n.getScope().toString().equals(GeneratorConstants.THIS);
+		boolean withScopeThis = n.getScope() == null || n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.THIS);
 		boolean withScopeSuper = n.getScope() != null && n.getScope().toString().equals(GeneratorConstants.SUPER);
 		boolean withOtherScope = !withScopeSuper && !withScopeThis;
 
@@ -1446,10 +1438,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		} else {
 			// Non static reference to parent type
 			printer.print(names.getTypeName(method.getOwnerType()));
-			printer.print(".").print(JavascriptKeywords.PROTOTYPE).print(".").print(names.getMethodName(method))
-					.print(".call");
-			printArguments(Collections.singleton(JavascriptKeywords.THIS), n.getArgs(),
-					Collections.<String>emptyList(), context);
+			printer.print(".").print(JavascriptKeywords.PROTOTYPE).print(".").print(names.getMethodName(method)).print(".call");
+			printArguments(Collections.singleton(JavascriptKeywords.THIS), n.getArgs(), Collections.<String> emptyList(), context);
 			return;
 		}
 		printer.print(names.getMethodName(method));
@@ -1552,39 +1542,39 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	@SuppressWarnings("PMD.CyclomaticComplexity")
 	public void visit(UnaryExpr n, GenerationContext context) {
 		switch (n.getOperator()) {
-		case positive:
-			printer.print("+");
-			break;
-		case negative:
-			printer.print("-");
-			break;
-		case inverse:
-			printer.print("~");
-			break;
-		case not:
-			printer.print("!");
-			break;
-		case preIncrement:
-			printer.print("++");
-			break;
-		case preDecrement:
-			printer.print("--");
-			break;
-		default:
-			break;
+			case positive:
+				printer.print("+");
+				break;
+			case negative:
+				printer.print("-");
+				break;
+			case inverse:
+				printer.print("~");
+				break;
+			case not:
+				printer.print("!");
+				break;
+			case preIncrement:
+				printer.print("++");
+				break;
+			case preDecrement:
+				printer.print("--");
+				break;
+			default:
+				break;
 		}
 
 		n.getExpr().accept(this, context);
 
 		switch (n.getOperator()) {
-		case posIncrement:
-			printer.print("++");
-			break;
-		case posDecrement:
-			printer.print("--");
-			break;
-		default:
-			break;
+			case posIncrement:
+				printer.print("++");
+				break;
+			case posDecrement:
+				printer.print("--");
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -1609,8 +1599,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	public void visit(ExplicitConstructorInvocationStmt n, GenerationContext context) {
 		if (n.isThis()) {
 			// This should not happen as another constructor is forbidden
-			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
-					"Only one constructor is allowed");
+			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n), "Only one constructor is allowed");
 		}
 
 		ClassScope classScope = scope(n).closest(ClassScope.class);
@@ -1727,8 +1716,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		} else {
 			printer.print("case ");
 			TypeWrapper selectorType = resolvedType(((SwitchStmt) parent(n)).getSelector());
-			PreConditions.checkState(selectorType != null, "The selector of the switch %s should have a type",
-					parent(n));
+			PreConditions.checkState(selectorType != null, "The selector of the switch %s should have a type", parent(n));
 			if (selectorType instanceof ClassWrapper && ((ClassWrapper) selectorType).getClazz().isEnum()) {
 				printer.print(names.getTypeName(selectorType));
 				printer.print(".");
