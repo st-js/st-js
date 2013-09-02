@@ -44,8 +44,6 @@
 		<module>server</module>
 		<module>maven-plugin</module>
 		<module>test-helper</module>
-		<module>example-lib</module>
-		<module>examples</module>
 		<module>maven-plugin-it</module>
 	</modules>
 

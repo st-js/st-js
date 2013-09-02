@@ -17,10 +17,9 @@
 	<dependencies>
 		<!-- for the java libraries -->
 		<dependency>
-			<groupId>org.st-js</groupId>
-			<artifactId>js-lib</artifactId>
-			<version>${parent.version}</version>
-			<scope>provided</scope>
+			<groupId>org.st-js.bridge</groupId>
+			<artifactId>html</artifactId>
+			<version>4.01.0</version>
 		</dependency>
 
 
