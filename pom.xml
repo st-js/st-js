@@ -213,8 +213,8 @@
 	</profiles>
 
 	<scm>
-		<connection>scm:git:http://github.com/st-js/st-js.git</connection>
-		<developerConnection>scm:git:http://github.com/st-js/st-js.git</developerConnection>
+		<connection>scm:git:https://github.com/st-js/st-js.git</connection>
+		<developerConnection>scm:git:https://github.com/st-js/st-js.git</developerConnection>
 		<url>scm:git:https://github.com/st-js/st-js</url>
 	  <tag>stjs-2.0.0</tag>
   </scm>
