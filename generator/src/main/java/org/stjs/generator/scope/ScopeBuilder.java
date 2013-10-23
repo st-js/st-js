@@ -112,6 +112,7 @@ import org.stjs.generator.visitor.ForEachNodeVisitor;
 
 /**
  * This class resolves the variables, methods and types and writes the corresponding information in the AST nodes.
+ * 
  * @author acraciun,ekaspi
  */
 @SuppressWarnings("PMD.ExcessivePublicCount")
@@ -119,8 +120,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	private final ClassLoaderWrapper classLoader;
 	private final GenerationContext context;
 
-	private final Map<Class<?>, AnonymousClassesHelper> anonymousClassHelpers =
-			new HashMap<Class<?>, AnonymousClassesHelper>();
+	private final Map<Class<?>, AnonymousClassesHelper> anonymousClassHelpers = new HashMap<Class<?>, AnonymousClassesHelper>();
 
 	public ScopeBuilder(ClassLoaderWrapper classLoader, GenerationContext context) {
 		super();
@@ -272,9 +272,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		MethodWrapper method = methods.get(0);
 		resolvedMethod(n, method);
 
-		BasicScope scope =
-				handleMethodDeclaration(n, n.getParameters(), method.getParameterTypes(), method.getTypeParameters(),
-						currentScope);
+		BasicScope scope = handleMethodDeclaration(n, n.getParameters(), method.getParameterTypes(),
+				method.getTypeParameters(), currentScope);
 		super.visit(n, new BasicScope(scope, context));
 	}
 
@@ -362,9 +361,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			for (Type arg : classType.getTypeArgs()) {
 				args.add(resolveType(scope, arg).getType());
 			}
-			resolvedType =
-					new ParameterizedTypeWrapper(new ParameterizedTypeImpl(rawType.getType().getType(),
-							args.toArray(new java.lang.reflect.Type[args.size()]), null));
+			resolvedType = new ParameterizedTypeWrapper(new ParameterizedTypeImpl(rawType.getType().getType(),
+					args.toArray(new java.lang.reflect.Type[args.size()]), null));
 
 		}
 		return resolvedType;
@@ -372,12 +370,10 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	private TypeWrapper resolveWildcardType(Scope scope, WildcardType wildcardType) {
 		TypeWrapper resolvedType;
-		java.lang.reflect.Type[] upperBound =
-				wildcardType.getExtends() == null ? new java.lang.reflect.Type[0]
-						: new java.lang.reflect.Type[] { resolveType(scope, wildcardType.getExtends()).getType() };
-		java.lang.reflect.Type[] lowerBound =
-				wildcardType.getSuper() == null ? new java.lang.reflect.Type[0]
-						: new java.lang.reflect.Type[] { resolveType(scope, wildcardType.getSuper()).getType() };
+		java.lang.reflect.Type[] upperBound = wildcardType.getExtends() == null ? new java.lang.reflect.Type[0]
+				: new java.lang.reflect.Type[]{ resolveType(scope, wildcardType.getExtends()).getType() };
+		java.lang.reflect.Type[] lowerBound = wildcardType.getSuper() == null ? new java.lang.reflect.Type[0]
+				: new java.lang.reflect.Type[]{ resolveType(scope, wildcardType.getSuper()).getType() };
 		resolvedType = new WildcardTypeWrapper(new WildcardTypeImpl(lowerBound, upperBound));
 		return resolvedType;
 	}
@@ -413,6 +409,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	/**
 	 * check if the given type is the argument of the public static void main(String[] args) method
+	 * 
 	 * @param type
 	 * @return
 	 */
@@ -446,6 +443,16 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			TypeWrapper clazz = resolveType(basicScope, n.getType());
 			resolvedType(n, clazz);
 			for (VariableDeclarator var : n.getVars()) {
+				VariableWithScope existingVariable = basicScope.resolveVariable(var.getId().getName());
+				if (existingVariable != null && existingVariable.getVariable() instanceof LocalVariable) {
+					throw new JavascriptFileGenerationException(
+							context.getInputFile(),
+							new SourcePosition(n),
+							"The variable '"
+									+ var.getId().getName()
+									+ "' is already defined in this method. In JavaScript the scope of a variable cannot be a "
+									+ "block but the method enclosing the block. Please rename your variable.");
+				}
 				basicScope.addVariable(new LocalVariable(clazz, var.getId().getName()));
 			}
 		}
@@ -472,9 +479,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		BasicScope scope;
 		if (c == null) {
 			// synthetic constructor
-			scope =
-					handleMethodDeclaration(n, n.getParameters(), new java.lang.reflect.Type[0],
-							new TypeVariable<?>[0], currentScope);
+			scope = handleMethodDeclaration(n, n.getParameters(), new java.lang.reflect.Type[0],
+					new TypeVariable<?>[0], currentScope);
 		} else {
 			java.lang.reflect.Type[] parameterTypes = c.getGenericParameterTypes();
 			// enums receive label and ordinal as first arguments
@@ -680,7 +686,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	public void visit(ClassExpr n, Scope arg) {
 		super.visit(n, arg);
 		TypeWrapper type = resolvedType(n.getType());
-		resolvedType(n, TypeWrappers.wrap(new ParameterizedTypeImpl(Class.class, new java.lang.reflect.Type[] { type
+		resolvedType(n, TypeWrappers.wrap(new ParameterizedTypeImpl(Class.class, new java.lang.reflect.Type[]{ type
 				.getType() }, null)));
 	}
 
@@ -786,9 +792,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			TypeWrapper scopeType = resolvedType(n.getScope());
 			PreConditions.checkStateNodeNotNull(n, scopeType, "%s The method %s's scope could not be resolved",
 					location(n), n.getName());
-			method =
-					scopeType.findMethod(n.getName(), argumentTypes).getOrThrow(
-							location(n) + "-> type:" + scopeType.getName() + " m:" + n.getName());
+			method = scopeType.findMethod(n.getName(), argumentTypes).getOrThrow(
+					location(n) + "-> type:" + scopeType.getName() + " m:" + n.getName());
 		}
 
 		resolvedType(n, method.getReturnType());
