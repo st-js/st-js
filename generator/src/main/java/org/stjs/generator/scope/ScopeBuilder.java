@@ -272,22 +272,22 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		MethodWrapper method = methods.get(0);
 		resolvedMethod(n, method);
 
-		BasicScope scope = handleMethodDeclaration(n, n.getParameters(), method.getParameterTypes(),
+		MethodScope scope = handleMethodDeclaration(n, n.getParameters(), method.getParameterTypes(),
 				method.getTypeParameters(), currentScope);
 		super.visit(n, new BasicScope(scope, context));
 	}
 
-	private BasicScope handleMethodDeclaration(Node node, final List<Parameter> parameters,
+	private MethodScope handleMethodDeclaration(Node node, final List<Parameter> parameters,
 			java.lang.reflect.Type[] resolvedParameterTypes,
 			TypeVariable<? extends GenericDeclaration>[] resolvedTypeParameters, Scope currentScope) {
 		return handleMethodDeclaration(node, parameters, TypeWrappers.wrap(resolvedParameterTypes),
 				TypeWrappers.wrap(resolvedTypeParameters), currentScope);
 	}
 
-	private BasicScope handleMethodDeclaration(Node node, final List<Parameter> parameters,
+	private MethodScope handleMethodDeclaration(Node node, final List<Parameter> parameters,
 			TypeWrapper[] resolvedParameterTypes, TypeWrapper[] resolvedTypeParameters, Scope currentScope) {
 
-		BasicScope scope = new BasicScope(currentScope, context);
+		MethodScope scope = new MethodScope(currentScope, context);
 		if (resolvedTypeParameters != null) {
 			for (TypeWrapper tv : resolvedTypeParameters) {
 				scope.addType(tv);
@@ -433,12 +433,12 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	@Override
 	public void visit(VariableDeclarationExpr n, Scope scope) {
-		PreConditions.checkStateNode(n, scope instanceof BasicScope,
-				"The variable [%s] is not defined inside a BasicScope", n);
+		PreConditions.checkStateNode(n, scope instanceof AbstractScope,
+				"The variable [%s] is not defined inside a AbstractScope", n);
 
 		Checks.checkVariableDeclarationExpr(n, context);
 
-		BasicScope basicScope = (BasicScope) scope;
+		AbstractScope basicScope = (AbstractScope) scope;
 		if (n.getVars() != null) {
 			TypeWrapper clazz = resolveType(basicScope, n.getType());
 			resolvedType(n, clazz);
@@ -476,7 +476,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		((ASTNodeData) n.getData()).setScope(currentScope);
 		Class<?> ownerClass = currentScope.closest(ClassScope.class).getClazz().getClazz();
 		Constructor<?> c = ClassUtils.findConstructor(ownerClass);
-		BasicScope scope;
+		MethodScope scope;
 		if (c == null) {
 			// synthetic constructor
 			scope = handleMethodDeclaration(n, n.getParameters(), new java.lang.reflect.Type[0],
@@ -507,7 +507,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	@Override
 	public void visit(InitializerDeclaration n, Scope currentScope) {
-		super.visit(n, new BasicScope(currentScope, context));
+		// we put an initializer block equivalent to a method scope
+		super.visit(n, new MethodScope(currentScope, context));
 	}
 
 	@Override
@@ -826,6 +827,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			if (field.isDefined()) {
 				resolvedType(n, field.getOrThrow().getType());
 				resolvedVariable(n, field.getOrThrow());
+				Checks.checkGlobalVariable(n, context, arg);
 			} else {
 				TypeWithScope innerType = arg.resolveType(scopeType.getName() + "$" + n.getField());
 				PreConditions.checkStateNodeNotNull(n, innerType,
@@ -877,7 +879,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 				resolvedVariableScope(n, var.getScope());
 				resolvedType(n, var.getVariable().getType());
 				Checks.checkScope(n, context);
-
+				Checks.checkGlobalVariable(n, context, arg);
 			}
 		}
 

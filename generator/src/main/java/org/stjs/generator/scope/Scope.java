@@ -27,6 +27,8 @@ public interface Scope {
 		T apply(ClassScope classScope);
 
 		T apply(BasicScope basicScope);
+
+		T apply(MethodScope basicScope);
 	}
 
 	<T> T apply(ScopeVisitor<T> visitor);
@@ -45,6 +47,7 @@ public interface Scope {
 
 	/**
 	 * Find the closest parent of type T
+	 * 
 	 * @param <T>
 	 * @param scopeType
 	 * @return

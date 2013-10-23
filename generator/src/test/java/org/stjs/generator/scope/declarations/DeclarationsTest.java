@@ -11,11 +11,12 @@ import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.scope.BasicScope;
 import org.stjs.generator.scope.ClassScope;
 import org.stjs.generator.scope.CompilationUnitScope;
+import org.stjs.generator.scope.MethodScope;
 
 public class DeclarationsTest {
 	@Test
 	public void testScopeParam() {
-		assertResolvedName(Declaration1.class, "param", BasicScope.class, 2);
+		assertResolvedName(Declaration1.class, "param", MethodScope.class, 2);
 	}
 
 	@Test

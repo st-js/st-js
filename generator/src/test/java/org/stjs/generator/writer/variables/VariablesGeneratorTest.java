@@ -39,4 +39,21 @@ public class VariablesGeneratorTest {
 		// "x" is declared twice in the method
 		generate(Variables6.class);
 	}
+
+	@Test
+	public void testVariableUseFromGlobalScopeBeforeDeclaredInMethod() {
+		assertCodeContains(Variables7.class, "y = x;");
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testVariableDeclaredInMethodAndGlobalScope() {
+		// the global "x" variable, after generation would in fact be replaced by the local variable
+		generate(Variables8.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testParamInMethodAndGlobalScope() {
+		// the global "x" variable, after generation would in fact be replaced by the parameter
+		generate(Variables9.class);
+	}
 }

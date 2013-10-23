@@ -15,6 +15,7 @@
  */
 package org.stjs.generator.scope;
 
+import static org.stjs.generator.ast.ASTNodeData.resolvedVariable;
 import japa.parser.ast.Node;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
@@ -26,6 +27,7 @@ import japa.parser.ast.body.ModifierSet;
 import japa.parser.ast.body.Parameter;
 import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.body.VariableDeclaratorId;
+import japa.parser.ast.expr.FieldAccessExpr;
 import japa.parser.ast.expr.LiteralExpr;
 import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
@@ -57,10 +59,12 @@ import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.Option;
 import org.stjs.generator.variable.Variable;
 import org.stjs.generator.writer.JavascriptKeywords;
+import org.stjs.javascript.annotation.GlobalScope;
 import org.stjs.javascript.annotation.JavascriptFunction;
 
 /**
  * this class generate different checks made on the Java statements before they are converted to Javascript
+ * 
  * @author acraciun
  */
 public final class Checks {
@@ -82,6 +86,7 @@ public final class Checks {
 
 	/**
 	 * check a method declaration
+	 * 
 	 * @param n
 	 * @param arg
 	 */
@@ -105,7 +110,7 @@ public final class Checks {
 		if (v.getInit() instanceof LiteralExpr) {
 			return;
 		}
-		// allowed  x = -1
+		// allowed x = -1
 		if (v.getInit() instanceof UnaryExpr && ((UnaryExpr) v.getInit()).getExpr() instanceof LiteralExpr) {
 			return;
 		}
@@ -115,6 +120,7 @@ public final class Checks {
 
 	/**
 	 * check a field declaration
+	 * 
 	 * @param n
 	 * @param arg
 	 */
@@ -172,6 +178,7 @@ public final class Checks {
 
 	/**
 	 * check a class declaration
+	 * 
 	 * @param n
 	 * @param context
 	 * @param scope
@@ -253,6 +260,7 @@ public final class Checks {
 
 	/**
 	 * other checks after the types were set
+	 * 
 	 * @param n
 	 * @param context
 	 */
@@ -294,6 +302,7 @@ public final class Checks {
 
 	/**
 	 * check enum declaration
+	 * 
 	 * @param n
 	 * @param context
 	 */
@@ -311,6 +320,7 @@ public final class Checks {
 
 	/**
 	 * check a name expression
+	 * 
 	 * @param n
 	 * @param context
 	 */
@@ -397,6 +407,7 @@ public final class Checks {
 
 	/**
 	 * makes sure only literals can be used as keys (so the even arguments)
+	 * 
 	 * @param n
 	 * @param context
 	 */
@@ -437,4 +448,59 @@ public final class Checks {
 		}
 	}
 
+	public static void checkGlobalVariable(NameExpr n, GenerationContext context, Scope currentScope) {
+		Variable var = resolvedVariable(n);
+		if (var instanceof FieldWrapper) {
+			FieldWrapper field = (FieldWrapper) var;
+			TypeWrapper scopeType = field.getOwnerType();
+			checkGlobalVariable(n, scopeType, field.getName(), currentScope, context);
+		}
+	}
+
+	public static void checkGlobalVariable(FieldAccessExpr n, GenerationContext context, Scope currentScope) {
+		FieldWrapper field = (FieldWrapper) resolvedVariable(n);
+		TypeWrapper scopeType = field.getOwnerType();
+		checkGlobalVariable(n, scopeType, field.getName(), currentScope, context);
+	}
+
+	private static void checkGlobalVariable(Node n, TypeWrapper scopeType, String name, Scope currentScope,
+			GenerationContext context) {
+		if (scopeType.hasAnnotation(GlobalScope.class)) {
+			// look if there is any variable with the same name in the method
+			MethodScope methodScope = currentScope.closest(MethodScope.class);
+			if (methodScope == null) {
+				return;
+			}
+			Variable existent = resolveVariableInDescendantBlocks(methodScope, name);
+			if (existent != null) {
+				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
+						"A variable with the same name as your global variable is already defined in this method's scope. "
+								+ "Please rename either the local variable/parameter or the global variable.");
+			}
+		}
+	}
+
+	/**
+	 * look for the variable in all the blocks (without going in other types)
+	 * 
+	 * @param methodScope
+	 * @param name
+	 * @return
+	 */
+	private static Variable resolveVariableInDescendantBlocks(Scope scope, String name) {
+		VariableWithScope existent = scope.resolveVariable(name);
+		if (existent != null && existent.getScope() == scope) {
+			// take only this scope, not a parent class scope
+			return existent.getVariable();
+		}
+		for (Scope child : scope.getChildren()) {
+			if (child instanceof BasicScope) {
+				Variable var = resolveVariableInDescendantBlocks(child, name);
+				if (var != null) {
+					return var;
+				}
+			}
+		}
+		return null;
+	}
 }

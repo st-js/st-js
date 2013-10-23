@@ -34,4 +34,9 @@ public class DefaultScopeVisitor<T> implements ScopeVisitor<T> {
 		return null;
 	}
 
+	@Override
+	public T apply(MethodScope basicScope) {
+		return null;
+	}
+
 }
