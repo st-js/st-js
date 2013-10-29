@@ -23,6 +23,8 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.stjs.javascript.annotation.BrowserCompatibility;
+
 /**
  * this date is implemented using a java {@link Calendar}. the aim of this class is to offer a similar behavior to the
  * Javascript date.
@@ -111,8 +113,8 @@ import java.util.TimeZone;
  * reason, ISO 8601 and this format specifies numeric representations of date and 
  * time.
  * 
- * The documentation in this class is adapted from the ECMAScript 262 specification
- * (http://www.ecma-international.org/ecma-262/5.1)
+ * The documentation of this class is mostly adapted from the ECMAScript 5.1 Specification: http://www.ecma-international.org/ecma-262/5.1/
+ * Browser compatibility information comes from: http://kangax.github.io/es5-compat-table
  * 
  * @author acraciun, npiguet
  */
@@ -506,6 +508,7 @@ public class Date {
 	 * @param date
 	 * @return
 	 */
+	@BrowserCompatibility("IE:7+")
 	public static double parse(String date) {
 		return new Date(date).getTime();
 	}
@@ -1035,6 +1038,7 @@ public class Date {
 	 * 
 	 * @return this <tt>Date</tt> in UTC formatted using the ISO-8601 format
 	 */
+	@BrowserCompatibility("IE:9+")
 	public String toISOString() {
 		// TODO: code it
 		return null;
@@ -1183,6 +1187,7 @@ public class Date {
 	 * 
 	 * @return the time value designating the UTC date and time of at the moment <tt>now</tt> is called.
 	 */
+	@BrowserCompatibility("IE:9+")
 	public static double now(){
 		// TODO: code it
 		return 0.0;
