@@ -61,7 +61,7 @@ public interface Array<V> extends Iterable<String> {
 
 	public int push(V... values);
 
-	public Array<V> reverse();
+	public void reverse();
 
 	public V shift();
 
@@ -69,41 +69,15 @@ public interface Array<V> extends Iterable<String> {
 
 	public Array<V> slice(int start, int end);
 
-	public Array<V> splice(int start, int deleteCount);
+	public Array<V> splice(int start);
 
-	public Array<V> splice(int start, int deleteCount, V... values);
+	public Array<V> splice(int start, int howMany);
 
-	public Array<V> sort();
-	
-	public Array<V> sort(SortFunction<V> comparefn);
+	public Array<V> splice(int start, int howMany, V... values);
+
+	public void sort(SortFunction<V> function);
 
 	public int unshift(V... values);
 
-	public void forEach(Callback1<V>  callbackfn);
-	
-	public void forEach(Callback3<V, Integer, Array<V>> callbackfn);
-	
-	public String toString();
-	
-	public String toLocaleString();
-	
-	public int lastIndexOf(V searchElement);
-	
-	public int lastIndexOf(V searchElement, int fromIndex);
-	
-	public boolean every(Function3<V, Integer, Array<V>, Boolean> callbackfn);
-	
-	public boolean some(Function3<V, Integer, Array<V>, Boolean> callbackfn);
-	
-	public <T> Array<T> map(Function3<V, Integer, Array<V>, T> callbackfn);
-	
-	public Array<V> filter(Function3<V, Integer, Array<V>, Boolean> callbackfn);
-	
-	public V reduce(Function4<V, V, Integer, Array<V>, V> callbackfn);
-	
-	public <T> T reduce(Function4<T, V, Integer, Array<V>, T> callbackfn, T initialValue);
-	
-	public V reduceRight(Function4<V, V, Integer, Array<V>, V> callbackfn);
-	
-	public <T> T reduceRight(Function4<T, V, Integer, Array<V>, T> callbackfn, T initialValue);
+	public void forEach(Callback1<V> callback);
 }
