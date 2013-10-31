@@ -26,6 +26,9 @@ import java.util.NoSuchElementException;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.SortFunction;
 import org.stjs.javascript.functions.Callback1;
+import org.stjs.javascript.functions.Callback3;
+import org.stjs.javascript.functions.Function3;
+import org.stjs.javascript.functions.Function4;
 
 /**
  * This class implements the {@link Array} interface to be used on the server side.
@@ -167,8 +170,9 @@ public class ArrayImpl<V> implements Array<V> {
 	}
 
 	@Override
-	public void reverse() {
+	public Array<V> reverse() {
 		Collections.reverse(array);
+		return this;
 	}
 
 	@Override
@@ -201,11 +205,6 @@ public class ArrayImpl<V> implements Array<V> {
 	}
 
 	@Override
-	public Array<V> splice(int start) {
-		return splice(start, array.size() - start);
-	}
-
-	@Override
 	public Array<V> splice(int start, int howMany) {
 		ArrayImpl<V> ret = new ArrayImpl<V>();
 		for (int i = 0; i < howMany; ++i) {
@@ -225,13 +224,14 @@ public class ArrayImpl<V> implements Array<V> {
 	}
 
 	@Override
-	public void sort(final SortFunction<V> function) {
+	public Array<V> sort(final SortFunction<V> function) {
 		Collections.sort(array, new Comparator<V>() {
 			@Override
 			public int compare(V a, V b) {
 				return function.$invoke(a, b);
 			}
 		});
+		return this;
 	}
 
 	@Override
@@ -250,5 +250,115 @@ public class ArrayImpl<V> implements Array<V> {
 	@Override
 	public String toString() {
 		return array.toString();
+	}
+
+	@Override
+	public Array<V> sort() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void forEach(Callback3<V, Integer, Array<V>> callbackfn) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String toLocaleString() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int lastIndexOf(V searchElement) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int lastIndexOf(V searchElement, int fromIndex) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public boolean every(Function3<V, Integer, Array<V>, Boolean> callbackfn) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean some(Function3<V, Integer, Array<V>, Boolean> callbackfn) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public <T> Array<T> map(Function3<V, Integer, Array<V>, T> callbackfn) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Array<V> filter(Function3<V, Integer, Array<V>, Boolean> callbackfn) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public V reduce(Function4<V, V, Integer, Array<V>, V> callbackfn) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public <T> T reduce(Function4<T, V, Integer, Array<V>, T> callbackfn,
+			T initialValue) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public V reduceRight(Function4<V, V, Integer, Array<V>, V> callbackfn) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public <T> T reduceRight(Function4<T, V, Integer, Array<V>, T> callbackfn,
+			T initialValue) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
+	/** 
+	 * From ECMA-262 spec, section 9.1:
+	 * Return a default value for the Object. The default value of an object is retrieved by 
+	 * calling the [[DefaultValue]] internal method of the object, passing the optional hint 
+	 * PreferredType. The behaviour of the [[DefaultValue]] internal method is defined by this 
+	 * specification for all native ECMAScript objects in 8.12.8.
+	 * 
+	 * <p>From ECMA-262 spec, section 8.12.8:
+	 * When the [[DefaultValue]] internal method of O is called with hint String, the following steps are taken:<br>
+	 * <ol>
+	 * <li>Let toString be the result of calling the [[Get]] internal method of object O with argument "toString".
+	 * <li>If IsCallable(toString) is true then,
+	 * <ol>
+	 * <li>Let str be the result of calling the [[Call]] internal method of toString, with O as the this value and an empty argument list.
+	 * <li>If str is a primitive value, return str.
+	 * </ol>
+	 * <li>Let valueOf be the result of calling the [[Get]] internal method of object O with argument "valueOf".
+	 * <li>If IsCallable(valueOf) is true then,
+	 * <ol>
+	 * <li>Let val be the result of calling the [[Call]] internal method of valueOf, with O as the this value and an empty argument list.
+	 * <li>If val is a primitive value, return val.
+	 * </ol>
+	 * <li>Throw a TypeError exception.
+	 * </ol>
+	 */
+	private String toStringPrimitive(Object o){
+		return null;
 	}
 }
