@@ -99,6 +99,16 @@ public interface Array<V> extends Iterable<String> {
 	 * @return a new <tt>Array</tt>, containing all the elements of the joined <tt>Arrays</tt>.
 	 */
 	public Array<V> concat(Array<V>... arrays);
+	
+	/**
+	 * Appends all the specified elements in the order they appear in the arguments list to the elements of this
+	 * <tt>Array</tt>. This method does not change the existing arrays, but returns a new array, containing 
+	 * the values of the joined arrays. 
+	 * 
+	 * @param values the elements to be concatenated to this <tt>Array</tt>
+	 * @return a new <tt>Array</tt>, containing all the elements of the joined <tt>Arrays</tt>.
+	 */
+	public Array<V> concat(V... values);
 
 	/**
 	 * Searches this <tt>Array</tt> for the specified item, and returns its position. Items are compared for

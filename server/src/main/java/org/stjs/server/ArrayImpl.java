@@ -361,4 +361,10 @@ public class ArrayImpl<V> implements Array<V> {
 	private String toStringPrimitive(Object o){
 		return null;
 	}
+
+	@Override
+	public Array<V> concat(V... values) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
