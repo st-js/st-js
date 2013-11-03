@@ -32,6 +32,7 @@ import japa.parser.ast.body.EnumDeclaration;
 import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.InitializerDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
+import japa.parser.ast.body.ModifierSet;
 import japa.parser.ast.body.Parameter;
 import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.body.VariableDeclaratorId;
@@ -256,20 +257,33 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		}
 	}
 
+	private MethodWrapper chooseMethodWithBody(ClassWrapper ownerClass, MethodDeclaration n) {
+		List<MethodWrapper> methods = ownerClass.findMethods(n.getName());
+		PreConditions.checkStateNode(n, !methods.isEmpty(), "Method [%s] not  found in the class [%s] line %d", n.getName(),
+				ownerClass.getName(), n.getBeginLine());
+		for (MethodWrapper m : methods) {
+			if (!ModifierSet.isNative(m.getModifiers())) {
+				// this is safe as only one method is allowed with a given name that is not native
+				resolvedMethod(n, m);
+				return m;
+			}
+		}
+		return null;
+	}
+
 	@Override
 	public void visit(final MethodDeclaration n, Scope currentScope) {
 		Checks.checkMethodDeclaration(n, context);
 
+		if (ModifierSet.isNative(n.getModifiers())) {
+			// do nothing for native methods
+			// TODO set at least the method wrapper
+			return;
+		}
 		// the scope is where the method is defined, i.e. the classScope
 		((ASTNodeData) n.getData()).setScope(currentScope);
 		ClassWrapper ownerClass = currentScope.closest(ClassScope.class).getClazz();
-		List<MethodWrapper> methods = ownerClass.findMethods(n.getName());
-		PreConditions.checkStateNode(n, !methods.isEmpty(), "Method [%s] not  found in the class [%s] line %d", n.getName(),
-				ownerClass.getName(), n.getBeginLine());
-
-		// this is safe as only one method is allowed with a given name
-		MethodWrapper method = methods.get(0);
-		resolvedMethod(n, method);
+		MethodWrapper method = chooseMethodWithBody(ownerClass, n);
 
 		MethodScope scope = handleMethodDeclaration(n, n.getParameters(), method.getParameterTypes(), method.getTypeParameters(), currentScope);
 		super.visit(n, new BasicScope(scope, context));
