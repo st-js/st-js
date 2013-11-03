@@ -185,8 +185,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	@Override
 	public void visit(final CompilationUnit n, Scope inputScope) {
-		PreConditions.checkStateNode(n, inputScope instanceof CompilationUnitScope,
-				"A compilationUnitScope was expected. Got %s", inputScope);
+		PreConditions.checkStateNode(n, inputScope instanceof CompilationUnitScope, "A compilationUnitScope was expected. Got %s", inputScope);
 
 		CompilationUnitScope scope = (CompilationUnitScope) inputScope;
 		// asterisk declaration have lower priority => process them first (JLS Â§7.5.2)
@@ -265,27 +264,25 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		((ASTNodeData) n.getData()).setScope(currentScope);
 		ClassWrapper ownerClass = currentScope.closest(ClassScope.class).getClazz();
 		List<MethodWrapper> methods = ownerClass.findMethods(n.getName());
-		PreConditions.checkStateNode(n, !methods.isEmpty(), "Method [%s] not  found in the class [%s] line %d",
-				n.getName(), ownerClass.getName(), n.getBeginLine());
+		PreConditions.checkStateNode(n, !methods.isEmpty(), "Method [%s] not  found in the class [%s] line %d", n.getName(),
+				ownerClass.getName(), n.getBeginLine());
 
 		// this is safe as only one method is allowed with a given name
 		MethodWrapper method = methods.get(0);
 		resolvedMethod(n, method);
 
-		MethodScope scope = handleMethodDeclaration(n, n.getParameters(), method.getParameterTypes(),
-				method.getTypeParameters(), currentScope);
+		MethodScope scope = handleMethodDeclaration(n, n.getParameters(), method.getParameterTypes(), method.getTypeParameters(), currentScope);
 		super.visit(n, new BasicScope(scope, context));
 	}
 
-	private MethodScope handleMethodDeclaration(Node node, final List<Parameter> parameters,
-			java.lang.reflect.Type[] resolvedParameterTypes,
+	private MethodScope handleMethodDeclaration(Node node, final List<Parameter> parameters, java.lang.reflect.Type[] resolvedParameterTypes,
 			TypeVariable<? extends GenericDeclaration>[] resolvedTypeParameters, Scope currentScope) {
-		return handleMethodDeclaration(node, parameters, TypeWrappers.wrap(resolvedParameterTypes),
-				TypeWrappers.wrap(resolvedTypeParameters), currentScope);
+		return handleMethodDeclaration(node, parameters, TypeWrappers.wrap(resolvedParameterTypes), TypeWrappers.wrap(resolvedTypeParameters),
+				currentScope);
 	}
 
-	private MethodScope handleMethodDeclaration(Node node, final List<Parameter> parameters,
-			TypeWrapper[] resolvedParameterTypes, TypeWrapper[] resolvedTypeParameters, Scope currentScope) {
+	private MethodScope handleMethodDeclaration(Node node, final List<Parameter> parameters, TypeWrapper[] resolvedParameterTypes,
+			TypeWrapper[] resolvedTypeParameters, Scope currentScope) {
 
 		MethodScope scope = new MethodScope(currentScope, context);
 		if (resolvedTypeParameters != null) {
@@ -326,8 +323,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 						"You cannot use Java arrays because they are incompatible with Javascript arrays. "
 								+ "Use org.stjs.javascript.Array<T> instead. "
 								+ "You can use also the method org.stjs.javascript.Global.$castArray to convert an "
-								+ "existent Java array to the corresponding Array type."
-								+ "The only exception is void main(String[] args).");
+								+ "existent Java array to the corresponding Array type." + "The only exception is void main(String[] args).");
 			}
 			return refType.getType(); // type is a primitive or class
 		}
@@ -395,15 +391,13 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 				WildcardType wildcardType = (WildcardType) type;
 				resolvedType = resolveWildcardType(scope, wildcardType);
 			} else {
-				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(type),
-						"Unexpected type:" + type);
+				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(type), "Unexpected type:" + type);
 			}
 			int arrayCount = getArrayCount(aType);
 			return ClassUtils.arrayOf(resolvedType, arrayCount);
 		}
 		catch (IllegalArgumentException ex) {
-			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(type),
-					ex.getMessage(), ex);
+			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(type), ex.getMessage(), ex);
 		}
 	}
 
@@ -433,8 +427,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 
 	@Override
 	public void visit(VariableDeclarationExpr n, Scope scope) {
-		PreConditions.checkStateNode(n, scope instanceof AbstractScope,
-				"The variable [%s] is not defined inside a AbstractScope", n);
+		PreConditions.checkStateNode(n, scope instanceof AbstractScope, "The variable [%s] is not defined inside a AbstractScope", n);
 
 		Checks.checkVariableDeclarationExpr(n, context);
 
@@ -443,16 +436,6 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			TypeWrapper clazz = resolveType(basicScope, n.getType());
 			resolvedType(n, clazz);
 			for (VariableDeclarator var : n.getVars()) {
-				VariableWithScope existingVariable = basicScope.resolveVariable(var.getId().getName());
-				if (existingVariable != null && existingVariable.getVariable() instanceof LocalVariable) {
-					throw new JavascriptFileGenerationException(
-							context.getInputFile(),
-							new SourcePosition(n),
-							"The variable '"
-									+ var.getId().getName()
-									+ "' is already defined in this method. In JavaScript the scope of a variable cannot be a "
-									+ "block but the method enclosing the block. Please rename your variable.");
-				}
 				basicScope.addVariable(new LocalVariable(clazz, var.getId().getName()));
 			}
 		}
@@ -465,8 +448,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		// TODO : this is broken in Java7 because a catch block might declare more than one exception
 		// would need a new javap
 		BasicScope scope = new BasicScope(currentScope, context);
-		scope.addVariable(new ParameterVariable(resolveType(scope, n.getExcept().getType()), n.getExcept().getId()
-				.getName()));
+		scope.addVariable(new ParameterVariable(resolveType(scope, n.getExcept().getType()), n.getExcept().getId().getName()));
 		super.visit(n, scope);
 	}
 
@@ -479,8 +461,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		MethodScope scope;
 		if (c == null) {
 			// synthetic constructor
-			scope = handleMethodDeclaration(n, n.getParameters(), new java.lang.reflect.Type[0],
-					new TypeVariable<?>[0], currentScope);
+			scope = handleMethodDeclaration(n, n.getParameters(), new java.lang.reflect.Type[0], new TypeVariable<?>[0], currentScope);
 		} else {
 			java.lang.reflect.Type[] parameterTypes = c.getGenericParameterTypes();
 			// enums receive label and ordinal as first arguments
@@ -558,8 +539,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			ClassScope classScope = scope.closest(ClassScope.class);
 
 			ClassWrapper anonymousClass = searchAnonymousClass(classScope.getClazz().getClazz(), n, scope);
-			PreConditions.checkStateNodeNotNull(n, anonymousClass,
-					"Could not find anoynmous class for node at line %d", n.getBeginLine());
+			PreConditions.checkStateNodeNotNull(n, anonymousClass, "Could not find anoynmous class for node at line %d", n.getBeginLine());
 
 			ClassScope anonymousClassScope = addClassToScope((AbstractScope) scope, anonymousClass);
 
@@ -590,8 +570,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 			return classLoader.loadClassOrInnerClass(expr.toString());
 		}
 		catch (IllegalArgumentException ex) {
-			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(expr),
-					ex.getMessage(), ex);
+			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(expr), ex.getMessage(), ex);
 		}
 	}
 
@@ -687,8 +666,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	public void visit(ClassExpr n, Scope arg) {
 		super.visit(n, arg);
 		TypeWrapper type = resolvedType(n.getType());
-		resolvedType(n, TypeWrappers.wrap(new ParameterizedTypeImpl(Class.class, new java.lang.reflect.Type[]{ type
-				.getType() }, null)));
+		resolvedType(n, TypeWrappers.wrap(new ParameterizedTypeImpl(Class.class, new java.lang.reflect.Type[]{ type.getType() }, null)));
 	}
 
 	@Override
@@ -751,8 +729,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	@Override
 	public void visit(DoubleLiteralExpr n, Scope arg) {
 		super.visit(n, arg);
-		resolvedType(n, TypeWrappers.wrap(n.getValue().endsWith("f") || n.getValue().endsWith("F") ? float.class
-				: double.class));
+		resolvedType(n, TypeWrappers.wrap(n.getValue().endsWith("f") || n.getValue().endsWith("F") ? float.class : double.class));
 	}
 
 	@Override
@@ -786,13 +763,11 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		}
 		if (n.getScope() == null) {
 			MethodsWithScope ms = arg.resolveMethod(n.getName(), argumentTypes);
-			PreConditions.checkStateNodeNotNull(n, ms, "%s The method %s could not be resolved", location(n),
-					n.getName());
+			PreConditions.checkStateNodeNotNull(n, ms, "%s The method %s could not be resolved", location(n), n.getName());
 			method = ms.getMethod();
 		} else {
 			TypeWrapper scopeType = resolvedType(n.getScope());
-			PreConditions.checkStateNodeNotNull(n, scopeType, "%s The method %s's scope could not be resolved",
-					location(n), n.getName());
+			PreConditions.checkStateNodeNotNull(n, scopeType, "%s The method %s's scope could not be resolved", location(n), n.getName());
 			method = scopeType.findMethod(n.getName(), argumentTypes).getOrThrow(
 					location(n) + "-> type:" + scopeType.getName() + " m:" + n.getName());
 		}
@@ -830,8 +805,8 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 				Checks.checkGlobalVariable(n, context, arg);
 			} else {
 				TypeWithScope innerType = arg.resolveType(scopeType.getName() + "$" + n.getField());
-				PreConditions.checkStateNodeNotNull(n, innerType,
-						"%s no inner type nor field could be resolved for '%s'", location(n), n.getField());
+				PreConditions.checkStateNodeNotNull(n, innerType, "%s no inner type nor field could be resolved for '%s'", location(n),
+						n.getField());
 				resolvedType(n, innerType.getType());
 			}
 		}
@@ -839,8 +814,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	}
 
 	private boolean isClassNamePart(Node parent) {
-		return parent instanceof QualifiedNameExpr || parent instanceof ImportDeclaration
-				|| parent instanceof PackageDeclaration;
+		return parent instanceof QualifiedNameExpr || parent instanceof ImportDeclaration || parent instanceof PackageDeclaration;
 	}
 
 	@Override
@@ -871,8 +845,7 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 					}
 				}
 				catch (IllegalArgumentException ex) {
-					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
-							ex.getMessage(), ex);
+					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n), ex.getMessage(), ex);
 				}
 			} else {
 				resolvedVariable(n, var.getVariable());
