@@ -27,6 +27,8 @@ public interface TypeWrapper {
 
 	Option<MethodWrapper> findMethod(String name, TypeWrapper... paramTypes);
 
+	Option<MethodWrapper> findConstructor(TypeWrapper... paramTypes);
+
 	/**
 	 * @return the last part of the type's name (ex: the Class name)
 	 */

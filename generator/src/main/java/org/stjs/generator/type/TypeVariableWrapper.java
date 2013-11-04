@@ -24,6 +24,7 @@ import org.stjs.generator.utils.Option;
 
 /**
  * this is a wrapper around a {@link TypeVariable} to allow the discovery of a field or a method
+ * 
  * @author acraciun
  */
 public class TypeVariableWrapper<D extends GenericDeclaration> implements TypeWrapper {
@@ -54,6 +55,18 @@ public class TypeVariableWrapper<D extends GenericDeclaration> implements TypeWr
 	public Option<MethodWrapper> findMethod(String name, TypeWrapper... paramTypes) {
 		for (TypeWrapper bound : boundsWrappers) {
 			Option<MethodWrapper> method = bound.findMethod(name, paramTypes);
+			if (method.isDefined()) {
+				return method;
+			}
+		}
+
+		return Option.none();
+	}
+
+	@Override
+	public Option<MethodWrapper> findConstructor(TypeWrapper... paramTypes) {
+		for (TypeWrapper bound : boundsWrappers) {
+			Option<MethodWrapper> method = bound.findConstructor(paramTypes);
 			if (method.isDefined()) {
 				return method;
 			}

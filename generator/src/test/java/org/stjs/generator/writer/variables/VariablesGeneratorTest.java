@@ -34,12 +34,6 @@ public class VariablesGeneratorTest {
 		assertCodeContains(Variables5.class, "k = x;");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
-	public void testVariableDeclaredTwiceInMethodScope() {
-		// "x" is declared twice in the method
-		generate(Variables6.class);
-	}
-
 	@Test
 	public void testVariableUseFromGlobalScopeBeforeDeclaredInMethod() {
 		assertCodeContains(Variables7.class, "y = x;");

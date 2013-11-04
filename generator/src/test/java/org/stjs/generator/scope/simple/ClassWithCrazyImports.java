@@ -7,7 +7,6 @@ import static org.stjs.generator.scope.simple.SimpleClass.AmbiguousName.InnerCla
 
 import org.stjs.generator.scope.declarations.MyCallback;
 import org.stjs.generator.scope.inner.ClassDeclaringInnerClass.InnerClass;
-import org.stjs.generator.scope.simple.SimpleClass.AmbiguousName;
 import org.stjs.generator.scope.simple.SimpleClass.AmbiguousName.InnerClassLevel2;
 import org.stjs.generator.scope.simple.SimpleClass.InnerClass2;
 import org.stjs.javascript.functions.Callback0;
@@ -26,7 +25,7 @@ public class ClassWithCrazyImports {
 		Integer innerFieldx = innerField;
 		SimpleClass y;
 		InnerClass2 k;
-		AmbiguousName n = AmbiguousName;
+		org.stjs.generator.scope.simple.SimpleClass.AmbiguousName n = AmbiguousName;
 		AmbiguousName();
 	}
 

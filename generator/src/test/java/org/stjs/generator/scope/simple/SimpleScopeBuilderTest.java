@@ -36,11 +36,9 @@ public class SimpleScopeBuilderTest {
 		String path = ClassWithCrazyImports.class.getName().replace('.', File.separatorChar);
 		path = "src/test/java/" + path + ".java";
 		CompilationUnit compilationUnit = JavaParser.parse(new File(path));
-		GeneratorConfiguration config =
-				new GeneratorConfigurationBuilder().allowedPackage("org.stjs.generator").build();
-		ClassLoaderWrapper classLoader =
-				new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader(), config.getAllowedPackages(),
-						config.getAllowedJavaLangClasses());
+		GeneratorConfiguration config = new GeneratorConfigurationBuilder().allowedPackage("org.stjs.generator").build();
+		ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader(), config.getAllowedPackages(),
+				config.getAllowedJavaLangClasses());
 		GenerationContext context = new GenerationContext(new File(path), config);
 		// set the parent of each node
 		compilationUnit.accept(new SetParentVisitor(), context);
@@ -74,7 +72,7 @@ public class SimpleScopeBuilderTest {
 		assertVariableEquals(methodScope, InnerClass.class, "tt");
 		assertVariableEquals(methodScope, String.class, "m");
 
-		NameScopeWalker methodBodyScope = methodScope.nextChild();
+		NameScopeWalker methodBodyScope = methodScope;// .nextChild();
 		assertVariableEquals(methodBodyScope, Integer.class, "f");
 		assertVariableEquals(methodBodyScope, InnerClassLevel2.class, "x");
 		assertVariableEquals(methodBodyScope, SimpleClass.class, "y");
@@ -82,14 +80,14 @@ public class SimpleScopeBuilderTest {
 
 		assertMethodsEquals(methodBodyScope.getScope(), 2, SimpleClass.class, "method");
 
-		NameScopeWalker method2BodyScope = classScope.nextChild().nextChild();
+		NameScopeWalker method2BodyScope = classScope.nextChild();// .nextChild();
 		NameScopeWalker anonymousClass1 = method2BodyScope.nextChild();
-		NameScopeWalker anonymousClass1_1 = anonymousClass1.nextChild().nextChild().nextChild();
-		NameScopeWalker anopnymousClass2Method1Body = anonymousClass1_1.nextChild().nextChild();
+		NameScopeWalker anonymousClass1_1 = anonymousClass1.nextChild().nextChild();// .nextChild();
+		NameScopeWalker anopnymousClass2Method1Body = anonymousClass1_1.nextChild();// .nextChild();
 		assertVariableEquals(anopnymousClass2Method1Body, byte.class, "b");
 
 		NameScopeWalker anonymousClass2 = method2BodyScope.nextChild();
-		NameScopeWalker anopnymousClass2Method2Body = anonymousClass2.nextChild().nextChild();
+		NameScopeWalker anopnymousClass2Method2Body = anonymousClass2.nextChild();// .nextChild();
 		assertVariableEquals(anopnymousClass2Method2Body, InnerClassC.class, "k");
 		assertVariableEquals(anonymousClass2, int.class, "counter");
 

@@ -19,8 +19,12 @@ import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.lang.reflect.Modifier.STATIC;
+import japa.parser.ast.body.BodyDeclaration;
+import japa.parser.ast.body.ClassOrInterfaceDeclaration;
+import japa.parser.ast.body.ConstructorDeclaration;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
@@ -29,6 +33,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -71,23 +76,20 @@ public class ClassWrapper implements TypeWrapper {
 	private Map<String, FieldWrapper> fields;
 	private Map<String, TypeWrapper> types;
 	private Multimap<String, MethodWrapper> methods;
+	private List<MethodWrapper> constructors;
 
-	public ClassWrapper(@Nonnull
-	Class<?> clazz) {
+	public ClassWrapper(@Nonnull Class<?> clazz) {
 		Preconditions.checkNotNull(clazz);
 		this.clazz = clazz;
 	}
 
-	private FieldWrapper buildFieldWrapper(String name, TypeWrapper type, int modifiers, Class<?> ownerClass,
-			TypeWrapper[] actualTypeArgs) {
+	private FieldWrapper buildFieldWrapper(String name, TypeWrapper type, int modifiers, Class<?> ownerClass, TypeWrapper[] actualTypeArgs) {
 		// substitute the field's type with the actual type if the field has a generic type
-		return new FieldWrapper(name, substituteType(type, ownerClass, actualTypeArgs), modifiers, this,
-				ownerClass.equals(clazz));
+		return new FieldWrapper(name, substituteType(type, ownerClass, actualTypeArgs), modifiers, this, ownerClass.equals(clazz));
 	}
 
 	private TypeWrapper substituteTypeInParameterizedType(ParameterizedTypeWrapper origParamType, Class<?> ownerClass,
-			@Nullable
-			TypeWrapper[] typeArguments) {
+			@Nullable TypeWrapper[] typeArguments) {
 		TypeWrapper[] argumentTypes = origParamType.getActualTypeArguments();
 		TypeWrapper[] modifiedArgumentTypes = new TypeWrapper[argumentTypes.length];
 		boolean modified = false;
@@ -101,14 +103,13 @@ public class ClassWrapper implements TypeWrapper {
 	/**
 	 * @return a TypeWrapper with the parameters replaced by the given arguments
 	 */
-	private TypeWrapper substituteType(TypeWrapper origType, Class<?> ownerClass, @Nullable
-	TypeWrapper[] typeArguments) {
+	private TypeWrapper substituteType(TypeWrapper origType, Class<?> ownerClass, @Nullable TypeWrapper[] typeArguments) {
 		if (typeArguments == null) {
 			return origType;
 		}
 		PreConditions.checkState(ownerClass.getTypeParameters().length == typeArguments.length,
-				"Difference length between class parameters (%d) and arguments list (%d)",
-				ownerClass.getTypeParameters().length, typeArguments.length);
+				"Difference length between class parameters (%d) and arguments list (%d)", ownerClass.getTypeParameters().length,
+				typeArguments.length);
 		if (origType instanceof ParameterizedTypeWrapper) {
 			ParameterizedTypeWrapper origParamType = (ParameterizedTypeWrapper) origType;
 			return substituteTypeInParameterizedType(origParamType, ownerClass, typeArguments);
@@ -124,6 +125,7 @@ public class ClassWrapper implements TypeWrapper {
 
 	/**
 	 * when the a type variable T is replaced by a simple wildcard (?), it in fact inherits the extends of the type var
+	 * 
 	 * @param typeWrapper
 	 * @param typeVar
 	 * @return
@@ -136,9 +138,8 @@ public class ClassWrapper implements TypeWrapper {
 			return typeWrapper;
 		}
 		WildcardType wctype = (WildcardType) typeWrapper.getType();
-		boolean unbounded =
-				wctype.getUpperBounds().length == 0 || wctype.getUpperBounds().length == 1
-						&& wctype.getUpperBounds()[0] == Object.class;
+		boolean unbounded = wctype.getUpperBounds().length == 0 || wctype.getUpperBounds().length == 1
+				&& wctype.getUpperBounds()[0] == Object.class;
 		if (!unbounded) {
 			// already bounded with something else
 			return typeWrapper;
@@ -157,15 +158,17 @@ public class ClassWrapper implements TypeWrapper {
 		return substTypes;
 	}
 
-	private MethodWrapper buildMethodWrapper(Method method, TypeWrapper returnType, TypeWrapper[] parameterTypes,
-			int modifiers, TypeVariableWrapper<Method>[] typeParameters, Class<?> ownerClass,
-			TypeWrapper[] actualTypeArgs) {
-		return new MethodWrapper(method, substituteType(returnType, ownerClass, actualTypeArgs), substituteTypes(
-				parameterTypes, ownerClass, actualTypeArgs), modifiers, typeParameters, this, clazz.equals(ownerClass));
+	// CHECKSTYLE:OFF - too many params
+	private MethodWrapper buildMethodWrapper(String name, TypeWrapper returnType, TypeWrapper[] parameterTypes, int modifiers,
+			TypeVariableWrapper<Method>[] typeParameters, Class<?> ownerClass, TypeWrapper[] actualTypeArgs, Annotation[] annotations) {
+		return new MethodWrapper(name, substituteType(returnType, ownerClass, actualTypeArgs), substituteTypes(parameterTypes, ownerClass,
+				actualTypeArgs), modifiers, typeParameters, this, clazz.equals(ownerClass), annotations);
 	}
 
+	// CHECKSTYLE:ON - too many params
+
 	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "PZLA_PREFER_ZERO_LENGTH_ARRAYS", //
-	justification = "null is actually for a raw class")
+			justification = "null is actually for a raw class")
 	private TypeWrapper[] getActualTypeArgs(Type type, Class<?> subTypeClass, TypeWrapper[] subTypeActualTypeArgs) {
 		if (type instanceof Class<?>) {
 			return null;
@@ -182,8 +185,7 @@ public class ClassWrapper implements TypeWrapper {
 		if (type instanceof GenericArrayType) {
 			return null;
 		}
-		throw new JavascriptClassGenerationException(type.getClass().getName(), "Received unknown type:" + type
-				+ " of class:" + type.getClass());
+		throw new JavascriptClassGenerationException(type.getClass().getName(), "Received unknown type:" + type + " of class:" + type.getClass());
 	}
 
 	private void prepareFieldsMethodsAndTypes() {
@@ -194,6 +196,82 @@ public class ClassWrapper implements TypeWrapper {
 		types = new HashMap<String, TypeWrapper>();
 		methods = ArrayListMultimap.create();
 		addFieldsMethodsAndTypes(getType(), null, null);
+
+		// add constructors
+		constructors = new ArrayList<MethodWrapper>();
+
+	}
+
+	private int getTotalNumberOfParamsInSource(ClassOrInterfaceDeclaration sourceDeclaration) {
+		int totalParamsInSource = 0;
+		if (sourceDeclaration.getMembers() != null) {
+			for (BodyDeclaration member : sourceDeclaration.getMembers()) {
+				if (member instanceof ConstructorDeclaration) {
+					ConstructorDeclaration c = (ConstructorDeclaration) member;
+					totalParamsInSource += c.getParameters() == null ? 0 : c.getParameters().size();
+				}
+			}
+		}
+		return totalParamsInSource;
+	}
+
+	private int getTotalNumberOfParamsInBinary() {
+		int total = 0;
+		for (Constructor<?> c : clazz.getDeclaredConstructors()) {
+			if (!c.isSynthetic()) {
+				total += c.getGenericParameterTypes().length;
+			}
+		}
+		return total;
+	}
+
+	private int getConstructorCount() {
+		int total = 0;
+		for (Constructor<?> c : clazz.getDeclaredConstructors()) {
+			if (!c.isSynthetic()) {
+				total++;
+			}
+		}
+		return total;
+	}
+
+	/**
+	 * adds all the constructors of this class. It needs the source declaration in order to figure out how many
+	 * parameters are added by the compiler to the constructors (for example for non-static inner classes). It does this
+	 * by counting the parameters for the constructors in the source and also in the code (non synthetic ones). Only
+	 * after that the constructors (from the source and from the binary class) may be matched.
+	 * 
+	 * @param sourceDeclaration
+	 */
+	public void addConstructors(ClassOrInterfaceDeclaration sourceDeclaration) {
+		int totalParamsInSource = getTotalNumberOfParamsInSource(sourceDeclaration);
+		int totalParamsInBinary = getTotalNumberOfParamsInBinary();
+		int constructorCount = getConstructorCount();
+
+		// enums receive label and ordinal as first arguments
+		// for non-static inner classes the constructor contains as first parameter the type of the outer type
+		int skipFirstParams = constructorCount == 0 ? 0 : (totalParamsInBinary - totalParamsInSource) / constructorCount;
+
+		for (Constructor<?> c : clazz.getDeclaredConstructors()) {
+			addConstructor(c, skipFirstParams);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void addConstructor(Constructor<?> c, int skipFirstParams) {
+		if (c.isSynthetic()) {
+			return;
+		}
+		TypeWrapper[] paramTypes = TypeWrappers.wrap(c.getGenericParameterTypes());
+
+		if (skipFirstParams > 0) {
+			// remove the first unneeded params
+			paramTypes = Arrays.copyOfRange(paramTypes, skipFirstParams, paramTypes.length);
+		}
+		TypeVariableWrapper<Method>[] typeParams = TypeWrappers.wrap(c.getTypeParameters());
+
+		constructors.add(buildMethodWrapper("new", TypeWrappers.wrap(clazz), paramTypes, c.getModifiers(), typeParams, clazz,
+				getActualTypeArgs(getType(), null, null), c.getAnnotations()));
 	}
 
 	private void addFieldsMethodsAndTypes(Type type, Class<?> aRawClass, TypeWrapper[] someActualTypeArgs) {
@@ -231,17 +309,13 @@ public class ClassWrapper implements TypeWrapper {
 		for (Field f : rawClass.getDeclaredFields()) {
 			if (fields.get(f.getName()) == null) {
 				// keep the version from the most specific class
-				fields.put(
-						f.getName(),
-						buildFieldWrapper(f.getName(), TypeWrappers.wrap(f.getGenericType()), f.getModifiers(),
-								rawClass, actualTypeArgs));
+				fields.put(f.getName(),
+						buildFieldWrapper(f.getName(), TypeWrappers.wrap(f.getGenericType()), f.getModifiers(), rawClass, actualTypeArgs));
 			}
 		}
 		if (rawClass.isArray()) {
 			// add the "length" field not listed for generic arrays
-			fields.put(
-					"length",
-					buildFieldWrapper("length", TypeWrappers.wrap(int.class), Modifier.PUBLIC, rawClass, actualTypeArgs));
+			fields.put("length", buildFieldWrapper("length", TypeWrappers.wrap(int.class), Modifier.PUBLIC, rawClass, actualTypeArgs));
 		}
 	}
 
@@ -257,8 +331,8 @@ public class ClassWrapper implements TypeWrapper {
 			TypeVariableWrapper<Method>[] typeParams = TypeWrappers.wrap(m.getTypeParameters());
 			methods.put(
 					m.getName(),
-					buildMethodWrapper(m, TypeWrappers.wrap(m.getGenericReturnType()), paramTypes, m.getModifiers(),
-							typeParams, rawClass, actualTypeArgs));
+					buildMethodWrapper(m.getName(), TypeWrappers.wrap(m.getGenericReturnType()), paramTypes, m.getModifiers(), typeParams,
+							rawClass, actualTypeArgs, m.getAnnotations()));
 		}
 
 	}
@@ -299,7 +373,7 @@ public class ClassWrapper implements TypeWrapper {
 
 	public Option<ClassWrapper> getDeclaringClass() {
 		Class<?> declaringClass = clazz.getDeclaringClass();
-		return declaringClass == null ? Option.<ClassWrapper> none() : Option.some(new ClassWrapper(declaringClass));
+		return declaringClass == null ? Option.<ClassWrapper>none() : Option.some(new ClassWrapper(declaringClass));
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -323,7 +397,7 @@ public class ClassWrapper implements TypeWrapper {
 	public Option<FieldWrapper> findField(String name) {
 		prepareFieldsMethodsAndTypes();
 		FieldWrapper f = fields.get(name);
-		return f == null ? Option.<FieldWrapper> none() : Option.some(f);
+		return f == null ? Option.<FieldWrapper>none() : Option.some(f);
 	}
 
 	public List<MethodWrapper> findMethods(final String name) {
@@ -370,13 +444,23 @@ public class ClassWrapper implements TypeWrapper {
 		return Lists.newArrayList(methods.values());
 	}
 
+	@Override
+	public Option<MethodWrapper> findConstructor(TypeWrapper... paramTypes) {
+		MethodWrapper w = MethodSelector.resolveMethod(constructors, paramTypes);
+		if (w != null) {
+			return Option.some(w);
+		}
+
+		return Option.none();
+	}
+
 	public boolean hasDeclaredField(String fieldName) {
 		return findField(fieldName).isDefined();
 	}
 
 	public Option<ClassWrapper> getSuperclass() {
 		Class<?> superClass = clazz.getSuperclass();
-		return superClass == null ? Option.<ClassWrapper> none() : Option.some(new ClassWrapper(superClass));
+		return superClass == null ? Option.<ClassWrapper>none() : Option.some(new ClassWrapper(superClass));
 	}
 
 	@Override
@@ -413,13 +497,12 @@ public class ClassWrapper implements TypeWrapper {
 
 	public List<ClassWrapper> getDeclaredNonPrivateStaticClasses() {
 
-		return ImmutableList.copyOf(transform(
-				filter(Arrays.asList(clazz.getDeclaredClasses()), new Predicate<Class<?>>() {
-					@Override
-					public boolean apply(Class<?> clazz) {
-						return isStaticButNotPrivate(clazz.getModifiers());
-					}
-				}), WRAP_CLASS));
+		return ImmutableList.copyOf(transform(filter(Arrays.asList(clazz.getDeclaredClasses()), new Predicate<Class<?>>() {
+			@Override
+			public boolean apply(Class<?> clazz) {
+				return isStaticButNotPrivate(clazz.getModifiers());
+			}
+		}), WRAP_CLASS));
 	}
 
 	public List<TypeWrapper> getDeclaredClasses() {
@@ -430,6 +513,10 @@ public class ClassWrapper implements TypeWrapper {
 	public List<FieldWrapper> getDeclaredFields() {
 		prepareFieldsMethodsAndTypes();
 		return Lists.newArrayList(fields.values());
+	}
+
+	public List<MethodWrapper> findConstructors() {
+		return ImmutableList.copyOf(constructors);
 	}
 
 	@Override
@@ -509,4 +596,5 @@ public class ClassWrapper implements TypeWrapper {
 	public TypeWrapper getSuperClass() {
 		return TypeWrappers.wrap(clazz.getGenericSuperclass());
 	}
+
 }

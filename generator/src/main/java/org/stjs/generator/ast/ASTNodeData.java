@@ -24,6 +24,7 @@ import org.stjs.generator.variable.Variable;
 
 /**
  * this is the data associated to a node in the AST
+ * 
  * @author acraciun
  */
 public class ASTNodeData {
@@ -35,7 +36,8 @@ public class ASTNodeData {
 	private TypeWrapper resolvedType;
 
 	/**
-	 * this is the method resolved only for a methodCall
+	 * this is the method resolved only for a methodCall. If the node is a ConstructorDeclaration, this method
+	 * corresponds to a constructor
 	 */
 	private MethodWrapper resolvedMethod;
 

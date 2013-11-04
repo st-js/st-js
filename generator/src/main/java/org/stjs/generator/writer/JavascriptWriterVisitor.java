@@ -144,6 +144,7 @@ import org.stjs.generator.utils.PreConditions;
 import org.stjs.generator.variable.Variable;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.annotation.GlobalScope;
+import org.stjs.javascript.annotation.Native;
 
 /**
  * This class visits the AST corresponding to a Java file and generates the corresponding Javascript code. It presumes
@@ -608,7 +609,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	}
 
 	public void printArguments(List<Expression> expressions, GenerationContext context) {
-		printArguments(Collections.<String> emptyList(), expressions, Collections.<String> emptyList(), context);
+		printArguments(Collections.<String>emptyList(), expressions, Collections.<String>emptyList(), context);
 	}
 
 	public void printArguments(Collection<String> beforeParams, Collection<Expression> expressions, Collection<String> afterParams,
@@ -686,8 +687,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 			// special construction to handle the inline body
 			printer.print("new ");
-			ClassOrInterfaceDeclaration inlineFakeClass =
-					buildClassDeclaration(GeneratorConstants.SPECIAL_INLINE_TYPE, n.getType(), n.getAnonymousClassBody());
+			ClassOrInterfaceDeclaration inlineFakeClass = buildClassDeclaration(GeneratorConstants.SPECIAL_INLINE_TYPE, n.getType(),
+					n.getAnonymousClassBody());
 			inlineFakeClass.setData(n.getData());
 			inlineFakeClass.accept(this, context);
 
@@ -713,6 +714,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(MethodDeclaration n, GenerationContext context) {
+		if (ModifierSet.isNative(n.getModifiers())) {
+			// native methods are there only to indicate already existing javascript code - or to allow method
+			// overloading
+			return;
+		}
 		printComments(n, context);
 		printMethod(names.getMethodName(resolvedMethod(n)), n.getParameters(), n.getModifiers(), n.getBody(), context, resolvedType(parent(n)),
 				false, false);
@@ -738,7 +744,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.print(".apply(this, arguments)");
 			} else {
 				printer.print(".call");
-				printArguments(Collections.singleton("this"), args, Collections.<String> emptyList(), context);
+				printArguments(Collections.singleton("this"), args, Collections.<String>emptyList(), context);
 			}
 			printer.print(";");
 
@@ -772,6 +778,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(ConstructorDeclaration n, GenerationContext context) {
+		MethodWrapper c = ASTNodeData.resolvedMethod(n);
+		if (c != null && c.getAnnotationDirectly(Native.class) != null) {
+			// this is a "native" constructor - no code is generator
+			return;
+		}
 		printComments(n, context);
 		Option<ClassWrapper> superClass = scope(n).closest(ClassScope.class).getClazz().getSuperclass();
 		if (superClass.isDefined() && !ClassUtils.isSyntheticType(superClass.getOrThrow())) {
@@ -976,7 +987,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				printer.print(type.getSimpleBinaryName());
 			}
 			printer.print("(){");
-			addCallToSuper(scope, context, Collections.<Expression> emptyList(), inlineType);
+			addCallToSuper(scope, context, Collections.<Expression>emptyList(), inlineType);
 			printer.print("}");
 		} else {
 			constr.accept(this, context);
@@ -1068,6 +1079,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	/**
 	 * print the information needed to deserialize type-safe from json
+	 * 
 	 * @param n
 	 * @param context
 	 */
@@ -1129,6 +1141,10 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		ConstructorDeclaration constr = null;
 		for (BodyDeclaration member : members) {
 			if (member instanceof ConstructorDeclaration) {
+				MethodWrapper constructorWrapper = ASTNodeData.resolvedMethod(member);
+				if (constructorWrapper.getAnnotationDirectly(Native.class) != null) {
+					continue;
+				}
 				if (constr == null) {
 					constr = (ConstructorDeclaration) member;
 				} else {
@@ -1326,8 +1342,8 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	public void visit(BinaryExpr n, GenerationContext context) {
 		TypeWrapper leftType = ASTNodeData.resolvedType(n.getLeft());
 		TypeWrapper rightType = ASTNodeData.resolvedType(n.getRight());
-		boolean integerDivision =
-				n.getOperator() == Operator.divide && ClassUtils.isIntegerType(leftType) && ClassUtils.isIntegerType(rightType);
+		boolean integerDivision = n.getOperator() == Operator.divide && ClassUtils.isIntegerType(leftType)
+				&& ClassUtils.isIntegerType(rightType);
 
 		if (integerDivision) {
 			printer.print("stjs.trunc(");
@@ -1439,7 +1455,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			// Non static reference to parent type
 			printer.print(names.getTypeName(method.getOwnerType()));
 			printer.print(".").print(JavascriptKeywords.PROTOTYPE).print(".").print(names.getMethodName(method)).print(".call");
-			printArguments(Collections.singleton(JavascriptKeywords.THIS), n.getArgs(), Collections.<String> emptyList(), context);
+			printArguments(Collections.singleton(JavascriptKeywords.THIS), n.getArgs(), Collections.<String>emptyList(), context);
 			return;
 		}
 		printer.print(names.getMethodName(method));
@@ -1542,39 +1558,39 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	@SuppressWarnings("PMD.CyclomaticComplexity")
 	public void visit(UnaryExpr n, GenerationContext context) {
 		switch (n.getOperator()) {
-			case positive:
-				printer.print("+");
-				break;
-			case negative:
-				printer.print("-");
-				break;
-			case inverse:
-				printer.print("~");
-				break;
-			case not:
-				printer.print("!");
-				break;
-			case preIncrement:
-				printer.print("++");
-				break;
-			case preDecrement:
-				printer.print("--");
-				break;
-			default:
-				break;
+		case positive:
+			printer.print("+");
+			break;
+		case negative:
+			printer.print("-");
+			break;
+		case inverse:
+			printer.print("~");
+			break;
+		case not:
+			printer.print("!");
+			break;
+		case preIncrement:
+			printer.print("++");
+			break;
+		case preDecrement:
+			printer.print("--");
+			break;
+		default:
+			break;
 		}
 
 		n.getExpr().accept(this, context);
 
 		switch (n.getOperator()) {
-			case posIncrement:
-				printer.print("++");
-				break;
-			case posDecrement:
-				printer.print("--");
-				break;
-			default:
-				break;
+		case posIncrement:
+			printer.print("++");
+			break;
+		case posDecrement:
+			printer.print("--");
+			break;
+		default:
+			break;
 		}
 	}
 

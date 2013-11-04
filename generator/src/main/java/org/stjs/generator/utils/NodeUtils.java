@@ -26,10 +26,13 @@ import japa.parser.ast.visitor.VoidVisitor;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.stjs.generator.ast.ASTNodeData;
+import org.stjs.generator.type.TypeWrapper;
 import org.stjs.generator.visitor.ForEachNodeVisitor;
 
 /**
  * different methods to work with AST nodes.
+ * 
  * @author acraciun
  */
 public final class NodeUtils {
@@ -58,8 +61,7 @@ public final class NodeUtils {
 		if (refType.getArrayCount() != 1) {
 			return false;
 		}
-		return (refType.getType() instanceof ClassOrInterfaceType)
-				&& isString((ClassOrInterfaceType) refType.getType());
+		return (refType.getType() instanceof ClassOrInterfaceType) && isString((ClassOrInterfaceType) refType.getType());
 	}
 
 	public static boolean isMainMethod(MethodDeclaration methodDeclaration) {
@@ -88,5 +90,15 @@ public final class NodeUtils {
 		};
 		parent.accept(visitor, null);
 		return children;
+	}
+
+	public static TypeWrapper[] typeWrappers(List<? extends Node> nodes) {
+		List<TypeWrapper> wrappers = new ArrayList<TypeWrapper>();
+		if (nodes != null) {
+			for (Node n : nodes) {
+				wrappers.add(ASTNodeData.resolvedType(n));
+			}
+		}
+		return wrappers.toArray(new TypeWrapper[wrappers.size()]);
 	}
 }

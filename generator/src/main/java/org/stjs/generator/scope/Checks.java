@@ -44,6 +44,7 @@ import japa.parser.ast.type.ClassOrInterfaceType;
 
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.stjs.generator.GenerationContext;
@@ -61,6 +62,7 @@ import org.stjs.generator.variable.Variable;
 import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.javascript.annotation.GlobalScope;
 import org.stjs.javascript.annotation.JavascriptFunction;
+import org.stjs.javascript.annotation.Native;
 
 /**
  * this class generate different checks made on the Java statements before they are converted to Javascript
@@ -133,29 +135,64 @@ public final class Checks {
 		}
 	}
 
-	private static void checkConstructor(ClassOrInterfaceDeclaration n, GenerationContext context) {
-		ConstructorDeclaration constr = null;
-		for (BodyDeclaration member : n.getMembers()) {
-			if (member instanceof ConstructorDeclaration) {
-				if (constr != null) {
-					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
-							"Only maximum one constructor is allowed");
-				}
-				constr = (ConstructorDeclaration) member;
+	private static boolean isMoreGenericVarArg(MethodWrapper more, MethodWrapper less) {
+		for (int p = 0; p < less.getParameterTypes().length; ++p) {
+			if (!more.getVarargParamType().isAssignableFrom(less.getParameterTypes()[p])) {
+				return false;
 			}
 		}
+		return true;
+	}
+
+	private static boolean isMoreGenericNormalArgs(MethodWrapper more, MethodWrapper less) {
+		for (int p = 0; p < less.getParameterTypes().length; ++p) {
+			if (!more.getParameterTypes()[p].isAssignableFrom(less.getParameterTypes()[p])) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * return true if the "more" method can be called with arguments that have the type of the "less" method. i.e. is
+	 * more generic
+	 * 
+	 * @param more
+	 * @param less
+	 * @return
+	 */
+	@SuppressWarnings("PMD.CompareObjectsWithEquals")
+	private static boolean isMoreGeneric(MethodWrapper more, MethodWrapper less) {
+		if (more == less) {
+			return true;
+		}
+		// assumes only a var arg parameter is allowed @see checkVarArgs
+		if (more.getParameterTypes().length == 1 && more.getVarargParamType() != null) {
+			return isMoreGenericVarArg(more, less);
+		}
+
+		if (less.getParameterTypes().length > more.getParameterTypes().length) {
+			return false;
+		}
+
+		return isMoreGenericNormalArgs(more, less);
 	}
 
 	private static void checkMethod(BodyDeclaration member, GenerationContext context, Set<String> existingNames) {
 		if (member instanceof MethodDeclaration) {
-			String name = ((MethodDeclaration) member).getName();
+			MethodDeclaration method = (MethodDeclaration) member;
+			if (ModifierSet.isNative(method.getModifiers())) {
+				// do nothing with the native methods as no code will be generated.
+				// the check will be done only for the method that has a body and that is supposed to me the most
+				// generic version of the overloaded method
+				return;
+			}
+			String name = method.getName();
+
 			if (!existingNames.add(name)) {
-				throw new JavascriptFileGenerationException(
-						context.getInputFile(),
-						new SourcePosition(member),
-						"The type contains already a method or a field called ["
-								+ name
-								+ "] with a different signature. Javascript cannot distinguish methods/fields with the same name");
+				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
+						"Only maximum one method with the name [" + name
+								+ "] is allowed to have a body. The other methods must be marked as native");
 			}
 		}
 	}
@@ -165,11 +202,8 @@ public final class Checks {
 			for (VariableDeclarator var : ((FieldDeclaration) member).getVariables()) {
 				String name = var.getId().getName();
 				if (!existingNames.add(name)) {
-					throw new JavascriptFileGenerationException(
-							context.getInputFile(),
-							new SourcePosition(member),
-							"The type contains already a method or a field called ["
-									+ name
+					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
+							"The type contains already a method or a field called [" + name
 									+ "] with a different signature. Javascript cannot distinguish methods/fields with the same name");
 				}
 			}
@@ -187,10 +221,13 @@ public final class Checks {
 		if (n.getMembers() == null) {
 			return;
 		}
-		checkConstructor(n, context);
 		Set<String> names = new HashSet<String>();
+		// check first the methods
 		for (BodyDeclaration member : n.getMembers()) {
 			checkMethod(member, context, names);
+		}
+		// check the fields
+		for (BodyDeclaration member : n.getMembers()) {
 			checkField(member, context, names);
 		}
 	}
@@ -199,8 +236,7 @@ public final class Checks {
 		if (n.getImplements() != null) {
 			for (ClassOrInterfaceType impl : n.getImplements()) {
 				TypeWrapper type = ASTNodeData.resolvedType(impl);
-				if (type instanceof ClassWrapper
-						&& ClassUtils.hasAnnotation((ClassWrapper) type, JavascriptFunction.class)) {
+				if (type instanceof ClassWrapper && ClassUtils.hasAnnotation((ClassWrapper) type, JavascriptFunction.class)) {
 					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 							"You cannot implement intefaces annotated with @JavascriptFunction. "
 									+ "You can only have inline object creation with this type of interfaces");
@@ -209,14 +245,10 @@ public final class Checks {
 		}
 	}
 
-	private static void checkExistentFieldOrMethod(String name, BodyDeclaration member, ClassWrapper superClass,
-			GenerationContext context) {
+	private static void checkExistentFieldOrMethod(String name, BodyDeclaration member, ClassWrapper superClass, GenerationContext context) {
 		if (superClass.findField(name).isDefined() || !superClass.findMethods(name).isEmpty()) {
-			throw new JavascriptFileGenerationException(
-					context.getInputFile(),
-					new SourcePosition(member),
-					"One of the parent types contains already a method or a field called ["
-							+ name
+			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
+					"One of the parent types contains already a method or a field called [" + name
 							+ "] with a different signature. Javascript cannot distinguish methods/fields with the same name");
 		}
 	}
@@ -244,6 +276,61 @@ public final class Checks {
 		checkExistentFieldOrMethod(name, member, superClass, context);
 	}
 
+	private static void checkOneMethodNonNative(BodyDeclaration member, GenerationContext context) {
+		if (!(member instanceof MethodDeclaration)) {
+			return;
+		}
+		MethodDeclaration methodDeclaration = (MethodDeclaration) member;
+		if (ModifierSet.isNative(methodDeclaration.getModifiers())) {
+			return;
+		}
+		String name = methodDeclaration.getName();
+
+		MethodWrapper methodWithBody = ASTNodeData.resolvedMethod(methodDeclaration);
+		ClassWrapper clazz = (ClassWrapper) methodWithBody.getOwnerType();
+		List<MethodWrapper> overloaded = clazz.findMethods(name);
+		if (overloaded.size() == 1) {
+			return;
+		}
+
+		// check that the non-native method is the most generic one (that is it can be called with the parameters of
+		// the other ones 1 some null)
+
+		for (MethodWrapper m : overloaded) {
+
+			if (!isMoreGeneric(methodWithBody, m)) {
+				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member), "The method with the name ["
+						+ name + "] that has a body is less generic than:" + m);
+			}
+		}
+	}
+
+	private static void checkOneNonNativeConstructor(BodyDeclaration member, GenerationContext context) {
+		if (!(member instanceof ConstructorDeclaration)) {
+			return;
+		}
+		ConstructorDeclaration constructorDeclaration = (ConstructorDeclaration) member;
+		MethodWrapper constructorWrapper = ASTNodeData.resolvedMethod(constructorDeclaration);
+		if (constructorWrapper.getAnnotationDirectly(Native.class) != null) {
+			return;
+		}
+
+		ClassWrapper clazz = (ClassWrapper) constructorWrapper.getOwnerType();
+		List<MethodWrapper> overloaded = clazz.findConstructors();
+		if (overloaded.size() == 1) {
+			return;
+		}
+
+		// check that the non-native method is the most generic one (that is it can be called with the parameters of
+		// the other ones 1 some null)
+		for (MethodWrapper m : overloaded) {
+			if (!isMoreGeneric(constructorWrapper, m)) {
+				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
+						"The constructor that has a body is less generic than:" + m);
+			}
+		}
+	}
+
 	private static void postCheckField(BodyDeclaration member, ClassWrapper superClass, GenerationContext context) {
 		if (!(member instanceof FieldDeclaration)) {
 			return;
@@ -267,6 +354,13 @@ public final class Checks {
 	public static void postCheckClassDeclaration(ClassOrInterfaceDeclaration n, GenerationContext context) {
 		checkImplements(n, context);
 		checkNamespace(n, context);
+
+		// check native
+		for (BodyDeclaration member : n.getMembers()) {
+			checkOneNonNativeConstructor(member, context);
+			checkOneMethodNonNative(member, context);
+		}
+
 		if (n.getExtends() != null && !n.isInterface()) {
 			TypeWrapper superType = ASTNodeData.resolvedType(n).getSuperClass();
 			if (!(superType instanceof ClassWrapper)) {
@@ -292,9 +386,8 @@ public final class Checks {
 			String[] identifiers = ns.split("\\.");
 			for (String identifier : identifiers) {
 				if (JavascriptKeywords.isReservedWord(identifier)) {
-					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
-							"Identifier \"" + identifier + "\" cannot be used as part of a namespace, "
-									+ "because it is a javascript keyword or a javascript reserved word");
+					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n), "Identifier \"" + identifier
+							+ "\" cannot be used as part of a namespace, " + "because it is a javascript keyword or a javascript reserved word");
 				}
 			}
 		}
@@ -333,9 +426,7 @@ public final class Checks {
 	}
 
 	private static void throwCannotCallOuterType(Node n, GenerationContext context) {
-		throw new JavascriptFileGenerationException(
-				context.getInputFile(),
-				new SourcePosition(n),
+		throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 				"In Javascript you cannot call methods or fields from the outer type. "
 						+ "You should define a variable var that=this outside your function definition and call the methods on this object");
 
@@ -429,8 +520,7 @@ public final class Checks {
 	}
 
 	private static boolean isMethodOrClassDeclaration(Node n) {
-		return n instanceof MethodDeclaration || n instanceof ConstructorDeclaration
-				|| n instanceof ClassOrInterfaceDeclaration;
+		return n instanceof MethodDeclaration || n instanceof ConstructorDeclaration || n instanceof ClassOrInterfaceDeclaration;
 	}
 
 	public static void checkVariableDeclarationExpr(VariableDeclarationExpr n, GenerationContext context) {
@@ -463,8 +553,7 @@ public final class Checks {
 		checkGlobalVariable(n, scopeType, field.getName(), currentScope, context);
 	}
 
-	private static void checkGlobalVariable(Node n, TypeWrapper scopeType, String name, Scope currentScope,
-			GenerationContext context) {
+	private static void checkGlobalVariable(Node n, TypeWrapper scopeType, String name, Scope currentScope, GenerationContext context) {
 		if (scopeType.hasAnnotation(GlobalScope.class)) {
 			// look if there is any variable with the same name in the method
 			MethodScope methodScope = currentScope.closest(MethodScope.class);
