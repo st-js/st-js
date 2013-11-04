@@ -33,18 +33,27 @@ public class JSGlobal {
 	// }
 
 	public static <T> Array<T> Array() {
-		// TODO: code it
-		return null;
+		@SuppressWarnings("unchecked")
+		Array<T> array = JSCollections.$array();
+		return array;
 	}
 
 	public static <T> Array<T> Array(int size) {
-		// TODO: code it
-		return null;
+		@SuppressWarnings("unchecked")
+		Array<T> array = JSCollections.$array();
+		array.$length(size);
+		return array;
 	}
 
 	public static <T> Array<T> Array(T first, T second, T... others) {
-		// TODO: code it
-		return null;
+		Object[] params = new Object[others.length + 2];
+		params[0] = first;
+		params[1] = second;
+		System.arraycopy(others, 0, params, 2, others.length);
+
+		@SuppressWarnings("unchecked")
+		Array<T> array = JSCollections.$array((T[]) params);
+		return array;
 	}
 
 	public static String String() {
@@ -52,13 +61,11 @@ public class JSGlobal {
 	}
 
 	public static String String(Object arg) {
-		// TODO: code it
-		return null;
+		return JSAbstractOperations.ToString(arg);
 	}
 
 	public static boolean Boolean(Object arg) {
-		// TODO: code it
-		return false;
+		return JSAbstractOperations.ToBoolean(arg);
 	}
 
 	public static double Number() {
@@ -66,8 +73,7 @@ public class JSGlobal {
 	}
 
 	public static double Number(Object arg) {
-		// TODO: code it
-		return 0.0;
+		return JSAbstractOperations.ToNumber(arg);
 	}
 
 	public static String Date() {
