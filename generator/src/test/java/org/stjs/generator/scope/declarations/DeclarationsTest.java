@@ -8,7 +8,6 @@ import static org.stjs.generator.scope.ScopeTestHelper.resolveName;
 
 import org.junit.Test;
 import org.stjs.generator.JavascriptFileGenerationException;
-import org.stjs.generator.scope.BasicScope;
 import org.stjs.generator.scope.ClassScope;
 import org.stjs.generator.scope.CompilationUnitScope;
 import org.stjs.generator.scope.MethodScope;
@@ -21,13 +20,13 @@ public class DeclarationsTest {
 
 	@Test
 	public void testScopeVariable() {
-		assertResolvedName(Declaration1.class, "var2", BasicScope.class, 3);
+		assertResolvedName(Declaration1.class, "var2", MethodScope.class, 2);
 	}
 
 	@Test
 	public void testScopeType() {
 		assertResolvedName(Declaration1.class, "type", ClassScope.class, 1);
-		assertResolvedName(Declaration1.class, "type", 2, ClassScope.class, 4);
+		assertResolvedName(Declaration1.class, "type", 2, ClassScope.class, 3);
 		assertResolvedField(Declaration1.class, "type", MyCallback.class);
 	}
 

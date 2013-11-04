@@ -17,7 +17,10 @@ package org.stjs.generator.type;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.concurrent.Immutable;
 
@@ -27,41 +30,50 @@ import com.google.common.base.Preconditions;
 
 /**
  * This is a wrapper around a method, but with the correct type for a generic type for example
+ * 
  * @author acraciun
  */
 @Immutable
 public final class MethodWrapper {
-	private final Method method;
+	private final String name;
 	private final TypeWrapper returnType;
 	private final TypeWrapper[] parameterTypes;
 	private final TypeVariableWrapper<Method>[] typeParameters;
 	private final int modifiers;
 	private final TypeWrapper ownerType;
 	private final boolean declared;
+	private final Map<Class<?>, Annotation> annotations;
 
 	private enum ParamMatch {
 		no, yes, maybeVarargs
 	}
 
-	public MethodWrapper(Method method, TypeWrapper returnType, TypeWrapper[] parameterTypes, int modifiers,
-			TypeVariableWrapper<Method>[] typeParameters, TypeWrapper ownerType, boolean declared) {
-		Preconditions.checkNotNull(method);
+	// CHECKSTYLE:OFF - too many params
+	public MethodWrapper(String name, TypeWrapper returnType, TypeWrapper[] parameterTypes, int modifiers,
+			TypeVariableWrapper<Method>[] typeParameters, TypeWrapper ownerType, boolean declared, Annotation[] annotations) {
+		Preconditions.checkNotNull(name);
 		Preconditions.checkNotNull(returnType);
 		Preconditions.checkNotNull(parameterTypes);
 		Preconditions.checkNotNull(typeParameters);
 		// Preconditions.checkNotNull(ownerType);
 
-		this.method = method;
+		this.name = name;
 		this.returnType = returnType;
 		this.parameterTypes = Arrays.copyOf(parameterTypes, parameterTypes.length);
 		this.modifiers = modifiers;
 		this.ownerType = ownerType;
 		this.declared = declared;
 		this.typeParameters = Arrays.copyOf(typeParameters, typeParameters.length);
+		this.annotations = new HashMap<Class<?>, Annotation>();
+		for (Annotation a : annotations) {
+			this.annotations.put(a.annotationType(), a);
+		}
 	}
 
+	// CHECKSTYLE:ON - too many params
+
 	public String getName() {
-		return method.getName();
+		return name;
 	}
 
 	public TypeWrapper getReturnType() {
@@ -171,11 +183,17 @@ public final class MethodWrapper {
 	}
 
 	public MethodWrapper withReturnType(TypeWrapper newReturnType) {
-		return new MethodWrapper(method, newReturnType, parameterTypes, modifiers, typeParameters, ownerType, declared);
+		return new MethodWrapper(name, newReturnType, parameterTypes, modifiers, typeParameters, ownerType, declared, new ArrayList<Annotation>(
+				annotations.values()).toArray(new Annotation[annotations.size()]));
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends Annotation> T getAnnotationDirectly(Class<T> annotationClass) {
+		return (T) annotations.get(annotationClass);
 	}
 
 	public <T extends Annotation> T getAnnotation(ClassLoader builtProjectClassLoader, Class<T> annotationClass) {
-		return AnnotationUtils.getAnnotation(builtProjectClassLoader, ownerType.getType(), method, annotationClass);
+		return AnnotationUtils.getAnnotation(builtProjectClassLoader, ownerType.getType(), this, annotationClass);
 	}
 
 }

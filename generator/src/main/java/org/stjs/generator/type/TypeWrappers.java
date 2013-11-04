@@ -44,6 +44,10 @@ public final class TypeWrappers {
 		return wrapped;
 	}
 
+	public static TypeWrapper[] wrapMore(Type... types) {
+		return wrap(types);
+	}
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static TypeVariableWrapper[] wrap(TypeVariable[] types) {
 		TypeVariableWrapper[] wrapped = new TypeVariableWrapper[types.length];

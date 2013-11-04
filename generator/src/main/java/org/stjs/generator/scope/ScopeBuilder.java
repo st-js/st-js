@@ -25,6 +25,7 @@ import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.Node;
 import japa.parser.ast.PackageDeclaration;
+import japa.parser.ast.TypeParameter;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
@@ -77,12 +78,9 @@ import japa.parser.ast.type.Type;
 import japa.parser.ast.type.VoidType;
 import japa.parser.ast.type.WildcardType;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.GenericDeclaration;
-import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,6 +96,7 @@ import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.type.ParameterizedTypeImpl;
 import org.stjs.generator.type.ParameterizedTypeWrapper;
 import org.stjs.generator.type.PrimitiveTypes;
+import org.stjs.generator.type.TypeVariableImpl;
 import org.stjs.generator.type.TypeWrapper;
 import org.stjs.generator.type.TypeWrappers;
 import org.stjs.generator.type.WildcardTypeImpl;
@@ -212,9 +211,11 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		AbstractScope parentScope = (AbstractScope) scope;
 		TypeWithScope type = scope.resolveType(n.getName());
 		PreConditions.checkStateNodeNotNull(n, type, "%s class cannot be resolved in the scope", n.getName());
-		Scope classScope = addClassToScope(parentScope, (ClassWrapper) type.getType());
+		ClassWrapper classWrapper = (ClassWrapper) type.getType();
+		Scope classScope = addClassToScope(parentScope, classWrapper);
 		resolvedType(n, type.getType());
 
+		classWrapper.addConstructors(n);
 		checkForDeadCode(n, context);
 
 		super.visit(n, classScope);
@@ -275,43 +276,46 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	public void visit(final MethodDeclaration n, Scope currentScope) {
 		Checks.checkMethodDeclaration(n, context);
 
-		if (ModifierSet.isNative(n.getModifiers())) {
-			// do nothing for native methods
-			// TODO set at least the method wrapper
-			return;
-		}
+		// if (ModifierSet.isNative(n.getModifiers())) {
+		// // do nothing for native methods
+		// // TODO set at least the method wrapper
+		// return;
+		// }
+
 		// the scope is where the method is defined, i.e. the classScope
 		((ASTNodeData) n.getData()).setScope(currentScope);
+
+		MethodScope scope = handleMethodDeclaration(n.getTypeParameters(), currentScope);
+		super.visit(n, scope);
+
+		// TODO search method by parameter type
 		ClassWrapper ownerClass = currentScope.closest(ClassScope.class).getClazz();
-		MethodWrapper method = chooseMethodWithBody(ownerClass, n);
-
-		MethodScope scope = handleMethodDeclaration(n, n.getParameters(), method.getParameterTypes(), method.getTypeParameters(), currentScope);
-		super.visit(n, new BasicScope(scope, context));
+		chooseMethodWithBody(ownerClass, n);
 	}
 
-	private MethodScope handleMethodDeclaration(Node node, final List<Parameter> parameters, java.lang.reflect.Type[] resolvedParameterTypes,
-			TypeVariable<? extends GenericDeclaration>[] resolvedTypeParameters, Scope currentScope) {
-		return handleMethodDeclaration(node, parameters, TypeWrappers.wrap(resolvedParameterTypes), TypeWrappers.wrap(resolvedTypeParameters),
-				currentScope);
+	@Override
+	public void visit(Parameter n, Scope arg) {
+		super.visit(n, arg);
+
+		TypeWrapper clazz = resolveType(arg, n.getType());
+		resolvedType(n, clazz);
+		AbstractScope currentScope = (AbstractScope) arg;
+		currentScope.addVariable(new ParameterVariable(clazz, n.getId().getName()));
 	}
 
-	private MethodScope handleMethodDeclaration(Node node, final List<Parameter> parameters, TypeWrapper[] resolvedParameterTypes,
-			TypeWrapper[] resolvedTypeParameters, Scope currentScope) {
+	private MethodScope handleMethodDeclaration(List<TypeParameter> typeParameters, Scope currentScope) {
 
 		MethodScope scope = new MethodScope(currentScope, context);
-		if (resolvedTypeParameters != null) {
-			for (TypeWrapper tv : resolvedTypeParameters) {
-				scope.addType(tv);
-			}
-		}
-
-		if (parameters != null) {
-			PreConditions.checkStateNode(node, parameters.size() == resolvedParameterTypes.length,
-					"The number of parameters (%d) should be the same as the number of types (%d) ", parameters.size(),
-					resolvedParameterTypes.length);
-			for (int i = 0; i < parameters.size(); ++i) {
-				TypeWrapper clazz = resolvedParameterTypes[i];
-				scope.addVariable(new ParameterVariable(clazz, parameters.get(i).getId().getName()));
+		if (typeParameters != null) {
+			for (TypeParameter tp : typeParameters) {
+				List<java.lang.reflect.Type> bounds = new ArrayList<java.lang.reflect.Type>();
+				if (tp.getTypeBound() != null) {
+					for (ClassOrInterfaceType b : tp.getTypeBound()) {
+						bounds.add(resolveType(currentScope, b).getType());
+					}
+				}
+				scope.addType(TypeWrappers.wrap(new TypeVariableImpl<GenericDeclaration>(null, bounds.toArray(new java.lang.reflect.Type[bounds
+						.size()]), tp.getName())));
 			}
 		}
 
@@ -470,24 +474,27 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	public void visit(ConstructorDeclaration n, Scope currentScope) {
 		// the scope is where the constructor is defined, i.e. the classScope
 		((ASTNodeData) n.getData()).setScope(currentScope);
-		Class<?> ownerClass = currentScope.closest(ClassScope.class).getClazz().getClazz();
-		Constructor<?> c = ClassUtils.findConstructor(ownerClass);
-		MethodScope scope;
-		if (c == null) {
-			// synthetic constructor
-			scope = handleMethodDeclaration(n, n.getParameters(), new java.lang.reflect.Type[0], new TypeVariable<?>[0], currentScope);
-		} else {
-			java.lang.reflect.Type[] parameterTypes = c.getGenericParameterTypes();
-			// enums receive label and ordinal as first arguments
-			// for non-static inner classes the constructor contains as first parameter the type of the outer type
-			int skipParams = parameterTypes.length - (n.getParameters() == null ? 0 : n.getParameters().size());
 
-			if (skipParams > 0) {
-				parameterTypes = Arrays.copyOfRange(parameterTypes, skipParams, parameterTypes.length);
-			}
-			scope = handleMethodDeclaration(n, n.getParameters(), parameterTypes, c.getTypeParameters(), currentScope);
-		}
-		super.visit(n, new BasicScope(scope, context));
+		MethodScope scope;
+		// if (!c.isDefined()) {
+		// // synthetic constructor
+		// scope = handleMethodDeclaration(n, Collections.<TypeParameter>emptyList(), currentScope);
+		// } else {
+		// TypeWrapper[] parameterTypes = c.getOrThrow().getParameterTypes();
+		// // enums receive label and ordinal as first arguments
+		// // for non-static inner classes the constructor contains as first parameter the type of the outer type
+		// int skipParams = parameterTypes.length - (n.getParameters() == null ? 0 : n.getParameters().size());
+		//
+		// if (skipParams > 0) {
+		// parameterTypes = Arrays.copyOfRange(parameterTypes, skipParams, parameterTypes.length);
+		// }
+		// }
+		scope = handleMethodDeclaration(n.getTypeParameters(), currentScope);
+		super.visit(n, scope);
+
+		ClassWrapper ownerClassWrapper = currentScope.closest(ClassScope.class).getClazz();
+		Option<MethodWrapper> c = ownerClassWrapper.findConstructor(NodeUtils.typeWrappers(n.getParameters()));
+		ASTNodeData.resolvedMethod(n, c.getOrNull());
 	}
 
 	@Override

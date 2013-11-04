@@ -144,6 +144,7 @@ import org.stjs.generator.utils.PreConditions;
 import org.stjs.generator.variable.Variable;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.annotation.GlobalScope;
+import org.stjs.javascript.annotation.Native;
 
 /**
  * This class visits the AST corresponding to a Java file and generates the corresponding Javascript code. It presumes
@@ -777,6 +778,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 
 	@Override
 	public void visit(ConstructorDeclaration n, GenerationContext context) {
+		MethodWrapper c = ASTNodeData.resolvedMethod(n);
+		if (c != null && c.getAnnotationDirectly(Native.class) != null) {
+			// this is a "native" constructor - no code is generator
+			return;
+		}
 		printComments(n, context);
 		Option<ClassWrapper> superClass = scope(n).closest(ClassScope.class).getClazz().getSuperclass();
 		if (superClass.isDefined() && !ClassUtils.isSyntheticType(superClass.getOrThrow())) {
@@ -1135,6 +1141,10 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		ConstructorDeclaration constr = null;
 		for (BodyDeclaration member : members) {
 			if (member instanceof ConstructorDeclaration) {
+				MethodWrapper constructorWrapper = ASTNodeData.resolvedMethod(member);
+				if (constructorWrapper.getAnnotationDirectly(Native.class) != null) {
+					continue;
+				}
 				if (constr == null) {
 					constr = (ConstructorDeclaration) member;
 				} else {

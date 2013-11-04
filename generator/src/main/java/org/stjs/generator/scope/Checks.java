@@ -62,6 +62,7 @@ import org.stjs.generator.variable.Variable;
 import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.javascript.annotation.GlobalScope;
 import org.stjs.javascript.annotation.JavascriptFunction;
+import org.stjs.javascript.annotation.Native;
 
 /**
  * this class generate different checks made on the Java statements before they are converted to Javascript
@@ -130,19 +131,6 @@ public final class Checks {
 			JavascriptKeywords.checkIdentifier(arg.getInputFile(), new SourcePosition(v), v.getId().getName());
 			if (!ModifierSet.isStatic(n.getModifiers()) && v.getInit() != null) {
 				checkInitializedInstanceField(v, n, arg);
-			}
-		}
-	}
-
-	private static void checkConstructor(ClassOrInterfaceDeclaration n, GenerationContext context) {
-		ConstructorDeclaration constr = null;
-		for (BodyDeclaration member : n.getMembers()) {
-			if (member instanceof ConstructorDeclaration) {
-				if (constr != null) {
-					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
-							"Only maximum one constructor is allowed");
-				}
-				constr = (ConstructorDeclaration) member;
 			}
 		}
 	}
@@ -233,7 +221,6 @@ public final class Checks {
 		if (n.getMembers() == null) {
 			return;
 		}
-		checkConstructor(n, context);
 		Set<String> names = new HashSet<String>();
 		// check first the methods
 		for (BodyDeclaration member : n.getMembers()) {
@@ -318,6 +305,32 @@ public final class Checks {
 		}
 	}
 
+	private static void checkOneNonNativeConstructor(BodyDeclaration member, GenerationContext context) {
+		if (!(member instanceof ConstructorDeclaration)) {
+			return;
+		}
+		ConstructorDeclaration constructorDeclaration = (ConstructorDeclaration) member;
+		MethodWrapper constructorWrapper = ASTNodeData.resolvedMethod(constructorDeclaration);
+		if (constructorWrapper.getAnnotationDirectly(Native.class) != null) {
+			return;
+		}
+
+		ClassWrapper clazz = (ClassWrapper) constructorWrapper.getOwnerType();
+		List<MethodWrapper> overloaded = clazz.findConstructors();
+		if (overloaded.size() == 1) {
+			return;
+		}
+
+		// check that the non-native method is the most generic one (that is it can be called with the parameters of
+		// the other ones 1 some null)
+		for (MethodWrapper m : overloaded) {
+			if (!isMoreGeneric(constructorWrapper, m)) {
+				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
+						"The constructor that has a body is less generic than:" + m);
+			}
+		}
+	}
+
 	private static void postCheckField(BodyDeclaration member, ClassWrapper superClass, GenerationContext context) {
 		if (!(member instanceof FieldDeclaration)) {
 			return;
@@ -341,8 +354,10 @@ public final class Checks {
 	public static void postCheckClassDeclaration(ClassOrInterfaceDeclaration n, GenerationContext context) {
 		checkImplements(n, context);
 		checkNamespace(n, context);
+
 		// check native
 		for (BodyDeclaration member : n.getMembers()) {
+			checkOneNonNativeConstructor(member, context);
 			checkOneMethodNonNative(member, context);
 		}
 

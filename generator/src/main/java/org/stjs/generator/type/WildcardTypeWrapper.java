@@ -66,6 +66,18 @@ public class WildcardTypeWrapper implements TypeWrapper {
 	}
 
 	@Override
+	public Option<MethodWrapper> findConstructor(TypeWrapper... paramTypes) {
+		for (TypeWrapper bound : boundsWrappers) {
+			Option<MethodWrapper> method = bound.findConstructor(paramTypes);
+			if (method.isDefined()) {
+				return method;
+			}
+		}
+
+		return Option.none();
+	}
+
+	@Override
 	public String getSimpleName() {
 		return "?";
 	}
