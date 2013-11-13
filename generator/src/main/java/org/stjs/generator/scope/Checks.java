@@ -17,14 +17,18 @@ package org.stjs.generator.scope;
 
 import static org.stjs.generator.ast.ASTNodeData.resolvedVariable;
 import japa.parser.ast.Node;
+import japa.parser.ast.body.AnnotationMemberDeclaration;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
+import japa.parser.ast.body.EnumConstantDeclaration;
 import japa.parser.ast.body.EnumDeclaration;
 import japa.parser.ast.body.FieldDeclaration;
+import japa.parser.ast.body.InitializerDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.body.ModifierSet;
 import japa.parser.ast.body.Parameter;
+import japa.parser.ast.body.TypeDeclaration;
 import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.body.VariableDeclaratorId;
 import japa.parser.ast.expr.FieldAccessExpr;
@@ -354,6 +358,7 @@ public final class Checks {
 	public static void postCheckClassDeclaration(ClassOrInterfaceDeclaration n, GenerationContext context) {
 		checkImplements(n, context);
 		checkNamespace(n, context);
+		checkGlobalScope(n, context);
 
 		// check native
 		for (BodyDeclaration member : n.getMembers()) {
@@ -374,6 +379,50 @@ public final class Checks {
 			}
 		}
 
+	}
+
+	/**
+	 * global scope classes should only have static members
+	 * 
+	 * @param n
+	 * @param context
+	 */
+	private static void checkGlobalScope(ClassOrInterfaceDeclaration n, GenerationContext context) {
+		if (ASTNodeData.resolvedType(n).hasAnnotation(GlobalScope.class)) {
+			for (BodyDeclaration member : n.getMembers()) {
+				if (!isStatic(member)) {
+					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
+							"Only static constructions can be used in a @GlobalScope class");
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings("PMD.CyclomaticComplexity")
+	private static boolean isStatic(BodyDeclaration n) {
+		if (n instanceof AnnotationMemberDeclaration) {
+			return ModifierSet.isStatic(((AnnotationMemberDeclaration) n).getModifiers());
+		}
+		if (n instanceof ConstructorDeclaration) {
+			return false;
+		}
+		if (n instanceof EnumConstantDeclaration) {
+			// TODO not sure this will be handled correctly by the global scope
+			return true;
+		}
+		if (n instanceof FieldDeclaration) {
+			return ModifierSet.isStatic(((FieldDeclaration) n).getModifiers());
+		}
+		if (n instanceof MethodDeclaration) {
+			return ModifierSet.isStatic(((MethodDeclaration) n).getModifiers());
+		}
+		if (n instanceof TypeDeclaration) {
+			return ModifierSet.isStatic(((TypeDeclaration) n).getModifiers());
+		}
+		if (n instanceof InitializerDeclaration) {
+			return ((InitializerDeclaration) n).isStatic();
+		}
+		return false;
 	}
 
 	private static void checkNamespace(BodyDeclaration n, GenerationContext context) {

@@ -10,12 +10,13 @@ public class Globals {
 
 	public static String field;
 
-	public void instanceMethod() {
+	public static int one, two;
 
+	public static void main(String[] args) {
+		method();
 	}
 
-	public String instanceField;
-
-	public static Globals global = new Globals();
-	public static int one, two;
+	static {
+		int n = method();
+	}
 }

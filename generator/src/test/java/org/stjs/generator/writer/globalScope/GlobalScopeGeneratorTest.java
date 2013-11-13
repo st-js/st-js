@@ -4,20 +4,21 @@ import static org.junit.Assert.assertEquals;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
 import static org.stjs.generator.utils.GeneratorTestHelper.execute;
+import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
+import org.stjs.generator.JavascriptFileGenerationException;
 
 public class GlobalScopeGeneratorTest {
 	@Test
 	public void testGlobalScopeGeneration() {
-		assertCodeDoesNotContain(Globals.class, "field:");
-		assertCodeDoesNotContain(Globals.class, "method:");
+		assertCodeDoesNotContain(Globals.class, "stjs.extends");
+		assertCodeDoesNotContain(Globals.class, "Globals");
 		assertCodeContains(Globals.class, "field=null");
 		assertCodeContains(Globals.class, "method=function(");
 		assertCodeContains(Globals.class, "one=null;two=null;");
-
-		assertCodeContains(Globals.class, "prototype.instanceMethod=");
-		assertCodeContains(Globals.class, "prototype.instanceField=");
+		assertCodeContains(Globals.class, "main()");
+		assertCodeContains(Globals.class, "(function(){var n = method();})()");
 	}
 
 	@Test
@@ -46,11 +47,6 @@ public class GlobalScopeGeneratorTest {
 	}
 
 	@Test
-	public void testFieldOfGlobalInstance() {
-		assertCodeContains(GlobalScope6.class, "global.instanceField");
-	}
-
-	@Test
 	public void testMethodWithStarImport() {
 		assertCodeContains(GlobalScope7.class, "n = method()");
 	}
@@ -66,5 +62,15 @@ public class GlobalScopeGeneratorTest {
 	@Test
 	public void testFullyQualifiedField() {
 		assertCodeContains(GlobalScope9.class, "s = field");
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testInstanceMembersNotAllowded1() {
+		generate(GlobalScope10.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testInstanceMembersNotAllowded2() {
+		generate(GlobalScope11.class);
 	}
 }

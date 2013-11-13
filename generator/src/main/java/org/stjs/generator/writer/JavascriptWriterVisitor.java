@@ -913,22 +913,9 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		}
 	}
 
-	@Override
-	public void visit(ClassOrInterfaceDeclaration n, GenerationContext context) {
-		printComments(n, context);
-
-		ClassScope scope = (ClassScope) scope(n);
-
-		if (resolvedType(n) == null) {
-			// for anonymous object creation the type is set already
-			resolvedType(n, scope.resolveType(n.getName()).getType());
-		}
-
-		ClassWrapper type = (ClassWrapper) resolvedType(n);
+	private void printNonGlobalClass(ClassOrInterfaceDeclaration n, ClassWrapper type, ClassScope scope, GenerationContext context) {
 		String namespace = printNamespace(type);
-
 		printTypeName(n, context, namespace);
-
 		printer.print("stjs.extend(");
 		if (type.isAnonymousClass() || type.hasAnonymousDeclaringClass()) {
 			printConstructorImplementation(n, context, scope, type.isAnonymousClass());
@@ -953,11 +940,34 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		} else {
 			printer.printLn(";");
 			if (!type.isInnerType()) {
-				printGlobals(filterGlobals(n, type), context);
 				printStaticInitializers(n, context);
 				printMainMethodCall(n, type);
 			}
 		}
+	}
+
+	@Override
+	public void visit(ClassOrInterfaceDeclaration n, GenerationContext context) {
+		printComments(n, context);
+
+		ClassScope scope = (ClassScope) scope(n);
+
+		if (resolvedType(n) == null) {
+			// for anonymous object creation the type is set already
+			resolvedType(n, scope.resolveType(n.getName()).getType());
+		}
+
+		ClassWrapper type = (ClassWrapper) resolvedType(n);
+
+		// the @GlobalScope classes will not be displayed with extends definition
+		if (isGlobal(type)) {
+			printGlobals(filterGlobals(n, type), context);
+			printStaticInitializers(n, context);
+			printMainMethodCall(n, type);
+			return;
+		}
+
+		printNonGlobalClass(n, type, scope, context);
 	}
 
 	private boolean isTypeOrStaticMember(BodyDeclaration decl) {
@@ -1133,7 +1143,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	private void printGlobals(List<BodyDeclaration> globals, GenerationContext context) {
 		for (BodyDeclaration global : globals) {
 			global.accept(this, context);
-			printer.printLn(";");
+			printer.printLn();
 		}
 	}
 
