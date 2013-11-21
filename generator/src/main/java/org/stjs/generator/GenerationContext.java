@@ -22,6 +22,7 @@ import java.io.File;
 /**
  * This class can resolve an identifier or a method in the given source context. There is one context create for each
  * generation process.
+ * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class GenerationContext {

@@ -33,8 +33,7 @@ public class ClassLoaderWrapper {
 	private final Collection<String> allowedPackages;
 	private final Collection<String> allowedJavaLangClasses;
 
-	public ClassLoaderWrapper(ClassLoader classLoader, Collection<String> allowedPackages,
-			Collection<String> allowedJavaLangClasses) {
+	public ClassLoaderWrapper(ClassLoader classLoader, Collection<String> allowedPackages, Collection<String> allowedJavaLangClasses) {
 		this.classLoader = classLoader;
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
 		this.allowedPackages = allowedPackages;
@@ -61,7 +60,7 @@ public class ClassLoaderWrapper {
 			Class<?> clazz = classLoader.loadClass(name);
 			Class<?> topDeclaringClass = getTopDeclaringClass(clazz);
 			checkAndAddResolvedClass(topDeclaringClass);
-			return Option.<ClassWrapper> some(new ClassWrapper(clazz));
+			return Option.<ClassWrapper>some(new ClassWrapper(clazz));
 		}
 		catch (ClassNotFoundException e) {
 			return Option.none();
@@ -137,6 +136,10 @@ public class ClassLoaderWrapper {
 
 	public List<String> getResolvedClasses() {
 		return ImmutableList.copyOf(resolvedClasses);
+	}
+
+	public ClassLoader getClassLoader() {
+		return classLoader;
 	}
 
 }
