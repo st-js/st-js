@@ -28,69 +28,83 @@ import org.stjs.javascript.annotation.Template;
 @GlobalScope
 @SuppressWarnings("unchecked")
 public class JSCollections {
-	private static JSCollectionsImplementor implementor = null;
-
-	private static synchronized JSCollectionsImplementor getImplementor() {
-		if (implementor != null) {
-			return implementor;
-		}
-		try {
-			// TODO it could be a cleaner way to inject the implementation, but for the moment this should be enough
-			Class<? extends JSCollectionsImplementor> clazz = (Class<? extends JSCollectionsImplementor>) Class
-					.forName("org.stjs.server.JSCollectionsServerImplementor");
-			implementor = clazz.newInstance();
-		} catch (Exception e) {
-			throw new UnsupportedOperationException();
-		}
-		return implementor;
-	}
 
 	@Template("array")
 	public static <V> Array<V> $array(V... values) {
-		return getImplementor().$array(values);
-	}
-
-	@Template("properties")
-	public static <T> Array<T> $castArray(T[] a) {
-		return getImplementor().$castArray(a);
+		Array<V> a = new Array<V>();
+		a.splice(0, 0, values);
+		return a;
 	}
 
 	@Template("map")
 	public static <K extends String, V> Map<K, V> $map() {
-		return getImplementor().$map();
+		return new Map<K, V>();
 	}
 
 	@Template("map")
 	public static <K extends String, V> Map<K, V> $map(K k1, V v1) {
-		return getImplementor().$map(k1, v1);
+		Map<K, V> m = new Map<K, V>();
+		m.$put(k1, v1);
+		return m;
 	}
 
 	@Template("map")
 	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2) {
-		return getImplementor().$map(k1, v1, k2, v2);
+		Map<K, V> m = new Map<K, V>();
+		m.$put(k1, v1);
+		m.$put(k2, v2);
+		return m;
 	}
 
 	@Template("map")
 	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3) {
-		return getImplementor().$map(k1, v1, k2, v2, k3, v3);
-
+		Map<K, V> m = new Map<K, V>();
+		m.$put(k1, v1);
+		m.$put(k2, v2);
+		m.$put(k3, v3);
+		return m;
 	}
 
 	@Template("map")
 	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
-		return getImplementor().$map(k1, v1, k2, v2, k3, v3, k4, v4);
+		Map<K, V> m = new Map<K, V>();
+		m.$put(k1, v1);
+		m.$put(k2, v2);
+		m.$put(k3, v3);
+		m.$put(k4, v4);
+		return m;
 	}
 
 	@Template("map")
 	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {
-		return getImplementor().$map(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5);
+		Map<K, V> m = new Map<K, V>();
+		m.$put(k1, v1);
+		m.$put(k2, v2);
+		m.$put(k3, v3);
+		m.$put(k4, v4);
+		m.$put(k5, v5);
+		return m;
 	}
 
 	@Template("map")
-	@SuppressWarnings({ "rawtypes" })
+	@SuppressWarnings("unchecked")
 	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5,
 			K k6, Object... morePairs) {
-		return (Map) getImplementor().$map(k1, v1, k2, v2, k3, v3, k4, v4, k6, morePairs);
+		Map<K, V> m = new Map<K, V>();
+		m.$put(k1, v1);
+		m.$put(k2, v2);
+		m.$put(k3, v3);
+		m.$put(k4, v4);
+		m.$put(k5, v5);
+		for (int i = 0; i < (morePairs.length - 1); i += 2) {
+			m.$put((K) morePairs[i], (V) morePairs[i + 1]);
+		}
+		return m;
+	}
+
+	@Template("properties")
+	public static <T> Array<T> $castArray(T[] a) {
+		return $array(a);
 	}
 
 }
