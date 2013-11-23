@@ -663,7 +663,7 @@ public class JSAbstractOperationsTest {
 
 	@Test
 	public void testToString02() {
-		assertEquals("2,4,8,16,23", ToString(Array(2, 4, 8, 16, 32)));
+		assertEquals("2,4,8,16,32", ToString(Array(2, 4, 8, 16, 32)));
 
 		// CHECK#11
 		Object myobj1 = new Object() {
