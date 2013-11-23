@@ -1,5 +1,6 @@
 package org.stjs.javascript;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
@@ -24,14 +25,51 @@ class JSAbstractOperations {
 	private static final BigInteger USHORT_MAX_VALUE = new BigInteger("65536"); // = 2^16
 
 	/**
-	 * The [[DefaultValue]] internal method of Object, as defined in the ECMA-262 specification section 8.12.8
+	 * The [[DefaultValue]] internal method of Object, as close as possible to the definition in the ECMA-262
+	 * specification section 8.12.8
+	 * 
+	 * <p>
+	 * This implementation of <tt>[[DefaultValue]]</tt> differs slightly from the ECMA-262 specification When applied to
+	 * Objects whose class does not override the <tt>toString()</tt> or <tt>valueOf()</tt> methods. In this case, this
+	 * implementation returns a String which is equal to whatever is produced by <tt>java.lang.Object.toString()</tt>.
+	 * Therefore, the returned string will not conform to the ECMA-262 specification which requires returning
+	 * <tt>"[object Object]"</tt> in this case.
+	 * 
+	 * <p>
+	 * This deviations is known and intentional. While it would have been possible to make the <tt>DefaultValue()</tt>
+	 * implementation conform to ECMA-262, doing so would make it inconsistent with the result of the
+	 * <tt>toString()</tt> method as defined by the java language. In order to minimize unexpected behavior,
+	 * <tt>DefaultValue()</tt> behaves like <tt>toString()</tt> in those cases.
+	 * 
+	 * <p>
+	 * Note that due to the fact that in Java toString() is guaranteed to return a String and is guaranteed to be
+	 * callable, we cannot throw a TypeError from this method.
 	 */
 	static Object DefaultValue(Object arg) {
 		return DefaultValue(arg, null);
 	}
 
 	/**
-	 * The [[DefaultValue]] internal method of Object, as defined in the ECMA-262 specification section 8.12.8
+	 * The [[DefaultValue]] internal method of Object, as close as possible to the definition in the ECMA-262
+	 * specification section 8.12.8
+	 * 
+	 * 
+	 * <p>
+	 * This implementation of <tt>[[DefaultValue]]</tt> differs slightly from the ECMA-262 specification When applied to
+	 * Objects whose class does not override the <tt>toString()</tt> or <tt>valueOf()</tt> methods. In this case, this
+	 * implementation returns a String which is equal to whatever is produced by <tt>java.lang.Object.toString()</tt>.
+	 * Therefore, the returned string will not conform to the ECMA-262 specification which requires returning
+	 * <tt>"[object Object]"</tt> in this case.
+	 * 
+	 * <p>
+	 * This deviations is known and intentional. While it would have been possible to make the <tt>DefaultValue()</tt>
+	 * implementation conform to ECMA-262, doing so would make it inconsistent with the result of the
+	 * <tt>toString()</tt> method as defined by the java language. In order to minimize unexpected behavior,
+	 * <tt>DefaultValue()</tt> behaves like <tt>toString()</tt> in those cases.
+	 * 
+	 * <p>
+	 * Note that due to the fact that in Java toString() is guaranteed to return a String and is guaranteed to be
+	 * callable, we cannot throw a TypeError from this method.
 	 */
 	static Object DefaultValue(Object arg, String hint) {
 		if (hint == null) {
@@ -48,30 +86,31 @@ class JSAbstractOperations {
 				// because Java guarantees that we can only get a String, null or an exception
 				return callToString(arg);
 			}
+			catch (InvocationTargetException e) {
+				throw new RuntimeException(e.getTargetException().getMessage(), e.getTargetException());
+			}
 			catch (Exception e) {
-				// swallow exception
+				throw new RuntimeException(e);
 			}
 
-			try {
-				Object value = callValueOf(arg);
-				if (!isJsPrimitiveEquivalent(value)) {
-					throw new RuntimeException("TypeError");
-				}
-				return value;
-			}
-			catch (Exception e) {
-				throw new RuntimeException("TypeError", e);
-			}
+			// toString is guaranteed to be callable and return a primitive value in Java, so we will
+			// never need to call valueOf();
 
 		} else if (hint.equals("Number")) {
-			try {
-				Object value = callValueOf(arg);
-				if (isJsPrimitiveEquivalent(value)) {
-					return value;
+			if (isValueOfCallable(arg)) {
+				try {
+					Object value = callValueOf(arg);
+					if (isJsPrimitiveEquivalent(value)) {
+						return value;
+					}
 				}
-			}
-			catch (Exception e) {
-				// swallow exception
+				catch (InvocationTargetException e) {
+					throw new RuntimeException(e.getTargetException().getMessage(), e.getTargetException());
+				}
+				catch (Exception e) {
+					// we can still get exception like SecurityException or IllegalAccessException here
+					throw new RuntimeException(e);
+				}
 			}
 
 			try {
@@ -79,8 +118,11 @@ class JSAbstractOperations {
 				// because Java guarantees that we can only get a String, null or an exception
 				return callToString(arg);
 			}
+			catch (InvocationTargetException e) {
+				throw new RuntimeException(e.getTargetException().getMessage(), e.getTargetException());
+			}
 			catch (Exception e) {
-				throw new RuntimeException("TypeError", e);
+				throw new RuntimeException(e);
 			}
 		}
 		throw new IllegalArgumentException("Unknown hint: " + hint);
@@ -100,18 +142,18 @@ class JSAbstractOperations {
 		return (String) toString.invoke(target);
 	}
 
-	private static Object callValueOf(Object target) throws Exception {
-		Method toString = target.getClass().getMethod("toString");
-		if (toString.getDeclaringClass().equals(Object.class)) {
-			// replace the of the toString method of Object as defined by java (which doesn't match JS
-			// behavior) by the proper JS implementation
-			// TODO: actually replace by the proper JS implementation. This might not even be a good idea.
-			return (String) toString.invoke(target);
-
+	private static boolean isValueOfCallable(Object target) {
+		try {
+			return target.getClass().getMethod("valueOf") != null;
 		}
+		catch (Exception e) {
+			return false;
+		}
+	}
 
-		// some class in the hierarchy redefines toString(), so we can happily call it
-		return (String) toString.invoke(target);
+	private static Object callValueOf(Object target) throws Exception {
+		Method valueOf = target.getClass().getMethod("valueOf");
+		return valueOf.invoke(target);
 	}
 
 	private static boolean isJsPrimitiveEquivalent(Object arg) {
@@ -119,7 +161,21 @@ class JSAbstractOperations {
 	}
 
 	/**
-	 * The ToPrimitive() abstract operation, as defined in the ECMA-262 specification section 9.1.
+	 * The ToPrimitive() abstract operation, as close as possible to the definition in the ECMA-262 specification
+	 * section 9.1.
+	 * 
+	 * <p>
+	 * This implementation of <tt>ToPrimitive()</tt> differs slightly from the ECMA-262 specification When applied to
+	 * Objects whose class does not override the <tt>toString()</tt> or <tt>valueOf()</tt> methods. In this case, this
+	 * implementation returns a String which is equal to whatever is produced by <tt>java.lang.Object.toString()</tt>.
+	 * Therefore, the returned string will not conform to the ECMA-262 specification which requires returning
+	 * <tt>"[object Object]"</tt> in this case.
+	 * 
+	 * <p>
+	 * This deviations is known and intentional. While it would have been possible to make the <tt>ToPrimitive()()</tt>
+	 * implementation conform to ECMA-262, doing so would make it inconsistent with the result of the
+	 * <tt>toString()</tt> method as defined by the java language. In order to minimize unexpected behavior,
+	 * <tt>ToPrimitive()()</tt> behaves like <tt>toString()</tt> in those cases.
 	 * 
 	 * <p>
 	 * This method returns Objects even though the Specification says that the values should be JS primitives, but when
@@ -127,11 +183,37 @@ class JSAbstractOperations {
 	 * can get away with returning the corresponding Object.
 	 */
 	static Object ToPrimitive(Object arg) {
+		return ToPrimitive(arg, "Number");
+	}
+
+	/**
+	 * The ToPrimitive() abstract operation, as close as possible to the definition in the ECMA-262 specification
+	 * section 9.1.
+	 * 
+	 * <p>
+	 * This implementation of <tt>ToPrimitive()</tt> differs slightly from the ECMA-262 specification When applied to
+	 * Objects whose class does not override the <tt>toString()</tt> or <tt>valueOf()</tt> methods. In this case, this
+	 * implementation returns a String which is equal to whatever is produced by <tt>java.lang.Object.toString()</tt>.
+	 * Therefore, the returned string will not conform to the ECMA-262 specification which requires returning
+	 * <tt>"[object Object]"</tt> in this case.
+	 * 
+	 * <p>
+	 * This deviations is known and intentional. While it would have been possible to make the <tt>ToPrimitive()()</tt>
+	 * implementation conform to ECMA-262, doing so would make it inconsistent with the result of the
+	 * <tt>toString()</tt> method as defined by the java language. In order to minimize unexpected behavior,
+	 * <tt>ToPrimitive()()</tt> behaves like <tt>toString()</tt> in those cases.
+	 * 
+	 * <p>
+	 * This method returns Objects even though the Specification says that the values should be JS primitives, but when
+	 * actually used JS primitives really behave the same a their wrapper object (similar to auto-boxing in Java), so we
+	 * can get away with returning the corresponding Object.
+	 */
+	static Object ToPrimitive(Object arg, String hint) {
 		if (arg == null || arg instanceof Boolean || arg instanceof Number || arg instanceof String) {
 			return arg;
 		}
 
-		return DefaultValue(arg);
+		return DefaultValue(arg, hint);
 	}
 
 	/**
@@ -169,9 +251,12 @@ class JSAbstractOperations {
 
 		} else if (arg instanceof String) {
 			return ToNumber((String) arg);
+
+		} else if (arg instanceof Number) {
+			return ((Number) arg).doubleValue();
 		}
 
-		Object primValue = ToPrimitive(arg);
+		Object primValue = ToPrimitive(arg, "Number");
 		return ToNumber(primValue).doubleValue();
 	}
 
@@ -179,6 +264,9 @@ class JSAbstractOperations {
 	 * The ToNumber() abstract operation applied to String, as defined in the ECMA-262 specification section 9.3.1
 	 */
 	static Double ToNumber(String arg) {
+		if (arg == null) {
+			return 0.0d;
+		}
 		String trimmed = ((String) arg).trim();
 		if (trimmed.isEmpty()) {
 			return 0.0d;
@@ -282,7 +370,27 @@ class JSAbstractOperations {
 	}
 
 	/**
-	 * The ToString() abstract operation, as defined in the ECMA-262 specification section 9.8.
+	 * The <tt>ToString()</tt> abstract operation, as close as possible to the definition in the ECMA-262 specification
+	 * section 9.8.
+	 * 
+	 * <p>
+	 * This implementation of <tt>ToString()</tt> differs slightly from the ECMA-262 specification in the following
+	 * manner:
+	 * <ul>
+	 * <li>When <tt>ToString()</tt> is applied to Objects whose class does not override the <tt>toString()</tt> method,
+	 * then the returned string is equal to whatever is produced by <tt>java.lang.Object.toString()</tt>. Therefore, the
+	 * returned string will not conform to the ECMA-262 specification which requires returning
+	 * <tt>"[object Object]"</tt> in this case.
+	 * <li><tt>ToString(0)</tt> returns <tt>"0"</tt> and to <tt>ToString(0.0)</tt> return <tt>"0.0"</tt>, which are not
+	 * equal. The ECMA-262 specification mentions a very specific algorithm for converting numbers to string, which due
+	 * to the difference between the various subclasses of <tt>java.lang.Number</tt> is not fully respected by this
+	 * implementation
+	 * </ul>
+	 * <p>
+	 * Both of these deviations are known and intentional. While it would have been possible to make the
+	 * <tt>ToString()</tt> operation conform to ECMA-262, doing so would make it inconsistent with the result of the
+	 * <tt>toString()</tt> method as defined by the java language. In order to minimize unexpected behavior,
+	 * <tt>ToString()</tt> behaves like <tt>toString()</tt> in those cases.
 	 */
 	static String ToString(Object arg) {
 		if (arg == null) {
@@ -302,12 +410,24 @@ class JSAbstractOperations {
 
 		}
 
-		Object primValue = ToPrimitive(arg);
+		Object primValue = ToPrimitive(arg, "String");
 		return ToString(primValue);
 	}
 
 	/**
-	 * The ToString() abstract operation for Numbers, as defined in the ECMA-262 specification section 9.8.1.
+	 * The ToString() abstract operation for Numbers, as close as possible to the definition in the ECMA-262
+	 * specification section 9.8.1.
+	 * 
+	 * <p>
+	 * This implementation of <tt>ToString()</tt> differs slightly from the ECMA-262 specification. <tt>ToString(0)</tt>
+	 * returns <tt>"0"</tt> and to <tt>ToString(0.0)</tt> return <tt>"0.0"</tt>, which are not equal. The ECMA-262
+	 * specification mentions a very specific algorithm for converting numbers to string, which due to the difference
+	 * between the various subclasses of <tt>java.lang.Number</tt> is not fully respected by this implementation
+	 * <p>
+	 * This deviation is known and intentional. While it would have been possible to make the <tt>ToString()</tt>
+	 * operation conform to ECMA-262, doing so would make it inconsistent with the result of the <tt>toString()</tt>
+	 * method as defined by the java language. In order to minimize unexpected behavior, <tt>ToString()</tt> behaves
+	 * like <tt>toString()</tt> in those cases.
 	 */
 	static String ToString(Number arg) {
 		if (arg == null) {
