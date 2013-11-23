@@ -78,7 +78,23 @@ public class Array<V> implements Iterable<String> {
 		this.push(values);
 	}
 
+	/**
+	 * Returns an <tt>Iterator</tt> that allow this <tt>Array</tt> to be used in foreach statements. The returned
+	 * iterator is designed to make Java for-each statements on <tt>Arrays</tt> match the corresponding JavaScript
+	 * for-in statement. As a result, the returned iterator will iterate over the indices of the <tt>Array</tt>
+	 * converted to <tt>String</tt> (the JavaScript behavior) instead of iterating directly over the values (the Java
+	 * behavior).
+	 * 
+	 * <p>
+	 * This method is marked as Deprecated because you should never call this method directly in code that will be
+	 * translated to JavaScript; the generated JavaScript code will not work because the prototype of Array in
+	 * JavaScript does not contain any <tt>iterator</tt> method.
+	 * <p>
+	 * You may safely call this method from a Java runtime if necessary.
+	 */
 	@Override
+	@Deprecated
+	@BrowserCompatibility("none")
 	public Iterator<String> iterator() {
 		return new Iterator<String>() {
 			private int current = 0;
