@@ -6,8 +6,8 @@ import org.stjs.javascript.stjs.STJS;
 @GlobalScope
 public class JSGlobal {
 
-	public static Number Infinity;
-	public static Number NaN;
+	public static Number Infinity = Double.POSITIVE_INFINITY;
+	public static Number NaN = Double.NaN;
 	public static Object undefined;
 	public static STJS stjs;
 	public static JSON JSON;
@@ -74,6 +74,13 @@ public class JSGlobal {
 
 	public static double Number(Object arg) {
 		return JSAbstractOperations.ToNumber(arg);
+	}
+
+	public static boolean isNaN(Object value) {
+		if (value instanceof Number) {
+			return Double.isNaN(((Number) value).doubleValue());
+		}
+		return false;
 	}
 
 	public static String Date() {
