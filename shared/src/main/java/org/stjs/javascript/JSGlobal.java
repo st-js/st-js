@@ -1,6 +1,7 @@
 package org.stjs.javascript;
 
 import org.stjs.javascript.annotation.GlobalScope;
+import org.stjs.javascript.annotation.Template;
 import org.stjs.javascript.stjs.STJS;
 
 @GlobalScope
@@ -122,4 +123,50 @@ public class JSGlobal {
 	public static RegExp RegExp(String pattern, String modifiers) {
 		return new RegExp(pattern, modifiers);
 	}
+
+	public native static <T> T eval(String expr);
+
+	public native static int parseInt(Object expr);
+
+	public native static int parseInt(Object expr, int radix);
+
+	public native static double parseFloat(Object expr);
+
+	public native static boolean isFinite(Object value);
+
+	public native static String decodeURI(String uri);
+
+	public native static String decodeURIComponent(String uri);
+
+	public native static String encodeURI(String uri);
+
+	public native static String encodeURIComponent(String uri);
+
+	@Template("typeOf")
+	public native static String typeof(Object obj);
+
+	/**
+	 * defined in stjs.js
+	 * 
+	 * @param exception
+	 * @return
+	 */
+	public native static RuntimeException exception(Object exception);
+
+	/**
+	 * defined in stjs.js
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	public native static boolean isEnum(Object obj);
+
+	/**
+	 * this is the equivalent of x || y || z in javascript
+	 * 
+	 * @return
+	 */
+	@Template("or")
+	public native static <T> T $or(T value, T... otherValues);
+
 }
