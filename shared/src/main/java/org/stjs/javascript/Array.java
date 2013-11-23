@@ -38,15 +38,38 @@ import org.stjs.javascript.functions.Function4;
  * array.$get(key) => array[key] <br>
  * array.$set(key, value) => array[key]=value
  * 
+ * <p>
  * The documentation of this class is mostly adapted from the ECMAScript 5.1 Specification:
- * http://www.ecma-international.org/ecma-262/5.1/ Browser compatibility information comes from:
- * http://kangax.github.io/es5-compat-table
+ * http://www.ecma-international.org/ecma-262/5.1/
+ * <p>
+ * Browser compatibility information comes from: http://kangax.github.io/es5-compat-table
  * 
  * @author acraciun, npiguet
  */
 public class Array<V> implements Iterable<String> {
 
 	private final List<V> array = new ArrayList<V>();
+
+	/**
+	 * Constructs a new empty <tt>Array</tt> and sets it's <tt>length</tt> property to <tt>len</tt>.
+	 * 
+	 * @param len
+	 *            the length of this new array
+	 */
+	public Array(Number len) {
+		this.$length(len.intValue());
+	}
+
+	/**
+	 * Constructs a new <tt>Array</tt> containing all the specified elements in the order in which they appear in the
+	 * argument list.
+	 * 
+	 * @param values
+	 *            the values to add to this array, in the order in which they appear in the argument list
+	 */
+	public Array(V... values) {
+		this.push(values);
+	}
 
 	@Override
 	public Iterator<String> iterator() {
@@ -74,7 +97,8 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Returns the element at the specified index in this <tt>Array</tt>.
+	 * Translated to <tt>array[index]</tt> in JavaScript, returns the element at the specified index in this
+	 * <tt>Array</tt>.
 	 * 
 	 * @param index
 	 *            the index
@@ -89,7 +113,8 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Returns the element at the specified index in this <tt>Array</tt>.
+	 * Translated to <tt>array[index]</tt> in JavaScript, returns the element at the specified index in this
+	 * <tt>Array</tt>.
 	 * 
 	 * @param index
 	 *            the index
@@ -101,7 +126,8 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Sets the element at the specified index in this <tt>Array</tt> to the specified value.
+	 * Translated to <tt>array[index] = value</tt> in JavaScript, sets the element at the specified index in this
+	 * <tt>Array</tt> to the specified value.
 	 * 
 	 * @param index
 	 *            the index
@@ -120,7 +146,8 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Sets the element at the specified index in this <tt>Array</tt> to the specified value.
+	 * Translated to <tt>array[index] = value</tt> in JavaScript, sets the element at the specified index in this
+	 * <tt>Array</tt> to the specified value.
 	 * 
 	 * @param index
 	 *            the index
@@ -133,8 +160,8 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Returns the length of this <tt>Array</tt>. The returned value is always greater than the highest index in this
-	 * <tt>Array</tt>.
+	 * Translated to <tt>array.length</tt> in JavaScript, returns the length of this <tt>Array</tt>. The returned value
+	 * is always greater than the highest index in this <tt>Array</tt>.
 	 * 
 	 * @return the length of this <tt>Array</tt>.
 	 */
@@ -144,7 +171,7 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Sets the length of this <tt>Array</tt>.
+	 * Translated to <tt>array.length = newLength</tt> in JavaScript, sets the length of this <tt>Array</tt>.
 	 * 
 	 * <p>
 	 * Attempting to set the length property of this <tt>Array</tt> to a value that is numerically less than or equal to

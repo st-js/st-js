@@ -33,28 +33,25 @@ public class JSGlobal {
 	//
 	// }
 
-	public static <T> Array<T> Array() {
-		@SuppressWarnings("unchecked")
-		Array<T> array = JSCollections.$array();
-		return array;
+	/**
+	 * Constructs a new empty <tt>Array</tt> and sets it's <tt>length</tt> property to <tt>len</tt>.
+	 * 
+	 * @param len
+	 *            the length of this new array
+	 */
+	public static <T> Array<T> Array(Number len) {
+		return new Array<T>(len);
 	}
 
-	public static <T> Array<T> Array(int size) {
-		@SuppressWarnings("unchecked")
-		Array<T> array = JSCollections.$array();
-		array.$length(size);
-		return array;
-	}
-
-	public static <T> Array<T> Array(T first, T second, T... others) {
-		Object[] params = new Object[others.length + 2];
-		params[0] = first;
-		params[1] = second;
-		System.arraycopy(others, 0, params, 2, others.length);
-
-		@SuppressWarnings("unchecked")
-		Array<T> array = JSCollections.$array((T[]) params);
-		return array;
+	/**
+	 * Constructs a new <tt>Array</tt> containing all the specified elements in the order in which they appear in the
+	 * argument list.
+	 * 
+	 * @param values
+	 *            the values to add to this array, in the order in which they appear in the argument list
+	 */
+	public static <T> Array<T> Array(T... values) {
+		return new Array<T>(values);
 	}
 
 	public static String String() {
