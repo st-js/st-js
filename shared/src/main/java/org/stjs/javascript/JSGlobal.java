@@ -34,6 +34,13 @@ public class JSGlobal {
 	// }
 
 	/**
+	 * Constructs a new empty <tt>Array</tt>.
+	 */
+	public static <T> Array<T> Array() {
+		return new Array<T>();
+	}
+
+	/**
 	 * Constructs a new empty <tt>Array</tt> and sets it's <tt>length</tt> property to <tt>len</tt>.
 	 * 
 	 * @param len

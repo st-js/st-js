@@ -51,6 +51,13 @@ public class Array<V> implements Iterable<String> {
 	private final List<V> array = new ArrayList<V>();
 
 	/**
+	 * Constructs a new empty <tt>Array</tt>.
+	 */
+	public Array() {
+		// nothing
+	}
+
+	/**
 	 * Constructs a new empty <tt>Array</tt> and sets it's <tt>length</tt> property to <tt>len</tt>.
 	 * 
 	 * @param len
