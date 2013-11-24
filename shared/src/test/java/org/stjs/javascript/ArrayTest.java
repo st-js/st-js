@@ -9,6 +9,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.stjs.javascript.JSCollections.$array;
+import static org.stjs.javascript.JSGlobal.Array;
 import static org.stjs.javascript.JSGlobal.String;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -112,7 +113,9 @@ public class ArrayTest {
 		// Array index is power of two
 		Array<Integer> x = $array();
 		int k = 1;
-		for (int i = 0; i < 31; i++) { // /!\ original test says 32, but our ints only go to 31
+		// FIXME: int here should be replaced by a string coming from a long, so we can test
+		// indices all the way to 2^32
+		for (int i = 0; i < 32; i++) { // /!\ original test says 32, but our ints only go to 31
 			k = k * 2;
 			x.$set(k - 2, k);
 		}
@@ -132,18 +135,24 @@ public class ArrayTest {
 	public void testConstructor01() {
 		// When the constructor of Array is passed exactly 1 parameter, then the first parameter
 		// is treated as the length of the array
-		Array<Integer> x = $array(2);
+		Array<Integer> x = Array(2);
 		assertFalse(x.$length() == 1);
 		assertFalse(x.$get(0) == 2);
+
+		// should also work the same when using varargs
+		Object length = 2;
+		Array<Object> y = Array(length);
+		assertFalse(y.$length() == 1);
+		assertFalse(y.$get(0).equals(2));
 	}
 
 	@Test
 	public void testConstructor02() {
 		// The length property of the newly constructed object;
 		// is set to the number of arguments
-		assertEquals(0, $array().$length());
-		assertEquals(4, $array(0, 1, 0, 1).$length());
-		assertEquals(2, $array(null, null).$length());
+		assertEquals(0, Array().$length());
+		assertEquals(4, Array(0, 1, 0, 1).$length());
+		assertEquals(2, Array(null, null).$length());
 	}
 
 	@Test
@@ -153,7 +162,7 @@ public class ArrayTest {
 		// (if supplied); and, in general, for as many arguments as there are, the k property
 		// of the newly constructed object is set to argument k, where the first argument is
 		// considered to be argument number
-		Array<Integer> x = $array( //
+		Array<Integer> x = Array( //
 				0, 1, 2, 3, 4, 5, 6, 7, 8, 9, //
 				10, 11, 12, 13, 14, 15, 16, 17, 18, 19, //
 				20, 21, 22, 23, 24, 25, 26, 27, 28, 29, //
@@ -180,13 +189,13 @@ public class ArrayTest {
 		// the built-in join method were invoked for this object with no argument
 
 		// If the array is empty, return the empty string
-		Array<Integer> x = $array();
+		Array<Integer> x = Array();
 		assertToStringJoinEquals("", x);
 	}
 
 	@Test
 	public void testToString02() {
-		Array<Integer> x = $array();
+		Array<Integer> x = Array();
 		x.$set(0, 1);
 		x.$length(0);
 		assertToStringJoinEquals("", x);
@@ -197,7 +206,7 @@ public class ArrayTest {
 		// The elements of the array are converted to strings, and these strings are
 		// then concatenated, separated by occurrences of the separator. If no separator is provided,
 		// a single comma is used as the separator
-		Array<Integer> x = $array(0, 1, 2, 3);
+		Array<Integer> x = Array(0, 1, 2, 3);
 		assertToStringJoinEquals("0,1,2,3", x);
 	}
 
@@ -211,7 +220,7 @@ public class ArrayTest {
 
 	@Test
 	public void testToString05() {
-		Array<Integer> x = $array(null, 1, null, 3);
+		Array<Integer> x = Array(null, 1, null, 3);
 		assertToStringJoinEquals(",1,,3", x);
 	}
 
@@ -225,43 +234,43 @@ public class ArrayTest {
 	@Test
 	public void testToString07() {
 		// Operator use ToString from array arguments
-		Array<String> s = $array("", "", "");
+		Array<String> s = Array("", "", "");
 		assertToStringJoinEquals(",,", s);
 	}
 
 	@Test
 	public void testToString08() {
-		Array<String> s = $array("\\", "\\", "\\");
+		Array<String> s = Array("\\", "\\", "\\");
 		assertToStringJoinEquals("\\,\\,\\", s);
 	}
 
 	@Test
 	public void testToString09() {
-		Array<String> s = $array("&", "&", "&");
+		Array<String> s = Array("&", "&", "&");
 		assertToStringJoinEquals("&,&,&", s);
 	}
 
 	@Test
 	public void testToString10() {
-		Array<Boolean> b = $array(true, true, true);
+		Array<Boolean> b = Array(true, true, true);
 		assertToStringJoinEquals("true,true,true", b);
 	}
 
 	@Test
 	public void testToString11() {
-		Array<String> x = $array(null, null, null);
+		Array<String> x = Array(null, null, null);
 		assertToStringJoinEquals(",,", x);
 	}
 
 	@Test
 	public void testToString12() {
-		Array<Double> d = $array(POSITIVE_INFINITY, POSITIVE_INFINITY, POSITIVE_INFINITY);
+		Array<Double> d = Array(POSITIVE_INFINITY, POSITIVE_INFINITY, POSITIVE_INFINITY);
 		assertToStringJoinEquals("Infinity,Infinity,Infinity", d);
 	}
 
 	@Test
 	public void testToString13() {
-		Array<Double> d = $array(NaN, NaN, NaN);
+		Array<Double> d = Array(NaN, NaN, NaN);
 		assertToStringJoinEquals("NaN,NaN,NaN", d); // BATMAAAN!
 	}
 
@@ -269,17 +278,19 @@ public class ArrayTest {
 	public void testToString14() {
 		// If Type(value) is Object, evaluate ToPrimitive(value, String)
 		Object object = new Object() {
+			@SuppressWarnings("unused")
 			public String valueOf() {
 				return "+";
 			}
 		};
-		Array<Object> o = $array(object);
+		Array<Object> o = Array(object);
 		assertToStringJoinEquals("[object Object]", o);
 	}
 
 	@Test
 	public void testToString15() {
 		Object object = new Object() {
+			@SuppressWarnings("unused")
 			public String valueOf() {
 				return "+";
 			}
@@ -288,13 +299,14 @@ public class ArrayTest {
 				return "*";
 			}
 		};
-		Array<Object> o = $array(object);
+		Array<Object> o = Array(object);
 		assertToStringJoinEquals("*", o);
 	}
 
 	@Test
 	public void testToString16() {
 		Object object = new Object() {
+			@SuppressWarnings("unused")
 			public String valueOf() {
 				throw new RuntimeException("error");
 			}
@@ -303,7 +315,7 @@ public class ArrayTest {
 				return "*";
 			}
 		};
-		Array<Object> o = $array(object);
+		Array<Object> o = Array(object);
 		assertToStringJoinEquals("*", o); // not supposed to throw an exception
 	}
 
@@ -314,13 +326,14 @@ public class ArrayTest {
 				return "*";
 			}
 		};
-		Array<Object> o = $array(object);
+		Array<Object> o = Array(object);
 		assertToStringJoinEquals("*", o);
 	}
 
 	@Test
 	public void testToString18() {
 		Object object = new Object() {
+			@SuppressWarnings("unused")
 			public Object valueOf() {
 				return new Object();
 			}
@@ -329,13 +342,14 @@ public class ArrayTest {
 				return "*";
 			}
 		};
-		Array<Object> o = $array(object);
+		Array<Object> o = Array(object);
 		assertToStringJoinEquals("*", o);
 	}
 
 	@Test
 	public void testToString19() {
 		Object object = new Object() {
+			@SuppressWarnings("unused")
 			public String valueOf() {
 				return "+";
 			}
@@ -344,7 +358,7 @@ public class ArrayTest {
 				throw new RuntimeException("error");
 			}
 		};
-		Array<Object> o = $array(object);
+		Array<Object> o = Array(object);
 		try {
 			o.toString();
 			assertTrue(false);
@@ -372,12 +386,13 @@ public class ArrayTest {
 		// verify that we correctly call toLocaleString on the elements
 		final AtomicInteger n = new AtomicInteger(0);
 		Object obj = new Object() {
+			@SuppressWarnings("unused")
 			public String toLocaleString() {
 				n.incrementAndGet();
 				return "";
 			};
 		};
-		Array<Object> arr = $array(null, obj, null, obj, obj);
+		Array<Object> arr = Array(null, obj, null, obj, obj);
 		arr.toLocaleString();
 
 		assertEquals(3, n.get());
@@ -393,9 +408,9 @@ public class ArrayTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testConcat01() {
-		Array<Integer> x = $array();
-		Array<Integer> y = $array(0, 1);
-		Array<Integer> z = $array(2, 3, 4);
+		Array<Integer> x = Array();
+		Array<Integer> y = Array(0, 1);
+		Array<Integer> z = Array(2, 3, 4);
 		Array<Integer> arr = x.concat(y, z);
 
 		assertNotSame(x, arr);
@@ -409,8 +424,7 @@ public class ArrayTest {
 
 	@Test
 	public void testConcat02() {
-		Array<Object> x = $array();
-		x.$set(0, 0);
+		Array<Object> x = $array((Object) 0);
 		Object y = new Object();
 		Array<Object> arr = x.concat(y, -1, true, "NaN");
 
@@ -1220,4 +1234,212 @@ public class ArrayTest {
 		assertTrue("Check toString operator", result);
 	}
 
+	// ============================================
+	// Tests section 15.4.4.12 of the ECMA-262 Spec
+	// ============================================
+
+	@Test
+	public void testSplice01() {
+		Array<Integer> x = $array(0, 1, 2, 3);
+		Array<Integer> arr = x.splice(0, 3);
+
+		assertArrayEquals($array(0, 1, 2), arr);
+		assertArrayEquals($array(3), x);
+	}
+
+	@Test
+	public void testSplice02() {
+		Array<Integer> x = $array(0, 1, 2, 3);
+		Array<Integer> arr = x.splice(0, 3, 4, 5);
+
+		assertArrayEquals($array(0, 1, 2), arr);
+		assertArrayEquals($array(4, 5, 3), x);
+	}
+
+	@Test
+	public void testSplice03() {
+		Array<Integer> x = $array(0, 1, 2, 3);
+		Array<Integer> arr = x.splice(0, 4);
+
+		assertArrayEquals($array(0, 1, 2, 3), arr);
+		assertArrayEquals(new Array<Integer>(), x);
+	}
+
+	@Test
+	public void testSplice04() {
+		Array<Integer> x = $array(0, 1, 2, 3);
+		Array<Integer> arr = x.splice(1, 3, 4, 5);
+
+		assertArrayEquals($array(1, 2, 3), arr);
+		assertArrayEquals($array(0, 4, 5), x);
+	}
+
+	@Test
+	public void testSplice05() {
+		Array<Integer> x = $array(0, 1, 2, 3);
+		Array<Integer> arr = x.splice(0, 5);
+
+		assertArrayEquals($array(1, 2, 3), arr);
+		assertArrayEquals(new Array<Integer>(), x);
+	}
+
+	@Test
+	public void testSplice06() {
+		Array<Integer> x = $array(0, 1, 2, 3);
+		Array<Integer> arr = x.splice(1, 4, 4, 5);
+
+		assertArrayEquals($array(1, 2, 3), arr);
+		assertArrayEquals($array(0, 4, 5), x);
+	}
+
+	@Test
+	public void testSplice07() {
+		Array<Integer> x = $array(0, 1);
+		Array<Integer> arr = x.splice(-2, -1);
+
+		assertArrayEquals(new Array<Integer>(), arr);
+		assertArrayEquals($array(0, 1), x);
+	}
+
+	@Test
+	public void testSplice08() {
+		Array<Integer> x = $array(0, 1);
+		Array<Integer> arr = x.splice(-1, -1);
+
+		assertArrayEquals(new Array<Integer>(), arr);
+		assertArrayEquals($array(0, 1), x);
+	}
+
+	@Test
+	public void testSplice09() {
+		Array<Integer> x = $array(0, 1);
+		Array<Integer> arr = x.splice(-2, -1, 2, 3);
+
+		assertArrayEquals(new Array<Integer>(), arr);
+		assertArrayEquals($array(2, 3, 0, 1), x);
+	}
+
+	@Test
+	public void testSplice10() {
+		Array<Integer> x = $array(0, 1);
+		Array<Integer> arr = x.splice(-1, -1, 2, 3);
+
+		assertArrayEquals(new Array<Integer>(), arr);
+		assertArrayEquals($array(0, 2, 3, 1), x);
+	}
+
+	@Test
+	public void testSplice11() {
+		Array<Integer> x = $array(0, 1);
+		Array<Integer> arr = x.splice(-3, -1, 2, 3);
+
+		assertArrayEquals(new Array<Integer>(), arr);
+		assertArrayEquals($array(2, 3, 0, 1), x);
+	}
+
+	@Test
+	public void testSplice12() {
+		Array<Integer> x = $array(0, 1);
+		Array<Integer> arr = x.splice(0, -1);
+
+		assertArrayEquals(new Array<Integer>(), arr);
+		assertArrayEquals($array(0, 1), x);
+	}
+
+	@Test
+	public void testSplice13() {
+		Array<Integer> x = $array(0, 1);
+		Array<Integer> arr = x.splice(2, -1);
+
+		assertArrayEquals(new Array<Integer>(), arr);
+		assertArrayEquals($array(0, 1), x);
+	}
+
+	@Test
+	public void testSplice14() {
+		Array<Integer> x = $array(0, 1);
+		Array<Integer> arr = x.splice(0, -1, 2, 3);
+
+		assertArrayEquals(new Array<Integer>(), arr);
+		assertArrayEquals($array(2, 3, 0, 1), x);
+	}
+
+	@Test
+	public void testSplice15() {
+		Array<Integer> x = $array(0, 1);
+		Array<Integer> arr = x.splice(2, -1, 2, 3);
+
+		assertArrayEquals(new Array<Integer>(), arr);
+		assertArrayEquals($array(0, 1, 2, 3), x);
+	}
+
+	@Test
+	public void testSplice16() {
+		Array<Integer> x = $array(0, 1);
+		Array<Integer> arr = x.splice(3, -1, 2, 3);
+
+		assertArrayEquals(new Array<Integer>(), arr);
+		assertArrayEquals($array(0, 1, 2, 3), x);
+	}
+
+	@Test
+	public void testSplice17() {
+		Array<Integer> x = $array(0, 1, 2, 3);
+		Array<Integer> arr = x.splice(-4, 3);
+
+		assertArrayEquals($array(0, 1, 2), arr);
+		assertArrayEquals($array(3), x);
+	}
+
+	@Test
+	public void testSplice18() {
+		Array<Integer> x = $array(0, 1, 2, 3);
+		Array<Integer> arr = x.splice(-4, 3, 4, 5);
+
+		assertArrayEquals($array(0, 1, 2), arr);
+		assertArrayEquals($array(4, 5, 3), x);
+	}
+
+	@Test
+	public void testSplice19() {
+		Array<Integer> x = $array(0, 1, 2, 3);
+		Array<Integer> arr = x.splice(-5, 4);
+
+		assertArrayEquals($array(0, 1, 2, 3), arr);
+		assertArrayEquals(new Array<Integer>(), x);
+	}
+
+	@Test
+	public void testSplice20() {
+		Array<Integer> x = $array(0, 1, 2, 3);
+		Array<Integer> arr = x.splice(-3, 3, 4, 5);
+
+		assertArrayEquals($array(1, 2, 3), arr);
+		assertArrayEquals($array(0, 4, 5), x);
+	}
+
+	@Test
+	public void testSplice21() {
+		Array<Integer> x = $array(0, 1, 2, 3);
+		Array<Integer> arr = x.splice(-9, 5);
+
+		assertArrayEquals($array(0, 1, 2, 3), arr);
+		assertArrayEquals(new Array<Integer>(), x);
+	}
+
+	@Test
+	public void testSplice22() {
+		Array<Integer> x = $array(0, 1, 2, 3);
+		Array<Integer> arr = x.splice(-3, 4, 4, 5);
+
+		assertArrayEquals($array(1, 2, 3), arr);
+		assertArrayEquals($array(0, 4, 5), x);
+	}
+
+	private static <T> void assertArrayEquals(Array<T> expected, Array<T> actual) {
+		assertEquals(expected.$length(), actual.$length());
+		for (int i = 0; i < expected.$length(); i++) {
+			assertEquals(expected.$get(i), actual.$get(i));
+		}
+	}
 }
