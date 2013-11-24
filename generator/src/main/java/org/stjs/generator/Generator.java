@@ -36,6 +36,7 @@ import javax.tools.ToolProvider;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
 import org.stjs.generator.javac.CustomClassloaderJavaFileManager;
+import org.stjs.generator.name.DefaultNameProvider;
 import org.stjs.generator.type.ClassLoaderWrapper;
 import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.utils.ClassUtils;
@@ -49,6 +50,7 @@ import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.util.JavacTask;
+import com.sun.source.util.Trees;
 
 /**
  * This class parses a Java source file, launches several visitors and finally generate the corresponding Javascript.
@@ -106,7 +108,7 @@ public class Generator {
 
 		File inputFile = getInputFile(sourceFolder, className);
 		File outputFile = getOutputFile(generationFolder.getAbsolutePath(), className);
-		GenerationContext context = new GenerationContext(inputFile, configuration);
+		GenerationContext context = new GenerationContext(inputFile, configuration, new DefaultNameProvider(), null);
 
 		CompilationUnitTree cu = parseAndResolve(classLoaderWrapper, inputFile, context, configuration.getSourceEncoding());
 
@@ -215,6 +217,8 @@ public class Generator {
 			Iterable<? extends JavaFileObject> fileObjects = fileManager.getJavaFileObjectsFromFiles(Collections.singleton(inputFile));
 			JavaCompiler.CompilationTask task = compiler.getTask(null, classLoaderFileManager, null, null, null, fileObjects);
 			JavacTask javacTask = (JavacTask) task;
+
+			context.setTrees(Trees.instance(javacTask));
 
 			CompilationUnitTree cu = javacTask.parse().iterator().next();
 			javacTask.analyze();

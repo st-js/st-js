@@ -16,7 +16,7 @@ public class CompilationUnitWriter implements VisitorContributor<CompilationUnit
 
 	@Override
 	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, CompilationUnitTree tree,
-			GenerationContext p) {
+			GenerationContext p, List<AstNode> prev) {
 		AstRoot root = new AstRoot();
 		for (Tree type : tree.getTypeDecls()) {
 			List<AstNode> jsNodes = visitor.scan(type, p);

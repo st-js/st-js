@@ -27,6 +27,7 @@ import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.ast.ASTNodeData;
+import org.stjs.generator.name.DefaultNameProvider;
 import org.stjs.generator.type.ClassLoaderWrapper;
 import org.stjs.generator.type.FieldWrapper;
 import org.stjs.generator.type.MethodWrapper;
@@ -42,7 +43,7 @@ public class ScopeTestHelper {
 	}
 
 	public static CompilationUnit resolveName(Class<?> clazz) {
-		return resolveName(clazz, Collections.<String> emptyList());
+		return resolveName(clazz, Collections.<String>emptyList());
 	}
 
 	public static CompilationUnit resolveName(Class<?> clazz, Collection<String> packages) {
@@ -50,14 +51,12 @@ public class ScopeTestHelper {
 		try {
 			in = new FileInputStream(getSourceFile(clazz));
 			CompilationUnit cu = JavaParser.parse(in);
-			GeneratorConfiguration config =
-					new GeneratorConfigurationBuilder().allowedPackages(packages).allowedPackage("org.stjs.javascript")
-							.allowedPackage("org.stjs.generator").build();
+			GeneratorConfiguration config = new GeneratorConfigurationBuilder().allowedPackages(packages).allowedPackage("org.stjs.javascript")
+					.allowedPackage("org.stjs.generator").build();
 
-			ClassLoaderWrapper classLoader =
-					new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader(), config.getAllowedPackages(),
-							config.getAllowedJavaLangClasses());
-			GenerationContext context = new GenerationContext(new File(getSourceFile(clazz)), config);
+			ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader(), config.getAllowedPackages(),
+					config.getAllowedJavaLangClasses());
+			GenerationContext context = new GenerationContext(new File(getSourceFile(clazz)), config, new DefaultNameProvider(), null);
 			// set the parent of each node
 			cu.accept(new SetParentVisitor(), context);
 			ScopeBuilder builder = new ScopeBuilder(classLoader, context);
@@ -89,8 +88,7 @@ public class ScopeTestHelper {
 		assertResolvedName(clazz, name, 1, scopeClass, level);
 	}
 
-	public static void assertResolvedName(Class<?> clazz, final String name, final int occurence,
-			Class<? extends Scope> scopeClass, int level) {
+	public static void assertResolvedName(Class<?> clazz, final String name, final int occurence, Class<? extends Scope> scopeClass, int level) {
 		CompilationUnit cu = resolveName(clazz);
 		final AtomicReference<Node> nodePointer = new AtomicReference<Node>();
 		cu.accept(new VoidVisitorAdapter<Boolean>() {

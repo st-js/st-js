@@ -19,23 +19,37 @@ import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 
 import java.io.File;
 
+import org.stjs.generator.name.NameProvider;
+import org.stjs.generator.visitor.TreePathHolder;
+
+import com.sun.source.util.TreePath;
+import com.sun.source.util.Trees;
+
 /**
  * This class can resolve an identifier or a method in the given source context. There is one context create for each
  * generation process.
  * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
-public class GenerationContext {
+public class GenerationContext implements TreePathHolder {
 
 	private final File inputFile;
 
 	private final GeneratorConfiguration configuration;
 
+	private final NameProvider names;
+
 	private ClassOrInterfaceDeclaration currentType;
 
-	public GenerationContext(File inputFile, GeneratorConfiguration configuration) {
+	private Trees trees;
+
+	private TreePath currentPath;
+
+	public GenerationContext(File inputFile, GeneratorConfiguration configuration, NameProvider names, Trees trees) {
 		this.inputFile = inputFile;
 		this.configuration = configuration;
+		this.names = names;
+		this.trees = trees;
 	}
 
 	public File getInputFile() {
@@ -54,6 +68,26 @@ public class GenerationContext {
 
 	public ClassOrInterfaceDeclaration getCurrentType() {
 		return currentType;
+	}
+
+	public NameProvider getNames() {
+		return names;
+	}
+
+	public Trees getTrees() {
+		return trees;
+	}
+
+	public void setTrees(Trees trees) {
+		this.trees = trees;
+	}
+
+	public TreePath getCurrentPath() {
+		return currentPath;
+	}
+
+	public void setCurrentPath(TreePath currentPath) {
+		this.currentPath = currentPath;
 	}
 
 }

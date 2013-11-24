@@ -1,4 +1,4 @@
-package org.stjs.generator.writer;
+package org.stjs.generator.writer.expression;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,7 +14,8 @@ import com.sun.source.tree.ArrayAccessTree;
 public class ArrayAccessWriter implements VisitorContributor<ArrayAccessTree, List<AstNode>, GenerationContext> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ArrayAccessTree tree, GenerationContext p) {
+	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ArrayAccessTree tree, GenerationContext p,
+			List<AstNode> prev) {
 		ElementGet array = new ElementGet();
 		array.setTarget(visitor.scan(tree.getExpression(), p).get(0));
 		array.setElement(visitor.scan(tree.getIndex(), p).get(0));

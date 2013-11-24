@@ -7,9 +7,10 @@ import java.util.Collection;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.sun.source.tree.Tree;
+import com.sun.source.util.TreePath;
 import com.sun.source.util.TreeScanner;
 
-public class TreePathScannerContributors<R, P> extends TreeScanner<R, P> {
+public class TreePathScannerContributors<R, P extends TreePathHolder> extends TreeScanner<R, P> {
 	private final Multimap<Class<?>, VisitorContributor<? extends Tree, R, P>> contributors = LinkedListMultimap.create();
 
 	public <T extends VisitorContributor<? extends Tree, R, P>> TreePathScannerContributors<R, P> contribute(T contributor) {
@@ -64,15 +65,21 @@ public class TreePathScannerContributors<R, P> extends TreeScanner<R, P> {
 		}
 		R lastR = r;
 		for (VisitorContributor<? extends Tree, R, P> vc : nodeContributors) {
-			lastR = ((VisitorContributor<T, R, P>) vc).visit(this, node, p);
+			lastR = ((VisitorContributor<T, R, P>) vc).visit(this, node, p, lastR);
 		}
 		return lastR;
 	}
 
 	@Override
 	public R scan(Tree tree, P p) {
-		// R r = super.scan(tree, p);
-		return visit(tree, p, null);
+		TreePath prev = p.getCurrentPath();
+		p.setCurrentPath(new TreePath(prev, tree));
+		try {
+			return visit(tree, p, null);
+		}
+		finally {
+			p.setCurrentPath(prev);
+		}
 	}
 
 }
