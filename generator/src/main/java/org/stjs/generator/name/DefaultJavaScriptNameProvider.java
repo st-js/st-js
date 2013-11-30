@@ -1,6 +1,7 @@
 package org.stjs.generator.name;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
@@ -14,8 +15,19 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 
 	@Override
 	public String getTypeName(GenerationContext context, TypeMirror type) {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO fix anonymous and inner types names
+		// String name = clazz.getSimpleName();
+		// if (name.isEmpty()) {
+		// return GeneratorConstants.SPECIAL_INLINE_TYPE;
+		// }
+		// for (Class<?> c = clazz.getDeclaringClass(); c != null && !c.isAnonymousClass(); c = c.getDeclaringClass()) {
+		// name = c.getSimpleName() + "." + name;
+		// }
+		//
+		if (type instanceof DeclaredType) {
+			return ((DeclaredType) type).asElement().getSimpleName().toString();
+		}
+		throw new IllegalArgumentException("Don't know what how to get the name of this type:" + type);
 	}
 
 	@Override

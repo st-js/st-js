@@ -18,8 +18,7 @@ public class CallSuperGeneratorTest {
 
 	@Test
 	public void testOverrideAndCallSuper() {
-		assertCodeContains(CallSuper3.class,
-				"prototype.instanceMethod = function(arg){ SuperClass.prototype.instanceMethod.call(this, arg);}");
+		assertCodeContains(CallSuper3.class, "prototype.instanceMethod = function(arg){ SuperClass.prototype.instanceMethod.call(this, arg);}");
 	}
 
 	@Test
@@ -34,13 +33,13 @@ public class CallSuperGeneratorTest {
 
 	@Test
 	public void testInstanceCallStaticSuperNotExplicit() {
-		assertCodeContains(CallSuper6.class, "prototype.instanceMethod = function(arg){ CallSuper6.staticMethod(arg);}");
+		assertCodeContains(CallSuper6.class, "prototype.instanceMethod = function(arg){ SuperClass.staticMethod(arg);}");
 	}
 
 	@Test
 	public void testStaticCallStaticSuperNotExplicit() {
 		assertCodeContains(CallSuper7.class, //
-				"constructor.staticMethod2 = function(arg){ CallSuper7.staticMethod(arg);}");
+				"constructor.staticMethod2 = function(arg){ SuperClass.staticMethod(arg);}");
 	}
 
 	@Test

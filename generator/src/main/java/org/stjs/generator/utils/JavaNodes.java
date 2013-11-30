@@ -8,6 +8,10 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
+import org.stjs.generator.GeneratorConstants;
+
+import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.Tree;
 
@@ -36,5 +40,12 @@ public class JavaNodes {
 	public static boolean isStatic(Element element) {
 		Set<Modifier> modifiers = element.getModifiers();
 		return modifiers.contains(Modifier.STATIC);
+	}
+
+	public static boolean isSuper(ExpressionTree expression) {
+		if (!(expression instanceof IdentifierTree)) {
+			return false;
+		}
+		return GeneratorConstants.SUPER.equals(((IdentifierTree) expression).getName().toString());
 	}
 }

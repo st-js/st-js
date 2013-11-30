@@ -6,6 +6,7 @@ import java.util.List;
 
 import javacutils.TreeUtils;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
@@ -27,19 +28,41 @@ import com.sun.source.tree.Tree;
 
 public class MethodInvocationWriter implements VisitorContributor<MethodInvocationTree, List<AstNode>, GenerationContext> {
 
-	private List<AstNode> callToSuper(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodInvocationTree tree,
-			GenerationContext context, List<AstNode> arguments) {
-		TypeElement typeElement = context.getTrees().getScope(context.getCurrentPath()).getEnclosingClass();
+	/**
+	 * super(args) -> SuperType.call(this, args)
+	 */
+	private List<AstNode> callToSuperConstructor(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor,
+			MethodInvocationTree tree, GenerationContext context, List<AstNode> arguments) {
+		if (!TreeUtils.isSuperCall(tree)) {
+			return null;
+		}
+
+		Element methodElement = TreeUtils.elementFromUse(tree);
+		if (JavaNodes.isStatic(methodElement)) {
+			// this is a call of type super.staticMethod(args) -> it should be handled as a simple call to staticMethod
+			return null;
+		}
+
+		TypeElement typeElement = (TypeElement) methodElement.getEnclosingElement();
+
+		String methodName;
+		if (tree.getMethodSelect() instanceof IdentifierTree) {
+			methodName = ((IdentifierTree) tree.getMethodSelect()).getName().toString();
+		} else {
+			methodName = ((MemberSelectTree) tree.getMethodSelect()).getIdentifier().toString();
+		}
+
 		// avoid useless call to super() when the super class is Object
-		if (JavaNodes.sameRawType(typeElement.getSuperclass(), Object.class)) {
+		if (GeneratorConstants.SUPER.equals(methodName) && JavaNodes.sameRawType(typeElement.asType(), Object.class)) {
 			return Collections.emptyList();
 		}
 
-		// transform it into superType.apply(this, args..);
-		AstNode superType = JavaScriptNodes.name(typeElement.getSuperclass().toString());
+		// transform it into superType.[prototype.method].call(this, args..);
+		String typeName = context.getNames().getTypeName(context, typeElement);
+		AstNode superType = JavaScriptNodes.name(GeneratorConstants.SUPER.equals(methodName) ? typeName : typeName + ".prototype." + methodName);
 
 		arguments.add(0, JavaScriptNodes.keyword(Token.THIS));
-		return Collections.<AstNode>singletonList(JavaScriptNodes.functionCall(superType, "apply", arguments));
+		return Collections.<AstNode>singletonList(JavaScriptNodes.functionCall(superType, "call", arguments));
 	}
 
 	@Override
@@ -57,18 +80,30 @@ public class MethodInvocationWriter implements VisitorContributor<MethodInvocati
 		ExecutableElement methodDecl = TreeUtils.elementFromUse(tree);
 		assert methodDecl != null : "Cannot find the definition for method  " + name;
 
+		List<AstNode> js = null;
+
+		js = callToSuperConstructor(visitor, tree, context, arguments);
+		if (js != null) {
+			return js;
+		}
+
 		if (select instanceof IdentifierTree) {
+			// simple call: method(args)
 			name = ((IdentifierTree) select).getName().toString();
 
-			if (name.equals(GeneratorConstants.SUPER)) {
-				return callToSuper(visitor, tree, context, arguments);
-			}
 			target = MemberWriters.buildTarget(context, methodDecl);
 		} else {
+			// calls with target: target.method(args)
 			MemberSelectTree memberSelect = (MemberSelectTree) select;
 			name = memberSelect.getIdentifier().toString();
 
-			target = visitor.scan(memberSelect.getExpression(), context).get(0);
+			if (TreeUtils.isSuperCall(tree)) {
+				// this is a call of type super.staticMethod(args) -> it should be handled as a simple call to
+				// staticMethod
+				target = MemberWriters.buildTarget(context, methodDecl);
+			} else {
+				target = visitor.scan(memberSelect.getExpression(), context).get(0);
+			}
 		}
 
 		return Collections.<AstNode>singletonList(JavaScriptNodes.functionCall(target, name, arguments));

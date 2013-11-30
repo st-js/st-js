@@ -147,4 +147,8 @@ public class JavaScriptNodes {
 		return array;
 	}
 
+	public static AstNode THIS() {
+		return keyword(Token.THIS);
+	}
+
 }

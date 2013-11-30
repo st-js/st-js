@@ -14,6 +14,7 @@ import org.stjs.generator.writer.expression.CompoundAssignmentWriter;
 import org.stjs.generator.writer.expression.ConditionalWriter;
 import org.stjs.generator.writer.expression.IdentifierWriter;
 import org.stjs.generator.writer.expression.LiteralWriter;
+import org.stjs.generator.writer.expression.MemberSelectWriter;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
 import org.stjs.generator.writer.expression.NewArrayWriter;
 import org.stjs.generator.writer.expression.NewClassWriter;
@@ -59,6 +60,7 @@ public class JavascriptWriterContributors {
 		contributors.contribute(new ConditionalWriter());
 		contributors.contribute(new IdentifierWriter());
 		contributors.contribute(new LiteralWriter());
+		contributors.contribute(new MemberSelectWriter());
 		contributors.contribute(new MethodInvocationWriter());
 		contributors.contribute(new NewArrayWriter());
 		contributors.contribute(new NewClassWriter());
