@@ -12,9 +12,11 @@ import org.stjs.generator.writer.expression.AssignmentWriter;
 import org.stjs.generator.writer.expression.BinaryWriter;
 import org.stjs.generator.writer.expression.CompoundAssignmentWriter;
 import org.stjs.generator.writer.expression.ConditionalWriter;
+import org.stjs.generator.writer.expression.IdentifierWriter;
 import org.stjs.generator.writer.expression.LiteralWriter;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
 import org.stjs.generator.writer.expression.NewArrayWriter;
+import org.stjs.generator.writer.expression.NewClassWriter;
 import org.stjs.generator.writer.expression.ParenthesizedWriter;
 import org.stjs.generator.writer.expression.UnaryWriter;
 import org.stjs.generator.writer.statement.AssertWriter;
@@ -55,9 +57,11 @@ public class JavascriptWriterContributors {
 		contributors.contribute(new BinaryWriter());
 		contributors.contribute(new CompoundAssignmentWriter());
 		contributors.contribute(new ConditionalWriter());
+		contributors.contribute(new IdentifierWriter());
 		contributors.contribute(new LiteralWriter());
 		contributors.contribute(new MethodInvocationWriter());
 		contributors.contribute(new NewArrayWriter());
+		contributors.contribute(new NewClassWriter());
 		contributors.contribute(new ParenthesizedWriter());
 		contributors.contribute(new UnaryWriter());
 

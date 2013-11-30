@@ -14,7 +14,7 @@ import org.junit.Test;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConfigurationBuilder;
-import org.stjs.generator.name.DefaultNameProvider;
+import org.stjs.generator.name.DefaultJavaScriptNameProvider;
 import org.stjs.generator.scope.AbstractScope;
 import org.stjs.generator.scope.CompilationUnitScope;
 import org.stjs.generator.scope.Scope;
@@ -40,7 +40,7 @@ public class SimpleScopeBuilderTest {
 		GeneratorConfiguration config = new GeneratorConfigurationBuilder().allowedPackage("org.stjs.generator").build();
 		ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader(), config.getAllowedPackages(),
 				config.getAllowedJavaLangClasses());
-		GenerationContext context = new GenerationContext(new File(path), config, new DefaultNameProvider(), null);
+		GenerationContext context = new GenerationContext(new File(path), config, new DefaultJavaScriptNameProvider(), null);
 		// set the parent of each node
 		compilationUnit.accept(new SetParentVisitor(), context);
 		ScopeBuilder builder = new ScopeBuilder(classLoader, context);

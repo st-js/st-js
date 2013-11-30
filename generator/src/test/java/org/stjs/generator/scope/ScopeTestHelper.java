@@ -27,7 +27,7 @@ import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.ast.ASTNodeData;
-import org.stjs.generator.name.DefaultNameProvider;
+import org.stjs.generator.name.DefaultJavaScriptNameProvider;
 import org.stjs.generator.type.ClassLoaderWrapper;
 import org.stjs.generator.type.FieldWrapper;
 import org.stjs.generator.type.MethodWrapper;
@@ -56,7 +56,7 @@ public class ScopeTestHelper {
 
 			ClassLoaderWrapper classLoader = new ClassLoaderWrapper(Thread.currentThread().getContextClassLoader(), config.getAllowedPackages(),
 					config.getAllowedJavaLangClasses());
-			GenerationContext context = new GenerationContext(new File(getSourceFile(clazz)), config, new DefaultNameProvider(), null);
+			GenerationContext context = new GenerationContext(new File(getSourceFile(clazz)), config, new DefaultJavaScriptNameProvider(), null);
 			// set the parent of each node
 			cu.accept(new SetParentVisitor(), context);
 			ScopeBuilder builder = new ScopeBuilder(classLoader, context);

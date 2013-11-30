@@ -19,7 +19,7 @@ import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 
 import java.io.File;
 
-import org.stjs.generator.name.NameProvider;
+import org.stjs.generator.name.JavaScriptNameProvider;
 import org.stjs.generator.visitor.TreePathHolder;
 
 import com.sun.source.util.TreePath;
@@ -37,7 +37,7 @@ public class GenerationContext implements TreePathHolder {
 
 	private final GeneratorConfiguration configuration;
 
-	private final NameProvider names;
+	private final JavaScriptNameProvider names;
 
 	private ClassOrInterfaceDeclaration currentType;
 
@@ -45,7 +45,7 @@ public class GenerationContext implements TreePathHolder {
 
 	private TreePath currentPath;
 
-	public GenerationContext(File inputFile, GeneratorConfiguration configuration, NameProvider names, Trees trees) {
+	public GenerationContext(File inputFile, GeneratorConfiguration configuration, JavaScriptNameProvider names, Trees trees) {
 		this.inputFile = inputFile;
 		this.configuration = configuration;
 		this.names = names;
@@ -70,7 +70,7 @@ public class GenerationContext implements TreePathHolder {
 		return currentType;
 	}
 
-	public NameProvider getNames() {
+	public JavaScriptNameProvider getNames() {
 		return names;
 	}
 

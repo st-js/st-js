@@ -2,6 +2,7 @@ package org.stjs.generator.utils;
 
 import java.util.Set;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -29,6 +30,11 @@ public class JavaNodes {
 
 	public static boolean isStatic(MethodTree method) {
 		Set<Modifier> modifiers = method.getModifiers().getFlags();
+		return modifiers.contains(Modifier.STATIC);
+	}
+
+	public static boolean isStatic(Element element) {
+		Set<Modifier> modifiers = element.getModifiers();
 		return modifiers.contains(Modifier.STATIC);
 	}
 }

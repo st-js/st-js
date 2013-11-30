@@ -32,8 +32,8 @@ public class MethodWriter implements VisitorContributor<MethodTree, List<AstNode
 	}
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodTree tree, GenerationContext p,
-			List<AstNode> prev) {
+	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodTree tree,
+			GenerationContext context, List<AstNode> prev) {
 		if (tree.getModifiers().getFlags().contains(Modifier.NATIVE)) {
 			// native methods are there only to indicate already existing javascript code - or to allow method
 			// overloading
@@ -59,13 +59,14 @@ public class MethodWriter implements VisitorContributor<MethodTree, List<AstNode
 			}
 			decl.addParam(name(changeName(param.getName().toString())));
 		}
-		decl.setBody(visitor.scan(tree.getBody(), p).get(0));
+		decl.setBody(visitor.scan(tree.getBody(), context).get(0));
 
 		// add the constructor.<name> or prototype.<name> if needed
 		if (!JavaNodes.isConstructor(tree)) {
 			AstNode target = name(tree.getModifiers().getFlags().contains(Modifier.STATIC) ? JavascriptKeywords.CONSTRUCTOR
 					: JavascriptKeywords.PROTOTYPE);
-			return Collections.<AstNode>singletonList(statement(assignment(target, tree.getName().toString(), decl)));
+			String methodName = context.getNames().getMethodName(context, tree, context.getCurrentPath());
+			return Collections.<AstNode>singletonList(statement(assignment(target, methodName, decl)));
 		}
 
 		return Collections.<AstNode>singletonList(decl);

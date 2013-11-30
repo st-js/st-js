@@ -40,6 +40,23 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 	// return namespace;
 	// }
 
+	/**
+	 * @return the JavaScript node for the class' constructor
+	 */
+	private AstNode getConstructor(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree clazz, GenerationContext p) {
+		for (Tree member : clazz.getMembers()) {
+			if (JavaNodes.isConstructor(member)) {
+				// TODO skip the "native" constructors
+				return visitor.scan(member, p).get(0);
+			}
+		}
+		// no constructor found -> the compiler normally generates one
+		return null;
+	}
+
+	/**
+	 * @return the JavaScript node for the class' members
+	 */
 	private AstNode getMembers(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree clazz, GenerationContext p) {
 		// the following members must not appear in the initializer function:
 		// - constructors (they are printed elsewhere)
@@ -69,17 +86,6 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 		decl.setBody(body);
 
 		return decl;
-	}
-
-	private AstNode getConstructor(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree clazz, GenerationContext p) {
-		for (Tree member : clazz.getMembers()) {
-			if (JavaNodes.isConstructor(member)) {
-				// TODO skip the "native" constructors
-				return visitor.scan(member, p).get(0);
-			}
-		}
-		// no constructor found -> the compiler normally generates one
-		return null;
 	}
 
 	private boolean isAbstractInstanceMethod(Tree member) {

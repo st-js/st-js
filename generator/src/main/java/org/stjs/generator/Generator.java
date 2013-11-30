@@ -36,7 +36,7 @@ import javax.tools.ToolProvider;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
 import org.stjs.generator.javac.CustomClassloaderJavaFileManager;
-import org.stjs.generator.name.DefaultNameProvider;
+import org.stjs.generator.name.DefaultJavaScriptNameProvider;
 import org.stjs.generator.type.ClassLoaderWrapper;
 import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.utils.ClassUtils;
@@ -108,7 +108,7 @@ public class Generator {
 
 		File inputFile = getInputFile(sourceFolder, className);
 		File outputFile = getOutputFile(generationFolder.getAbsolutePath(), className);
-		GenerationContext context = new GenerationContext(inputFile, configuration, new DefaultNameProvider(), null);
+		GenerationContext context = new GenerationContext(inputFile, configuration, new DefaultJavaScriptNameProvider(), null);
 
 		CompilationUnitTree cu = parseAndResolve(classLoaderWrapper, inputFile, context, configuration.getSourceEncoding());
 

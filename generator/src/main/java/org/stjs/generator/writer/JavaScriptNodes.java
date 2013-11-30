@@ -14,6 +14,7 @@ import org.mozilla.javascript.ast.FunctionCall;
 import org.mozilla.javascript.ast.InfixExpression;
 import org.mozilla.javascript.ast.KeywordLiteral;
 import org.mozilla.javascript.ast.Name;
+import org.mozilla.javascript.ast.NewExpression;
 import org.mozilla.javascript.ast.PropertyGet;
 import org.mozilla.javascript.ast.UnaryExpression;
 import org.mozilla.javascript.ast.VariableDeclaration;
@@ -90,6 +91,15 @@ public class JavaScriptNodes {
 			fc.setArguments(arguments);
 		}
 		return fc;
+	}
+
+	public static NewExpression newExpression(Name name, List<AstNode> arguments) {
+		NewExpression ne = new NewExpression();
+		ne.setTarget(name);
+		if (arguments.size() > 0) {
+			ne.setArguments(arguments);
+		}
+		return ne;
 	}
 
 	public static AstNode keyword(int token) {
