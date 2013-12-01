@@ -59,8 +59,7 @@ public class NamespaceGeneratorTest {
 
 	@Test
 	public void testInlineConstruct() {
-		assertCodeContains(Namespace8.class,
-				"stjs.extend(function Namespace8$1(){a.b.Namespace8.apply(this, arguments);}, a.b.Namespace8, [], ");
+		assertCodeContains(Namespace8.class, "stjs.extend(function Namespace8$1(){a.b.Namespace8.call(this);}, a.b.Namespace8, [], ");
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)

@@ -15,7 +15,9 @@ import org.mozilla.javascript.ast.InfixExpression;
 import org.mozilla.javascript.ast.KeywordLiteral;
 import org.mozilla.javascript.ast.Name;
 import org.mozilla.javascript.ast.NewExpression;
+import org.mozilla.javascript.ast.ParenthesizedExpression;
 import org.mozilla.javascript.ast.PropertyGet;
+import org.mozilla.javascript.ast.StringLiteral;
 import org.mozilla.javascript.ast.UnaryExpression;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
@@ -93,9 +95,9 @@ public class JavaScriptNodes {
 		return fc;
 	}
 
-	public static NewExpression newExpression(Name name, List<AstNode> arguments) {
+	public static NewExpression newExpression(AstNode target, List<AstNode> arguments) {
 		NewExpression ne = new NewExpression();
-		ne.setTarget(name);
+		ne.setTarget(target);
 		if (arguments.size() > 0) {
 			ne.setArguments(arguments);
 		}
@@ -149,6 +151,23 @@ public class JavaScriptNodes {
 
 	public static AstNode THIS() {
 		return keyword(Token.THIS);
+	}
+
+	public static StringLiteral string(String value) {
+		StringLiteral expr = new StringLiteral();
+		expr.setQuoteCharacter('"');
+		expr.setValue(value);
+		return expr;
+	}
+
+	public static AstNode NULL() {
+		return keyword(Token.NULL);
+	}
+
+	public static AstNode paren(AstNode expr) {
+		ParenthesizedExpression paren = new ParenthesizedExpression();
+		paren.setExpression(expr);
+		return paren;
 	}
 
 }

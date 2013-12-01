@@ -23,6 +23,7 @@ public class LiteralWriter implements VisitorContributor<LiteralTree, List<AstNo
 		if (tree.getKind() == Kind.STRING_LITERAL || tree.getKind() == Kind.CHAR_LITERAL) {
 			StringLiteral expr = new StringLiteral();
 			expr.setValue(tree.getValue().toString());
+			expr.setQuoteCharacter(tree.getKind() == Kind.STRING_LITERAL ? '"' : '\'');
 			return Collections.<AstNode>singletonList(expr);
 		}
 		if (tree.getKind() == Kind.NULL_LITERAL) {

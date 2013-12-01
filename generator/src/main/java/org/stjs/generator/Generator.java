@@ -219,6 +219,8 @@ public class Generator {
 			JavacTask javacTask = (JavacTask) task;
 
 			context.setTrees(Trees.instance(javacTask));
+			context.setElements(javacTask.getElements());
+			context.setTypes(javacTask.getTypes());
 
 			CompilationUnitTree cu = javacTask.parse().iterator().next();
 			javacTask.analyze();

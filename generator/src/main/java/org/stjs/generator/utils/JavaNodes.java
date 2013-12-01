@@ -3,12 +3,15 @@ package org.stjs.generator.utils;
 import java.util.Set;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.javascript.annotation.JavascriptFunction;
+import org.stjs.javascript.annotation.Namespace;
 
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
@@ -47,5 +50,34 @@ public class JavaNodes {
 			return false;
 		}
 		return GeneratorConstants.SUPER.equals(((IdentifierTree) expression).getName().toString());
+	}
+
+	public static boolean isJavaScriptFunction(Element element) {
+		return element.getAnnotation(JavascriptFunction.class) != null;
+	}
+
+	public static String getNamespace(Element type) {
+		Namespace ns = type.getAnnotation(Namespace.class);
+		if (ns != null) {
+			return ns.value();
+		}
+		return null;
+	}
+
+	public static boolean isInnerType(Element type) {
+		return type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
+	}
+
+	public static DeclaredType getEnclosingType(TypeMirror type) {
+		if (!(type instanceof DeclaredType)) {
+			return null;
+		}
+		DeclaredType declaredType = (DeclaredType) type;
+
+		TypeMirror superType = declaredType.asElement().getEnclosingElement().asType();
+		if (superType instanceof DeclaredType) {
+			return (DeclaredType) superType;
+		}
+		return null;
 	}
 }

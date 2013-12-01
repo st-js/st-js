@@ -19,6 +19,9 @@ import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 
 import java.io.File;
 
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
+
 import org.stjs.generator.name.JavaScriptNameProvider;
 import org.stjs.generator.visitor.TreePathHolder;
 
@@ -42,6 +45,10 @@ public class GenerationContext implements TreePathHolder {
 	private ClassOrInterfaceDeclaration currentType;
 
 	private Trees trees;
+
+	private Elements elements;
+
+	private Types types;
 
 	private TreePath currentPath;
 
@@ -88,6 +95,22 @@ public class GenerationContext implements TreePathHolder {
 
 	public void setCurrentPath(TreePath currentPath) {
 		this.currentPath = currentPath;
+	}
+
+	public Elements getElements() {
+		return elements;
+	}
+
+	public void setElements(Elements elements) {
+		this.elements = elements;
+	}
+
+	public Types getTypes() {
+		return types;
+	}
+
+	public void setTypes(Types types) {
+		this.types = types;
 	}
 
 }

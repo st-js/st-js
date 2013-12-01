@@ -5,6 +5,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.utils.JavaNodes;
 
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MethodInvocationTree;
@@ -25,7 +26,17 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 		// }
 		//
 		if (type instanceof DeclaredType) {
-			return ((DeclaredType) type).asElement().getSimpleName().toString();
+			DeclaredType declaredType = (DeclaredType) type;
+			String name = declaredType.asElement().getSimpleName().toString();
+			Element rootTypeElement = declaredType.asElement();
+			for (DeclaredType enclosingType = JavaNodes.getEnclosingType(declaredType); enclosingType != null; enclosingType = JavaNodes
+					.getEnclosingType(enclosingType)) {
+				rootTypeElement = enclosingType.asElement();
+				name = rootTypeElement.getSimpleName() + "." + name;
+			}
+
+			String namespace = JavaNodes.getNamespace(rootTypeElement);
+			return (namespace == null ? "" : namespace + ".") + name;
 		}
 		throw new IllegalArgumentException("Don't know what how to get the name of this type:" + type);
 	}
@@ -49,8 +60,7 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 
 	@Override
 	public String getTypeName(GenerationContext context, Element type) {
-		// TODO to this correctly
-		return type.getSimpleName().toString();
+		return getTypeName(context, type.asType());
 	}
 
 }

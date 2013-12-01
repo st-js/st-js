@@ -3,11 +3,16 @@ package org.stjs.generator.writer.declaration;
 import static org.stjs.generator.writer.JavaScriptNodes.functionCall;
 import static org.stjs.generator.writer.JavaScriptNodes.name;
 import static org.stjs.generator.writer.JavaScriptNodes.statement;
+import static org.stjs.generator.writer.JavaScriptNodes.string;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javacutils.TreeUtils;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 
 import org.mozilla.javascript.Token;
@@ -25,20 +30,42 @@ import org.stjs.generator.writer.JavaScriptNodes;
 import org.stjs.generator.writer.JavascriptKeywords;
 
 import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.Tree;
 
 public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>, GenerationContext> {
-	// private String printNamespace(ClassWrapper type) {
-	// String namespace = null;
-	// if (!ClassUtils.isInnerType(type)) {
-	// namespace = ClassUtils.getNamespace(type);
-	// if (namespace != null) {
-	// printer.printLn("stjs.ns(\"" + namespace + "\");");
-	// }
-	// }
-	// return namespace;
-	// }
+
+	/**
+	 * generate the namespace declaration stjs.ns("namespace") if needed
+	 */
+	private void addNamespace(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree tree, GenerationContext p,
+			List<AstNode> stmts) {
+		Element type = TreeUtils.elementFromDeclaration(tree);
+		if (JavaNodes.isInnerType(type)) {
+			// this is an inner (anonymous or not) class - no namespace declaration is generated
+			return;
+		}
+		String namespace = JavaNodes.getNamespace(type);
+		if (namespace != null) {
+			stmts.add(statement(functionCall(name("stjs"), "ns", string(namespace))));
+		}
+	}
+
+	/**
+	 * @return the node to put in the super class
+	 */
+	private AstNode getSuperClass(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree clazz,
+			GenerationContext context) {
+		Element type = TreeUtils.elementFromDeclaration(clazz);
+		if (clazz.getExtendsClause() == null || type.getKind() == ElementKind.INTERFACE) {
+			// no super class found
+			return JavaScriptNodes.NULL();
+		}
+
+		Element superType = TreeUtils.elementFromUse((ExpressionTree) clazz.getExtendsClause());
+		return name(context.getNames().getTypeName(context, superType));
+	}
 
 	/**
 	 * @return the JavaScript node for the class' constructor
@@ -111,6 +138,9 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 		return false;
 	}
 
+	/**
+	 * add the call to the main method, if it exists
+	 */
 	private void addMainMethodCall(ClassTree clazz, List<AstNode> stmts) {
 		if (!hasMainMethod(clazz)) {
 			return;
@@ -122,7 +152,7 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 	}
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree tree, GenerationContext p,
+	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree tree, GenerationContext context,
 			List<AstNode> prev) {
 		// if (isGlobal(type)) {
 		// printGlobals(filterGlobals(n, type), context);
@@ -132,18 +162,35 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 		// }
 
 		List<AstNode> stmts = new ArrayList<AstNode>();
-		addTypeName(visitor, tree, p, stmts);
+		addNamespace(visitor, tree, context, stmts);
 
 		// extends
-		AstNode name = JavaScriptNodes.name(tree.getSimpleName());
-		AstNode superClazz = JavaScriptNodes.keyword(Token.NULL);
+		Element type = TreeUtils.elementFromDeclaration(tree);
+		String typeName = context.getNames().getTypeName(context, type);
+		AstNode name = name(typeName);
+		AstNode superClazz = getSuperClass(visitor, tree, context);
 		AstNode interfaces = JavaScriptNodes.array();
-		AstNode members = getMembers(visitor, tree, p);
+		AstNode members = getMembers(visitor, tree, context);
 		AstNode typeDesc = new ObjectLiteral();
+		boolean anonymousClass = (tree.getSimpleName().length() == 0);
 
-		FunctionCall extendsCall = JavaScriptNodes.functionCall(JavaScriptNodes.name("stjs"), "extend", name, superClazz, interfaces, members,
-				typeDesc);
-		stmts.add(JavaScriptNodes.statement(extendsCall));
+		if (anonymousClass) {
+			// anonymous class
+			name = getConstructor(visitor, tree, context);
+		} else if (typeName.contains(".")) {
+			// inner class
+			stmts.add(statement(JavaScriptNodes.assignment(null, typeName, getConstructor(visitor, tree, context))));
+		} else {
+			// regular class
+			stmts.add(JavaScriptNodes.variableDeclarationStatement(typeName, getConstructor(visitor, tree, context)));
+		}
+
+		FunctionCall extendsCall = functionCall(name("stjs"), "extend", name, superClazz, interfaces, members, typeDesc);
+		if (anonymousClass) {
+			stmts.add(extendsCall);
+		} else {
+			stmts.add(JavaScriptNodes.statement(extendsCall));
+		}
 		// printNonGlobalClass(n, type, scope, context);
 		// if (!type.isInnerType()) {
 		// printStaticInitializers(n, context);
@@ -151,32 +198,6 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 		// }
 
 		return stmts;
-	}
-
-	private void addTypeName(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree tree, GenerationContext p,
-			List<AstNode> stmts) {
-		if (tree.getSimpleName() == null) {
-			// TODO anonymous class
-			// printer.print("(");
-		} else {
-			stmts.add(JavaScriptNodes.variableDeclarationStatement(tree.getSimpleName().toString(), getConstructor(visitor, tree, p)));
-		}
-		// if (!type.isInnerType() && namespace == null) {
-		// printer.print("var ");
-		// }
-		// className = names.getTypeName(type);
-		// if (type.isInnerType()) {
-		// printer.print("constructor.");
-		// printer.print(type.getSimpleName());
-		// } else {
-		// printer.print(className);
-		// }
-		// printer.print(EQUALS);
-		// if (!type.hasAnonymousDeclaringClass()) {
-		// printConstructorImplementation(n, context, scope, type.isAnonymousClass());
-		// printer.printLn(";");
-		// }
-		// }
 	}
 
 }

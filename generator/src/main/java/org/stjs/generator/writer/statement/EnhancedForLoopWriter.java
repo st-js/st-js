@@ -31,7 +31,8 @@ public class EnhancedForLoopWriter implements VisitorContributor<EnhancedForLoop
 
 		UnaryExpression not = new UnaryExpression();
 		not.setOperator(Token.NOT);
-		not.setOperand(JavaScriptNodes.functionCall(stmt.getIteratedObject(), "hasOwnProperty", stmt.getIterator()));
+		not.setOperand(JavaScriptNodes.functionCall(stmt.getIteratedObject(), "hasOwnProperty",
+				JavaScriptNodes.name(tree.getVariable().getName().toString())));
 
 		IfStatement ifs = new IfStatement();
 		ifs.setCondition(not);

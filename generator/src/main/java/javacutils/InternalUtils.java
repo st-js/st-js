@@ -3,6 +3,7 @@ package javacutils;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
@@ -17,6 +18,7 @@ import com.sun.source.tree.Tree;
 import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.code.Symbol.ClassSymbol;
 import com.sun.tools.javac.code.Symbol.TypeSymbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.Types;
@@ -360,5 +362,20 @@ public class InternalUtils {
 	 */
 	public static Context getJavacContext(ProcessingEnvironment env) {
 		return ((JavacProcessingEnvironment) env).getContext();
+	}
+
+	/**
+	 * 
+	 * @param element
+	 * @return Type$1 for inner types
+	 */
+	public static String getBinaryName(Element element) {
+		PackageElement pack = ElementUtils.enclosingPackage(element);
+		String packageName = pack != null && !pack.isUnnamed() ? pack.getQualifiedName().toString() : "";
+
+		if (element instanceof ClassSymbol) {
+			return ((ClassSymbol) element).flatName().toString().substring(packageName.length() + 1);
+		}
+		return null;
 	}
 }

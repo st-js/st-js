@@ -3,15 +3,15 @@ package org.stjs.generator.writer.expression;
 import java.util.Collections;
 import java.util.List;
 
+import javacutils.TreeUtils;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 
-import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.utils.Scopes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
 import org.stjs.generator.writer.JavaScriptNodes;
@@ -32,9 +32,9 @@ public class IdentifierWriter implements VisitorContributor<IdentifierTree, List
 		AstNode target = null;
 		if (JavaNodes.isStatic(def)) {
 			// TODO use type names here
-			target = JavaScriptNodes.name(def.getEnclosingElement().getSimpleName());
+			target = JavaScriptNodes.name(context.getNames().getTypeName(context, def.getEnclosingElement()));
 		} else {
-			target = JavaScriptNodes.keyword(Token.THIS);
+			target = JavaScriptNodes.THIS();
 		}
 		return Collections.<AstNode>singletonList(JavaScriptNodes.property(target, tree.getName().toString()));
 	}
@@ -43,10 +43,12 @@ public class IdentifierWriter implements VisitorContributor<IdentifierTree, List
 	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, IdentifierTree tree,
 			GenerationContext context, List<AstNode> prev) {
 
-		if (GeneratorConstants.SPECIAL_THIS.equals(tree.getName().toString())) {
-			return Collections.singletonList(JavaScriptNodes.keyword(Token.THIS));
+		String name = tree.getName().toString();
+
+		if (GeneratorConstants.SPECIAL_THIS.equals(name) || GeneratorConstants.THIS.equals(name)) {
+			return Collections.singletonList(JavaScriptNodes.THIS());
 		}
-		Element def = Scopes.findElement(context.getTrees().getScope(context.getCurrentPath()), tree.getName().toString());
+		Element def = TreeUtils.elementFromUse(tree);
 		assert def != null : "Cannot find the definition for variable " + tree.getName();
 
 		// if (var == null) {
@@ -61,9 +63,12 @@ public class IdentifierWriter implements VisitorContributor<IdentifierTree, List
 		if (def.getKind() == ElementKind.FIELD) {
 			return visitField(def, tree, context);
 		}
+		if (def.getKind() == ElementKind.CLASS) {
+			name = context.getNames().getTypeName(context, def);
+		}
 
 		// assume variable
-		return Collections.<AstNode>singletonList(JavaScriptNodes.name(tree.getName().toString()));
+		return Collections.<AstNode>singletonList(JavaScriptNodes.name(name));
 	}
 
 }

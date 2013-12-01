@@ -58,7 +58,7 @@ public class StatementsGeneratorTest {
 	@Test
 	public void testLiterals() {
 		// "abc", "\"", "'", 'a', '\'', 1D, 2f, 1l);
-		assertCodeContains(Statements9.class, "\"abc\", \"\\\"\", \"'\", 'a', '\\'', 1, 2, 1");
+		assertCodeContains(Statements9.class, "\"abc\", \"\\\"\", \"'\", 'a', '\\'', 1.0, 2.0, 1");
 	}
 
 	@Test
