@@ -1,7 +1,16 @@
 package org.stjs.generator.writer.statement;
 
+import static org.stjs.generator.writer.JavaScriptNodes.functionCall;
+import static org.stjs.generator.writer.JavaScriptNodes.name;
+import static org.stjs.generator.writer.JavaScriptNodes.paren;
+
 import java.util.Collections;
 import java.util.List;
+
+import javacutils.TreeUtils;
+import javacutils.TypesUtils;
+
+import javax.lang.model.element.Element;
 
 import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.AstNode;
@@ -13,6 +22,7 @@ import org.stjs.generator.GenerationContext;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
 import org.stjs.generator.writer.JavaScriptNodes;
+import org.stjs.javascript.Array;
 
 import com.sun.source.tree.EnhancedForLoopTree;
 
@@ -29,10 +39,13 @@ public class EnhancedForLoopWriter implements VisitorContributor<EnhancedForLoop
 		// return;
 		// }
 
+		Element iteratedElement = TreeUtils.elementFromUse(tree.getExpression());
+		if (!TypesUtils.isDeclaredOfName(iteratedElement.asType(), Array.class.getName())) {
+			return;
+		}
 		UnaryExpression not = new UnaryExpression();
 		not.setOperator(Token.NOT);
-		not.setOperand(JavaScriptNodes.functionCall(stmt.getIteratedObject(), "hasOwnProperty",
-				JavaScriptNodes.name(tree.getVariable().getName().toString())));
+		not.setOperand(functionCall(paren(stmt.getIteratedObject()), "hasOwnProperty", name(tree.getVariable().getName().toString())));
 
 		IfStatement ifs = new IfStatement();
 		ifs.setCondition(not);

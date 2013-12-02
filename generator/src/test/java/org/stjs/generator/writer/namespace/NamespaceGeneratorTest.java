@@ -54,7 +54,7 @@ public class NamespaceGeneratorTest {
 
 	@Test
 	public void testTypeDesc() {
-		assertCodeContains(Namespace7.class, "\"field\":\"a.b.Namespace7\"");
+		assertCodeContains(Namespace7.class, "field:\"a.b.Namespace7\"");
 	}
 
 	@Test

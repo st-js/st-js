@@ -369,7 +369,12 @@ public class InternalUtils {
 	 * @param element
 	 * @return Type$1 for inner types
 	 */
-	public static String getBinaryName(Element element) {
+	public static String getSimpleName(Element element) {
+		if (element.getSimpleName().length() != 0) {
+			return element.getSimpleName().toString();
+		}
+
+		// take the binary name for anonymous classes
 		PackageElement pack = ElementUtils.enclosingPackage(element);
 		String packageName = pack != null && !pack.isUnnamed() ? pack.getQualifiedName().toString() : "";
 

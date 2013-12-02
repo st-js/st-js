@@ -55,7 +55,7 @@ public class MethodWriter extends AbstractMemberWriter implements VisitorContrib
 		Element typeElement = TreeUtils.elementFromDeclaration((ClassTree) context.getCurrentPath().getParentPath().getLeaf());
 		boolean anonymous = typeElement.getSimpleName().toString().isEmpty();
 		if (anonymous) {
-			decl.setFunctionName(name(InternalUtils.getBinaryName(typeElement)));
+			decl.setFunctionName(name(InternalUtils.getSimpleName(typeElement)));
 		}
 	}
 

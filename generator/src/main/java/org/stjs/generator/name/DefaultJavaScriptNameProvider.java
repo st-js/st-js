@@ -1,5 +1,7 @@
 package org.stjs.generator.name;
 
+import javacutils.InternalUtils;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -27,12 +29,12 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 		//
 		if (type instanceof DeclaredType) {
 			DeclaredType declaredType = (DeclaredType) type;
-			String name = declaredType.asElement().getSimpleName().toString();
+			String name = InternalUtils.getSimpleName(declaredType.asElement());
 			Element rootTypeElement = declaredType.asElement();
 			for (DeclaredType enclosingType = JavaNodes.getEnclosingType(declaredType); enclosingType != null; enclosingType = JavaNodes
 					.getEnclosingType(enclosingType)) {
 				rootTypeElement = enclosingType.asElement();
-				name = rootTypeElement.getSimpleName() + "." + name;
+				name = InternalUtils.getSimpleName(rootTypeElement) + "." + name;
 			}
 
 			String namespace = JavaNodes.getNamespace(rootTypeElement);

@@ -40,6 +40,7 @@ import org.stjs.generator.writer.JavaScriptNodes;
 import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.javascript.annotation.GlobalScope;
 
+import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MethodTree;
@@ -104,7 +105,7 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 
 		List<Tree> nonConstructors = new ArrayList<Tree>();
 		for (Tree member : clazz.getMembers()) {
-			if (!JavaNodes.isConstructor(member) && !isAbstractInstanceMethod(member)) {
+			if (!JavaNodes.isConstructor(member) && !isAbstractInstanceMethod(member) && !(member instanceof BlockTree)) {
 				nonConstructors.add(member);
 			}
 		}
@@ -134,12 +135,21 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 		}
 		Element memberElement = TreeUtils.elementFromDeclaration((MethodTree) member);
 		if (memberElement.getEnclosingElement().getKind() == ElementKind.INTERFACE) {
-			//an interface method is like an instance method
+			// an interface method is like an instance method
 			return true;
 		}
 
 		Set<Modifier> modifiers = ((MethodTree) member).getModifiers().getFlags();
 		return modifiers.contains(Modifier.ABSTRACT) && !modifiers.contains(Modifier.STATIC);
+	}
+
+	private void addStaticInitializers(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree tree,
+			GenerationContext context, List<AstNode> stmts) {
+		for (Tree member : tree.getMembers()) {
+			if (member instanceof BlockTree) {
+				stmts.addAll(visitor.scan(member, context));
+			}
+		}
 	}
 
 	private boolean hasMainMethod(ClassTree clazz) {
@@ -186,11 +196,11 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 		if (type instanceof DeclaredType) {
 			DeclaredType declaredType = (DeclaredType) type;
 
-			//enum
+			// enum
 			if (declaredType.asElement().getKind() == ElementKind.ENUM) {
 				return object("name", string("Enum"), "arguments", array(typeName));
 			}
-			//parametrized type
+			// parametrized type
 			if (!declaredType.getTypeArguments().isEmpty()) {
 				ArrayLiteral array = new ArrayLiteral();
 				for (TypeMirror arg : declaredType.getTypeArguments()) {
@@ -207,10 +217,10 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 	@SuppressWarnings("unused")
 	private AstNode getTypeDescription(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree tree,
 			GenerationContext context) {
-		//			if (isGlobal(type)) {
-		//				printer.print(JavascriptKeywords.NULL);
-		//				return;
-		//			}
+		// if (isGlobal(type)) {
+		// printer.print(JavascriptKeywords.NULL);
+		// return;
+		// }
 
 		TypeElement type = TreeUtils.elementFromDeclaration(tree);
 		ObjectLiteral typeDesc = new ObjectLiteral();
@@ -228,6 +238,15 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 		return typeDesc;
 	}
 
+	/**
+	 * 
+	 * transform a.b.type in constructor.type
+	 */
+	private String replaceFullNameWithConstructor(String typeName) {
+		int pos = typeName.lastIndexOf('.');
+		return JavascriptKeywords.CONSTRUCTOR + typeName.substring(pos);
+	}
+
 	@SuppressWarnings("unused")
 	private boolean generareEnum(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree tree,
 			GenerationContext context, List<AstNode> stmts) {
@@ -236,7 +255,7 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 			return false;
 		}
 
-		//add all anum entries
+		// add all anum entries
 		List<AstNode> enumEntries = new ArrayList<AstNode>();
 		for (Element member : ElementUtils.getAllFieldsIn((TypeElement) type)) {
 			if (member.getKind() == ElementKind.ENUM_CONSTANT) {
@@ -248,8 +267,11 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 
 		String typeName = context.getNames().getTypeName(context, type);
 		if (typeName.contains(".")) {
-			// inner class
-			stmts.add(statement(JavaScriptNodes.assignment(null, typeName, enumConstructor)));
+			// inner class or namespace
+			boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
+			String leftSide = innerClass ? replaceFullNameWithConstructor(typeName) : typeName;
+
+			stmts.add(statement(JavaScriptNodes.assignment(null, leftSide, enumConstructor)));
 		} else {
 			// regular class
 			stmts.add(JavaScriptNodes.variableDeclarationStatement(typeName, enumConstructor));
@@ -268,15 +290,15 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 			return false;
 		}
 
-		//print members
+		// print members
 		for (Tree member : tree.getMembers()) {
-			if (!JavaNodes.isConstructor(member) && !isAbstractInstanceMethod(member)) {
+			if (!JavaNodes.isConstructor(member) && !isAbstractInstanceMethod(member) && !(member instanceof BlockTree)) {
 				List<AstNode> jsNodes = visitor.scan(member, context);
 				stmts.addAll(jsNodes);
 			}
 		}
 
-		//printStaticInitializers(n, context);
+		addStaticInitializers(visitor, tree, context, stmts);
 		addMainMethodCall(tree, stmts, context);
 
 		return true;
@@ -287,8 +309,7 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 			List<AstNode> prev) {
 		List<AstNode> stmts = new ArrayList<AstNode>();
 		if (generateGlobal(visitor, tree, context, stmts)) {
-			//special construction for globals
-
+			// special construction for globals
 			return stmts;
 		}
 
@@ -299,7 +320,7 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 		AstNode name = name(typeName);
 
 		if (generareEnum(visitor, tree, context, stmts)) {
-			//special construction for enums
+			// special construction for enums
 			return stmts;
 		}
 
@@ -313,8 +334,11 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 			// anonymous class
 			name = getConstructor(visitor, tree, context);
 		} else if (typeName.contains(".")) {
-			// inner class
-			stmts.add(statement(JavaScriptNodes.assignment(null, typeName, getConstructor(visitor, tree, context))));
+			// inner class or namespace
+			boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
+			String leftSide = innerClass ? replaceFullNameWithConstructor(typeName) : typeName;
+
+			stmts.add(statement(JavaScriptNodes.assignment(null, leftSide, getConstructor(visitor, tree, context))));
 		} else {
 			// regular class
 			stmts.add(JavaScriptNodes.variableDeclarationStatement(typeName, getConstructor(visitor, tree, context)));
@@ -326,11 +350,8 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 		} else {
 			stmts.add(JavaScriptNodes.statement(extendsCall));
 		}
-		// printNonGlobalClass(n, type, scope, context);
-		// if (!type.isInnerType()) {
-		// printStaticInitializers(n, context);
+		addStaticInitializers(visitor, tree, context, stmts);
 		addMainMethodCall(tree, stmts, context);
-		// }
 
 		return stmts;
 	}
