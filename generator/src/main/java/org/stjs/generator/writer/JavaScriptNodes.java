@@ -11,10 +11,13 @@ import org.mozilla.javascript.ast.Block;
 import org.mozilla.javascript.ast.EmptyExpression;
 import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.FunctionCall;
+import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.InfixExpression;
 import org.mozilla.javascript.ast.KeywordLiteral;
 import org.mozilla.javascript.ast.Name;
 import org.mozilla.javascript.ast.NewExpression;
+import org.mozilla.javascript.ast.ObjectLiteral;
+import org.mozilla.javascript.ast.ObjectProperty;
 import org.mozilla.javascript.ast.ParenthesizedExpression;
 import org.mozilla.javascript.ast.PropertyGet;
 import org.mozilla.javascript.ast.StringLiteral;
@@ -61,7 +64,10 @@ public class JavaScriptNodes {
 		return block;
 	}
 
-	public static PropertyGet property(AstNode target, String name) {
+	public static AstNode property(AstNode target, String name) {
+		if (target == null) {
+			return name(name);
+		}
 		PropertyGet prop = new PropertyGet();
 		prop.setTarget(target);
 		prop.setProperty(name(name));
@@ -168,6 +174,36 @@ public class JavaScriptNodes {
 		ParenthesizedExpression paren = new ParenthesizedExpression();
 		paren.setExpression(expr);
 		return paren;
+	}
+
+	public static ObjectLiteral object(String name, AstNode value) {
+		ObjectLiteral object = new ObjectLiteral();
+		object.addElement(objectProperty(name(name), value));
+		return object;
+	}
+
+	public static ObjectLiteral object(String name1, AstNode value1, String name2, AstNode value2) {
+		ObjectLiteral object = new ObjectLiteral();
+		object.addElement(objectProperty(name(name1), value1));
+		object.addElement(objectProperty(name(name2), value2));
+		return object;
+	}
+
+	public static ObjectProperty objectProperty(String name, AstNode value) {
+		return objectProperty(name(name), value);
+	}
+
+	public static ObjectProperty objectProperty(AstNode name, AstNode value) {
+		ObjectProperty prop = new ObjectProperty();
+		prop.setLeft(name);
+		prop.setRight(value);
+		return prop;
+	}
+
+	public static FunctionNode function() {
+		FunctionNode func = new FunctionNode();
+		func.setBody(new Block());
+		return func;
 	}
 
 }

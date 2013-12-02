@@ -20,7 +20,6 @@ import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
-import org.stjs.generator.writer.JavascriptKeywords;
 
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.MethodTree;
@@ -28,7 +27,7 @@ import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.util.TreePath;
 
-public class MethodWriter implements VisitorContributor<MethodTree, List<AstNode>, GenerationContext> {
+public class MethodWriter extends AbstractMemberWriter implements VisitorContributor<MethodTree, List<AstNode>, GenerationContext> {
 
 	private String changeName(String name) {
 		if (name.equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
@@ -39,7 +38,6 @@ public class MethodWriter implements VisitorContributor<MethodTree, List<AstNode
 	}
 
 	/**
-	 * 
 	 * @return true if this method is the unique method of an online declaration
 	 */
 	private boolean isMethodOfJavascriptFunction(TreePath path) {
@@ -74,14 +72,6 @@ public class MethodWriter implements VisitorContributor<MethodTree, List<AstNode
 			return Collections.emptyList();
 		}
 
-		// no type appears for global scopes
-		/*
-		 * boolean global = isGlobal(type) && isStatic(modifiers); if (!anonymous) { if (!global) { if
-		 * (isStatic(modifiers)) { printer.print("constructor."); } else { printer.print("prototype."); } }
-		 * printer.print(name); printer.print(EQUALS); } printer.print("function"); if (isInnerClassConstructor) {
-		 * printer.print(" "); printer.print(name); }
-		 */
-
 		FunctionNode decl = new FunctionNode();
 		for (VariableTree param : tree.getParameters()) {
 			if (GeneratorConstants.SPECIAL_THIS.equals(param.getName().toString())) {
@@ -96,12 +86,10 @@ public class MethodWriter implements VisitorContributor<MethodTree, List<AstNode
 
 		// add the constructor.<name> or prototype.<name> if needed
 		if (!JavaNodes.isConstructor(tree) && !isMethodOfJavascriptFunction(context.getCurrentPath())) {
-			AstNode target = name(tree.getModifiers().getFlags().contains(Modifier.STATIC) ? JavascriptKeywords.CONSTRUCTOR
-					: JavascriptKeywords.PROTOTYPE);
 			String methodName = context.getNames().getMethodName(context, tree, context.getCurrentPath());
-			return Collections.<AstNode>singletonList(statement(assignment(target, methodName, decl)));
+			return Collections.<AstNode> singletonList(statement(assignment(getMemberTarget(tree), methodName, decl)));
 		}
 
-		return Collections.<AstNode>singletonList(decl);
+		return Collections.<AstNode> singletonList(decl);
 	}
 }

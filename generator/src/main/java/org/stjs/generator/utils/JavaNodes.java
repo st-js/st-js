@@ -10,6 +10,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.javascript.annotation.GlobalScope;
 import org.stjs.javascript.annotation.JavascriptFunction;
 import org.stjs.javascript.annotation.Namespace;
 
@@ -54,6 +55,10 @@ public class JavaNodes {
 
 	public static boolean isJavaScriptFunction(Element element) {
 		return element.getAnnotation(JavascriptFunction.class) != null;
+	}
+
+	public static boolean isGlobal(Element element) {
+		return element.getAnnotation(GlobalScope.class) != null;
 	}
 
 	public static String getNamespace(Element type) {

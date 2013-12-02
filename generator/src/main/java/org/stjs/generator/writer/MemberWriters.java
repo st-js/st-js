@@ -1,18 +1,19 @@
 package org.stjs.generator.writer;
 
-import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Element;
 
-import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.utils.JavaNodes;
 
 public class MemberWriters {
-	public static AstNode buildTarget(GenerationContext context, ExecutableElement methodDecl) {
-		if (JavaNodes.isStatic(methodDecl)) {
-			// TODO check global
-			return JavaScriptNodes.name(context.getNames().getTypeName(context, methodDecl.getEnclosingElement()));
+	public static AstNode buildTarget(GenerationContext context, Element memberDecl) {
+		if (JavaNodes.isGlobal(memberDecl.getEnclosingElement())) {
+			return null;
 		}
-		return JavaScriptNodes.keyword(Token.THIS);
+		if (JavaNodes.isStatic(memberDecl)) {
+			return JavaScriptNodes.name(context.getNames().getTypeName(context, memberDecl.getEnclosingElement()));
+		}
+		return JavaScriptNodes.THIS();
 	}
 }

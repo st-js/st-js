@@ -1,7 +1,11 @@
 package org.stjs.generator.writer.declaration;
 
+import static org.stjs.generator.writer.JavaScriptNodes.NULL;
+import static org.stjs.generator.writer.JavaScriptNodes.array;
 import static org.stjs.generator.writer.JavaScriptNodes.functionCall;
 import static org.stjs.generator.writer.JavaScriptNodes.name;
+import static org.stjs.generator.writer.JavaScriptNodes.object;
+import static org.stjs.generator.writer.JavaScriptNodes.objectProperty;
 import static org.stjs.generator.writer.JavaScriptNodes.statement;
 import static org.stjs.generator.writer.JavaScriptNodes.string;
 
@@ -9,13 +13,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javacutils.ElementUtils;
 import javacutils.TreeUtils;
+import javacutils.TypesUtils;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 
 import org.mozilla.javascript.Token;
+import org.mozilla.javascript.ast.ArrayLiteral;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.Block;
 import org.mozilla.javascript.ast.FunctionCall;
@@ -28,6 +38,7 @@ import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
 import org.stjs.generator.writer.JavaScriptNodes;
 import org.stjs.generator.writer.JavascriptKeywords;
+import org.stjs.javascript.annotation.GlobalScope;
 
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionTree;
@@ -39,6 +50,7 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 	/**
 	 * generate the namespace declaration stjs.ns("namespace") if needed
 	 */
+	@SuppressWarnings("unused")
 	private void addNamespace(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree tree, GenerationContext p,
 			List<AstNode> stmts) {
 		Element type = TreeUtils.elementFromDeclaration(tree);
@@ -55,6 +67,7 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 	/**
 	 * @return the node to put in the super class
 	 */
+	@SuppressWarnings("unused")
 	private AstNode getSuperClass(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree clazz,
 			GenerationContext context) {
 		Element type = TreeUtils.elementFromDeclaration(clazz);
@@ -77,8 +90,8 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 				return visitor.scan(member, p).get(0);
 			}
 		}
-		// no constructor found -> the compiler normally generates one
-		return null;
+		// no constructor found : interfaces, return an empty function
+		return JavaScriptNodes.function();
 	}
 
 	/**
@@ -119,6 +132,12 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 		if (!(member instanceof MethodTree)) {
 			return false;
 		}
+		Element memberElement = TreeUtils.elementFromDeclaration((MethodTree) member);
+		if (memberElement.getEnclosingElement().getKind() == ElementKind.INTERFACE) {
+			//an interface method is like an instance method
+			return true;
+		}
+
 		Set<Modifier> modifiers = ((MethodTree) member).getModifiers().getFlags();
 		return modifiers.contains(Modifier.ABSTRACT) && !modifiers.contains(Modifier.STATIC);
 	}
@@ -141,38 +160,154 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 	/**
 	 * add the call to the main method, if it exists
 	 */
-	private void addMainMethodCall(ClassTree clazz, List<AstNode> stmts) {
+	private void addMainMethodCall(ClassTree clazz, List<AstNode> stmts, GenerationContext context) {
 		if (!hasMainMethod(clazz)) {
 			return;
 		}
+		TypeElement type = TreeUtils.elementFromDeclaration(clazz);
+		AstNode target = JavaNodes.isGlobal(type) ? null : name(context.getNames().getTypeName(context, type));
+
 		IfStatement ifs = new IfStatement();
 		ifs.setCondition(JavaScriptNodes.not(JavaScriptNodes.property(name("stjs"), "mainCallDisabled")));
-		ifs.setThenPart(statement(functionCall(name(clazz.getSimpleName()), "main")));
+		ifs.setThenPart(statement(functionCall(target, "main")));
 		stmts.add(ifs);
+	}
+
+	private boolean isJavaStriptPrimitive(TypeMirror type) {
+		return TypesUtils.isPrimitive(type) || TypesUtils.isBoxedPrimitive(type) || TypesUtils.isString(type);
+	}
+
+	private AstNode getFieldTypeDesc(TypeMirror type, GenerationContext context) {
+		if (isJavaStriptPrimitive(type)) {
+			return NULL();
+		}
+		AstNode typeName = string(context.getNames().getTypeName(context, type));
+
+		if (type instanceof DeclaredType) {
+			DeclaredType declaredType = (DeclaredType) type;
+
+			//enum
+			if (declaredType.asElement().getKind() == ElementKind.ENUM) {
+				return object("name", string("Enum"), "arguments", array(typeName));
+			}
+			//parametrized type
+			if (!declaredType.getTypeArguments().isEmpty()) {
+				ArrayLiteral array = new ArrayLiteral();
+				for (TypeMirror arg : declaredType.getTypeArguments()) {
+					array.addElement(getFieldTypeDesc(arg, context));
+				}
+				return object("name", typeName, "arguments", array);
+			}
+
+		}
+
+		return typeName;
+	}
+
+	@SuppressWarnings("unused")
+	private AstNode getTypeDescription(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree tree,
+			GenerationContext context) {
+		//			if (isGlobal(type)) {
+		//				printer.print(JavascriptKeywords.NULL);
+		//				return;
+		//			}
+
+		TypeElement type = TreeUtils.elementFromDeclaration(tree);
+		ObjectLiteral typeDesc = new ObjectLiteral();
+
+		for (Element member : ElementUtils.getAllFieldsIn(type)) {
+			TypeMirror memberType = ElementUtils.getType(member);
+			if (isJavaStriptPrimitive(memberType)) {
+				continue;
+			}
+			if (member.getKind() == ElementKind.ENUM_CONSTANT) {
+				continue;
+			}
+			typeDesc.addElement(objectProperty(member.getSimpleName().toString(), getFieldTypeDesc(memberType, context)));
+		}
+		return typeDesc;
+	}
+
+	@SuppressWarnings("unused")
+	private boolean generareEnum(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree tree,
+			GenerationContext context, List<AstNode> stmts) {
+		Element type = TreeUtils.elementFromDeclaration(tree);
+		if (type.getKind() != ElementKind.ENUM) {
+			return false;
+		}
+
+		//add all anum entries
+		List<AstNode> enumEntries = new ArrayList<AstNode>();
+		for (Element member : ElementUtils.getAllFieldsIn((TypeElement) type)) {
+			if (member.getKind() == ElementKind.ENUM_CONSTANT) {
+				enumEntries.add(string(member.getSimpleName().toString()));
+			}
+		}
+
+		FunctionCall enumConstructor = functionCall(name("stjs"), "enumeration", enumEntries);
+
+		String typeName = context.getNames().getTypeName(context, type);
+		if (typeName.contains(".")) {
+			// inner class
+			stmts.add(statement(JavaScriptNodes.assignment(null, typeName, enumConstructor)));
+		} else {
+			// regular class
+			stmts.add(JavaScriptNodes.variableDeclarationStatement(typeName, enumConstructor));
+		}
+
+		return true;
+	}
+
+	/**
+	 * Special generation for classes marked with {@link GlobalScope}. The name of the class must appear nowhere.
+	 */
+	private boolean generateGlobal(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree tree,
+			GenerationContext context, List<AstNode> stmts) {
+		Element type = TreeUtils.elementFromDeclaration(tree);
+		if (!JavaNodes.isGlobal(type)) {
+			return false;
+		}
+
+		//print members
+		for (Tree member : tree.getMembers()) {
+			if (!JavaNodes.isConstructor(member) && !isAbstractInstanceMethod(member)) {
+				List<AstNode> jsNodes = visitor.scan(member, context);
+				stmts.addAll(jsNodes);
+			}
+		}
+
+		//printStaticInitializers(n, context);
+		addMainMethodCall(tree, stmts, context);
+
+		return true;
 	}
 
 	@Override
 	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree tree, GenerationContext context,
 			List<AstNode> prev) {
-		// if (isGlobal(type)) {
-		// printGlobals(filterGlobals(n, type), context);
-		// printStaticInitializers(n, context);
-		// printMainMethodCall(n, type);
-		// return;
-		// }
-
 		List<AstNode> stmts = new ArrayList<AstNode>();
+		if (generateGlobal(visitor, tree, context, stmts)) {
+			//special construction for globals
+
+			return stmts;
+		}
+
 		addNamespace(visitor, tree, context, stmts);
 
-		// extends
 		Element type = TreeUtils.elementFromDeclaration(tree);
 		String typeName = context.getNames().getTypeName(context, type);
 		AstNode name = name(typeName);
+
+		if (generareEnum(visitor, tree, context, stmts)) {
+			//special construction for enums
+			return stmts;
+		}
+
 		AstNode superClazz = getSuperClass(visitor, tree, context);
 		AstNode interfaces = JavaScriptNodes.array();
 		AstNode members = getMembers(visitor, tree, context);
-		AstNode typeDesc = new ObjectLiteral();
-		boolean anonymousClass = (tree.getSimpleName().length() == 0);
+		AstNode typeDesc = getTypeDescription(visitor, tree, context);
+		boolean anonymousClass = tree.getSimpleName().length() == 0;
 
 		if (anonymousClass) {
 			// anonymous class
@@ -194,7 +329,7 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 		// printNonGlobalClass(n, type, scope, context);
 		// if (!type.isInnerType()) {
 		// printStaticInitializers(n, context);
-		addMainMethodCall(tree, stmts);
+		addMainMethodCall(tree, stmts, context);
 		// }
 
 		return stmts;

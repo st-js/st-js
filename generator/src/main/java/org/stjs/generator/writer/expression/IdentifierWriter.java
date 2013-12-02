@@ -1,5 +1,7 @@
 package org.stjs.generator.writer.expression;
 
+import static org.stjs.generator.writer.JavaScriptNodes.name;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -15,6 +17,7 @@ import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
 import org.stjs.generator.writer.JavaScriptNodes;
+import org.stjs.generator.writer.MemberWriters;
 
 import com.sun.source.tree.IdentifierTree;
 
@@ -29,14 +32,12 @@ public class IdentifierWriter implements VisitorContributor<IdentifierTree, List
 	// }
 
 	private List<AstNode> visitField(Element def, IdentifierTree tree, GenerationContext context) {
-		AstNode target = null;
-		if (JavaNodes.isStatic(def)) {
-			// TODO use type names here
-			target = JavaScriptNodes.name(context.getNames().getTypeName(context, def.getEnclosingElement()));
-		} else {
-			target = JavaScriptNodes.THIS();
-		}
-		return Collections.<AstNode>singletonList(JavaScriptNodes.property(target, tree.getName().toString()));
+		return Collections.<AstNode> singletonList(JavaScriptNodes.property(MemberWriters.buildTarget(context, def), tree.getName().toString()));
+	}
+
+	private List<AstNode> visitEnumConstant(Element def, IdentifierTree tree, GenerationContext context) {
+		AstNode target = JavaScriptNodes.name(context.getNames().getTypeName(context, def.getEnclosingElement()));
+		return Collections.<AstNode> singletonList(JavaScriptNodes.property(target, tree.getName().toString()));
 	}
 
 	@Override
@@ -60,15 +61,24 @@ public class IdentifierWriter implements VisitorContributor<IdentifierTree, List
 		// }
 		// }
 		// } else {
+		if (def.getKind() == ElementKind.PACKAGE) {
+			return Collections.emptyList();
+		}
 		if (def.getKind() == ElementKind.FIELD) {
 			return visitField(def, tree, context);
 		}
-		if (def.getKind() == ElementKind.CLASS) {
+		if (def.getKind() == ElementKind.ENUM_CONSTANT) {
+			return visitEnumConstant(def, tree, context);
+		}
+		if (def.getKind() == ElementKind.CLASS || def.getKind() == ElementKind.ENUM || def.getKind() == ElementKind.INTERFACE) {
+			if (JavaNodes.isGlobal(def)) {
+				return Collections.emptyList();
+			}
 			name = context.getNames().getTypeName(context, def);
 		}
 
 		// assume variable
-		return Collections.<AstNode>singletonList(JavaScriptNodes.name(name));
+		return Collections.<AstNode> singletonList(name(name));
 	}
 
 }

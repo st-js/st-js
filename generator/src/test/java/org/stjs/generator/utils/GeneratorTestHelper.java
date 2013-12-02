@@ -91,7 +91,7 @@ public class GeneratorTestHelper {
 	private static Object invoke(Object obj, String method, int argCount, Object... args) {
 		try {
 			for (Method m : obj.getClass().getMethods()) {
-				if (m.getName().equals(method) && (m.getParameterTypes().length == argCount)) {
+				if (m.getName().equals(method) && m.getParameterTypes().length == argCount) {
 					return m.invoke(obj, args);
 				}
 			}
@@ -135,26 +135,19 @@ public class GeneratorTestHelper {
 		Generator gen = new Generator();
 
 		File generationPath = new File("target", TEMP_GENERATION_PATH);
-		GenerationDirectory generationFolder =
-				new GenerationDirectory(generationPath, new File(TEMP_GENERATION_PATH), new File(""));
+		GenerationDirectory generationFolder = new GenerationDirectory(generationPath, new File(TEMP_GENERATION_PATH), new File(""));
 		String sourcePath = "src/test/java";
 		ClassWithJavascript stjsClass =
-				gen.generateJavascript(
-						Thread.currentThread().getContextClassLoader(),
-						clazz.getName(),
-						new File(sourcePath),
-						generationFolder,
-						new File("target", "test-classes"),
-						new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript")
+				gen.generateJavascript(Thread.currentThread().getContextClassLoader(), clazz.getName(), new File(sourcePath), generationFolder,
+						new File("target", "test-classes"), new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript")
 								.allowedPackage("org.stjs.generator").generateSourceMap(withSourceMap).build());
 
 		File jsFile = new File(generationPath, stjsClass.getJavascriptFiles().get(0).getPath());
+		List<File> javascriptFiles = new ArrayList<File>();
 		try {
 			String content = Files.toString(jsFile, Charset.defaultCharset());
-			List<File> javascriptFiles = new ArrayList<File>();
 			List<ClassWithJavascript> allDeps =
-					new DependencyCollection(stjsClass).orderAllDependencies(Thread.currentThread()
-							.getContextClassLoader());
+					new DependencyCollection(stjsClass).orderAllDependencies(Thread.currentThread().getContextClassLoader());
 			for (ClassWithJavascript dep : allDeps) {
 				for (URI js : dep.getJavascriptFiles()) {
 					javascriptFiles.add(new File(generationPath, js.getPath()));
@@ -172,8 +165,8 @@ public class GeneratorTestHelper {
 		}
 		catch (ScriptException ex) {
 			// display the generated code in case of exception
-			for (URI file : stjsClass.getJavascriptFiles()) {
-				displayWithLines(new File(generationPath, file.getPath()));
+			for (File file : javascriptFiles) {
+				displayWithLines(file);
 			}
 			throw new RuntimeException(ex);
 		}

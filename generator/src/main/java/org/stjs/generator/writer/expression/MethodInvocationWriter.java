@@ -62,7 +62,7 @@ public class MethodInvocationWriter implements VisitorContributor<MethodInvocati
 		AstNode superType = JavaScriptNodes.name(GeneratorConstants.SUPER.equals(methodName) ? typeName : typeName + ".prototype." + methodName);
 
 		arguments.add(0, JavaScriptNodes.keyword(Token.THIS));
-		return Collections.<AstNode>singletonList(JavaScriptNodes.functionCall(superType, "call", arguments));
+		return Collections.<AstNode> singletonList(JavaScriptNodes.functionCall(superType, "call", arguments));
 	}
 
 	@Override
@@ -102,10 +102,11 @@ public class MethodInvocationWriter implements VisitorContributor<MethodInvocati
 				// staticMethod
 				target = MemberWriters.buildTarget(context, methodDecl);
 			} else {
-				target = visitor.scan(memberSelect.getExpression(), context).get(0);
+				List<AstNode> exprNodes = visitor.scan(memberSelect.getExpression(), context);
+				target = exprNodes.isEmpty() ? null : exprNodes.get(0);
 			}
 		}
 
-		return Collections.<AstNode>singletonList(JavaScriptNodes.functionCall(target, name, arguments));
+		return Collections.<AstNode> singletonList(JavaScriptNodes.functionCall(target, name, arguments));
 	}
 }
