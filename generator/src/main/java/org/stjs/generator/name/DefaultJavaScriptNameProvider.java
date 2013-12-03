@@ -1,5 +1,10 @@
 package org.stjs.generator.name;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import javacutils.ElementUtils;
 import javacutils.InternalUtils;
 
 import javax.lang.model.element.Element;
@@ -15,6 +20,7 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.util.TreePath;
 
 public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
+	private Set<String> resolvedRootTypes = new HashSet<String>();
 
 	@Override
 	public String getTypeName(GenerationContext context, TypeMirror type) {
@@ -37,10 +43,18 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 				name = InternalUtils.getSimpleName(rootTypeElement) + "." + name;
 			}
 
+			addResolvedType(rootTypeElement);
 			String namespace = JavaNodes.getNamespace(rootTypeElement);
 			return (namespace == null ? "" : namespace + ".") + name;
 		}
 		throw new IllegalArgumentException("Don't know what how to get the name of this type:" + type);
+	}
+
+	private void addResolvedType(Element rootTypeElement) {
+		String name = ElementUtils.getQualifiedClassName(rootTypeElement).toString();
+		if (!name.startsWith("java.lang.")) {
+			resolvedRootTypes.add(name);
+		}
 	}
 
 	@Override
@@ -63,6 +77,11 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 	@Override
 	public String getTypeName(GenerationContext context, Element type) {
 		return getTypeName(context, type.asType());
+	}
+
+	@Override
+	public Collection<String> getResolvedTypes() {
+		return resolvedRootTypes;
 	}
 
 }

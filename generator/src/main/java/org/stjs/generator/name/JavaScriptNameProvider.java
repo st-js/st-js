@@ -1,5 +1,7 @@
 package org.stjs.generator.name;
 
+import java.util.Collection;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
 
@@ -20,4 +22,6 @@ public interface JavaScriptNameProvider {
 	String getMethodName(GenerationContext context, MethodTree tree, TreePath path);
 
 	String getMethodName(GenerationContext context, MethodInvocationTree tree, TreePath path);
+
+	Collection<String> getResolvedTypes();
 }

@@ -7,12 +7,16 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.javascript.annotation.DataType;
 import org.stjs.javascript.annotation.GlobalScope;
 import org.stjs.javascript.annotation.JavascriptFunction;
 import org.stjs.javascript.annotation.Namespace;
+import org.stjs.javascript.annotation.Native;
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.annotation.Template;
 
 import com.sun.source.tree.ExpressionTree;
@@ -80,9 +84,13 @@ public class JavaNodes {
 		}
 		DeclaredType declaredType = (DeclaredType) type;
 
-		TypeMirror superType = declaredType.asElement().getEnclosingElement().asType();
-		if (superType instanceof DeclaredType) {
-			return (DeclaredType) superType;
+		TypeMirror enclosingType = declaredType.asElement().getEnclosingElement().asType();
+		if (enclosingType instanceof ExecutableType) {
+			// get the type that encloses this method
+			enclosingType = declaredType.asElement().getEnclosingElement().getEnclosingElement().asType();
+		}
+		if (enclosingType instanceof DeclaredType) {
+			return (DeclaredType) enclosingType;
 		}
 		return null;
 	}
@@ -93,5 +101,14 @@ public class JavaNodes {
 			return t.value();
 		}
 		return null;
+	}
+
+	@SuppressWarnings("deprecation")
+	public static boolean isSyntheticType(Element type) {
+		return type.getAnnotation(SyntheticType.class) != null || type.getAnnotation(DataType.class) != null;
+	}
+
+	public static boolean isNative(Element element) {
+		return element.getModifiers().contains(Modifier.NATIVE) || element.getAnnotation(Native.class) != null;
 	}
 }

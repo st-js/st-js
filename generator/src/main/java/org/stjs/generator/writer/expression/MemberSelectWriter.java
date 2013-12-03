@@ -10,6 +10,7 @@ import javax.lang.model.element.ElementKind;
 
 import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
@@ -26,19 +27,13 @@ public class MemberSelectWriter implements VisitorContributor<MemberSelectTree, 
 
 		Element element = TreeUtils.elementFromUse(tree);
 		if (element == null || element.getKind() == ElementKind.PACKAGE) {
-			//package names are ignored
+			// package names are ignored
 			return Collections.emptyList();
 		}
 		if (element.getKind() == ElementKind.CLASS && JavaNodes.isGlobal(element)) {
-			//global classes are ignored
+			// global classes are ignored
 			return Collections.emptyList();
 		}
-		//		if (element.getKind() == ElementKind.CLASS || element.getKind() == ElementKind.ENUM || element.getKind() == ElementKind.INTERFACE) {
-		//			if (JavaNodes.isGlobal(element)) {
-		//				return Collections.emptyList();
-		//			}
-		//			name = context.getNames().getTypeName(context, def);
-		//		}
 
 		AstNode target = null;
 		if (JavaNodes.isSuper(tree.getExpression())) {
@@ -49,6 +44,10 @@ public class MemberSelectWriter implements VisitorContributor<MemberSelectTree, 
 			target = exprNodes.isEmpty() ? null : exprNodes.get(0);
 		}
 
-		return Collections.<AstNode> singletonList(JavaScriptNodes.property(target, tree.getIdentifier().toString()));
+		if (GeneratorConstants.CLASS.equals(tree.getIdentifier().toString())) {
+			// When ClassName.class -> ClassName
+			return Collections.<AstNode>singletonList(target);
+		}
+		return Collections.<AstNode>singletonList(JavaScriptNodes.property(target, tree.getIdentifier().toString()));
 	}
 }

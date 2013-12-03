@@ -217,6 +217,14 @@ public class JavaScriptNodes {
 		return object;
 	}
 
+	public static ObjectLiteral object(List<AstNode> names, List<AstNode> values) {
+		ObjectLiteral object = new ObjectLiteral();
+		for (int i = 0; i < names.size(); ++i) {
+			object.addElement(objectProperty(names.get(i), values.get(i)));
+		}
+		return object;
+	}
+
 	public static ObjectProperty objectProperty(String name, AstNode value) {
 		return objectProperty(name(name), value);
 	}

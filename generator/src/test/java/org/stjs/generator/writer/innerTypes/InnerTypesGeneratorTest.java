@@ -104,8 +104,10 @@ public class InnerTypesGeneratorTest {
 		String code = generate(InnerTypes16.class);
 		assertCodeContains(code, "var InnerTypes16 = function(){};" + "stjs.extend(InnerTypes16, null, [], function(constructor, prototype){");
 		assertCodeContains(code, "var o = new (stjs.extend(function InnerTypes16$1(){}, Object, [], function(constructor, prototype){");
-		assertCodeContains(code, "};"
-				+ "constructor.InnerDeep = function(){}; stjs.extend(InnerTypes16$1.InnerDeep, null, [], function(constructor, prototype){");
+		assertCodeContains(
+				code,
+				"};"
+						+ "constructor.InnerDeep = function(){}; stjs.extend(InnerTypes16.InnerTypes16$1.InnerDeep, null, [], function(constructor, prototype){");
 	}
 
 	@Test

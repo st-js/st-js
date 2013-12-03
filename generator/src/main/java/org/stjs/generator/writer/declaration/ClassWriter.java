@@ -66,7 +66,7 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 	}
 
 	/**
-	 * @return the node to put in the super class
+	 * @return the node to put in the super class. for intefaces, the super class goes also in the interfaces list
 	 */
 	@SuppressWarnings("unused")
 	private AstNode getSuperClass(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree clazz,
@@ -82,13 +82,36 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 	}
 
 	/**
+	 * 
+	 @return the list of implemented interfaces. for intefaces, the super class goes also in the interfaces list
+	 */
+	private AstNode getInterfaces(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree clazz,
+			GenerationContext context) {
+		List<AstNode> ifaces = new ArrayList<AstNode>();
+		for (Tree iface : clazz.getImplementsClause()) {
+			Element ifaceType = TreeUtils.elementFromUse((ExpressionTree) iface);
+			ifaces.add(name(context.getNames().getTypeName(context, ifaceType)));
+		}
+
+		Element type = TreeUtils.elementFromDeclaration(clazz);
+		if (clazz.getExtendsClause() != null && type.getKind() == ElementKind.INTERFACE) {
+			Element superType = TreeUtils.elementFromUse((ExpressionTree) clazz.getExtendsClause());
+			ifaces.add(0, name(context.getNames().getTypeName(context, superType)));
+		}
+		return array(ifaces);
+	}
+
+	/**
 	 * @return the JavaScript node for the class' constructor
 	 */
 	private AstNode getConstructor(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree clazz, GenerationContext p) {
 		for (Tree member : clazz.getMembers()) {
 			if (JavaNodes.isConstructor(member)) {
 				// TODO skip the "native" constructors
-				return visitor.scan(member, p).get(0);
+				List<AstNode> nodes = visitor.scan(member, p);
+				if (!nodes.isEmpty()) {
+					return nodes.get(0);
+				}
 			}
 		}
 		// no constructor found : interfaces, return an empty function
@@ -325,7 +348,7 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 		}
 
 		AstNode superClazz = getSuperClass(visitor, tree, context);
-		AstNode interfaces = JavaScriptNodes.array();
+		AstNode interfaces = getInterfaces(visitor, tree, context);
 		AstNode members = getMembers(visitor, tree, context);
 		AstNode typeDesc = getTypeDescription(visitor, tree, context);
 		boolean anonymousClass = tree.getSimpleName().length() == 0;

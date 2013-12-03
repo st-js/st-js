@@ -42,7 +42,7 @@ public class MethodWriter extends AbstractMemberWriter implements VisitorContrib
 	 */
 	private boolean isMethodOfJavascriptFunction(TreePath path) {
 		if (path.getParentPath().getLeaf() instanceof NewClassTree) {
-			return JavaNodes.isJavaScriptFunction(TreeUtils.elementFromUse((NewClassTree) path.getParentPath().getLeaf()));
+			return JavaNodes.isJavaScriptFunction(TreeUtils.elementFromUse(((NewClassTree) path.getParentPath().getLeaf()).getIdentifier()));
 		}
 		return false;
 	}
@@ -62,7 +62,8 @@ public class MethodWriter extends AbstractMemberWriter implements VisitorContrib
 	@Override
 	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodTree tree,
 			GenerationContext context, List<AstNode> prev) {
-		if (tree.getModifiers().getFlags().contains(Modifier.NATIVE)) {
+		Element element = elementFromDeclaration(tree);
+		if (JavaNodes.isNative(element)) {
 			// native methods are there only to indicate already existing javascript code - or to allow method
 			// overloading
 			return Collections.emptyList();
@@ -87,9 +88,9 @@ public class MethodWriter extends AbstractMemberWriter implements VisitorContrib
 		// add the constructor.<name> or prototype.<name> if needed
 		if (!JavaNodes.isConstructor(tree) && !isMethodOfJavascriptFunction(context.getCurrentPath())) {
 			String methodName = context.getNames().getMethodName(context, tree, context.getCurrentPath());
-			return Collections.<AstNode> singletonList(statement(assignment(getMemberTarget(tree), methodName, decl)));
+			return Collections.<AstNode>singletonList(statement(assignment(getMemberTarget(tree), methodName, decl)));
 		}
 
-		return Collections.<AstNode> singletonList(decl);
+		return Collections.<AstNode>singletonList(decl);
 	}
 }

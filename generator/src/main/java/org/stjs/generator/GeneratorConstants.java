@@ -29,12 +29,13 @@ public final class GeneratorConstants {
 
 	public static final String THIS = "this";
 
+	public static final String CLASS = "class";
+
 	public static final String ARGUMENTS_PARAMETER = "arguments";
 
 	public static final String TYPE_DESCRIPTION_PROPERTY = "$typeDescription";
 
-	public static final Pattern NAMESPACE_PATTERN = Pattern
-			.compile("([A-Za-z_][A-Za-z_0-9]*)(?:\\.([A-Za-z_][A-Za-z_0-9]*))*");
+	public static final Pattern NAMESPACE_PATTERN = Pattern.compile("([A-Za-z_][A-Za-z_0-9]*)(?:\\.([A-Za-z_][A-Za-z_0-9]*))*");
 
 	/**
 	 * this is the file in which the maven plugin writes the classpath needed to launch tests
