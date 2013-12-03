@@ -8,6 +8,7 @@ import org.mozilla.javascript.ast.ArrayLiteral;
 import org.mozilla.javascript.ast.Assignment;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.Block;
+import org.mozilla.javascript.ast.ElementGet;
 import org.mozilla.javascript.ast.EmptyExpression;
 import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.FunctionCall;
@@ -32,7 +33,7 @@ public class JavaScriptNodes {
 		return n;
 	}
 
-	public static AstNode asExpressionList(List<AstNode> nodes) {
+	public static AstNode binary(int operator, List<AstNode> nodes) {
 		if (nodes.isEmpty()) {
 			return new EmptyExpression();
 		}
@@ -40,17 +41,21 @@ public class JavaScriptNodes {
 			return nodes.get(0);
 		}
 		InfixExpression list = new InfixExpression();
-		list.setOperator(Token.COMMA);
+		list.setOperator(operator);
 		list.setLeft(nodes.get(0));
 		list.setRight(nodes.get(1));
 		for (int i = 2; i < nodes.size(); ++i) {
 			InfixExpression tmpIncrements = new InfixExpression();
-			tmpIncrements.setOperator(Token.COMMA);
+			tmpIncrements.setOperator(operator);
 			tmpIncrements.setLeft(list);
 			tmpIncrements.setRight(nodes.get(i));
 			list = tmpIncrements;
 		}
 		return list;
+	}
+
+	public static AstNode asExpressionList(List<AstNode> nodes) {
+		return binary(Token.COMMA, nodes);
 	}
 
 	public static AstNode addStatement(AstNode body, AstNode stmt) {
@@ -71,6 +76,13 @@ public class JavaScriptNodes {
 		PropertyGet prop = new PropertyGet();
 		prop.setTarget(target);
 		prop.setProperty(name(name));
+		return prop;
+	}
+
+	public static ElementGet elementGet(AstNode target, AstNode index) {
+		ElementGet prop = new ElementGet();
+		prop.setTarget(target);
+		prop.setElement(index);
 		return prop;
 	}
 
@@ -132,6 +144,14 @@ public class JavaScriptNodes {
 		return stmt;
 	}
 
+	public static Assignment assignment(AstNode left, AstNode right) {
+		Assignment a = new Assignment();
+		a.setOperator(Token.ASSIGN);
+		a.setLeft(left);
+		a.setRight(right);
+		return a;
+	}
+
 	public static Assignment assignment(AstNode target, String field, AstNode value) {
 		Assignment a = new Assignment();
 		a.setOperator(Token.ASSIGN);
@@ -148,6 +168,14 @@ public class JavaScriptNodes {
 	}
 
 	public static ArrayLiteral array(AstNode... values) {
+		ArrayLiteral array = new ArrayLiteral();
+		for (AstNode value : values) {
+			array.addElement(value);
+		}
+		return array;
+	}
+
+	public static ArrayLiteral array(List<AstNode> values) {
 		ArrayLiteral array = new ArrayLiteral();
 		for (AstNode value : values) {
 			array.addElement(value);
@@ -204,6 +232,13 @@ public class JavaScriptNodes {
 		FunctionNode func = new FunctionNode();
 		func.setBody(new Block());
 		return func;
+	}
+
+	public static UnaryExpression unary(int operatorToken, AstNode expr) {
+		UnaryExpression ue = new UnaryExpression();
+		ue.setOperand(expr);
+		ue.setOperator(operatorToken);
+		return ue;
 	}
 
 }

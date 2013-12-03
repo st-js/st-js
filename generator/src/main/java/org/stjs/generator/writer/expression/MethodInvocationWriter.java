@@ -19,6 +19,7 @@ import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
 import org.stjs.generator.writer.JavaScriptNodes;
 import org.stjs.generator.writer.MemberWriters;
+import org.stjs.generator.writer.templates.MethodCallTemplates;
 
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
@@ -27,12 +28,13 @@ import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.Tree;
 
 public class MethodInvocationWriter implements VisitorContributor<MethodInvocationTree, List<AstNode>, GenerationContext> {
+	private MethodCallTemplates templates = new MethodCallTemplates();
 
 	/**
 	 * super(args) -> SuperType.call(this, args)
 	 */
 	private List<AstNode> callToSuperConstructor(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor,
-			MethodInvocationTree tree, GenerationContext context, List<AstNode> arguments) {
+			MethodInvocationTree tree, GenerationContext context) {
 		if (!TreeUtils.isSuperCall(tree)) {
 			return null;
 		}
@@ -61,52 +63,82 @@ public class MethodInvocationWriter implements VisitorContributor<MethodInvocati
 		String typeName = context.getNames().getTypeName(context, typeElement);
 		AstNode superType = JavaScriptNodes.name(GeneratorConstants.SUPER.equals(methodName) ? typeName : typeName + ".prototype." + methodName);
 
+		List<AstNode> arguments = buildArguments(visitor, tree, context);
 		arguments.add(0, JavaScriptNodes.keyword(Token.THIS));
 		return Collections.<AstNode> singletonList(JavaScriptNodes.functionCall(superType, "call", arguments));
+	}
+
+	public static AstNode buildTarget(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodInvocationTree tree,
+			GenerationContext context) {
+		ExpressionTree select = tree.getMethodSelect();
+		ExecutableElement methodDecl = TreeUtils.elementFromUse(tree);
+		assert methodDecl != null : "Cannot find the definition for method  " + tree.getMethodSelect();
+
+		if (select instanceof IdentifierTree) {
+			// simple call: method(args)
+			return MemberWriters.buildTarget(context, methodDecl);
+		}
+		// calls with target: target.method(args)
+		MemberSelectTree memberSelect = (MemberSelectTree) select;
+		if (TreeUtils.isSuperCall(tree)) {
+			// this is a call of type super.staticMethod(args) -> it should be handled as a simple call to
+			// staticMethod
+			return MemberWriters.buildTarget(context, methodDecl);
+		}
+		List<AstNode> exprNodes = visitor.scan(memberSelect.getExpression(), context);
+		return exprNodes.isEmpty() ? null : exprNodes.get(0);
+	}
+
+	public static String buildMethodName(MethodInvocationTree tree) {
+		ExpressionTree select = tree.getMethodSelect();
+		if (select instanceof IdentifierTree) {
+			// simple call: method(args)
+			return ((IdentifierTree) select).getName().toString();
+		}
+		// calls with target: target.method(args)
+		MemberSelectTree memberSelect = (MemberSelectTree) select;
+		return memberSelect.getIdentifier().toString();
+	}
+
+	public static List<AstNode> buildArguments(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodInvocationTree tree,
+			GenerationContext context) {
+		List<AstNode> arguments = new ArrayList<AstNode>();
+		for (Tree arg : tree.getArguments()) {
+			arguments.addAll(visitor.scan(arg, context));
+		}
+		return arguments;
+	}
+
+	public static String buildTemplateName(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodInvocationTree tree,
+			GenerationContext context) {
+		ExecutableElement methodDecl = TreeUtils.elementFromUse(tree);
+		String name = JavaNodes.getMethodTemplate(methodDecl);
+		if (name != null) {
+			return name;
+		}
+		return JavaNodes.isJavaScriptFunction(methodDecl.getEnclosingElement()) ? "invoke" : null;
 	}
 
 	@Override
 	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodInvocationTree tree,
 			GenerationContext context, List<AstNode> prev) {
-		List<AstNode> arguments = new ArrayList<AstNode>();
-		for (Tree arg : tree.getArguments()) {
-			arguments.addAll(visitor.scan(arg, context));
+		String templateName = buildTemplateName(visitor, tree, context);
+		VisitorContributor<MethodInvocationTree, List<AstNode>, GenerationContext> template = templates.getTemplate(templateName);
+
+		if (template != null) {
+			return template.visit(visitor, tree, context, prev);
 		}
-
-		ExpressionTree select = tree.getMethodSelect();
-		String name = "";
-		AstNode target = null;
-
-		ExecutableElement methodDecl = TreeUtils.elementFromUse(tree);
-		assert methodDecl != null : "Cannot find the definition for method  " + name;
 
 		List<AstNode> js = null;
 
-		js = callToSuperConstructor(visitor, tree, context, arguments);
+		js = callToSuperConstructor(visitor, tree, context);
 		if (js != null) {
 			return js;
 		}
 
-		if (select instanceof IdentifierTree) {
-			// simple call: method(args)
-			name = ((IdentifierTree) select).getName().toString();
-
-			target = MemberWriters.buildTarget(context, methodDecl);
-		} else {
-			// calls with target: target.method(args)
-			MemberSelectTree memberSelect = (MemberSelectTree) select;
-			name = memberSelect.getIdentifier().toString();
-
-			if (TreeUtils.isSuperCall(tree)) {
-				// this is a call of type super.staticMethod(args) -> it should be handled as a simple call to
-				// staticMethod
-				target = MemberWriters.buildTarget(context, methodDecl);
-			} else {
-				List<AstNode> exprNodes = visitor.scan(memberSelect.getExpression(), context);
-				target = exprNodes.isEmpty() ? null : exprNodes.get(0);
-			}
-		}
-
+		AstNode target = buildTarget(visitor, tree, context);
+		String name = buildMethodName(tree);
+		List<AstNode> arguments = buildArguments(visitor, tree, context);
 		return Collections.<AstNode> singletonList(JavaScriptNodes.functionCall(target, name, arguments));
 	}
 }

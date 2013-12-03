@@ -174,6 +174,6 @@ public class SpecialMethodGeneratorTest {
 
 	@Test
 	public void testPrefix() {
-		assertCodeContains(SpecialMethod24.class, "n = prefix()");
+		assertCodeContains(SpecialMethod24.class, "n = this.prefix()");
 	}
 }

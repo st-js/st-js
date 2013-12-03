@@ -16,4 +16,5 @@ public class MemberWriters {
 		}
 		return JavaScriptNodes.THIS();
 	}
+
 }

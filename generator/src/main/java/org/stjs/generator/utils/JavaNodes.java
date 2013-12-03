@@ -13,6 +13,7 @@ import org.stjs.generator.GeneratorConstants;
 import org.stjs.javascript.annotation.GlobalScope;
 import org.stjs.javascript.annotation.JavascriptFunction;
 import org.stjs.javascript.annotation.Namespace;
+import org.stjs.javascript.annotation.Template;
 
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
@@ -82,6 +83,14 @@ public class JavaNodes {
 		TypeMirror superType = declaredType.asElement().getEnclosingElement().asType();
 		if (superType instanceof DeclaredType) {
 			return (DeclaredType) superType;
+		}
+		return null;
+	}
+
+	public static String getMethodTemplate(Element element) {
+		Template t = element.getAnnotation(Template.class);
+		if (t != null) {
+			return t.value();
 		}
 		return null;
 	}
