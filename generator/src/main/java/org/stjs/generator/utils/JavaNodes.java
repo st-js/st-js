@@ -23,6 +23,7 @@ import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.Tree;
+import com.sun.source.tree.VariableTree;
 
 public class JavaNodes {
 	public static boolean isConstructor(Tree tree) {
@@ -44,6 +45,10 @@ public class JavaNodes {
 	public static boolean isStatic(MethodTree method) {
 		Set<Modifier> modifiers = method.getModifiers().getFlags();
 		return modifiers.contains(Modifier.STATIC);
+	}
+
+	public static boolean isFinal(VariableTree tree) {
+		return tree.getModifiers().getFlags().contains(Modifier.FINAL);
 	}
 
 	public static boolean isStatic(Element element) {
@@ -111,4 +116,5 @@ public class JavaNodes {
 	public static boolean isNative(Element element) {
 		return element.getModifiers().contains(Modifier.NATIVE) || element.getAnnotation(Native.class) != null;
 	}
+
 }

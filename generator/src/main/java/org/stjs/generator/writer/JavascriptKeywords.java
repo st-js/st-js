@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.ast.SourcePosition;
+import org.stjs.generator.check.Checks;
 
 /**
  * This class checks if a method or a variable has the name of a Javascript keyword. Even though the Java compiler lets
@@ -37,19 +38,21 @@ public final class JavascriptKeywords {
 	public static final String THIS = "this";
 	public static final String NULL = "null";
 
-	private static final Set<String> KEYWORDS = new HashSet<String>(Arrays.asList(new String[] { "break", "case",
-			"catch", "continue", "debugger", "default", "delete", "do", "else", "finally", "for", "function", "if",
-			"in", "instanceof", "new", "return", "switch", "this", "throw", "try", "typeof", "var", "void", "while",
-			"with", "class", "enum", "export", "extends", "import", "super", "implements", "interface", "let",
-			"package", "private", "protected", "public", "static", "yield" }));
+	private static final Set<String> KEYWORDS = new HashSet<String>(Arrays.asList(new String[] { "break", "case", "catch", "continue",
+			"debugger", "default", "delete", "do", "else", "finally", "for", "function", "if", "in", "instanceof", "new", "return", "switch",
+			"this", "throw", "try", "typeof", "var", "void", "while", "with", "class", "enum", "export", "extends", "import", "super",
+			"implements", "interface", "let", "package", "private", "protected", "public", "static", "yield" }));
 
 	private JavascriptKeywords() {
 		//
 	}
 
 	public static void checkIdentifier(File inputFile, SourcePosition pos, String name) {
+	}
+
+	public static void checkIdentifier(File inputFile, SourcePosition pos, String name, Checks checks) {
 		if (KEYWORDS.contains(name)) {
-			throw new JavascriptFileGenerationException(inputFile, pos, "Wrong usage of Javascript keyword:" + name);
+			checks.addError(new JavascriptFileGenerationException(inputFile, pos, "Wrong usage of Javascript keyword:" + name));
 		}
 	}
 
@@ -59,8 +62,7 @@ public final class JavascriptKeywords {
 
 	public static void checkMethod(File inputFile, SourcePosition sourcePosition, String name) {
 		if (KEYWORDS.contains(name)) {
-			throw new JavascriptFileGenerationException(inputFile, sourcePosition, "Wrong usage of Javascript keyword:"
-					+ name);
+			throw new JavascriptFileGenerationException(inputFile, sourcePosition, "Wrong usage of Javascript keyword:" + name);
 		}
 	}
 }

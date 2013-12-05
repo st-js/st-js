@@ -22,6 +22,7 @@ import java.io.File;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+import org.stjs.generator.check.Checks;
 import org.stjs.generator.name.JavaScriptNameProvider;
 import org.stjs.generator.visitor.TreePathHolder;
 
@@ -31,7 +32,6 @@ import com.sun.source.util.Trees;
 /**
  * This class can resolve an identifier or a method in the given source context. There is one context create for each
  * generation process.
- * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class GenerationContext implements TreePathHolder {
@@ -52,11 +52,14 @@ public class GenerationContext implements TreePathHolder {
 
 	private TreePath currentPath;
 
+	private final Checks checks;
+
 	public GenerationContext(File inputFile, GeneratorConfiguration configuration, JavaScriptNameProvider names, Trees trees) {
 		this.inputFile = inputFile;
 		this.configuration = configuration;
 		this.names = names;
 		this.trees = trees;
+		this.checks = new Checks();
 	}
 
 	public File getInputFile() {
@@ -111,6 +114,10 @@ public class GenerationContext implements TreePathHolder {
 
 	public void setTypes(Types types) {
 		this.types = types;
+	}
+
+	public Checks getChecks() {
+		return checks;
 	}
 
 }

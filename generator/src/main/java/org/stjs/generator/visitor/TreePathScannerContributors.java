@@ -13,6 +13,16 @@ import com.sun.source.util.TreeScanner;
 public class TreePathScannerContributors<R, P extends TreePathHolder> extends TreeScanner<R, P> {
 	private final Multimap<Class<?>, VisitorContributor<? extends Tree, R, P>> contributors = LinkedListMultimap.create();
 
+	private boolean continueScanning = false;
+
+	public boolean isContinueScanning() {
+		return continueScanning;
+	}
+
+	public void setContinueScanning(boolean continueScanning) {
+		this.continueScanning = continueScanning;
+	}
+
 	public <T extends VisitorContributor<? extends Tree, R, P>> TreePathScannerContributors<R, P> contribute(T contributor) {
 		assert contributor != null;
 		Class<?> treeNodeClass = getTreeNodeClass(contributor.getClass());
@@ -24,7 +34,6 @@ public class TreePathScannerContributors<R, P extends TreePathHolder> extends Tr
 	}
 
 	/**
-	 * 
 	 * @return
 	 */
 	private Class<?> getTreeNodeClass(Class<?> clazz) {
@@ -61,6 +70,9 @@ public class TreePathScannerContributors<R, P extends TreePathHolder> extends Tr
 		}
 		Collection<VisitorContributor<? extends Tree, R, P>> nodeContributors = contributors.get(getTreeInteface(node.getClass()));
 		if (nodeContributors.isEmpty()) {
+			if (continueScanning) {
+				return node.accept(this, p);
+			}
 			System.err.println("No contributors for node of type:" + getTreeInteface(node.getClass()));
 		}
 		R lastR = r;
@@ -72,6 +84,9 @@ public class TreePathScannerContributors<R, P extends TreePathHolder> extends Tr
 
 	@Override
 	public R scan(Tree tree, P p) {
+		if (tree == null) {
+			return null;
+		}
 		TreePath prev = p.getCurrentPath();
 		p.setCurrentPath(new TreePath(prev, tree));
 		try {
