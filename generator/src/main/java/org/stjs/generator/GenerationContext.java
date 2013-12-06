@@ -22,10 +22,12 @@ import java.io.File;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+import org.stjs.generator.ast.SourcePosition;
 import org.stjs.generator.check.Checks;
 import org.stjs.generator.name.JavaScriptNameProvider;
 import org.stjs.generator.visitor.TreePathHolder;
 
+import com.sun.source.tree.Tree;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
 
@@ -118,6 +120,13 @@ public class GenerationContext implements TreePathHolder {
 
 	public Checks getChecks() {
 		return checks;
+	}
+
+	public void addError(Tree tree, String message) {
+		SourcePosition pos = null;
+		//TODO have the real position here or use diagnistics api
+		checks.addError(new JavascriptFileGenerationException(inputFile, pos, message));
+
 	}
 
 }

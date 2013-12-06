@@ -28,9 +28,7 @@ import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.InitializerDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.body.ModifierSet;
-import japa.parser.ast.body.Parameter;
 import japa.parser.ast.body.TypeDeclaration;
-import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.expr.FieldAccessExpr;
 import japa.parser.ast.expr.LiteralExpr;
 import japa.parser.ast.expr.MethodCallExpr;
@@ -38,13 +36,10 @@ import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.ObjectCreationExpr;
 import japa.parser.ast.expr.SuperExpr;
 import japa.parser.ast.expr.ThisExpr;
-import japa.parser.ast.expr.UnaryExpr;
 import japa.parser.ast.type.ClassOrInterfaceType;
 
 import java.lang.reflect.Modifier;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
@@ -56,7 +51,6 @@ import org.stjs.generator.type.FieldWrapper;
 import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.type.TypeWrapper;
 import org.stjs.generator.utils.ClassUtils;
-import org.stjs.generator.utils.Option;
 import org.stjs.generator.variable.Variable;
 import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.javascript.annotation.GlobalScope;
@@ -70,65 +64,6 @@ import org.stjs.javascript.annotation.Native;
 public final class StillToDo {
 	private StillToDo() {
 		//
-	}
-
-	private static void checkVarArgs(MethodDeclaration n, Parameter p, GenerationContext arg) {
-		if (!p.getId().getName().equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
-			throw new JavascriptFileGenerationException(arg.getInputFile(), new SourcePosition(n),
-					"You can only have a vararg parameter that has to be called 'arguments'");
-
-		}
-		if (n.getParameters().size() != 1) {
-			throw new JavascriptFileGenerationException(arg.getInputFile(), new SourcePosition(n),
-					"You can only have a vararg parameter that has to be called 'arguments'");
-		}
-	}
-
-	/**
-	 * check a method declaration
-	 * @param n
-	 * @param arg
-	 */
-	public static void checkMethodDeclaration(MethodDeclaration n, GenerationContext arg) {
-		if (n.getParameters() != null) {
-			for (Parameter p : n.getParameters()) {
-				if (p.isVarArgs()) {
-					checkVarArgs(n, p, arg);
-				}
-			}
-		}
-
-	}
-
-	private static void checkInitializedInstanceField(VariableDeclarator v, FieldDeclaration n, GenerationContext arg) {
-		if (!ClassUtils.isBasicType(n.getType())) {
-			throw new JavascriptFileGenerationException(arg.getInputFile(), new SourcePosition(v),
-					"Instance field inline initialization is allowed only for string and number field types");
-		}
-		// allowed x = 1
-		if (v.getInit() instanceof LiteralExpr) {
-			return;
-		}
-		// allowed x = -1
-		if (v.getInit() instanceof UnaryExpr && ((UnaryExpr) v.getInit()).getExpr() instanceof LiteralExpr) {
-			return;
-		}
-		throw new JavascriptFileGenerationException(arg.getInputFile(), new SourcePosition(v),
-				"Instance field inline initialization can only done with literal constants");
-	}
-
-	/**
-	 * check a field declaration
-	 * @param n
-	 * @param arg
-	 */
-	public static void checkFieldDeclaration(FieldDeclaration n, GenerationContext arg) {
-		for (VariableDeclarator v : n.getVariables()) {
-			JavascriptKeywords.checkIdentifier(arg.getInputFile(), new SourcePosition(v), v.getId().getName());
-			if (!ModifierSet.isStatic(n.getModifiers()) && v.getInit() != null) {
-				checkInitializedInstanceField(v, n, arg);
-			}
-		}
 	}
 
 	private static boolean isMoreGenericVarArg(MethodWrapper more, MethodWrapper less) {
@@ -173,59 +108,6 @@ public final class StillToDo {
 		return isMoreGenericNormalArgs(more, less);
 	}
 
-	private static void checkMethod(BodyDeclaration member, GenerationContext context, Set<String> existingNames) {
-		if (member instanceof MethodDeclaration) {
-			MethodDeclaration method = (MethodDeclaration) member;
-			if (ModifierSet.isNative(method.getModifiers())) {
-				// do nothing with the native methods as no code will be generated.
-				// the check will be done only for the method that has a body and that is supposed to me the most
-				// generic version of the overloaded method
-				return;
-			}
-			String name = method.getName();
-
-			if (!existingNames.add(name)) {
-				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
-						"Only maximum one method with the name [" + name
-								+ "] is allowed to have a body. The other methods must be marked as native");
-			}
-		}
-	}
-
-	private static void checkField(BodyDeclaration member, GenerationContext context, Set<String> existingNames) {
-		if (member instanceof FieldDeclaration) {
-			for (VariableDeclarator var : ((FieldDeclaration) member).getVariables()) {
-				String name = var.getId().getName();
-				if (!existingNames.add(name)) {
-					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
-							"The type contains already a method or a field called [" + name
-									+ "] with a different signature. Javascript cannot distinguish methods/fields with the same name");
-				}
-			}
-		}
-	}
-
-	/**
-	 * check a class declaration
-	 * @param n
-	 * @param context
-	 * @param scope
-	 */
-	public static void checkClassDeclaration(ClassOrInterfaceDeclaration n, GenerationContext context) {
-		if (n.getMembers() == null) {
-			return;
-		}
-		Set<String> names = new HashSet<String>();
-		// check first the methods
-		for (BodyDeclaration member : n.getMembers()) {
-			checkMethod(member, context, names);
-		}
-		// check the fields
-		for (BodyDeclaration member : n.getMembers()) {
-			checkField(member, context, names);
-		}
-	}
-
 	private static void checkImplements(ClassOrInterfaceDeclaration n, GenerationContext context) {
 		if (n.getImplements() != null) {
 			for (ClassOrInterfaceType impl : n.getImplements()) {
@@ -237,37 +119,6 @@ public final class StillToDo {
 				}
 			}
 		}
-	}
-
-	private static void checkExistentFieldOrMethod(String name, BodyDeclaration member, ClassWrapper superClass, GenerationContext context) {
-		if (superClass.findField(name).isDefined() || !superClass.findMethods(name).isEmpty()) {
-			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
-					"One of the parent types contains already a method or a field called [" + name
-							+ "] with a different signature. Javascript cannot distinguish methods/fields with the same name");
-		}
-	}
-
-	private static void postCheckMethod(BodyDeclaration member, ClassWrapper superClass, GenerationContext context) {
-		if (!(member instanceof MethodDeclaration)) {
-			return;
-		}
-		MethodDeclaration methodDeclaration = (MethodDeclaration) member;
-		MethodWrapper resolvedMethod = ASTNodeData.resolvedMethod(methodDeclaration);
-		if (Modifier.isStatic(resolvedMethod.getModifiers())) {
-			return;
-		}
-		String name = methodDeclaration.getName();
-		Option<MethodWrapper> overrideMethod = superClass.findMethod(name, resolvedMethod.getParameterTypes());
-		if (overrideMethod.isDefined()) {
-			if (Modifier.isPrivate(overrideMethod.getOrThrow().getModifiers())) {
-				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
-						"One of the parent types contains already a private method called [" + name
-								+ "]. Javascript cannot distinguish methods/fields with the same name");
-			}
-			return;
-		}
-
-		checkExistentFieldOrMethod(name, member, superClass, context);
 	}
 
 	private static void checkOneMethodNonNative(BodyDeclaration member, GenerationContext context) {
@@ -325,20 +176,6 @@ public final class StillToDo {
 		}
 	}
 
-	private static void postCheckField(BodyDeclaration member, ClassWrapper superClass, GenerationContext context) {
-		if (!(member instanceof FieldDeclaration)) {
-			return;
-		}
-		FieldDeclaration fieldDeclaration = (FieldDeclaration) member;
-		if (Modifier.isStatic(fieldDeclaration.getModifiers())) {
-			return;
-		}
-		for (VariableDeclarator var : fieldDeclaration.getVariables()) {
-			String name = var.getId().getName();
-			checkExistentFieldOrMethod(name, member, superClass, context);
-		}
-	}
-
 	/**
 	 * other checks after the types were set
 	 * @param n
@@ -353,19 +190,6 @@ public final class StillToDo {
 		for (BodyDeclaration member : n.getMembers()) {
 			checkOneNonNativeConstructor(member, context);
 			checkOneMethodNonNative(member, context);
-		}
-
-		if (n.getExtends() != null && !n.isInterface()) {
-			TypeWrapper superType = ASTNodeData.resolvedType(n).getSuperClass();
-			if (!(superType instanceof ClassWrapper)) {
-				return;
-			}
-			ClassWrapper superClass = (ClassWrapper) superType;
-
-			for (BodyDeclaration member : n.getMembers()) {
-				postCheckMethod(member, superClass, context);
-				postCheckField(member, superClass, context);
-			}
 		}
 
 	}

@@ -15,7 +15,6 @@ import java.util.Set;
 
 import javacutils.ElementUtils;
 import javacutils.TreeUtils;
-import javacutils.TypesUtils;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -23,6 +22,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
 
 import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.ArrayLiteral;
@@ -206,12 +206,8 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 		stmts.add(ifs);
 	}
 
-	private boolean isJavaStriptPrimitive(TypeMirror type) {
-		return TypesUtils.isPrimitive(type) || TypesUtils.isBoxedPrimitive(type) || TypesUtils.isString(type);
-	}
-
 	private AstNode getFieldTypeDesc(TypeMirror type, GenerationContext context) {
-		if (isJavaStriptPrimitive(type)) {
+		if (JavaNodes.isJavaScriptPrimitive(type)) {
 			return NULL();
 		}
 		AstNode typeName = string(context.getNames().getTypeName(context, type));
@@ -250,10 +246,14 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 
 		for (Element member : ElementUtils.getAllFieldsIn(type)) {
 			TypeMirror memberType = ElementUtils.getType(member);
-			if (isJavaStriptPrimitive(memberType)) {
+			if (JavaNodes.isJavaScriptPrimitive(memberType)) {
 				continue;
 			}
 			if (member.getKind() == ElementKind.ENUM_CONSTANT) {
+				continue;
+			}
+			if (memberType instanceof TypeVariable) {
+				//what to do with fields of generic parameters !?
 				continue;
 			}
 			typeDesc.addElement(objectProperty(member.getSimpleName().toString(), getFieldTypeDesc(memberType, context)));
@@ -262,7 +262,6 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 	}
 
 	/**
-	 * 
 	 * transform a.b.type in constructor.type
 	 */
 	private String replaceFullNameWithConstructor(String typeName) {

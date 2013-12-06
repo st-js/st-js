@@ -11,7 +11,7 @@ public class VariableWrongNameCheck implements VisitorContributor<VariableTree, 
 	@Override
 	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, VariableTree tree, GenerationContext context, Void v) {
 		//TODO add new SourcePosition(n)
-		JavascriptKeywords.checkIdentifier(context.getInputFile(), null, tree.getName().toString(), context.getChecks());
+		JavascriptKeywords.checkIdentifier(tree, tree.getName().toString(), context);
 		return null;
 	}
 

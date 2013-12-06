@@ -1,7 +1,6 @@
 package org.stjs.generator.check.statement;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
@@ -33,11 +32,8 @@ public class VariableFinalInLoopCheck implements VisitorContributor<VariableTree
 		}
 		for (TreePath p = context.getCurrentPath(); p != null; p = p.getParentPath()) {
 			if (isLoop(p)) {
-				//TODO add new SourcePosition(n)
-				context.getChecks()
-						.addError(
-								new JavascriptFileGenerationException(context.getInputFile(), null,
-										"To prevent unexpected behaviour in Javascript, final variables must be declared at method level and not inside loops"));
+				context.addError(p.getLeaf(),
+						"To prevent unexpected behaviour in Javascript, final variables must be declared at method level and not inside loops");
 			}
 			if (isMethodOrClassDeclaration(p)) {
 				break;
@@ -45,5 +41,4 @@ public class VariableFinalInLoopCheck implements VisitorContributor<VariableTree
 		}
 		return null;
 	}
-
 }

@@ -69,15 +69,15 @@ public class TreePathScannerContributors<R, P extends TreePathHolder> extends Tr
 			return r;
 		}
 		Collection<VisitorContributor<? extends Tree, R, P>> nodeContributors = contributors.get(getTreeInteface(node.getClass()));
-		if (nodeContributors.isEmpty()) {
-			if (continueScanning) {
-				return node.accept(this, p);
-			}
+		if (nodeContributors.isEmpty() && !continueScanning) {
 			System.err.println("No contributors for node of type:" + getTreeInteface(node.getClass()));
 		}
 		R lastR = r;
 		for (VisitorContributor<? extends Tree, R, P> vc : nodeContributors) {
 			lastR = ((VisitorContributor<T, R, P>) vc).visit(this, node, p, lastR);
+		}
+		if (continueScanning) {
+			return node.accept(this, p);
 		}
 		return lastR;
 	}

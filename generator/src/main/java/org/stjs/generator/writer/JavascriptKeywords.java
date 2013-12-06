@@ -20,9 +20,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.ast.SourcePosition;
-import org.stjs.generator.check.Checks;
+
+import com.sun.source.tree.Tree;
 
 /**
  * This class checks if a method or a variable has the name of a Javascript keyword. Even though the Java compiler lets
@@ -50,9 +52,9 @@ public final class JavascriptKeywords {
 	public static void checkIdentifier(File inputFile, SourcePosition pos, String name) {
 	}
 
-	public static void checkIdentifier(File inputFile, SourcePosition pos, String name, Checks checks) {
+	public static void checkIdentifier(Tree tree, String name, GenerationContext context) {
 		if (KEYWORDS.contains(name)) {
-			checks.addError(new JavascriptFileGenerationException(inputFile, pos, "Wrong usage of Javascript keyword:" + name));
+			context.addError(tree, "Wrong usage of Javascript keyword:" + name);
 		}
 	}
 

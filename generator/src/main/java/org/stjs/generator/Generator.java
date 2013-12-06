@@ -114,6 +114,7 @@ public class Generator {
 
 		CompilationUnitTree cu = parseAndResolve(classLoaderWrapper, inputFile, context, configuration.getSourceEncoding());
 
+		System.out.println(cu);
 		BufferedWriter writer = null;
 
 		try {

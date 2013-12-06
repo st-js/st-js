@@ -15,6 +15,7 @@ import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
+import com.sun.source.tree.VariableTree;
 import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
@@ -50,11 +51,8 @@ public class InternalUtils {
 
 	/**
 	 * Gets the {@link Element} ("symbol") for the given Tree API node.
-	 * 
-	 * @param tree
-	 *            the {@link Tree} node to get the symbol for
-	 * @throws IllegalArgumentException
-	 *             if {@code tree} is null or is not a valid javac-internal tree (JCTree)
+	 * @param tree the {@link Tree} node to get the symbol for
+	 * @throws IllegalArgumentException if {@code tree} is null or is not a valid javac-internal tree (JCTree)
 	 * @return the {@code {@link Symbol} for the given tree, or null if one could not be found
 	 */
 	public static/* @Nullable */Element symbol(/* @Nullable */Tree tree) {
@@ -73,40 +71,38 @@ public class InternalUtils {
 		}
 
 		switch (tree.getKind()) {
-		case VARIABLE:
-		case METHOD:
-		case CLASS:
-			// case ENUM:
-			// case INTERFACE:
-			// case ANNOTATION_TYPE:
-		case TYPE_PARAMETER:
-			return TreeInfo.symbolFor((JCTree) tree);
+			case VARIABLE:
+			case METHOD:
+			case CLASS:
+				// case ENUM:
+				// case INTERFACE:
+				// case ANNOTATION_TYPE:
+			case TYPE_PARAMETER:
+				return TreeInfo.symbolFor((JCTree) tree);
 
-			// symbol() only works on MethodSelects, so we need to get it manually
-			// for method invocations.
-		case METHOD_INVOCATION:
-			return TreeInfo.symbol(((JCMethodInvocation) tree).getMethodSelect());
+				// symbol() only works on MethodSelects, so we need to get it manually
+				// for method invocations.
+			case METHOD_INVOCATION:
+				return TreeInfo.symbol(((JCMethodInvocation) tree).getMethodSelect());
 
-		case ASSIGNMENT:
-			return TreeInfo.symbol((JCTree) ((AssignmentTree) tree).getVariable());
+			case ASSIGNMENT:
+				return TreeInfo.symbol((JCTree) ((AssignmentTree) tree).getVariable());
 
-		case ARRAY_ACCESS:
-			return symbol(((ArrayAccessTree) tree).getExpression());
+			case ARRAY_ACCESS:
+				return symbol(((ArrayAccessTree) tree).getExpression());
 
-		case NEW_CLASS:
-			return ((JCNewClass) tree).constructor;
+			case NEW_CLASS:
+				return ((JCNewClass) tree).constructor;
 
-		default:
-			return TreeInfo.symbol((JCTree) tree);
+			default:
+				return TreeInfo.symbol((JCTree) tree);
 		}
 	}
 
 	/**
 	 * Determines whether or not the node referred to by the given {@link TreePath} is an anonymous constructor (the
 	 * constructor for an anonymous class.
-	 * 
-	 * @param method
-	 *            the {@link TreePath} for a node that may be an anonymous constructor
+	 * @param method the {@link TreePath} for a node that may be an anonymous constructor
 	 * @return true if the given path points to an anonymous constructor, false if it does not
 	 */
 	public static boolean isAnonymousConstructor(final MethodTree method) {
@@ -128,13 +124,10 @@ public class InternalUtils {
 	private static final boolean RETURN_INVOKE_CONSTRUCTOR = true;
 
 	/**
-	 * Determines the symbol for a constructor given an invocation via {@code new}.
-	 * 
-	 * If the tree is a declaration of an anonymous class, then method returns constructor that gets invoked in the
-	 * extended class, rather than the anonymous constructor implicitly added by the constructor (JLS 15.9.5.1)
-	 * 
-	 * @param tree
-	 *            the constructor invocation
+	 * Determines the symbol for a constructor given an invocation via {@code new}. If the tree is a declaration of an
+	 * anonymous class, then method returns constructor that gets invoked in the extended class, rather than the
+	 * anonymous constructor implicitly added by the constructor (JLS 15.9.5.1)
+	 * @param tree the constructor invocation
 	 * @return the {@link ExecutableElement} corresponding to the constructor call in {@code tree}
 	 */
 	public static ExecutableElement constructor(NewClassTree tree) {
@@ -219,18 +212,14 @@ public class InternalUtils {
 	 * Returns whether a TypeMirror represents a class type.
 	 */
 	public static boolean isClassType(TypeMirror type) {
-		return (type instanceof Type.ClassType);
+		return type instanceof Type.ClassType;
 	}
 
 	/**
 	 * Returns the least upper bound of two {@link TypeMirror}s.
-	 * 
-	 * @param processingEnv
-	 *            The {@link ProcessingEnvironment} to use.
-	 * @param tm1
-	 *            A {@link TypeMirror}.
-	 * @param tm2
-	 *            A {@link TypeMirror}.
+	 * @param processingEnv The {@link ProcessingEnvironment} to use.
+	 * @param tm1 A {@link TypeMirror}.
+	 * @param tm2 A {@link TypeMirror}.
 	 * @return The least upper bound of {@code tm1} and {@code tm2}.
 	 */
 	public static TypeMirror leastUpperBound(ProcessingEnvironment processingEnv, TypeMirror tm1, TypeMirror tm2) {
@@ -284,13 +273,9 @@ public class InternalUtils {
 
 	/**
 	 * Returns the greatest lower bound of two {@link TypeMirror}s.
-	 * 
-	 * @param processingEnv
-	 *            The {@link ProcessingEnvironment} to use.
-	 * @param tm1
-	 *            A {@link TypeMirror}.
-	 * @param tm2
-	 *            A {@link TypeMirror}.
+	 * @param processingEnv The {@link ProcessingEnvironment} to use.
+	 * @param tm1 A {@link TypeMirror}.
+	 * @param tm2 A {@link TypeMirror}.
 	 * @return The greatest lower bound of {@code tm1} and {@code tm2}.
 	 */
 	public static TypeMirror greatestLowerBound(ProcessingEnvironment processingEnv, TypeMirror tm1, TypeMirror tm2) {
@@ -355,9 +340,7 @@ public class InternalUtils {
 
 	/**
 	 * Helper function to extract the javac Context from the javac processing environment.
-	 * 
-	 * @param env
-	 *            the processing environment
+	 * @param env the processing environment
 	 * @return the javac Context
 	 */
 	public static Context getJavacContext(ProcessingEnvironment env) {
@@ -365,7 +348,6 @@ public class InternalUtils {
 	}
 
 	/**
-	 * 
 	 * @param element
 	 * @return Type$1 for inner types
 	 */
@@ -382,5 +364,25 @@ public class InternalUtils {
 			return ((ClassSymbol) element).flatName().toString().substring(packageName.length() + 1);
 		}
 		return null;
+	}
+
+	/**
+	 * @param tree
+	 * @return true if the node is a vararg
+	 */
+	public static boolean isVarArg(Tree tree) {
+		if (!(tree instanceof VariableTree)) {
+			return false;
+		}
+
+		/* @Nullable */Element e = InternalUtils.symbol(tree);
+		if (e == null || !(e instanceof Symbol)) {
+			return false;
+		}
+
+		if ((((/* @NonNull */Symbol) e).flags() & Flags.VARARGS) != 0) {
+			return true;
+		}
+		return false;
 	}
 }

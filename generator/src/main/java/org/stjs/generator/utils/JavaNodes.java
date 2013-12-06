@@ -2,6 +2,8 @@ package org.stjs.generator.utils;
 
 import java.util.Set;
 
+import javacutils.TypesUtils;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
@@ -117,4 +119,7 @@ public class JavaNodes {
 		return element.getModifiers().contains(Modifier.NATIVE) || element.getAnnotation(Native.class) != null;
 	}
 
+	public static boolean isJavaScriptPrimitive(TypeMirror type) {
+		return TypesUtils.isPrimitive(type) || TypesUtils.isBoxedPrimitive(type) || TypesUtils.isString(type);
+	}
 }
