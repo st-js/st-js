@@ -52,15 +52,6 @@ public class IdentifierWriter implements VisitorContributor<IdentifierTree, List
 		Element def = TreeUtils.elementFromUse(tree);
 		assert def != null : "Cannot find the definition for variable " + tree.getName();
 
-		// if (var == null) {
-		// if (!(parent(n) instanceof SwitchEntryStmt)) {
-		// TypeWrapper type = resolvedType(n);
-		// if (type != null) {
-		// printStaticFieldOrMethodAccessPrefix(type, false);
-		// return;
-		// }
-		// }
-		// } else {
 		if (def.getKind() == ElementKind.PACKAGE) {
 			return Collections.emptyList();
 		}
