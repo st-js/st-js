@@ -62,7 +62,7 @@ public class MethodWriter extends AbstractMemberWriter implements VisitorContrib
 	@Override
 	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodTree tree,
 			GenerationContext context, List<AstNode> prev) {
-		Element element = elementFromDeclaration(tree);
+		Element element = JavaNodes.elementFromDeclaration(tree);
 		if (JavaNodes.isNative(element)) {
 			// native methods are there only to indicate already existing javascript code - or to allow method
 			// overloading

@@ -2,6 +2,7 @@ package org.stjs.generator.utils;
 
 import java.util.Set;
 
+import javacutils.TreeUtils;
 import javacutils.TypesUtils;
 
 import javax.lang.model.element.Element;
@@ -13,6 +14,7 @@ import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.JavascriptClassGenerationException;
 import org.stjs.javascript.annotation.DataType;
 import org.stjs.javascript.annotation.GlobalScope;
 import org.stjs.javascript.annotation.JavascriptFunction;
@@ -21,6 +23,7 @@ import org.stjs.javascript.annotation.Native;
 import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.annotation.Template;
 
+import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MethodTree;
@@ -121,5 +124,18 @@ public class JavaNodes {
 
 	public static boolean isJavaScriptPrimitive(TypeMirror type) {
 		return TypesUtils.isPrimitive(type) || TypesUtils.isBoxedPrimitive(type) || TypesUtils.isString(type);
+	}
+
+	public static Element elementFromDeclaration(Tree tree) {
+		if (tree instanceof MethodTree) {
+			return TreeUtils.elementFromDeclaration((MethodTree) tree);
+		}
+		if (tree instanceof VariableTree) {
+			return TreeUtils.elementFromDeclaration((VariableTree) tree);
+		}
+		if (tree instanceof ClassTree) {
+			return TreeUtils.elementFromDeclaration((ClassTree) tree);
+		}
+		throw new JavascriptClassGenerationException("none", "Unexpected node type:" + tree.getClass() + "," + tree.getKind());
 	}
 }

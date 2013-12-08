@@ -15,6 +15,7 @@ import javax.lang.model.element.Element;
 
 import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.check.expression.NewClassInlineFunctionCheck;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
@@ -30,7 +31,7 @@ import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.Tree;
 
 public class NewClassWriter implements VisitorContributor<NewClassTree, List<AstNode>, GenerationContext> {
-	private BlockTree getDoubleBracesBlock(NewClassTree tree) {
+	public static BlockTree getDoubleBracesBlock(NewClassTree tree) {
 		if (tree.getClassBody() == null) {
 			return null;
 		}
@@ -72,7 +73,7 @@ public class NewClassWriter implements VisitorContributor<NewClassTree, List<Ast
 		List<AstNode> values = new ArrayList<AstNode>();
 		if (initBlock != null) {
 			for (StatementTree stmt : initBlock.getStatements()) {
-				// TODO check the right type of statements x=y
+				// check the right type of statements x=y is done in NewClassObjectInitCheck
 				AssignmentTree assign = ((AssignmentTree) ((ExpressionStatementTree) stmt).getExpression());
 				names.add(name(getPropertyName(assign.getVariable())));
 				values.add(visitor.scan(assign.getExpression(), context).get(0));
@@ -81,6 +82,25 @@ public class NewClassWriter implements VisitorContributor<NewClassTree, List<Ast
 		return Collections.<AstNode>singletonList(object(names, values));
 	}
 
+	/**
+	 * check by {@link NewClassInlineFunctionCheck}
+	 * 
+	 * generate the code for inline functions:
+	 * 
+	 * <pre>
+	 * new FunctionInterface(){
+	 * 	  public void $invoke(args){
+	 *    }
+	 * }
+	 * </pre>
+	 * 
+	 * is transformed in
+	 * 
+	 * <pre>
+	 * function(args){
+	 * }
+	 * </pre>
+	 */
 	private List<AstNode> getInlineFunctionDeclaration(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, NewClassTree tree,
 			GenerationContext context) {
 		// special construction for inline function definition
@@ -89,7 +109,7 @@ public class NewClassWriter implements VisitorContributor<NewClassTree, List<Ast
 			return null;
 		}
 
-		// here there should be a check that verified the existence of a single method (first is the generated
+		// the check verifies the existence of a single method (first is the generated
 		// constructor)
 		Tree method = tree.getClassBody().getMembers().get(1);
 		return visitor.scan(method, context);

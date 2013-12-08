@@ -1,9 +1,5 @@
 package org.stjs.generator.check.declaration;
 
-import japa.parser.ast.body.BodyDeclaration;
-import japa.parser.ast.body.MethodDeclaration;
-
-import java.lang.reflect.Modifier;
 import java.util.Collection;
 
 import javacutils.TreeUtils;
@@ -17,13 +13,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.JavascriptFileGenerationException;
-import org.stjs.generator.ast.ASTNodeData;
-import org.stjs.generator.ast.SourcePosition;
-import org.stjs.generator.type.ClassWrapper;
-import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.utils.Option;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
 
@@ -36,39 +26,10 @@ import com.sun.source.tree.VariableTree;
 
 /**
  * checks the a field name or method exists only once in the class and its hierchy
+ * 
  * @author acraciun
  */
 public class ClassDuplicateMemberNameCheck implements VisitorContributor<ClassTree, Void, GenerationContext> {
-	private static void checkExistentFieldOrMethod(String name, BodyDeclaration member, ClassWrapper superClass, GenerationContext context) {
-		if (superClass.findField(name).isDefined() || !superClass.findMethods(name).isEmpty()) {
-			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
-					"One of the parent types contains already a method or a field called [" + name
-							+ "] with a different signature. Javascript cannot distinguish methods/fields with the same name");
-		}
-	}
-
-	private static void postCheckMethod(BodyDeclaration member, ClassWrapper superClass, GenerationContext context) {
-		if (!(member instanceof MethodDeclaration)) {
-			return;
-		}
-		MethodDeclaration methodDeclaration = (MethodDeclaration) member;
-		MethodWrapper resolvedMethod = ASTNodeData.resolvedMethod(methodDeclaration);
-		if (Modifier.isStatic(resolvedMethod.getModifiers())) {
-			return;
-		}
-		String name = methodDeclaration.getName();
-		Option<MethodWrapper> overrideMethod = superClass.findMethod(name, resolvedMethod.getParameterTypes());
-		if (overrideMethod.isDefined()) {
-			if (Modifier.isPrivate(overrideMethod.getOrThrow().getModifiers())) {
-				throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(member),
-						"One of the parent types contains already a private method called [" + name
-								+ "]. Javascript cannot distinguish methods/fields with the same name");
-			}
-			return;
-		}
-
-		checkExistentFieldOrMethod(name, member, superClass, context);
-	}
 
 	private void checkMethod(TypeElement classElement, Tree member, GenerationContext context, Multimap<String, Element> existingNames) {
 		if (member instanceof MethodTree) {
@@ -81,7 +42,7 @@ public class ClassDuplicateMemberNameCheck implements VisitorContributor<ClassTr
 				return;
 			}
 			if (methodElement.getKind() != ElementKind.METHOD) {
-				//skip the constructors
+				// skip the constructors
 				return;
 			}
 			String name = method.getName().toString();
@@ -90,11 +51,11 @@ public class ClassDuplicateMemberNameCheck implements VisitorContributor<ClassTr
 			if (sameName.isEmpty()) {
 				existingNames.put(name, methodElement);
 			} else {
-				//try to see if it's  not in fact a method override
+				// try to see if it's not in fact a method override
 				for (Element overrideCandidate : sameName) {
 					boolean error = false;
 					if (!(overrideCandidate instanceof ExecutableElement)) {
-						//it's a field or inner type -> this is illegal
+						// it's a field or inner type -> this is illegal
 						error = true;
 					} else if (!context.getElements().overrides(methodElement, (ExecutableElement) overrideCandidate, classElement)) {
 						error = true;
@@ -133,7 +94,7 @@ public class ClassDuplicateMemberNameCheck implements VisitorContributor<ClassTr
 		TypeElement classElement = TreeUtils.elementFromDeclaration(tree);
 		TypeMirror superType = classElement.getSuperclass();
 		if (superType.getKind() != TypeKind.NONE) {
-			//add the names from the super class
+			// add the names from the super class
 			TypeElement superclassElement = (TypeElement) ((DeclaredType) superType).asElement();
 			for (Element memberElement : context.getElements().getAllMembers(superclassElement)) {
 				if (!JavaNodes.isNative(memberElement)) {

@@ -44,8 +44,23 @@ public class InnerTypesGeneratorTest {
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
-	public void testCallToQualifiedOuterType() {
+	public void testCallFieldOuterType() {
 		generate(InnerTypes6.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testCallFieldToQualifiedOuterType() {
+		generate(InnerTypes6a.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testCallMethodOuterType() {
+		generate(InnerTypes6b.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testCallMethodToQualifiedOuterType() {
+		generate(InnerTypes6c.class);
 	}
 
 	@Test
@@ -76,9 +91,10 @@ public class InnerTypesGeneratorTest {
 		generate(InnerTypes11.class);
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test
 	public void testDeadCode() {
-		// the compiler will not generate the code inside the if (dead code), so the inner type may not be found
+		// ACR - Java8 branch - no longer a problem with Javac AST - the compiler will not generate the code inside the
+		// if (dead code), so the inner type may not be found
 		generate(InnerTypes12.class);
 	}
 
