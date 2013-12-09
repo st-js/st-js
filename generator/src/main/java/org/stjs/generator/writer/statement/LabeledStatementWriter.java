@@ -16,13 +16,13 @@ public class LabeledStatementWriter implements VisitorContributor<LabeledStateme
 
 	@Override
 	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, LabeledStatementTree tree,
-			GenerationContext p, List<AstNode> prev) {
+			GenerationContext context, List<AstNode> prev) {
 		LabeledStatement stmt = new LabeledStatement();
 		Label label = new Label();
 		label.setName(tree.getLabel().toString());
 		stmt.setLabels(Collections.singletonList(label));
-		stmt.setStatement(visitor.scan(tree.getStatement(), p).get(0));
+		stmt.setStatement(visitor.scan(tree.getStatement(), context).get(0));
 
-		return Collections.<AstNode>singletonList(stmt);
+		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
 	}
 }

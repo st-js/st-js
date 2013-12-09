@@ -15,13 +15,13 @@ public class ExpressionStatementWriter implements VisitorContributor<ExpressionS
 
 	@Override
 	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ExpressionStatementTree tree,
-			GenerationContext p, List<AstNode> prev) {
-		List<AstNode> expressions = visitor.scan(tree.getExpression(), p);
+			GenerationContext context, List<AstNode> prev) {
+		List<AstNode> expressions = visitor.scan(tree.getExpression(), context);
 		if (expressions.isEmpty()) {
 			return Collections.emptyList();
 		}
 		ExpressionStatement stmt = new ExpressionStatement();
 		stmt.setExpression(expressions.get(0));
-		return Collections.<AstNode>singletonList(stmt);
+		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
 	}
 }

@@ -15,11 +15,11 @@ import com.sun.source.tree.CatchTree;
 public class CatchWriter implements VisitorContributor<CatchTree, List<AstNode>, GenerationContext> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, CatchTree tree, GenerationContext p,
+	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, CatchTree tree, GenerationContext context,
 			List<AstNode> prev) {
 		CatchClause stmt = new CatchClause();
-		stmt.setCatchCondition(visitor.scan(tree.getParameter(), p).get(0));
-		stmt.setBody((Block) visitor.scan(tree.getBlock(), p).get(0));
-		return Collections.<AstNode>singletonList(stmt);
+		stmt.setCatchCondition(visitor.scan(tree.getParameter(), context).get(0));
+		stmt.setBody((Block) visitor.scan(tree.getBlock(), context).get(0));
+		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
 	}
 }

@@ -109,8 +109,7 @@ public class MethodInvocationWriter implements VisitorContributor<MethodInvocati
 		return arguments;
 	}
 
-	public static String buildTemplateName(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodInvocationTree tree,
-			GenerationContext context) {
+	public static String buildTemplateName(MethodInvocationTree tree, GenerationContext context) {
 		ExecutableElement methodDecl = TreeUtils.elementFromUse(tree);
 		String name = JavaNodes.getMethodTemplate(methodDecl);
 		if (name != null) {
@@ -122,7 +121,7 @@ public class MethodInvocationWriter implements VisitorContributor<MethodInvocati
 	@Override
 	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodInvocationTree tree,
 			GenerationContext context, List<AstNode> prev) {
-		String templateName = buildTemplateName(visitor, tree, context);
+		String templateName = buildTemplateName(tree, context);
 		VisitorContributor<MethodInvocationTree, List<AstNode>, GenerationContext> template = templates.getTemplate(templateName);
 
 		if (template != null) {

@@ -14,12 +14,12 @@ import com.sun.source.tree.ReturnTree;
 public class ReturnWriter implements VisitorContributor<ReturnTree, List<AstNode>, GenerationContext> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ReturnTree tree, GenerationContext p,
-			List<AstNode> prev) {
+	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ReturnTree tree,
+			GenerationContext context, List<AstNode> prev) {
 		ReturnStatement stmt = new ReturnStatement();
 		if (tree.getExpression() != null) {
-			stmt.setReturnValue(visitor.scan(tree.getExpression(), p).get(0));
+			stmt.setReturnValue(visitor.scan(tree.getExpression(), context).get(0));
 		}
-		return Collections.<AstNode>singletonList(stmt);
+		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
 	}
 }

@@ -15,12 +15,12 @@ import com.sun.source.tree.BreakTree;
 public class BreakWriter implements VisitorContributor<BreakTree, List<AstNode>, GenerationContext> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, BreakTree tree, GenerationContext p,
+	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, BreakTree tree, GenerationContext context,
 			List<AstNode> prev) {
 		BreakStatement stmt = new BreakStatement();
 		if (tree.getLabel() != null) {
 			stmt.setBreakLabel(JavaScriptNodes.name(tree.getLabel().toString()));
 		}
-		return Collections.<AstNode>singletonList(stmt);
+		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
 	}
 }

@@ -21,12 +21,12 @@ import com.sun.source.tree.Tree;
 public class BlockWriter implements VisitorContributor<BlockTree, List<AstNode>, GenerationContext> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, BlockTree tree, GenerationContext p,
+	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, BlockTree tree, GenerationContext context,
 			List<AstNode> prev) {
 		// only for regular and static block. instance initializing blocks are not supported
 		Block stmt = new Block();
 		for (Tree child : tree.getStatements()) {
-			List<AstNode> jsNodes = visitor.scan(child, p);
+			List<AstNode> jsNodes = visitor.scan(child, context);
 			for (AstNode jsNode : jsNodes) {
 				stmt.addChild(jsNode);
 			}
@@ -39,7 +39,7 @@ public class BlockWriter implements VisitorContributor<BlockTree, List<AstNode>,
 			FunctionCall funcCall = new FunctionCall();
 			funcCall.setTarget(paren(func));
 
-			return Collections.<AstNode> singletonList(statement(funcCall));
+			return Collections.<AstNode> singletonList(context.withPosition(tree, statement(funcCall)));
 		}
 		return Collections.<AstNode> singletonList(stmt);
 	}

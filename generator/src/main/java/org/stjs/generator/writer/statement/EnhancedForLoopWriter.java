@@ -55,13 +55,13 @@ public class EnhancedForLoopWriter implements VisitorContributor<EnhancedForLoop
 
 	@Override
 	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, EnhancedForLoopTree tree,
-			GenerationContext p, List<AstNode> prev) {
+			GenerationContext context, List<AstNode> prev) {
 		ForInLoop stmt = new ForInLoop();
-		stmt.setIterator(visitor.scan(tree.getVariable(), p).get(0));
-		stmt.setIteratedObject(visitor.scan(tree.getExpression(), p).get(0));
-		stmt.setBody(visitor.scan(tree.getStatement(), p).get(0));
+		stmt.setIterator(visitor.scan(tree.getVariable(), context).get(0));
+		stmt.setIteratedObject(visitor.scan(tree.getExpression(), context).get(0));
+		stmt.setBody(visitor.scan(tree.getStatement(), context).get(0));
 
-		generateArrayHasOwnProperty(tree, p, stmt);
-		return Collections.<AstNode>singletonList(stmt);
+		generateArrayHasOwnProperty(tree, context, stmt);
+		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
 	}
 }

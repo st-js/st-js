@@ -16,16 +16,16 @@ import com.sun.source.tree.TryTree;
 public class TryWriter implements VisitorContributor<TryTree, List<AstNode>, GenerationContext> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, TryTree tree, GenerationContext p,
+	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, TryTree tree, GenerationContext context,
 			List<AstNode> prev) {
 		TryStatement stmt = new TryStatement();
-		stmt.setTryBlock(visitor.scan(tree.getBlock(), p).get(0));
+		stmt.setTryBlock(visitor.scan(tree.getBlock(), context).get(0));
 		for (Tree c : tree.getCatches()) {
-			stmt.addCatchClause((CatchClause) visitor.scan(c, p).get(0));
+			stmt.addCatchClause((CatchClause) visitor.scan(c, context).get(0));
 		}
 		if (tree.getFinallyBlock() != null) {
-			stmt.setFinallyBlock(visitor.scan(tree.getFinallyBlock(), p).get(0));
+			stmt.setFinallyBlock(visitor.scan(tree.getFinallyBlock(), context).get(0));
 		}
-		return Collections.<AstNode>singletonList(stmt);
+		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
 	}
 }

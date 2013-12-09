@@ -1,7 +1,9 @@
 package org.stjs.generator.check;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.check.declaration.ArrayTypeForbiddenCheck;
 import org.stjs.generator.check.declaration.ClassDuplicateMemberNameCheck;
+import org.stjs.generator.check.declaration.ClassEnumWithoutMembersCheck;
 import org.stjs.generator.check.declaration.ClassForbidExtendsSyntheticTypeCheck;
 import org.stjs.generator.check.declaration.ClassGlobalInstanceMembersCheck;
 import org.stjs.generator.check.declaration.ClassImplementJavascriptFunctionCheck;
@@ -11,9 +13,12 @@ import org.stjs.generator.check.declaration.MethodOverloadCheck;
 import org.stjs.generator.check.declaration.MethodVarArgParamCheck;
 import org.stjs.generator.check.expression.IdentifierAccessOuterScopeCheck;
 import org.stjs.generator.check.expression.MemberSelectOuterScopeCheck;
+import org.stjs.generator.check.expression.MethodInvocationMapConstructorCheck;
 import org.stjs.generator.check.expression.MethodInvocationOuterScopeCheck;
+import org.stjs.generator.check.expression.NewArrayForbiddenCheck;
 import org.stjs.generator.check.expression.NewClassInlineFunctionCheck;
 import org.stjs.generator.check.expression.NewClassObjectInitCheck;
+import org.stjs.generator.check.statement.BlockInstanceCheck;
 import org.stjs.generator.check.statement.VariableFinalInLoopCheck;
 import org.stjs.generator.check.statement.VariableWrongNameCheck;
 import org.stjs.generator.visitor.TreePathScannerContributors;
@@ -35,5 +40,10 @@ public class CheckContributors {
 		contributors.contribute(new ClassForbidExtendsSyntheticTypeCheck());
 		contributors.contribute(new MethodInvocationOuterScopeCheck());
 		contributors.contribute(new MemberSelectOuterScopeCheck());
+		contributors.contribute(new ArrayTypeForbiddenCheck());
+		contributors.contribute(new ClassEnumWithoutMembersCheck());
+		contributors.contribute(new NewArrayForbiddenCheck());
+		contributors.contribute(new BlockInstanceCheck());
+		contributors.contribute(new MethodInvocationMapConstructorCheck());
 	}
 }

@@ -14,11 +14,11 @@ import com.sun.source.tree.DoWhileLoopTree;
 public class DoWhileLoopWriter implements VisitorContributor<DoWhileLoopTree, List<AstNode>, GenerationContext> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, DoWhileLoopTree tree, GenerationContext p,
-			List<AstNode> prev) {
+	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, DoWhileLoopTree tree,
+			GenerationContext context, List<AstNode> prev) {
 		DoLoop stmt = new DoLoop();
-		stmt.setCondition(visitor.scan(tree.getCondition(), p).get(0));
-		stmt.setBody(visitor.scan(tree.getStatement(), p).get(0));
-		return Collections.<AstNode>singletonList(stmt);
+		stmt.setCondition(visitor.scan(tree.getCondition(), context).get(0));
+		stmt.setBody(visitor.scan(tree.getStatement(), context).get(0));
+		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
 	}
 }

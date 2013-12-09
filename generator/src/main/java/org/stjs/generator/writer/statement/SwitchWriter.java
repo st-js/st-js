@@ -16,14 +16,14 @@ import com.sun.source.tree.Tree;
 public class SwitchWriter implements VisitorContributor<SwitchTree, List<AstNode>, GenerationContext> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, SwitchTree tree, GenerationContext p,
-			List<AstNode> prev) {
+	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, SwitchTree tree,
+			GenerationContext context, List<AstNode> prev) {
 		SwitchStatement stmt = new SwitchStatement();
-		stmt.setExpression(visitor.scan(tree.getExpression(), p).get(0));
+		stmt.setExpression(visitor.scan(tree.getExpression(), context).get(0));
 		for (Tree c : tree.getCases()) {
-			stmt.addCase((SwitchCase) visitor.scan(c, p).get(0));
+			stmt.addCase((SwitchCase) visitor.scan(c, context).get(0));
 		}
 
-		return Collections.<AstNode>singletonList(stmt);
+		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
 	}
 }

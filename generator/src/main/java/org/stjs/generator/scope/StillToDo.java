@@ -18,11 +18,7 @@ package org.stjs.generator.scope;
 
 import static org.stjs.generator.ast.ASTNodeData.resolvedVariable;
 import japa.parser.ast.Node;
-import japa.parser.ast.body.EnumDeclaration;
-import japa.parser.ast.body.InitializerDeclaration;
 import japa.parser.ast.expr.FieldAccessExpr;
-import japa.parser.ast.expr.LiteralExpr;
-import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.stmt.AssertStmt;
 import japa.parser.ast.stmt.SynchronizedStmt;
@@ -37,45 +33,11 @@ import org.stjs.javascript.annotation.GlobalScope;
 
 /**
  * this class generate different checks made on the Java statements before they are converted to Javascript
- * 
  * @author acraciun
  */
 public final class StillToDo {
 	private StillToDo() {
 		//
-	}
-
-	/**
-	 * check enum declaration
-	 * 
-	 * @param n
-	 * @param context
-	 */
-	public static void checkEnumDeclaration(EnumDeclaration n, GenerationContext context) {
-		if (n.getMembers() != null && n.getMembers().size() > 0) {
-			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
-					"Enums with fields or methods are not supported");
-		}
-
-	}
-
-	/**
-	 * makes sure only literals can be used as keys (so the even arguments)
-	 * 
-	 * @param n
-	 * @param context
-	 */
-	public static void checkMapConstructor(MethodCallExpr n, GenerationContext context) {
-		if (n.getArgs() != null) {
-			for (int i = 0; i < n.getArgs().size(); i += 2) {
-				if (!(n.getArgs().get(i) instanceof LiteralExpr)) {
-					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
-							"The key of a map built this way can only be a literal. "
-									+ "Use map.$put(variable) if you want to use variables as keys");
-				}
-
-			}
-		}
 	}
 
 	public static void checkGlobalVariable(NameExpr n, GenerationContext context, Scope currentScope) {
@@ -111,7 +73,6 @@ public final class StillToDo {
 
 	/**
 	 * look for the variable in all the blocks (without going in other types)
-	 * 
 	 * @param methodScope
 	 * @param name
 	 * @return
@@ -136,16 +97,6 @@ public final class StillToDo {
 	public void visit(SynchronizedStmt n, GenerationContext context) {
 		throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 				"synchronized blocks are not supported by Javascript");
-	}
-
-	public void visit(InitializerDeclaration n, GenerationContext context) {
-		if (!n.isStatic()) {
-			// should find a way to implement these blocks. For the moment forbid them
-			throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
-					"Initializing blocks are not supported by Javascript");
-		}
-		// the static initializers are treated inside the class declaration to be able to execute them at the end of
-		// the definition of the type
 	}
 
 	public void visit(AssertStmt n, GenerationContext context) {

@@ -60,7 +60,7 @@ public class VariableWriter implements VisitorContributor<VariableTree, List<Ast
 		stmt.addVariable(var);
 
 		// TODO add here all the variables on the same line
-		return Collections.<AstNode>singletonList(stmt);
+		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
 	}
 
 }

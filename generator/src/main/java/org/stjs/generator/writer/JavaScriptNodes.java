@@ -27,6 +27,9 @@ import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 
 public class JavaScriptNodes {
+	private static final int PROP_JAVA_LINE_NO = AstNode.LAST_PROP + 1;
+	private static final int PROP_JAVA_COLUMN_NO = AstNode.LAST_PROP + 2;
+
 	public static Name name(Object name) {
 		Name n = new Name();
 		n.setIdentifier(name.toString());
@@ -249,4 +252,9 @@ public class JavaScriptNodes {
 		return ue;
 	}
 
+	public static AstNode position(AstNode node, int javaLineNumber, int javaColumnNumber) {
+		node.putIntProp(PROP_JAVA_LINE_NO, javaLineNumber);
+		node.putIntProp(PROP_JAVA_COLUMN_NO, javaColumnNumber);
+		return node;
+	}
 }

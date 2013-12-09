@@ -14,15 +14,15 @@ import com.sun.source.tree.IfTree;
 public class IfWriter implements VisitorContributor<IfTree, List<AstNode>, GenerationContext> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, IfTree tree, GenerationContext p,
+	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, IfTree tree, GenerationContext context,
 			List<AstNode> prev) {
 		IfStatement stmt = new IfStatement();
-		stmt.setCondition(visitor.scan(tree.getCondition(), p).get(0));
-		stmt.setThenPart(visitor.scan(tree.getThenStatement(), p).get(0));
+		stmt.setCondition(visitor.scan(tree.getCondition(), context).get(0));
+		stmt.setThenPart(visitor.scan(tree.getThenStatement(), context).get(0));
 
 		if (tree.getElseStatement() != null) {
-			stmt.setElsePart(visitor.scan(tree.getElseStatement(), p).get(0));
+			stmt.setElsePart(visitor.scan(tree.getElseStatement(), context).get(0));
 		}
-		return Collections.<AstNode>singletonList(stmt);
+		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
 	}
 }

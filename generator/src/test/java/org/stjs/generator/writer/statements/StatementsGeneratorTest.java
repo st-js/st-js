@@ -34,25 +34,33 @@ public class StatementsGeneratorTest {
 		assertCodeContains(Statements4.class, "default: break");
 	}
 
-	@Ignore
-	// arrays are not allowed
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testArray1() {
-		assertCodeContains(Statements5.class, "x = [1,2,3]");
+		generate(Statements5.class);
 	}
 
-	@Test
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testArray2() {
-		assertCodeContains(Statements6.class, "method(([1,2,3]))");
+		//java array creation is forbidden
+		generate(Statements6.class);
 	}
 
-	@Test
+	@Ignore
+	//comments are currenly disabled
 	public void testLineComment() {
 		assertCodeContains(Statements7.class, "//line comment");
 	}
 
-	@Test
+	@Ignore
+	//comments are currenly disabled
 	public void testBlockComment() {
 		assertCodeContains(Statements8.class, "/* * block comment */");
+	}
+
+	@Ignore
+	//comments are currenly disabled
+	public void testJavadocComment() {
+		assertCodeContains(Statements8b.class, "/** javadoc comment */");
 	}
 
 	@Test

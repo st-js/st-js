@@ -15,7 +15,7 @@ import com.sun.source.tree.Tree;
 public class CaseWriter implements VisitorContributor<CaseTree, List<AstNode>, GenerationContext> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, CaseTree tree, GenerationContext p,
+	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, CaseTree tree, GenerationContext context,
 			List<AstNode> prev) {
 		// TODO: check qualified enums:
 		// if (selectorType instanceof ClassWrapper && ((ClassWrapper) selectorType).getClazz().isEnum()) {
@@ -24,12 +24,12 @@ public class CaseWriter implements VisitorContributor<CaseTree, List<AstNode>, G
 
 		SwitchCase stmt = new SwitchCase();
 		if (tree.getExpression() != null) {
-			stmt.setExpression(visitor.scan(tree.getExpression(), p).get(0));
+			stmt.setExpression(visitor.scan(tree.getExpression(), context).get(0));
 		}
 		for (Tree c : tree.getStatements()) {
-			stmt.addStatement(visitor.scan(c, p).get(0));
+			stmt.addStatement(visitor.scan(c, context).get(0));
 		}
 
-		return Collections.<AstNode>singletonList(stmt);
+		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
 	}
 }

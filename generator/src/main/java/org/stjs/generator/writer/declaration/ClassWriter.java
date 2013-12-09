@@ -15,11 +15,14 @@ import java.util.Set;
 
 import javacutils.ElementUtils;
 import javacutils.TreeUtils;
+import javacutils.TypesUtils;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
@@ -175,6 +178,17 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 		}
 	}
 
+	public static boolean isMainMethod(MethodTree method) {
+		if (JavaNodes.isStatic(method) && "main".equals(method.getName().toString()) && method.getParameters().size() == 1) {
+			VariableElement var = TreeUtils.elementFromDeclaration(method.getParameters().get(0));
+			if (var.asType() instanceof ArrayType) {
+				TypeMirror componentType = ((ArrayType) var.asType()).getComponentType();
+				return TypesUtils.isString(componentType);
+			}
+		}
+		return false;
+	}
+
 	private boolean hasMainMethod(ClassTree clazz) {
 		for (Tree member : clazz.getMembers()) {
 			if (!(member instanceof MethodTree)) {
@@ -182,8 +196,7 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 			}
 			MethodTree method = (MethodTree) member;
 
-			if (JavaNodes.isStatic(method) && "main".equals(method.getName().toString())) {
-				// TODO check params isMainMethod = isStringArray(methodDeclaration.getParameters());
+			if (isMainMethod(method)) {
 				return true;
 			}
 		}

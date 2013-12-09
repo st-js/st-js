@@ -15,12 +15,12 @@ import com.sun.source.tree.ContinueTree;
 public class ContinueWriter implements VisitorContributor<ContinueTree, List<AstNode>, GenerationContext> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ContinueTree tree, GenerationContext p,
-			List<AstNode> prev) {
+	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ContinueTree tree,
+			GenerationContext context, List<AstNode> prev) {
 		ContinueStatement stmt = new ContinueStatement();
 		if (tree.getLabel() != null) {
 			stmt.setLabel(JavaScriptNodes.name(tree.getLabel().toString()));
 		}
-		return Collections.<AstNode>singletonList(stmt);
+		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
 	}
 }

@@ -46,15 +46,15 @@ public class ForLoopWriter implements VisitorContributor<ForLoopTree, List<AstNo
 	}
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ForLoopTree tree, GenerationContext p,
+	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ForLoopTree tree, GenerationContext context,
 			List<AstNode> prev) {
 		ForLoop stmt = new ForLoop();
 
-		addInit(visitor, tree, p, stmt);
-		addCondition(visitor, tree, p, stmt);
-		addUpdate(visitor, tree, p, stmt);
+		addInit(visitor, tree, context, stmt);
+		addCondition(visitor, tree, context, stmt);
+		addUpdate(visitor, tree, context, stmt);
 
-		stmt.setBody(visitor.scan(tree.getStatement(), p).get(0));
-		return Collections.<AstNode>singletonList(stmt);
+		stmt.setBody(visitor.scan(tree.getStatement(), context).get(0));
+		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
 	}
 }
