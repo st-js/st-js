@@ -108,4 +108,16 @@ public class StatementsGeneratorTest {
 		// integer 2 when run from eclipse, but return the double 2.0 when run from maven...
 		assertEquals(2, ((Number) execute(Statements16.class)).intValue());
 	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testSynchronizedBlock() {
+		//synchronized not supported
+		generate(Statements17.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testAssert() {
+		//assert not supported
+		generate(Statements18.class);
+	}
 }

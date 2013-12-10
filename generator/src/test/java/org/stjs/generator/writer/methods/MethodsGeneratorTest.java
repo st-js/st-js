@@ -96,4 +96,10 @@ public class MethodsGeneratorTest {
 		// the class only contains abstract methods, therefore nothing must be generated
 		assertCodeContains(Methods15.class, "stjs.extend(Methods15, null, [], null, {});");
 	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testSynchronizedMethod() {
+		// synchronized is forbidden
+		generate(Methods16.class);
+	}
 }

@@ -23,9 +23,7 @@ import com.sun.source.tree.MethodTree;
  * this check verifies that only one method (or constructor) with a given name has actually a body, all the other should
  * be marked as native (or @Native). More the method having the body must be the more generic than the other overloaded
  * methods, so , when generated in the JavaScript, it knows how to handle all the calls.
- * 
  * @author acraciun
- * 
  */
 public class MethodOverloadCheck implements VisitorContributor<MethodTree, Void, GenerationContext> {
 	private static boolean isMoreGenericVarArg(GenerationContext context, ExecutableElement more, ExecutableElement less) {
@@ -55,9 +53,7 @@ public class MethodOverloadCheck implements VisitorContributor<MethodTree, Void,
 	/**
 	 * return true if the "more" method can be called with arguments that have the type of the "less" method. i.e. is
 	 * more generic
-	 * 
 	 * @param context
-	 * 
 	 * @param more
 	 * @param less
 	 * @return
@@ -85,13 +81,14 @@ public class MethodOverloadCheck implements VisitorContributor<MethodTree, Void,
 			// no need to check the native ones - only the one with the body
 			return null;
 		}
-		boolean hasVarArgs = (tree.getParameters().size() == 1 && InternalUtils.isVarArg(tree.getParameters().get(0)));
+		boolean hasVarArgs = tree.getParameters().size() == 1 && InternalUtils.isVarArg(tree.getParameters().get(0));
 
 		TypeElement typeElement = (TypeElement) methodElement.getEnclosingElement();
 		// for constructors take only the class's other constructors. For regular methods, checks agains all the methods
 		// in the class' hierarchy
-		List<? extends Element> allMembers = methodElement.getKind() == ElementKind.CONSTRUCTOR ? typeElement.getEnclosedElements() : context
-				.getElements().getAllMembers(typeElement);
+		List<? extends Element> allMembers =
+				methodElement.getKind() == ElementKind.CONSTRUCTOR ? typeElement.getEnclosedElements() : context.getElements().getAllMembers(
+						typeElement);
 
 		for (Element memberElement : allMembers) {
 			if (methodElement.equals(memberElement)) {
@@ -107,7 +104,6 @@ public class MethodOverloadCheck implements VisitorContributor<MethodTree, Void,
 			}
 		}
 
-		// TODO Auto-generated method stub
 		return null;
 	}
 }

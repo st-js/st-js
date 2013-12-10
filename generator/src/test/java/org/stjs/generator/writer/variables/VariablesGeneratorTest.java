@@ -34,15 +34,27 @@ public class VariablesGeneratorTest {
 		assertCodeContains(Variables5.class, "k = x;");
 	}
 
-	@Test
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testVariableUseFromGlobalScopeBeforeDeclaredInMethod() {
 		assertCodeContains(Variables7.class, "y = x;");
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
-	public void testVariableDeclaredInMethodAndGlobalScope() {
+	public void testVariableDeclaredInMethodAndGlobalScopeQualified() {
 		// the global "x" variable, after generation would in fact be replaced by the local variable
 		generate(Variables8.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testVariableDeclaredInMethodAndGlobalScope() {
+		// the global "x" variable, after generation would in fact be replaced by the local variable
+		generate(Variables8c.class);
+	}
+
+	@Test
+	public void testVariableDeclaredInInnerTypeAndGlobalScope() {
+		// this should not raise any error
+		generate(Variables8b.class);
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)

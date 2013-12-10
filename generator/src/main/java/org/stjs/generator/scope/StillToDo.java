@@ -20,8 +20,6 @@ import static org.stjs.generator.ast.ASTNodeData.resolvedVariable;
 import japa.parser.ast.Node;
 import japa.parser.ast.expr.FieldAccessExpr;
 import japa.parser.ast.expr.NameExpr;
-import japa.parser.ast.stmt.AssertStmt;
-import japa.parser.ast.stmt.SynchronizedStmt;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptFileGenerationException;
@@ -92,16 +90,6 @@ public final class StillToDo {
 			}
 		}
 		return null;
-	}
-
-	public void visit(SynchronizedStmt n, GenerationContext context) {
-		throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
-				"synchronized blocks are not supported by Javascript");
-	}
-
-	public void visit(AssertStmt n, GenerationContext context) {
-		throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
-				"Assert statement is not supported by Javascript");
 	}
 
 }
