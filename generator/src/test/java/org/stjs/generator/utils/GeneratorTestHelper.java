@@ -137,17 +137,19 @@ public class GeneratorTestHelper {
 		File generationPath = new File("target", TEMP_GENERATION_PATH);
 		GenerationDirectory generationFolder = new GenerationDirectory(generationPath, new File(TEMP_GENERATION_PATH), new File(""));
 		String sourcePath = "src/test/java";
-		ClassWithJavascript stjsClass =
-				gen.generateJavascript(Thread.currentThread().getContextClassLoader(), clazz.getName(), new File(sourcePath), generationFolder,
-						new File("target", "test-classes"), new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript")
-								.allowedPackage("org.stjs.generator").generateSourceMap(withSourceMap).build());
-
+		Timers.start("js-generate");
+		ClassWithJavascript stjsClass = gen.generateJavascript(Thread.currentThread().getContextClassLoader(), clazz.getName(), new File(
+				sourcePath), generationFolder, new File("target", "test-classes"),
+				new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript").allowedPackage("org.stjs.generator")
+						.generateSourceMap(withSourceMap).build());
+		Timers.end("js-generate");
+		Timers.start("js-exec");
 		File jsFile = new File(generationPath, stjsClass.getJavascriptFiles().get(0).getPath());
 		List<File> javascriptFiles = new ArrayList<File>();
 		try {
 			String content = Files.toString(jsFile, Charset.defaultCharset());
-			List<ClassWithJavascript> allDeps =
-					new DependencyCollection(stjsClass).orderAllDependencies(Thread.currentThread().getContextClassLoader());
+			List<ClassWithJavascript> allDeps = new DependencyCollection(stjsClass).orderAllDependencies(Thread.currentThread()
+					.getContextClassLoader());
 			for (ClassWithJavascript dep : allDeps) {
 				for (URI js : dep.getJavascriptFiles()) {
 					javascriptFiles.add(new File(generationPath, js.getPath()));
@@ -170,6 +172,9 @@ public class GeneratorTestHelper {
 			}
 			throw new RuntimeException(ex);
 		}
+		finally {
+			Timers.end("js-exec");
+		}
 	}
 
 	public static void assertCodeContains(Class<?> clazz, String snippet) {
@@ -178,6 +183,7 @@ public class GeneratorTestHelper {
 
 	/**
 	 * checks if the searched snippet is found inside the given code. The whitespaces are not taken into account
+	 * 
 	 * @param code
 	 * @param search
 	 */
@@ -193,6 +199,7 @@ public class GeneratorTestHelper {
 
 	/**
 	 * checks if the searched snippet is not found inside the given code. The whitespaces are not taken into account
+	 * 
 	 * @param code
 	 * @param search
 	 */

@@ -42,6 +42,7 @@ import org.stjs.generator.name.JavaScriptNameProvider;
 import org.stjs.generator.type.ClassLoaderWrapper;
 import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.utils.ClassUtils;
+import org.stjs.generator.utils.Timers;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.writer.JavascriptWriterContributors;
 import org.stjs.generator.writer.JavascriptWriterVisitor;
@@ -56,6 +57,7 @@ import com.sun.source.util.Trees;
 
 /**
  * This class parses a Java source file, launches several visitors and finally generate the corresponding Javascript.
+ * 
  * @author acraciun
  */
 public class Generator {
@@ -97,10 +99,10 @@ public class Generator {
 			GenerationDirectory generationFolder, File targetFolder, GeneratorConfiguration configuration)
 			throws JavascriptFileGenerationException {
 
-		ClassLoaderWrapper classLoaderWrapper =
-				new ClassLoaderWrapper(builtProjectClassLoader, configuration.getAllowedPackages(), configuration.getAllowedJavaLangClasses());
-		DependencyResolver dependencyResolver =
-				new GeneratorDependencyResolver(builtProjectClassLoader, sourceFolder, generationFolder, targetFolder, configuration);
+		ClassLoaderWrapper classLoaderWrapper = new ClassLoaderWrapper(builtProjectClassLoader, configuration.getAllowedPackages(),
+				configuration.getAllowedJavaLangClasses());
+		DependencyResolver dependencyResolver = new GeneratorDependencyResolver(builtProjectClassLoader, sourceFolder, generationFolder,
+				targetFolder, configuration);
 
 		ClassWrapper clazz = classLoaderWrapper.loadClass(className).getOrThrow();
 		if (ClassUtils.isBridge(clazz.getClazz())) {
@@ -116,23 +118,27 @@ public class Generator {
 		BufferedWriter writer = null;
 
 		try {
+			Timers.start("check");
 			// check the code
 			TreePathScannerContributors<Void, GenerationContext> astChecks = new TreePathScannerContributors<Void, GenerationContext>();
 			astChecks.setContinueScanning(true);
 			CheckContributors.addContributors(astChecks);
 			astChecks.scan(cu, context);
 			context.getChecks().check();
+			Timers.end("check");
 
+			Timers.start("write");
 			// generate the javascript code
-			TreePathScannerContributors<List<AstNode>, GenerationContext> javascriptAstWriter =
-					new TreePathScannerContributors<List<AstNode>, GenerationContext>();
+			TreePathScannerContributors<List<AstNode>, GenerationContext> javascriptAstWriter = new TreePathScannerContributors<List<AstNode>, GenerationContext>();
 			JavascriptWriterContributors.addContributors(javascriptAstWriter);
 			AstRoot javascriptRoot = (AstRoot) javascriptAstWriter.scan(cu, context).get(0);
+			Timers.end("write");
 
+			Timers.start("dump");
 			writer = Files.newWriter(outputFile, Charset.forName(configuration.getSourceEncoding()));
 			writer.write(javascriptRoot.toSource());
 			writer.flush();
-
+			Timers.end("dump");
 		}
 		catch (IOException e1) {
 			throw new STJSRuntimeException("Could not open output file " + outputFile + ":" + e1, e1);
@@ -141,6 +147,7 @@ public class Generator {
 			Closeables.closeQuietly(writer);
 		}
 
+		Timers.start("write-props");
 		// write properties
 		STJSClass stjsClass = new STJSClass(dependencyResolver, targetFolder, className);
 		Set<String> resolvedClasses = new LinkedHashSet<String>(names.getResolvedTypes());
@@ -148,6 +155,7 @@ public class Generator {
 		stjsClass.setDependencies(resolvedClasses);
 		stjsClass.setGeneratedJavascriptFile(relative(generationFolder, className));
 		stjsClass.store();
+		Timers.end("write-props");
 
 		if (configuration.isGenerateSourceMap()) {
 			// XXX: generateSourceMap(generationFolder, configuration, context, generatorVisitor, outputFile,
@@ -165,9 +173,8 @@ public class Generator {
 
 		try {
 			// write the source map
-			sourceMapWriter =
-					Files.newWriter(getSourceMapFile(generationFolder.getAbsolutePath(), stjsClass.getClassName()),
-							Charset.forName(configuration.getSourceEncoding()));
+			sourceMapWriter = Files.newWriter(getSourceMapFile(generationFolder.getAbsolutePath(), stjsClass.getClassName()),
+					Charset.forName(configuration.getSourceEncoding()));
 			generatorVisitor.writeSourceMap(context, sourceMapWriter);
 			sourceMapWriter.flush();
 
@@ -220,11 +227,13 @@ public class Generator {
 	private CompilationUnitTree parseAndResolve(ClassLoaderWrapper builtProjectClassLoader, File inputFile, GenerationContext context,
 			String sourceEncoding) {
 		try {
+			Timers.start("compiler");
 			JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 			if (compiler == null) {
 				throw new JavascriptFileGenerationException(inputFile, null,
 						"A Java compiler is not available for this project. You may have configured your environment to run with JRE instead of a JDK");
 			}
+			Timers.end("compiler");
 			StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, Charset.forName(sourceEncoding));
 			JavaFileManager classLoaderFileManager = new CustomClassloaderJavaFileManager(builtProjectClassLoader.getClassLoader(), fileManager);
 
@@ -236,8 +245,10 @@ public class Generator {
 			context.setElements(javacTask.getElements());
 			context.setTypes(javacTask.getTypes());
 
+			Timers.start("parse");
 			CompilationUnitTree cu = javacTask.parse().iterator().next();
 			javacTask.analyze();
+			Timers.end("parse");
 
 			context.setCompilationUnit(cu);
 
@@ -253,6 +264,7 @@ public class Generator {
 	/**
 	 * This method copies the Javascript support file (stjs.js currently) to the desired folder. This method should be
 	 * called after the processing of all the files.
+	 * 
 	 * @param folder
 	 */
 	public void copyJavascriptSupport(File folder) {
@@ -335,9 +347,8 @@ public class Generator {
 			STJSClass stjsClass = new STJSClass(this, builtProjectClassLoader, parentClassName);
 			if (stjsClass.getJavascriptFiles().isEmpty()) {
 				checkFolders(parentClassName);
-				stjsClass =
-						(STJSClass) generateJavascript(builtProjectClassLoader, parentClassName, sourceFolder, generationFolder, targetFolder,
-								configuration);
+				stjsClass = (STJSClass) generateJavascript(builtProjectClassLoader, parentClassName, sourceFolder, generationFolder,
+						targetFolder, configuration);
 			}
 			return stjsClass;
 		}
@@ -346,6 +357,7 @@ public class Generator {
 
 	/**
 	 * This method assumes the javascript code for the given class was already generated
+	 * 
 	 * @param testClass
 	 */
 	public ClassWithJavascript getExistingStjsClass(ClassLoader classLoader, Class<?> testClass) {
