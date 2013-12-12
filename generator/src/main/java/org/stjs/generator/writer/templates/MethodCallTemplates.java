@@ -28,6 +28,7 @@ public class MethodCallTemplates {
 		templates.put("put", new PutTemplate());
 		templates.put("set", new SetTemplate());
 		templates.put("typeOf", new TypeOfTemplate());
+		templates.put("assert", new AssertTemplate());
 	}
 
 	public VisitorContributor<MethodInvocationTree, List<AstNode>, GenerationContext> getTemplate(String name) {

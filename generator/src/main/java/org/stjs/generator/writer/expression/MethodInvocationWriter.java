@@ -65,7 +65,7 @@ public class MethodInvocationWriter implements VisitorContributor<MethodInvocati
 
 		List<AstNode> arguments = buildArguments(visitor, tree, context);
 		arguments.add(0, JavaScriptNodes.keyword(Token.THIS));
-		return Collections.<AstNode> singletonList(JavaScriptNodes.functionCall(superType, "call", arguments));
+		return Collections.<AstNode>singletonList(JavaScriptNodes.functionCall(superType, "call", arguments));
 	}
 
 	public static AstNode buildTarget(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodInvocationTree tree,
@@ -111,7 +111,7 @@ public class MethodInvocationWriter implements VisitorContributor<MethodInvocati
 
 	public static String buildTemplateName(MethodInvocationTree tree, GenerationContext context) {
 		ExecutableElement methodDecl = TreeUtils.elementFromUse(tree);
-		String name = JavaNodes.getMethodTemplate(methodDecl);
+		String name = JavaNodes.getMethodTemplate(context.getElements(), methodDecl);
 		if (name != null) {
 			return name;
 		}
@@ -138,6 +138,6 @@ public class MethodInvocationWriter implements VisitorContributor<MethodInvocati
 		AstNode target = buildTarget(visitor, tree, context);
 		String name = buildMethodName(tree);
 		List<AstNode> arguments = buildArguments(visitor, tree, context);
-		return Collections.<AstNode> singletonList(JavaScriptNodes.functionCall(target, name, arguments));
+		return Collections.<AstNode>singletonList(JavaScriptNodes.functionCall(target, name, arguments));
 	}
 }

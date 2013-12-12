@@ -131,7 +131,7 @@ public class SpecialMethodGeneratorTest {
 	@Test
 	public void testStringLength() {
 		// string.length() -> string.length
-		assertCodeContains(SpecialMethod16.class, "n = (\"a\" + \"b\").length;");
+		assertCodeContains(SpecialMethod16.class, "n = (\"a\" + b).length;");
 	}
 
 	@Test

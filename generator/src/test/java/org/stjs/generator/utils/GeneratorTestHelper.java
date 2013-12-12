@@ -144,9 +144,9 @@ public class GeneratorTestHelper {
 						.generateSourceMap(withSourceMap).build());
 		Timers.end("js-generate");
 		Timers.start("js-exec");
-		File jsFile = new File(generationPath, stjsClass.getJavascriptFiles().get(0).getPath());
 		List<File> javascriptFiles = new ArrayList<File>();
 		try {
+			File jsFile = new File(generationPath, stjsClass.getJavascriptFiles().get(0).getPath());
 			String content = Files.toString(jsFile, Charset.defaultCharset());
 			List<ClassWithJavascript> allDeps = new DependencyCollection(stjsClass).orderAllDependencies(Thread.currentThread()
 					.getContextClassLoader());

@@ -37,6 +37,7 @@ import com.sun.source.util.Trees;
 /**
  * This class can resolve an identifier or a method in the given source context. There is one context create for each
  * generation process.
+ * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class GenerationContext implements TreePathHolder {
@@ -139,14 +140,14 @@ public class GenerationContext implements TreePathHolder {
 
 	public void addError(Tree tree, String message) {
 		long startPos = trees.getSourcePositions().getStartPosition(compilationUnit, tree);
-		SourcePosition pos =
-				new SourcePosition((int) compilationUnit.getLineMap().getLineNumber(startPos), (int) compilationUnit.getLineMap()
-						.getColumnNumber(startPos));
+		SourcePosition pos = new SourcePosition((int) compilationUnit.getLineMap().getLineNumber(startPos), (int) compilationUnit.getLineMap()
+				.getColumnNumber(startPos));
 		checks.addError(new JavascriptFileGenerationException(inputFile, pos, message));
 	}
 
 	/**
 	 * add the position of the Java original node in the generated node.
+	 * 
 	 * @param tree
 	 * @param node
 	 * @return
@@ -158,4 +159,13 @@ public class GenerationContext implements TreePathHolder {
 		return JavaScriptNodes.position(node, line, column);
 	}
 
+	/**
+	 * 
+	 * @param tree
+	 * @return the starting line of the given tree node
+	 */
+	public int getStartLine(Tree tree) {
+		long startPos = trees.getSourcePositions().getStartPosition(compilationUnit, tree);
+		return (int) compilationUnit.getLineMap().getLineNumber(startPos);
+	}
 }

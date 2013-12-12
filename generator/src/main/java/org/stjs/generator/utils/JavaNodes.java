@@ -1,17 +1,23 @@
 package org.stjs.generator.utils;
 
+import java.lang.annotation.Annotation;
+import java.util.Locale;
 import java.util.Set;
 
+import javacutils.ElementUtils;
 import javacutils.TreeUtils;
 import javacutils.TypesUtils;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
 
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.JavascriptClassGenerationException;
@@ -31,6 +37,8 @@ import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
 
 public class JavaNodes {
+	private static final String ANNOTATED_PACKAGE = "annotation.";
+
 	public static boolean isConstructor(Tree tree) {
 		if (!(tree instanceof MethodTree)) {
 			return false;
@@ -68,12 +76,21 @@ public class JavaNodes {
 		return GeneratorConstants.SUPER.equals(((IdentifierTree) expression).getName().toString());
 	}
 
+	private static <T extends Annotation> T getAnnotation(Element element, Class<T> annotationType) {
+		T a = element.getAnnotation(annotationType);
+		if (a != null) {
+			return a;
+		}
+		PackageElement pack = ElementUtils.enclosingPackage(element);
+		return pack != null ? pack.getAnnotation(annotationType) : null;
+	}
+
 	public static boolean isJavaScriptFunction(Element element) {
-		return element.getAnnotation(JavascriptFunction.class) != null;
+		return getAnnotation(element, JavascriptFunction.class) != null;
 	}
 
 	public static boolean isGlobal(Element element) {
-		return element.getAnnotation(GlobalScope.class) != null;
+		return getAnnotation(element, GlobalScope.class) != null;
 	}
 
 	public static String getNamespace(Element type) {
@@ -105,17 +122,74 @@ public class JavaNodes {
 		return null;
 	}
 
-	public static String getMethodTemplate(Element element) {
+	public static String getMethodTemplate(Elements elements, Element element) {
 		Template t = element.getAnnotation(Template.class);
+		if (t != null) {
+			return t.value();
+		}
+
+		if (!(element instanceof ExecutableElement)) {
+			// make sure we're only doing it for methods
+			return null;
+		}
+		// give it a second chance (for classes in another jars or in the JDK, by using ...)
+		t = getAnnotationInHelpers(elements, (ExecutableElement) element, Template.class);
 		if (t != null) {
 			return t.value();
 		}
 		return null;
 	}
 
+	private static String capitalize(String s) {
+		if (s == null) {
+			return null;
+		}
+		if (s.length() == 1) {
+			return s.toUpperCase(Locale.getDefault());
+		}
+		return s.substring(0, 1).toUpperCase(Locale.getDefault()) + s.substring(1);
+	}
+
+	private static <T extends Annotation> T getAnnotationInHelpers(Elements elements, ExecutableElement methodElement, Class<T> annotationClass) {
+		// 1. look for a class in the same package of the declaring class but with the name of the method (with the
+		// 1st letter capitalized) attached
+		// and the suffix "Annotated"
+		String ownerClassName = ((TypeElement) methodElement.getEnclosingElement()).getQualifiedName().toString();
+		T annotation = getAnnotationInHelperClass(elements, ANNOTATED_PACKAGE + ownerClassName
+				+ capitalize(methodElement.getSimpleName().toString()), methodElement, annotationClass);
+		if (annotation != null) {
+			return annotation;
+		}
+
+		// 2. look for a class in the same package of the declaring class but with the suffix "Annotated"
+		return getAnnotationInHelperClass(elements, ANNOTATED_PACKAGE + ownerClassName, methodElement, annotationClass);
+	}
+
+	private static <T extends Annotation> T getAnnotationInHelperClass(Elements elements, String helperClassName,
+			ExecutableElement methodElement, Class<T> annotationClass) {
+		TypeElement type = elements.getTypeElement(helperClassName);
+
+		if (type == null) {
+			return null;
+		}
+
+		// find a method with the same signature in the new class
+		for (Element member : elements.getAllMembers(type)) {
+			if (member instanceof ExecutableElement && sameSignature((ExecutableElement) member, methodElement)) {
+				return member.getAnnotation(annotationClass);
+			}
+		}
+		return null;
+	}
+
+	private static boolean sameSignature(ExecutableElement member, ExecutableElement methodElement) {
+		// TODO Auto-generated method stub
+		return member.getSimpleName().equals(methodElement.getSimpleName());
+	}
+
 	@SuppressWarnings("deprecation")
 	public static boolean isSyntheticType(Element type) {
-		return type.getAnnotation(SyntheticType.class) != null || type.getAnnotation(DataType.class) != null;
+		return getAnnotation(type, SyntheticType.class) != null || getAnnotation(type, DataType.class) != null;
 	}
 
 	public static boolean isNative(Element element) {
