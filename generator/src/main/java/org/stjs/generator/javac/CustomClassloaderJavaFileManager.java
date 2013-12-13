@@ -24,10 +24,12 @@ public class CustomClassloaderJavaFileManager implements JavaFileManager {
 		this.classLoader = classLoader;
 		this.standardFileManager = standardFileManager;
 		finder = new PackageInternalsFinder(classLoader);
+		System.out.println("LOADED:" + classLoader);
 	}
 
 	@Override
 	public ClassLoader getClassLoader(Location location) {
+		System.out.println("Classloader for:" + location);
 		return classLoader;
 	}
 

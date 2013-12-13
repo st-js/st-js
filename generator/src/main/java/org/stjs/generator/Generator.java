@@ -31,7 +31,6 @@ import javax.tools.JavaCompiler;
 import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
 
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
@@ -54,6 +53,7 @@ import com.google.common.io.InputSupplier;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.util.JavacTask;
 import com.sun.source.util.Trees;
+import com.sun.tools.javac.api.JavacTool;
 
 /**
  * This class parses a Java source file, launches several visitors and finally generate the corresponding Javascript.
@@ -228,7 +228,9 @@ public class Generator {
 			String sourceEncoding) {
 		try {
 			Timers.start("compiler");
-			JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+			// create it directly to avoid ClassLoader problems
+			JavaCompiler compiler = JavacTool.create();
+			// JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 			if (compiler == null) {
 				throw new JavascriptFileGenerationException(inputFile, null,
 						"A Java compiler is not available for this project. You may have configured your environment to run with JRE instead of a JDK");
