@@ -32,7 +32,6 @@ public class ArrayGetterSetterTest {
 	public void testGetterSetter02() {
 		Array<Integer> x = $array();
 		x.$set("false", 0);
-		x = $array();
 		assertEquals(null, x.$get(0)); // same goes for "false"
 		assertEquals(0, x.$get("false").intValue());
 	}

@@ -20,9 +20,10 @@ import java.text.DecimalFormat;
 class JSAbstractOperations {
 
 	private static final DecimalFormat PLAIN_INTEGER_FORMAT = new DecimalFormat("#0");
-	private static final BigInteger UINT_MAX_VALUE = new BigInteger("4294967296"); // = 2^32
-	private static final BigInteger SINT_MAX_VALUE = new BigInteger("2147483648"); // = 2^31
-	private static final BigInteger USHORT_MAX_VALUE = new BigInteger("65536"); // = 2^16
+	public static final BigInteger UINT_MAX_VALUE = new BigInteger("4294967296"); // = 2^32
+	public static final Double UINT_MAX_VALUE_D = 4294967296.0; // = 2^32
+	public static final BigInteger SINT_MAX_VALUE = new BigInteger("2147483648"); // = 2^31
+	public static final BigInteger USHORT_MAX_VALUE = new BigInteger("65536"); // = 2^16
 
 	/**
 	 * The [[DefaultValue]] internal method of Object, as close as possible to the definition in the ECMA-262
@@ -85,11 +86,9 @@ class JSAbstractOperations {
 				// note: no need to check if the return value is a primitive type as the spec specifies,
 				// because Java guarantees that we can only get a String, null or an exception
 				return callToString(arg);
-			}
-			catch (InvocationTargetException e) {
+			} catch (InvocationTargetException e) {
 				throw new RuntimeException(e.getTargetException().getMessage(), e.getTargetException());
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 
@@ -103,11 +102,9 @@ class JSAbstractOperations {
 					if (isJsPrimitiveEquivalent(value)) {
 						return value;
 					}
-				}
-				catch (InvocationTargetException e) {
+				} catch (InvocationTargetException e) {
 					throw new RuntimeException(e.getTargetException().getMessage(), e.getTargetException());
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					// we can still get exception like SecurityException or IllegalAccessException here
 					throw new RuntimeException(e);
 				}
@@ -117,11 +114,9 @@ class JSAbstractOperations {
 				// note: no need to check if the return value is a primitive type as the spec specifies,
 				// because Java guarantees that we can only get a String, null or an exception
 				return callToString(arg);
-			}
-			catch (InvocationTargetException e) {
+			} catch (InvocationTargetException e) {
 				throw new RuntimeException(e.getTargetException().getMessage(), e.getTargetException());
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -145,8 +140,7 @@ class JSAbstractOperations {
 	private static boolean isValueOfCallable(Object target) {
 		try {
 			return target.getClass().getMethod("valueOf") != null;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			return false;
 		}
 	}
@@ -267,7 +261,7 @@ class JSAbstractOperations {
 		if (arg == null) {
 			return 0.0d;
 		}
-		String trimmed = ((String) arg).trim();
+		String trimmed = arg.trim();
 		if (trimmed.isEmpty()) {
 			return 0.0d;
 
@@ -279,8 +273,7 @@ class JSAbstractOperations {
 			// parse as a hexadecimal digit
 			try {
 				return Long.decode(trimmed).doubleValue();
-			}
-			catch (NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				return Double.NaN;
 			}
 		}
@@ -288,8 +281,7 @@ class JSAbstractOperations {
 		// parse as a decimal number
 		try {
 			return Double.parseDouble(trimmed);
-		}
-		catch (NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			return Double.NaN;
 		}
 	}

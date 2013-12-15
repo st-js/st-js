@@ -16,12 +16,9 @@
 package org.stjs.javascript;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.TreeMap;
 
 import org.stjs.javascript.annotation.BrowserCompatibility;
 import org.stjs.javascript.annotation.Template;
@@ -48,7 +45,10 @@ import org.stjs.javascript.functions.Function4;
  */
 public class Array<V> implements Iterable<String> {
 
-	private final List<V> array = new ArrayList<V>();
+	private ArrayStore<V> array = new PackedArrayStore<V>();
+	private long length = 0;
+	private long setElements = 0;
+	private java.util.Map<String, V> nonArrayElements = new HashMap<String, V>();
 
 	/**
 	 * Constructs a new empty <tt>Array</tt>.
@@ -96,27 +96,28 @@ public class Array<V> implements Iterable<String> {
 	@Deprecated
 	@BrowserCompatibility("none")
 	public Iterator<String> iterator() {
-		return new Iterator<String>() {
-			private int current = 0;
-
-			@Override
-			public boolean hasNext() {
-				return current < array.size();
-			}
-
-			@Override
-			public String next() {
-				if (!hasNext()) {
-					throw new NoSuchElementException();
-				}
-				return Integer.toString(current++);
-			}
-
-			@Override
-			public void remove() {
-				throw new UnsupportedOperationException();
-			}
-		};
+		// return new Iterator<String>() {
+		// private int current = 0;
+		//
+		// @Override
+		// public boolean hasNext() {
+		// return current < array.size();
+		// }
+		//
+		// @Override
+		// public String next() {
+		// if (!hasNext()) {
+		// throw new NoSuchElementException();
+		// }
+		// return Integer.toString(current++);
+		// }
+		//
+		// @Override
+		// public void remove() {
+		// throw new UnsupportedOperationException();
+		// }
+		// };
+		return null;
 	}
 
 	/**
@@ -129,10 +130,13 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@Template("get")
 	public V $get(int index) {
-		if ((index < 0) || (index >= array.size())) {
-			return null;
+		if (index < 0) {
+			// index is not an array index, so we'll look into the non-array element values
+			return this.nonArrayElements.get(Integer.toString(index));
 		}
-		return array.get(index);
+
+		// index is an array element, so let's ask the array store
+		return this.array.get(index);
 	}
 
 	/**
@@ -145,7 +149,29 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@Template("get")
 	public V $get(String index) {
-		return $get(Integer.valueOf(index));
+		Long i = toArrayIndex(index);
+
+		if (i == null) {
+			// index is not an array Index , look in the non-array elements
+			return this.nonArrayElements.get(index);
+		}
+
+		return array.get(i);
+	}
+
+	private Long toArrayIndex(String index) {
+		if (index == null) {
+			return null;
+		}
+		Double asNum = JSAbstractOperations.ToNumber(index);
+		Double asInt = JSAbstractOperations.ToInteger(asNum);
+
+		if (Double.isNaN(asNum) || asInt < 0 || asInt >= JSAbstractOperations.UINT_MAX_VALUE_D - 1
+				|| !asInt.equals(asNum)) {
+			// index is not an array Index , look in the non-array elements
+			return null;
+		}
+		return asInt.longValue();
 	}
 
 	/**
@@ -160,12 +186,12 @@ public class Array<V> implements Iterable<String> {
 	@Template("set")
 	public void $set(int index, V value) {
 		if (index < 0) {
-			return;
+			// not an array index. Set the value in the non-array properties
+			this.nonArrayElements.put(JSAbstractOperations.ToString(index), value);
+
+		} else {
+			this.$set((long) index, value);
 		}
-		if (index >= array.size()) {
-			$length(index + 1);
-		}
-		array.set(index, value);
 	}
 
 	/**
@@ -179,7 +205,29 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@Template("set")
 	public void $set(String index, V value) {
-		$set(Integer.valueOf(index), value);
+		Long i = this.toArrayIndex(index);
+		if (i == null) {
+			this.nonArrayElements.put(JSAbstractOperations.ToString(index), value);
+		} else {
+			this.$set(i, value);
+		}
+	}
+
+	private void $set(long index, V value) {
+		// check if store type is correct for setting this value
+		boolean isSet = array.isSet(index);
+		if (!isSet) {
+			// unsetElement, we may need to convert between stores
+			this.length = (long) Math.max(this.length, index + 1);
+			this.setElements++;
+			if (!this.array.isEfficientStoreFor(this.length, this.setElements)) {
+				// it looks like we must change the type of store for efficiency
+				this.array = this.array.switchStoreType();
+			}
+		}
+
+		// store type is now correct, let's do the actual setting
+		array.set(index, value);
 	}
 
 	/**
@@ -190,7 +238,7 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@Template("toProperty")
 	public int $length() {
-		return array.size();
+		return (int) this.length;
 	}
 
 	/**
@@ -206,13 +254,13 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@Template("toProperty")
 	public void $length(int newLength) {
-		if (newLength < array.size()) {
-			splice(newLength, array.size() - newLength);
-		} else {
-			while (array.size() < newLength) {
-				array.add(null);
-			}
-		}
+		// if (newLength < array.size()) {
+		// splice(newLength, array.size() - newLength);
+		// } else {
+		// while (array.size() < newLength) {
+		// array.add(null);
+		// }
+		// }
 
 	}
 
@@ -226,14 +274,15 @@ public class Array<V> implements Iterable<String> {
 	 * @return a new <tt>Array</tt>, containing all the elements of the joined <tt>Arrays</tt>.
 	 */
 	public Array<V> concat(Array<V>... arrays) {
-		Array<V> ret = new Array<V>();
-		ret.array.addAll(this.array);
-		for (Array<V> a : arrays) {
-			for (int i = 0; i < a.$length(); ++i) {
-				ret.array.add(a.$get(i));
-			}
-		}
-		return ret;
+		// Array<V> ret = new Array<V>();
+		// ret.array.addAll(this.array);
+		// for (Array<V> a : arrays) {
+		// for (int i = 0; i < a.$length(); ++i) {
+		// ret.array.add(a.$get(i));
+		// }
+		// }
+		// return ret;
+		return null;
 	}
 
 	/**
@@ -269,7 +318,8 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+")
 	public int indexOf(V element) {
-		return array.indexOf(element);
+		// return array.indexOf(element);
+		return 0;
 	}
 
 	/**
@@ -298,11 +348,12 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+")
 	public int indexOf(V element, int start) {
-		int pos = array.subList(start, array.size()).indexOf(element);
-		if (pos < 0) {
-			return pos;
-		}
-		return pos + start;
+		// int pos = array.subList(start, array.size()).indexOf(element);
+		// if (pos < 0) {
+		// return pos;
+		// }
+		// return pos + start;
+		return 0;
 	}
 
 	/**
@@ -328,14 +379,15 @@ public class Array<V> implements Iterable<String> {
 	 * @return the string representation of the values in this <tt>Array</tt>, separated by the specified separator.
 	 */
 	public String join(String separator) {
-		StringBuilder sb = new StringBuilder();
-		for (V value : array) {
-			if (sb.length() != 0) {
-				sb.append(separator);
-			}
-			sb.append(value != null ? value.toString() : "");
-		}
-		return sb.toString();
+		// StringBuilder sb = new StringBuilder();
+		// for (V value : array) {
+		// if (sb.length() != 0) {
+		// sb.append(separator);
+		// }
+		// sb.append(value != null ? value.toString() : "");
+		// }
+		// return sb.toString();
+		return "";
 	}
 
 	/**
@@ -347,10 +399,11 @@ public class Array<V> implements Iterable<String> {
 	 * @return the last element from this <tt>Array</tt>
 	 */
 	public V pop() {
-		if (array.size() == 0) {
-			return null;
-		}
-		return array.remove(array.size() - 1);
+		// if (array.size() == 0) {
+		// return null;
+		// }
+		// return array.remove(array.size() - 1);
+		return null;
 	}
 
 	/**
@@ -362,10 +415,11 @@ public class Array<V> implements Iterable<String> {
 	 * @return the new length of this <tt>Array</tt>
 	 */
 	public int push(V... values) {
-		for (V value : values) {
-			array.add(value);
-		}
-		return array.size();
+		// for (V value : values) {
+		// array.add(value);
+		// }
+		// return array.size();
+		return 0;
 	}
 
 	/**
@@ -375,7 +429,8 @@ public class Array<V> implements Iterable<String> {
 	 * @return this <tt>Array</tt>
 	 */
 	public Array<V> reverse() {
-		Collections.reverse(array);
+		// Collections.reverse(array);
+		// return this;
 		return this;
 	}
 
@@ -388,10 +443,11 @@ public class Array<V> implements Iterable<String> {
 	 * @return the first element of this <tt>Array</tt>.
 	 */
 	public V shift() {
-		if (array.size() == 0) {
-			return null;
-		}
-		return array.remove(0);
+		// if (array.size() == 0) {
+		// return null;
+		// }
+		// return array.remove(0);
+		return null;
 	}
 
 	/**
@@ -411,10 +467,11 @@ public class Array<V> implements Iterable<String> {
 	 *         index until the end of the <tt>Array</tt>.
 	 */
 	public Array<V> slice(int start) {
-		if (start < 0) {
-			return slice(java.lang.Math.max(0, array.size() - start), array.size());
-		}
-		return slice(start, array.size());
+		// if (start < 0) {
+		// return slice(java.lang.Math.max(0, array.size() - start), array.size());
+		// }
+		// return slice(start, array.size());
+		return null;
 	}
 
 	/**
@@ -438,15 +495,16 @@ public class Array<V> implements Iterable<String> {
 	 *         index and ending at the given end index
 	 */
 	public Array<V> slice(int start, int end) {
-		int s = start < 0 ? java.lang.Math.max(0, array.size() - start) : start;
-		s = java.lang.Math.min(s, array.size());
-		int e = java.lang.Math.min(end, array.size());
-		if (s <= e) {
-			return new Array<V>();
-		}
-		Array<V> ret = new Array<V>();
-		ret.array.addAll(array.subList(s, e));
-		return ret;
+		// int s = start < 0 ? java.lang.Math.max(0, array.size() - start) : start;
+		// s = java.lang.Math.min(s, array.size());
+		// int e = java.lang.Math.min(end, array.size());
+		// if (s <= e) {
+		// return new Array<V>();
+		// }
+		// Array<V> ret = new Array<V>();
+		// ret.array.addAll(array.subList(s, e));
+		// return ret;
+		return null;
 	}
 
 	/**
@@ -464,14 +522,15 @@ public class Array<V> implements Iterable<String> {
 	 * @return a new <tt>Array</tt> containing the deleted elements (if any)
 	 */
 	public Array<V> splice(int start, int deleteCount) {
-		Array<V> ret = new Array<V>();
-		for (int i = 0; i < deleteCount; ++i) {
-			if (start >= array.size()) {
-				break;
-			}
-			ret.array.add(array.remove(start));
-		}
-		return ret;
+		// Array<V> ret = new Array<V>();
+		// for (int i = 0; i < deleteCount; ++i) {
+		// if (start >= array.size()) {
+		// break;
+		// }
+		// ret.array.add(array.remove(start));
+		// }
+		// return ret;
+		return null;
 	}
 
 	/**
@@ -492,9 +551,10 @@ public class Array<V> implements Iterable<String> {
 	 * @return a new <tt>Array</tt> containing the deleted elements (if any)
 	 */
 	public Array<V> splice(int start, int deleteCount, V... values) {
-		Array<V> removed = splice(start, deleteCount);
-		array.addAll(start, Arrays.asList(values));
-		return removed;
+		// Array<V> removed = splice(start, deleteCount);
+		// array.addAll(start, Arrays.asList(values));
+		// return removed;
+		return null;
 	}
 
 	/**
@@ -541,13 +601,14 @@ public class Array<V> implements Iterable<String> {
 	 * @return this <tt>Array</tt>
 	 */
 	public Array<V> sort(final SortFunction<V> comparefn) {
-		Collections.sort(array, new Comparator<V>() {
-			@Override
-			public int compare(V a, V b) {
-				return comparefn.$invoke(a, b);
-			}
-		});
-		return this;
+		// Collections.sort(array, new Comparator<V>() {
+		// @Override
+		// public int compare(V a, V b) {
+		// return comparefn.$invoke(a, b);
+		// }
+		// });
+		// return this;
+		return null;
 	}
 
 	/**
@@ -560,8 +621,9 @@ public class Array<V> implements Iterable<String> {
 	 * @return the new length of this <tt>Array</tt>
 	 */
 	public int unshift(V... values) {
-		array.addAll(0, Arrays.asList(values));
-		return array.size();
+		// array.addAll(0, Arrays.asList(values));
+		// return array.size();
+		return 0;
 	}
 
 	/**
@@ -588,9 +650,9 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+")
 	public void forEach(Callback1<V> callbackfn) {
-		for (V value : array) {
-			callbackfn.$invoke(value);
-		}
+		// for (V value : array) {
+		// callbackfn.$invoke(value);
+		// }
 	}
 
 	/**
@@ -628,26 +690,28 @@ public class Array<V> implements Iterable<String> {
 	 * 
 	 * @return the string representation of the values in this <tt>Array</tt>, separated by a comma.
 	 */
+	@Override
 	public String toString() {
 		// ArrayList.toString() look like this "[1, 2, 3, 4, 5]" (with spaces
 		// between elements and enclosed in []
 		// but in Array.toString() must actually look like "1,2,3,4,5" (no spaces,
 		// no [])
-		StringBuilder builder = new StringBuilder();
-		boolean first = true;
-		for (V item : array) {
-			if (!first) {
-				builder.append(",");
-			} else {
-				first = false;
-			}
-			if (item == null) {
-				builder.append("null");
-			} else {
-				builder.append(item.toString());
-			}
-		}
-		return builder.toString();
+		// StringBuilder builder = new StringBuilder();
+		// boolean first = true;
+		// for (V item : array) {
+		// if (!first) {
+		// builder.append(",");
+		// } else {
+		// first = false;
+		// }
+		// if (item == null) {
+		// builder.append("null");
+		// } else {
+		// builder.append(item.toString());
+		// }
+		// }
+		// return builder.toString();
+		return null;
 	}
 
 	/**
@@ -1003,5 +1067,262 @@ public class Array<V> implements Iterable<String> {
 	public <T> T reduceRight(Function4<T, V, Integer, Array<V>, T> callbackfn, T initialValue) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	private static abstract class ArrayStore<E> {
+
+		ArrayStore<E> switchStoreType() {
+			ArrayStore<E> that;
+			if (this instanceof PackedArrayStore) {
+				that = new SparseArrayStore<E>();
+			} else {
+				that = new PackedArrayStore<E>();
+			}
+
+			Iterator<Entry<E>> entries = this.entryIterator();
+			while (entries.hasNext()) {
+				Entry<E> entry = entries.next();
+				that.set(entry.key, entry.value);
+			}
+
+			return that;
+		}
+
+		abstract Iterator<Entry<E>> entryIterator();
+
+		abstract boolean isEfficientStoreFor(long newLength, long newElementCount);
+
+		abstract void shift();
+
+		abstract void unshift();
+
+		abstract void pop();
+
+		abstract void push();
+
+		abstract void set(long index, E value);
+
+		abstract boolean isSet(long index);
+
+		abstract E get(long index);
+
+		abstract void slice(long from, long to);
+	}
+
+	private static final class PackedArrayStore<E> extends ArrayStore<E> {
+
+		private static final Object UNSET = new Object();
+		/**
+		 * We can't use <E> instead of <Object> here, because we must be able to make a difference between elements set
+		 * to null, and unset elements (represented by UNSET).
+		 */
+		private ArrayList<Object> elements = new ArrayList<Object>();
+
+		@Override
+		boolean isEfficientStoreFor(long newLength, long newElementCount) {
+			if (newLength > Integer.MAX_VALUE) {
+				// PackedArrayStore cannot store values with index > Integer.MAX_VALUE
+				return false;
+			}
+			if (newLength < 120) {
+				// for small arrays, PackedArrayStore is always better
+				// note that the threshold (120) intentionally doesn't match with the threshold defined in
+				// SparseArrayStore.isEfficientStoreFor(), to make sure that we don't convert back and forth
+				// between both types of ArrayStore
+				return true;
+			}
+			if ((newLength / newElementCount) >= 6) {
+				// if we have more than 5/6 unset elements, we're better off with SparseArrayStore
+				// thresholds between the two ArrayStore types don't match: see length condition
+				return false;
+			}
+			// we're good enough with the current store
+			return true;
+		}
+
+		@Override
+		void shift() {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		void unshift() {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		void pop() {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		void push() {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		void set(long index, E value) {
+			for (int i = elements.size(); i <= index; i++) {
+				this.elements.add(UNSET);
+			}
+			this.elements.set((int) index, value);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		E get(long index) {
+			if (index > Integer.MAX_VALUE || index >= elements.size()) {
+				return null;
+			}
+			return (E) this.elements.get((int) index);
+		}
+
+		@Override
+		void slice(long from, long to) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		boolean isSet(long index) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		Iterator<Entry<E>> entryIterator() {
+			return new Iterator<Entry<E>>() {
+				private int nextIndex = 0;
+
+				@Override
+				public boolean hasNext() {
+					while (nextIndex < elements.size() && elements.get(nextIndex) == UNSET) {
+						nextIndex++;
+					}
+					return nextIndex < elements.size();
+				}
+
+				@Override
+				public Entry<E> next() {
+					Entry<E> entry = new Entry<E>();
+					entry.key = nextIndex;
+					entry.value = get(nextIndex);
+					nextIndex++;
+					return entry;
+				}
+
+				@Override
+				public void remove() {
+					throw new UnsupportedOperationException();
+				}
+			};
+		}
+	}
+
+	private static final class SparseArrayStore<E> extends ArrayStore<E> {
+
+		java.util.Map<Long, E> elements = new TreeMap<Long, E>();
+
+		@Override
+		boolean isEfficientStoreFor(long newLength, long newElementCount) {
+			if (newLength > Integer.MAX_VALUE) {
+				// SparseArrayStore is the only one that can store values with index > Integer.MAX_VALUE
+				return true;
+			}
+			if (newLength < 80) {
+				// for small arrays, PackedArrayStore is always better
+				// note that the threshold (80) intentionally doesn't match with the threshold defined in
+				// PackedArrayStore.isEfficientStoreFor(), to make sure that we don't convert back and forth
+				// between both types of ArrayStore
+				return false;
+			}
+			if ((newLength / newElementCount) < 3) {
+				// if we have less than 2/3 empty elements, we're better off with PackedArrayStore.
+				// thresholds between the two ArrayStore types don't match: see length condition
+				return false;
+			}
+			// we're happy enough with the current store
+			return true;
+		}
+
+		@Override
+		void shift() {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		void unshift() {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		void pop() {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		void push() {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		void set(long index, E value) {
+			this.elements.put(index, value);
+		}
+
+		@Override
+		E get(long index) {
+			return this.elements.get(index);
+		}
+
+		@Override
+		void slice(long from, long to) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		boolean isSet(long index) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		Iterator<Entry<E>> entryIterator() {
+			final Iterator<java.util.Map.Entry<Long, E>> it = elements.entrySet().iterator();
+			return new Iterator<Entry<E>>() {
+				@Override
+				public boolean hasNext() {
+					return it.hasNext();
+				}
+
+				@Override
+				public Entry<E> next() {
+					java.util.Map.Entry<Long, E> utilEntry = it.next();
+					Entry<E> entry = new Entry<E>();
+					entry.key = utilEntry.getKey();
+					entry.value = utilEntry.getValue();
+					return entry;
+				}
+
+				@Override
+				public void remove() {
+					throw new UnsupportedOperationException();
+				}
+			};
+		}
+	}
+
+	private static class Entry<E> {
+		long key;
+		E value;
 	}
 }
