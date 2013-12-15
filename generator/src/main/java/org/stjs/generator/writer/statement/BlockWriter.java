@@ -1,7 +1,7 @@
 package org.stjs.generator.writer.statement;
 
-import static org.stjs.generator.writer.JavaScriptNodes.paren;
-import static org.stjs.generator.writer.JavaScriptNodes.statement;
+import static org.stjs.generator.javascript.JavaScriptNodes.paren;
+import static org.stjs.generator.javascript.JavaScriptNodes.statement;
 
 import java.util.Collections;
 import java.util.List;
@@ -11,9 +11,9 @@ import org.mozilla.javascript.ast.Block;
 import org.mozilla.javascript.ast.FunctionCall;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javascript.JavaScriptNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
-import org.stjs.generator.writer.JavaScriptNodes;
 
 import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.StatementTree;

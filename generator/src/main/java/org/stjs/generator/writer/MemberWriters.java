@@ -4,6 +4,7 @@ import javax.lang.model.element.Element;
 
 import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javascript.JavaScriptNodes;
 import org.stjs.generator.utils.JavaNodes;
 
 public class MemberWriters {

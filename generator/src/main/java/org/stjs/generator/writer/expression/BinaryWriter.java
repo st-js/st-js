@@ -1,7 +1,7 @@
 package org.stjs.generator.writer.expression;
 
-import static org.stjs.generator.writer.JavaScriptNodes.functionCall;
-import static org.stjs.generator.writer.JavaScriptNodes.name;
+import static org.stjs.generator.javascript.JavaScriptNodes.functionCall;
+import static org.stjs.generator.javascript.JavaScriptNodes.name;
 
 import java.util.Collections;
 import java.util.HashMap;

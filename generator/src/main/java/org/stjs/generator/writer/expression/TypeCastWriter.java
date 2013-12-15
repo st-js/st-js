@@ -9,9 +9,9 @@ import javax.lang.model.type.TypeMirror;
 
 import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javascript.JavaScriptNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
-import org.stjs.generator.writer.JavaScriptNodes;
 
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.util.TreePath;

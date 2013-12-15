@@ -1,6 +1,6 @@
 package org.stjs.generator.writer.declaration;
 
-import static org.stjs.generator.writer.JavaScriptNodes.name;
+import static org.stjs.generator.javascript.JavaScriptNodes.name;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;

@@ -7,8 +7,8 @@ import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javascript.JavaScriptNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.writer.JavaScriptNodes;
 
 import com.sun.source.tree.VariableTree;
 

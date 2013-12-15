@@ -11,10 +11,10 @@ import javax.lang.model.element.ElementKind;
 import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javascript.JavaScriptNodes;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
-import org.stjs.generator.writer.JavaScriptNodes;
 
 import com.sun.source.tree.MemberSelectTree;
 

@@ -6,9 +6,9 @@ import java.util.List;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.BreakStatement;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javascript.JavaScriptNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
-import org.stjs.generator.writer.JavaScriptNodes;
 
 import com.sun.source.tree.BreakTree;
 

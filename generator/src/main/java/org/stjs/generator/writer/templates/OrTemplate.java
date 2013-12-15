@@ -1,7 +1,7 @@
 package org.stjs.generator.writer.templates;
 
-import static org.stjs.generator.writer.JavaScriptNodes.binary;
-import static org.stjs.generator.writer.JavaScriptNodes.paren;
+import static org.stjs.generator.javascript.JavaScriptNodes.binary;
+import static org.stjs.generator.javascript.JavaScriptNodes.paren;
 
 import java.util.Collections;
 import java.util.List;

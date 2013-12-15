@@ -25,9 +25,9 @@ import javax.lang.model.util.Types;
 import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.ast.SourcePosition;
 import org.stjs.generator.check.Checks;
+import org.stjs.generator.javascript.JavaScriptNodes;
 import org.stjs.generator.name.JavaScriptNameProvider;
 import org.stjs.generator.visitor.TreePathHolder;
-import org.stjs.generator.writer.JavaScriptNodes;
 
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.Tree;

@@ -1,6 +1,6 @@
 package org.stjs.generator.writer.templates;
 
-import static org.stjs.generator.writer.JavaScriptNodes.elementGet;
+import static org.stjs.generator.javascript.JavaScriptNodes.elementGet;
 
 import java.util.Collections;
 import java.util.List;
@@ -9,9 +9,9 @@ import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.ElementGet;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.javascript.JavaScriptNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
-import org.stjs.generator.writer.JavaScriptNodes;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
 
 import com.sun.source.tree.MethodInvocationTree;

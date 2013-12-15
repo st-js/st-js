@@ -1,16 +1,16 @@
 package org.stjs.generator.writer.declaration;
 
-import static org.stjs.generator.writer.JavaScriptNodes.assignment;
-import static org.stjs.generator.writer.JavaScriptNodes.statement;
+import static org.stjs.generator.javascript.JavaScriptNodes.assignment;
+import static org.stjs.generator.javascript.JavaScriptNodes.statement;
 
 import java.util.Collections;
 import java.util.List;
 
 import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javascript.JavaScriptNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
-import org.stjs.generator.writer.JavaScriptNodes;
 import org.stjs.generator.writer.statement.VariableWriter;
 
 import com.sun.source.tree.VariableTree;

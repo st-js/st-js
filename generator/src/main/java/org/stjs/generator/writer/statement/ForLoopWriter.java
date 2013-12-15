@@ -8,9 +8,9 @@ import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.EmptyExpression;
 import org.mozilla.javascript.ast.ForLoop;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javascript.JavaScriptNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
-import org.stjs.generator.writer.JavaScriptNodes;
 
 import com.sun.source.tree.ExpressionStatementTree;
 import com.sun.source.tree.ForLoopTree;

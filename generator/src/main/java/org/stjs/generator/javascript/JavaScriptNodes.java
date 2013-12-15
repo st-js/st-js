@@ -1,4 +1,4 @@
-package org.stjs.generator.writer;
+package org.stjs.generator.javascript;
 
 import java.util.Arrays;
 import java.util.List;

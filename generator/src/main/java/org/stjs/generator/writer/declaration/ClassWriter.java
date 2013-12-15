@@ -1,13 +1,13 @@
 package org.stjs.generator.writer.declaration;
 
-import static org.stjs.generator.writer.JavaScriptNodes.NULL;
-import static org.stjs.generator.writer.JavaScriptNodes.array;
-import static org.stjs.generator.writer.JavaScriptNodes.functionCall;
-import static org.stjs.generator.writer.JavaScriptNodes.name;
-import static org.stjs.generator.writer.JavaScriptNodes.object;
-import static org.stjs.generator.writer.JavaScriptNodes.objectProperty;
-import static org.stjs.generator.writer.JavaScriptNodes.statement;
-import static org.stjs.generator.writer.JavaScriptNodes.string;
+import static org.stjs.generator.javascript.JavaScriptNodes.NULL;
+import static org.stjs.generator.javascript.JavaScriptNodes.array;
+import static org.stjs.generator.javascript.JavaScriptNodes.functionCall;
+import static org.stjs.generator.javascript.JavaScriptNodes.name;
+import static org.stjs.generator.javascript.JavaScriptNodes.object;
+import static org.stjs.generator.javascript.JavaScriptNodes.objectProperty;
+import static org.stjs.generator.javascript.JavaScriptNodes.statement;
+import static org.stjs.generator.javascript.JavaScriptNodes.string;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,10 +36,10 @@ import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.IfStatement;
 import org.mozilla.javascript.ast.ObjectLiteral;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javascript.JavaScriptNodes;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
-import org.stjs.generator.writer.JavaScriptNodes;
 import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.javascript.annotation.GlobalScope;
 

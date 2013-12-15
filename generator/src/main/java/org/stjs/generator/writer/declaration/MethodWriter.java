@@ -1,8 +1,8 @@
 package org.stjs.generator.writer.declaration;
 
-import static org.stjs.generator.writer.JavaScriptNodes.assignment;
-import static org.stjs.generator.writer.JavaScriptNodes.name;
-import static org.stjs.generator.writer.JavaScriptNodes.statement;
+import static org.stjs.generator.javascript.JavaScriptNodes.assignment;
+import static org.stjs.generator.javascript.JavaScriptNodes.name;
+import static org.stjs.generator.javascript.JavaScriptNodes.statement;
 
 import java.util.Collections;
 import java.util.List;

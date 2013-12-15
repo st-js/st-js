@@ -1,9 +1,9 @@
 package org.stjs.generator.writer.expression;
 
-import static org.stjs.generator.writer.JavaScriptNodes.name;
-import static org.stjs.generator.writer.JavaScriptNodes.newExpression;
-import static org.stjs.generator.writer.JavaScriptNodes.object;
-import static org.stjs.generator.writer.JavaScriptNodes.paren;
+import static org.stjs.generator.javascript.JavaScriptNodes.name;
+import static org.stjs.generator.javascript.JavaScriptNodes.newExpression;
+import static org.stjs.generator.javascript.JavaScriptNodes.object;
+import static org.stjs.generator.javascript.JavaScriptNodes.paren;
 
 import java.util.ArrayList;
 import java.util.Collections;

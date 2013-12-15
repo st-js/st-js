@@ -24,7 +24,6 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.tools.JavaCompiler;
@@ -32,18 +31,15 @@ import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 
-import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
-import org.stjs.generator.check.CheckContributors;
 import org.stjs.generator.javac.CustomClassloaderJavaFileManager;
 import org.stjs.generator.name.DefaultJavaScriptNameProvider;
 import org.stjs.generator.name.JavaScriptNameProvider;
+import org.stjs.generator.plugin.MainGenerationPlugin;
 import org.stjs.generator.type.ClassLoaderWrapper;
 import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.Timers;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.writer.JavascriptWriterContributors;
 import org.stjs.generator.writer.JavascriptWriterVisitor;
 
 import com.google.common.base.Throwables;
@@ -118,20 +114,19 @@ public class Generator {
 		BufferedWriter writer = null;
 
 		try {
+			// TODO add the possibility for use-defined plugins
+			MainGenerationPlugin mainPlugin = new MainGenerationPlugin();
+
 			Timers.start("check");
 			// check the code
-			TreePathScannerContributors<Void, GenerationContext> astChecks = new TreePathScannerContributors<Void, GenerationContext>();
-			astChecks.setContinueScanning(true);
-			CheckContributors.addContributors(astChecks);
-			astChecks.scan(cu, context);
+			mainPlugin.getCheckVisitor().scan(cu, context);
+
 			context.getChecks().check();
 			Timers.end("check");
 
 			Timers.start("write");
 			// generate the javascript code
-			TreePathScannerContributors<List<AstNode>, GenerationContext> javascriptAstWriter = new TreePathScannerContributors<List<AstNode>, GenerationContext>();
-			JavascriptWriterContributors.addContributors(javascriptAstWriter);
-			AstRoot javascriptRoot = (AstRoot) javascriptAstWriter.scan(cu, context).get(0);
+			AstRoot javascriptRoot = (AstRoot) mainPlugin.getWriterVisitor().scan(cu, context).get(0);
 			Timers.end("write");
 
 			Timers.start("dump");

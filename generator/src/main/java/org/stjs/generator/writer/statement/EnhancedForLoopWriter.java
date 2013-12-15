@@ -1,8 +1,8 @@
 package org.stjs.generator.writer.statement;
 
-import static org.stjs.generator.writer.JavaScriptNodes.functionCall;
-import static org.stjs.generator.writer.JavaScriptNodes.name;
-import static org.stjs.generator.writer.JavaScriptNodes.paren;
+import static org.stjs.generator.javascript.JavaScriptNodes.functionCall;
+import static org.stjs.generator.javascript.JavaScriptNodes.name;
+import static org.stjs.generator.javascript.JavaScriptNodes.paren;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,9 +19,9 @@ import org.mozilla.javascript.ast.ForInLoop;
 import org.mozilla.javascript.ast.IfStatement;
 import org.mozilla.javascript.ast.UnaryExpression;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javascript.JavaScriptNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.visitor.VisitorContributor;
-import org.stjs.generator.writer.JavaScriptNodes;
 import org.stjs.javascript.Array;
 
 import com.sun.source.tree.EnhancedForLoopTree;

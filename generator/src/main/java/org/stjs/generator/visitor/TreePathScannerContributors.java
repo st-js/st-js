@@ -3,6 +3,8 @@ package org.stjs.generator.visitor;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
@@ -12,6 +14,8 @@ import com.sun.source.util.TreeScanner;
 
 public class TreePathScannerContributors<R, P extends TreePathHolder> extends TreeScanner<R, P> {
 	private final Multimap<Class<?>, VisitorContributor<? extends Tree, R, P>> contributors = LinkedListMultimap.create();
+
+	private final Map<DiscriminatorKey, VisitorContributor<? extends Tree, R, P>> contributorsWithDiscriminator = new HashMap<DiscriminatorKey, VisitorContributor<? extends Tree, R, P>>();
 
 	private boolean continueScanning = false;
 
@@ -30,6 +34,13 @@ public class TreePathScannerContributors<R, P extends TreePathHolder> extends Tr
 			throw new RuntimeException("Cannot guess the tree node class from the contributor " + contributor + " ");
 		}
 		contributors.put(treeNodeClass, contributor);
+		return this;
+	}
+
+	public <T extends VisitorContributor<? extends Tree, R, P>> TreePathScannerContributors<R, P> contribute(DiscriminatorKey discriminatorKey,
+			T contributor) {
+		assert contributor != null;
+		contributorsWithDiscriminator.put(discriminatorKey, contributor);
 		return this;
 	}
 
@@ -64,7 +75,17 @@ public class TreePathScannerContributors<R, P extends TreePathHolder> extends Tr
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends Tree> R visit(T node, P p, R r) {
+	public <T extends Tree> R forward(DiscriminatorKey discriminator, T node, P param) {
+		VisitorContributor<? extends Tree, R, P> contributor = contributorsWithDiscriminator.get(discriminator);
+		if (contributor != null) {
+			// here i should be sure i have the right type
+			return ((VisitorContributor<T, R, P>) contributor).visit(this, node, param, null);
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected <T extends Tree> R visit(T node, P p, R r) {
 		if (node == null) {
 			return r;
 		}
