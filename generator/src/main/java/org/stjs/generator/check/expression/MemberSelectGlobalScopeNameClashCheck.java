@@ -1,8 +1,8 @@
 package org.stjs.generator.check.expression;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.check.CheckContributor;
+import org.stjs.generator.check.CheckVisitor;
 
 import com.sun.source.tree.MemberSelectTree;
 
@@ -10,10 +10,10 @@ import com.sun.source.tree.MemberSelectTree;
  * @see {@link IdentifierGlobalScopeNameClashCheck}
  * @author acraciun
  */
-public class MemberSelectGlobalScopeNameClashCheck implements VisitorContributor<MemberSelectTree, Void, GenerationContext> {
+public class MemberSelectGlobalScopeNameClashCheck implements CheckContributor<MemberSelectTree> {
 
 	@Override
-	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, MemberSelectTree tree, GenerationContext context, Void prev) {
+	public Void visit(CheckVisitor visitor, MemberSelectTree tree, GenerationContext<Void> context) {
 		return IdentifierGlobalScopeNameClashCheck.checkGlobalScope(tree, tree.getIdentifier().toString(), context);
 	}
 

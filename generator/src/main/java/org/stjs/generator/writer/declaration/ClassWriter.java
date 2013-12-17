@@ -1,14 +1,5 @@
 package org.stjs.generator.writer.declaration;
 
-import static org.stjs.generator.javascript.JavaScriptNodes.NULL;
-import static org.stjs.generator.javascript.JavaScriptNodes.array;
-import static org.stjs.generator.javascript.JavaScriptNodes.functionCall;
-import static org.stjs.generator.javascript.JavaScriptNodes.name;
-import static org.stjs.generator.javascript.JavaScriptNodes.object;
-import static org.stjs.generator.javascript.JavaScriptNodes.objectProperty;
-import static org.stjs.generator.javascript.JavaScriptNodes.statement;
-import static org.stjs.generator.javascript.JavaScriptNodes.string;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -36,11 +27,11 @@ import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.IfStatement;
 import org.mozilla.javascript.ast.ObjectLiteral;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.javascript.JavaScriptNodes;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
 import org.stjs.generator.writer.JavascriptKeywords;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.javascript.annotation.GlobalScope;
 
 import com.sun.source.tree.BlockTree;
@@ -49,7 +40,7 @@ import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.Tree;
 
-public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>, GenerationContext> {
+public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 
 	/**
 	 * generate the namespace declaration stjs.ns("namespace") if needed
@@ -340,8 +331,7 @@ public class ClassWriter implements VisitorContributor<ClassTree, List<AstNode>,
 	}
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ClassTree tree, GenerationContext context,
-			List<AstNode> prev) {
+	public JS visit(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context) {
 		List<AstNode> stmts = new ArrayList<AstNode>();
 		if (generateGlobal(visitor, tree, context, stmts)) {
 			// special construction for globals

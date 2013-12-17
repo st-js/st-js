@@ -1,16 +1,11 @@
 package org.stjs.generator.writer.declaration;
 
-import static org.stjs.generator.javascript.JavaScriptNodes.assignment;
-import static org.stjs.generator.javascript.JavaScriptNodes.statement;
-
 import java.util.Collections;
-import java.util.List;
 
 import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.javascript.JavaScriptNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.statement.VariableWriter;
 
 import com.sun.source.tree.VariableTree;
@@ -20,11 +15,10 @@ import com.sun.source.tree.VariableTree;
  * {@link VariableWriter}
  * @author acraciun
  */
-public class FieldWriter extends AbstractMemberWriter implements VisitorContributor<VariableTree, List<AstNode>, GenerationContext> {
+public class FieldWriter<JS> extends AbstractMemberWriter implements WriterContributor<VariableTree, JS> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, VariableTree tree,
-			GenerationContext context, List<AstNode> prev) {
+	public JS visit(WriterVisitor<JS> visitor, VariableTree tree, GenerationContext<JS> context) {
 		AstNode initializer = null;
 		if (tree.getInitializer() == null) {
 			initializer = JavaScriptNodes.NULL();

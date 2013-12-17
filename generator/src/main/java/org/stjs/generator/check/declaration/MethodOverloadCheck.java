@@ -13,9 +13,9 @@ import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.check.CheckContributor;
+import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
 
 import com.sun.source.tree.MethodTree;
 
@@ -25,8 +25,8 @@ import com.sun.source.tree.MethodTree;
  * methods, so , when generated in the JavaScript, it knows how to handle all the calls.
  * @author acraciun
  */
-public class MethodOverloadCheck implements VisitorContributor<MethodTree, Void, GenerationContext> {
-	private static boolean isMoreGenericVarArg(GenerationContext context, ExecutableElement more, ExecutableElement less) {
+public class MethodOverloadCheck implements CheckContributor<MethodTree> {
+	private static boolean isMoreGenericVarArg(GenerationContext<Void> context, ExecutableElement more, ExecutableElement less) {
 		TypeMirror moreType = ((ArrayType) more.getParameters().get(0).asType()).getComponentType();
 		for (int p = 0; p < less.getParameters().size(); ++p) {
 			TypeMirror lessType = less.getParameters().get(p).asType();
@@ -38,7 +38,7 @@ public class MethodOverloadCheck implements VisitorContributor<MethodTree, Void,
 		return true;
 	}
 
-	private static boolean isMoreGenericNormalArgs(GenerationContext context, ExecutableElement more, ExecutableElement less) {
+	private static boolean isMoreGenericNormalArgs(GenerationContext<Void> context, ExecutableElement more, ExecutableElement less) {
 		for (int p = 0; p < less.getParameters().size(); ++p) {
 			TypeMirror lessType = less.getParameters().get(p).asType();
 			TypeMirror moreType = more.getParameters().get(p).asType();
@@ -58,7 +58,7 @@ public class MethodOverloadCheck implements VisitorContributor<MethodTree, Void,
 	 * @param less
 	 * @return
 	 */
-	private static boolean isMoreGeneric(GenerationContext context, ExecutableElement more, ExecutableElement less, boolean hasVarArgs) {
+	private static boolean isMoreGeneric(GenerationContext<Void> context, ExecutableElement more, ExecutableElement less, boolean hasVarArgs) {
 		if (more.equals(less)) {
 			return true;
 		}
@@ -75,7 +75,7 @@ public class MethodOverloadCheck implements VisitorContributor<MethodTree, Void,
 	}
 
 	@Override
-	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, MethodTree tree, GenerationContext context, Void prev) {
+	public Void visit(CheckVisitor visitor, MethodTree tree, GenerationContext<Void> context) {
 		ExecutableElement methodElement = TreeUtils.elementFromDeclaration(tree);
 		if (JavaNodes.isNative(methodElement)) {
 			// no need to check the native ones - only the one with the body

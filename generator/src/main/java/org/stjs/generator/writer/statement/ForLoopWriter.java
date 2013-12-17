@@ -1,60 +1,51 @@
 package org.stjs.generator.writer.statement;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.EmptyExpression;
-import org.mozilla.javascript.ast.ForLoop;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.javascript.JavaScriptNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.ExpressionStatementTree;
 import com.sun.source.tree.ForLoopTree;
 import com.sun.source.tree.Tree;
 
-public class ForLoopWriter implements VisitorContributor<ForLoopTree, List<AstNode>, GenerationContext> {
+/**
+ * @author acraciun
+ */
+public class ForLoopWriter<JS> implements WriterContributor<ForLoopTree, JS> {
 
-	private void addInit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ForLoopTree tree, GenerationContext p,
-			ForLoop stmt) {
-		List<AstNode> jsNodes = new ArrayList<AstNode>();
+	private JS initializer(WriterVisitor<JS> visitor, ForLoopTree tree, GenerationContext<JS> p) {
+		List<JS> jsNodes = new ArrayList<JS>();
 		for (Tree u : tree.getInitializer()) {
-			jsNodes.addAll(visitor.scan(u, p));
+			jsNodes.add(visitor.scan(u, p));
 		}
-		stmt.setInitializer(JavaScriptNodes.asExpressionList(jsNodes));
+		return p.js().asExpressionList(jsNodes);
 	}
 
-	private void addCondition(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ForLoopTree tree, GenerationContext p,
-			ForLoop stmt) {
-		if (tree.getCondition() == null) {
-			stmt.setCondition(new EmptyExpression());
-		} else {
-			stmt.setCondition(visitor.scan(tree.getCondition(), p).get(0));
+	private JS condition(WriterVisitor<JS> visitor, ForLoopTree tree, GenerationContext<JS> p) {
+		if (tree.getCondition() != null) {
+			return visitor.scan(tree.getCondition(), p);
 		}
+		return null;
 	}
 
-	private void addUpdate(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ForLoopTree tree, GenerationContext p,
-			ForLoop stmt) {
-		List<AstNode> jsNodes = new ArrayList<AstNode>();
+	private JS update(WriterVisitor<JS> visitor, ForLoopTree tree, GenerationContext<JS> p) {
+		List<JS> jsNodes = new ArrayList<JS>();
 		for (ExpressionStatementTree u : tree.getUpdate()) {
-			jsNodes.addAll(visitor.scan(u.getExpression(), p));
+			jsNodes.add(visitor.scan(u.getExpression(), p));
 		}
-		stmt.setIncrement(JavaScriptNodes.asExpressionList(jsNodes));
+		return p.js().asExpressionList(jsNodes);
 	}
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ForLoopTree tree, GenerationContext context,
-			List<AstNode> prev) {
-		ForLoop stmt = new ForLoop();
+	public JS visit(WriterVisitor<JS> visitor, ForLoopTree tree, GenerationContext<JS> context) {
+		JS init = initializer(visitor, tree, context);
+		JS condition = condition(visitor, tree, context);
+		JS update = update(visitor, tree, context);
+		JS body = visitor.scan(tree.getStatement(), context);
 
-		addInit(visitor, tree, context, stmt);
-		addCondition(visitor, tree, context, stmt);
-		addUpdate(visitor, tree, context, stmt);
-
-		stmt.setBody(visitor.scan(tree.getStatement(), context).get(0));
-		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
+		return context.withPosition(tree, context.js().forLoop(init, condition, update, body));
 	}
 }

@@ -22,10 +22,10 @@ import java.io.File;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.ast.SourcePosition;
 import org.stjs.generator.check.Checks;
-import org.stjs.generator.javascript.JavaScriptNodes;
+import org.stjs.generator.javascript.JavaScriptBuilder;
+import org.stjs.generator.javascript.RhinoJavaScriptBuilder;
 import org.stjs.generator.name.JavaScriptNameProvider;
 import org.stjs.generator.visitor.TreePathHolder;
 
@@ -37,10 +37,9 @@ import com.sun.source.util.Trees;
 /**
  * This class can resolve an identifier or a method in the given source context. There is one context create for each
  * generation process.
- * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
-public class GenerationContext implements TreePathHolder {
+public class GenerationContext<JS> implements TreePathHolder {
 
 	private final File inputFile;
 
@@ -62,12 +61,15 @@ public class GenerationContext implements TreePathHolder {
 
 	private CompilationUnitTree compilationUnit;
 
+	private final JavaScriptBuilder<JS> javaScriptBuilder;
+
 	public GenerationContext(File inputFile, GeneratorConfiguration configuration, JavaScriptNameProvider names, Trees trees) {
 		this.inputFile = inputFile;
 		this.configuration = configuration;
 		this.names = names;
 		this.trees = trees;
 		this.checks = new Checks();
+		this.javaScriptBuilder = (JavaScriptBuilder<JS>) new RhinoJavaScriptBuilder();
 	}
 
 	public File getInputFile() {
@@ -140,32 +142,35 @@ public class GenerationContext implements TreePathHolder {
 
 	public void addError(Tree tree, String message) {
 		long startPos = trees.getSourcePositions().getStartPosition(compilationUnit, tree);
-		SourcePosition pos = new SourcePosition((int) compilationUnit.getLineMap().getLineNumber(startPos), (int) compilationUnit.getLineMap()
-				.getColumnNumber(startPos));
+		SourcePosition pos =
+				new SourcePosition((int) compilationUnit.getLineMap().getLineNumber(startPos), (int) compilationUnit.getLineMap()
+						.getColumnNumber(startPos));
 		checks.addError(new JavascriptFileGenerationException(inputFile, pos, message));
 	}
 
 	/**
 	 * add the position of the Java original node in the generated node.
-	 * 
 	 * @param tree
 	 * @param node
 	 * @return
 	 */
-	public AstNode withPosition(Tree tree, AstNode node) {
+	public JS withPosition(Tree tree, JS node) {
 		long startPos = trees.getSourcePositions().getStartPosition(compilationUnit, tree);
 		int line = (int) compilationUnit.getLineMap().getLineNumber(startPos);
 		int column = (int) compilationUnit.getLineMap().getColumnNumber(startPos);
-		return JavaScriptNodes.position(node, line, column);
+		return javaScriptBuilder.position(node, line, column);
 	}
 
 	/**
-	 * 
 	 * @param tree
 	 * @return the starting line of the given tree node
 	 */
 	public int getStartLine(Tree tree) {
 		long startPos = trees.getSourcePositions().getStartPosition(compilationUnit, tree);
 		return (int) compilationUnit.getLineMap().getLineNumber(startPos);
+	}
+
+	public JavaScriptBuilder<JS> js() {
+		return javaScriptBuilder;
 	}
 }

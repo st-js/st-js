@@ -6,9 +6,8 @@ import java.util.List;
 
 import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.javascript.JavaScriptNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MethodInvocationTree;
@@ -17,11 +16,10 @@ import com.sun.source.tree.MethodInvocationTree;
  * $array() -> []
  * @author acraciun
  */
-public class ArrayTemplate implements VisitorContributor<MethodInvocationTree, List<AstNode>, GenerationContext> {
+public class ArrayTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodInvocationTree tree,
-			GenerationContext context, List<AstNode> prev) {
+	public JS visit(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		List<AstNode> values = new ArrayList<AstNode>();
 		for (ExpressionTree arg : tree.getArguments()) {
 			values.addAll(visitor.scan(arg, context));

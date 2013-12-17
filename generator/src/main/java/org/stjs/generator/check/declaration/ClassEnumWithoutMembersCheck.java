@@ -8,8 +8,8 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.check.CheckContributor;
+import org.stjs.generator.check.CheckVisitor;
 
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.Tree;
@@ -19,10 +19,10 @@ import com.sun.source.tree.VariableTree;
  * this class checks that no member is added to an enum declaration (other than of course the enum constants)
  * @author acraciun
  */
-public class ClassEnumWithoutMembersCheck implements VisitorContributor<ClassTree, Void, GenerationContext> {
+public class ClassEnumWithoutMembersCheck implements CheckContributor<ClassTree> {
 
 	@Override
-	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, ClassTree tree, GenerationContext context, Void prev) {
+	public Void visit(CheckVisitor visitor, ClassTree tree, GenerationContext<Void> context) {
 		TypeElement typeElement = TreeUtils.elementFromDeclaration(tree);
 		if (typeElement.getKind() != ElementKind.ENUM) {
 			return null;

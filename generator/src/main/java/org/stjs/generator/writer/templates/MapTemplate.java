@@ -6,22 +6,19 @@ import java.util.List;
 
 import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.javascript.JavaScriptNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * $map(n1, v1, n2, v2) -> {n1: v1, n2: v2}
- * 
  * @author acraciun
  */
-public class MapTemplate implements VisitorContributor<MethodInvocationTree, List<AstNode>, GenerationContext> {
+public class MapTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodInvocationTree tree,
-			GenerationContext context, List<AstNode> prev) {
+	public JS visit(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 
 		List<AstNode> names = new ArrayList<AstNode>();
 		List<AstNode> values = new ArrayList<AstNode>();
@@ -29,6 +26,6 @@ public class MapTemplate implements VisitorContributor<MethodInvocationTree, Lis
 			names.add(visitor.scan(tree.getArguments().get(i), context).get(0));
 			values.add(visitor.scan(tree.getArguments().get(i + 1), context).get(0));
 		}
-		return Collections.<AstNode>singletonList(JavaScriptNodes.object(names, values));
+		return Collections.<AstNode> singletonList(JavaScriptNodes.object(names, values));
 	}
 }

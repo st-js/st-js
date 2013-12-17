@@ -1,16 +1,19 @@
 package org.stjs.generator.check.statement;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.check.CheckContributor;
+import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.writer.JavascriptKeywords;
 
 import com.sun.source.tree.VariableTree;
 
-public class VariableWrongNameCheck implements VisitorContributor<VariableTree, Void, GenerationContext> {
+/**
+ * check that no JavaScript keyword (that is not a Java keyword) is used as a variable name
+ * @author acraciun
+ */
+public class VariableWrongNameCheck implements CheckContributor<VariableTree> {
 	@Override
-	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, VariableTree tree, GenerationContext context, Void v) {
-		//TODO add new SourcePosition(n)
+	public Void visit(CheckVisitor visitor, VariableTree tree, GenerationContext<Void> context) {
 		JavascriptKeywords.checkIdentifier(tree, tree.getName().toString(), context);
 		return null;
 	}

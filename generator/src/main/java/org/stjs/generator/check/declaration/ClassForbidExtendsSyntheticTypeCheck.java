@@ -7,9 +7,9 @@ import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.check.CheckContributor;
+import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
 import org.stjs.javascript.annotation.SyntheticType;
 
 import com.sun.source.tree.ClassTree;
@@ -19,14 +19,12 @@ import com.sun.source.tree.Tree;
 /**
  * this checks that a class or interface does not try to extend or implement a {@link SyntheticType} as the code for
  * this class does not exist in reality, so the calls to any method of such a type may end up in a runtime error.
- * 
  * @author acraciun
- * 
  */
-public class ClassForbidExtendsSyntheticTypeCheck implements VisitorContributor<ClassTree, Void, GenerationContext> {
+public class ClassForbidExtendsSyntheticTypeCheck implements CheckContributor<ClassTree> {
 
 	@Override
-	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, ClassTree tree, GenerationContext context, Void prev) {
+	public Void visit(CheckVisitor visitor, ClassTree tree, GenerationContext<Void> context) {
 		TypeElement element = TreeUtils.elementFromDeclaration(tree);
 		if (element.getNestingKind() == NestingKind.ANONYMOUS) {
 			return null;

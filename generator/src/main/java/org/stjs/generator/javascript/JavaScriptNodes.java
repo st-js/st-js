@@ -26,7 +26,7 @@ import org.mozilla.javascript.ast.UnaryExpression;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 
-public class JavaScriptNodes {
+class JavaScriptNodes {
 	private static final int PROP_JAVA_LINE_NO = AstNode.LAST_PROP + 1;
 	private static final int PROP_JAVA_COLUMN_NO = AstNode.LAST_PROP + 2;
 

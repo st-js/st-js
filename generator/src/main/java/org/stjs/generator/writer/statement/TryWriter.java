@@ -1,31 +1,32 @@
 package org.stjs.generator.writer.statement;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.CatchClause;
-import org.mozilla.javascript.ast.TryStatement;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.TryTree;
 
-public class TryWriter implements VisitorContributor<TryTree, List<AstNode>, GenerationContext> {
+/**
+ * Try blocks -> as in java
+ * @author acraciun
+ */
+public class TryWriter<JS> implements WriterContributor<TryTree, JS> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, TryTree tree, GenerationContext context,
-			List<AstNode> prev) {
-		TryStatement stmt = new TryStatement();
-		stmt.setTryBlock(visitor.scan(tree.getBlock(), context).get(0));
+	public JS visit(WriterVisitor<JS> visitor, TryTree tree, GenerationContext<JS> context) {
+		JS tryBlock = visitor.scan(tree.getBlock(), context);
+		List<JS> catchClauses = new ArrayList<JS>();
 		for (Tree c : tree.getCatches()) {
-			stmt.addCatchClause((CatchClause) visitor.scan(c, context).get(0));
+			catchClauses.add(visitor.scan(c, context));
 		}
+		JS finallyBlock = null;
 		if (tree.getFinallyBlock() != null) {
-			stmt.setFinallyBlock(visitor.scan(tree.getFinallyBlock(), context).get(0));
+			finallyBlock = visitor.scan(tree.getFinallyBlock(), context);
 		}
-		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
+		return context.withPosition(tree, context.js().tryStatement(tryBlock, catchClauses, finallyBlock));
 	}
 }

@@ -8,9 +8,9 @@ import javax.lang.model.element.TypeElement;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.check.CheckContributor;
+import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
 
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionTree;
@@ -47,7 +47,7 @@ import com.sun.source.util.TreeScanner;
  * The global x will be in fact hidden by the local variable.
  * @author acraciun
  */
-public class IdentifierGlobalScopeNameClashCheck implements VisitorContributor<IdentifierTree, Void, GenerationContext> {
+public class IdentifierGlobalScopeNameClashCheck implements CheckContributor<IdentifierTree> {
 
 	private static MethodTree getEnclosingMethod(TreePath path) {
 		for (TreePath p = path.getParentPath(); p != null; p = p.getParentPath()) {
@@ -58,7 +58,7 @@ public class IdentifierGlobalScopeNameClashCheck implements VisitorContributor<I
 		return null;
 	}
 
-	public static Void checkGlobalScope(final ExpressionTree tree, final String name, final GenerationContext context) {
+	public static Void checkGlobalScope(final ExpressionTree tree, final String name, final GenerationContext<Void> context) {
 		Element fieldElement = TreeUtils.elementFromUse(tree);
 		if (fieldElement == null || fieldElement.getKind() != ElementKind.FIELD) {
 			// only meant for fields
@@ -104,8 +104,7 @@ public class IdentifierGlobalScopeNameClashCheck implements VisitorContributor<I
 	}
 
 	@Override
-	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, final IdentifierTree tree, final GenerationContext context,
-			Void prev) {
+	public Void visit(CheckVisitor visitor, IdentifierTree tree, GenerationContext<Void> context) {
 
 		return checkGlobalScope(tree, tree.getName().toString(), context);
 	}

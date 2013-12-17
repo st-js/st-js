@@ -6,18 +6,18 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.check.CheckContributor;
+import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
 
 import com.sun.source.tree.LiteralTree;
 import com.sun.source.tree.UnaryTree;
 import com.sun.source.tree.VariableTree;
 
-public class FieldInitializerCheck implements VisitorContributor<VariableTree, Void, GenerationContext> {
+public class FieldInitializerCheck implements CheckContributor<VariableTree> {
 
 	@Override
-	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, VariableTree tree, GenerationContext context, Void prev) {
+	public Void visit(CheckVisitor visitor, VariableTree tree, GenerationContext<Void> context) {
 		Element element = TreeUtils.elementFromDeclaration(tree);
 		if (element.getKind() != ElementKind.FIELD) {
 			//only deals with fields

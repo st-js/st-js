@@ -1,8 +1,8 @@
 package org.stjs.generator.check.expression;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.check.CheckContributor;
+import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
 
 import com.sun.source.tree.LiteralTree;
@@ -13,11 +13,10 @@ import com.sun.source.tree.MethodInvocationTree;
  * is allowed
  * @author acraciun
  */
-public class MethodInvocationMapConstructorCheck implements VisitorContributor<MethodInvocationTree, Void, GenerationContext> {
+public class MethodInvocationMapConstructorCheck implements CheckContributor<MethodInvocationTree> {
 
 	@Override
-	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, MethodInvocationTree tree, GenerationContext context,
-			Void prev) {
+	public Void visit(CheckVisitor visitor, MethodInvocationTree tree, GenerationContext<Void> context) {
 		String templateName = MethodInvocationWriter.buildTemplateName(tree, context);
 		if ("map".equals(templateName)) {
 			for (int i = 0; i < tree.getArguments().size(); i += 2) {

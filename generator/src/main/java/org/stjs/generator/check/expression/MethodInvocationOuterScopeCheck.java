@@ -6,20 +6,19 @@ import javax.lang.model.element.Element;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.check.CheckContributor;
+import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
 
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.Scope;
 
-public class MethodInvocationOuterScopeCheck implements VisitorContributor<MethodInvocationTree, Void, GenerationContext> {
+public class MethodInvocationOuterScopeCheck implements CheckContributor<MethodInvocationTree> {
 
 	@Override
-	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, MethodInvocationTree tree, GenerationContext context,
-			Void prev) {
+	public Void visit(CheckVisitor visitor, MethodInvocationTree tree, GenerationContext<Void> context) {
 		Element methodElement = TreeUtils.elementFromUse(tree);
 
 		if (JavaNodes.isStatic(methodElement)) {
@@ -40,8 +39,8 @@ public class MethodInvocationOuterScopeCheck implements VisitorContributor<Metho
 		}
 		Scope currentScope = context.getTrees().getScope(context.getCurrentPath());
 
-		Element currentScopeClassElement = IdentifierAccessOuterScopeCheck.getEnclosingElementSkipAnonymousInitializer(currentScope
-				.getEnclosingClass());
+		Element currentScopeClassElement =
+				IdentifierAccessOuterScopeCheck.getEnclosingElementSkipAnonymousInitializer(currentScope.getEnclosingClass());
 		Element methodOwnerElement = methodElement.getEnclosingElement();
 		if (!context.getTypes().isSubtype(currentScopeClassElement.asType(), methodOwnerElement.asType())) {
 			context.addError(tree, "In Javascript you cannot call methods or fields from the outer type. "

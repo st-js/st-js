@@ -7,17 +7,17 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.check.CheckContributor;
+import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
 
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
 
-public class NewClassInlineFunctionCheck implements VisitorContributor<NewClassTree, Void, GenerationContext> {
+public class NewClassInlineFunctionCheck implements CheckContributor<NewClassTree> {
 
 	@Override
-	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, NewClassTree tree, GenerationContext context, Void prev) {
+	public Void visit(CheckVisitor visitor, NewClassTree tree, GenerationContext<Void> context) {
 		Element type = TreeUtils.elementFromUse(tree.getIdentifier());
 		if (!JavaNodes.isJavaScriptFunction(type)) {
 			return null;

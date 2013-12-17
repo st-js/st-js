@@ -12,10 +12,11 @@ import com.sun.source.tree.Tree;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreeScanner;
 
-public class TreePathScannerContributors<R, P extends TreePathHolder> extends TreeScanner<R, P> {
-	private final Multimap<Class<?>, VisitorContributor<? extends Tree, R, P>> contributors = LinkedListMultimap.create();
+public class TreePathScannerContributors<R, P extends TreePathHolder, V extends TreePathScannerContributors<R, P, V>> extends TreeScanner<R, P> {
+	private final Multimap<Class<?>, VisitorContributor<? extends Tree, R, P, V>> contributors = LinkedListMultimap.create();
 
-	private final Map<DiscriminatorKey, VisitorContributor<? extends Tree, R, P>> contributorsWithDiscriminator = new HashMap<DiscriminatorKey, VisitorContributor<? extends Tree, R, P>>();
+	private final Map<DiscriminatorKey, VisitorContributor<? extends Tree, R, P, V>> contributorsWithDiscriminator =
+			new HashMap<DiscriminatorKey, VisitorContributor<? extends Tree, R, P, V>>();
 
 	private boolean continueScanning = false;
 
@@ -27,7 +28,7 @@ public class TreePathScannerContributors<R, P extends TreePathHolder> extends Tr
 		this.continueScanning = continueScanning;
 	}
 
-	public <T extends VisitorContributor<? extends Tree, R, P>> TreePathScannerContributors<R, P> contribute(T contributor) {
+	public <T extends VisitorContributor<? extends Tree, R, P, V>> TreePathScannerContributors<R, P, V> contribute(T contributor) {
 		assert contributor != null;
 		Class<?> treeNodeClass = getTreeNodeClass(contributor.getClass());
 		if (treeNodeClass == null) {
@@ -37,8 +38,8 @@ public class TreePathScannerContributors<R, P extends TreePathHolder> extends Tr
 		return this;
 	}
 
-	public <T extends VisitorContributor<? extends Tree, R, P>> TreePathScannerContributors<R, P> contribute(DiscriminatorKey discriminatorKey,
-			T contributor) {
+	public <T extends VisitorContributor<? extends Tree, R, P, V>> TreePathScannerContributors<R, P, V> contribute(
+			DiscriminatorKey discriminatorKey, T contributor) {
 		assert contributor != null;
 		contributorsWithDiscriminator.put(discriminatorKey, contributor);
 		return this;
@@ -76,10 +77,10 @@ public class TreePathScannerContributors<R, P extends TreePathHolder> extends Tr
 
 	@SuppressWarnings("unchecked")
 	public <T extends Tree> R forward(DiscriminatorKey discriminator, T node, P param) {
-		VisitorContributor<? extends Tree, R, P> contributor = contributorsWithDiscriminator.get(discriminator);
+		VisitorContributor<? extends Tree, R, P, V> contributor = contributorsWithDiscriminator.get(discriminator);
 		if (contributor != null) {
 			// here i should be sure i have the right type
-			return ((VisitorContributor<T, R, P>) contributor).visit(this, node, param, null);
+			return ((VisitorContributor<T, R, P, V>) contributor).visit((V) this, node, param);
 		}
 		return null;
 	}
@@ -89,13 +90,13 @@ public class TreePathScannerContributors<R, P extends TreePathHolder> extends Tr
 		if (node == null) {
 			return r;
 		}
-		Collection<VisitorContributor<? extends Tree, R, P>> nodeContributors = contributors.get(getTreeInteface(node.getClass()));
+		Collection<VisitorContributor<? extends Tree, R, P, V>> nodeContributors = contributors.get(getTreeInteface(node.getClass()));
 		if (nodeContributors.isEmpty() && !continueScanning) {
 			System.err.println("No contributors for node of type:" + getTreeInteface(node.getClass()));
 		}
 		R lastR = r;
-		for (VisitorContributor<? extends Tree, R, P> vc : nodeContributors) {
-			lastR = ((VisitorContributor<T, R, P>) vc).visit(this, node, p, lastR);
+		for (VisitorContributor<? extends Tree, R, P, V> vc : nodeContributors) {
+			lastR = ((VisitorContributor<T, R, P, V>) vc).visit((V) this, node, p);
 		}
 		if (continueScanning) {
 			return node.accept(this, p);

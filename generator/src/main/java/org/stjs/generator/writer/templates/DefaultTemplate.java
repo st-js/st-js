@@ -12,10 +12,10 @@ import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
-import org.stjs.generator.javascript.JavaScriptNodes;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
 
 import com.sun.source.tree.IdentifierTree;
@@ -24,10 +24,9 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * this is the standard generation template
- * 
  * @author acraciun
  */
-public class DefaultTemplate implements VisitorContributor<MethodInvocationTree, List<AstNode>, GenerationContext> {
+public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
 	/**
 	 * super(args) -> SuperType.call(this, args)
 	 */
@@ -63,12 +62,11 @@ public class DefaultTemplate implements VisitorContributor<MethodInvocationTree,
 
 		List<AstNode> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
 		arguments.add(0, JavaScriptNodes.keyword(Token.THIS));
-		return Collections.<AstNode>singletonList(JavaScriptNodes.functionCall(superType, "call", arguments));
+		return Collections.<AstNode> singletonList(JavaScriptNodes.functionCall(superType, "call", arguments));
 	}
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodInvocationTree tree,
-			GenerationContext context, List<AstNode> prev) {
+	public JS visit(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		List<AstNode> js = null;
 
 		js = callToSuperConstructor(visitor, tree, context);
@@ -79,6 +77,6 @@ public class DefaultTemplate implements VisitorContributor<MethodInvocationTree,
 		AstNode target = MethodInvocationWriter.buildTarget(visitor, tree, context);
 		String name = MethodInvocationWriter.buildMethodName(tree);
 		List<AstNode> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
-		return Collections.<AstNode>singletonList(JavaScriptNodes.functionCall(target, name, arguments));
+		return Collections.<AstNode> singletonList(JavaScriptNodes.functionCall(target, name, arguments));
 	}
 }

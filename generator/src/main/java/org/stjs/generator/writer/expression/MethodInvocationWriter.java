@@ -11,9 +11,9 @@ import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.visitor.DiscriminatorKey;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
 import org.stjs.generator.writer.MemberWriters;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
@@ -21,9 +21,9 @@ import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.Tree;
 
-public class MethodInvocationWriter implements VisitorContributor<MethodInvocationTree, List<AstNode>, GenerationContext> {
-	public static AstNode buildTarget(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodInvocationTree tree,
-			GenerationContext context) {
+public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvocationTree, JS> {
+
+	public static <JS> JS buildTarget(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		ExpressionTree select = tree.getMethodSelect();
 		ExecutableElement methodDecl = TreeUtils.elementFromUse(tree);
 		assert methodDecl != null : "Cannot find the definition for method  " + tree.getMethodSelect();
@@ -54,16 +54,15 @@ public class MethodInvocationWriter implements VisitorContributor<MethodInvocati
 		return memberSelect.getIdentifier().toString();
 	}
 
-	public static List<AstNode> buildArguments(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodInvocationTree tree,
-			GenerationContext context) {
-		List<AstNode> arguments = new ArrayList<AstNode>();
+	public static <JS> List<JS> buildArguments(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
+		List<JS> arguments = new ArrayList<JS>();
 		for (Tree arg : tree.getArguments()) {
-			arguments.addAll(visitor.scan(arg, context));
+			arguments.add(visitor.scan(arg, context));
 		}
 		return arguments;
 	}
 
-	public static String buildTemplateName(MethodInvocationTree tree, GenerationContext context) {
+	public static <JS> String buildTemplateName(MethodInvocationTree tree, GenerationContext<JS> context) {
 		ExecutableElement methodDecl = TreeUtils.elementFromUse(tree);
 		String name = JavaNodes.getMethodTemplate(context.getElements(), methodDecl);
 		if (name != null) {
@@ -73,8 +72,7 @@ public class MethodInvocationWriter implements VisitorContributor<MethodInvocati
 	}
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodInvocationTree tree,
-			GenerationContext context, List<AstNode> prev) {
+	public JS visit(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		String templateName = buildTemplateName(tree, context);
 
 		return visitor.forward(DiscriminatorKey.of(MethodInvocationWriter.class.getSimpleName(), templateName), tree, context);

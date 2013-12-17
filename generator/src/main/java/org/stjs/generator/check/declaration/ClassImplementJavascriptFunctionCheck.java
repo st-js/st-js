@@ -5,9 +5,9 @@ import javacutils.TreeUtils;
 import javax.lang.model.element.Element;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.check.CheckContributor;
+import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
 
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionTree;
@@ -16,14 +16,12 @@ import com.sun.source.tree.Tree;
 /**
  * check that a class does not implement a @JavaScript annotated interface as this is reserved to build inline
  * functions.
- * 
  * @author acraciun
- * 
  */
-public class ClassImplementJavascriptFunctionCheck implements VisitorContributor<ClassTree, Void, GenerationContext> {
+public class ClassImplementJavascriptFunctionCheck implements CheckContributor<ClassTree> {
 
 	@Override
-	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, ClassTree tree, GenerationContext context, Void prev) {
+	public Void visit(CheckVisitor visitor, ClassTree tree, GenerationContext<Void> context) {
 		if (tree.getSimpleName().toString().isEmpty()) {
 			// anonymous class is ok
 			return null;

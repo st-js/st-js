@@ -1,28 +1,18 @@
 package org.stjs.generator.writer.statement;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.Label;
-import org.mozilla.javascript.ast.LabeledStatement;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.LabeledStatementTree;
 
-public class LabeledStatementWriter implements VisitorContributor<LabeledStatementTree, List<AstNode>, GenerationContext> {
+public class LabeledStatementWriter<JS> implements WriterContributor<LabeledStatementTree, JS> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, LabeledStatementTree tree,
-			GenerationContext context, List<AstNode> prev) {
-		LabeledStatement stmt = new LabeledStatement();
-		Label label = new Label();
-		label.setName(tree.getLabel().toString());
-		stmt.setLabels(Collections.singletonList(label));
-		stmt.setStatement(visitor.scan(tree.getStatement(), context).get(0));
+	public JS visit(WriterVisitor<JS> visitor, LabeledStatementTree tree, GenerationContext<JS> context) {
+		JS label = context.js().name(tree.getLabel());
+		JS statement = visitor.scan(tree.getStatement(), context);
 
-		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
+		return context.withPosition(tree, context.js().labeledStatement(label, statement));
 	}
 }

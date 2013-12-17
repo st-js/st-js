@@ -10,17 +10,16 @@ import javax.lang.model.type.DeclaredType;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.check.CheckContributor;
+import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
 
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.Scope;
 
-public class IdentifierAccessOuterScopeCheck implements VisitorContributor<IdentifierTree, Void, GenerationContext> {
+public class IdentifierAccessOuterScopeCheck implements CheckContributor<IdentifierTree> {
 	/**
 	 * if the block is an anonymous initializer, then return the outer class
-	 * 
 	 * @param element
 	 * @return
 	 */
@@ -32,7 +31,7 @@ public class IdentifierAccessOuterScopeCheck implements VisitorContributor<Ident
 	}
 
 	@Override
-	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, IdentifierTree tree, GenerationContext context, Void prev) {
+	public Void visit(CheckVisitor visitor, IdentifierTree tree, GenerationContext<Void> context) {
 		Element fieldElement = TreeUtils.elementFromUse(tree);
 		if (fieldElement == null || fieldElement.getKind() != ElementKind.FIELD) {
 			// only meant for fields

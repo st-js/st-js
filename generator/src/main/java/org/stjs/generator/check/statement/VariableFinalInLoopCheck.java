@@ -1,9 +1,9 @@
 package org.stjs.generator.check.statement;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.check.CheckContributor;
+import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
 
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.EnhancedForLoopTree;
@@ -19,7 +19,7 @@ import com.sun.source.util.TreePath;
  * exists in JavaScript.
  * @author acraciun
  */
-public class VariableFinalInLoopCheck implements VisitorContributor<VariableTree, Void, GenerationContext> {
+public class VariableFinalInLoopCheck implements CheckContributor<VariableTree> {
 	private static boolean isLoop(TreePath path) {
 		Tree tree = path.getLeaf();
 		return tree instanceof ForLoopTree || tree instanceof EnhancedForLoopTree || tree instanceof WhileLoopTree;
@@ -31,7 +31,7 @@ public class VariableFinalInLoopCheck implements VisitorContributor<VariableTree
 	}
 
 	@Override
-	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, VariableTree tree, GenerationContext context, Void v) {
+	public Void visit(CheckVisitor visitor, VariableTree tree, GenerationContext<Void> context) {
 		if (!JavaNodes.isFinal(tree)) {
 			return null;
 		}

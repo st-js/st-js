@@ -4,15 +4,15 @@ import javacutils.InternalUtils;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.check.CheckContributor;
+import org.stjs.generator.check.CheckVisitor;
 
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.VariableTree;
 
-public class MethodVarArgParamCheck implements VisitorContributor<MethodTree, Void, GenerationContext> {
+public class MethodVarArgParamCheck implements CheckContributor<MethodTree> {
 
-	private void checkVarArg(MethodTree tree, VariableTree param, GenerationContext context) {
+	private void checkVarArg(MethodTree tree, VariableTree param, GenerationContext<Void> context) {
 		if (!param.getName().toString().equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
 			context.addError(param, "You can only have a vararg parameter that has to be called 'arguments'");
 
@@ -23,7 +23,7 @@ public class MethodVarArgParamCheck implements VisitorContributor<MethodTree, Vo
 	}
 
 	@Override
-	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, MethodTree tree, GenerationContext context, Void prev) {
+	public Void visit(CheckVisitor visitor, MethodTree tree, GenerationContext<Void> context) {
 		for (VariableTree param : tree.getParameters()) {
 			if (InternalUtils.isVarArg(param)) {
 				checkVarArg(tree, param, context);

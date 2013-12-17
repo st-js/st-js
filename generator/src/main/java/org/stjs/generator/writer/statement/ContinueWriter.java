@@ -1,26 +1,20 @@
 package org.stjs.generator.writer.statement;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.ContinueStatement;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.javascript.JavaScriptNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.ContinueTree;
 
-public class ContinueWriter implements VisitorContributor<ContinueTree, List<AstNode>, GenerationContext> {
+public class ContinueWriter<JS> implements WriterContributor<ContinueTree, JS> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ContinueTree tree,
-			GenerationContext context, List<AstNode> prev) {
-		ContinueStatement stmt = new ContinueStatement();
+	public JS visit(WriterVisitor<JS> visitor, ContinueTree tree, GenerationContext<JS> context) {
+		JS label = null;
 		if (tree.getLabel() != null) {
-			stmt.setLabel(JavaScriptNodes.name(tree.getLabel().toString()));
+			context.js().name(tree.getLabel().toString());
 		}
-		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
+
+		return context.withPosition(tree, context.js().continueStatement(label));
 	}
 }

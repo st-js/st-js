@@ -6,9 +6,9 @@ import javax.lang.model.element.TypeElement;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.check.CheckContributor;
+import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
 import org.stjs.generator.writer.JavascriptKeywords;
 
 import com.sun.source.tree.ClassTree;
@@ -16,14 +16,12 @@ import com.sun.source.tree.ClassTree;
 /**
  * this check makes sure the names used to define a namespace are JavaScript correctly defined variables, as they will
  * be used as such
- * 
  * @author acraciun
- * 
  */
-public class ClassNamespaceCheck implements VisitorContributor<ClassTree, Void, GenerationContext> {
+public class ClassNamespaceCheck implements CheckContributor<ClassTree> {
 
 	@Override
-	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, ClassTree tree, GenerationContext context, Void prev) {
+	public Void visit(CheckVisitor visitor, ClassTree tree, GenerationContext<Void> context) {
 		TypeElement classElement = TreeUtils.elementFromDeclaration(tree);
 		String namespace = JavaNodes.getNamespace(classElement);
 		if (namespace != null) {

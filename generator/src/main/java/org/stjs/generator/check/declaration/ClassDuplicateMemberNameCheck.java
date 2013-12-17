@@ -13,9 +13,9 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.check.CheckContributor;
+import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
@@ -26,12 +26,11 @@ import com.sun.source.tree.VariableTree;
 
 /**
  * checks the a field name or method exists only once in the class and its hierchy
- * 
  * @author acraciun
  */
-public class ClassDuplicateMemberNameCheck implements VisitorContributor<ClassTree, Void, GenerationContext> {
+public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree> {
 
-	private void checkMethod(TypeElement classElement, Tree member, GenerationContext context, Multimap<String, Element> existingNames) {
+	private void checkMethod(TypeElement classElement, Tree member, GenerationContext<Void> context, Multimap<String, Element> existingNames) {
 		if (member instanceof MethodTree) {
 			MethodTree method = (MethodTree) member;
 			ExecutableElement methodElement = TreeUtils.elementFromDeclaration(method);
@@ -74,7 +73,7 @@ public class ClassDuplicateMemberNameCheck implements VisitorContributor<ClassTr
 		}
 	}
 
-	private void checkField(Tree member, GenerationContext context, Multimap<String, Element> existingNames) {
+	private void checkField(Tree member, GenerationContext<Void> context, Multimap<String, Element> existingNames) {
 		if (member instanceof VariableTree) {
 			String name = ((VariableTree) member).getName().toString();
 			Element variableElement = TreeUtils.elementFromDeclaration((VariableTree) member);
@@ -88,7 +87,7 @@ public class ClassDuplicateMemberNameCheck implements VisitorContributor<ClassTr
 	}
 
 	@Override
-	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, ClassTree tree, GenerationContext context, Void prev) {
+	public Void visit(CheckVisitor visitor, ClassTree tree, GenerationContext<Void> context) {
 		Multimap<String, Element> names = LinkedListMultimap.create();
 
 		TypeElement classElement = TreeUtils.elementFromDeclaration(tree);

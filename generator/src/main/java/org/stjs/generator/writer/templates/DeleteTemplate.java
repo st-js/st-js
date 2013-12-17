@@ -1,17 +1,13 @@
 package org.stjs.generator.writer.templates;
 
-import static org.stjs.generator.javascript.JavaScriptNodes.elementGet;
-
 import java.util.Collections;
-import java.util.List;
 
 import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptFileGenerationException;
-import org.stjs.generator.javascript.JavaScriptNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
 
 import com.sun.source.tree.MethodInvocationTree;
@@ -20,11 +16,10 @@ import com.sun.source.tree.MethodInvocationTree;
  * map.$delete(key) -> delete map[key]
  * @author acraciun
  */
-public class DeleteTemplate implements VisitorContributor<MethodInvocationTree, List<AstNode>, GenerationContext> {
+public class DeleteTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodInvocationTree tree,
-			GenerationContext context, List<AstNode> prev) {
+	public JS visit(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		int argCount = tree.getArguments().size();
 		if (argCount != 1) {
 			throw new JavascriptFileGenerationException(context.getInputFile(), null,

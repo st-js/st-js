@@ -1,11 +1,6 @@
 package org.stjs.generator.writer.statement;
 
-import static org.stjs.generator.javascript.JavaScriptNodes.functionCall;
-import static org.stjs.generator.javascript.JavaScriptNodes.name;
-import static org.stjs.generator.javascript.JavaScriptNodes.paren;
-
 import java.util.Collections;
-import java.util.List;
 
 import javacutils.TreeUtils;
 import javacutils.TypesUtils;
@@ -13,24 +8,35 @@ import javacutils.TypesUtils;
 import javax.lang.model.element.Element;
 
 import org.mozilla.javascript.Token;
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.ContinueStatement;
-import org.mozilla.javascript.ast.ForInLoop;
-import org.mozilla.javascript.ast.IfStatement;
-import org.mozilla.javascript.ast.UnaryExpression;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.javascript.JavaScriptNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.javascript.JavaScriptBuilder;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.javascript.Array;
 
 import com.sun.source.tree.EnhancedForLoopTree;
 
-public class EnhancedForLoopWriter implements VisitorContributor<EnhancedForLoopTree, List<AstNode>, GenerationContext> {
+/**
+ * generates from
+ * 
+ * <pre>
+ * for (String x : list) {
+ * }
+ * </pre>
+ * 
+ * <pre>
+ * for(var x in list) {
+ * }
+ * </pre>
+ * 
+ * Warning: the iteration is on indexes as in JavaScript, not on values as in Java!
+ * @author acraciun
+ */
+public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForLoopTree, JS> {
 
-	private void generateArrayHasOwnProperty(EnhancedForLoopTree tree, GenerationContext context, ForInLoop stmt) {
+	private JS generateArrayHasOwnProperty(EnhancedForLoopTree tree, GenerationContext<JS> context, JS iterated, JS body) {
 		if (!context.getConfiguration().isGenerateArrayHasOwnProperty()) {
-			return;
+			return body;
 		}
 		// TODO check
 		// TypeWrapper iterated = resolvedType(n.getIterable());
@@ -41,27 +47,25 @@ public class EnhancedForLoopWriter implements VisitorContributor<EnhancedForLoop
 
 		Element iteratedElement = TreeUtils.elementFromUse(tree.getExpression());
 		if (!TypesUtils.isDeclaredOfName(iteratedElement.asType(), Array.class.getName())) {
-			return;
+			return body;
 		}
-		UnaryExpression not = new UnaryExpression();
-		not.setOperator(Token.NOT);
-		not.setOperand(functionCall(paren(stmt.getIteratedObject()), "hasOwnProperty", name(tree.getVariable().getName().toString())));
+		JavaScriptBuilder<JS> js = context.js();
 
-		IfStatement ifs = new IfStatement();
-		ifs.setCondition(not);
-		ifs.setThenPart(new ContinueStatement());
-		stmt.setBody(JavaScriptNodes.addStatement(stmt.getBody(), ifs));
+		JS not =
+				js.unary(Token.NOT,
+						js.functionCall(js.paren(iterated), "hasOwnProperty", Collections.singleton(js.name(tree.getVariable().getName()))));
+
+		JS ifs = js.ifStatement(not, js.continueStatement(null), null);
+		return js.addStatement(body, ifs);
 	}
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, EnhancedForLoopTree tree,
-			GenerationContext context, List<AstNode> prev) {
-		ForInLoop stmt = new ForInLoop();
-		stmt.setIterator(visitor.scan(tree.getVariable(), context).get(0));
-		stmt.setIteratedObject(visitor.scan(tree.getExpression(), context).get(0));
-		stmt.setBody(visitor.scan(tree.getStatement(), context).get(0));
+	public JS visit(WriterVisitor<JS> visitor, EnhancedForLoopTree tree, GenerationContext<JS> context) {
+		JS iterator = visitor.scan(tree.getVariable(), context);
+		JS iterated = visitor.scan(tree.getExpression(), context);
+		JS body = visitor.scan(tree.getStatement(), context);
 
-		generateArrayHasOwnProperty(tree, context, stmt);
-		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
+		body = generateArrayHasOwnProperty(tree, context, iterated, body);
+		return context.withPosition(tree, context.js().forInLoop(iterator, iterated, body));
 	}
 }

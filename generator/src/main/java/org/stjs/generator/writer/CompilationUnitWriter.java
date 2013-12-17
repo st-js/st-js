@@ -1,30 +1,22 @@
 package org.stjs.generator.writer;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.AstRoot;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
 
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.Tree;
 
-public class CompilationUnitWriter implements VisitorContributor<CompilationUnitTree, List<AstNode>, GenerationContext> {
+public class CompilationUnitWriter<JS> implements WriterContributor<CompilationUnitTree, JS> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, CompilationUnitTree tree,
-			GenerationContext p, List<AstNode> prev) {
-		AstRoot root = new AstRoot();
+	public JS visit(WriterVisitor<JS> visitor, CompilationUnitTree tree, GenerationContext<JS> context) {
+		List<JS> children = new ArrayList<JS>();
 		for (Tree type : tree.getTypeDecls()) {
-			List<AstNode> jsNodes = visitor.scan(type, p);
-			for (AstNode jsNode : jsNodes) {
-				root.addChild(jsNode);
-			}
+			children.add(visitor.scan(type, context));
 		}
-		return Collections.<AstNode>singletonList(root);
+		return context.js().root(children);
 	}
 
 }

@@ -1,35 +1,37 @@
 package org.stjs.generator.writer.statement;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.SwitchCase;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.CaseTree;
 import com.sun.source.tree.Tree;
 
-public class CaseWriter implements VisitorContributor<CaseTree, List<AstNode>, GenerationContext> {
+/**
+ * @author acraciun
+ */
+public class CaseWriter<JS> implements WriterContributor<CaseTree, JS> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, CaseTree tree, GenerationContext context,
-			List<AstNode> prev) {
+	public JS visit(WriterVisitor<JS> visitor, CaseTree tree, GenerationContext<JS> context) {
 		// TODO: check qualified enums:
 		// if (selectorType instanceof ClassWrapper && ((ClassWrapper) selectorType).getClazz().isEnum()) {
 		// printer.print(names.getTypeName(selectorType));
 		// printer.print(".");
 
-		SwitchCase stmt = new SwitchCase();
+		JS expression = null;
+		List<JS> statements = new ArrayList<JS>();
+
 		if (tree.getExpression() != null) {
-			stmt.setExpression(visitor.scan(tree.getExpression(), context).get(0));
+			expression = visitor.scan(tree.getExpression(), context);
 		}
 		for (Tree c : tree.getStatements()) {
-			stmt.addStatement(visitor.scan(c, context).get(0));
+			statements.add(visitor.scan(c, context));
 		}
 
-		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
+		return context.withPosition(tree, context.js().caseStatement(expression, statements));
 	}
 }

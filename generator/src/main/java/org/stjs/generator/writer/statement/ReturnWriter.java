@@ -1,25 +1,22 @@
 package org.stjs.generator.writer.statement;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.ReturnStatement;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.ReturnTree;
 
-public class ReturnWriter implements VisitorContributor<ReturnTree, List<AstNode>, GenerationContext> {
+/**
+ * @author acraciun
+ */
+public class ReturnWriter<JS> implements WriterContributor<ReturnTree, JS> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ReturnTree tree,
-			GenerationContext context, List<AstNode> prev) {
-		ReturnStatement stmt = new ReturnStatement();
+	public JS visit(WriterVisitor<JS> visitor, ReturnTree tree, GenerationContext<JS> context) {
+		JS expr = null;
 		if (tree.getExpression() != null) {
-			stmt.setReturnValue(visitor.scan(tree.getExpression(), context).get(0));
+			expr = visitor.scan(tree.getExpression(), context);
 		}
-		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
+		return context.withPosition(tree, context.js().returnStatement(expr));
 	}
 }

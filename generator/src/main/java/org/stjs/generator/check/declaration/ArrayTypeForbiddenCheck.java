@@ -3,8 +3,8 @@ package org.stjs.generator.check.declaration;
 import javacutils.InternalUtils;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.check.CheckContributor;
+import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.writer.declaration.ClassWriter;
 
 import com.sun.source.tree.ArrayTypeTree;
@@ -17,10 +17,10 @@ import com.sun.source.util.TreePath;
  * only should also be forbidden). You should use {@link org.stjs.javascript.Array instead}.
  * @author acraciun
  */
-public class ArrayTypeForbiddenCheck implements VisitorContributor<ArrayTypeTree, Void, GenerationContext> {
+public class ArrayTypeForbiddenCheck implements CheckContributor<ArrayTypeTree> {
 
 	@Override
-	public Void visit(TreePathScannerContributors<Void, GenerationContext> visitor, ArrayTypeTree tree, GenerationContext context, Void prev) {
+	public Void visit(CheckVisitor visitor, ArrayTypeTree tree, GenerationContext<Void> context) {
 		if (!argOfMainMethod(context) && !isVarArg(context)) {
 			context.addError(tree, "You cannot use Java arrays because they are incompatible with Javascript arrays. "
 					+ "Use org.stjs.javascript.Array<T> instead. "
@@ -30,7 +30,7 @@ public class ArrayTypeForbiddenCheck implements VisitorContributor<ArrayTypeTree
 		return null;
 	}
 
-	private boolean isVarArg(GenerationContext context) {
+	private boolean isVarArg(GenerationContext<Void> context) {
 		TreePath path = context.getCurrentPath();
 		if (!(path.getParentPath().getLeaf() instanceof VariableTree)) {
 			return false;
@@ -38,7 +38,7 @@ public class ArrayTypeForbiddenCheck implements VisitorContributor<ArrayTypeTree
 		return InternalUtils.isVarArg(path.getParentPath().getLeaf());
 	}
 
-	private boolean argOfMainMethod(GenerationContext context) {
+	private boolean argOfMainMethod(GenerationContext<Void> context) {
 		TreePath path = context.getCurrentPath();
 		if (!(path.getParentPath().getLeaf() instanceof VariableTree)) {
 			return false;

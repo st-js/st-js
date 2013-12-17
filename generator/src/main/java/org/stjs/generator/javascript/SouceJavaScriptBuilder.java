@@ -1,0 +1,197 @@
+package org.stjs.generator.javascript;
+
+public class SouceJavaScriptBuilder implements JavaScriptBuilder<String> {
+
+	@Override
+	public String binary(int operator, Iterable<String> operands) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String asExpressionList(Iterable<String> nodes) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String block(Iterable<String> statements) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String property(String target, String name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String elementGet(String target, String index) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String unary(int operator, String operand) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String functionCall(String target, String name, Iterable<String> arguments) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String keyword(int token) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String expressionStatement(String expr) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String assignment(int operator, String left, String right) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String array(Iterable<String> values) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String string(String value) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String paren(String expr) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String position(String node, int javaLineNumber, int javaColumnNumber) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String breakStatement(String label) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String caseStatement(String expression, Iterable<String> statements) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String catchClause(String contidion, String body) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String continueStatement(String label) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String function(String name, Iterable<String> params, String body) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String name(CharSequence name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String newExpression(String target, Iterable<String> arguments) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String object(Iterable<NameValue<String>> props) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String variableDeclarationStatement(Iterable<NameValue<String>> vars) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String doLoop(String condition, String body) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String emptyStatement() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String forInLoop(String iterator, String iterated, String body) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String forLoop(String init, String condition, String update, String body) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String ifStatement(String condition, String thenPart, String elsePart) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String addStatement(String blockOrStatement, String statement) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String labeledStatement(String label, String statement) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String returnStatement(String returnValue) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String switchStatement(String expr, Iterable<String> cases) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

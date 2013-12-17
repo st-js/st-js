@@ -1,27 +1,16 @@
 package org.stjs.generator.writer.statement;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.ExpressionStatement;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.ExpressionStatementTree;
 
-public class ExpressionStatementWriter implements VisitorContributor<ExpressionStatementTree, List<AstNode>, GenerationContext> {
+public class ExpressionStatementWriter<JS> implements WriterContributor<ExpressionStatementTree, JS> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ExpressionStatementTree tree,
-			GenerationContext context, List<AstNode> prev) {
-		List<AstNode> expressions = visitor.scan(tree.getExpression(), context);
-		if (expressions.isEmpty()) {
-			return Collections.emptyList();
-		}
-		ExpressionStatement stmt = new ExpressionStatement();
-		stmt.setExpression(expressions.get(0));
-		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
+	public JS visit(WriterVisitor<JS> visitor, ExpressionStatementTree tree, GenerationContext<JS> context) {
+		JS expression = visitor.scan(tree.getExpression(), context);
+		return context.withPosition(tree, context.js().expressionStatement(expression));
 	}
 }

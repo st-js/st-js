@@ -1,49 +1,77 @@
 package org.stjs.generator.javascript;
 
-import org.mozilla.javascript.ast.AstNode;
-
 /**
  * .
- * 
  * @author acraciun
- * 
  */
 public interface JavaScriptBuilder<T> {
-	public T name(Object name);
+	public T array(Iterable<T> values);
 
-	public T binary(int operator, T... operands);
-
-	public T asExpressionList(T... nodes);
-
-	public T block(T... statements);
-
-	public T property(T target, String name);
-
-	public T elementGet(T target, T index);
-
-	public T unary(int operator, T operand);
-
-	public T functionCall(T target, String name, T... arguments);
-
-	public T newExpression(AstNode target, T... arguments);
-
-	public T keyword(int token);
-
-	public T variableDeclarationStatement(String name, T init);
-
-	public T expressionStatement(T expr);
+	public T asExpressionList(Iterable<T> nodes);
 
 	public T assignment(int operator, T left, T right);
 
-	public T array(T... values);
+	public T binary(int operator, Iterable<T> operands);
 
-	public T string(String value);
+	public T block(Iterable<T> statements);
+
+	public T breakStatement(T label);
+
+	public T caseStatement(T expression, Iterable<T> statements);
+
+	public T catchClause(T contidion, T body);
+
+	public T continueStatement(T label);
+
+	public T elementGet(T target, T index);
+
+	public T expressionStatement(T expr);
+
+	public T function(String name, Iterable<T> params, T body);
+
+	public T functionCall(T target, String name, Iterable<T> arguments);
+
+	public T keyword(int token);
+
+	public T name(CharSequence name);
+
+	public T newExpression(T target, Iterable<T> arguments);
+
+	public T object(Iterable<NameValue<T>> props);
 
 	public T paren(T expr);
 
-	public T object(PropertyValue... props);
-
-	public T function();
-
 	public T position(T node, int javaLineNumber, int javaColumnNumber);
+
+	public T property(T target, String name);
+
+	public T string(String value);
+
+	public T unary(int operator, T operand);
+
+	public T variableDeclaration(boolean statement, Iterable<NameValue<T>> vars);
+
+	public T doLoop(T condition, T body);
+
+	public T emptyStatement();
+
+	public T forInLoop(T iterator, T iterated, T body);
+
+	public T forLoop(T init, T condition, T update, T body);
+
+	public T ifStatement(T condition, T thenPart, T elsePart);
+
+	public T addStatement(T blockOrStatement, T statement);
+
+	public T labeledStatement(T label, T statement);
+
+	public T returnStatement(T returnValue);
+
+	public T switchStatement(T expr, Iterable<T> cases);
+
+	public T tryStatement(T tryBlock, Iterable<T> catchClauses, T finallyBlock);
+
+	public T whileLoop(T condition, T body);
+
+	public T root(Iterable<T> children);
 }

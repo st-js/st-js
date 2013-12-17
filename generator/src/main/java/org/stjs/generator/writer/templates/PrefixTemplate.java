@@ -5,9 +5,8 @@ import java.util.List;
 
 import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.javascript.JavaScriptNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
 
 import com.sun.source.tree.MethodInvocationTree;
@@ -17,11 +16,10 @@ import com.sun.source.tree.MethodInvocationTree;
  * $method() => method() or _method() => method() <br>
  * @author acraciun
  */
-public class PrefixTemplate implements VisitorContributor<MethodInvocationTree, List<AstNode>, GenerationContext> {
+public class PrefixTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, MethodInvocationTree tree,
-			GenerationContext context, List<AstNode> prev) {
+	public JS visit(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		AstNode target = MethodInvocationWriter.buildTarget(visitor, tree, context);
 		String name = MethodInvocationWriter.buildMethodName(tree);
 		name = name.substring(1);

@@ -1,24 +1,23 @@
 package org.stjs.generator.writer.statement;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.WhileLoop;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.WhileLoopTree;
 
-public class WhileLoopWriter implements VisitorContributor<WhileLoopTree, List<AstNode>, GenerationContext> {
+/**
+ * while loop - as in Java
+ * @author acraciun
+ */
+public class WhileLoopWriter<JS> implements WriterContributor<WhileLoopTree, JS> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, WhileLoopTree tree, GenerationContext context,
-			List<AstNode> prev) {
+	public JS visit(WriterVisitor<JS> visitor, WhileLoopTree tree, GenerationContext<JS> context) {
 		WhileLoop stmt = new WhileLoop();
-		stmt.setCondition(visitor.scan(tree.getCondition(), context).get(0));
-		stmt.setBody(visitor.scan(tree.getStatement(), context).get(0));
-		return Collections.<AstNode> singletonList(context.withPosition(tree, stmt));
+		JS condition = visitor.scan(tree.getCondition(), context);
+		JS body = visitor.scan(tree.getStatement(), context);
+		return context.withPosition(tree, context.js().whileLoop(condition, body));
 	}
 }
