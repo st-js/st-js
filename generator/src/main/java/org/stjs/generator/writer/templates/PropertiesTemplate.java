@@ -1,8 +1,5 @@
 package org.stjs.generator.writer.templates;
 
-import java.util.Collections;
-
-import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.writer.WriterContributor;
@@ -12,6 +9,7 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * $properties(obj) -> obj
+ * 
  * @author acraciun
  */
 public class PropertiesTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
@@ -24,6 +22,6 @@ public class PropertiesTemplate<JS> implements WriterContributor<MethodInvocatio
 					"A 'properties' template can only be applied for methods with 1 parameter");
 		}
 
-		return Collections.<AstNode> singletonList(paren(visitor.scan(tree.getArguments().get(0), context).get(0)));
+		return context.js().paren(visitor.scan(tree.getArguments().get(0), context));
 	}
 }

@@ -1,10 +1,5 @@
 package org.stjs.generator.writer.expression;
 
-import static org.stjs.generator.javascript.JavaScriptNodes.name;
-import static org.stjs.generator.javascript.JavaScriptNodes.newExpression;
-import static org.stjs.generator.javascript.JavaScriptNodes.object;
-import static org.stjs.generator.javascript.JavaScriptNodes.paren;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +13,8 @@ import org.stjs.generator.GenerationContext;
 import org.stjs.generator.check.expression.NewClassInlineFunctionCheck;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BlockTree;
@@ -30,7 +26,7 @@ import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.Tree;
 
-public class NewClassWriter implements VisitorContributor<NewClassTree, List<AstNode>, GenerationContext> {
+public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 	public static BlockTree getDoubleBracesBlock(NewClassTree tree) {
 		if (tree.getClassBody() == null) {
 			return null;
@@ -143,8 +139,7 @@ public class NewClassWriter implements VisitorContributor<NewClassTree, List<Ast
 	}
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, NewClassTree tree,
-			GenerationContext context, List<AstNode> prev) {
+	public JS visit(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {
 		List<AstNode> js = getObjectInitializer(visitor, tree, context);
 		if (js != null) {
 			return js;

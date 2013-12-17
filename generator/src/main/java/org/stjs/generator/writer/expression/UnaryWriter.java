@@ -2,20 +2,19 @@ package org.stjs.generator.writer.expression;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.UnaryExpression;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.UnaryTree;
 
-public class UnaryWriter implements VisitorContributor<UnaryTree, List<AstNode>, GenerationContext> {
+public class UnaryWriter<JS> implements WriterContributor<UnaryTree, JS> {
 	private static Map<Kind, JavaScriptUnaryOperator> jsOperators = new HashMap<Kind, JavaScriptUnaryOperator>();
 
 	private static class JavaScriptUnaryOperator {
@@ -51,8 +50,7 @@ public class UnaryWriter implements VisitorContributor<UnaryTree, List<AstNode>,
 	}
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, UnaryTree tree, GenerationContext p,
-			List<AstNode> prev) {
+	public JS visit(WriterVisitor<JS> visitor, UnaryTree tree, GenerationContext<JS> context) {
 		UnaryExpression expr = new UnaryExpression();
 		expr.setOperand(visitor.scan(tree.getExpression(), p).get(0));
 		JavaScriptUnaryOperator op = jsOperators.get(tree.getKind());

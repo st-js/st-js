@@ -1,7 +1,5 @@
 package org.stjs.generator.writer.expression;
 
-import static org.stjs.generator.javascript.JavaScriptNodes.name;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -13,15 +11,14 @@ import javax.lang.model.element.ElementKind;
 import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
-import org.stjs.generator.javascript.JavaScriptNodes;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
 import org.stjs.generator.writer.MemberWriters;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.IdentifierTree;
 
-public class IdentifierWriter implements VisitorContributor<IdentifierTree, List<AstNode>, GenerationContext> {
+public class IdentifierWriter<JS> implements WriterContributor<IdentifierTree, JS> {
 
 	// private void visitField(FieldWrapper field, NameExpr n) {
 	// if (Modifier.isStatic(field.getModifiers())) {
@@ -32,17 +29,16 @@ public class IdentifierWriter implements VisitorContributor<IdentifierTree, List
 	// }
 
 	private List<AstNode> visitField(Element def, IdentifierTree tree, GenerationContext context) {
-		return Collections.<AstNode> singletonList(JavaScriptNodes.property(MemberWriters.buildTarget(context, def), tree.getName().toString()));
+		return Collections.<AstNode>singletonList(JavaScriptNodes.property(MemberWriters.buildTarget(context, def), tree.getName().toString()));
 	}
 
 	private List<AstNode> visitEnumConstant(Element def, IdentifierTree tree, GenerationContext context) {
 		AstNode target = JavaScriptNodes.name(context.getNames().getTypeName(context, def.getEnclosingElement()));
-		return Collections.<AstNode> singletonList(JavaScriptNodes.property(target, tree.getName().toString()));
+		return Collections.<AstNode>singletonList(JavaScriptNodes.property(target, tree.getName().toString()));
 	}
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, IdentifierTree tree,
-			GenerationContext context, List<AstNode> prev) {
+	public JS visit(WriterVisitor<JS> visitor, IdentifierTree tree, GenerationContext<JS> context) {
 
 		String name = tree.getName().toString();
 
@@ -69,7 +65,7 @@ public class IdentifierWriter implements VisitorContributor<IdentifierTree, List
 		}
 
 		// assume variable
-		return Collections.<AstNode> singletonList(name(name));
+		return Collections.<AstNode>singletonList(name(name));
 	}
 
 }

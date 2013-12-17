@@ -1,24 +1,24 @@
 package org.stjs.generator.writer.expression;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.ElementGet;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.ArrayAccessTree;
 
-public class ArrayAccessWriter implements VisitorContributor<ArrayAccessTree, List<AstNode>, GenerationContext> {
+/**
+ * array access -> used only in very specific case, otherwise the arrays are forbidden
+ * 
+ * @author acraciun
+ * 
+ * @param <JS>
+ */
+public class ArrayAccessWriter<JS> implements WriterContributor<ArrayAccessTree, JS> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, ArrayAccessTree tree, GenerationContext p,
-			List<AstNode> prev) {
-		ElementGet array = new ElementGet();
-		array.setTarget(visitor.scan(tree.getExpression(), p).get(0));
-		array.setElement(visitor.scan(tree.getIndex(), p).get(0));
-		return Collections.<AstNode>singletonList(array);
+	public JS visit(WriterVisitor<JS> visitor, ArrayAccessTree tree, GenerationContext<JS> context) {
+		JS target = visitor.scan(tree.getExpression(), context);
+		JS elem = visitor.scan(tree.getIndex(), context);
+		return context.js().elementGet(target, elem);
 	}
 }

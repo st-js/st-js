@@ -1,9 +1,6 @@
 package org.stjs.generator.writer.templates;
 
-import java.util.Collections;
-
 import org.mozilla.javascript.Token;
-import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.writer.WriterContributor;
@@ -13,6 +10,7 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * $typeOf(arg) -> (typeof arg)
+ * 
  * @author acraciun
  */
 public class TypeOfTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
@@ -24,7 +22,7 @@ public class TypeOfTemplate<JS> implements WriterContributor<MethodInvocationTre
 			throw new JavascriptFileGenerationException(context.getInputFile(), null,
 					"A 'typeof' template can only be applied for methods with 1 parameter");
 		}
-		AstNode prop = visitor.scan(tree.getArguments().get(0), context).get(0);
-		return Collections.<AstNode> singletonList(paren(unary(Token.TYPEOF, prop)));
+		JS prop = visitor.scan(tree.getArguments().get(0), context);
+		return context.js().paren(context.js().unary(Token.TYPEOF, prop));
 	}
 }

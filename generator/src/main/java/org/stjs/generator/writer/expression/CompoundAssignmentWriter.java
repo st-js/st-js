@@ -1,21 +1,17 @@
 package org.stjs.generator.writer.expression;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.mozilla.javascript.Token;
-import org.mozilla.javascript.ast.Assignment;
-import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.CompoundAssignmentTree;
 import com.sun.source.tree.Tree.Kind;
 
-public class CompoundAssignmentWriter implements VisitorContributor<CompoundAssignmentTree, List<AstNode>, GenerationContext> {
+public class CompoundAssignmentWriter<JS> implements WriterContributor<CompoundAssignmentTree, JS> {
 	private static Map<Kind, Integer> jsOperators = new HashMap<Kind, Integer>();
 
 	static {
@@ -33,15 +29,12 @@ public class CompoundAssignmentWriter implements VisitorContributor<CompoundAssi
 	}
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, CompoundAssignmentTree tree,
-			GenerationContext p, List<AstNode> prev) {
-		Assignment expr = new Assignment();
-		expr.setLeft(visitor.scan(tree.getVariable(), p).get(0));
-		expr.setRight(visitor.scan(tree.getExpression(), p).get(0));
+	public JS visit(WriterVisitor<JS> visitor, CompoundAssignmentTree tree, GenerationContext<JS> context) {
+		JS left = visitor.scan(tree.getVariable(), context);
+		JS right = visitor.scan(tree.getExpression(), context);
 		Integer op = jsOperators.get(tree.getKind());
 		assert op != null : "Unknow operator:" + tree.getKind();
 
-		expr.setOperator(op);
-		return Collections.<AstNode>singletonList(expr);
+		return context.js().assignment(op, left, right);
 	}
 }

@@ -15,6 +15,7 @@ import com.sun.source.tree.VariableTree;
 
 /**
  * regular blocks. The static blocks are wrapped in a anonymous function to prevent global scope pollution.
+ * 
  * @author acraciun
  */
 public class BlockWriter<JS> implements WriterContributor<BlockTree, JS> {
@@ -45,8 +46,8 @@ public class BlockWriter<JS> implements WriterContributor<BlockTree, JS> {
 
 		if (tree.isStatic()) {
 			// generate the enclosing function call (function(){BLOCK()})() to avoid polluting the global scope
-			JS function = js.function(null, Collections.<JS> emptyList(), block);
-			block = js.functionCall(js.paren(function), null, Collections.<JS> emptyList());
+			JS function = js.function(null, Collections.<JS>emptyList(), block);
+			block = js.functionCall(js.paren(function), Collections.<JS>emptyList());
 		}
 		return context.withPosition(tree, block);
 	}

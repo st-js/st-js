@@ -30,6 +30,7 @@ import com.sun.source.tree.EnhancedForLoopTree;
  * </pre>
  * 
  * Warning: the iteration is on indexes as in JavaScript, not on values as in Java!
+ * 
  * @author acraciun
  */
 public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForLoopTree, JS> {
@@ -51,9 +52,11 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 		}
 		JavaScriptBuilder<JS> js = context.js();
 
-		JS not =
-				js.unary(Token.NOT,
-						js.functionCall(js.paren(iterated), "hasOwnProperty", Collections.singleton(js.name(tree.getVariable().getName()))));
+		// !(iterated).hasOwnProperty(tree.getVariable().getName())
+		JS not = js
+				.unary(Token.NOT,
+						js.functionCall(js.property(js.paren(iterated), "hasOwnProperty"),
+								Collections.singleton(js.name(tree.getVariable().getName()))));
 
 		JS ifs = js.ifStatement(not, js.continueStatement(null), null);
 		return js.addStatement(body, ifs);

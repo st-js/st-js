@@ -1,9 +1,6 @@
 package org.stjs.generator.writer.templates;
 
-import java.util.Collections;
-
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.ElementGet;
+import org.mozilla.javascript.Token;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.writer.WriterContributor;
@@ -14,6 +11,7 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * array.$set(index, value) -> array[index] = value, or $set(obj, prop, value) -> obj[prop]=value
+ * 
  * @author acraciun
  */
 public class PutTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
@@ -27,17 +25,17 @@ public class PutTemplate<JS> implements WriterContributor<MethodInvocationTree, 
 					"A 'put' template can only be applied for methods with 2 or 3 parameters");
 		}
 
-		AstNode target = null;
+		JS target = null;
 		int arg = 0;
 		if (argCount == 2) {
 			// array.$get(x) -> array[x]
 			target = MethodInvocationWriter.buildTarget(visitor, tree, context);
 		} else {
-			//$get(obj, prop) -> obj[prop]
-			target = JavaScriptNodes.paren(visitor.scan(tree.getArguments().get(arg++), context).get(0));
+			// $get(obj, prop) -> obj[prop]
+			target = context.js().paren(visitor.scan(tree.getArguments().get(arg++), context));
 		}
-		ElementGet eg = elementGet(target, visitor.scan(tree.getArguments().get(arg++), context).get(0));
-		AstNode value = visitor.scan(tree.getArguments().get(arg++), context).get(0);
-		return Collections.<AstNode> singletonList(JavaScriptNodes.assignment(eg, value));
+		JS eg = context.js().elementGet(target, visitor.scan(tree.getArguments().get(arg++), context));
+		JS value = visitor.scan(tree.getArguments().get(arg++), context);
+		return context.js().assignment(Token.ASSIGN, eg, value);
 	}
 }

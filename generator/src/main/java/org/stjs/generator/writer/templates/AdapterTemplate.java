@@ -12,6 +12,7 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * method(x, arg1, arg2) -> x.method(arg1, arg2)
+ * 
  * @author acraciun
  */
 public class AdapterTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
@@ -28,6 +29,6 @@ public class AdapterTemplate<JS> implements WriterContributor<MethodInvocationTr
 
 		JS target = context.js().paren(arguments.get(0));
 
-		return context.js().functionCall(target, name, arguments.subList(1, arguments.size()));
+		return context.js().functionCall(context.js().property(target, name), arguments.subList(1, arguments.size()));
 	}
 }

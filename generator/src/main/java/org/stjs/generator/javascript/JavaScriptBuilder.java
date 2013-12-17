@@ -2,6 +2,7 @@ package org.stjs.generator.javascript;
 
 /**
  * .
+ * 
  * @author acraciun
  */
 public interface JavaScriptBuilder<T> {
@@ -29,7 +30,7 @@ public interface JavaScriptBuilder<T> {
 
 	public T function(String name, Iterable<T> params, T body);
 
-	public T functionCall(T target, String name, Iterable<T> arguments);
+	public T functionCall(T target, Iterable<T> arguments);
 
 	public T keyword(int token);
 
@@ -74,4 +75,15 @@ public interface JavaScriptBuilder<T> {
 	public T whileLoop(T condition, T body);
 
 	public T root(Iterable<T> children);
+
+	// AstNode node = new Parser().parse(code, "inline", 0);
+	public T code(String code);
+
+	public String toString(T node);
+
+	public T conditionalExpression(T test, T trueExpr, T falseExpr);
+
+	public T character(String c);
+
+	public T number(Number n);
 }

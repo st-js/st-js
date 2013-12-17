@@ -1,43 +1,27 @@
 package org.stjs.generator.writer.expression;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.mozilla.javascript.Token;
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.KeywordLiteral;
-import org.mozilla.javascript.ast.NumberLiteral;
-import org.mozilla.javascript.ast.StringLiteral;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.LiteralTree;
 import com.sun.source.tree.Tree.Kind;
 
-public class LiteralWriter implements VisitorContributor<LiteralTree, List<AstNode>, GenerationContext> {
+public class LiteralWriter<JS> implements WriterContributor<LiteralTree, JS> {
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, LiteralTree tree, GenerationContext p,
-			List<AstNode> prev) {
+	public JS visit(WriterVisitor<JS> visitor, LiteralTree tree, GenerationContext<JS> context) {
 		if (tree.getKind() == Kind.STRING_LITERAL || tree.getKind() == Kind.CHAR_LITERAL) {
-			StringLiteral expr = new StringLiteral();
-			expr.setValue(tree.getValue().toString());
-			expr.setQuoteCharacter(tree.getKind() == Kind.STRING_LITERAL ? '"' : '\'');
-			return Collections.<AstNode>singletonList(expr);
+			return tree.getKind() == Kind.STRING_LITERAL ? context.js().string(tree.getValue().toString()) : context.js().character(
+					tree.getValue().toString());
 		}
 		if (tree.getKind() == Kind.NULL_LITERAL) {
-			KeywordLiteral expr = new KeywordLiteral();
-			expr.setType(Token.NULL);
-			return Collections.<AstNode>singletonList(expr);
+			return context.js().keyword(Token.NULL);
 		}
 		if (tree.getKind() == Kind.BOOLEAN_LITERAL) {
-			KeywordLiteral expr = new KeywordLiteral();
-			expr.setType(Boolean.TRUE.equals(tree.getValue()) ? Token.TRUE : Token.FALSE);
-			return Collections.<AstNode>singletonList(expr);
+			return context.js().keyword(Boolean.TRUE.equals(tree.getValue()) ? Token.TRUE : Token.FALSE);
 		}
-		NumberLiteral expr = new NumberLiteral();
-		expr.setValue(tree.getValue().toString());
-		return Collections.<AstNode>singletonList(expr);
+		return context.js().number((Number) tree.getValue());
 	}
 }

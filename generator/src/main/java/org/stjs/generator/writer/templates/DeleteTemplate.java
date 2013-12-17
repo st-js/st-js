@@ -1,9 +1,6 @@
 package org.stjs.generator.writer.templates;
 
-import java.util.Collections;
-
 import org.mozilla.javascript.Token;
-import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.writer.WriterContributor;
@@ -14,6 +11,7 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * map.$delete(key) -> delete map[key]
+ * 
  * @author acraciun
  */
 public class DeleteTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
@@ -26,8 +24,8 @@ public class DeleteTemplate<JS> implements WriterContributor<MethodInvocationTre
 					"A 'delete' template can only be applied for methods with 1 parameter");
 		}
 		int arg = 0;
-		AstNode target = MethodInvocationWriter.buildTarget(visitor, tree, context);
-		AstNode prop = elementGet(target, visitor.scan(tree.getArguments().get(arg++), context).get(0));
-		return Collections.<AstNode> singletonList(JavaScriptNodes.unary(Token.DELPROP, prop));
+		JS target = MethodInvocationWriter.buildTarget(visitor, tree, context);
+		JS prop = context.js().elementGet(target, visitor.scan(tree.getArguments().get(arg++), context));
+		return context.js().unary(Token.DELPROP, prop);
 	}
 }

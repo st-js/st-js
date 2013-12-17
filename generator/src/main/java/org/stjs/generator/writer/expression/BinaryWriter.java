@@ -1,11 +1,8 @@
 package org.stjs.generator.writer.expression;
 
-import static org.stjs.generator.javascript.JavaScriptNodes.functionCall;
-import static org.stjs.generator.javascript.JavaScriptNodes.name;
-
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javacutils.TypesUtils;
@@ -13,17 +10,15 @@ import javacutils.TypesUtils;
 import javax.lang.model.type.TypeMirror;
 
 import org.mozilla.javascript.Token;
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.InfixExpression;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.visitor.TreePathScannerContributors;
-import org.stjs.generator.visitor.VisitorContributor;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.util.TreePath;
 
-public class BinaryWriter implements VisitorContributor<BinaryTree, List<AstNode>, GenerationContext> {
+public class BinaryWriter<JS> implements WriterContributor<BinaryTree, JS> {
 	private static Map<Kind, Integer> jsOperators = new HashMap<Kind, Integer>();
 
 	static {
@@ -52,15 +47,14 @@ public class BinaryWriter implements VisitorContributor<BinaryTree, List<AstNode
 	}
 
 	@Override
-	public List<AstNode> visit(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, BinaryTree tree,
-			GenerationContext context, List<AstNode> prev) {
-
-		InfixExpression expr = new InfixExpression();
-		expr.setLeft(visitor.scan(tree.getLeftOperand(), context).get(0));
-		expr.setRight(visitor.scan(tree.getRightOperand(), context).get(0));
+	public JS visit(WriterVisitor<JS> visitor, BinaryTree tree, GenerationContext<JS> context) {
+		JS left = visitor.scan(tree.getLeftOperand(), context);
+		JS right = visitor.scan(tree.getRightOperand(), context);
 		Integer op = jsOperators.get(tree.getKind());
 		assert op != null : "Unknow operator:" + tree.getKind();
-		expr.setOperator(op);
+
+		@SuppressWarnings("unchecked")
+		JS expr = context.js().binary(op, Arrays.asList(left, right));
 
 		TypeMirror leftType = context.getTrees().getTypeMirror(new TreePath(context.getCurrentPath(), tree.getLeftOperand()));
 		TypeMirror rightType = context.getTrees().getTypeMirror(new TreePath(context.getCurrentPath(), tree.getRightOperand()));
@@ -68,8 +62,9 @@ public class BinaryWriter implements VisitorContributor<BinaryTree, List<AstNode
 
 		if (integerDivision) {
 			// force a cast for integer division to have the expected behavior in JavaScript too
-			return Collections.<AstNode>singletonList(functionCall(name("stjs"), "trunc", expr));
+			JS target = context.js().property(context.js().name("stjs"), "trunc");
+			return context.js().functionCall(target, Collections.singleton(expr));
 		}
-		return Collections.<AstNode>singletonList(expr);
+		return expr;
 	}
 }
