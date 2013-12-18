@@ -2,7 +2,6 @@ package org.stjs.generator.javascript;
 
 /**
  * .
- * 
  * @author acraciun
  */
 public interface JavaScriptBuilder<T> {
@@ -44,7 +43,7 @@ public interface JavaScriptBuilder<T> {
 
 	public T position(T node, int javaLineNumber, int javaColumnNumber);
 
-	public T property(T target, String name);
+	public T property(T target, CharSequence name);
 
 	public T string(String value);
 

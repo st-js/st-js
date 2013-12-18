@@ -7,7 +7,6 @@ import javacutils.TreeUtils;
 
 import javax.lang.model.element.ExecutableElement;
 
-import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.visitor.DiscriminatorKey;
@@ -39,8 +38,7 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 			// staticMethod
 			return MemberWriters.buildTarget(context, methodDecl);
 		}
-		List<AstNode> exprNodes = visitor.scan(memberSelect.getExpression(), context);
-		return exprNodes.isEmpty() ? null : exprNodes.get(0);
+		return visitor.scan(memberSelect.getExpression(), context);
 	}
 
 	public static String buildMethodName(MethodInvocationTree tree) {

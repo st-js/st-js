@@ -1,8 +1,6 @@
 package org.stjs.generator.writer.declaration;
 
-import java.util.Collections;
-
-import org.mozilla.javascript.ast.AstNode;
+import org.mozilla.javascript.Token;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
@@ -15,19 +13,19 @@ import com.sun.source.tree.VariableTree;
  * {@link VariableWriter}
  * @author acraciun
  */
-public class FieldWriter<JS> extends AbstractMemberWriter implements WriterContributor<VariableTree, JS> {
+public class FieldWriter<JS> extends AbstractMemberWriter<JS> implements WriterContributor<VariableTree, JS> {
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, VariableTree tree, GenerationContext<JS> context) {
-		AstNode initializer = null;
+		JS initializer = null;
 		if (tree.getInitializer() == null) {
-			initializer = JavaScriptNodes.NULL();
+			initializer = context.js().keyword(Token.NULL);
 		} else {
-			initializer = visitor.scan(tree.getInitializer(), context).get(0);
+			initializer = visitor.scan(tree.getInitializer(), context);
 		}
 
 		String fieldName = tree.getName().toString();
-		return Collections.<AstNode> singletonList(statement(assignment(getMemberTarget(tree), fieldName, initializer)));
+		JS member = context.js().property(getMemberTarget(tree, context), fieldName);
+		return context.js().expressionStatement(context.js().assignment(Token.ASSIGN, member, initializer));
 	}
-
 }

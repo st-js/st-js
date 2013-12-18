@@ -1,12 +1,9 @@
 package org.stjs.generator.writer.expression;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.mozilla.javascript.Token;
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.UnaryExpression;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
@@ -51,13 +48,11 @@ public class UnaryWriter<JS> implements WriterContributor<UnaryTree, JS> {
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, UnaryTree tree, GenerationContext<JS> context) {
-		UnaryExpression expr = new UnaryExpression();
-		expr.setOperand(visitor.scan(tree.getExpression(), p).get(0));
+		JS operand = visitor.scan(tree.getExpression(), context);
 		JavaScriptUnaryOperator op = jsOperators.get(tree.getKind());
 		assert op != null : "Unknow operator:" + tree.getKind();
 
-		expr.setIsPostfix(op.isPostfix());
-		expr.setOperator(op.getOperator());
-		return Collections.<AstNode>singletonList(expr);
+		//TODO		expr.setIsPostfix(op.isPostfix());
+		return context.js().unary(op.getOperator(), operand);
 	}
 }

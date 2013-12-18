@@ -1,18 +1,16 @@
 package org.stjs.generator.writer.expression;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javacutils.TreeUtils;
 
 import javax.lang.model.element.Element;
 
-import org.mozilla.javascript.ast.AstNode;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.check.expression.NewClassInlineFunctionCheck;
+import org.stjs.generator.javascript.NameValue;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.visitor.TreePathScannerContributors;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 
@@ -57,31 +55,26 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 	/**
 	 * special construction for object initialization new Object(){{x = 1; y = 2; }};
 	 */
-	private List<AstNode> getObjectInitializer(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, NewClassTree tree,
-			GenerationContext context) {
+	private JS getObjectInitializer(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {
 		BlockTree initBlock = getDoubleBracesBlock(tree);
 		Element type = TreeUtils.elementFromUse(tree.getIdentifier());
 		if (initBlock == null && !JavaNodes.isSyntheticType(type)) {
 			return null;
 		}
 
-		List<AstNode> names = new ArrayList<AstNode>();
-		List<AstNode> values = new ArrayList<AstNode>();
+		List<NameValue<JS>> props = new ArrayList<NameValue<JS>>();
 		if (initBlock != null) {
 			for (StatementTree stmt : initBlock.getStatements()) {
 				// check the right type of statements x=y is done in NewClassObjectInitCheck
-				AssignmentTree assign = ((AssignmentTree) ((ExpressionStatementTree) stmt).getExpression());
-				names.add(name(getPropertyName(assign.getVariable())));
-				values.add(visitor.scan(assign.getExpression(), context).get(0));
+				AssignmentTree assign = (AssignmentTree) ((ExpressionStatementTree) stmt).getExpression();
+				props.add(NameValue.of(getPropertyName(assign.getVariable()), visitor.scan(assign.getExpression(), context)));
 			}
 		}
-		return Collections.<AstNode>singletonList(object(names, values));
+		return context.js().object(props);
 	}
 
 	/**
-	 * check by {@link NewClassInlineFunctionCheck}
-	 * 
-	 * generate the code for inline functions:
+	 * check by {@link NewClassInlineFunctionCheck} generate the code for inline functions:
 	 * 
 	 * <pre>
 	 * new FunctionInterface(){
@@ -97,8 +90,7 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 	 * }
 	 * </pre>
 	 */
-	private List<AstNode> getInlineFunctionDeclaration(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, NewClassTree tree,
-			GenerationContext context) {
+	private JS getInlineFunctionDeclaration(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {
 		// special construction for inline function definition
 		Element type = TreeUtils.elementFromUse(tree.getIdentifier());
 		if (!JavaNodes.isJavaScriptFunction(type)) {
@@ -111,36 +103,33 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 		return visitor.scan(method, context);
 	}
 
-	private List<AstNode> getAnonymousClassDeclaration(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, NewClassTree tree,
-			GenerationContext context) {
+	private JS getAnonymousClassDeclaration(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {
 		if (tree.getClassBody() == null) {
 			return null;
 		}
 
-		List<AstNode> typeDeclaration = visitor.scan(tree.getClassBody(), context);
+		JS typeDeclaration = visitor.scan(tree.getClassBody(), context);
 
-		return Collections.<AstNode>singletonList(newExpression(paren(typeDeclaration.get(0)), arguments(visitor, tree, context)));
+		return context.js().newExpression(context.js().paren(typeDeclaration), arguments(visitor, tree, context));
 	}
 
-	private List<AstNode> arguments(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, NewClassTree tree,
-			GenerationContext context) {
-		List<AstNode> arguments = new ArrayList<AstNode>();
+	private List<JS> arguments(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {
+		List<JS> arguments = new ArrayList<JS>();
 		for (Tree arg : tree.getArguments()) {
-			arguments.addAll(visitor.scan(arg, context));
+			arguments.add(visitor.scan(arg, context));
 		}
 		return arguments;
 	}
 
-	private List<AstNode> getRegularNewExpression(TreePathScannerContributors<List<AstNode>, GenerationContext> visitor, NewClassTree tree,
-			GenerationContext context) {
+	private JS getRegularNewExpression(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {
 		Element type = TreeUtils.elementFromUse(tree.getIdentifier());
-		return Collections.<AstNode>singletonList(newExpression(name(context.getNames().getTypeName(context, type)),
-				arguments(visitor, tree, context)));
+		JS typeName = context.js().name(context.getNames().getTypeName(context, type));
+		return context.js().newExpression(typeName, arguments(visitor, tree, context));
 	}
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {
-		List<AstNode> js = getObjectInitializer(visitor, tree, context);
+		JS js = getObjectInitializer(visitor, tree, context);
 		if (js != null) {
 			return js;
 		}
