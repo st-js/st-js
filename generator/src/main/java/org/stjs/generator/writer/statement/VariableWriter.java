@@ -1,9 +1,6 @@
 package org.stjs.generator.writer.statement;
 
-import java.util.Collections;
-
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.javascript.NameValue;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.declaration.FieldWriter;
@@ -47,7 +44,6 @@ public class VariableWriter<JS> implements WriterContributor<VariableTree, JS> {
 		if (tree.getInitializer() != null) {
 			init = visitor.scan(tree.getInitializer(), context);
 		}
-		return context.withPosition(tree,
-				context.js().variableDeclaration(isStatement, Collections.singleton(NameValue.of(tree.getName(), init))));
+		return context.withPosition(tree, context.js().variableDeclaration(isStatement, tree.getName(), init));
 	}
 }

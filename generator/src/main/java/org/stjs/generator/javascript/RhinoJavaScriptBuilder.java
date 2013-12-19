@@ -29,12 +29,6 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	}
 
 	@Override
-	public AstNode property(AstNode target, String name) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public AstNode elementGet(AstNode target, AstNode index) {
 		// TODO Auto-generated method stub
 		return null;
@@ -42,12 +36,6 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 
 	@Override
 	public AstNode unary(int operator, AstNode operand) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public AstNode functionCall(AstNode target, String name, Iterable<AstNode> arguments) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -137,12 +125,6 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	}
 
 	@Override
-	public AstNode variableDeclarationStatement(Iterable<NameValue<AstNode>> vars) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public AstNode doLoop(AstNode condition, AstNode body) {
 		// TODO Auto-generated method stub
 		return null;
@@ -192,6 +174,84 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 
 	@Override
 	public AstNode switchStatement(AstNode expr, Iterable<AstNode> cases) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AstNode functionCall(AstNode target, Iterable<AstNode> arguments) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AstNode property(AstNode target, CharSequence name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AstNode variableDeclaration(boolean statement, Iterable<NameValue<AstNode>> vars) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AstNode variableDeclaration(boolean statement, CharSequence name, AstNode init) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AstNode tryStatement(AstNode tryBlock, Iterable<AstNode> catchClauses, AstNode finallyBlock) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AstNode whileLoop(AstNode condition, AstNode body) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AstNode root(Iterable<AstNode> children) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AstNode code(String code) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String toString(AstNode node) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AstNode conditionalExpression(AstNode test, AstNode trueExpr, AstNode falseExpr) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AstNode character(String c) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AstNode number(Number n) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AstNode statements(Iterable<AstNode> stmts) {
 		// TODO Auto-generated method stub
 		return null;
 	}

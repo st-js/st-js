@@ -21,12 +21,6 @@ public class SouceJavaScriptBuilder implements JavaScriptBuilder<String> {
 	}
 
 	@Override
-	public String property(String target, String name) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public String elementGet(String target, String index) {
 		// TODO Auto-generated method stub
 		return null;
@@ -34,12 +28,6 @@ public class SouceJavaScriptBuilder implements JavaScriptBuilder<String> {
 
 	@Override
 	public String unary(int operator, String operand) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String functionCall(String target, String name, Iterable<String> arguments) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -135,12 +123,6 @@ public class SouceJavaScriptBuilder implements JavaScriptBuilder<String> {
 	}
 
 	@Override
-	public String variableDeclarationStatement(Iterable<NameValue<String>> vars) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public String doLoop(String condition, String body) {
 		// TODO Auto-generated method stub
 		return null;
@@ -190,6 +172,84 @@ public class SouceJavaScriptBuilder implements JavaScriptBuilder<String> {
 
 	@Override
 	public String switchStatement(String expr, Iterable<String> cases) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String functionCall(String target, Iterable<String> arguments) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String property(String target, CharSequence name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String variableDeclaration(boolean statement, Iterable<NameValue<String>> vars) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String variableDeclaration(boolean statement, CharSequence name, String init) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String tryStatement(String tryBlock, Iterable<String> catchClauses, String finallyBlock) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String whileLoop(String condition, String body) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String root(Iterable<String> children) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String code(String code) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String toString(String node) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String conditionalExpression(String test, String trueExpr, String falseExpr) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String character(String c) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String number(Number n) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String statements(Iterable<String> stmts) {
 		// TODO Auto-generated method stub
 		return null;
 	}

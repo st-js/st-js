@@ -51,6 +51,8 @@ public interface JavaScriptBuilder<T> {
 
 	public T variableDeclaration(boolean statement, Iterable<NameValue<T>> vars);
 
+	public T variableDeclaration(boolean statement, CharSequence name, T init);
+
 	public T doLoop(T condition, T body);
 
 	public T emptyStatement();
@@ -85,4 +87,6 @@ public interface JavaScriptBuilder<T> {
 	public T character(String c);
 
 	public T number(Number n);
+
+	public T statements(Iterable<T> stmts);
 }

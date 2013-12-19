@@ -21,13 +21,9 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 
 import org.mozilla.javascript.Token;
-import org.mozilla.javascript.ast.ArrayLiteral;
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.FunctionCall;
-import org.mozilla.javascript.ast.IfStatement;
-import org.mozilla.javascript.ast.ObjectLiteral;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javascript.JavaScriptBuilder;
+import org.stjs.generator.javascript.NameValue;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.WriterContributor;
@@ -190,39 +186,42 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	/**
 	 * add the call to the main method, if it exists
 	 */
-	private void addMainMethodCall(ClassTree clazz, List<AstNode> stmts, GenerationContext context) {
+	private void addMainMethodCall(ClassTree clazz, List<JS> stmts, GenerationContext<JS> context) {
 		if (!hasMainMethod(clazz)) {
 			return;
 		}
 		TypeElement type = TreeUtils.elementFromDeclaration(clazz);
-		AstNode target = JavaNodes.isGlobal(type) ? null : name(context.getNames().getTypeName(context, type));
+		JS target = JavaNodes.isGlobal(type) ? null : context.js().name(context.getNames().getTypeName(context, type));
 
-		IfStatement ifs = new IfStatement();
-		ifs.setCondition(JavaScriptNodes.not(JavaScriptNodes.property(name("stjs"), "mainCallDisabled")));
-		ifs.setThenPart(statement(functionCall(target, "main")));
-		stmts.add(ifs);
+		JavaScriptBuilder<JS> js = context.js();
+		JS condition = js.unary(Token.NOT, js.property(js.name("stjs"), "mainCallDisabled"));
+		JS thenPart = js.expressionStatement(js.functionCall(js.property(target, "main"), Collections.<JS> emptyList()));
+		stmts.add(js.ifStatement(condition, thenPart, null));
 	}
 
-	private AstNode getFieldTypeDesc(TypeMirror type, GenerationContext context) {
+	@SuppressWarnings("unchecked")
+	private JS getFieldTypeDesc(TypeMirror type, GenerationContext<JS> context) {
+		JavaScriptBuilder<JS> js = context.js();
 		if (JavaNodes.isJavaScriptPrimitive(type)) {
-			return NULL();
+			return js.keyword(Token.NULL);
 		}
-		AstNode typeName = string(context.getNames().getTypeName(context, type));
+		JS typeName = js.string(context.getNames().getTypeName(context, type));
 
 		if (type instanceof DeclaredType) {
 			DeclaredType declaredType = (DeclaredType) type;
 
 			// enum
 			if (declaredType.asElement().getKind() == ElementKind.ENUM) {
-				return object("name", string("Enum"), "arguments", array(typeName));
+				return js.object(Arrays.asList(NameValue.of("name", js.string("Enum")),
+						NameValue.of("arguments", js.array(Collections.singleton(typeName)))));
 			}
 			// parametrized type
 			if (!declaredType.getTypeArguments().isEmpty()) {
-				ArrayLiteral array = new ArrayLiteral();
+				List<JS> array = new ArrayList<JS>();
 				for (TypeMirror arg : declaredType.getTypeArguments()) {
-					array.addElement(getFieldTypeDesc(arg, context));
+					array.add(getFieldTypeDesc(arg, context));
 				}
-				return object("name", typeName, "arguments", array);
+				return js.object(Arrays.asList(NameValue.of("name", typeName), NameValue.of("arguments", js.array(array))));
 			}
 
 		}
@@ -231,15 +230,15 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	}
 
 	@SuppressWarnings("unused")
-	private AstNode getTypeDescription(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext context) {
+	private JS getTypeDescription(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context) {
 		// if (isGlobal(type)) {
 		// printer.print(JavascriptKeywords.NULL);
 		// return;
 		// }
 
 		TypeElement type = TreeUtils.elementFromDeclaration(tree);
-		ObjectLiteral typeDesc = new ObjectLiteral();
 
+		List<NameValue<JS>> props = new ArrayList<NameValue<JS>>();
 		for (Element member : ElementUtils.getAllFieldsIn(type)) {
 			TypeMirror memberType = ElementUtils.getType(member);
 			if (JavaNodes.isJavaScriptPrimitive(memberType)) {
@@ -252,9 +251,9 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 				//what to do with fields of generic parameters !?
 				continue;
 			}
-			typeDesc.addElement(objectProperty(member.getSimpleName().toString(), getFieldTypeDesc(memberType, context)));
+			props.add(NameValue.of(member.getSimpleName(), getFieldTypeDesc(memberType, context)));
 		}
-		return typeDesc;
+		return context.js().object(props);
 	}
 
 	/**
@@ -266,21 +265,23 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	}
 
 	@SuppressWarnings("unused")
-	private boolean generareEnum(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext context, List<AstNode> stmts) {
+	private boolean generareEnum(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
 		Element type = TreeUtils.elementFromDeclaration(tree);
 		if (type.getKind() != ElementKind.ENUM) {
 			return false;
 		}
 
+		JavaScriptBuilder<JS> js = context.js();
+
 		// add all anum entries
-		List<AstNode> enumEntries = new ArrayList<AstNode>();
+		List<JS> enumEntries = new ArrayList<JS>();
 		for (Element member : ElementUtils.getAllFieldsIn((TypeElement) type)) {
 			if (member.getKind() == ElementKind.ENUM_CONSTANT) {
-				enumEntries.add(string(member.getSimpleName().toString()));
+				enumEntries.add(js.string(member.getSimpleName().toString()));
 			}
 		}
 
-		FunctionCall enumConstructor = functionCall(name("stjs"), "enumeration", enumEntries);
+		JS enumConstructor = js.functionCall(js.property(js.name("stjs"), "enumeration"), enumEntries);
 
 		String typeName = context.getNames().getTypeName(context, type);
 		if (typeName.contains(".")) {
@@ -288,10 +289,10 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
 			String leftSide = innerClass ? replaceFullNameWithConstructor(typeName) : typeName;
 
-			stmts.add(statement(JavaScriptNodes.assignment(null, leftSide, enumConstructor)));
+			stmts.add(js.expressionStatement(js.assignment(Token.ASSIGN, js.name(leftSide), enumConstructor)));
 		} else {
 			// regular class
-			stmts.add(JavaScriptNodes.variableDeclarationStatement(typeName, enumConstructor));
+			stmts.add(js.variableDeclaration(true, Collections.singleton(NameValue.of(typeName, enumConstructor))));
 		}
 
 		return true;
@@ -300,7 +301,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	/**
 	 * Special generation for classes marked with {@link GlobalScope}. The name of the class must appear nowhere.
 	 */
-	private boolean generateGlobal(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext context, List<AstNode> stmts) {
+	private boolean generateGlobal(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
 		Element type = TreeUtils.elementFromDeclaration(tree);
 		if (!JavaNodes.isGlobal(type)) {
 			return false;
@@ -309,8 +310,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		// print members
 		for (Tree member : tree.getMembers()) {
 			if (!JavaNodes.isConstructor(member) && !isAbstractInstanceMethod(member) && !(member instanceof BlockTree)) {
-				List<AstNode> jsNodes = visitor.scan(member, context);
-				stmts.addAll(jsNodes);
+				stmts.add(visitor.scan(member, context));
 			}
 		}
 
@@ -322,27 +322,28 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context) {
-		List<AstNode> stmts = new ArrayList<AstNode>();
+		JavaScriptBuilder<JS> js = context.js();
+		List<JS> stmts = new ArrayList<JS>();
 		if (generateGlobal(visitor, tree, context, stmts)) {
 			// special construction for globals
-			return stmts;
+			return js.statements(stmts);
 		}
 
 		addNamespace(visitor, tree, context, stmts);
 
 		Element type = TreeUtils.elementFromDeclaration(tree);
 		String typeName = context.getNames().getTypeName(context, type);
-		AstNode name = name(typeName);
+		JS name = js.name(typeName);
 
 		if (generareEnum(visitor, tree, context, stmts)) {
 			// special construction for enums
-			return stmts;
+			return js.statements(stmts);
 		}
 
-		AstNode superClazz = getSuperClass(visitor, tree, context);
-		AstNode interfaces = getInterfaces(visitor, tree, context);
-		AstNode members = getMembers(visitor, tree, context);
-		AstNode typeDesc = getTypeDescription(visitor, tree, context);
+		JS superClazz = getSuperClass(visitor, tree, context);
+		JS interfaces = getInterfaces(visitor, tree, context);
+		JS members = getMembers(visitor, tree, context);
+		JS typeDesc = getTypeDescription(visitor, tree, context);
 		boolean anonymousClass = tree.getSimpleName().length() == 0;
 
 		if (anonymousClass) {
@@ -353,22 +354,22 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
 			String leftSide = innerClass ? replaceFullNameWithConstructor(typeName) : typeName;
 
-			stmts.add(statement(JavaScriptNodes.assignment(null, leftSide, getConstructor(visitor, tree, context))));
+			stmts.add(js.expressionStatement(js.assignment(Token.ASSIGN, js.name(leftSide), getConstructor(visitor, tree, context))));
 		} else {
 			// regular class
-			stmts.add(JavaScriptNodes.variableDeclarationStatement(typeName, getConstructor(visitor, tree, context)));
+			stmts.add(js.variableDeclaration(true, typeName, getConstructor(visitor, tree, context)));
 		}
 
-		FunctionCall extendsCall = functionCall(name("stjs"), "extend", name, superClazz, interfaces, members, typeDesc);
+		@SuppressWarnings("unchecked")
+		JS extendsCall = js.functionCall(js.property(js.name("stjs"), "extend"), Arrays.asList(name, superClazz, interfaces, members, typeDesc));
 		if (anonymousClass) {
 			stmts.add(extendsCall);
 		} else {
-			stmts.add(JavaScriptNodes.statement(extendsCall));
+			stmts.add(js.expressionStatement(extendsCall));
 		}
 		addStaticInitializers(visitor, tree, context, stmts);
 		addMainMethodCall(tree, stmts, context);
 
-		return stmts;
+		return js.statements(stmts);
 	}
-
 }
