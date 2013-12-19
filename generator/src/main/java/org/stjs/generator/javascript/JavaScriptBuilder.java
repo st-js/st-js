@@ -9,9 +9,9 @@ public interface JavaScriptBuilder<T> {
 
 	public T asExpressionList(Iterable<T> nodes);
 
-	public T assignment(int operator, T left, T right);
+	public T assignment(AssignOperator operator, T left, T right);
 
-	public T binary(int operator, Iterable<T> operands);
+	public T binary(BinaryOperator operator, Iterable<T> operands);
 
 	public T block(Iterable<T> statements);
 
@@ -31,7 +31,7 @@ public interface JavaScriptBuilder<T> {
 
 	public T functionCall(T target, Iterable<T> arguments);
 
-	public T keyword(int token);
+	public T keyword(Keyword token);
 
 	public T name(CharSequence name);
 
@@ -47,7 +47,7 @@ public interface JavaScriptBuilder<T> {
 
 	public T string(String value);
 
-	public T unary(int operator, T operand);
+	public T unary(UnaryOperator operator, T operand);
 
 	public T variableDeclaration(boolean statement, Iterable<NameValue<T>> vars);
 

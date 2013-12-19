@@ -1,7 +1,7 @@
 package org.stjs.generator.writer.expression;
 
-import org.mozilla.javascript.Token;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 
@@ -14,6 +14,6 @@ public class AssignmentWriter<JS> implements WriterContributor<AssignmentTree, J
 		JS left = visitor.scan(tree.getVariable(), context);
 		JS right = visitor.scan(tree.getExpression(), context);
 
-		return context.js().assignment(Token.ASSIGN, left, right);
+		return context.js().assignment(AssignOperator.ASSIGN, left, right);
 	}
 }

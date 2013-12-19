@@ -1,8 +1,8 @@
 package org.stjs.generator.writer.templates;
 
-import org.mozilla.javascript.Token;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
@@ -11,7 +11,6 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * array.$set(index, value) -> array[index] = value, or $set(obj, prop, value) -> obj[prop]=value
- * 
  * @author acraciun
  */
 public class PutTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
@@ -36,6 +35,6 @@ public class PutTemplate<JS> implements WriterContributor<MethodInvocationTree, 
 		}
 		JS eg = context.js().elementGet(target, visitor.scan(tree.getArguments().get(arg++), context));
 		JS value = visitor.scan(tree.getArguments().get(arg++), context);
-		return context.js().assignment(Token.ASSIGN, eg, value);
+		return context.js().assignment(AssignOperator.ASSIGN, eg, value);
 	}
 }

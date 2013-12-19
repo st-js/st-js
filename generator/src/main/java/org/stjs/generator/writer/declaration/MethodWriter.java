@@ -9,9 +9,9 @@ import javacutils.TreeUtils;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
-import org.mozilla.javascript.Token;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
@@ -85,7 +85,7 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		if (!JavaNodes.isConstructor(tree) && !isMethodOfJavascriptFunction(context.getCurrentPath())) {
 			String methodName = context.getNames().getMethodName(context, tree, context.getCurrentPath());
 			JS member = context.js().property(getMemberTarget(tree, context), methodName);
-			return context.js().expressionStatement(context.js().assignment(Token.ASSIGN, member, decl));
+			return context.js().expressionStatement(context.js().assignment(AssignOperator.ASSIGN, member, decl));
 		}
 
 		return decl;

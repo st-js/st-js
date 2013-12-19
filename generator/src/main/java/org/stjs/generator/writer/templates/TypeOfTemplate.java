@@ -1,8 +1,8 @@
 package org.stjs.generator.writer.templates;
 
-import org.mozilla.javascript.Token;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.javascript.UnaryOperator;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 
@@ -10,7 +10,6 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * $typeOf(arg) -> (typeof arg)
- * 
  * @author acraciun
  */
 public class TypeOfTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
@@ -23,6 +22,6 @@ public class TypeOfTemplate<JS> implements WriterContributor<MethodInvocationTre
 					"A 'typeof' template can only be applied for methods with 1 parameter");
 		}
 		JS prop = visitor.scan(tree.getArguments().get(0), context);
-		return context.js().paren(context.js().unary(Token.TYPEOF, prop));
+		return context.js().paren(context.js().unary(UnaryOperator.TYPEOF, prop));
 	}
 }

@@ -7,9 +7,9 @@ import javacutils.TreeUtils;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
-import org.mozilla.javascript.Token;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
@@ -19,7 +19,6 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * this is the standard generation template
- * 
  * @author acraciun
  */
 public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
@@ -57,7 +56,7 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		JS superType = context.js().name(GeneratorConstants.SUPER.equals(methodName) ? typeName : typeName + ".prototype." + methodName);
 
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
-		arguments.add(0, context.js().keyword(Token.THIS));
+		arguments.add(0, context.js().keyword(Keyword.THIS));
 		return context.js().functionCall(context.js().property(superType, "call"), arguments);
 	}
 

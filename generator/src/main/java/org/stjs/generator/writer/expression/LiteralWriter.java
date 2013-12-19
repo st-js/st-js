@@ -1,7 +1,7 @@
 package org.stjs.generator.writer.expression;
 
-import org.mozilla.javascript.Token;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 
@@ -17,10 +17,10 @@ public class LiteralWriter<JS> implements WriterContributor<LiteralTree, JS> {
 					tree.getValue().toString());
 		}
 		if (tree.getKind() == Kind.NULL_LITERAL) {
-			return context.js().keyword(Token.NULL);
+			return context.js().keyword(Keyword.NULL);
 		}
 		if (tree.getKind() == Kind.BOOLEAN_LITERAL) {
-			return context.js().keyword(Boolean.TRUE.equals(tree.getValue()) ? Token.TRUE : Token.FALSE);
+			return context.js().keyword(Boolean.TRUE.equals(tree.getValue()) ? Keyword.TRUE : Keyword.FALSE);
 		}
 		return context.js().number((Number) tree.getValue());
 	}

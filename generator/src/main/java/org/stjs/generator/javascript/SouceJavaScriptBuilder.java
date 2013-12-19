@@ -3,12 +3,6 @@ package org.stjs.generator.javascript;
 public class SouceJavaScriptBuilder implements JavaScriptBuilder<String> {
 
 	@Override
-	public String binary(int operator, Iterable<String> operands) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public String asExpressionList(Iterable<String> nodes) {
 		// TODO Auto-generated method stub
 		return null;
@@ -27,25 +21,7 @@ public class SouceJavaScriptBuilder implements JavaScriptBuilder<String> {
 	}
 
 	@Override
-	public String unary(int operator, String operand) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String keyword(int token) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public String expressionStatement(String expr) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String assignment(int operator, String left, String right) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -250,6 +226,30 @@ public class SouceJavaScriptBuilder implements JavaScriptBuilder<String> {
 
 	@Override
 	public String statements(Iterable<String> stmts) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String assignment(AssignOperator operator, String left, String right) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String binary(BinaryOperator operator, Iterable<String> operands) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String keyword(Keyword token) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String unary(UnaryOperator operator, String operand) {
 		// TODO Auto-generated method stub
 		return null;
 	}

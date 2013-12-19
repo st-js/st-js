@@ -5,9 +5,9 @@ import javacutils.TreeUtils;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 
-import org.mozilla.javascript.Token;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
@@ -33,7 +33,7 @@ public class MemberSelectWriter<JS> implements WriterContributor<MemberSelectTre
 		JS target = null;
 		if (JavaNodes.isSuper(tree.getExpression())) {
 			// super.field does not make sense, so convert it to this
-			target = context.js().keyword(Token.THIS);
+			target = context.js().keyword(Keyword.THIS);
 		} else {
 			target = visitor.scan(tree.getExpression(), context);
 		}

@@ -11,12 +11,6 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	}
 
 	@Override
-	public AstNode binary(int operator, Iterable<AstNode> operands) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public AstNode asExpressionList(Iterable<AstNode> nodes) {
 		// TODO Auto-generated method stub
 		return null;
@@ -35,31 +29,13 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	}
 
 	@Override
-	public AstNode unary(int operator, AstNode operand) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public AstNode newExpression(AstNode target, Iterable<AstNode> arguments) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public AstNode keyword(int token) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public AstNode expressionStatement(AstNode expr) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public AstNode assignment(int operator, AstNode left, AstNode right) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -252,6 +228,30 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 
 	@Override
 	public AstNode statements(Iterable<AstNode> stmts) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AstNode assignment(AssignOperator operator, AstNode left, AstNode right) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AstNode binary(BinaryOperator operator, Iterable<AstNode> operands) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AstNode keyword(Keyword token) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AstNode unary(UnaryOperator operator, AstNode operand) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -20,10 +20,12 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 
-import org.mozilla.javascript.Token;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.javascript.JavaScriptBuilder;
+import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.javascript.NameValue;
+import org.stjs.generator.javascript.UnaryOperator;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.WriterContributor;
@@ -64,7 +66,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		Element type = TreeUtils.elementFromDeclaration(clazz);
 		if (clazz.getExtendsClause() == null || type.getKind() == ElementKind.INTERFACE) {
 			// no super class found
-			return context.js().keyword(Token.NULL);
+			return context.js().keyword(Keyword.NULL);
 		}
 
 		Element superType = TreeUtils.elementFromUse((ExpressionTree) clazz.getExtendsClause());
@@ -123,7 +125,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		}
 
 		if (nonConstructors.isEmpty()) {
-			return context.js().keyword(Token.NULL);
+			return context.js().keyword(Keyword.NULL);
 		}
 		@SuppressWarnings("unchecked")
 		List<JS> params = Arrays.asList(context.js().name(JavascriptKeywords.CONSTRUCTOR), context.js().name(JavascriptKeywords.PROTOTYPE));
@@ -194,7 +196,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		JS target = JavaNodes.isGlobal(type) ? null : context.js().name(context.getNames().getTypeName(context, type));
 
 		JavaScriptBuilder<JS> js = context.js();
-		JS condition = js.unary(Token.NOT, js.property(js.name("stjs"), "mainCallDisabled"));
+		JS condition = js.unary(UnaryOperator.LOGICAL_COMPLEMENT, js.property(js.name("stjs"), "mainCallDisabled"));
 		JS thenPart = js.expressionStatement(js.functionCall(js.property(target, "main"), Collections.<JS> emptyList()));
 		stmts.add(js.ifStatement(condition, thenPart, null));
 	}
@@ -203,7 +205,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	private JS getFieldTypeDesc(TypeMirror type, GenerationContext<JS> context) {
 		JavaScriptBuilder<JS> js = context.js();
 		if (JavaNodes.isJavaScriptPrimitive(type)) {
-			return js.keyword(Token.NULL);
+			return js.keyword(Keyword.NULL);
 		}
 		JS typeName = js.string(context.getNames().getTypeName(context, type));
 
@@ -289,7 +291,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
 			String leftSide = innerClass ? replaceFullNameWithConstructor(typeName) : typeName;
 
-			stmts.add(js.expressionStatement(js.assignment(Token.ASSIGN, js.name(leftSide), enumConstructor)));
+			stmts.add(js.expressionStatement(js.assignment(AssignOperator.ASSIGN, js.name(leftSide), enumConstructor)));
 		} else {
 			// regular class
 			stmts.add(js.variableDeclaration(true, Collections.singleton(NameValue.of(typeName, enumConstructor))));
@@ -354,7 +356,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
 			String leftSide = innerClass ? replaceFullNameWithConstructor(typeName) : typeName;
 
-			stmts.add(js.expressionStatement(js.assignment(Token.ASSIGN, js.name(leftSide), getConstructor(visitor, tree, context))));
+			stmts.add(js.expressionStatement(js.assignment(AssignOperator.ASSIGN, js.name(leftSide), getConstructor(visitor, tree, context))));
 		} else {
 			// regular class
 			stmts.add(js.variableDeclaration(true, typeName, getConstructor(visitor, tree, context)));

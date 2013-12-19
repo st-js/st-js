@@ -7,9 +7,9 @@ import javacutils.TypesUtils;
 
 import javax.lang.model.element.Element;
 
-import org.mozilla.javascript.Token;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javascript.JavaScriptBuilder;
+import org.stjs.generator.javascript.UnaryOperator;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.javascript.Array;
@@ -30,7 +30,6 @@ import com.sun.source.tree.EnhancedForLoopTree;
  * </pre>
  * 
  * Warning: the iteration is on indexes as in JavaScript, not on values as in Java!
- * 
  * @author acraciun
  */
 public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForLoopTree, JS> {
@@ -53,8 +52,9 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 		JavaScriptBuilder<JS> js = context.js();
 
 		// !(iterated).hasOwnProperty(tree.getVariable().getName())
-		JS not = js
-				.unary(Token.NOT,
+		JS not =
+				js.unary(
+						UnaryOperator.LOGICAL_COMPLEMENT,
 						js.functionCall(js.property(js.paren(iterated), "hasOwnProperty"),
 								Collections.singleton(js.name(tree.getVariable().getName()))));
 

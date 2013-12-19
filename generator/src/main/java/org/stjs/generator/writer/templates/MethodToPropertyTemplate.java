@@ -4,9 +4,9 @@ import javacutils.TreeUtils;
 
 import javax.lang.model.element.ExecutableElement;
 
-import org.mozilla.javascript.Token;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
@@ -18,7 +18,6 @@ import com.sun.source.tree.MethodInvocationTree;
  * $method() => $method and <br>
  * $method(x) => $method = x and $staticMethod(x) => x.$method and <br>
  * $staticMethod(x, y) => x.$method = y
- * 
  * @author acraciun
  */
 public class MethodToPropertyTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
@@ -56,6 +55,6 @@ public class MethodToPropertyTemplate<JS> implements WriterContributor<MethodInv
 		}
 
 		// $staticMethod(x,y) or $method(x)
-		return context.js().assignment(Token.ASSIGN, property, visitor.scan(tree.getArguments().get(arg++), context));
+		return context.js().assignment(AssignOperator.ASSIGN, property, visitor.scan(tree.getArguments().get(arg++), context));
 	}
 }

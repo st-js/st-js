@@ -7,12 +7,12 @@ import javax.lang.model.element.ElementKind;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 
-import com.google.javascript.rhino.Token;
 import com.sun.source.tree.IdentifierTree;
 
 /**
@@ -44,7 +44,7 @@ public class IdentifierWriter<JS> implements WriterContributor<IdentifierTree, J
 		String name = tree.getName().toString();
 
 		if (GeneratorConstants.SPECIAL_THIS.equals(name) || GeneratorConstants.THIS.equals(name)) {
-			return context.js().keyword(Token.THIS);
+			return context.js().keyword(Keyword.THIS);
 		}
 		Element def = TreeUtils.elementFromUse(tree);
 		assert def != null : "Cannot find the definition for variable " + tree.getName();
