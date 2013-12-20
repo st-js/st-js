@@ -41,24 +41,24 @@ public class StatementsGeneratorTest {
 
 	@Test(expected = JavascriptFileGenerationException.class)
 	public void testArray2() {
-		//java array creation is forbidden
+		// java array creation is forbidden
 		generate(Statements6.class);
 	}
 
 	@Ignore
-	//comments are currenly disabled
+	// comments are currenly disabled
 	public void testLineComment() {
 		assertCodeContains(Statements7.class, "//line comment");
 	}
 
 	@Ignore
-	//comments are currenly disabled
+	// comments are currenly disabled
 	public void testBlockComment() {
 		assertCodeContains(Statements8.class, "/* * block comment */");
 	}
 
 	@Ignore
-	//comments are currenly disabled
+	// comments are currenly disabled
 	public void testJavadocComment() {
 		assertCodeContains(Statements8b.class, "/** javadoc comment */");
 	}
@@ -111,13 +111,13 @@ public class StatementsGeneratorTest {
 
 	@Test(expected = JavascriptFileGenerationException.class)
 	public void testSynchronizedBlock() {
-		//synchronized not supported
+		// synchronized not supported
 		generate(Statements17.class);
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
 	public void testAssert() {
-		//assert not supported
+		// assert not supported
 		generate(Statements18.class);
 	}
 }

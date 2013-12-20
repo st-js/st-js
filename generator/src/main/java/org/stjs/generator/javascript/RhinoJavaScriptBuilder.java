@@ -47,6 +47,12 @@ import org.mozilla.javascript.ast.WhileLoop;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
+/**
+ * 
+ * this JavaScript builder uses the rhino AST nodes to build the synthax tree.
+ * 
+ * @author acraciun
+ */
 public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	private static final int PROP_JAVA_LINE_NO = AstNode.LAST_PROP + 1;
 	private static final int PROP_JAVA_COLUMN_NO = AstNode.LAST_PROP + 2;
@@ -150,9 +156,9 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	}
 
 	@Override
-	public AstNode catchClause(AstNode condition, AstNode body) {
+	public AstNode catchClause(AstNode varName, AstNode body) {
 		CatchClause c = new CatchClause();
-		c.setCatchCondition(condition);
+		c.setVarName((Name) varName);
 		if (body instanceof Block) {
 			c.setBody((Block) body);
 		} else {

@@ -23,7 +23,7 @@ public interface JavaScriptBuilder<T> {
 
 	public T caseStatement(@Nullable T expression, @Nonnull Iterable<T> statements);
 
-	public T catchClause(@Nonnull T condition, @Nonnull T body);
+	public T catchClause(@Nonnull T varName, @Nonnull T body);
 
 	public T continueStatement(@Nullable T label);
 
