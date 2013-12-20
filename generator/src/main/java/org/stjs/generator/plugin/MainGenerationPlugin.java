@@ -85,13 +85,11 @@ import org.stjs.generator.writer.templates.TypeOfTemplate;
 
 /**
  * this is the main generation plugin that adds all the needed checks and writers.
- * 
  * @author acraciun
- * 
  */
-public class MainGenerationPlugin {
+public class MainGenerationPlugin<JS> {
 
-	public GenerationContext newContext() {
+	public GenerationContext<JS> newContext() {
 		return null;
 	}
 
@@ -127,48 +125,48 @@ public class MainGenerationPlugin {
 		return visitor;
 	}
 
-	public WriterVisitor getWriterVisitor() {
-		WriterVisitor visitor = new WriterVisitor();
-		visitor.contribute(new CompilationUnitWriter());
+	public WriterVisitor<JS> getWriterVisitor() {
+		WriterVisitor<JS> visitor = new WriterVisitor<JS>();
+		visitor.contribute(new CompilationUnitWriter<JS>());
 
-		visitor.contribute(new ClassWriter());
-		visitor.contribute(new MethodWriter());
+		visitor.contribute(new ClassWriter<JS>());
+		visitor.contribute(new MethodWriter<JS>());
 
-		visitor.contribute(new ArrayAccessWriter());
-		visitor.contribute(new AssignmentWriter());
-		visitor.contribute(new BinaryWriter());
-		visitor.contribute(new CompoundAssignmentWriter());
-		visitor.contribute(new ConditionalWriter());
-		visitor.contribute(new IdentifierWriter());
-		visitor.contribute(new InstanceofWriter());
-		visitor.contribute(new LiteralWriter());
-		visitor.contribute(new MemberSelectWriter());
-		visitor.contribute(new MethodInvocationWriter());
-		visitor.contribute(new NewArrayWriter());
-		visitor.contribute(new NewClassWriter());
-		visitor.contribute(new ParenthesizedWriter());
-		visitor.contribute(new TypeCastWriter());
-		visitor.contribute(new UnaryWriter());
+		visitor.contribute(new ArrayAccessWriter<JS>());
+		visitor.contribute(new AssignmentWriter<JS>());
+		visitor.contribute(new BinaryWriter<JS>());
+		visitor.contribute(new CompoundAssignmentWriter<JS>());
+		visitor.contribute(new ConditionalWriter<JS>());
+		visitor.contribute(new IdentifierWriter<JS>());
+		visitor.contribute(new InstanceofWriter<JS>());
+		visitor.contribute(new LiteralWriter<JS>());
+		visitor.contribute(new MemberSelectWriter<JS>());
+		visitor.contribute(new MethodInvocationWriter<JS>());
+		visitor.contribute(new NewArrayWriter<JS>());
+		visitor.contribute(new NewClassWriter<JS>());
+		visitor.contribute(new ParenthesizedWriter<JS>());
+		visitor.contribute(new TypeCastWriter<JS>());
+		visitor.contribute(new UnaryWriter<JS>());
 
-		visitor.contribute(new AssertWriter());
-		visitor.contribute(new BlockWriter());
-		visitor.contribute(new BreakWriter());
-		visitor.contribute(new CaseWriter());
-		visitor.contribute(new CatchWriter());
-		visitor.contribute(new ContinueWriter());
-		visitor.contribute(new DoWhileLoopWriter());
-		visitor.contribute(new EmptyStatementWriter());
-		visitor.contribute(new EnhancedForLoopWriter());
-		visitor.contribute(new ExpressionStatementWriter());
-		visitor.contribute(new ForLoopWriter());
-		visitor.contribute(new IfWriter());
-		visitor.contribute(new LabeledStatementWriter());
-		visitor.contribute(new ReturnWriter());
-		visitor.contribute(new SwitchWriter());
-		visitor.contribute(new SynchronizedWriter());
-		visitor.contribute(new TryWriter());
-		visitor.contribute(new VariableWriter());
-		visitor.contribute(new WhileLoopWriter());
+		visitor.contribute(new AssertWriter<JS>());
+		visitor.contribute(new BlockWriter<JS>());
+		visitor.contribute(new BreakWriter<JS>());
+		visitor.contribute(new CaseWriter<JS>());
+		visitor.contribute(new CatchWriter<JS>());
+		visitor.contribute(new ContinueWriter<JS>());
+		visitor.contribute(new DoWhileLoopWriter<JS>());
+		visitor.contribute(new EmptyStatementWriter<JS>());
+		visitor.contribute(new EnhancedForLoopWriter<JS>());
+		visitor.contribute(new ExpressionStatementWriter<JS>());
+		visitor.contribute(new ForLoopWriter<JS>());
+		visitor.contribute(new IfWriter<JS>());
+		visitor.contribute(new LabeledStatementWriter<JS>());
+		visitor.contribute(new ReturnWriter<JS>());
+		visitor.contribute(new SwitchWriter<JS>());
+		visitor.contribute(new SynchronizedWriter<JS>());
+		visitor.contribute(new TryWriter<JS>());
+		visitor.contribute(new VariableWriter<JS>());
+		visitor.contribute(new WhileLoopWriter<JS>());
 
 		addMethodCallTemplates(visitor);
 		return visitor;
@@ -178,22 +176,22 @@ public class MainGenerationPlugin {
 		return DiscriminatorKey.of(MethodInvocationWriter.class.getSimpleName(), name);
 	}
 
-	protected void addMethodCallTemplates(WriterVisitor visitor) {
-		visitor.contribute(template("adapter"), new AdapterTemplate());
-		visitor.contribute(template("array"), new ArrayTemplate());
-		visitor.contribute(template("delete"), new DeleteTemplate());
-		visitor.contribute(template("get"), new GetTemplate());
-		visitor.contribute(template("invoke"), new InvokeTemplate());
-		visitor.contribute(template("js"), new JsTemplate());
-		visitor.contribute(template("map"), new MapTemplate());
-		visitor.contribute(template("toProperty"), new MethodToPropertyTemplate());
-		visitor.contribute(template("or"), new OrTemplate());
-		visitor.contribute(template("prefix"), new PrefixTemplate());
-		visitor.contribute(template("properties"), new PropertiesTemplate());
-		visitor.contribute(template("put"), new PutTemplate());
-		visitor.contribute(template("set"), new SetTemplate());
-		visitor.contribute(template("typeOf"), new TypeOfTemplate());
-		visitor.contribute(template("assert"), new AssertTemplate());
-		visitor.contribute(template("none"), new DefaultTemplate());
+	protected void addMethodCallTemplates(WriterVisitor<JS> visitor) {
+		visitor.contribute(template("adapter"), new AdapterTemplate<JS>());
+		visitor.contribute(template("array"), new ArrayTemplate<JS>());
+		visitor.contribute(template("delete"), new DeleteTemplate<JS>());
+		visitor.contribute(template("get"), new GetTemplate<JS>());
+		visitor.contribute(template("invoke"), new InvokeTemplate<JS>());
+		visitor.contribute(template("js"), new JsTemplate<JS>());
+		visitor.contribute(template("map"), new MapTemplate<JS>());
+		visitor.contribute(template("toProperty"), new MethodToPropertyTemplate<JS>());
+		visitor.contribute(template("or"), new OrTemplate<JS>());
+		visitor.contribute(template("prefix"), new PrefixTemplate<JS>());
+		visitor.contribute(template("properties"), new PropertiesTemplate<JS>());
+		visitor.contribute(template("put"), new PutTemplate<JS>());
+		visitor.contribute(template("set"), new SetTemplate<JS>());
+		visitor.contribute(template("typeOf"), new TypeOfTemplate<JS>());
+		visitor.contribute(template("assert"), new AssertTemplate<JS>());
+		visitor.contribute(template("none"), new DefaultTemplate<JS>());
 	}
 }

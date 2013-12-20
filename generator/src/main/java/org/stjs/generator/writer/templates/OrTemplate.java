@@ -13,6 +13,7 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * $or(x, y, z) -> (x || y || z)
+ * 
  * @author acraciun
  */
 public class OrTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
@@ -25,6 +26,6 @@ public class OrTemplate<JS> implements WriterContributor<MethodInvocationTree, J
 					"A 'or' template can only be applied for methods with at least 2 parameters");
 		}
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
-		return context.js().paren(context.js().binary(BinaryOperator.OR, arguments));
+		return context.js().paren(context.js().binary(BinaryOperator.CONDITIONAL_OR, arguments));
 	}
 }

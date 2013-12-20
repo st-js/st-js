@@ -9,27 +9,27 @@ import com.sun.source.tree.Tree.Kind;
 
 /**
  * this is the list of the JavaScript operators and how they map on Java AST element Kind and Rhino token IDs
+ * 
  * @author acraciun
  */
 public enum BinaryOperator {
-	//math
-	MULTIPLY(Kind.MULTIPLY, Token.MUL), DIVIDE(Kind.DIVIDE, Token.DIV),
-	REMAINDER(Kind.REMAINDER, Token.MOD),
-	PLUS(Kind.PLUS, Token.ADD),
-	MINUSt(Kind.MINUS, Token.DEC),
+	// math
+	MULTIPLY(Kind.MULTIPLY, Token.MUL), DIVIDE(Kind.DIVIDE, Token.DIV), REMAINDER(Kind.REMAINDER, Token.MOD), PLUS(Kind.PLUS, Token.ADD), MINUSt(
+			Kind.MINUS, Token.DEC),
 
-	//bit
-	LEFT_SHIFT(Kind.LEFT_SHIFT, Token.LSH),
-	RIGHT_SHIFT(Kind.RIGHT_SHIFT, Token.RSH),
-	UNSIGNED_RIGHT_SHIFT(Kind.UNSIGNED_RIGHT_SHIFT, Token.URSH),
+	// bit
+	LEFT_SHIFT(Kind.LEFT_SHIFT, Token.LSH), RIGHT_SHIFT(Kind.RIGHT_SHIFT, Token.RSH), UNSIGNED_RIGHT_SHIFT(Kind.UNSIGNED_RIGHT_SHIFT, Token.URSH), AND(
+			Kind.AND, Token.BITAND), XOR(Kind.XOR, Token.BITXOR), OR(Kind.OR, Token.BITOR),
 
-	//comparator
-	LESS_THAN(Kind.LESS_THAN, Token.LT), LESS_THAN_EQUAL(Kind.LESS_THAN_EQUAL, Token.LE), GREATER_THAN(Kind.GREATER_THAN, Token.GT),
-	GREATER_THAN_EQUAL(Kind.GREATER_THAN_EQUAL, Token.GE), EQUAL_TOt(Kind.EQUAL_TO, Token.EQ), NOT_EQUAL_TO(Kind.NOT_EQUAL_TO, Token.NE),
+	// comparator
+	LESS_THAN(Kind.LESS_THAN, Token.LT), LESS_THAN_EQUAL(Kind.LESS_THAN_EQUAL, Token.LE), GREATER_THAN(Kind.GREATER_THAN, Token.GT), GREATER_THAN_EQUAL(
+			Kind.GREATER_THAN_EQUAL, Token.GE), EQUAL_TOt(Kind.EQUAL_TO, Token.EQ), NOT_EQUAL_TO(Kind.NOT_EQUAL_TO, Token.NE),
 
-	//logical
-	AND(Kind.AND, Token.BITAND), XOR(Kind.XOR, Token.BITXOR), OR(Kind.OR, Token.BITOR), CONDITIONAL_AND(Kind.CONDITIONAL_AND, Token.AND),
-	CONDITIONAL_OR(Kind.CONDITIONAL_OR, Token.OR);
+	// logical
+	CONDITIONAL_AND(Kind.CONDITIONAL_AND, Token.AND), CONDITIONAL_OR(Kind.CONDITIONAL_OR, Token.OR),
+
+	// javascript only
+	COMMA(null, Token.COMMA);
 
 	private final Kind java;
 	private final int javaScript;
@@ -50,7 +50,9 @@ public enum BinaryOperator {
 	private static final Map<Kind, BinaryOperator> byJavaOperator = new EnumMap<Kind, BinaryOperator>(Kind.class);
 	static {
 		for (BinaryOperator op : values()) {
-			byJavaOperator.put(op.getJava(), op);
+			if (op.getJava() != null) {
+				byJavaOperator.put(op.getJava(), op);
+			}
 		}
 	}
 

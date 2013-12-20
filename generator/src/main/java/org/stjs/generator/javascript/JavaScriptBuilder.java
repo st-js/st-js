@@ -1,92 +1,97 @@
 package org.stjs.generator.javascript;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * .
+ * 
  * @author acraciun
  */
 public interface JavaScriptBuilder<T> {
-	public T array(Iterable<T> values);
+	public T array(@Nonnull Iterable<T> values);
 
-	public T asExpressionList(Iterable<T> nodes);
+	public T asExpressionList(@Nonnull Iterable<T> nodes);
 
-	public T assignment(AssignOperator operator, T left, T right);
+	public T assignment(@Nonnull AssignOperator operator, @Nonnull T left, @Nonnull T right);
 
-	public T binary(BinaryOperator operator, Iterable<T> operands);
+	public T binary(@Nonnull BinaryOperator operator, @Nonnull Iterable<T> operands);
 
-	public T block(Iterable<T> statements);
+	public T block(@Nonnull Iterable<T> statements);
 
-	public T breakStatement(T label);
+	public T breakStatement(@Nullable T label);
 
-	public T caseStatement(T expression, Iterable<T> statements);
+	public T caseStatement(@Nullable T expression, @Nonnull Iterable<T> statements);
 
-	public T catchClause(T contidion, T body);
+	public T catchClause(@Nonnull T condition, @Nonnull T body);
 
-	public T continueStatement(T label);
+	public T continueStatement(@Nullable T label);
 
-	public T elementGet(T target, T index);
+	public T elementGet(@Nonnull T target, @Nonnull T index);
 
-	public T expressionStatement(T expr);
+	public T expressionStatement(@Nonnull T expr);
 
-	public T function(String name, Iterable<T> params, T body);
+	public T function(@Nullable String name, @Nonnull Iterable<T> params, @Nullable T body);
 
-	public T functionCall(T target, Iterable<T> arguments);
+	public T functionCall(@Nonnull T target, @Nonnull Iterable<T> arguments);
 
-	public T keyword(Keyword token);
+	public T keyword(@Nonnull Keyword token);
 
-	public T name(CharSequence name);
+	public T name(@Nonnull CharSequence name);
 
-	public T newExpression(T target, Iterable<T> arguments);
+	public T label(@Nonnull CharSequence name);
 
-	public T object(Iterable<NameValue<T>> props);
+	public T newExpression(@Nonnull T target, @Nonnull Iterable<T> arguments);
 
-	public T paren(T expr);
+	public T object(@Nonnull Iterable<NameValue<T>> props);
 
-	public T position(T node, int javaLineNumber, int javaColumnNumber);
+	public T paren(@Nonnull T expr);
 
-	public T property(T target, CharSequence name);
+	public T position(@Nonnull T node, int javaLineNumber, int javaColumnNumber);
 
-	public T string(String value);
+	public T property(@Nonnull T target, @Nonnull CharSequence name);
 
-	public T unary(UnaryOperator operator, T operand);
+	public T string(@Nonnull String value);
 
-	public T variableDeclaration(boolean statement, Iterable<NameValue<T>> vars);
+	public T unary(@Nonnull UnaryOperator operator, @Nonnull T operand);
 
-	public T variableDeclaration(boolean statement, CharSequence name, T init);
+	public T variableDeclaration(boolean statement, @Nonnull Iterable<NameValue<T>> vars);
 
-	public T doLoop(T condition, T body);
+	public T variableDeclaration(boolean statement, @Nonnull CharSequence name, @Nullable T init);
+
+	public T doLoop(@Nonnull T condition, @Nonnull T body);
 
 	public T emptyStatement();
 
-	public T forInLoop(T iterator, T iterated, T body);
+	public T forInLoop(@Nullable T iterator, @Nullable T iterated, @Nullable T body);
 
-	public T forLoop(T init, T condition, T update, T body);
+	public T forLoop(@Nullable T init, @Nullable T condition, @Nullable T update, @Nullable T body);
 
-	public T ifStatement(T condition, T thenPart, T elsePart);
+	public T ifStatement(@Nonnull T condition, @Nonnull T thenPart, @Nullable T elsePart);
 
-	public T addStatement(T blockOrStatement, T statement);
+	public T addStatement(@Nullable T blockOrStatement, @Nullable T statement);
 
-	public T labeledStatement(T label, T statement);
+	public T labeledStatement(@Nonnull T label, @Nonnull T statement);
 
-	public T returnStatement(T returnValue);
+	public T returnStatement(@Nullable T returnValue);
 
-	public T switchStatement(T expr, Iterable<T> cases);
+	public T switchStatement(@Nonnull T expr, @Nonnull Iterable<T> cases);
 
-	public T tryStatement(T tryBlock, Iterable<T> catchClauses, T finallyBlock);
+	public T tryStatement(@Nonnull T tryBlock, @Nonnull Iterable<T> catchClauses, @Nullable T finallyBlock);
 
-	public T whileLoop(T condition, T body);
+	public T whileLoop(@Nonnull T condition, @Nullable T body);
 
-	public T root(Iterable<T> children);
+	public T root(@Nonnull Iterable<T> children);
 
-	// AstNode node = new Parser().parse(code, "inline", 0);
-	public T code(String code);
+	public T code(@Nonnull String code);
 
-	public String toString(T node);
+	public String toString(@Nullable T node);
 
-	public T conditionalExpression(T test, T trueExpr, T falseExpr);
+	public T conditionalExpression(@Nonnull T test, @Nonnull T trueExpr, @Nonnull T falseExpr);
 
-	public T character(String c);
+	public T character(@Nonnull String c);
 
-	public T number(Number n);
+	public T number(@Nonnull Number n);
 
-	public T statements(Iterable<T> stmts);
+	public T statements(@Nonnull Iterable<T> stmts);
 }

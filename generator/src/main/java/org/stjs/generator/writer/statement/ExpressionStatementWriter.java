@@ -11,6 +11,9 @@ public class ExpressionStatementWriter<JS> implements WriterContributor<Expressi
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, ExpressionStatementTree tree, GenerationContext<JS> context) {
 		JS expression = visitor.scan(tree.getExpression(), context);
+		if (expression == null) {
+			return null;
+		}
 		return context.withPosition(tree, context.js().expressionStatement(expression));
 	}
 }

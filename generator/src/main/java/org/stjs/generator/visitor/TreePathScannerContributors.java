@@ -15,8 +15,7 @@ import com.sun.source.util.TreeScanner;
 public class TreePathScannerContributors<R, P extends TreePathHolder, V extends TreePathScannerContributors<R, P, V>> extends TreeScanner<R, P> {
 	private final Multimap<Class<?>, VisitorContributor<? extends Tree, R, P, V>> contributors = LinkedListMultimap.create();
 
-	private final Map<DiscriminatorKey, VisitorContributor<? extends Tree, R, P, V>> contributorsWithDiscriminator =
-			new HashMap<DiscriminatorKey, VisitorContributor<? extends Tree, R, P, V>>();
+	private final Map<DiscriminatorKey, VisitorContributor<? extends Tree, R, P, V>> contributorsWithDiscriminator = new HashMap<DiscriminatorKey, VisitorContributor<? extends Tree, R, P, V>>();
 
 	private boolean continueScanning = false;
 
@@ -53,9 +52,11 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 		for (Type iface : interfaces) {
 			if (iface instanceof ParameterizedType) {
 				ParameterizedType ptype = (ParameterizedType) iface;
-				if (ptype.getRawType().equals(VisitorContributor.class)) {
-					// I need the class of the tree
-					return (Class<?>) ptype.getActualTypeArguments()[0];
+				for (Type arg : ptype.getActualTypeArguments()) {
+					// look for the first argument that is a descendant of Tree
+					if (arg instanceof Class<?> && Tree.class.isAssignableFrom((Class<?>) arg)) {
+						return (Class<?>) arg;
+					}
 				}
 			}
 		}
@@ -113,8 +114,7 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 		p.setCurrentPath(new TreePath(prev, tree));
 		try {
 			return visit(tree, p, null);
-		}
-		finally {
+		} finally {
 			p.setCurrentPath(prev);
 		}
 	}

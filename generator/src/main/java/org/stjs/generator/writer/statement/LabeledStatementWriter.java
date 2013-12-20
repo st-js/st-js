@@ -10,7 +10,7 @@ public class LabeledStatementWriter<JS> implements WriterContributor<LabeledStat
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, LabeledStatementTree tree, GenerationContext<JS> context) {
-		JS label = context.js().name(tree.getLabel());
+		JS label = context.js().label(tree.getLabel());
 		JS statement = visitor.scan(tree.getStatement(), context);
 
 		return context.withPosition(tree, context.js().labeledStatement(label, statement));

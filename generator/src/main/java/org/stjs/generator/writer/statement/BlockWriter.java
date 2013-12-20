@@ -46,8 +46,9 @@ public class BlockWriter<JS> implements WriterContributor<BlockTree, JS> {
 
 		if (tree.isStatic()) {
 			// generate the enclosing function call (function(){BLOCK()})() to avoid polluting the global scope
-			JS function = js.function(null, Collections.<JS>emptyList(), block);
-			block = js.functionCall(js.paren(function), Collections.<JS>emptyList());
+			JS function = js.function(null, Collections.<JS> emptyList(), block);
+			block = js.functionCall(js.paren(function), Collections.<JS> emptyList());
+			block = js.expressionStatement(block);
 		}
 		return context.withPosition(tree, block);
 	}

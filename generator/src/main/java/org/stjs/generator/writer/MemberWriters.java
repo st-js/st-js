@@ -14,7 +14,7 @@ public class MemberWriters {
 		if (JavaNodes.isStatic(memberDecl)) {
 			return context.js().name(context.getNames().getTypeName(context, memberDecl.getEnclosingElement()));
 		}
-		return context.js().keyword(Keyword.NULL);
+		return context.js().keyword(Keyword.THIS);
 	}
 
 }
