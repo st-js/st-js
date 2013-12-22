@@ -87,9 +87,9 @@ class JSAbstractOperations {
 				// because Java guarantees that we can only get a String, null or an exception
 				return callToString(arg);
 			} catch (InvocationTargetException e) {
-				throw new RuntimeException(e.getTargetException().getMessage(), e.getTargetException());
+				throw new Error("TypeError", e.getTargetException().getMessage(), e.getTargetException());
 			} catch (Exception e) {
-				throw new RuntimeException(e);
+				throw new Error("TypeError", e.getMessage(), e);
 			}
 
 			// toString is guaranteed to be callable and return a primitive value in Java, so we will
@@ -103,10 +103,10 @@ class JSAbstractOperations {
 						return value;
 					}
 				} catch (InvocationTargetException e) {
-					throw new RuntimeException(e.getTargetException().getMessage(), e.getTargetException());
+					throw new Error("TypeError", e.getTargetException().getMessage(), e.getTargetException());
 				} catch (Exception e) {
 					// we can still get exception like SecurityException or IllegalAccessException here
-					throw new RuntimeException(e);
+					throw new Error("TypeError", e.getMessage(), e);
 				}
 			}
 
@@ -115,11 +115,12 @@ class JSAbstractOperations {
 				// because Java guarantees that we can only get a String, null or an exception
 				return callToString(arg);
 			} catch (InvocationTargetException e) {
-				throw new RuntimeException(e.getTargetException().getMessage(), e.getTargetException());
+				throw new Error("TypeError", e.getTargetException().getMessage(), e.getTargetException());
 			} catch (Exception e) {
-				throw new RuntimeException(e);
+				throw new Error("TypeError", e.getMessage(), e);
 			}
 		}
+		// should not happen due to user code
 		throw new IllegalArgumentException("Unknown hint: " + hint);
 	}
 
@@ -434,7 +435,7 @@ class JSAbstractOperations {
 	 */
 	static Object ToObject(Object arg) {
 		if (arg == null) {
-			throw new RuntimeException("TypeError");
+			throw new Error("TypeError", "null is not an Object");
 		}
 		return arg;
 	}

@@ -51,4 +51,21 @@ public class ArrayPushTest {
 		assertEquals("1", x.$get(4));
 		assertEquals(-1, x.$get(5));
 	}
+
+	@Test
+	public void testPush03() {
+		// tests push on a sparse array store
+		Array<Integer> x = $array();
+		x.$length(10000);
+
+		int push = x.push(0, 1, 2, 3, 4);
+
+		assertEquals(10005, push);
+		assertEquals(10005, x.$length());
+		assertEquals(0, x.$get(10000).intValue());
+		assertEquals(1, x.$get(10001).intValue());
+		assertEquals(2, x.$get(10002).intValue());
+		assertEquals(3, x.$get(10003).intValue());
+		assertEquals(4, x.$get(10004).intValue());
+	}
 }

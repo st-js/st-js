@@ -1034,7 +1034,7 @@ public class Date {
 	 * Return this <tt>Date</tt> in UTC formatted using the ISO-8601 format 
 	 * (described in the class documentation). All fields are present in the String. 
 	 * The time zone is always UTC, denoted by the suffix Z. If the time value 
-	 * of this object is not a finite Number a RangeError exception is thrown.
+	 * of this object is not a finite Number a Error exception is thrown.
 	 * 
 	 * @return this <tt>Date</tt> in UTC formatted using the ISO-8601 format
 	 */

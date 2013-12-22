@@ -16,6 +16,7 @@
 package org.stjs.javascript;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -45,6 +46,8 @@ import org.stjs.javascript.functions.Function4;
  */
 public class Array<V> implements Iterable<String> {
 
+	private static final Object UNSET = new Object();
+
 	private ArrayStore<V> array = new PackedArrayStore<V>();
 	private long length = 0;
 	private long setElements = 0;
@@ -64,18 +67,34 @@ public class Array<V> implements Iterable<String> {
 	 *            the length of this new array
 	 */
 	public Array(Number len) {
-		this.$length(len.intValue());
+		double signedLen = len.doubleValue();
+		double unsignedLen = JSAbstractOperations.ToUInt32(signedLen).doubleValue();
+		if (signedLen != unsignedLen) {
+			throw new Error("RangeError", len + " is out of range for Array length");
+		}
+		this.$length();
 	}
 
 	/**
 	 * Constructs a new <tt>Array</tt> containing all the specified elements in the order in which they appear in the
-	 * argument list.
+	 * argument list. If the specified values contain exactly one element, and that element is a Number, then this
+	 * constructor behaves like <tt>Array(Number)</tt>.
 	 * 
 	 * @param values
 	 *            the values to add to this array, in the order in which they appear in the argument list
 	 */
 	public Array(V... values) {
-		this.push(values);
+		// special case when there is a single Number argument: Should behave like Array(Number)
+		if (values.length == 1 && values[0] instanceof Number) {
+			double signedLen = ((Number) values[0]).doubleValue();
+			double unsignedLen = JSAbstractOperations.ToUInt32(signedLen).doubleValue();
+			if (signedLen != unsignedLen) {
+				throw new Error("RangeError", signedLen + " is out of range for Array length");
+			}
+			this.$length();
+		} else {
+			this.push(values);
+		}
 	}
 
 	/**
@@ -254,14 +273,14 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@Template("toProperty")
 	public void $length(int newLength) {
-		// if (newLength < array.size()) {
-		// splice(newLength, array.size() - newLength);
-		// } else {
-		// while (array.size() < newLength) {
-		// array.add(null);
-		// }
-		// }
+		if (newLength >= this.length) {
+			// no problem, easy case
+			this.length = newLength;
 
+		} else {
+			// harder case, we cannot truncate the array
+			this.length = array.getLastIndex() + 1;
+		}
 	}
 
 	/**
@@ -415,11 +434,16 @@ public class Array<V> implements Iterable<String> {
 	 * @return the new length of this <tt>Array</tt>
 	 */
 	public int push(V... values) {
-		// for (V value : values) {
-		// array.add(value);
-		// }
-		// return array.size();
-		return 0;
+		this.length += values.length;
+		this.setElements += values.length;
+
+		if (!this.array.isEfficientStoreFor(this.length, this.setElements)) {
+			// it looks like we must change the type of store for efficiency
+			this.array = this.array.switchStoreType();
+		}
+
+		this.array.push(values);
+		return (int) this.length;
 	}
 
 	/**
@@ -1069,7 +1093,7 @@ public class Array<V> implements Iterable<String> {
 		return null;
 	}
 
-	private static abstract class ArrayStore<E> {
+	private abstract class ArrayStore<E> {
 
 		ArrayStore<E> switchStoreType() {
 			ArrayStore<E> that;
@@ -1088,6 +1112,8 @@ public class Array<V> implements Iterable<String> {
 			return that;
 		}
 
+		abstract long getLastIndex();
+
 		abstract Iterator<Entry<E>> entryIterator();
 
 		abstract boolean isEfficientStoreFor(long newLength, long newElementCount);
@@ -1098,7 +1124,7 @@ public class Array<V> implements Iterable<String> {
 
 		abstract void pop();
 
-		abstract void push();
+		abstract void push(E[] values);
 
 		abstract void set(long index, E value);
 
@@ -1109,9 +1135,8 @@ public class Array<V> implements Iterable<String> {
 		abstract void slice(long from, long to);
 	}
 
-	private static final class PackedArrayStore<E> extends ArrayStore<E> {
+	private final class PackedArrayStore<E> extends ArrayStore<E> {
 
-		private static final Object UNSET = new Object();
 		/**
 		 * We can't use <E> instead of <Object> here, because we must be able to make a difference between elements set
 		 * to null, and unset elements (represented by UNSET).
@@ -1159,9 +1184,8 @@ public class Array<V> implements Iterable<String> {
 		}
 
 		@Override
-		void push() {
-			// TODO Auto-generated method stub
-
+		void push(E[] values) {
+			this.elements.addAll(Arrays.asList(values));
 		}
 
 		@Override
@@ -1189,8 +1213,7 @@ public class Array<V> implements Iterable<String> {
 
 		@Override
 		boolean isSet(long index) {
-			// TODO Auto-generated method stub
-			return false;
+			return index < this.elements.size() && this.get(index) != UNSET;
 		}
 
 		@Override
@@ -1200,7 +1223,7 @@ public class Array<V> implements Iterable<String> {
 
 				@Override
 				public boolean hasNext() {
-					while (nextIndex < elements.size() && elements.get(nextIndex) == UNSET) {
+					while (nextIndex < elements.size() && !isSet(nextIndex)) {
 						nextIndex++;
 					}
 					return nextIndex < elements.size();
@@ -1221,11 +1244,20 @@ public class Array<V> implements Iterable<String> {
 				}
 			};
 		}
+
+		@Override
+		long getLastIndex() {
+			// TODO Auto-generated method stub
+
+			// Hmm....
+
+			return 0;
+		}
 	}
 
-	private static final class SparseArrayStore<E> extends ArrayStore<E> {
+	private final class SparseArrayStore<E> extends ArrayStore<E> {
 
-		java.util.Map<Long, E> elements = new TreeMap<Long, E>();
+		TreeMap<Long, E> elements = new TreeMap<Long, E>();
 
 		@Override
 		boolean isEfficientStoreFor(long newLength, long newElementCount) {
@@ -1268,9 +1300,11 @@ public class Array<V> implements Iterable<String> {
 		}
 
 		@Override
-		void push() {
-			// TODO Auto-generated method stub
-
+		void push(E[] values) {
+			long startIndex = Array.this.length - values.length;
+			for (int i = 0; i < values.length; i++) {
+				this.elements.put(startIndex + i, values[i]);
+			}
 		}
 
 		@Override
@@ -1291,8 +1325,7 @@ public class Array<V> implements Iterable<String> {
 
 		@Override
 		boolean isSet(long index) {
-			// TODO Auto-generated method stub
-			return false;
+			return elements.containsKey(index);
 		}
 
 		@Override
@@ -1318,6 +1351,11 @@ public class Array<V> implements Iterable<String> {
 					throw new UnsupportedOperationException();
 				}
 			};
+		}
+
+		@Override
+		long getLastIndex() {
+			return elements.lastKey();
 		}
 	}
 

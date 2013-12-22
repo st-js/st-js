@@ -17,13 +17,13 @@ public class ArrayConstructorTest {
 		// is treated as the length of the array
 		Array<Integer> x = Array(2);
 		assertFalse(x.$length() == 1);
-		assertFalse(x.$get(0) == 2);
+		assertFalse(x.$get(0) == Integer.valueOf(2));
 
 		// should also work the same when using varargs
 		Object length = 2;
-		Array<Object> y = Array(length);
+		Array<Object> y = Array(length); // not the same constructor as above, Array(Object...)
 		assertFalse(y.$length() == 1);
-		assertFalse(y.$get(0).equals(2));
+		assertFalse(y.$get(0) == Integer.valueOf(2));
 	}
 
 	@Test
