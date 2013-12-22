@@ -188,6 +188,11 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	@Override
 	public void visitBlock(Block block, Boolean param) {
+		if (block.getFirstChild() == null) {
+			// empty blocks
+			print("{}");
+			return;
+		}
 		println("{").indent();
 		for (Node child : block) {
 			visitorSupport.accept((AstNode) child, this, param);
@@ -573,16 +578,15 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		startPosition(w);
 		print(" while (");
 		visitorSupport.accept(w.getCondition(), this, param);
-		println(");");
+		println(")");
 		printStatementAsBlock(w.getBody(), param);
 		endPosition();
 	}
 
 	public void startPosition(AstNode node) {
 		if (generateSourceMap) {
-			javaPosition = new FilePosition(RhinoJavaScriptBuilder.getLineNumber(node), RhinoJavaScriptBuilder.getColumnNumber(node));
-			javaScriptPosition = new FilePosition(currentLine, currentColumn + 1);
-			System.out.println("NODE:[" + node.toSource() + "]");
+			javaPosition = new FilePosition(RhinoJavaScriptBuilder.getLineNumber(node) - 1, RhinoJavaScriptBuilder.getColumnNumber(node) - 1);
+			javaScriptPosition = new FilePosition(currentLine, currentColumn);
 		}
 	}
 
@@ -590,10 +594,6 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		if (generateSourceMap) {
 			FilePosition endJavaScriptPosition = new FilePosition(currentLine, currentColumn);
 			if (javaPosition != null && javaPosition.getLine() >= 0 && javaPosition.getColumn() >= 0) {
-				System.out.println("added [" + inputFile.getName() + "]:" + javaPosition.getLine() + "," + javaPosition.getColumn() + "->"
-						+ javaScriptPosition.getLine() + "," + javaScriptPosition.getColumn() + " to " + endJavaScriptPosition.getLine() + ","
-						+ endJavaScriptPosition.getColumn());
-
 				sourceMapGenerator.addMapping(inputFile.getName(), null, javaPosition, javaScriptPosition, endJavaScriptPosition);
 			}
 		}

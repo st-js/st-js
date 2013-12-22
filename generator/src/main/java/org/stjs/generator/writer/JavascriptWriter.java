@@ -171,8 +171,10 @@ public class JavascriptWriter {
 	public void addSouceMapping(GenerationContext context) {
 		if (generateSourceMap) {
 			FilePosition endOutputPosition = new FilePosition(currentLine, currentColumn);
-			sourceMapGenerator.addMapping(context.getInputFile().getName(), null, sourcePosition, startOutputPosition,
-					endOutputPosition);
+			sourceMapGenerator.addMapping(context.getInputFile().getName(), null, sourcePosition, startOutputPosition, endOutputPosition);
+			System.out.println("added [" + context.getInputFile().getName() + "]:" + sourcePosition.getLine() + "," + sourcePosition.getColumn()
+					+ "->" + startOutputPosition.getLine() + "," + startOutputPosition.getColumn() + " to " + endOutputPosition.getLine() + ","
+					+ endOutputPosition.getColumn());
 		}
 	}
 
