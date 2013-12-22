@@ -33,7 +33,6 @@ import javax.tools.StandardJavaFileManager;
 
 import org.mozilla.javascript.ast.AstRoot;
 import org.stjs.generator.javac.CustomClassloaderJavaFileManager;
-import org.stjs.generator.javascript.JavaScriptWriter;
 import org.stjs.generator.name.DefaultJavaScriptNameProvider;
 import org.stjs.generator.name.JavaScriptNameProvider;
 import org.stjs.generator.plugin.MainGenerationPlugin;
@@ -41,7 +40,6 @@ import org.stjs.generator.type.ClassLoaderWrapper;
 import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.Timers;
-import org.stjs.generator.writer.JavascriptWriterVisitor;
 
 import com.google.common.base.Throwables;
 import com.google.common.io.Closeables;
@@ -131,14 +129,16 @@ public class Generator {
 			Timers.end("write");
 
 			Timers.start("dump");
+			// dump the ast to a file
 			writer = Files.newWriter(outputFile, Charset.forName(configuration.getSourceEncoding()));
-			new JavaScriptWriter(writer).visitAstRoot(javascriptRoot, null);
-			// writer.write(javascriptRoot.toSource());
+			context.writeJavaScript(javascriptRoot, writer);
 			writer.flush();
 			Timers.end("dump");
-		} catch (IOException e1) {
+		}
+		catch (IOException e1) {
 			throw new STJSRuntimeException("Could not open output file " + outputFile + ":" + e1, e1);
-		} finally {
+		}
+		finally {
 			Closeables.closeQuietly(writer);
 		}
 
@@ -153,8 +153,7 @@ public class Generator {
 		Timers.end("write-props");
 
 		if (configuration.isGenerateSourceMap()) {
-			// XXX: generateSourceMap(generationFolder, configuration, context, generatorVisitor, outputFile,
-			// stjsClass);
+			generateSourceMap(generationFolder, configuration, context, outputFile, stjsClass);
 		}
 		return stjsClass;
 	}
@@ -163,14 +162,14 @@ public class Generator {
 	 * generate the source map for the given class
 	 */
 	private void generateSourceMap(GenerationDirectory generationFolder, GeneratorConfiguration configuration, GenerationContext context,
-			JavascriptWriterVisitor generatorVisitor, File outputFile, STJSClass stjsClass) {
+			File outputFile, STJSClass stjsClass) {
 		BufferedWriter sourceMapWriter = null;
 
 		try {
 			// write the source map
 			sourceMapWriter = Files.newWriter(getSourceMapFile(generationFolder.getAbsolutePath(), stjsClass.getClassName()),
 					Charset.forName(configuration.getSourceEncoding()));
-			generatorVisitor.writeSourceMap(context, sourceMapWriter);
+			context.writeSourceMap(sourceMapWriter);
 			sourceMapWriter.flush();
 
 			// copy the source aside the generated js to be able to have it delivered to the browser for debugging
@@ -183,9 +182,11 @@ public class Generator {
 			if (!stjsPropFile.equals(copyStjsPropFile)) {
 				Files.copy(stjsPropFile, copyStjsPropFile);
 			}
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new STJSRuntimeException("Could generate source map:" + e, e);
-		} finally {
+		}
+		finally {
 			if (sourceMapWriter != null) {
 				Closeables.closeQuietly(sourceMapWriter);
 			}
@@ -211,7 +212,8 @@ public class Generator {
 			// return new URI(file.getPath().replace('\\', '/'));
 			// }
 			// return getOutputFile(generationFolder, className).toURI();
-		} catch (URISyntaxException e) {
+		}
+		catch (URISyntaxException e) {
 			throw new JavascriptClassGenerationException(className, e);
 		}
 	}
@@ -248,7 +250,8 @@ public class Generator {
 
 			fileManager.close();
 			return cu;
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw Throwables.propagate(e);
 		}
 
@@ -268,9 +271,11 @@ public class Generator {
 		File outputFile = new File(folder, STJS_FILE);
 		try {
 			Files.copy(new InputStreamSupplier(stjs), outputFile);
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new STJSRuntimeException("Could not copy the " + STJS_FILE + " file to the folder " + folder + ":" + e.getMessage(), e);
-		} finally {
+		}
+		finally {
 			Closeables.closeQuietly(stjs);
 		}
 	}
@@ -326,7 +331,8 @@ public class Generator {
 			Class<?> clazz;
 			try {
 				clazz = builtProjectClassLoader.loadClass(parentClassName);
-			} catch (ClassNotFoundException e) {
+			}
+			catch (ClassNotFoundException e) {
 				throw new STJSRuntimeException(e);
 			}
 			if (ClassUtils.isBridge(clazz)) {

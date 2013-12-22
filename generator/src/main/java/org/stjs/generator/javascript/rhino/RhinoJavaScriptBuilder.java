@@ -1,5 +1,7 @@
-package org.stjs.generator.javascript;
+package org.stjs.generator.javascript.rhino;
 
+import java.io.File;
+import java.io.Writer;
 import java.util.Iterator;
 import java.util.List;
 
@@ -43,9 +45,16 @@ import org.mozilla.javascript.ast.UnaryExpression;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.mozilla.javascript.ast.WhileLoop;
+import org.stjs.generator.javascript.AssignOperator;
+import org.stjs.generator.javascript.BinaryOperator;
+import org.stjs.generator.javascript.JavaScriptBuilder;
+import org.stjs.generator.javascript.Keyword;
+import org.stjs.generator.javascript.NameValue;
+import org.stjs.generator.javascript.UnaryOperator;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.debugging.sourcemap.SourceMapGenerator;
 
 /**
  * 
@@ -134,6 +143,14 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		node.putIntProp(PROP_JAVA_LINE_NO, javaLineNumber);
 		node.putIntProp(PROP_JAVA_COLUMN_NO, javaColumnNumber);
 		return node;
+	}
+
+	public static int getLineNumber(AstNode node) {
+		return node.getIntProp(PROP_JAVA_LINE_NO, -1);
+	}
+
+	public static int getColumnNumber(AstNode node) {
+		return node.getIntProp(PROP_JAVA_COLUMN_NO, -1);
 	}
 
 	@Override
@@ -475,4 +492,12 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return Lists.newArrayList(it);
 
 	}
+
+	@Override
+	public SourceMapGenerator writeJavaScript(AstNode javascriptRoot, File inputFile, boolean generateSourceMap, Writer writer) {
+		RhinoJavaScriptWriter jsw = new RhinoJavaScriptWriter(writer, inputFile, generateSourceMap);
+		jsw.visitAstRoot((AstRoot) javascriptRoot, null);
+		return jsw.getSourceMapGenerator();
+	}
+
 }

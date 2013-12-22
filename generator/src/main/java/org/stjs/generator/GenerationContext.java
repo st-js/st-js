@@ -18,6 +18,8 @@ package org.stjs.generator;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
 
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -25,10 +27,11 @@ import javax.lang.model.util.Types;
 import org.stjs.generator.ast.SourcePosition;
 import org.stjs.generator.check.Checks;
 import org.stjs.generator.javascript.JavaScriptBuilder;
-import org.stjs.generator.javascript.RhinoJavaScriptBuilder;
+import org.stjs.generator.javascript.rhino.RhinoJavaScriptBuilder;
 import org.stjs.generator.name.JavaScriptNameProvider;
 import org.stjs.generator.visitor.TreePathHolder;
 
+import com.google.debugging.sourcemap.SourceMapGenerator;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.util.TreePath;
@@ -37,6 +40,7 @@ import com.sun.source.util.Trees;
 /**
  * This class can resolve an identifier or a method in the given source context. There is one context create for each
  * generation process.
+ * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class GenerationContext<JS> implements TreePathHolder {
@@ -62,6 +66,8 @@ public class GenerationContext<JS> implements TreePathHolder {
 	private CompilationUnitTree compilationUnit;
 
 	private final JavaScriptBuilder<JS> javaScriptBuilder;
+
+	private SourceMapGenerator sourceMapGenerator;
 
 	public GenerationContext(File inputFile, GeneratorConfiguration configuration, JavaScriptNameProvider names, Trees trees) {
 		this.inputFile = inputFile;
@@ -142,14 +148,14 @@ public class GenerationContext<JS> implements TreePathHolder {
 
 	public void addError(Tree tree, String message) {
 		long startPos = trees.getSourcePositions().getStartPosition(compilationUnit, tree);
-		SourcePosition pos =
-				new SourcePosition((int) compilationUnit.getLineMap().getLineNumber(startPos), (int) compilationUnit.getLineMap()
-						.getColumnNumber(startPos));
+		SourcePosition pos = new SourcePosition((int) compilationUnit.getLineMap().getLineNumber(startPos), (int) compilationUnit.getLineMap()
+				.getColumnNumber(startPos));
 		checks.addError(new JavascriptFileGenerationException(inputFile, pos, message));
 	}
 
 	/**
 	 * add the position of the Java original node in the generated node.
+	 * 
 	 * @param tree
 	 * @param node
 	 * @return
@@ -172,5 +178,17 @@ public class GenerationContext<JS> implements TreePathHolder {
 
 	public JavaScriptBuilder<JS> js() {
 		return javaScriptBuilder;
+	}
+
+	public void writeJavaScript(JS astRoot, Writer writer) {
+		sourceMapGenerator = javaScriptBuilder.writeJavaScript(astRoot, inputFile, configuration.isGenerateSourceMap(), writer);
+	}
+
+	public void writeSourceMap(Writer sourceMapWriter) throws IOException {
+		// you need to call first writeJavaScript
+		if (sourceMapGenerator == null) {
+			throw new IllegalStateException("Cannot call this method for writer that do not generate source maps");
+		}
+		sourceMapGenerator.appendTo(sourceMapWriter, inputFile.getName().replaceAll("\\.java$", ".js"));
 	}
 }

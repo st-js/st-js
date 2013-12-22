@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package org.stjs.generator.javascript;
+package org.stjs.generator.javascript.rhino;
 
 import org.mozilla.javascript.Node;
 import org.mozilla.javascript.Token;

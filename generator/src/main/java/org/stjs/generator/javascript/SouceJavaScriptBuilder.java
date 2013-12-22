@@ -1,5 +1,10 @@
 package org.stjs.generator.javascript;
 
+import java.io.File;
+import java.io.Writer;
+
+import com.google.debugging.sourcemap.SourceMapGenerator;
+
 public class SouceJavaScriptBuilder implements JavaScriptBuilder<String> {
 
 	@Override
@@ -256,6 +261,12 @@ public class SouceJavaScriptBuilder implements JavaScriptBuilder<String> {
 
 	@Override
 	public String label(CharSequence name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SourceMapGenerator writeJavaScript(String javascriptRoot, File inputFile, boolean generateSourceMap, Writer writer) {
 		// TODO Auto-generated method stub
 		return null;
 	}

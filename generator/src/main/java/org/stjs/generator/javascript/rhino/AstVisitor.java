@@ -1,4 +1,4 @@
-package org.stjs.generator.javascript;
+package org.stjs.generator.javascript.rhino;
 
 import org.mozilla.javascript.ast.ArrayLiteral;
 import org.mozilla.javascript.ast.Assignment;

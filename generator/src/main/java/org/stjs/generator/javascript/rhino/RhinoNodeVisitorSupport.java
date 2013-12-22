@@ -1,4 +1,4 @@
-package org.stjs.generator.javascript;
+package org.stjs.generator.javascript.rhino;
 
 import java.util.HashMap;
 import java.util.Map;

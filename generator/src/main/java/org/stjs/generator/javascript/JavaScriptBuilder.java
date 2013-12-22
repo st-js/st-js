@@ -1,7 +1,12 @@
 package org.stjs.generator.javascript;
 
+import java.io.File;
+import java.io.Writer;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import com.google.debugging.sourcemap.SourceMapGenerator;
 
 /**
  * .
@@ -94,4 +99,6 @@ public interface JavaScriptBuilder<T> {
 	public T number(@Nonnull Number n);
 
 	public T statements(@Nonnull Iterable<T> stmts);
+
+	public SourceMapGenerator writeJavaScript(T javascriptRoot, File inputFile, boolean generateSourceMap, Writer writer);
 }

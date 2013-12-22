@@ -66,7 +66,8 @@ public class GeneratorTestHelper {
 			File jsfile = new File(preGeneratedJs);
 			ExecutionResult execResult = new RhinoExecutor().run(Collections.singletonList(jsfile), false);
 			return convert(execResult.getResult());
-		} catch (ScriptException se) {
+		}
+		catch (ScriptException se) {
 			throw new RuntimeException(se);
 		}
 	}
@@ -95,7 +96,8 @@ public class GeneratorTestHelper {
 				}
 			}
 			throw new RuntimeException("Method " + method + " not found in class " + obj.getClass());
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -158,20 +160,19 @@ public class GeneratorTestHelper {
 				return execResult != null ? execResult.getResult() : null;
 			}
 			return content;
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
-		} catch (ScriptException ex) {
+		}
+		catch (ScriptException ex) {
 			// display the generated code in case of exception
 			for (File file : javascriptFiles) {
 				displayWithLines(file);
 			}
 			throw new RuntimeException(ex);
-		} finally {
-			// display the generated code in case of exception
-			for (File file : javascriptFiles) {
-				displayWithLines(file);
-			}
+		}
+		finally {
 			Timers.end("js-exec");
 		}
 	}
@@ -220,16 +221,20 @@ public class GeneratorTestHelper {
 				System.out.println(line);
 				lineNo++;
 			}
-		} catch (FileNotFoundException e) {
+		}
+		catch (FileNotFoundException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
-		} finally {
+		}
+		finally {
 			try {
 				if (in != null) {
 					in.close();
 				}
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				// silent
 			}
 
@@ -241,7 +246,8 @@ public class GeneratorTestHelper {
 		try {
 			URL[] urls = { generationPath.toURI().toURL() };
 			return new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
