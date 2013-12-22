@@ -2,12 +2,12 @@ package org.stjs.generator.writer.statement;
 
 import java.util.Collections;
 
-import javacutils.TreeUtils;
-import javacutils.TypesUtils;
 
 import javax.lang.model.element.Element;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.TypesUtils;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.javascript.UnaryOperator;
 import org.stjs.generator.writer.WriterContributor;

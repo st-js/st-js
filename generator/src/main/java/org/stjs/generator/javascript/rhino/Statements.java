@@ -11,6 +11,8 @@ import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.NodeVisitor;
 
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
+
 /**
  * This is a collection of statements. Its like a block without the curly braces
  * 
@@ -43,12 +45,18 @@ class Statements extends AstNode {
 		addChild(statement);
 	}
 
+	@java.lang.SuppressWarnings("unused")
+	@SuppressWarnings(justification = "No problem with this cast", value = "BC_UNCONFIRMED_CAST")
+	private AstNode cast(Node n) {
+		return (AstNode) n;
+	}
+
 	@Override
 	public String toSource(int depth) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(makeIndent(depth));
 		for (Node kid : this) {
-			sb.append(((AstNode) kid).toSource(depth + 1));
+			sb.append(cast(kid).toSource(depth + 1));
 		}
 		sb.append(makeIndent(depth));
 		return sb.toString();
@@ -58,7 +66,7 @@ class Statements extends AstNode {
 	public void visit(NodeVisitor v) {
 		if (v.visit(this)) {
 			for (Node kid : this) {
-				((AstNode) kid).visit(v);
+				cast(kid).visit(v);
 			}
 		}
 	}

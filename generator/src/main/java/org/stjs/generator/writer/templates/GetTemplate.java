@@ -31,6 +31,6 @@ public class GetTemplate<JS> implements WriterContributor<MethodInvocationTree, 
 			target = context.js().paren(visitor.scan(tree.getArguments().get(arg++), context));
 		}
 
-		return context.js().elementGet(target, visitor.scan(tree.getArguments().get(arg++), context));
+		return context.js().elementGet(target, visitor.scan(tree.getArguments().get(arg), context));
 	}
 }

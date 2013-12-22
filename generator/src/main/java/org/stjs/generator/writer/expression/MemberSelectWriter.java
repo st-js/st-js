@@ -1,12 +1,12 @@
 package org.stjs.generator.writer.expression;
 
-import javacutils.TreeUtils;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.WriterContributor;

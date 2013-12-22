@@ -6,9 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import javacutils.ElementUtils;
-import javacutils.TreeUtils;
-import javacutils.TypesUtils;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -21,6 +18,9 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javac.ElementUtils;
+import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.TypesUtils;
 import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.javascript.Keyword;

@@ -4,9 +4,6 @@ import java.lang.annotation.Annotation;
 import java.util.Locale;
 import java.util.Set;
 
-import javacutils.ElementUtils;
-import javacutils.TreeUtils;
-import javacutils.TypesUtils;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -21,6 +18,9 @@ import javax.lang.model.util.Elements;
 
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.JavascriptClassGenerationException;
+import org.stjs.generator.javac.ElementUtils;
+import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.TypesUtils;
 import org.stjs.javascript.annotation.DataType;
 import org.stjs.javascript.annotation.GlobalScope;
 import org.stjs.javascript.annotation.JavascriptFunction;

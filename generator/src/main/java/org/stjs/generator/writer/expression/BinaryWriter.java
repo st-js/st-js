@@ -5,11 +5,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javacutils.TypesUtils;
 
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javac.TypesUtils;
 import org.stjs.generator.javascript.BinaryOperator;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;

@@ -30,6 +30,7 @@ import org.stjs.javascript.annotation.STJSBridge;
 /**
  * This class represents a bridge class. As javascript files it has the corresponding source files from the javascript
  * library. As dependencies it can have other bridge classes or even stjs classes.
+ * 
  * @author acraciun
  */
 @Immutable
@@ -86,9 +87,9 @@ public class BridgeClass implements ClassWithJavascript {
 		return result;
 	}
 
-	public Class<?> getClazz() {
-		return clazz;
-	}
+	// public Class<?> getClazz() {
+	// return clazz;
+	// }
 
 	@Override
 	public boolean equals(Object obj) {

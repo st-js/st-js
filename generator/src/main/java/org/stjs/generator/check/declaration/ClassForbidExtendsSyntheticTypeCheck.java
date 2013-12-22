@@ -1,6 +1,5 @@
 package org.stjs.generator.check.declaration;
 
-import javacutils.TreeUtils;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.NestingKind;
@@ -9,6 +8,7 @@ import javax.lang.model.element.TypeElement;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
+import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.javascript.annotation.SyntheticType;
 

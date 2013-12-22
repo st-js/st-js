@@ -181,7 +181,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	@Override
 	public void visitAstRoot(AstRoot r, Boolean param) {
 		for (Node child : r) {
-			visitorSupport.accept((AstNode) child, this, param);
+			visitorSupport.accept(child, this, param);
 		}
 		addSourceMapURL();
 	}
@@ -195,7 +195,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		}
 		println("{").indent();
 		for (Node child : block) {
-			visitorSupport.accept((AstNode) child, this, param);
+			visitorSupport.accept(child, this, param);
 		}
 		unindent().print("}");
 	}
@@ -384,7 +384,9 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 			print("false");
 			break;
 		case Token.DEBUGGER:
-			print("debugger;\n");
+			println("debugger;");
+			break;
+		default:
 			break;
 		}
 	}
@@ -477,7 +479,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	@Override
 	public void visitStatements(Statements s, Boolean param) {
 		for (Node stmt : s) {
-			visitorSupport.accept((AstNode) stmt, this, param);
+			visitorSupport.accept(stmt, this, param);
 		}
 	}
 
@@ -553,15 +555,15 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	@Override
 	public void visitVariableDeclaration(VariableDeclaration v, Boolean param) {
-		startPosition(v);
 		if (v.isStatement()) {
+			startPosition(v);
 		}
 		print("var ");
 		printList(v.getVariables(), param);
 		if (v.isStatement()) {
 			println(";");
+			endPosition();
 		}
-		endPosition();
 	}
 
 	@Override

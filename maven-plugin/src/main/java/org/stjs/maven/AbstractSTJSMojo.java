@@ -53,7 +53,6 @@ import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.STJSClass;
-import org.stjs.generator.type.TypeWrappers;
 
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
@@ -169,9 +168,6 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 		getLog().info("Generating JavaScript files to " + gendir.getAbsolutePath());
 
-		// clear cache before each execution
-		TypeWrappers.clearCache();
-
 		ClassLoader builtProjectClassLoader = getBuiltProjectClassLoader();
 		Generator generator = new Generator();
 
@@ -213,8 +209,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				}
 				File absoluteSource = new File(sourceDir, source.getPath());
 				try {
-					File absoluteTarget = (File) mapping.getTargetFiles(gendir.getAbsolutePath(), source.getPath())
-							.iterator().next();
+					File absoluteTarget = (File) mapping.getTargetFiles(gendir.getAbsolutePath(), source.getPath()).iterator().next();
 					if (getLog().isDebugEnabled()) {
 						getLog().debug("Generating " + absoluteTarget);
 					}
@@ -225,8 +220,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 						continue;
 					}
 					String className = getClassNameForSource(source.getPath());
-					generator.generateJavascript(builtProjectClassLoader, className, sourceDir, gendir,
-							getBuildOutputDirectory(), configBuilder.build());
+					generator.generateJavascript(builtProjectClassLoader, className, sourceDir, gendir, getBuildOutputDirectory(),
+							configBuilder.build());
 					++generatedFiles;
 
 				}
@@ -234,8 +229,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 					throw new MojoExecutionException("Cannot scan the source directory:" + e, e);
 				}
 				catch (JavascriptFileGenerationException e) {
-					buildContext.addMessage(e.getInputFile(), e.getSourcePosition().getLine(), e.getSourcePosition()
-							.getColumn(), e.getMessage(), BuildContext.SEVERITY_ERROR, null);
+					buildContext.addMessage(e.getInputFile(), e.getSourcePosition().getLine(), e.getSourcePosition().getColumn(),
+							e.getMessage(), BuildContext.SEVERITY_ERROR, null);
 					hasFailures = true;
 					// continue with the next file
 				}
@@ -266,8 +261,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	 * @throws MojoFailureException
 	 * @throws MojoExecutionException
 	 */
-	protected void packFiles(Generator generator, GenerationDirectory gendir) throws MojoFailureException,
-			MojoExecutionException {
+	protected void packFiles(Generator generator, GenerationDirectory gendir) throws MojoFailureException, MojoExecutionException {
 		if (!pack) {
 			return;
 		}
@@ -277,8 +271,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 		// pack the files
 		try {
-			DirectedGraph<String, DefaultEdge> dependencyGraph = new DefaultDirectedGraph<String, DefaultEdge>(
-					DefaultEdge.class);
+			DirectedGraph<String, DefaultEdge> dependencyGraph = new DefaultDirectedGraph<String, DefaultEdge>(DefaultEdge.class);
 			File outputFile = new File(gendir.getAbsolutePath(), project.getArtifactId() + ".js");
 			allSourcesFile = new BufferedOutputStream(new FileOutputStream(outputFile));
 			for (String sourceRoot : getCompileSourceRoots()) {
@@ -291,8 +284,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				sources = accumulateSources(gendir, sourceDir, mapping, stjsMapping, Integer.MIN_VALUE);
 				for (File source : sources) {
 
-					File absoluteTarget = (File) mapping.getTargetFiles(gendir.getAbsolutePath(), source.getPath())
-							.iterator().next();
+					File absoluteTarget = (File) mapping.getTargetFiles(gendir.getAbsolutePath(), source.getPath()).iterator().next();
 
 					String className = getClassNameForSource(source.getPath());
 					if (!absoluteTarget.exists()) {
@@ -317,8 +309,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			// check for cycles
 			Set<String> cycles = new CycleDetector<String, DefaultEdge>(dependencyGraph).findCycles();
 			if (!cycles.isEmpty()) {
-				throw new Exception("Cycles are detected in the dependency graph:\n"
-						+ cycles.toString().replace(',', '\n')
+				throw new Exception("Cycles are detected in the dependency graph:\n" + cycles.toString().replace(',', '\n')
 						+ "\n Please fix the problem before continuing or disable the packing");
 			}
 			// dump all the files in the dependency order in the pack file
@@ -343,8 +334,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 	}
 
-	protected void filesGenerated(Generator generator, GenerationDirectory gendir) throws MojoFailureException,
-			MojoExecutionException {
+	protected void filesGenerated(Generator generator, GenerationDirectory gendir) throws MojoFailureException, MojoExecutionException {
 		// copy the javascript support
 		try {
 			generator.copyJavascriptSupport(getGeneratedSourcesDirectory().getAbsolutePath());
@@ -397,8 +387,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	 *         file). The returned files are relative to the given source directory.
 	 */
 	@SuppressWarnings("unchecked")
-	private List<File> accumulateSources(GenerationDirectory gendir, File sourceDir, SourceMapping jsMapping,
-			SourceMapping stjsMapping, int stale) throws MojoExecutionException {
+	private List<File> accumulateSources(GenerationDirectory gendir, File sourceDir, SourceMapping jsMapping, SourceMapping stjsMapping,
+			int stale) throws MojoExecutionException {
 		final List<File> result = new ArrayList<File>();
 		if (sourceDir == null || !sourceDir.exists()) {
 			return result;

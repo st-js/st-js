@@ -12,7 +12,7 @@ public class ContinueWriter<JS> implements WriterContributor<ContinueTree, JS> {
 	public JS visit(WriterVisitor<JS> visitor, ContinueTree tree, GenerationContext<JS> context) {
 		JS label = null;
 		if (tree.getLabel() != null) {
-			context.js().name(tree.getLabel().toString());
+			label = context.js().name(tree.getLabel().toString());
 		}
 
 		return context.withPosition(tree, context.js().continueStatement(label));

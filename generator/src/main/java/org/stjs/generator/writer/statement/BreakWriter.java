@@ -15,7 +15,7 @@ public class BreakWriter<JS> implements WriterContributor<BreakTree, JS> {
 	public JS visit(WriterVisitor<JS> visitor, BreakTree tree, GenerationContext<JS> context) {
 		JS label = null;
 		if (tree.getLabel() != null) {
-			context.js().name(tree.getLabel().toString());
+			label = context.js().name(tree.getLabel().toString());
 		}
 
 		return context.withPosition(tree, context.js().breakStatement(label));

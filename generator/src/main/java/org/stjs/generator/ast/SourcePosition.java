@@ -15,18 +15,17 @@
  */
 package org.stjs.generator.ast;
 
-import japa.parser.ast.Node;
-
 import java.io.Serializable;
 
 import javax.annotation.concurrent.Immutable;
 
 /**
  * This class indicated a position in a source file (line, column) where the given identifier starts.
+ * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 @Immutable
-//PMD cannot correctly handle final fields
+// PMD cannot correctly handle final fields
 @SuppressWarnings("PMD.BeanMembersShouldSerialize")
 public final class SourcePosition implements Serializable {
 	/**
@@ -40,10 +39,6 @@ public final class SourcePosition implements Serializable {
 	public SourcePosition(int beginLine, int beginColumn) {
 		this.line = beginLine;
 		this.column = beginColumn;
-	}
-
-	public SourcePosition(Node node) {
-		this(node.getBeginLine(), node.getBeginColumn());
 	}
 
 	public int getLine() {

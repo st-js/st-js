@@ -1,7 +1,5 @@
 package org.stjs.generator.check.expression;
 
-import javacutils.InternalUtils;
-import javacutils.TreeUtils;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -9,6 +7,8 @@ import javax.lang.model.element.ElementKind;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
+import org.stjs.generator.javac.InternalUtils;
+import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.utils.JavaNodes;
 
 import com.sun.source.tree.NewClassTree;

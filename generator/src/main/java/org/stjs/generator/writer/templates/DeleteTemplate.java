@@ -11,6 +11,7 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * map.$delete(key) -> delete map[key]
+ * 
  * @author acraciun
  */
 public class DeleteTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
@@ -22,9 +23,8 @@ public class DeleteTemplate<JS> implements WriterContributor<MethodInvocationTre
 			throw new JavascriptFileGenerationException(context.getInputFile(), null,
 					"A 'delete' template can only be applied for methods with 1 parameter");
 		}
-		int arg = 0;
 		JS target = MethodInvocationWriter.buildTarget(visitor, tree, context);
-		JS prop = context.js().elementGet(target, visitor.scan(tree.getArguments().get(arg++), context));
+		JS prop = context.js().elementGet(target, visitor.scan(tree.getArguments().get(0), context));
 		return context.js().unary(UnaryOperator.DELETE_PROPERTY, prop);
 	}
 }

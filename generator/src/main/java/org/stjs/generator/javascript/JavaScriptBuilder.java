@@ -54,7 +54,7 @@ public interface JavaScriptBuilder<T> {
 
 	public T position(@Nonnull T node, int javaLineNumber, int javaColumnNumber);
 
-	public T property(@Nonnull T target, @Nonnull CharSequence name);
+	public T property(@Nullable T target, @Nonnull CharSequence name);
 
 	public T string(@Nonnull String value);
 

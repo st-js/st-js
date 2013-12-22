@@ -36,12 +36,9 @@ import org.stjs.generator.javac.CustomClassloaderJavaFileManager;
 import org.stjs.generator.name.DefaultJavaScriptNameProvider;
 import org.stjs.generator.name.JavaScriptNameProvider;
 import org.stjs.generator.plugin.MainGenerationPlugin;
-import org.stjs.generator.type.ClassLoaderWrapper;
-import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.Timers;
 
-import com.google.common.base.Throwables;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
@@ -83,6 +80,15 @@ public class Generator {
 		return new File(sourceFolder, className.replace('.', File.separatorChar) + ".java");
 	}
 
+	private Class<?> getClazz(ClassLoader builtProjectClassLoader, String className) {
+		try {
+			return builtProjectClassLoader.loadClass(className);
+		}
+		catch (ClassNotFoundException e) {
+			throw new JavascriptClassGenerationException(className, "Cannot load class:" + e);
+		}
+	}
+
 	/**
 	 * @param builtProjectClassLoader
 	 * @param inputFile
@@ -94,14 +100,12 @@ public class Generator {
 			GenerationDirectory generationFolder, File targetFolder, GeneratorConfiguration configuration)
 			throws JavascriptFileGenerationException {
 
-		ClassLoaderWrapper classLoaderWrapper = new ClassLoaderWrapper(builtProjectClassLoader, configuration.getAllowedPackages(),
-				configuration.getAllowedJavaLangClasses());
 		DependencyResolver dependencyResolver = new GeneratorDependencyResolver(builtProjectClassLoader, sourceFolder, generationFolder,
 				targetFolder, configuration);
 
-		ClassWrapper clazz = classLoaderWrapper.loadClass(className).getOrThrow();
-		if (ClassUtils.isBridge(clazz.getClazz())) {
-			return new BridgeClass(dependencyResolver, clazz.getClazz());
+		Class<?> clazz = getClazz(builtProjectClassLoader, className);
+		if (ClassUtils.isBridge(clazz)) {
+			return new BridgeClass(dependencyResolver, clazz);
 		}
 
 		File inputFile = getInputFile(sourceFolder, className);
@@ -109,31 +113,31 @@ public class Generator {
 		JavaScriptNameProvider names = new DefaultJavaScriptNameProvider();
 		GenerationContext context = new GenerationContext(inputFile, configuration, names, null);
 
-		CompilationUnitTree cu = parseAndResolve(classLoaderWrapper, inputFile, context, configuration.getSourceEncoding());
+		CompilationUnitTree cu = parseAndResolve(builtProjectClassLoader, inputFile, context, configuration.getSourceEncoding());
 		BufferedWriter writer = null;
 
 		try {
 			// TODO add the possibility for use-defined plugins
 			MainGenerationPlugin mainPlugin = new MainGenerationPlugin();
 
-			Timers.start("check");
+			Timers.start("check-java");
 			// check the code
 			mainPlugin.getCheckVisitor().scan(cu, context);
 
 			context.getChecks().check();
-			Timers.end("check");
+			Timers.end("check-java");
 
-			Timers.start("write");
+			Timers.start("write-js-ast");
 			// generate the javascript code
 			AstRoot javascriptRoot = (AstRoot) mainPlugin.getWriterVisitor().scan(cu, context);
-			Timers.end("write");
+			Timers.end("write-js-ast");
 
-			Timers.start("dump");
+			Timers.start("dump-js");
 			// dump the ast to a file
 			writer = Files.newWriter(outputFile, Charset.forName(configuration.getSourceEncoding()));
 			context.writeJavaScript(javascriptRoot, writer);
 			writer.flush();
-			Timers.end("dump");
+			Timers.end("dump-js");
 		}
 		catch (IOException e1) {
 			throw new STJSRuntimeException("Could not open output file " + outputFile + ":" + e1, e1);
@@ -218,20 +222,18 @@ public class Generator {
 		}
 	}
 
-	private CompilationUnitTree parseAndResolve(ClassLoaderWrapper builtProjectClassLoader, File inputFile, GenerationContext context,
+	private CompilationUnitTree parseAndResolve(ClassLoader builtProjectClassLoader, File inputFile, GenerationContext context,
 			String sourceEncoding) {
+		StandardJavaFileManager fileManager = null;
 		try {
-			Timers.start("compiler");
 			// create it directly to avoid ClassLoader problems
 			JavaCompiler compiler = JavacTool.create();
-			// JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 			if (compiler == null) {
 				throw new JavascriptFileGenerationException(inputFile, null,
 						"A Java compiler is not available for this project. You may have configured your environment to run with JRE instead of a JDK");
 			}
-			Timers.end("compiler");
-			StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, Charset.forName(sourceEncoding));
-			JavaFileManager classLoaderFileManager = new CustomClassloaderJavaFileManager(builtProjectClassLoader.getClassLoader(), fileManager);
+			fileManager = compiler.getStandardFileManager(null, null, Charset.forName(sourceEncoding));
+			JavaFileManager classLoaderFileManager = new CustomClassloaderJavaFileManager(builtProjectClassLoader, fileManager);
 
 			Iterable<? extends JavaFileObject> fileObjects = fileManager.getJavaFileObjectsFromFiles(Collections.singleton(inputFile));
 			JavaCompiler.CompilationTask task = compiler.getTask(null, classLoaderFileManager, null, null, null, fileObjects);
@@ -241,18 +243,24 @@ public class Generator {
 			context.setElements(javacTask.getElements());
 			context.setTypes(javacTask.getTypes());
 
-			Timers.start("parse");
+			Timers.start("parse-java");
 			CompilationUnitTree cu = javacTask.parse().iterator().next();
+			Timers.end("parse-java");
+
+			Timers.start("analyze-java");
 			javacTask.analyze();
-			Timers.end("parse");
+			Timers.end("analyze-java");
 
 			context.setCompilationUnit(cu);
 
-			fileManager.close();
 			return cu;
 		}
-		catch (Exception e) {
-			throw Throwables.propagate(e);
+		catch (IOException e) {
+			throw new JavascriptFileGenerationException(context.getInputFile(), null, "Cannot parse the Java file:" + e);
+		}
+
+		finally {
+			Closeables.closeQuietly(fileManager);
 		}
 
 	}
@@ -360,17 +368,4 @@ public class Generator {
 		return new GeneratorDependencyResolver(classLoader, null, null, null, null).resolve(testClass.getName());
 	}
 
-	@SuppressWarnings("PMD.SystemPrintln")
-	public static void main(String[] args) throws URISyntaxException {
-		if (args.length == 0) {
-			System.out.println("Usage: Generator <class.name> [<allow package>] [<allow package>] .. ");
-			return;
-		}
-		GeneratorConfigurationBuilder builder = new GeneratorConfigurationBuilder();
-		for (int i = 1; i < args.length; ++i) {
-			builder.allowedPackage(args[i]);
-		}
-		// new Generator().generateJavascript(Thread.currentThread().getContextClassLoader(), args[0], new File(
-		// "src/main/java"), new File("target", "generate-js"), new File("target"), builder.build());
-	}
 }

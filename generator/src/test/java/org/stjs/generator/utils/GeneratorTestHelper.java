@@ -137,12 +137,10 @@ public class GeneratorTestHelper {
 		File generationPath = new File("target", TEMP_GENERATION_PATH);
 		GenerationDirectory generationFolder = new GenerationDirectory(generationPath, new File(TEMP_GENERATION_PATH), new File(""));
 		String sourcePath = "src/test/java";
-		Timers.start("js-generate");
 		ClassWithJavascript stjsClass = gen.generateJavascript(Thread.currentThread().getContextClassLoader(), clazz.getName(), new File(
 				sourcePath), generationFolder, new File("target", "test-classes"),
 				new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript").allowedPackage("org.stjs.generator")
 						.generateSourceMap(withSourceMap).build());
-		Timers.end("js-generate");
 		Timers.start("js-exec");
 		List<File> javascriptFiles = new ArrayList<File>();
 		try {

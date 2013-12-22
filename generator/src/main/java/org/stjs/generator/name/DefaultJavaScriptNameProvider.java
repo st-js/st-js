@@ -4,14 +4,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import javacutils.ElementUtils;
-import javacutils.InternalUtils;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javac.ElementUtils;
+import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.utils.JavaNodes;
 
 import com.sun.source.tree.IdentifierTree;

@@ -45,6 +45,7 @@ import org.mozilla.javascript.ast.UnaryExpression;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.mozilla.javascript.ast.WhileLoop;
+import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.javascript.BinaryOperator;
 import org.stjs.generator.javascript.JavaScriptBuilder;
@@ -55,6 +56,8 @@ import org.stjs.generator.javascript.UnaryOperator;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.debugging.sourcemap.SourceMapGenerator;
+
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
 /**
  * 
@@ -156,8 +159,21 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	@Override
 	public AstNode breakStatement(AstNode label) {
 		BreakStatement b = new BreakStatement();
-		b.setBreakLabel((Name) label);
+		b.setBreakLabel(cast(label, Name.class));
 		return b;
+	}
+
+	@java.lang.SuppressWarnings("unchecked")
+	@SuppressWarnings(justification = "Checked cast", value = "BC_UNCONFIRMED_CAST")
+	private <T extends AstNode> T cast(AstNode node, Class<T> clazz) {
+		if (node == null) {
+			return null;
+		}
+		if (!clazz.isAssignableFrom(node.getClass())) {
+			throw new STJSRuntimeException("Received wrong JavaScript node type:" + node.getClass().getName() + " instead of " + clazz.getName()
+					+ ". This is probably a ST-JS bug. Please report it to our website");
+		}
+		return (T) node;
 	}
 
 	@Override
@@ -175,7 +191,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	@Override
 	public AstNode catchClause(AstNode varName, AstNode body) {
 		CatchClause c = new CatchClause();
-		c.setVarName((Name) varName);
+		c.setVarName(cast(varName, Name.class));
 		if (body instanceof Block) {
 			c.setBody((Block) body);
 		} else {
@@ -189,7 +205,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	@Override
 	public AstNode continueStatement(AstNode label) {
 		ContinueStatement c = new ContinueStatement();
-		c.setLabel((Name) label);
+		c.setLabel(cast(label, Name.class));
 		return c;
 	}
 
@@ -284,7 +300,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	@Override
 	public AstNode labeledStatement(AstNode label, AstNode statement) {
 		LabeledStatement s = new LabeledStatement();
-		s.addLabel((Label) label);
+		s.addLabel(cast(label, Label.class));
 		s.setStatement(statement);
 		return s;
 	}
@@ -496,7 +512,9 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	@Override
 	public SourceMapGenerator writeJavaScript(AstNode javascriptRoot, File inputFile, boolean generateSourceMap, Writer writer) {
 		RhinoJavaScriptWriter jsw = new RhinoJavaScriptWriter(writer, inputFile, generateSourceMap);
-		jsw.visitAstRoot((AstRoot) javascriptRoot, null);
+
+		jsw.visitAstRoot(cast(javascriptRoot, AstRoot.class), null);
+
 		return jsw.getSourceMapGenerator();
 	}
 

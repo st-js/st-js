@@ -15,8 +15,6 @@
  */
 package org.stjs.generator;
 
-import japa.parser.ast.body.ClassOrInterfaceDeclaration;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
@@ -51,8 +49,6 @@ public class GenerationContext<JS> implements TreePathHolder {
 
 	private final JavaScriptNameProvider names;
 
-	private ClassOrInterfaceDeclaration currentType;
-
 	private Trees trees;
 
 	private Elements elements;
@@ -84,16 +80,6 @@ public class GenerationContext<JS> implements TreePathHolder {
 
 	public GeneratorConfiguration getConfiguration() {
 		return configuration;
-	}
-
-	public ClassOrInterfaceDeclaration setCurrentType(ClassOrInterfaceDeclaration n) {
-		ClassOrInterfaceDeclaration prevType = this.currentType;
-		currentType = n;
-		return prevType;
-	}
-
-	public ClassOrInterfaceDeclaration getCurrentType() {
-		return currentType;
 	}
 
 	public JavaScriptNameProvider getNames() {
@@ -147,6 +133,9 @@ public class GenerationContext<JS> implements TreePathHolder {
 	}
 
 	public void addError(Tree tree, String message) {
+		if (compilationUnit == null) {
+			return;
+		}
 		long startPos = trees.getSourcePositions().getStartPosition(compilationUnit, tree);
 		SourcePosition pos = new SourcePosition((int) compilationUnit.getLineMap().getLineNumber(startPos), (int) compilationUnit.getLineMap()
 				.getColumnNumber(startPos));
@@ -161,6 +150,9 @@ public class GenerationContext<JS> implements TreePathHolder {
 	 * @return
 	 */
 	public JS withPosition(Tree tree, JS node) {
+		if (compilationUnit == null) {
+			return node;
+		}
 		long startPos = trees.getSourcePositions().getStartPosition(compilationUnit, tree);
 		int line = (int) compilationUnit.getLineMap().getLineNumber(startPos);
 		int column = (int) compilationUnit.getLineMap().getColumnNumber(startPos);
@@ -172,6 +164,9 @@ public class GenerationContext<JS> implements TreePathHolder {
 	 * @return the starting line of the given tree node
 	 */
 	public int getStartLine(Tree tree) {
+		if (compilationUnit == null) {
+			return -1;
+		}
 		long startPos = trees.getSourcePositions().getStartPosition(compilationUnit, tree);
 		return (int) compilationUnit.getLineMap().getLineNumber(startPos);
 	}
