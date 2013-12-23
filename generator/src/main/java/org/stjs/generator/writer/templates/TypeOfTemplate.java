@@ -10,6 +10,7 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * $typeOf(arg) -> (typeof arg)
+ * 
  * @author acraciun
  */
 public class TypeOfTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {

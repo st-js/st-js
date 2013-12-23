@@ -8,6 +8,7 @@ import com.sun.source.tree.AssertTree;
 
 /**
  * asserts - not supported
+ * 
  * @author acraciun
  */
 public class AssertWriter<JS> implements WriterContributor<AssertTree, JS> {

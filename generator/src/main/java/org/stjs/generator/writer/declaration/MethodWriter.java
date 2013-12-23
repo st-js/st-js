@@ -53,6 +53,17 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		return null;
 	}
 
+	private List<JS> getParams(MethodTree tree, GenerationContext<JS> context) {
+		List<JS> params = new ArrayList<JS>();
+		for (VariableTree param : tree.getParameters()) {
+			if (GeneratorConstants.SPECIAL_THIS.equals(param.getName().toString())) {
+				continue;
+			}
+			params.add(context.js().name(changeName(param.getName().toString())));
+		}
+		return params;
+	}
+
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, MethodTree tree, GenerationContext<JS> context) {
 		Element element = JavaNodes.elementFromDeclaration(tree);
@@ -66,13 +77,8 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 			return null;
 		}
 
-		List<JS> params = new ArrayList<JS>();
-		for (VariableTree param : tree.getParameters()) {
-			if (GeneratorConstants.SPECIAL_THIS.equals(param.getName().toString())) {
-				continue;
-			}
-			params.add(context.js().name(changeName(param.getName().toString())));
-		}
+		List<JS> params = getParams(tree, context);
+
 		JS body = visitor.scan(tree.getBody(), context);
 
 		// set if needed Type$1 name, if this is an anonymous type constructor

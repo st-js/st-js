@@ -42,19 +42,19 @@ import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.mozilla.javascript.ast.WhileLoop;
 
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
-
 /**
  * 
  * this class helps using a type visitor as the rhino library does not provide one out of the box
  * 
  * @author acraciun
  */
-@SuppressWarnings(justification = "The type check is done by looking in the map", value = "BC_UNCONFIRMED_CAST")
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+		justification = "The type check is done by looking in the map", value = "BC_UNCONFIRMED_CAST")
+@SuppressWarnings("PMD.CouplingBetweenObjects")
 public class RhinoNodeVisitorSupport {
 	private static Map<Class<?>, Caller> callers = new HashMap<Class<?>, Caller>();
 
-	private static interface Caller {
+	private interface Caller {
 		<T> void call(Node node, AstVisitor<T> visitor, T param);
 	}
 
@@ -291,20 +291,16 @@ public class RhinoNodeVisitorSupport {
 				visitor.visitExpressionStatement((ExpressionStatement) node, param);
 			}
 		});
-
 	}
 
 	public <T> void accept(Node node, AstVisitor<T> visitor, T param) {
 		Caller caller = callers.get(node.getClass());
 		if (caller != null) {
 			caller.call(node, visitor, param);
-		} else {
-			// TODO what to do here !?
 		}
 	}
 
 	private static void addCaller(Class<?> nodeClass, Caller caller) {
 		callers.put(nodeClass, caller);
-
 	}
 }

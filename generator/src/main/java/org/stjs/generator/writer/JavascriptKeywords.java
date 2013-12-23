@@ -22,13 +22,14 @@ import java.util.Set;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.JavascriptFileGenerationException;
-import org.stjs.generator.ast.SourcePosition;
+import org.stjs.generator.SourcePosition;
 
 import com.sun.source.tree.Tree;
 
 /**
  * This class checks if a method or a variable has the name of a Javascript keyword. Even though the Java compiler lets
  * the user use some of the keywords as variable names, the Generator should not generate code with these names.
+ * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 
@@ -40,7 +41,7 @@ public final class JavascriptKeywords {
 	public static final String THIS = "this";
 	public static final String NULL = "null";
 
-	private static final Set<String> KEYWORDS = new HashSet<String>(Arrays.asList(new String[] { "break", "case", "catch", "continue",
+	private static final Set<String> KEYWORDS = new HashSet<String>(Arrays.asList(new String[]{ "break", "case", "catch", "continue",
 			"debugger", "default", "delete", "do", "else", "finally", "for", "function", "if", "in", "instanceof", "new", "return", "switch",
 			"this", "throw", "try", "typeof", "var", "void", "while", "with", "class", "enum", "export", "extends", "import", "super",
 			"implements", "interface", "let", "package", "private", "protected", "public", "static", "yield" }));
@@ -49,10 +50,7 @@ public final class JavascriptKeywords {
 		//
 	}
 
-	public static void checkIdentifier(File inputFile, SourcePosition pos, String name) {
-	}
-
-	public static void checkIdentifier(Tree tree, String name, GenerationContext context) {
+	public static void checkIdentifier(Tree tree, String name, GenerationContext<?> context) {
 		if (KEYWORDS.contains(name)) {
 			context.addError(tree, "Wrong usage of Javascript keyword:" + name);
 		}

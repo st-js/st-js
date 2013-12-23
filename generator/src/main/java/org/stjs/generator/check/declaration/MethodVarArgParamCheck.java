@@ -1,6 +1,5 @@
 package org.stjs.generator.check.declaration;
 
-
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.check.CheckContributor;

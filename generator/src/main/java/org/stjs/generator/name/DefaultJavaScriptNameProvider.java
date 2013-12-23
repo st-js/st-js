@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -20,19 +19,10 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.util.TreePath;
 
 public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
-	private Set<String> resolvedRootTypes = new HashSet<String>();
+	private final Set<String> resolvedRootTypes = new HashSet<String>();
 
 	@Override
-	public String getTypeName(GenerationContext context, TypeMirror type) {
-		// TODO fix anonymous and inner types names
-		// String name = clazz.getSimpleName();
-		// if (name.isEmpty()) {
-		// return GeneratorConstants.SPECIAL_INLINE_TYPE;
-		// }
-		// for (Class<?> c = clazz.getDeclaringClass(); c != null && !c.isAnonymousClass(); c = c.getDeclaringClass()) {
-		// name = c.getSimpleName() + "." + name;
-		// }
-		//
+	public String getTypeName(GenerationContext<?> context, TypeMirror type) {
 		if (type instanceof DeclaredType) {
 			DeclaredType declaredType = (DeclaredType) type;
 			String name = InternalUtils.getSimpleName(declaredType.asElement());

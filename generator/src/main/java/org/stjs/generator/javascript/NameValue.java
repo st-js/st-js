@@ -1,6 +1,6 @@
 package org.stjs.generator.javascript;
 
-public class NameValue<JS> {
+public final class NameValue<JS> {
 	private final CharSequence name;
 	private final JS value;
 

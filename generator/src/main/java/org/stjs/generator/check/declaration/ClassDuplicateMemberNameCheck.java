@@ -2,7 +2,6 @@ package org.stjs.generator.check.declaration;
 
 import java.util.Collection;
 
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -26,9 +25,32 @@ import com.sun.source.tree.VariableTree;
 
 /**
  * checks the a field name or method exists only once in the class and its hierchy
+ * 
  * @author acraciun
  */
 public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree> {
+
+	private void checkCandidate(Element overrideCandidate, ExecutableElement methodElement, TypeElement classElement, Tree member,
+			GenerationContext<Void> context) {
+
+		boolean error = false;
+		boolean isMethod = overrideCandidate instanceof ExecutableElement;
+		boolean isFieldOrInnerType = !isMethod;
+
+		if (isFieldOrInnerType) {
+			// it's a field or inner type -> this is illegal
+			error = true;
+		} else if (!context.getElements().overrides(methodElement, (ExecutableElement) overrideCandidate, classElement)) {
+			error = true;
+		}
+		if (error) {
+			String name = methodElement.getSimpleName().toString();
+			context.addError(member, "Only maximum one method with the name [" + name
+					+ "] is allowed to have a body. The other methods must be marked as native."
+					+ " The type (or one of its parents) may contain already a method or a field called [" + name
+					+ "] with a different signature. ");
+		}
+	}
 
 	private void checkMethod(TypeElement classElement, Tree member, GenerationContext<Void> context, Multimap<String, Element> existingNames) {
 		if (member instanceof MethodTree) {
@@ -52,22 +74,7 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 			} else {
 				// try to see if it's not in fact a method override
 				for (Element overrideCandidate : sameName) {
-					boolean error = false;
-					if (!(overrideCandidate instanceof ExecutableElement)) {
-						// it's a field or inner type -> this is illegal
-						error = true;
-					} else if (!context.getElements().overrides(methodElement, (ExecutableElement) overrideCandidate, classElement)) {
-						error = true;
-					}
-					if (error) {
-						context.addError(
-								member,
-								"Only maximum one method with the name ["
-										+ name
-										+ "] is allowed to have a body. The other methods must be marked as native. The type (or one of its parents) may contain already a method or a field called ["
-										+ name + "] with a different signature. ");
-						break;
-					}
+					checkCandidate(overrideCandidate, methodElement, classElement, member, context);
 				}
 			}
 		}

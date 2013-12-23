@@ -11,6 +11,7 @@ import com.sun.source.tree.Tree.Kind;
 public class LiteralWriter<JS> implements WriterContributor<LiteralTree, JS> {
 
 	@Override
+	@SuppressWarnings("PMD.CyclomaticComplexity")
 	public JS visit(WriterVisitor<JS> visitor, LiteralTree tree, GenerationContext<JS> context) {
 		if (tree.getKind() == Kind.STRING_LITERAL || tree.getKind() == Kind.CHAR_LITERAL) {
 			return tree.getKind() == Kind.STRING_LITERAL ? context.js().string(tree.getValue().toString()) : context.js().character(

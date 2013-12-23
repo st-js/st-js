@@ -12,6 +12,7 @@ import com.sun.source.tree.VariableTree;
 /**
  * this is a special writer called from a block to handle the case of multiple variables declarated on the same line.
  * This is needed because the Javac AST parser has an separate node per variable
+ * 
  * @author acraciun
  */
 public class MultipleVariableWriter<JS> {
@@ -21,7 +22,7 @@ public class MultipleVariableWriter<JS> {
 		// if (isLoopInitializer(context)) {
 		// stmt.setIsStatement(false);
 		// } else {
-		//		stmt.setIsStatement(true);
+		// stmt.setIsStatement(true);
 		// }
 
 		List<NameValue<JS>> vars = new ArrayList<NameValue<JS>>();

@@ -9,6 +9,7 @@ import com.sun.source.tree.VariableTree;
 
 /**
  * check that no JavaScript keyword (that is not a Java keyword) is used as a variable name
+ * 
  * @author acraciun
  */
 public class VariableWrongNameCheck implements CheckContributor<VariableTree> {

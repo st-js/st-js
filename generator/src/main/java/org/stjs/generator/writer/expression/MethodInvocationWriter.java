@@ -3,7 +3,6 @@ package org.stjs.generator.writer.expression;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import javax.lang.model.element.ExecutableElement;
 
 import org.stjs.generator.GenerationContext;
@@ -32,12 +31,12 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 			return MemberWriters.buildTarget(context, methodDecl);
 		}
 		// calls with target: target.method(args)
-		MemberSelectTree memberSelect = (MemberSelectTree) select;
 		if (TreeUtils.isSuperCall(tree)) {
 			// this is a call of type super.staticMethod(args) -> it should be handled as a simple call to
 			// staticMethod
 			return MemberWriters.buildTarget(context, methodDecl);
 		}
+		MemberSelectTree memberSelect = (MemberSelectTree) select;
 		return visitor.scan(memberSelect.getExpression(), context);
 	}
 

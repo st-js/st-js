@@ -20,10 +20,6 @@ import org.stjs.generator.BridgeClass;
 import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
 import org.stjs.generator.Generator;
-import org.stjs.generator.name.DefaultNameProvider;
-import org.stjs.generator.name.NameProvider;
-import org.stjs.generator.type.TypeWrapper;
-import org.stjs.generator.type.TypeWrappers;
 import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.Scripts;
 import org.stjs.testing.annotation.ScriptsAfter;
@@ -89,10 +85,12 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	public void start() throws InitializationError {
 		try {
 			this.doStart();
-		} catch (InitializationError ie) {
+		}
+		catch (InitializationError ie) {
 			this.markAsDead();
 			throw ie;
-		} catch (Throwable t) {
+		}
+		catch (Throwable t) {
 			this.markAsDead();
 			throw new InitializationError(t);
 		}
@@ -123,14 +121,14 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 			if (getConfig().isDebugEnabled()) {
 				if (methodUnderExecution != null) {
-					System.out.println("Browser " + this.id + " has picked up the test "
-							+ methodUnderExecution.getMethod().getMethod());
+					System.out.println("Browser " + this.id + " has picked up the test " + methodUnderExecution.getMethod().getMethod());
 				} else {
 					System.out.println("Browser " + this.id + " has no more tests");
 				}
 			}
 			return methodUnderExecution;
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -158,9 +156,11 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 			if (getConfig().isDebugEnabled()) {
 				System.out.println("Browser " + this.id + " has picked up the new test");
 			}
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			throw new RuntimeException(e);
-		} catch (TimeoutException e) {
+		}
+		catch (TimeoutException e) {
 			// the browser failed to pick up the test in time.
 			this.markAsDead();
 			this.reportAsDead(method);
@@ -189,9 +189,11 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 				System.out.println("Browser " + this.id + " has been notified that no more tests are coming");
 			}
 			exchanger.exchange(null, getConfig().getTestTimeout(), TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			throw new RuntimeException(e);
-		} catch (TimeoutException e) {
+		}
+		catch (TimeoutException e) {
 			// the browser failed to pick up the test in time.
 			this.markAsDead();
 		}
@@ -206,9 +208,9 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	private String getTypeName(Class<?> clazz) {
 		// TODO have it inject it here
-		NameProvider names = new DefaultNameProvider();
-		TypeWrapper type = TypeWrappers.wrap(clazz);
-		return names.getTypeName(type);
+		// NameProvider names = new DefaultNameProvider();
+		// TypeWrapper type = TypeWrappers.wrap(clazz);
+		return clazz.getName();
 	}
 
 	/**
@@ -259,8 +261,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		}
 
 		Set<URI> jsFiles = new LinkedHashSet<URI>();
-		for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(getConfig()
-				.getClassLoader())) {
+		for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(getConfig().getClassLoader())) {
 
 			if (addedScripts != null && dep instanceof BridgeClass) {
 				// bridge dependencies are not added when using @Scripts
@@ -296,8 +297,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		resp.append("    parent.startingTest('" + testedClassName + "', '" + method.getName() + "');");
 		resp.append("    var stjsTest = new " + testedClassName + "();\n");
 		resp.append("    var stjsResult = 'OK';\n");
-		resp.append("    var expectedException = "
-				+ (test.expected() != Test.None.class ? getTypeName(test.expected()) : null) + ";\n");
+		resp.append("    var expectedException = " + (test.expected() != Test.None.class ? getTypeName(test.expected()) : null) + ";\n");
 		resp.append("    try{\n");
 		// call before methods
 		for (FrameworkMethod beforeMethod : beforeMethods) {

@@ -64,12 +64,14 @@ public class GlobalScopeGeneratorTest {
 		assertCodeContains(GlobalScope9.class, "s = field");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testInstanceMembersNotAllowded1() {
 		generate(GlobalScope10.class);
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testInstanceMembersNotAllowded2() {
 		generate(GlobalScope11.class);
 	}

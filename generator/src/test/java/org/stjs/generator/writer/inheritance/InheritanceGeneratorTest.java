@@ -34,12 +34,14 @@ public class InheritanceGeneratorTest {
 		assertCodeContains(Inheritance5.class, "stjs.extend(Inheritance5, null, [MyInterface3],");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testImplementsSyntheticType() {
 		generate(Inheritance6.class);
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testExtendsSyntheticType() {
 		generate(Inheritance9.class);
 	}

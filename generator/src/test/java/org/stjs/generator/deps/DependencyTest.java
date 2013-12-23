@@ -30,7 +30,8 @@ public class DependencyTest {
 		assertEquals(0, DependencyCollection.DEPENDENCY_COMPARATOR.compare(Dep4.class, Dep3.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(
+			expected = IllegalArgumentException.class)
 	public void test5() {
 		DependencyCollection.DEPENDENCY_COMPARATOR.compare(Err1.class, Err2.class);
 	}

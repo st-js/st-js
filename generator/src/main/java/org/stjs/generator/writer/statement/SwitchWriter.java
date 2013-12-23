@@ -12,6 +12,7 @@ import com.sun.source.tree.Tree;
 
 /**
  * switch
+ * 
  * @author acraciun
  */
 public class SwitchWriter<JS> implements WriterContributor<SwitchTree, JS> {

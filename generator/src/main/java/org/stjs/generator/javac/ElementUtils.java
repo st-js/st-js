@@ -29,13 +29,13 @@ import javax.lang.model.util.Elements;
 
 import com.sun.tools.javac.code.Symbol;
 
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
-
 /**
  * A Utility class for analyzing {@code Element}s.
  */
-@SuppressWarnings(justification = "copied code", value = "BC_UNCONFIRMED_CAST")
-public class ElementUtils {
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+		justification = "copied code", value = "BC_UNCONFIRMED_CAST")
+@SuppressWarnings("PMD")
+public final class ElementUtils {
 
 	// Class cannot be instantiated.
 	private ElementUtils() {
@@ -263,7 +263,7 @@ public class ElementUtils {
 	}
 
 	public static boolean isError(Element element) {
-		return element.getClass().getName().equals("com.sun.tools.javac.comp.Resolve$SymbolNotFoundError");
+		return "com.sun.tools.javac.comp.Resolve$SymbolNotFoundError".equals(element.getClass().getName());
 	}
 
 	/**

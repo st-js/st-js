@@ -17,6 +17,7 @@ import com.sun.source.util.TreePath;
 /**
  * This check class verifies that all final variables are declared at the method level, as the block scope does not
  * exists in JavaScript.
+ * 
  * @author acraciun
  */
 public class VariableFinalInLoopCheck implements CheckContributor<VariableTree> {

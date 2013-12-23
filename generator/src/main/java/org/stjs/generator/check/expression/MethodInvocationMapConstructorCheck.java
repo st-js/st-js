@@ -11,6 +11,7 @@ import com.sun.source.tree.MethodInvocationTree;
 /**
  * this class checks that you use only literals for a map key: i.e. $map(variable, 1) is not allowed but $map("key", 1)
  * is allowed
+ * 
  * @author acraciun
  */
 public class MethodInvocationMapConstructorCheck implements CheckContributor<MethodInvocationTree> {

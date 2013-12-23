@@ -22,7 +22,6 @@ import java.io.Writer;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import org.stjs.generator.ast.SourcePosition;
 import org.stjs.generator.check.Checks;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.javascript.rhino.RhinoJavaScriptBuilder;

@@ -1,6 +1,5 @@
 package org.stjs.generator.check.expression;
 
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.NestingKind;
@@ -20,6 +19,7 @@ import com.sun.source.tree.Scope;
 public class IdentifierAccessOuterScopeCheck implements CheckContributor<IdentifierTree> {
 	/**
 	 * if the block is an anonymous initializer, then return the outer class
+	 * 
 	 * @param element
 	 * @return
 	 */

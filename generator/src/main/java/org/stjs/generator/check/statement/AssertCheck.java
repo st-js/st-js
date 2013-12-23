@@ -8,6 +8,7 @@ import com.sun.source.tree.AssertTree;
 
 /**
  * Java asserts don't have an equivalent - at language level in JavaScript
+ * 
  * @author acraciun
  */
 public class AssertCheck implements CheckContributor<AssertTree> {

@@ -11,6 +11,7 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * array.$set(index, value) -> array[index] = value, or $set(obj, prop, value) -> obj[prop]=value
+ * 
  * @author acraciun
  */
 public class PutTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {

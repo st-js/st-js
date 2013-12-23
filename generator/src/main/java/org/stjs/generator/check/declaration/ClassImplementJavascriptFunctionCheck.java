@@ -1,6 +1,5 @@
 package org.stjs.generator.check.declaration;
 
-
 import javax.lang.model.element.Element;
 
 import org.stjs.generator.GenerationContext;
@@ -16,9 +15,18 @@ import com.sun.source.tree.Tree;
 /**
  * check that a class does not implement a @JavaScript annotated interface as this is reserved to build inline
  * functions.
+ * 
  * @author acraciun
  */
 public class ClassImplementJavascriptFunctionCheck implements CheckContributor<ClassTree> {
+
+	private void checkInteface(Tree iface, GenerationContext<Void> context) {
+		Element ifaceType = TreeUtils.elementFromUse((ExpressionTree) iface);
+		if (JavaNodes.isJavaScriptFunction(ifaceType)) {
+			context.addError(iface, "You cannot implement intefaces annotated with @JavascriptFunction. "
+					+ "You can only have inline object creation with this type of interfaces");
+		}
+	}
 
 	@Override
 	public Void visit(CheckVisitor visitor, ClassTree tree, GenerationContext<Void> context) {
@@ -27,11 +35,7 @@ public class ClassImplementJavascriptFunctionCheck implements CheckContributor<C
 			return null;
 		}
 		for (Tree iface : tree.getImplementsClause()) {
-			Element ifaceType = TreeUtils.elementFromUse((ExpressionTree) iface);
-			if (JavaNodes.isJavaScriptFunction(ifaceType)) {
-				context.addError(iface, "You cannot implement intefaces annotated with @JavascriptFunction. "
-						+ "You can only have inline object creation with this type of interfaces");
-			}
+			checkInteface(iface, context);
 		}
 		if (tree.getExtendsClause() != null) {
 			Element superType = TreeUtils.elementFromUse((ExpressionTree) tree.getExtendsClause());

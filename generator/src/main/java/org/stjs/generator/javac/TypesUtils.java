@@ -13,14 +13,15 @@ import javax.lang.model.util.Types;
 
 import com.sun.tools.javac.model.JavacTypes;
 
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
-
 /**
  * A utility class that helps with {@link TypeMirror}s.
  * 
  */
 // TODO: This class needs significant restructuring
-@SuppressWarnings(justification = "copied code", value = "BC_UNCONFIRMED_CAST")
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+		justification = "copied code", value = "BC_UNCONFIRMED_CAST")
+@SuppressWarnings("PMD")
+// CHECKSTYLE:OFF
 public final class TypesUtils {
 
 	// Class cannot be instantiated
@@ -310,3 +311,4 @@ public final class TypesUtils {
 		return t.getArrayType(componentType);
 	}
 }
+// CHECKSTYLE:ON

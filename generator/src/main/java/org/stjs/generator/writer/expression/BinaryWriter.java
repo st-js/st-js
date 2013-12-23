@@ -2,9 +2,6 @@ package org.stjs.generator.writer.expression;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 
 import javax.lang.model.type.TypeMirror;
 
@@ -19,8 +16,6 @@ import com.sun.source.tree.Tree.Kind;
 import com.sun.source.util.TreePath;
 
 public class BinaryWriter<JS> implements WriterContributor<BinaryTree, JS> {
-	private static Map<Kind, Integer> jsOperators = new HashMap<Kind, Integer>();
-
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, BinaryTree tree, GenerationContext<JS> context) {
 		JS left = visitor.scan(tree.getLeftOperand(), context);

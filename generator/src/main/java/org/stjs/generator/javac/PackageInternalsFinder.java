@@ -13,8 +13,16 @@ import java.util.jar.JarEntry;
 
 import javax.tools.JavaFileObject;
 
+import org.stjs.generator.STJSRuntimeException;
+
+/**
+ * this class looks for packages in the classpath
+ * 
+ * @author acraciun
+ * 
+ */
 class PackageInternalsFinder {
-	private ClassLoader classLoader;
+	private final ClassLoader classLoader;
 	private static final String CLASS_FILE_EXTENSION = ".class";
 
 	public PackageInternalsFinder(ClassLoader classLoader) {
@@ -66,8 +74,8 @@ class PackageInternalsFinder {
 				}
 			}
 		}
-		catch (Exception e) {
-			throw new RuntimeException("Wasn't able to open " + packageFolderURL + " as a jar file", e);
+		catch (IOException e) {
+			throw new STJSRuntimeException("Wasn't able to open " + packageFolderURL + " as a jar file", e);
 		}
 		return result;
 	}
@@ -77,14 +85,12 @@ class PackageInternalsFinder {
 
 		File[] childFiles = directory.listFiles();
 		for (File childFile : childFiles) {
-			if (childFile.isFile()) {
+			if (childFile.isFile() && childFile.getName().endsWith(CLASS_FILE_EXTENSION)) {
 				// We only want the .class files.
-				if (childFile.getName().endsWith(CLASS_FILE_EXTENSION)) {
-					String binaryName = packageName + "." + childFile.getName();
-					binaryName = binaryName.replaceAll(CLASS_FILE_EXTENSION + "$", "");
+				String binaryName = packageName + "." + childFile.getName();
+				binaryName = binaryName.replaceAll(CLASS_FILE_EXTENSION + "$", "");
 
-					result.add(new CustomJavaFileObject(binaryName, childFile.toURI()));
-				}
+				result.add(new CustomJavaFileObject(binaryName, childFile.toURI()));
 			}
 		}
 

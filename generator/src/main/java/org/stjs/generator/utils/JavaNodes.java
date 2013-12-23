@@ -4,7 +4,6 @@ import java.lang.annotation.Annotation;
 import java.util.Locale;
 import java.util.Set;
 
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -36,15 +35,19 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
 
-public class JavaNodes {
+public final class JavaNodes {
 	private static final String ANNOTATED_PACKAGE = "annotation.";
+
+	private JavaNodes() {
+		// private
+	}
 
 	public static boolean isConstructor(Tree tree) {
 		if (!(tree instanceof MethodTree)) {
 			return false;
 		}
 		MethodTree method = (MethodTree) tree;
-		return method.getName().toString().equals("<init>") && !method.getModifiers().getFlags().contains(Modifier.STATIC);
+		return "<init>".equals(method.getName().toString()) && !method.getModifiers().getFlags().contains(Modifier.STATIC);
 	}
 
 	public static boolean sameRawType(TypeMirror type1, Class<?> clazz) {
@@ -82,7 +85,7 @@ public class JavaNodes {
 			return a;
 		}
 		PackageElement pack = ElementUtils.enclosingPackage(element);
-		return pack != null ? pack.getAnnotation(annotationType) : null;
+		return pack == null ? null : pack.getAnnotation(annotationType);
 	}
 
 	public static boolean isJavaScriptFunction(Element element) {

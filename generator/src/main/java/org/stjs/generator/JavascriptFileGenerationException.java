@@ -17,10 +17,10 @@ package org.stjs.generator;
 
 import java.io.File;
 
-import org.stjs.generator.ast.SourcePosition;
 
 /**
  * This is the exception thrown by the Generator.
+ * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class JavascriptFileGenerationException extends STJSRuntimeException {
@@ -30,8 +30,7 @@ public class JavascriptFileGenerationException extends STJSRuntimeException {
 
 	private final SourcePosition sourcePosition;
 
-	public JavascriptFileGenerationException(File inputFile, SourcePosition sourcePosition, String message,
-			Throwable cause) {
+	public JavascriptFileGenerationException(File inputFile, SourcePosition sourcePosition, String message, Throwable cause) {
 		super(message, cause);
 		this.inputFile = inputFile;
 		this.sourcePosition = sourcePosition;

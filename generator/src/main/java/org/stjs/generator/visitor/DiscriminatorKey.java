@@ -1,6 +1,6 @@
 package org.stjs.generator.visitor;
 
-public class DiscriminatorKey {
+public final class DiscriminatorKey {
 	private final String id;
 	private final Object value;
 

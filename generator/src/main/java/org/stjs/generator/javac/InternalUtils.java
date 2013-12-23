@@ -17,7 +17,6 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
-import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Symbol.ClassSymbol;
@@ -33,8 +32,6 @@ import com.sun.tools.javac.tree.JCTree.JCNewClass;
 import com.sun.tools.javac.tree.TreeInfo;
 import com.sun.tools.javac.util.Context;
 
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
-
 //import com.sun.source.tree.AnnotatedTypeTree;
 
 /*>>>
@@ -45,8 +42,11 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
  * Static utility methods used by annotation abstractions in this package. Some methods in this class depend on the use
  * of Sun javac internals; any procedure in the Checker Framework that uses a non-public API should be placed here.
  */
-@SuppressWarnings(justification = "copied code", value = "BC_UNCONFIRMED_CAST")
-public class InternalUtils {
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+		justification = "copied code", value = "BC_UNCONFIRMED_CAST")
+@SuppressWarnings("PMD")
+// CHECKSTYLE:OFF
+public final class InternalUtils {
 
 	// Class cannot be instantiated.
 	private InternalUtils() {
@@ -107,11 +107,11 @@ public class InternalUtils {
 	}
 
 	/**
-	 * Determines whether or not the node referred to by the given {@link TreePath} is an anonymous constructor (the
-	 * constructor for an anonymous class.
+	 * Determines whether or not the node referred to by the given {@link com.sun.source.util.TreePath} is an anonymous
+	 * constructor (the constructor for an anonymous class.
 	 * 
 	 * @param method
-	 *            the {@link TreePath} for a node that may be an anonymous constructor
+	 *            the {@link com.sun.source.util.TreePath} for a node that may be an anonymous constructor
 	 * @return true if the given path points to an anonymous constructor, false if it does not
 	 */
 	public static boolean isAnonymousConstructor(final MethodTree method) {
@@ -428,3 +428,4 @@ public class InternalUtils {
 		return isSynthetic(tree);
 	}
 }
+// CHECKSTYLE:ON

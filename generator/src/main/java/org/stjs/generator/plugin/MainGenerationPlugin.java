@@ -85,6 +85,7 @@ import org.stjs.generator.writer.templates.TypeOfTemplate;
 
 /**
  * this is the main generation plugin that adds all the needed checks and writers.
+ * 
  * @author acraciun
  */
 public class MainGenerationPlugin<JS> {

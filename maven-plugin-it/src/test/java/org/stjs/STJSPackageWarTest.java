@@ -3,7 +3,6 @@ package org.stjs;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.maven.it.Verifier;
@@ -12,10 +11,12 @@ import org.junit.Test;
 
 /**
  * This integration test checks if a war is correctly packaged
+ * 
  * @author acraciun
  */
 public class STJSPackageWarTest {
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testPackageIt() throws Exception {
 
@@ -25,9 +26,10 @@ public class STJSPackageWarTest {
 
 		verifier.deleteArtifact("org.st-js", "package-js-war", "1.0.0-SNAPSHOT", "war");
 
-		Properties props = new Properties(System.getProperties());
-		props.put("stjs.version", System.getProperty("stjs.version"));//coming from the configuration of surefire plugin outside
-		verifier.executeGoal("install", props);
+		// coming from the configuration of surefire plugin outside
+		verifier.getCliOptions().add("-Dstjs.version=" + System.getProperty("stjs.version"));
+
+		verifier.executeGoal("install");
 
 		verifier.verifyErrorFreeLog();
 

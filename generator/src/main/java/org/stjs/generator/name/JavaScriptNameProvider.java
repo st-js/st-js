@@ -13,15 +13,15 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.util.TreePath;
 
 public interface JavaScriptNameProvider {
-	String getTypeName(GenerationContext context, TypeMirror type);
+	String getTypeName(GenerationContext<?> context, TypeMirror type);
 
-	String getTypeName(GenerationContext context, Element type);
+	String getTypeName(GenerationContext<?> context, Element type);
 
-	String getVariableName(GenerationContext context, IdentifierTree treeNode, TreePath path);
+	String getVariableName(GenerationContext<?> context, IdentifierTree treeNode, TreePath path);
 
-	String getMethodName(GenerationContext context, MethodTree tree, TreePath path);
+	String getMethodName(GenerationContext<?> context, MethodTree tree, TreePath path);
 
-	String getMethodName(GenerationContext context, MethodInvocationTree tree, TreePath path);
+	String getMethodName(GenerationContext<?> context, MethodInvocationTree tree, TreePath path);
 
 	Collection<String> getResolvedTypes();
 }

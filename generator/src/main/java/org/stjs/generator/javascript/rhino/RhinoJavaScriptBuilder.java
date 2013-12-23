@@ -57,14 +57,13 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.debugging.sourcemap.SourceMapGenerator;
 
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
-
 /**
  * 
  * this JavaScript builder uses the rhino AST nodes to build the synthax tree.
  * 
  * @author acraciun
  */
+@SuppressWarnings("PMD.ExcessivePublicCount")
 public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	private static final int PROP_JAVA_LINE_NO = AstNode.LAST_PROP + 1;
 	private static final int PROP_JAVA_COLUMN_NO = AstNode.LAST_PROP + 2;
@@ -163,8 +162,9 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return b;
 	}
 
-	@java.lang.SuppressWarnings("unchecked")
-	@SuppressWarnings(justification = "Checked cast", value = "BC_UNCONFIRMED_CAST")
+	@SuppressWarnings("unchecked")
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+			justification = "Checked cast", value = "BC_UNCONFIRMED_CAST")
 	private <T extends AstNode> T cast(AstNode node, Class<T> clazz) {
 		if (node == null) {
 			return null;
@@ -401,8 +401,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 
 	@Override
 	public AstNode code(String code) {
-		AstNode node = new Parser().parse(code, "inline", 0);
-		return node;
+		return new Parser().parse(code, "inline", 0);
 	}
 
 	@Override

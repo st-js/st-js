@@ -6,7 +6,11 @@ import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.utils.JavaNodes;
 
-public class MemberWriters {
+public final class MemberWriters {
+	private MemberWriters() {
+		//
+	}
+
 	public static <JS> JS buildTarget(GenerationContext<JS> context, Element memberDecl) {
 		if (JavaNodes.isGlobal(memberDecl.getEnclosingElement())) {
 			return null;

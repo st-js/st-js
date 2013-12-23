@@ -51,9 +51,7 @@ public class RhinoExecutor {
 		ScriptEngine engine = factory.getEngineByName("JavaScript");
 		Reader reader = null;
 		try {
-			reader =
-					new InputStreamReader(
-							Thread.currentThread().getContextClassLoader().getResourceAsStream("stjs.js"), "UTF-8");
+			reader = new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream("stjs.js"), "UTF-8");
 			engine.eval(reader);
 			if (mainClassDisabled) {
 				engine.eval("stjs.mainCallDisabled=true;");

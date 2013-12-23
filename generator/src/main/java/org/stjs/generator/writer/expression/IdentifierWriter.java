@@ -1,6 +1,5 @@
 package org.stjs.generator.writer.expression;
 
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 
@@ -17,17 +16,10 @@ import com.sun.source.tree.IdentifierTree;
 
 /**
  * this class deal with identifiers likes variable, field references.
+ * 
  * @author acraciun
  */
 public class IdentifierWriter<JS> implements WriterContributor<IdentifierTree, JS> {
-
-	// private void visitField(FieldWrapper field, NameExpr n) {
-	// if (Modifier.isStatic(field.getModifiers())) {
-	// printStaticFieldOrMethodAccessPrefix(field.getOwnerType(), true);
-	// } else if (!isInlineObjectCreationChild(n, INLINE_CREATION_PARENT_LEVEL)) {
-	// printer.print("this.");
-	// }
-	// }
 
 	private JS visitField(Element def, IdentifierTree tree, GenerationContext<JS> context) {
 		return context.js().property(MemberWriters.buildTarget(context, def), tree.getName());
@@ -39,6 +31,7 @@ public class IdentifierWriter<JS> implements WriterContributor<IdentifierTree, J
 	}
 
 	@Override
+	@SuppressWarnings("PMD.CyclomaticComplexity")
 	public JS visit(WriterVisitor<JS> visitor, IdentifierTree tree, GenerationContext<JS> context) {
 
 		String name = tree.getName().toString();

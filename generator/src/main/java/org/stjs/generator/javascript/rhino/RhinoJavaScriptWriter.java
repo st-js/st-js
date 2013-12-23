@@ -64,7 +64,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	private static final String INDENT = "    ";
 	private int level;
 
-	private boolean indented = false;
+	private boolean indented;
 
 	private final Writer writer;
 
@@ -157,7 +157,8 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		int count = 0;
 		for (AstNode item : items) {
 			visitorSupport.accept(item, this, param);
-			if (count++ < max - 1) {
+			if (count < max - 1) {
+				count++;
 				print(", ");
 			} else if (item instanceof EmptyExpression) {
 				print(",");

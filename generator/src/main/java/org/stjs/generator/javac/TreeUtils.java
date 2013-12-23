@@ -40,12 +40,9 @@ import com.sun.source.tree.Tree;
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.util.TreePath;
-import com.sun.source.util.Trees;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.tree.JCTree;
-
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
 //import com.sun.source.tree.AnnotatedTypeTree;
 
@@ -53,7 +50,10 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
  * A utility class made for helping to analyze a given {@code Tree}.
  */
 // TODO: This class needs significant restructuring
-@SuppressWarnings(justification = "copied code", value = "BC_UNCONFIRMED_CAST")
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+		justification = "copied code", value = "BC_UNCONFIRMED_CAST")
+@SuppressWarnings("PMD")
+// CHECKSTYLE:OFF
 public final class TreeUtils {
 
 	// Class cannot be instantiated.
@@ -391,7 +391,7 @@ public final class TreeUtils {
 
 	/**
 	 * Gets the element for the declaration corresponding to this use of an element. To get the element for a
-	 * declaration, use {@link Trees#getElement(TreePath)} instead.
+	 * declaration, use {@link com.sun.source.util.Trees#getElement(TreePath)} instead.
 	 * 
 	 * TODO: remove this method, as it really doesn't do anything.
 	 * 
@@ -845,3 +845,4 @@ public final class TreeUtils {
 	}
 
 }
+// CHECKSTYLE:ON

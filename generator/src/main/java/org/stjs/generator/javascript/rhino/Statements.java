@@ -23,19 +23,17 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
  */
 class Statements extends AstNode {
 
-	{
-		this.type = Token.LAST_TOKEN + 1;
-	}
-
 	public Statements() {
+		this(0, 0);
 	}
 
 	public Statements(int pos) {
-		super(pos);
+		this(pos, 0);
 	}
 
 	public Statements(int pos, int len) {
 		super(pos, len);
+		this.type = Token.LAST_TOKEN + 1;
 	}
 
 	/**
@@ -46,7 +44,8 @@ class Statements extends AstNode {
 	}
 
 	@java.lang.SuppressWarnings("unused")
-	@SuppressWarnings(justification = "No problem with this cast", value = "BC_UNCONFIRMED_CAST")
+	@SuppressWarnings(
+			justification = "No problem with this cast", value = "BC_UNCONFIRMED_CAST")
 	private AstNode cast(Node n) {
 		return (AstNode) n;
 	}

@@ -8,6 +8,7 @@ import com.sun.source.tree.SynchronizedTree;
 
 /**
  * ths synchronized blocks are illegal, as there is no threading model in JavaScript
+ * 
  * @author acraciun
  */
 public class SynchronizedCheck implements CheckContributor<SynchronizedTree> {

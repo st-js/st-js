@@ -14,16 +14,18 @@ import com.sun.source.tree.Tree.Kind;
  */
 public enum BinaryOperator {
 	// math
-	MULTIPLY(Kind.MULTIPLY, Token.MUL), DIVIDE(Kind.DIVIDE, Token.DIV), REMAINDER(Kind.REMAINDER, Token.MOD), PLUS(Kind.PLUS, Token.ADD), MINUSt(
-			Kind.MINUS, Token.DEC),
+	MULTIPLY(Kind.MULTIPLY, Token.MUL), DIVIDE(Kind.DIVIDE, Token.DIV), REMAINDER(Kind.REMAINDER, Token.MOD), //
+	PLUS(Kind.PLUS, Token.ADD), MINUS(Kind.MINUS, Token.DEC),
 
 	// bit
-	LEFT_SHIFT(Kind.LEFT_SHIFT, Token.LSH), RIGHT_SHIFT(Kind.RIGHT_SHIFT, Token.RSH), UNSIGNED_RIGHT_SHIFT(Kind.UNSIGNED_RIGHT_SHIFT, Token.URSH), AND(
-			Kind.AND, Token.BITAND), XOR(Kind.XOR, Token.BITXOR), OR(Kind.OR, Token.BITOR),
+	LEFT_SHIFT(Kind.LEFT_SHIFT, Token.LSH), RIGHT_SHIFT(Kind.RIGHT_SHIFT, Token.RSH), //
+	UNSIGNED_RIGHT_SHIFT(Kind.UNSIGNED_RIGHT_SHIFT, Token.URSH), AND(Kind.AND, Token.BITAND), //
+	XOR(Kind.XOR, Token.BITXOR), OR(Kind.OR, Token.BITOR),
 
 	// comparator
-	LESS_THAN(Kind.LESS_THAN, Token.LT), LESS_THAN_EQUAL(Kind.LESS_THAN_EQUAL, Token.LE), GREATER_THAN(Kind.GREATER_THAN, Token.GT), GREATER_THAN_EQUAL(
-			Kind.GREATER_THAN_EQUAL, Token.GE), EQUAL_TOt(Kind.EQUAL_TO, Token.EQ), NOT_EQUAL_TO(Kind.NOT_EQUAL_TO, Token.NE),
+	LESS_THAN(Kind.LESS_THAN, Token.LT), LESS_THAN_EQUAL(Kind.LESS_THAN_EQUAL, Token.LE), //
+	GREATER_THAN(Kind.GREATER_THAN, Token.GT), GREATER_THAN_EQUAL(Kind.GREATER_THAN_EQUAL, Token.GE), //
+	EQUAL_TOt(Kind.EQUAL_TO, Token.EQ), NOT_EQUAL_TO(Kind.NOT_EQUAL_TO, Token.NE),
 
 	// logical
 	CONDITIONAL_AND(Kind.CONDITIONAL_AND, Token.AND), CONDITIONAL_OR(Kind.CONDITIONAL_OR, Token.OR),
@@ -47,16 +49,16 @@ public enum BinaryOperator {
 		return javaScript;
 	}
 
-	private static final Map<Kind, BinaryOperator> byJavaOperator = new EnumMap<Kind, BinaryOperator>(Kind.class);
+	private static final Map<Kind, BinaryOperator> BY_JAVA_OPERATOR = new EnumMap<Kind, BinaryOperator>(Kind.class);
 	static {
 		for (BinaryOperator op : values()) {
 			if (op.getJava() != null) {
-				byJavaOperator.put(op.getJava(), op);
+				BY_JAVA_OPERATOR.put(op.getJava(), op);
 			}
 		}
 	}
 
 	public static BinaryOperator valueOf(Kind javaOperator) {
-		return byJavaOperator.get(javaOperator);
+		return BY_JAVA_OPERATOR.get(javaOperator);
 	}
 }

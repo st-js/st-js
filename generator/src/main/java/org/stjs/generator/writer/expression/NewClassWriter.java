@@ -3,11 +3,9 @@ package org.stjs.generator.writer.expression;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import javax.lang.model.element.Element;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.check.expression.NewClassInlineFunctionCheck;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javascript.NameValue;
 import org.stjs.generator.utils.JavaNodes;
@@ -74,7 +72,8 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 	}
 
 	/**
-	 * check by {@link NewClassInlineFunctionCheck} generate the code for inline functions:
+	 * check by {@link org.stjs.generator.check.expression.NewClassInlineFunctionCheck} generate the code for inline
+	 * functions:
 	 * 
 	 * <pre>
 	 * new FunctionInterface(){

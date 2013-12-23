@@ -34,12 +34,14 @@ public class StatementsGeneratorTest {
 		assertCodeContains(Statements4.class, "default: break");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testArray1() {
 		generate(Statements5.class);
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testArray2() {
 		// java array creation is forbidden
 		generate(Statements6.class);
@@ -97,7 +99,8 @@ public class StatementsGeneratorTest {
 				"}");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testInstanceInitializer() {
 		generate(Statements15.class);
 	}
@@ -109,13 +112,15 @@ public class StatementsGeneratorTest {
 		assertEquals(2, ((Number) execute(Statements16.class)).intValue());
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testSynchronizedBlock() {
 		// synchronized not supported
 		generate(Statements17.class);
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testAssert() {
 		// assert not supported
 		generate(Statements18.class);

@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.stjs.generator.STJSRuntimeException;
+
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.sun.source.tree.Tree;
@@ -15,9 +17,10 @@ import com.sun.source.util.TreeScanner;
 public class TreePathScannerContributors<R, P extends TreePathHolder, V extends TreePathScannerContributors<R, P, V>> extends TreeScanner<R, P> {
 	private final Multimap<Class<?>, VisitorContributor<? extends Tree, R, P, V>> contributors = LinkedListMultimap.create();
 
-	private final Map<DiscriminatorKey, VisitorContributor<? extends Tree, R, P, V>> contributorsWithDiscriminator = new HashMap<DiscriminatorKey, VisitorContributor<? extends Tree, R, P, V>>();
+	private final Map<DiscriminatorKey, VisitorContributor<? extends Tree, R, P, V>> contributorsWithDiscriminator = //
+	new HashMap<DiscriminatorKey, VisitorContributor<? extends Tree, R, P, V>>();
 
-	private boolean continueScanning = false;
+	private boolean continueScanning;
 
 	public boolean isContinueScanning() {
 		return continueScanning;
@@ -31,7 +34,7 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 		assert contributor != null;
 		Class<?> treeNodeClass = getTreeNodeClass(contributor.getClass());
 		if (treeNodeClass == null) {
-			throw new RuntimeException("Cannot guess the tree node class from the contributor " + contributor + " ");
+			throw new STJSRuntimeException("Cannot guess the tree node class from the contributor " + contributor + ". ");
 		}
 		contributors.put(treeNodeClass, contributor);
 		return this;
@@ -92,9 +95,6 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 			return r;
 		}
 		Collection<VisitorContributor<? extends Tree, R, P, V>> nodeContributors = contributors.get(getTreeInteface(node.getClass()));
-		if (nodeContributors.isEmpty() && !continueScanning) {
-			System.err.println("No contributors for node of type:" + getTreeInteface(node.getClass()));
-		}
 		R lastR = r;
 		for (VisitorContributor<? extends Tree, R, P, V> vc : nodeContributors) {
 			lastR = ((VisitorContributor<T, R, P, V>) vc).visit((V) this, node, p);
@@ -114,7 +114,8 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 		p.setCurrentPath(new TreePath(prev, tree));
 		try {
 			return visit(tree, p, null);
-		} finally {
+		}
+		finally {
 			p.setCurrentPath(prev);
 		}
 	}

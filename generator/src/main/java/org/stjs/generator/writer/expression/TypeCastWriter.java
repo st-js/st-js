@@ -2,7 +2,6 @@ package org.stjs.generator.writer.expression;
 
 import java.util.Collections;
 
-
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;

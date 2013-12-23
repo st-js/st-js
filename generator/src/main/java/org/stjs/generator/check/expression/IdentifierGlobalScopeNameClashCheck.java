@@ -1,6 +1,5 @@
 package org.stjs.generator.check.expression;
 
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
@@ -45,6 +44,7 @@ import com.sun.source.util.TreeScanner;
  * </pre>
  * 
  * The global x will be in fact hidden by the local variable.
+ * 
  * @author acraciun
  */
 public class IdentifierGlobalScopeNameClashCheck implements CheckContributor<IdentifierTree> {
@@ -56,6 +56,34 @@ public class IdentifierGlobalScopeNameClashCheck implements CheckContributor<Ide
 			}
 		}
 		return null;
+	}
+
+	private static void findVariablesInMethod(final String name, final GenerationContext<Void> context) {
+		MethodTree enclosingMethod = getEnclosingMethod(context.getCurrentPath());
+
+		if (enclosingMethod == null) {
+			// don't see a reason why!?
+			return;
+		}
+		enclosingMethod.accept(new TreeScanner<Void, Void>() {
+			private boolean checkStopped;
+
+			@Override
+			public Void visitClass(ClassTree arg0, Void arg1) {
+				// stop the checks if a new type is encountered
+				checkStopped = true;
+				return super.visitClass(arg0, arg1);
+			}
+
+			@Override
+			public Void visitVariable(VariableTree var, Void arg1) {
+				if (!checkStopped && var.getName().toString().equals(name)) {
+					context.addError(var, "A variable with the same name as your global variable is already defined in this method's scope. "
+							+ "Please rename either the local variable/parameter or the global variable.");
+				}
+				return super.visitVariable(var, arg1);
+			}
+		}, null);
 	}
 
 	public static Void checkGlobalScope(final ExpressionTree tree, final String name, final GenerationContext<Void> context) {
@@ -72,34 +100,10 @@ public class IdentifierGlobalScopeNameClashCheck implements CheckContributor<Ide
 
 		TypeElement typeElement = (TypeElement) fieldElement.getEnclosingElement();
 		if (!JavaNodes.isGlobal(typeElement)) {
-			//check only global fields
+			// check only global fields
 			return null;
 		}
-		MethodTree enclosingMethod = getEnclosingMethod(context.getCurrentPath());
-
-		if (enclosingMethod == null) {
-			//don't see a reason why!?
-			return null;
-		}
-		enclosingMethod.accept(new TreeScanner<Void, Void>() {
-			private boolean checkStopped = false;
-
-			@Override
-			public Void visitClass(ClassTree arg0, Void arg1) {
-				//stop the checks if a new type is encountered
-				checkStopped = true;
-				return super.visitClass(arg0, arg1);
-			}
-
-			@Override
-			public Void visitVariable(VariableTree var, Void arg1) {
-				if (!checkStopped && var.getName().toString().equals(name)) {
-					context.addError(var, "A variable with the same name as your global variable is already defined in this method's scope. "
-							+ "Please rename either the local variable/parameter or the global variable.");
-				}
-				return super.visitVariable(var, arg1);
-			}
-		}, null);
+		findVariablesInMethod(name, context);
 		return null;
 	}
 

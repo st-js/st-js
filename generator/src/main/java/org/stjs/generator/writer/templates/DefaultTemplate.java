@@ -2,7 +2,6 @@ package org.stjs.generator.writer.templates;
 
 import java.util.List;
 
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
@@ -19,6 +18,7 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * this is the standard generation template
+ * 
  * @author acraciun
  */
 public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {

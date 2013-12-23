@@ -1,6 +1,5 @@
 package org.stjs.generator.check.declaration;
 
-
 import javax.lang.model.element.TypeElement;
 
 import org.stjs.generator.GenerationContext;
@@ -16,6 +15,7 @@ import com.sun.source.tree.ClassTree;
 /**
  * this check makes sure the names used to define a namespace are JavaScript correctly defined variables, as they will
  * be used as such
+ * 
  * @author acraciun
  */
 public class ClassNamespaceCheck implements CheckContributor<ClassTree> {

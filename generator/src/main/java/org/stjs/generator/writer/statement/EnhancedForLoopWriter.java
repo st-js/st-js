@@ -2,7 +2,6 @@ package org.stjs.generator.writer.statement;
 
 import java.util.Collections;
 
-
 import javax.lang.model.element.Element;
 
 import org.stjs.generator.GenerationContext;
@@ -30,6 +29,7 @@ import com.sun.source.tree.EnhancedForLoopTree;
  * </pre>
  * 
  * Warning: the iteration is on indexes as in JavaScript, not on values as in Java!
+ * 
  * @author acraciun
  */
 public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForLoopTree, JS> {
@@ -52,9 +52,8 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 		JavaScriptBuilder<JS> js = context.js();
 
 		// !(iterated).hasOwnProperty(tree.getVariable().getName())
-		JS not =
-				js.unary(
-						UnaryOperator.LOGICAL_COMPLEMENT,
+		JS not = js
+				.unary(UnaryOperator.LOGICAL_COMPLEMENT,
 						js.functionCall(js.property(js.paren(iterated), "hasOwnProperty"),
 								Collections.singleton(js.name(tree.getVariable().getName()))));
 

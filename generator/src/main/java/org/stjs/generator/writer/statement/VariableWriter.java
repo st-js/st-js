@@ -13,6 +13,7 @@ import com.sun.source.tree.VariableTree;
 
 /**
  * variable declaration. Covers also the fields.
+ * 
  * @author acraciun
  */
 public class VariableWriter<JS> implements WriterContributor<VariableTree, JS> {

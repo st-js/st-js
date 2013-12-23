@@ -75,6 +75,7 @@ public class JavascriptToJava {
 	 * // the format is the one given by stacktrace.js: // <br>
 	 * at prototype.method (url) <br>
 	 * where url is http://localhost:xxxx/org/stjs/TestClass.js:row:col
+	 * 
 	 * @param stacktraceLine
 	 * @return
 	 */
@@ -127,6 +128,7 @@ public class JavascriptToJava {
 	 * </pre>
 	 * 
 	 * where url is in the form of http://localhost:xxxx/org/stjs/TestClass.js:row:col
+	 * 
 	 * @param javascriptStacktrace
 	 * @return
 	 */

@@ -22,6 +22,7 @@ import java.util.List;
  * this interface represents the link between a java class and corresponding Javascript file (or files). As we need the
  * full dependencies list at compile time, they are set either during the code generation (for generated files) or
  * during the bridge construction
+ * 
  * @author acraciun
  */
 public interface ClassWithJavascript {

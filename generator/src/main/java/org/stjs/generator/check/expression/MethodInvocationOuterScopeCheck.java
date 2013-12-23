@@ -1,6 +1,5 @@
 package org.stjs.generator.check.expression;
 
-
 import javax.lang.model.element.Element;
 
 import org.stjs.generator.GenerationContext;
@@ -15,7 +14,24 @@ import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.Scope;
 
+/**
+ * this check verifies that you don't call a method from the outer type as in javaScript this scope is not accessible.
+ * 
+ * @author acraciun
+ * 
+ */
 public class MethodInvocationOuterScopeCheck implements CheckContributor<MethodInvocationTree> {
+	private void checkScope(Element methodElement, MethodInvocationTree tree, GenerationContext<Void> context) {
+		Scope currentScope = context.getTrees().getScope(context.getCurrentPath());
+
+		Element currentScopeClassElement = IdentifierAccessOuterScopeCheck.getEnclosingElementSkipAnonymousInitializer(currentScope
+				.getEnclosingClass());
+		Element methodOwnerElement = methodElement.getEnclosingElement();
+		if (!context.getTypes().isSubtype(currentScopeClassElement.asType(), methodOwnerElement.asType())) {
+			context.addError(tree, "In Javascript you cannot call methods or fields from the outer type. "
+					+ "You should define a variable var that=this outside your function definition and call the methods on this object");
+		}
+	}
 
 	@Override
 	public Void visit(CheckVisitor visitor, MethodInvocationTree tree, GenerationContext<Void> context) {
@@ -37,15 +53,8 @@ public class MethodInvocationOuterScopeCheck implements CheckContributor<MethodI
 			// check for Outer.this check
 			return null;
 		}
-		Scope currentScope = context.getTrees().getScope(context.getCurrentPath());
 
-		Element currentScopeClassElement =
-				IdentifierAccessOuterScopeCheck.getEnclosingElementSkipAnonymousInitializer(currentScope.getEnclosingClass());
-		Element methodOwnerElement = methodElement.getEnclosingElement();
-		if (!context.getTypes().isSubtype(currentScopeClassElement.asType(), methodOwnerElement.asType())) {
-			context.addError(tree, "In Javascript you cannot call methods or fields from the outer type. "
-					+ "You should define a variable var that=this outside your function definition and call the methods on this object");
-		}
+		checkScope(methodElement, tree, context);
 		return null;
 	}
 }

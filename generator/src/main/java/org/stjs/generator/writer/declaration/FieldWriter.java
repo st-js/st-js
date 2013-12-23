@@ -5,13 +5,13 @@ import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
-import org.stjs.generator.writer.statement.VariableWriter;
 
 import com.sun.source.tree.VariableTree;
 
 /**
  * This will add the declaration of a field. This contributor is not added directly, but redirect from
- * {@link VariableWriter}
+ * {@link org.stjs.generator.writer.statement.VariableWriter}
+ * 
  * @author acraciun
  */
 public class FieldWriter<JS> extends AbstractMemberWriter<JS> implements WriterContributor<VariableTree, JS> {

@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
@@ -18,6 +17,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TypesUtils;
@@ -30,7 +30,6 @@ import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
-import org.stjs.javascript.annotation.GlobalScope;
 
 import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.ClassTree;
@@ -43,8 +42,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	/**
 	 * generate the namespace declaration stjs.ns("namespace") if needed
 	 */
-	@SuppressWarnings("unused")
-	private void addNamespace(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
+	private void addNamespace(ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
 		Element type = TreeUtils.elementFromDeclaration(tree);
 		if (JavaNodes.isInnerType(type)) {
 			// this is an inner (anonymous or not) class - no namespace declaration is generated
@@ -53,7 +51,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		String namespace = JavaNodes.getNamespace(type);
 		if (namespace != null) {
 			JavaScriptBuilder<JS> js = context.js();
-			JS target = js.property(js.name("stjs"), "ns");
+			JS target = js.property(js.name(GeneratorConstants.STJS), "ns");
 			stmts.add(js.expressionStatement(js.functionCall(target, Collections.singleton(js.string(namespace)))));
 		}
 	}
@@ -61,8 +59,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	/**
 	 * @return the node to put in the super class. for intefaces, the super class goes also in the interfaces list
 	 */
-	@SuppressWarnings("unused")
-	private JS getSuperClass(WriterVisitor<JS> visitor, ClassTree clazz, GenerationContext<JS> context) {
+	private JS getSuperClass(ClassTree clazz, GenerationContext<JS> context) {
 		Element type = TreeUtils.elementFromDeclaration(clazz);
 		if (clazz.getExtendsClause() == null || type.getKind() == ElementKind.INTERFACE) {
 			// no super class found
@@ -77,7 +74,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	 * 
 	 @return the list of implemented interfaces. for intefaces, the super class goes also in the interfaces list
 	 */
-	private JS getInterfaces(WriterVisitor<JS> visitor, ClassTree clazz, GenerationContext<JS> context) {
+	private JS getInterfaces(ClassTree clazz, GenerationContext<JS> context) {
 		List<JS> ifaces = new ArrayList<JS>();
 		for (Tree iface : clazz.getImplementsClause()) {
 			Element ifaceType = TreeUtils.elementFromUse((ExpressionTree) iface);
@@ -106,7 +103,17 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			}
 		}
 		// no constructor found : interfaces, return an empty function
-		return context.js().function(null, Collections.<JS> emptyList(), null);
+		return context.js().function(null, Collections.<JS>emptyList(), null);
+	}
+
+	private List<Tree> getAllMembersExceptConstructors(ClassTree clazz) {
+		List<Tree> nonConstructors = new ArrayList<Tree>();
+		for (Tree member : clazz.getMembers()) {
+			if (!JavaNodes.isConstructor(member) && !isAbstractInstanceMethod(member) && !(member instanceof BlockTree)) {
+				nonConstructors.add(member);
+			}
+		}
+		return nonConstructors;
 	}
 
 	/**
@@ -117,12 +124,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		// - constructors (they are printed elsewhere)
 		// - abstract methods (they should be omitted)
 
-		List<Tree> nonConstructors = new ArrayList<Tree>();
-		for (Tree member : clazz.getMembers()) {
-			if (!JavaNodes.isConstructor(member) && !isAbstractInstanceMethod(member) && !(member instanceof BlockTree)) {
-				nonConstructors.add(member);
-			}
-		}
+		List<Tree> nonConstructors = getAllMembersExceptConstructors(clazz);
 
 		if (nonConstructors.isEmpty()) {
 			return context.js().keyword(Keyword.NULL);
@@ -196,8 +198,8 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		JS target = JavaNodes.isGlobal(type) ? null : context.js().name(context.getNames().getTypeName(context, type));
 
 		JavaScriptBuilder<JS> js = context.js();
-		JS condition = js.unary(UnaryOperator.LOGICAL_COMPLEMENT, js.property(js.name("stjs"), "mainCallDisabled"));
-		JS thenPart = js.expressionStatement(js.functionCall(js.property(target, "main"), Collections.<JS> emptyList()));
+		JS condition = js.unary(UnaryOperator.LOGICAL_COMPLEMENT, js.property(js.name(GeneratorConstants.STJS), "mainCallDisabled"));
+		JS thenPart = js.expressionStatement(js.functionCall(js.property(target, "main"), Collections.<JS>emptyList()));
 		stmts.add(js.ifStatement(condition, thenPart, null));
 	}
 
@@ -250,7 +252,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 				continue;
 			}
 			if (memberType instanceof TypeVariable) {
-				//what to do with fields of generic parameters !?
+				// what to do with fields of generic parameters !?
 				continue;
 			}
 			props.add(NameValue.of(member.getSimpleName(), getFieldTypeDesc(memberType, context)));
@@ -283,7 +285,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			}
 		}
 
-		JS enumConstructor = js.functionCall(js.property(js.name("stjs"), "enumeration"), enumEntries);
+		JS enumConstructor = js.functionCall(js.property(js.name(GeneratorConstants.STJS), "enumeration"), enumEntries);
 
 		String typeName = context.getNames().getTypeName(context, type);
 		if (typeName.contains(".")) {
@@ -301,7 +303,8 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	}
 
 	/**
-	 * Special generation for classes marked with {@link GlobalScope}. The name of the class must appear nowhere.
+	 * Special generation for classes marked with {@link org.stjs.javascript.annotation.GlobalScope}. The name of the
+	 * class must appear nowhere.
 	 */
 	private boolean generateGlobal(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
 		Element type = TreeUtils.elementFromDeclaration(tree);
@@ -322,6 +325,31 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		return true;
 	}
 
+	private void addConstructorStatement(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
+		boolean anonymousClass = tree.getSimpleName().length() == 0;
+		if (anonymousClass) {
+			// anonymous class - nothing to do the constructor will be added directly
+			return;
+		}
+
+		JavaScriptBuilder<JS> js = context.js();
+		Element type = TreeUtils.elementFromDeclaration(tree);
+		String typeName = context.getNames().getTypeName(context, type);
+
+		if (typeName.contains(".")) {
+			// inner class or namespace
+			// generate [ns.]typeName = function() {...}
+			boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
+			String leftSide = innerClass ? replaceFullNameWithConstructor(typeName) : typeName;
+
+			stmts.add(js.expressionStatement(js.assignment(AssignOperator.ASSIGN, js.name(leftSide), getConstructor(visitor, tree, context))));
+		} else {
+			// regular class
+			// generate var typeName = function() {...}
+			stmts.add(js.variableDeclaration(true, typeName, getConstructor(visitor, tree, context)));
+		}
+	}
+
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context) {
 		JavaScriptBuilder<JS> js = context.js();
@@ -331,19 +359,19 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			return js.statements(stmts);
 		}
 
-		addNamespace(visitor, tree, context, stmts);
-
-		Element type = TreeUtils.elementFromDeclaration(tree);
-		String typeName = context.getNames().getTypeName(context, type);
-		JS name = js.name(typeName);
+		addNamespace(tree, context, stmts);
 
 		if (generareEnum(visitor, tree, context, stmts)) {
 			// special construction for enums
 			return js.statements(stmts);
 		}
 
-		JS superClazz = getSuperClass(visitor, tree, context);
-		JS interfaces = getInterfaces(visitor, tree, context);
+		Element type = TreeUtils.elementFromDeclaration(tree);
+		String typeName = context.getNames().getTypeName(context, type);
+		JS name = js.name(typeName);
+
+		JS superClazz = getSuperClass(tree, context);
+		JS interfaces = getInterfaces(tree, context);
 		JS members = getMembers(visitor, tree, context);
 		JS typeDesc = getTypeDescription(visitor, tree, context);
 		boolean anonymousClass = tree.getSimpleName().length() == 0;
@@ -351,19 +379,12 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		if (anonymousClass) {
 			// anonymous class
 			name = getConstructor(visitor, tree, context);
-		} else if (typeName.contains(".")) {
-			// inner class or namespace
-			boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
-			String leftSide = innerClass ? replaceFullNameWithConstructor(typeName) : typeName;
-
-			stmts.add(js.expressionStatement(js.assignment(AssignOperator.ASSIGN, js.name(leftSide), getConstructor(visitor, tree, context))));
-		} else {
-			// regular class
-			stmts.add(js.variableDeclaration(true, typeName, getConstructor(visitor, tree, context)));
 		}
+		addConstructorStatement(visitor, tree, context, stmts);
 
 		@SuppressWarnings("unchecked")
-		JS extendsCall = js.functionCall(js.property(js.name("stjs"), "extend"), Arrays.asList(name, superClazz, interfaces, members, typeDesc));
+		JS extendsCall = js.functionCall(js.property(js.name(GeneratorConstants.STJS), "extend"),
+				Arrays.asList(name, superClazz, interfaces, members, typeDesc));
 		if (anonymousClass) {
 			stmts.add(extendsCall);
 		} else {

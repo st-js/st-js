@@ -12,6 +12,7 @@ import com.sun.source.tree.TryTree;
 
 /**
  * Try blocks -> as in java
+ * 
  * @author acraciun
  */
 public class TryWriter<JS> implements WriterContributor<TryTree, JS> {

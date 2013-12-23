@@ -1,6 +1,5 @@
 package org.stjs.generator.writer.expression;
 
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 
@@ -14,7 +13,23 @@ import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.MemberSelectTree;
 
+/**
+ * write member select access, for fields, types and methods.
+ * 
+ * @author acraciun
+ * 
+ * @param <JS>
+ */
 public class MemberSelectWriter<JS> implements WriterContributor<MemberSelectTree, JS> {
+
+	private JS getTarget(WriterVisitor<JS> visitor, MemberSelectTree tree, GenerationContext<JS> context) {
+		if (JavaNodes.isSuper(tree.getExpression())) {
+			// super.field does not make sense, so convert it to this
+			return context.js().keyword(Keyword.THIS);
+		}
+		return visitor.scan(tree.getExpression(), context);
+
+	}
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, MemberSelectTree tree, GenerationContext<JS> context) {
@@ -30,13 +45,7 @@ public class MemberSelectWriter<JS> implements WriterContributor<MemberSelectTre
 			return null;
 		}
 
-		JS target = null;
-		if (JavaNodes.isSuper(tree.getExpression())) {
-			// super.field does not make sense, so convert it to this
-			target = context.js().keyword(Keyword.THIS);
-		} else {
-			target = visitor.scan(tree.getExpression(), context);
-		}
+		JS target = getTarget(visitor, tree, context);
 
 		if (GeneratorConstants.CLASS.equals(tree.getIdentifier().toString())) {
 			// When ClassName.class -> ClassName

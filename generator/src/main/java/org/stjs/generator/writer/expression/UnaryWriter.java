@@ -9,6 +9,7 @@ import com.sun.source.tree.UnaryTree;
 
 /**
  * Java unary operator
+ * 
  * @author acraciun
  */
 public class UnaryWriter<JS> implements WriterContributor<UnaryTree, JS> {

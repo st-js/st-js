@@ -43,22 +43,26 @@ public class InnerTypesGeneratorTest {
 		assertCodeContains(InnerTypes5.class, "stjs.extend(InnerTypes5.InnerType, MySuperClass, [], ");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testCallFieldOuterType() {
 		generate(InnerTypes6.class);
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testCallFieldToQualifiedOuterType() {
 		generate(InnerTypes6a.class);
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testCallMethodOuterType() {
 		generate(InnerTypes6b.class);
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testCallMethodToQualifiedOuterType() {
 		generate(InnerTypes6c.class);
 	}

@@ -12,6 +12,7 @@ import com.sun.source.util.TreePath;
 /**
  * this class checks that you cannot have instance initializer blocks (other than the one for special double brace
  * construction) as you can have only a constructor in a JavaScript class-like construction.
+ * 
  * @author acraciun
  */
 public class BlockInstanceCheck implements CheckContributor<BlockTree> {
@@ -21,7 +22,7 @@ public class BlockInstanceCheck implements CheckContributor<BlockTree> {
 	}
 
 	private boolean isObjectinitializerBlock(TreePath path) {
-		//TODO some additional checks may be needed to make sure there are not other construction this condition fits
+		// TODO some additional checks may be needed to make sure there are not other construction this condition fits
 		return isInitializationBlock(path) && path.getParentPath().getParentPath().getLeaf() instanceof NewClassTree;
 	}
 

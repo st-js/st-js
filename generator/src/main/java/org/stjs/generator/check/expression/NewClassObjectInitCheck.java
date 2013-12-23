@@ -1,6 +1,5 @@
 package org.stjs.generator.check.expression;
 
-
 import javax.lang.model.element.Element;
 
 import org.stjs.generator.GenerationContext;
@@ -19,9 +18,23 @@ import com.sun.source.tree.StatementTree;
 /**
  * this class checks that only field assignment are present in the initialization like this:<br>
  * new Type(){{x = 1; y = 2; }};
+ * 
  * @author acraciun
  */
 public class NewClassObjectInitCheck implements CheckContributor<NewClassTree> {
+
+	private void checkStatement(StatementTree stmt, GenerationContext<Void> context) {
+		boolean ok = true;
+		if (stmt instanceof ExpressionStatementTree) {
+			ok = ((ExpressionStatementTree) stmt).getExpression() instanceof AssignmentTree;
+		} else {
+			ok = false;
+		}
+
+		if (!ok) {
+			context.addError(stmt, "Only assign expression are allowed in an object creation block");
+		}
+	}
 
 	@Override
 	public Void visit(CheckVisitor visitor, NewClassTree tree, GenerationContext<Void> context) {
@@ -33,16 +46,7 @@ public class NewClassObjectInitCheck implements CheckContributor<NewClassTree> {
 
 		if (initBlock != null) {
 			for (StatementTree stmt : initBlock.getStatements()) {
-				boolean ok = true;
-				if (!(stmt instanceof ExpressionStatementTree)) {
-					ok = false;
-				} else {
-					ok = ((ExpressionStatementTree) stmt).getExpression() instanceof AssignmentTree;
-				}
-
-				if (!ok) {
-					context.addError(stmt, "Only assign expression are allowed in an object creation block");
-				}
+				checkStatement(stmt, context);
 			}
 		}
 		return null;

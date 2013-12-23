@@ -56,10 +56,6 @@ public class Generator {
 
 	private static final String STJS_FILE = "stjs.js";
 
-	public Generator() {
-
-	}
-
 	public File getOutputFile(File generationFolder, String className) {
 		return getOutputFile(generationFolder, className, true);
 	}

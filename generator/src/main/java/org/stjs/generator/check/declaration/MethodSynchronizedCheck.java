@@ -10,6 +10,7 @@ import com.sun.source.tree.MethodTree;
 
 /**
  * this class checks that you don't have synchornized methods, as this feature is not supported in JavaScript
+ * 
  * @author acraciun
  */
 public class MethodSynchronizedCheck implements CheckContributor<MethodTree> {

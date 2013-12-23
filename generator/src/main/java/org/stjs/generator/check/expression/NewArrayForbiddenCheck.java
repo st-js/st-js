@@ -8,6 +8,7 @@ import com.sun.source.tree.NewArrayTree;
 
 /**
  * this checks that no java array is used. You should use {@link org.stjs.javascript.Array} instead.
+ * 
  * @author acraciun
  */
 public class NewArrayForbiddenCheck implements CheckContributor<NewArrayTree> {

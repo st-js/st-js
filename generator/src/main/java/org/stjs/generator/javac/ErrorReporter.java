@@ -5,9 +5,14 @@ package org.stjs.generator.javac;
  * the utility library may register a handler to change the behavior. For example, type checkers can direct errors to
  * the checkers.source.SourceChecker class.
  */
-public class ErrorReporter {
+@SuppressWarnings("PMD")
+public final class ErrorReporter {
 
-	private static ErrorHandler handler = null;
+	private static ErrorHandler handler;
+
+	private ErrorReporter() {
+		//
+	}
 
 	/**
 	 * Register a handler to customize error reporting.

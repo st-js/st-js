@@ -18,7 +18,8 @@ public class InlineObjectsGeneratorTest {
 		assertCodeContains(InlineObjects1a.class, "o = {}");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testInlineObjectAndOtherStatements() {
 		// other statements cannot be put inside the initializing blocks
 		generate(InlineObjects2.class);

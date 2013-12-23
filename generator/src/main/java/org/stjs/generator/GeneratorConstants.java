@@ -20,6 +20,8 @@ import java.util.regex.Pattern;
 public final class GeneratorConstants {
 	public static final String SPECIAL_THIS = "THIS";
 
+	public static final String STJS = "stjs";
+
 	/**
 	 * this is the type to be used when defining an inline type
 	 */

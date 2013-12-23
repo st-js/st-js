@@ -9,6 +9,7 @@ import com.sun.source.tree.MemberSelectTree;
 
 /**
  * this check that you don't try to access the outer this using Type.this.
+ * 
  * @author acraciun
  */
 public class MemberSelectOuterScopeCheck implements CheckContributor<MemberSelectTree> {

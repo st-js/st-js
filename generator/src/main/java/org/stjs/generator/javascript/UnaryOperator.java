@@ -10,17 +10,18 @@ import com.sun.source.tree.Tree.Kind;
 /**
  * this is the list of the JavaScript operators and how they map on Java AST element Kind and Rhino token IDs. Some
  * JavaScript operators do not have their Java counter part: like delete or typeof
+ * 
  * @author acraciun
  */
 public enum UnaryOperator {
-	//increments
+	// increments
 	POSTFIX_INCREMENT(Kind.POSTFIX_INCREMENT, true, Token.INC), POSTFIX_DECREMENT(Kind.POSTFIX_DECREMENT, true, Token.DEC), PREFIX_INCREMENT(
 			Kind.PREFIX_INCREMENT, false, Token.INC), PREFIX_DECREMENT(Kind.PREFIX_INCREMENT, false, Token.DEC),
 
 	//
 	UNARY_PLUS(Kind.UNARY_PLUS, false, Token.ADD), UNARY_MINUS(Kind.UNARY_MINUS, false, Token.SUB), BITWISE_COMPLEMENT(Kind.BITWISE_COMPLEMENT,
 			false, Token.BITNOT), LOGICAL_COMPLEMENT(Kind.LOGICAL_COMPLEMENT, false, Token.NOT),
-	//specific java script
+	// specific java script
 	TYPEOF(null, false, Token.TYPEOF), DELETE_PROPERTY(null, false, Token.DELPROP);
 
 	private final Kind java;
@@ -45,16 +46,16 @@ public enum UnaryOperator {
 		return javaScript;
 	}
 
-	private static final Map<Kind, UnaryOperator> byJavaOperator = new EnumMap<Kind, UnaryOperator>(Kind.class);
+	private static final Map<Kind, UnaryOperator> BY_JAVA_OPERATOR = new EnumMap<Kind, UnaryOperator>(Kind.class);
 	static {
 		for (UnaryOperator op : values()) {
 			if (op.getJava() != null) {
-				byJavaOperator.put(op.getJava(), op);
+				BY_JAVA_OPERATOR.put(op.getJava(), op);
 			}
 		}
 	}
 
 	public static UnaryOperator valueOf(Kind javaOperator) {
-		return byJavaOperator.get(javaOperator);
+		return BY_JAVA_OPERATOR.get(javaOperator);
 	}
 }

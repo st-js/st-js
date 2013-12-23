@@ -35,7 +35,8 @@ public class FieldsGeneratorTest {
 		assertCodeContains(Fields4.class, "constructor.x = 2;");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testForbidInstanceFieldInit() {
 		generate(Fields6.class);
 	}
@@ -45,7 +46,8 @@ public class FieldsGeneratorTest {
 		assertCodeContains(Fields7.class, "constructor.x = {};");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testForbidInstanceFieldInitWithNonLiterals() {
 		generate(Fields8.class);
 	}

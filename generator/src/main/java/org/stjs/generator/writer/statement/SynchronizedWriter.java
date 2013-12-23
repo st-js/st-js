@@ -8,6 +8,7 @@ import com.sun.source.tree.SynchronizedTree;
 
 /**
  * Synchronized blocks are not allowed
+ * 
  * @author acraciun
  */
 public class SynchronizedWriter<JS> implements WriterContributor<SynchronizedTree, JS> {
