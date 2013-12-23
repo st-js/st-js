@@ -40,6 +40,7 @@
 	<modules>
 		<module>code-analysis</module>
 		<module>generator</module>
+		<module>generator-plugin-java8</module>
 		<module>shared</module>
 		<module>server</module>
 		<module>maven-plugin</module>

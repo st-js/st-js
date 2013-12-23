@@ -23,7 +23,7 @@ import com.sun.source.util.TreePath;
 
 public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements WriterContributor<MethodTree, JS> {
 
-	private String changeName(String name) {
+	private static String changeName(String name) {
 		if (name.equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
 			return "_" + name;
 		}
@@ -53,9 +53,9 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		return null;
 	}
 
-	private List<JS> getParams(MethodTree tree, GenerationContext<JS> context) {
+	public static <JS> List<JS> getParams(List<? extends VariableTree> treeParams, GenerationContext<JS> context) {
 		List<JS> params = new ArrayList<JS>();
-		for (VariableTree param : tree.getParameters()) {
+		for (VariableTree param : treeParams) {
 			if (GeneratorConstants.SPECIAL_THIS.equals(param.getName().toString())) {
 				continue;
 			}
@@ -77,7 +77,7 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 			return null;
 		}
 
-		List<JS> params = getParams(tree, context);
+		List<JS> params = getParams(tree.getParameters(), context);
 
 		JS body = visitor.scan(tree.getBody(), context);
 

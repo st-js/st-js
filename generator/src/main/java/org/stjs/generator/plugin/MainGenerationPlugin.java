@@ -88,15 +88,13 @@ import org.stjs.generator.writer.templates.TypeOfTemplate;
  * 
  * @author acraciun
  */
-public class MainGenerationPlugin<JS> {
+public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 
 	public GenerationContext<JS> newContext() {
 		return null;
 	}
 
-	public CheckVisitor getCheckVisitor() {
-		CheckVisitor visitor = new CheckVisitor();
-
+	public void contributeCheckVisitor(CheckVisitor visitor) {
 		visitor.contribute(new VariableFinalInLoopCheck());
 		visitor.contribute(new VariableWrongNameCheck());
 		visitor.contribute(new MethodVarArgParamCheck());
@@ -123,11 +121,9 @@ public class MainGenerationPlugin<JS> {
 
 		visitor.contribute(new IdentifierGlobalScopeNameClashCheck());
 		visitor.contribute(new MemberSelectGlobalScopeNameClashCheck());
-		return visitor;
 	}
 
-	public WriterVisitor<JS> getWriterVisitor() {
-		WriterVisitor<JS> visitor = new WriterVisitor<JS>();
+	public void contributeWriteVisitor(WriterVisitor<JS> visitor) {
 		visitor.contribute(new CompilationUnitWriter<JS>());
 
 		visitor.contribute(new ClassWriter<JS>());
@@ -170,7 +166,6 @@ public class MainGenerationPlugin<JS> {
 		visitor.contribute(new WhileLoopWriter<JS>());
 
 		addMethodCallTemplates(visitor);
-		return visitor;
 	}
 
 	private DiscriminatorKey template(String name) {

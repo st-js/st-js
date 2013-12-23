@@ -54,28 +54,18 @@
 			<version>r1810</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache.bcel</groupId>
-			<artifactId>bcel</artifactId>
-			<version>5.2</version>
-		</dependency>
-
+	
 
 		<!-- test deps -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.1</version>
-			<scope>test</scope>
+			<optional>true</optional>
+<!-- 			<scope>test</scope> -->
 		</dependency>
 
-		<dependency>
-			<groupId>dom4j</groupId>
-			<artifactId>dom4j</artifactId>
-			<version>1.6.1</version>
-			<scope>test</scope>
-		</dependency>
-
+	
 		<dependency>
 			<groupId>org.st-js</groupId>
 			<artifactId>server</artifactId>

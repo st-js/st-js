@@ -35,7 +35,7 @@ import org.mozilla.javascript.ast.AstRoot;
 import org.stjs.generator.javac.CustomClassloaderJavaFileManager;
 import org.stjs.generator.name.DefaultJavaScriptNameProvider;
 import org.stjs.generator.name.JavaScriptNameProvider;
-import org.stjs.generator.plugin.MainGenerationPlugin;
+import org.stjs.generator.plugin.GenerationPlugins;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.Timers;
 
@@ -114,18 +114,18 @@ public class Generator {
 
 		try {
 			// TODO add the possibility for use-defined plugins
-			MainGenerationPlugin mainPlugin = new MainGenerationPlugin();
+			GenerationPlugins plugins = new GenerationPlugins();
 
 			Timers.start("check-java");
 			// check the code
-			mainPlugin.getCheckVisitor().scan(cu, context);
+			plugins.getCheckVisitor().scan(cu, context);
 
 			context.getChecks().check();
 			Timers.end("check-java");
 
 			Timers.start("write-js-ast");
 			// generate the javascript code
-			AstRoot javascriptRoot = (AstRoot) mainPlugin.getWriterVisitor().scan(cu, context);
+			AstRoot javascriptRoot = (AstRoot) plugins.getWriterVisitor().scan(cu, context);
 			Timers.end("write-js-ast");
 
 			Timers.start("dump-js");
