@@ -22,4 +22,9 @@ public class LambdaGeneratorTest {
 		assertCodeContains(Lambda3.class, "method(function(x){var y = x;})");
 	}
 
+	@Test
+	public void testLambdaTypeResolution() {
+		assertCodeContains(Lambda4.class, "method(function(x){return x.length + 1;})");
+	}
+
 }

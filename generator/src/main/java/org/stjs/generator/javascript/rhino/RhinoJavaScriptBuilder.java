@@ -218,8 +218,10 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		func.setParams(list(params));
 		if (body == null) {
 			func.setBody(new Block());
-		} else {
+		} else if (body instanceof Block) {
 			func.setBody(body);
+		} else {
+			func.setBody(addStatement(null, body));
 		}
 		return func;
 	}

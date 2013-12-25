@@ -39,6 +39,14 @@
 			<version>4.8.1</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<!-- to be removed -->
+			<dependency>
+			<groupId>org.st-js.bridge</groupId>
+			<artifactId>html</artifactId>
+			<version>4.01.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
