@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
@@ -144,14 +142,8 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		if (!(member instanceof MethodTree)) {
 			return false;
 		}
-		Element memberElement = TreeUtils.elementFromDeclaration((MethodTree) member);
-		if (memberElement.getEnclosingElement().getKind() == ElementKind.INTERFACE) {
-			// an interface method is like an instance method
-			return true;
-		}
-
-		Set<Modifier> modifiers = ((MethodTree) member).getModifiers().getFlags();
-		return modifiers.contains(Modifier.ABSTRACT) && !modifiers.contains(Modifier.STATIC);
+		MethodTree methodTree = (MethodTree) member;
+		return methodTree.getBody() == null;
 	}
 
 	private void addStaticInitializers(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
@@ -313,10 +305,9 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		}
 
 		// print members
-		for (Tree member : tree.getMembers()) {
-			if (!JavaNodes.isConstructor(member) && !isAbstractInstanceMethod(member) && !(member instanceof BlockTree)) {
-				stmts.add(visitor.scan(member, context));
-			}
+		List<Tree> nonConstructors = getAllMembersExceptConstructors(tree);
+		for (Tree member : nonConstructors) {
+			stmts.add(visitor.scan(member, context));
 		}
 
 		addStaticInitializers(visitor, tree, context, stmts);

@@ -7,8 +7,8 @@ import static org.stjs.javascript.JSCollections.$map;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
@@ -25,6 +25,7 @@ import org.stjs.generator.DependencyCollection;
 import org.stjs.generator.GenerationDirectory;
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfigurationBuilder;
+import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.executor.ExecutionResult;
 import org.stjs.generator.executor.RhinoExecutor;
 import org.stjs.javascript.Array;
@@ -32,10 +33,16 @@ import org.stjs.javascript.Date;
 import org.stjs.javascript.Map;
 
 import com.google.common.base.Strings;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 
-public class GeneratorTestHelper {
+@SuppressWarnings("PMD")
+public final class GeneratorTestHelper {
 	private static final String TEMP_GENERATION_PATH = "temp-generated-js";
+
+	private GeneratorTestHelper() {
+		//
+	}
 
 	/**
 	 * @param clazz
@@ -95,23 +102,33 @@ public class GeneratorTestHelper {
 					return m.invoke(obj, args);
 				}
 			}
-			throw new RuntimeException("Method " + method + " not found in class " + obj.getClass());
+			throw new STJSRuntimeException("Method " + method + " not found in class " + obj.getClass());
 		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
+		catch (InvocationTargetException e) {
+			throw new STJSRuntimeException(e);
+		}
+		catch (IllegalArgumentException e) {
+			throw new STJSRuntimeException(e);
+		}
+		catch (IllegalAccessException e) {
+			throw new STJSRuntimeException(e);
 		}
 	}
 
+	private static final int CALL_METHOD_ARG_COUNT = 3;
+
 	private static Object convertToDate(Object result) {
-		Double time = (Double) invoke(result, "callMethod", 3, result, "getTime", null);
+		Double time = (Double) invoke(result, "callMethod", CALL_METHOD_ARG_COUNT, result, "getTime", null);
 		return new Date(time.longValue());
 	}
+
+	private static final int ARRAY_GET_METHOD_ARG_COUNT = 2;
 
 	private static Array<Object> convertToArray(Object result) {
 		Array<Object> js = $array();
 		long length = (Long) invoke(result, "getLength", 0);
 		for (int i = 0; i < length; ++i) {
-			Object value = invoke(result, "get", 2, i, null);
+			Object value = invoke(result, "get", ARRAY_GET_METHOD_ARG_COUNT, i, null);
 			js.push(convert(value));
 		}
 		return js;
@@ -155,7 +172,7 @@ public class GeneratorTestHelper {
 			}
 			ExecutionResult execResult = new RhinoExecutor().run(javascriptFiles, !execute);
 			if (execute) {
-				return execResult != null ? execResult.getResult() : null;
+				return execResult.getResult();
 			}
 			return content;
 		}
@@ -168,7 +185,7 @@ public class GeneratorTestHelper {
 			for (File file : javascriptFiles) {
 				displayWithLines(file);
 			}
-			throw new RuntimeException(ex);
+			throw new STJSRuntimeException(ex);
 		}
 		finally {
 			Timers.end("js-exec");
@@ -207,15 +224,18 @@ public class GeneratorTestHelper {
 		assertTrue("[" + snippet + "] in \n" + code, !cleanCode.contains(cleanSnippet));
 	}
 
+	private static final int PAD = 5;
+
 	private static void displayWithLines(File file) {
 		BufferedReader in = null;
 		try {
 			System.out.println("//---" + file);
-			in = new BufferedReader(new FileReader(file));
+
+			in = Files.newReader(file, Charset.defaultCharset());
 			int lineNo = 1;
 			String line = null;
 			while ((line = in.readLine()) != null) {
-				System.out.print(Strings.padEnd(lineNo + "", 5, ' '));
+				System.out.print(Strings.padEnd(lineNo + "", PAD, ' '));
 				System.out.println(line);
 				lineNo++;
 			}
@@ -227,18 +247,12 @@ public class GeneratorTestHelper {
 			e.printStackTrace();
 		}
 		finally {
-			try {
-				if (in != null) {
-					in.close();
-				}
-			}
-			catch (IOException e) {
-				// silent
-			}
-
+			Closeables.closeQuietly(in);
 		}
 	}
 
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+			value = "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED", justification = "this is for tests only")
 	public static ClassLoader buildClassLoader() {
 		File generationPath = new File("target", TEMP_GENERATION_PATH);
 		try {

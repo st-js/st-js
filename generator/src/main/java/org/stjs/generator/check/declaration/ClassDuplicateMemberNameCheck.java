@@ -97,7 +97,8 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 	public Void visit(CheckVisitor visitor, ClassTree tree, GenerationContext<Void> context) {
 		Multimap<String, Element> names = LinkedListMultimap.create();
 
-		TypeElement classElement = TreeUtils.elementFromDeclaration(tree);
+		// TypeElement classElement = TreeUtils.elementFromDeclaration(tree);
+		TypeElement classElement = (TypeElement) context.getTrees().getElement(context.getCurrentPath());
 		TypeMirror superType = classElement.getSuperclass();
 		if (superType.getKind() != TypeKind.NONE) {
 			// add the names from the super class

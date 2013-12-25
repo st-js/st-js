@@ -81,9 +81,7 @@ public final class InternalUtils {
 		case VARIABLE:
 		case METHOD:
 		case CLASS:
-			// case ENUM:
-			// case INTERFACE:
-			// case ANNOTATION_TYPE:
+
 		case TYPE_PARAMETER:
 			return TreeInfo.symbolFor((JCTree) tree);
 
@@ -102,6 +100,15 @@ public final class InternalUtils {
 			return ((JCNewClass) tree).constructor;
 
 		default:
+			if (tree.getKind().toString().equals("ENUM") || tree.getKind().toString().equals("INTERFACE")
+					|| tree.getKind().toString().equals("ANNOTATION_TYPE")) {
+				// java 7 & 8
+				// case ENUM:
+				// case INTERFACE:
+				// case ANNOTATION_TYPE:
+				return TreeInfo.symbolFor((JCTree) tree);
+			}
+
 			return TreeInfo.symbol((JCTree) tree);
 		}
 	}

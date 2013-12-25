@@ -63,18 +63,26 @@ public class GenerationPlugins<JS> {
 				return;
 			}
 			for (Map.Entry<Object, Object> entry : props.entrySet()) {
-				if (entry.getKey().equals(JAVA_VERSION_ENTRY)) {
-					continue;
-				}
-				@SuppressWarnings("unchecked")
-				STJSGenerationPlugin<JS> plugin = (STJSGenerationPlugin<JS>) Class.forName(entry.getValue().toString()).newInstance();
-				plugin.contributeCheckVisitor(checkVisitor);
-				plugin.contributeWriteVisitor(writerVisitor);
-				plugins.put(entry.getKey().toString(), plugin);
+				loadPlugin(entry.getKey().toString(), entry.getValue().toString());
 			}
 		}
 		catch (IOException e) {
 			throw new STJSRuntimeException(e);
+		}
+
+		finally {
+			Closeables.closeQuietly(input);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void loadPlugin(String key, String value) {
+		if (key.equals(JAVA_VERSION_ENTRY)) {
+			return;
+		}
+		STJSGenerationPlugin<JS> plugin;
+		try {
+			plugin = (STJSGenerationPlugin<JS>) Class.forName(value).newInstance();
 		}
 		catch (InstantiationException e) {
 			throw new STJSRuntimeException(e);
@@ -85,9 +93,9 @@ public class GenerationPlugins<JS> {
 		catch (ClassNotFoundException e) {
 			throw new STJSRuntimeException(e);
 		}
-		finally {
-			Closeables.closeQuietly(input);
-		}
+		plugin.contributeCheckVisitor(checkVisitor);
+		plugin.contributeWriteVisitor(writerVisitor);
+		plugins.put(key, plugin);
 	}
 
 	// public GenerationContext<JS> newContext() {
