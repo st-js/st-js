@@ -799,9 +799,17 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 	}
 
 	@Override
-	public void visit(FieldDeclaration n, Scope arg) {
+	public void visit(FieldDeclaration n, Scope scope) {
 		Checks.checkFieldDeclaration(n, context);
-		super.visit(n, arg);
+
+		TypeWrapper clazz = resolveType(scope, n.getType());
+		resolvedType(n, clazz);
+
+		for (VariableDeclarator v : n.getVariables()) {
+			resolvedType(v, clazz);
+		}
+
+		super.visit(n, scope);
 	}
 
 	@Override

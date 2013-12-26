@@ -146,6 +146,8 @@ import org.stjs.javascript.Array;
 import org.stjs.javascript.annotation.GlobalScope;
 import org.stjs.javascript.annotation.Native;
 
+import com.google.common.base.Defaults;
+
 /**
  * This class visits the AST corresponding to a Java file and generates the corresponding Javascript code. It presumes
  * the {@link org.stjs.generator.scope.ScopeBuilder} previously visited the tree and set the resolved name of certain
@@ -466,7 +468,13 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 		if (n.getInit() == null) {
 			if (forceInitNull) {
 				printer.print(EQUALS);
-				printer.print(JavascriptKeywords.NULL);
+				TypeWrapper type = resolvedType(n);
+				if (type instanceof ClassWrapper && ((ClassWrapper) type).getClazz().isPrimitive()) {
+					Object defaultValue = Defaults.defaultValue(((ClassWrapper) type).getClazz());
+					printer.printNumberLiteral(defaultValue.toString());
+				} else {
+					printer.print(JavascriptKeywords.NULL);
+				}
 			}
 		} else {
 			printer.print(EQUALS);
