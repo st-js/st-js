@@ -17,7 +17,8 @@ public class ParametersGeneratorTest {
 		assertCodeContains(Parameters2.class, "function(arg1, arg2, arg3)");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testParamWrongName() {
 		// "var" is a wrong name
 		generate(Parameters4.class);
@@ -26,5 +27,10 @@ public class ParametersGeneratorTest {
 	@Test
 	public void testGenericParams() {
 		assertCodeContains(Parameters5.class, "function(arg)");
+	}
+
+	@Test
+	public void testVarArgsLength() {
+		assertCodeContains(Parameters6.class, "n = arguments.length");
 	}
 }

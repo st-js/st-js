@@ -92,6 +92,7 @@ import org.stjs.generator.ast.SourcePosition;
 import org.stjs.generator.type.ClassLoaderWrapper;
 import org.stjs.generator.type.ClassWrapper;
 import org.stjs.generator.type.FieldWrapper;
+import org.stjs.generator.type.GenericArrayTypeImpl;
 import org.stjs.generator.type.MethodWrapper;
 import org.stjs.generator.type.ParameterizedTypeImpl;
 import org.stjs.generator.type.ParameterizedTypeWrapper;
@@ -298,6 +299,10 @@ public class ScopeBuilder extends ForEachNodeVisitor<Scope> {
 		super.visit(n, arg);
 
 		TypeWrapper clazz = resolveType(arg, n.getType());
+		if (n.isVarArgs()) {
+			java.lang.reflect.Type arrayType = new GenericArrayTypeImpl(clazz.getType());
+			clazz = TypeWrappers.wrap(arrayType);
+		}
 		resolvedType(n, clazz);
 		AbstractScope currentScope = (AbstractScope) arg;
 		currentScope.addVariable(new ParameterVariable(clazz, n.getId().getName()));

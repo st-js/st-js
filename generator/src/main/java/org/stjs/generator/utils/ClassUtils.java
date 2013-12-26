@@ -54,8 +54,7 @@ public final class ClassUtils {
 
 	private static final Set<String> BASIC_TYPE_NAMES = new HashSet<String>();
 
-	private static final Set<String> INTEGER_TYPE_NAMES = new HashSet<String>(Arrays.asList("int", "long", "short",
-			"byte"));
+	private static final Set<String> INTEGER_TYPE_NAMES = new HashSet<String>(Arrays.asList("int", "long", "short", "byte"));
 
 	static {
 		for (Class<?> clazz : Primitives.allWrapperTypes()) {
@@ -148,8 +147,7 @@ public final class ClassUtils {
 
 	@SuppressWarnings("deprecation")
 	public static boolean isSyntheticType(Class<?> clazz) {
-		return hasAnnotation(clazz, org.stjs.javascript.annotation.DataType.class)
-				|| hasAnnotation(clazz, SyntheticType.class);
+		return hasAnnotation(clazz, org.stjs.javascript.annotation.DataType.class) || hasAnnotation(clazz, SyntheticType.class);
 	}
 
 	public static boolean hasAnnotation(ClassWrapper clazz, Class<? extends Annotation> annotation) {
@@ -165,6 +163,7 @@ public final class ClassUtils {
 
 	/**
 	 * the namespace is taken from the outermost declaring class
+	 * 
 	 * @param type
 	 * @return
 	 */
@@ -238,8 +237,7 @@ public final class ClassUtils {
 			return resolvedType;
 		}
 		if (resolvedType.getClass() == ClassWrapper.class) {
-			return new ClassWrapper(Array.newInstance((Class<?>) resolvedType.getType(), new int[arrayCount])
-					.getClass());
+			return new ClassWrapper(Array.newInstance((Class<?>) resolvedType.getType(), new int[arrayCount]).getClass());
 		}
 
 		TypeWrapper returnType = resolvedType;
@@ -311,12 +309,14 @@ public final class ClassUtils {
 		return isAssignableFromType(cls.getComponentType(), componentType);
 	}
 
-	private static boolean isAssignableFromParameterizedType(final Class<?> cls,
-			final ParameterizedType parameterizedType) {
+	private static boolean isAssignableFromParameterizedType(final Class<?> cls, final ParameterizedType parameterizedType) {
 		return isAssignableFromType(cls, parameterizedType.getRawType());
 	}
 
 	private static boolean isAssignableFromTypeVariable(final Class<?> cls, final TypeVariable<?> typeVariable) {
+		if (cls.equals(Object.class)) {
+			return true;
+		}
 		return isAssignableFromUpperBounds(cls, typeVariable.getBounds());
 	}
 
