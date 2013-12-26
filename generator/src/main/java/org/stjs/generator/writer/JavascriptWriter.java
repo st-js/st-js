@@ -79,9 +79,13 @@ public class JavascriptWriter {
 	}
 
 	public JavascriptWriter printNumberLiteral(String value) {
-
+		String n = value;
 		// remove and ending type coercion. i.e 123L -> 123
-		print(value.replaceAll(NUMERIC_LITERAL_ENDING, ""));
+		if (!value.startsWith("0")) {
+			// without hexa and binary 0x...
+			n = value.replaceAll(NUMERIC_LITERAL_ENDING, "");
+		}
+		print(n);
 		return this;
 	}
 
@@ -171,8 +175,7 @@ public class JavascriptWriter {
 	public void addSouceMapping(GenerationContext context) {
 		if (generateSourceMap) {
 			FilePosition endOutputPosition = new FilePosition(currentLine, currentColumn);
-			sourceMapGenerator.addMapping(context.getInputFile().getName(), null, sourcePosition, startOutputPosition,
-					endOutputPosition);
+			sourceMapGenerator.addMapping(context.getInputFile().getName(), null, sourcePosition, startOutputPosition, endOutputPosition);
 		}
 	}
 
