@@ -1340,12 +1340,27 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 			return;
 		}
 
-		n.getTarget().accept(this, context);
-		printer.print(" ");
-		printer.print(n.getOperator());
-		printer.print(" ");
-		n.getValue().accept(this, context);
+		TypeWrapper leftType = ASTNodeData.resolvedType(n.getTarget());
+		TypeWrapper rightType = ASTNodeData.resolvedType(n.getValue());
+		boolean integerDivision = n.getOperator() == AssignExpr.Operator.slash && ClassUtils.isIntegerType(leftType)
+				&& ClassUtils.isIntegerType(rightType);
 
+		if (integerDivision) {
+			n.getTarget().accept(this, context);
+			printer.print(" = ");
+			printer.print("stjs.trunc(");
+			n.getTarget().accept(this, context);
+			printer.print(BinaryExpr.Operator.divide);
+			printer.print("(");
+			n.getValue().accept(this, context);
+			printer.print("))");
+		} else {
+			n.getTarget().accept(this, context);
+			printer.print(" ");
+			printer.print(n.getOperator());
+			printer.print(" ");
+			n.getValue().accept(this, context);
+		}
 	}
 
 	@Override
