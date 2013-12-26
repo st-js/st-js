@@ -25,28 +25,32 @@ import org.stjs.javascript.annotation.Template;
  * @author acraciun
  */
 @Adapter
-public class JSObjectAdapter {
+public final class JSObjectAdapter {
+	private JSObjectAdapter() {
+		//
+	}
+
 	@Template("get")
-	public native static Object $get  (Object obj, String property);
+	public native static Object $get(Object obj, String property);
 
 	@Template("put")
-	public native static void $put  (Object obj, String property, Object value);
+	public native static void $put(Object obj, String property, Object value);
 
 	@Template("adapter")
-	public native static boolean hasOwnProperty  (Object obj, String property);
+	public native static boolean hasOwnProperty(Object obj, String property);
 
 	@Template("toProperty")
-	public native static Map<String, Object> $prototype  (Object obj);
+	public native static Map<String, Object> $prototype(Object obj);
 
 	@Template("toProperty")
-	public native static Object $constructor  (Object obj);
+	public native static Object $constructor(Object obj);
 
 	@Template("properties")
-	public native static Map<String, Object> $properties  (Object obj);
+	public native static Map<String, Object> $properties(Object obj);
 
 	@Template("properties")
-	public native static <T> T $object  (Map<String, Object> properties);
+	public native static <T> T $object(Map<String, Object> properties);
 
 	@Template("js")
-	public native static <T> T $js  (String code);
+	public native static <T> T $js(String code);
 }

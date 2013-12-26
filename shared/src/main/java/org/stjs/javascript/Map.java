@@ -18,6 +18,7 @@ package org.stjs.javascript;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.annotation.Template;
 
 /**
@@ -30,7 +31,8 @@ import org.stjs.javascript.annotation.Template;
  * 
  * @author acraciun
  */
-public final class Map<K extends String, V> implements Iterable<K> {
+@SyntheticType
+public class Map<K extends String, V> implements Iterable<K> {
 	private final java.util.Map<K, V> map = new HashMap<K, V>();
 
 	/**
@@ -60,6 +62,7 @@ public final class Map<K extends String, V> implements Iterable<K> {
 		map.remove(key);
 	}
 
+	@Override
 	public String toString() {
 		return map.toString();
 	}

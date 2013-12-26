@@ -1,6 +1,6 @@
 package org.stjs.generator.exec.json;
 
-import static org.stjs.javascript.Global.stjs;
+import static org.stjs.javascript.JSGlobal.stjs;
 
 public class Json6 {
 	public static Object main(String[] args) {
