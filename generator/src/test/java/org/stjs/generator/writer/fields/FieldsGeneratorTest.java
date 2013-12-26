@@ -11,8 +11,18 @@ import org.stjs.generator.JavascriptFileGenerationException;
 
 public class FieldsGeneratorTest {
 	@Test
-	public void testInstanceField() {
-		assertCodeContains(Fields1.class, "prototype.x = null;");
+	public void testPrimitiveIntInstanceField() {
+		assertCodeContains(Fields1.class, "prototype.x = 0;");
+	}
+
+	@Test
+	public void testWrapperIntInstanceField() {
+		assertCodeContains(Fields1a.class, "prototype.x = null;");
+	}
+
+	@Test
+	public void testPrimitiveDoubleField() {
+		assertCodeContains(Fields1b.class, "prototype.x = 0.0;");
 	}
 
 	@Test

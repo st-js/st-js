@@ -36,7 +36,11 @@ import org.stjs.javascript.functions.Function4;
  * 
  */
 @Adapter
-public class JSFunctionAdapter {
+public final class JSFunctionAdapter {
+	private JSFunctionAdapter() {
+		//
+	}
+
 	@Template("adapter")
 	public native static void call(Callback0 function, Object receiver);
 
@@ -50,8 +54,7 @@ public class JSFunctionAdapter {
 	public native static <P1, P2, P3> void call(Callback3<P1, P2, P3> function, Object receiver, P1 p1, P2 p2, P3 p3);
 
 	@Template("adapter")
-	public native static <P1, P2, P3, P4> void call(Callback4<P1, P2, P3, P4> function, Object receiver, P1 p1, P2 p2,
-			P3 p3, P4 p4);
+	public native static <P1, P2, P3, P4> void call(Callback4<P1, P2, P3, P4> function, Object receiver, P1 p1, P2 p2, P3 p3, P4 p4);
 
 	@Template("adapter")
 	public native static <R> R call(Function0<R> function, Object receiver);
@@ -63,12 +66,10 @@ public class JSFunctionAdapter {
 	public native static <P1, P2, R> void call(Function2<P1, P2, R> function, Object receiver, P1 p1, P2 p2);
 
 	@Template("adapter")
-	public native static <P1, P2, P3, R> void call(Function3<P1, P2, P3, R> function, Object receiver, P1 p1, P2 p2,
-			P3 p3);
+	public native static <P1, P2, P3, R> void call(Function3<P1, P2, P3, R> function, Object receiver, P1 p1, P2 p2, P3 p3);
 
 	@Template("adapter")
-	public native static <P1, P2, P3, P4, R> void call(Function4<P1, P2, P3, P4, R> function, Object receiver, P1 p1,
-			P2 p2, P3 p3, P4 p4);
+	public native static <P1, P2, P3, P4, R> void call(Function4<P1, P2, P3, P4, R> function, Object receiver, P1 p1, P2 p2, P3 p3, P4 p4);
 
 	@Template("adapter")
 	public native static <T> T call(Object function, Object receiver, Object... args);

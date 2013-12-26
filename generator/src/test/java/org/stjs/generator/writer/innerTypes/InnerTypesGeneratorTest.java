@@ -33,7 +33,7 @@ public class InnerTypesGeneratorTest {
 	@Test
 	public void testDeclarationAndAccessInnerTypeInstanceField() {
 		assertCodeContains(InnerTypes4.class,
-				"stjs.extend(InnerTypes4.InnerType, null, [], function(constructor, prototype){prototype.innerField=null");
+				"stjs.extend(InnerTypes4.InnerType, null, [], function(constructor, prototype){prototype.innerField=0");
 		assertCodeContains(InnerTypes4.class, "new InnerTypes4.InnerType().innerField");
 		assertCodeDoesNotContain(InnerTypes4.class, "function(constructor,prototype){InnerTypes4.InnerType=");
 	}
@@ -45,10 +45,10 @@ public class InnerTypesGeneratorTest {
 
 	@Test(
 			expected = JavascriptFileGenerationException.class)
-	public void testCallFieldOuterType() {
+	public void testCallToQualifiedOuterType() {
 		generate(InnerTypes6.class);
 	}
-
+	
 	@Test(
 			expected = JavascriptFileGenerationException.class)
 	public void testCallFieldToQualifiedOuterType() {
@@ -95,10 +95,10 @@ public class InnerTypesGeneratorTest {
 		generate(InnerTypes11.class);
 	}
 
-	@Test
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testDeadCode() {
-		// ACR - Java8 branch - no longer a problem with Javac AST - the compiler will not generate the code inside the
-		// if (dead code), so the inner type may not be found
+		// the compiler will not generate the code inside the if (dead code), so the inner type may not be found
 		generate(InnerTypes12.class);
 	}
 
@@ -124,11 +124,10 @@ public class InnerTypesGeneratorTest {
 		String code = generate(InnerTypes16.class);
 		assertCodeContains(code, "var InnerTypes16 = function(){};" + "stjs.extend(InnerTypes16, null, [], function(constructor, prototype){");
 		assertCodeContains(code, "var o = new (stjs.extend(function InnerTypes16$1(){}, Object, [], function(constructor, prototype){");
-		assertCodeContains(
-				code,
-				"};"
-						+ "constructor.InnerDeep = function(){}; stjs.extend(InnerTypes16.InnerTypes16$1.InnerDeep, null, [], function(constructor, prototype){");
+		assertCodeContains(code, "};"
+				+ "constructor.InnerDeep = stjs.extend(function InnerTypes16$1$InnerDeep(){}, null, [], function(constructor, prototype){");
 	}
+
 
 	@Test
 	public void testEnumInsideInner() {
@@ -160,7 +159,7 @@ public class InnerTypesGeneratorTest {
 		assertNotNull(result);
 		assertEquals(2, ((Number) result).intValue());
 
-		assertCodeContains(InnerTypes20.class, "constructor.Holder = function (){};"
+		assertCodeContains(InnerTypes20.class, "constructor.Holder = function InnerTypes20$Holder(){};"
 				+ "stjs.extend(InnerTypes20.Holder, null, [], function(constructor, prototype){" + "       constructor.VALUE = 2;" + "}, {});");
 	}
 

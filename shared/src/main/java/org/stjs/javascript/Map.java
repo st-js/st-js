@@ -15,6 +15,10 @@
  */
 package org.stjs.javascript;
 
+import java.util.HashMap;
+import java.util.Iterator;
+
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.annotation.Template;
 
 /**
@@ -27,13 +31,39 @@ import org.stjs.javascript.annotation.Template;
  * 
  * @author acraciun
  */
-public interface Map<K extends String, V> extends Iterable<K> {
+@SyntheticType
+public final class Map<K extends String, V> implements Iterable<K> {
+	private final java.util.Map<K, V> map = new HashMap<K, V>();
+
+	/**
+	 * Constructor is package private, it isn't supposed to be used directly by clients of the API. Use
+	 * <tt>JSCollections.$map()</tt> instead.
+	 */
+	Map() {
+		super();
+	}
+
+	public Iterator<K> iterator() {
+		return map.keySet().iterator();
+	}
+
 	@Template("get")
-	public V $get(K key);
+	public V $get(K key) {
+		return map.get(key);
+	}
 
 	@Template("put")
-	public void $put(K key, V value);
+	public void $put(K key, V value) {
+		map.put(key, value);
+	}
 
 	@Template("delete")
-	public void $delete(K key);
+	public void $delete(K key) {
+		map.remove(key);
+	}
+
+	@Override
+	public String toString() {
+		return map.toString();
+	}
 }

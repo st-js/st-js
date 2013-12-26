@@ -1,6 +1,6 @@
 package org.stjs.generator.writer.methods;
 
-import static org.stjs.javascript.JSStringAdapter.fromCharCode;
+import static org.stjs.javascript.JSStringAdapterBase.fromCharCode;
 
 public class Methods14 {
 	public void method() {

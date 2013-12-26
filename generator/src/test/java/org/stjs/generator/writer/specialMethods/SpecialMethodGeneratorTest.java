@@ -174,6 +174,11 @@ public class SpecialMethodGeneratorTest {
 	}
 
 	@Test
+	public void testTypeOf2() {
+		assertCodeContains(SpecialMethod23a.class, "n = (typeof t)");
+	}
+
+	@Test
 	public void testPrefix() {
 		assertCodeContains(SpecialMethod24.class, "n = this.prefix()");
 	}

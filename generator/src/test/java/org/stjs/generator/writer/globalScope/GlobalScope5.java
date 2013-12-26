@@ -1,6 +1,6 @@
 package org.stjs.generator.writer.globalScope;
 
-import static org.stjs.javascript.JSStringAdapter.replace;
+import static org.stjs.javascript.JSStringAdapterBase.replace;
 
 import org.stjs.javascript.RegExp;
 

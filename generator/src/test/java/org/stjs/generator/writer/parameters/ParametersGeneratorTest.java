@@ -28,4 +28,9 @@ public class ParametersGeneratorTest {
 	public void testGenericParams() {
 		assertCodeContains(Parameters5.class, "function(arg)");
 	}
+
+	@Test
+	public void testVarArgsLength() {
+		assertCodeContains(Parameters6.class, "n = arguments.length");
+	}
 }

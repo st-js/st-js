@@ -31,4 +31,14 @@ public class IntsTest {
 	public void testDoubleDivision2() {
 		assertEquals(2.5, GeneratorTestHelper.execute(Ints5.class));
 	}
+
+	@Test
+	public void testIntegerDivisionAndAssign() {
+		assertEquals(2.0, GeneratorTestHelper.execute(Ints6.class));
+	}
+
+	@Test
+	public void testIntegerDivisionAndAssign2() {
+		assertEquals(2.0, GeneratorTestHelper.execute(Ints7.class));
+	}
 }

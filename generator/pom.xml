@@ -26,12 +26,6 @@
 			<version>${project.version}</version>
 		</dependency>
 
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.jvnet.sorcerer</groupId> -->
-<!-- 			<artifactId>sorcerer-javac</artifactId> -->
-<!-- 			<version>0.8</version> -->
-<!-- 		</dependency> -->
-
 
 		<dependency>
 			<groupId>com.sun</groupId>
@@ -73,12 +67,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.st-js.bridge</groupId>
-			<artifactId>html</artifactId>
-			<version>4.01.0</version>
-			<scope>test</scope>
-		</dependency>
+	
 
 		<dependency>
 			<groupId>org.mozilla</groupId>

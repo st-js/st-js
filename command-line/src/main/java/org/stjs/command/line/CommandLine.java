@@ -19,6 +19,7 @@ import org.stjs.generator.GenerationDirectory;
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConfigurationBuilder;
+import org.stjs.generator.STJSRuntimeException;
 
 import com.google.common.base.Throwables;
 
@@ -44,9 +45,8 @@ public class CommandLine {
 				classpathElements.add(dep.toURI().toURL());
 			}
 
-			ClassLoader builtProjectClassLoader = new URLClassLoader(
-					classpathElements.toArray(new URL[classpathElements.size()]), Thread.currentThread()
-							.getContextClassLoader());
+			ClassLoader builtProjectClassLoader = new URLClassLoader(classpathElements.toArray(new URL[classpathElements.size()]), Thread
+					.currentThread().getContextClassLoader());
 			File sourceFolder = new File(path);
 			GenerationDirectory targetFolder = new GenerationDirectory(new File(outputDir), null, null);
 			File generationFolder = targetFolder.getAbsolutePath();
@@ -54,8 +54,7 @@ public class CommandLine {
 			GeneratorConfigurationBuilder configBuilder = new GeneratorConfigurationBuilder();
 			configBuilder.allowedPackage(builtProjectClassLoader.loadClass(className).getPackage().getName());
 			GeneratorConfiguration configuration = configBuilder.build();
-			new Generator().generateJavascript(builtProjectClassLoader, className, sourceFolder, targetFolder,
-					generationFolder, configuration);
+			new Generator().generateJavascript(builtProjectClassLoader, className, sourceFolder, targetFolder, generationFolder, configuration);
 		}
 		catch (Exception e) {
 			throw Throwables.propagate(e);
@@ -65,6 +64,10 @@ public class CommandLine {
 	static void compile(final String path, final List<File> sourceFiles, List<File> dependencies) {
 		try {
 			JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+			if (compiler == null) {
+				throw new STJSRuntimeException("A Java compiler is not available for this project. "
+						+ "You may have configured your environment to run with a JRE instead of a JDK");
+			}
 			StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
 			fileManager.setLocation(StandardLocation.CLASS_PATH, dependencies);
 
@@ -78,5 +81,4 @@ public class CommandLine {
 		}
 
 	}
-
 }

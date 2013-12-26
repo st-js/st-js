@@ -25,17 +25,21 @@ import org.stjs.javascript.annotation.Template;
  * @author acraciun
  */
 @Adapter
-public class JSNumberAdapter {
-	@Template("adapter")
-	public native static String toFixed  (Number n, int positions);
+public final class JSNumberAdapter {
+	private JSNumberAdapter() {
+		//
+	}
 
 	@Template("adapter")
-	public native static String toFixed  (String n, int positions);
+	public native static String toFixed(Number n, int positions);
 
 	@Template("adapter")
-	public native static String toExponential  (Number n, int positions);
+	public native static String toFixed(String n, int positions);
 
 	@Template("adapter")
-	public native static String toPrecision  (Number n, int positions);
+	public native static String toExponential(Number n, int positions);
+
+	@Template("adapter")
+	public native static String toPrecision(Number n, int positions);
 
 }
