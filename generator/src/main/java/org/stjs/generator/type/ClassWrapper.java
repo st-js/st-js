@@ -46,6 +46,7 @@ import javax.annotation.concurrent.Immutable;
 
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.JavascriptClassGenerationException;
+import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.Option;
 import org.stjs.generator.utils.PreConditions;
@@ -167,7 +168,8 @@ public class ClassWrapper implements TypeWrapper {
 
 	// CHECKSTYLE:ON - too many params
 
-	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "PZLA_PREFER_ZERO_LENGTH_ARRAYS", //
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+			value = "PZLA_PREFER_ZERO_LENGTH_ARRAYS", //
 			justification = "null is actually for a raw class")
 	private TypeWrapper[] getActualTypeArgs(Type type, Class<?> subTypeClass, TypeWrapper[] subTypeActualTypeArgs) {
 		if (type instanceof Class<?>) {
@@ -306,16 +308,21 @@ public class ClassWrapper implements TypeWrapper {
 	}
 
 	private void addFields(Class<?> rawClass, TypeWrapper[] actualTypeArgs) {
-		for (Field f : rawClass.getDeclaredFields()) {
-			if (fields.get(f.getName()) == null) {
-				// keep the version from the most specific class
-				fields.put(f.getName(),
-						buildFieldWrapper(f.getName(), TypeWrappers.wrap(f.getGenericType()), f.getModifiers(), rawClass, actualTypeArgs));
+		try {
+			for (Field f : rawClass.getDeclaredFields()) {
+				if (fields.get(f.getName()) == null) {
+					// keep the version from the most specific class
+					fields.put(f.getName(),
+							buildFieldWrapper(f.getName(), TypeWrappers.wrap(f.getGenericType()), f.getModifiers(), rawClass, actualTypeArgs));
+				}
+			}
+			if (rawClass.isArray()) {
+				// add the "length" field not listed for generic arrays
+				fields.put("length", buildFieldWrapper("length", TypeWrappers.wrap(int.class), Modifier.PUBLIC, rawClass, actualTypeArgs));
 			}
 		}
-		if (rawClass.isArray()) {
-			// add the "length" field not listed for generic arrays
-			fields.put("length", buildFieldWrapper("length", TypeWrappers.wrap(int.class), Modifier.PUBLIC, rawClass, actualTypeArgs));
+		catch (Error err) {
+			throw new STJSRuntimeException("Error declaring class:" + rawClass.getName(), err);
 		}
 	}
 

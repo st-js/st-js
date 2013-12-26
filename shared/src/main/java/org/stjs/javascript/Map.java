@@ -32,7 +32,7 @@ import org.stjs.javascript.annotation.Template;
  * @author acraciun
  */
 @SyntheticType
-public class Map<K extends String, V> implements Iterable<K> {
+public final class Map<K extends String, V> implements Iterable<K> {
 	private final java.util.Map<K, V> map = new HashMap<K, V>();
 
 	/**
