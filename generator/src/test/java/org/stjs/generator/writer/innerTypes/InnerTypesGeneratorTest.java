@@ -48,7 +48,7 @@ public class InnerTypesGeneratorTest {
 	public void testCallToQualifiedOuterType() {
 		generate(InnerTypes6.class);
 	}
-	
+
 	@Test(
 			expected = JavascriptFileGenerationException.class)
 	public void testCallFieldToQualifiedOuterType() {
@@ -95,8 +95,7 @@ public class InnerTypesGeneratorTest {
 		generate(InnerTypes11.class);
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test()
 	public void testDeadCode() {
 		// the compiler will not generate the code inside the if (dead code), so the inner type may not be found
 		generate(InnerTypes12.class);
@@ -124,10 +123,11 @@ public class InnerTypesGeneratorTest {
 		String code = generate(InnerTypes16.class);
 		assertCodeContains(code, "var InnerTypes16 = function(){};" + "stjs.extend(InnerTypes16, null, [], function(constructor, prototype){");
 		assertCodeContains(code, "var o = new (stjs.extend(function InnerTypes16$1(){}, Object, [], function(constructor, prototype){");
-		assertCodeContains(code, "};"
-				+ "constructor.InnerDeep = stjs.extend(function InnerTypes16$1$InnerDeep(){}, null, [], function(constructor, prototype){");
+		assertCodeContains(
+				code,
+				"};"
+						+ "constructor.InnerDeep = function(){}; stjs.extend(InnerTypes16.InnerTypes16$1.InnerDeep, null, [], function(constructor, prototype){");
 	}
-
 
 	@Test
 	public void testEnumInsideInner() {
@@ -159,7 +159,7 @@ public class InnerTypesGeneratorTest {
 		assertNotNull(result);
 		assertEquals(2, ((Number) result).intValue());
 
-		assertCodeContains(InnerTypes20.class, "constructor.Holder = function InnerTypes20$Holder(){};"
+		assertCodeContains(InnerTypes20.class, "constructor.Holder = function(){};"
 				+ "stjs.extend(InnerTypes20.Holder, null, [], function(constructor, prototype){" + "       constructor.VALUE = 2;" + "}, {});");
 	}
 
