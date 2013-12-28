@@ -55,6 +55,11 @@ import com.sun.tools.javac.api.JavacTool;
 public class Generator {
 
 	private static final String STJS_FILE = "stjs.js";
+	private final GenerationPlugins plugins;
+
+	public Generator() {
+		plugins = new GenerationPlugins();
+	}
 
 	public File getOutputFile(File generationFolder, String className) {
 		return getOutputFile(generationFolder, className, true);
@@ -113,19 +118,18 @@ public class Generator {
 		BufferedWriter writer = null;
 
 		try {
-			// TODO add the possibility for use-defined plugins
-			GenerationPlugins plugins = new GenerationPlugins();
+			GenerationPlugins currentClassPlugins = plugins.forClass(clazz);
 
 			Timers.start("check-java");
 			// check the code
-			plugins.getCheckVisitor().scan(cu, context);
+			currentClassPlugins.getCheckVisitor().scan(cu, context);
 
 			context.getChecks().check();
 			Timers.end("check-java");
 
 			Timers.start("write-js-ast");
 			// generate the javascript code
-			AstRoot javascriptRoot = (AstRoot) plugins.getWriterVisitor().scan(cu, context);
+			AstRoot javascriptRoot = (AstRoot) currentClassPlugins.getWriterVisitor().scan(cu, context);
 			Timers.end("write-js-ast");
 
 			Timers.start("dump-js");

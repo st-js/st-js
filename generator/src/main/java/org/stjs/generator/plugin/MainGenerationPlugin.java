@@ -190,4 +190,9 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(template("assert"), new AssertTemplate<JS>());
 		visitor.contribute(template("none"), new DefaultTemplate<JS>());
 	}
+
+	@Override
+	public boolean loadByDefault() {
+		return true;
+	}
 }

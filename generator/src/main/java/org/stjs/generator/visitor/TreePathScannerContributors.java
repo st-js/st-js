@@ -2,25 +2,44 @@ package org.stjs.generator.visitor;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Nonnull;
 
 import org.stjs.generator.STJSRuntimeException;
 
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.sun.source.tree.Tree;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreeScanner;
 
 public class TreePathScannerContributors<R, P extends TreePathHolder, V extends TreePathScannerContributors<R, P, V>> extends TreeScanner<R, P> {
-	private final Multimap<Class<?>, VisitorContributor<? extends Tree, R, P, V>> contributors = LinkedListMultimap.create();
+	private final Map<Class<?>, ContributorHolder<? extends Tree>> contributors = Maps.newHashMap();
 
-	private final Map<DiscriminatorKey, VisitorContributor<? extends Tree, R, P, V>> contributorsWithDiscriminator = //
-	new HashMap<DiscriminatorKey, VisitorContributor<? extends Tree, R, P, V>>();
+	private final Map<DiscriminatorKey, ContributorHolder<? extends Tree>> contributorsWithDiscriminator = Maps.newHashMap();
 
 	private boolean continueScanning;
+
+	private boolean onlyOneFinalContributor = false;
+
+	public TreePathScannerContributors() {
+		//
+	}
+
+	@SuppressWarnings("unchecked")
+	public TreePathScannerContributors(TreePathScannerContributors<R, P, V> copy) {
+		// deep clone the maps
+		contributors.clear();
+		contributors.putAll(copy.contributors);
+
+		contributorsWithDiscriminator.clear();
+		contributorsWithDiscriminator.putAll(copy.contributorsWithDiscriminator);
+
+		continueScanning = copy.continueScanning;
+		onlyOneFinalContributor = copy.continueScanning;
+	}
 
 	public boolean isContinueScanning() {
 		return continueScanning;
@@ -30,21 +49,62 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 		this.continueScanning = continueScanning;
 	}
 
-	public <T extends VisitorContributor<? extends Tree, R, P, V>> TreePathScannerContributors<R, P, V> contribute(T contributor) {
-		assert contributor != null;
-		Class<?> treeNodeClass = getTreeNodeClass(contributor.getClass());
-		if (treeNodeClass == null) {
-			throw new STJSRuntimeException("Cannot guess the tree node class from the contributor " + contributor + ". ");
-		}
-		contributors.put(treeNodeClass, contributor);
-		return this;
+	public boolean isOnlyOneFinalContributor() {
+		return onlyOneFinalContributor;
 	}
 
-	public <T extends VisitorContributor<? extends Tree, R, P, V>> TreePathScannerContributors<R, P, V> contribute(
-			DiscriminatorKey discriminatorKey, T contributor) {
-		assert contributor != null;
-		contributorsWithDiscriminator.put(discriminatorKey, contributor);
-		return this;
+	public void setOnlyOneFinalContributor(boolean onlyOneFinalContributor) {
+		this.onlyOneFinalContributor = onlyOneFinalContributor;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends Tree> ContributorHolder<T> getHolder(Class<?> contributorClass) {
+		Class<?> treeNodeClass = getTreeNodeClass(contributorClass);
+		if (treeNodeClass == null) {
+			throw new STJSRuntimeException("Cannot guess the tree node class from the contributor " + contributorClass + ". ");
+		}
+		ContributorHolder<T> holder = (ContributorHolder<T>) contributors.get(treeNodeClass);
+		if (holder == null) {
+			holder = new ContributorHolder<T>();
+			contributors.put(treeNodeClass, holder);
+		}
+		return holder;
+	}
+
+	public <T extends Tree, C extends VisitorContributor<T, R, P, V>, N> void contribute(@Nonnull C contributor) {
+		if (onlyOneFinalContributor) {
+			this.<T>getHolder(contributor.getClass()).setContributor(contributor);
+		} else {
+			this.<T>getHolder(contributor.getClass()).addContributor(contributor);
+		}
+	}
+
+	public <T extends Tree, F extends VisitorFilterContributor<T, R, P, V>> void addFilter(@Nonnull F filter) {
+		this.<T>getHolder(filter.getClass()).addFilter(filter);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends Tree> ContributorHolder<T> getHolder(DiscriminatorKey discriminatorKey) {
+		ContributorHolder<T> holder = (ContributorHolder<T>) contributorsWithDiscriminator.get(discriminatorKey);
+		if (holder == null) {
+			holder = new ContributorHolder<T>();
+			contributorsWithDiscriminator.put(discriminatorKey, holder);
+		}
+		return holder;
+	}
+
+	public <T extends Tree, C extends VisitorContributor<T, R, P, V>> void contribute(@Nonnull DiscriminatorKey discriminatorKey,
+			@Nonnull C contributor) {
+		if (onlyOneFinalContributor) {
+			this.<T>getHolder(discriminatorKey).setContributor(contributor);
+		} else {
+			this.<T>getHolder(discriminatorKey).addContributor(contributor);
+		}
+	}
+
+	public <T extends Tree, F extends VisitorFilterContributor<T, R, P, V>> void addFilter(@Nonnull DiscriminatorKey discriminatorKey,
+			@Nonnull F filter) {
+		this.<T>getHolder(discriminatorKey).addFilter(filter);
 	}
 
 	/**
@@ -94,11 +154,8 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 		if (node == null) {
 			return r;
 		}
-		Collection<VisitorContributor<? extends Tree, R, P, V>> nodeContributors = contributors.get(getTreeInteface(node.getClass()));
-		R lastR = r;
-		for (VisitorContributor<? extends Tree, R, P, V> vc : nodeContributors) {
-			lastR = ((VisitorContributor<T, R, P, V>) vc).visit((V) this, node, p);
-		}
+		ContributorHolder<T> holder = (ContributorHolder<T>) contributors.get(getTreeInteface(node.getClass()));
+		R lastR = holder != null ? holder.visit((V) this, node, p) : null;
 		if (continueScanning) {
 			return node.accept(this, p);
 		}
@@ -120,4 +177,75 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 		}
 	}
 
+	/**
+	 * 
+	 * Keeps the list of filters and contributors for a given type of node
+	 * 
+	 * @param <T>
+	 */
+	private class ContributorHolder<T extends Tree> implements VisitorContributor<T, R, P, V> {
+		private final List<VisitorFilterContributor<T, R, P, V>> filters = Lists.newArrayList();
+		private final List<VisitorContributor<T, R, P, V>> contributors = Lists.newArrayList();
+
+		public void addFilter(VisitorFilterContributor<T, R, P, V> f) {
+			filters.add(f);
+		}
+
+		public void addContributor(VisitorContributor<T, R, P, V> c) {
+			contributors.add(c);
+		}
+
+		public void setContributor(VisitorContributor<T, R, P, V> c) {
+			contributors.clear();
+			contributors.add(c);
+		}
+
+		public List<VisitorFilterContributor<T, R, P, V>> getFilters() {
+			return filters;
+		}
+
+		@Override
+		public R visit(V visitor, T tree, P p) {
+			if (filters.size() > 0) {
+				// create a chain if there is at least a filter
+				return new FilterChain<T>(this).visit(visitor, tree, p);
+			}
+			return visitContributors(visitor, tree, p);
+		}
+
+		public R visitContributors(V visitor, T tree, P p) {
+			// the contributors are called at the end, but only the result of the last one will be kept
+			R lastR = null;
+			for (VisitorContributor<T, R, P, V> vc : contributors) {
+				lastR = vc.visit(visitor, tree, p);
+			}
+			return lastR;
+		}
+	}
+
+	/**
+	 * 
+	 * a filter is created for each visit in a node
+	 * 
+	 * @param <T>
+	 */
+	private class FilterChain<T extends Tree> implements VisitorContributor<T, R, P, V> {
+		private final ContributorHolder<T> holder;
+		private int nextFilter;
+
+		public FilterChain(ContributorHolder<T> holder) {
+			this.holder = holder;
+		}
+
+		@Override
+		public R visit(V visitor, T tree, P p) {
+			// filters are called before, one by one
+			if (nextFilter < holder.getFilters().size()) {
+				VisitorFilterContributor<T, R, P, V> next = holder.getFilters().get(nextFilter);
+				nextFilter++;
+				return next.visit(visitor, tree, p, this);
+			}
+			return holder.visitContributors(visitor, tree, p);
+		}
+	}
 }

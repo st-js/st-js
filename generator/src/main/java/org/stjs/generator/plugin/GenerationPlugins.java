@@ -11,6 +11,7 @@ import java.util.Properties;
 import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.writer.WriterVisitor;
+import org.stjs.javascript.annotation.UsePlugin;
 
 import com.google.common.io.Closeables;
 
@@ -25,16 +26,18 @@ public class GenerationPlugins<JS> {
 
 	private static final String JAVA_VERSION_ENTRY = "java.version";
 
-	private final Map<String, STJSGenerationPlugin<JS>> plugins = new HashMap<String, STJSGenerationPlugin<JS>>();
-	private final CheckVisitor checkVisitor = new CheckVisitor();
-	private final WriterVisitor<JS> writerVisitor = new WriterVisitor<JS>();
+	private final Map<String, STJSGenerationPlugin<JS>> mandatoryPlugins = new HashMap<String, STJSGenerationPlugin<JS>>();
+	private final Map<String, STJSGenerationPlugin<JS>> optionalPlugins = new HashMap<String, STJSGenerationPlugin<JS>>();
+
+	private CheckVisitor checkVisitor = new CheckVisitor();
+	private WriterVisitor<JS> writerVisitor = new WriterVisitor<JS>();
 
 	public GenerationPlugins() {
 
 		MainGenerationPlugin<JS> mainPlugin = new MainGenerationPlugin<JS>();
 		mainPlugin.contributeCheckVisitor(checkVisitor);
 		mainPlugin.contributeWriteVisitor(writerVisitor);
-		plugins.put("default", mainPlugin);
+		mandatoryPlugins.put("default", mainPlugin);
 
 		Enumeration<URL> configFiles;
 		try {
@@ -93,9 +96,13 @@ public class GenerationPlugins<JS> {
 		catch (ClassNotFoundException e) {
 			throw new STJSRuntimeException(e);
 		}
-		plugin.contributeCheckVisitor(checkVisitor);
-		plugin.contributeWriteVisitor(writerVisitor);
-		plugins.put(key, plugin);
+		if (plugin.loadByDefault()) {
+			plugin.contributeCheckVisitor(checkVisitor);
+			plugin.contributeWriteVisitor(writerVisitor);
+			mandatoryPlugins.put(key, plugin);
+		} else {
+			optionalPlugins.put(key, plugin);
+		}
 	}
 
 	// public GenerationContext<JS> newContext() {
@@ -117,5 +124,29 @@ public class GenerationPlugins<JS> {
 
 	public WriterVisitor<JS> getWriterVisitor() {
 		return writerVisitor;
+	}
+
+	@SuppressWarnings("unchecked")
+	public GenerationPlugins<JS> forClass(Class<?> clazz) {
+		UsePlugin usePlugins = clazz.getAnnotation(UsePlugin.class);
+		if (usePlugins == null || usePlugins.value() == null || usePlugins.value().length == 0) {
+			// this class uses the default plugins - no need to create a new one
+			return this;
+		}
+
+		// TODO - here I can add a cache using the list of plugin names as key
+		GenerationPlugins<JS> newPlugins = new GenerationPlugins<JS>();
+		newPlugins.checkVisitor = new CheckVisitor(checkVisitor);
+		newPlugins.writerVisitor = new WriterVisitor<JS>(writerVisitor);
+
+		for (String pluginName : usePlugins.value()) {
+			STJSGenerationPlugin<JS> plugin = optionalPlugins.get(pluginName);
+			if (plugin == null) {
+				throw new STJSRuntimeException("The class:" + clazz.getName() + " need an unknown Generation Plugin :" + pluginName);
+			}
+			plugin.contributeCheckVisitor(newPlugins.checkVisitor);
+			plugin.contributeWriteVisitor(newPlugins.writerVisitor);
+		}
+		return newPlugins;
 	}
 }

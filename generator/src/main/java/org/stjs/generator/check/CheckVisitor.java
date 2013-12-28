@@ -14,4 +14,8 @@ public class CheckVisitor extends TreePathScannerContributors<Void, GenerationCo
 		super();
 		setContinueScanning(true);
 	}
+
+	public CheckVisitor(CheckVisitor checkVisitor) {
+		super(checkVisitor);
+	}
 }
