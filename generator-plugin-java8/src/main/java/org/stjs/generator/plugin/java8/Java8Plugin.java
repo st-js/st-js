@@ -7,7 +7,9 @@ import org.stjs.generator.plugin.java8.writer.expression.MemberReferenceWriter;
 import org.stjs.generator.writer.WriterVisitor;
 
 public class Java8Plugin<JS> implements STJSGenerationPlugin<JS> {
-
+	public boolean loadByDefault(){
+		return true;
+	}
 	@Override
 	public void contributeCheckVisitor(CheckVisitor visitor) {
 		// nothing to add

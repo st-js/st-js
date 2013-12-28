@@ -15,6 +15,7 @@ import com.sun.source.tree.Tree;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreeScanner;
 
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class TreePathScannerContributors<R, P extends TreePathHolder, V extends TreePathScannerContributors<R, P, V>> extends TreeScanner<R, P> {
 	private final Map<Class<?>, ContributorHolder<? extends Tree>> contributors = Maps.newHashMap();
 
@@ -22,14 +23,15 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 
 	private boolean continueScanning;
 
-	private boolean onlyOneFinalContributor = false;
+	private boolean onlyOneFinalContributor;
 
 	public TreePathScannerContributors() {
-		//
+		super();
 	}
 
 	@SuppressWarnings("unchecked")
 	public TreePathScannerContributors(TreePathScannerContributors<R, P, V> copy) {
+		super();
 		// deep clone the maps
 		contributors.clear();
 		contributors.putAll(copy.contributors);
@@ -79,8 +81,20 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 		}
 	}
 
+	public <T extends Tree, C extends VisitorContributor<T, R, P, V>, N> void contribute(@Nonnull C contributor, Class<T> nodeClass) {
+		if (onlyOneFinalContributor) {
+			this.<T>getHolder(nodeClass).setContributor(contributor);
+		} else {
+			this.<T>getHolder(nodeClass).addContributor(contributor);
+		}
+	}
+
 	public <T extends Tree, F extends VisitorFilterContributor<T, R, P, V>> void addFilter(@Nonnull F filter) {
 		this.<T>getHolder(filter.getClass()).addFilter(filter);
+	}
+
+	public <T extends Tree, F extends VisitorFilterContributor<T, R, P, V>> void addFilter(@Nonnull F filter, Class<?> nodeClass) {
+		this.<T>getHolder(nodeClass).addFilter(filter);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -107,20 +121,31 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 		this.<T>getHolder(discriminatorKey).addFilter(filter);
 	}
 
+	private Class<?> getTreeNodeClassFromInteface(Type iface) {
+		if (iface instanceof ParameterizedType) {
+			ParameterizedType ptype = (ParameterizedType) iface;
+			for (Type arg : ptype.getActualTypeArguments()) {
+				// look for the first argument that is a descendant of Tree
+				if (arg instanceof Class<?> && Tree.class.isAssignableFrom((Class<?>) arg)) {
+					return (Class<?>) arg;
+				}
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * @return
 	 */
 	private Class<?> getTreeNodeClass(Class<?> clazz) {
+		if (Tree.class.isAssignableFrom(clazz)) {
+			return clazz;
+		}
 		Type[] interfaces = clazz.getGenericInterfaces();
 		for (Type iface : interfaces) {
-			if (iface instanceof ParameterizedType) {
-				ParameterizedType ptype = (ParameterizedType) iface;
-				for (Type arg : ptype.getActualTypeArguments()) {
-					// look for the first argument that is a descendant of Tree
-					if (arg instanceof Class<?> && Tree.class.isAssignableFrom((Class<?>) arg)) {
-						return (Class<?>) arg;
-					}
-				}
+			Class<?> nodeClass = getTreeNodeClassFromInteface(iface);
+			if (nodeClass != null) {
+				return nodeClass;
 			}
 		}
 		return null;
@@ -155,9 +180,9 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 			return r;
 		}
 		ContributorHolder<T> holder = (ContributorHolder<T>) contributors.get(getTreeInteface(node.getClass()));
-		R lastR = holder != null ? holder.visit((V) this, node, p) : null;
+		R lastR = holder == null ? null : holder.visit((V) this, node, p);
 		if (continueScanning) {
-			return node.accept(this, p);
+			lastR = node.accept(this, p);
 		}
 		return lastR;
 	}
@@ -206,7 +231,7 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 
 		@Override
 		public R visit(V visitor, T tree, P p) {
-			if (filters.size() > 0) {
+			if (!filters.isEmpty()) {
 				// create a chain if there is at least a filter
 				return new FilterChain<T>(this).visit(visitor, tree, p);
 			}

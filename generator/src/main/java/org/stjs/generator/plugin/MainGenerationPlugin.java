@@ -28,6 +28,7 @@ import org.stjs.generator.check.statement.SynchronizedCheck;
 import org.stjs.generator.check.statement.VariableFinalInLoopCheck;
 import org.stjs.generator.check.statement.VariableWrongNameCheck;
 import org.stjs.generator.visitor.DiscriminatorKey;
+import org.stjs.generator.writer.CommentWriter;
 import org.stjs.generator.writer.CompilationUnitWriter;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.declaration.ClassWriter;
@@ -82,6 +83,10 @@ import org.stjs.generator.writer.templates.PropertiesTemplate;
 import org.stjs.generator.writer.templates.PutTemplate;
 import org.stjs.generator.writer.templates.SetTemplate;
 import org.stjs.generator.writer.templates.TypeOfTemplate;
+
+import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.VariableTree;
 
 /**
  * this is the main generation plugin that adds all the needed checks and writers.
@@ -166,6 +171,14 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(new WhileLoopWriter<JS>());
 
 		addMethodCallTemplates(visitor);
+		addJavaDocCommentFilter(visitor);
+	}
+
+	private void addJavaDocCommentFilter(WriterVisitor<JS> visitor) {
+		CommentWriter<JS> cw = new CommentWriter<JS>();
+		visitor.addFilter(cw, ClassTree.class);
+		visitor.addFilter(cw, MethodTree.class);
+		visitor.addFilter(cw, VariableTree.class);
 	}
 
 	private DiscriminatorKey template(String name) {

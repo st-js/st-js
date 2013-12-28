@@ -5,6 +5,7 @@ import java.io.Writer;
 
 import com.google.debugging.sourcemap.SourceMapGenerator;
 
+@SuppressWarnings("PMD.ExcessivePublicCount")
 public class SouceJavaScriptBuilder implements JavaScriptBuilder<String> {
 
 	@Override
@@ -267,6 +268,12 @@ public class SouceJavaScriptBuilder implements JavaScriptBuilder<String> {
 
 	@Override
 	public SourceMapGenerator writeJavaScript(String javascriptRoot, File inputFile, boolean generateSourceMap, Writer writer) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String comment(String node, String comment) {
 		// TODO Auto-generated method stub
 		return null;
 	}

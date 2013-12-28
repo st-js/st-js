@@ -59,10 +59,19 @@ public class StatementsGeneratorTest {
 		assertCodeContains(Statements8.class, "/* * block comment */");
 	}
 
-	@Ignore
-	// comments are currenly disabled
-	public void testJavadocComment() {
+	@Test
+	public void testJavadocCommentMethod() {
 		assertCodeContains(Statements8b.class, "/** javadoc comment */");
+	}
+
+	@Test
+	public void testJavadocCommentClass() {
+		assertCodeContains(Statements8c.class, "/** javadoc comment */");
+	}
+
+	@Test
+	public void testJavadocCommentField() {
+		assertCodeContains(Statements8d.class, "/** javadoc comment */");
 	}
 
 	@Test

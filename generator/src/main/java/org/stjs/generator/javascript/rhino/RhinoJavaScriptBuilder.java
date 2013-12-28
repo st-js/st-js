@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.mozilla.javascript.Parser;
+import org.mozilla.javascript.Token.CommentType;
 import org.mozilla.javascript.ast.ArrayLiteral;
 import org.mozilla.javascript.ast.Assignment;
 import org.mozilla.javascript.ast.AstNode;
@@ -13,6 +14,7 @@ import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.Block;
 import org.mozilla.javascript.ast.BreakStatement;
 import org.mozilla.javascript.ast.CatchClause;
+import org.mozilla.javascript.ast.Comment;
 import org.mozilla.javascript.ast.ConditionalExpression;
 import org.mozilla.javascript.ast.ContinueStatement;
 import org.mozilla.javascript.ast.DoLoop;
@@ -517,6 +519,17 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		jsw.visitAstRoot(cast(javascriptRoot, AstRoot.class), null);
 
 		return jsw.getSourceMapGenerator();
+	}
+
+	@Override
+	public AstNode comment(AstNode node, String comment) {
+		if (node == null) {
+			return null;
+		}
+		if (comment != null) {
+			node.setJsDocNode(new Comment(0, comment.length(), CommentType.JSDOC, comment));
+		}
+		return node;
 	}
 
 }

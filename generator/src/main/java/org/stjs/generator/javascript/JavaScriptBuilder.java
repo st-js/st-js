@@ -13,6 +13,7 @@ import com.google.debugging.sourcemap.SourceMapGenerator;
  * 
  * @author acraciun
  */
+@SuppressWarnings("PMD.ExcessivePublicCount")
 public interface JavaScriptBuilder<T> {
 	T array(@Nonnull Iterable<T> values);
 
@@ -101,4 +102,6 @@ public interface JavaScriptBuilder<T> {
 	T statements(@Nonnull Iterable<T> stmts);
 
 	SourceMapGenerator writeJavaScript(T javascriptRoot, File inputFile, boolean generateSourceMap, Writer writer);
+
+	T comment(@Nullable T node, @Nullable String comment);
 }

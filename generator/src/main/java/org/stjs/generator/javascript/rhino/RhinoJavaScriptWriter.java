@@ -62,6 +62,8 @@ import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
  */
 public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	private static final String INDENT = "    ";
+	private static final String START_JAVA_DOC = "/**";
+	private static final String END_JAVA_DOC = "*/";
 	private int level;
 
 	private boolean indented;
@@ -124,6 +126,18 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		return this;
 	}
 
+	protected RhinoJavaScriptWriter printComments(AstNode node) {
+		String comment = node.getJsDoc();
+		if (comment != null) {
+			comment = START_JAVA_DOC + comment + END_JAVA_DOC;
+			String[] lines = comment.split("\n");
+			for (String line : lines) {
+				println(line);
+			}
+		}
+		return this;
+	}
+
 	public RhinoJavaScriptWriter println(String arg) {
 		print(arg);
 		println();
@@ -168,6 +182,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	@Override
 	public void visitAssignment(Assignment a, Boolean param) {
+		printComments(a);
 		printBinaryOperator(a.getType(), a.getLeft(), a.getRight(), param);
 	}
 
@@ -270,6 +285,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	@Override
 	public void visitExpressionStatement(ExpressionStatement e, Boolean param) {
+		printComments(e);
 		startPosition(e);
 		visitorSupport.accept(e.getExpression(), this, param);
 		println(";");
@@ -325,6 +341,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	@Override
 	public void visitFunctionNode(FunctionNode f, Boolean param) {
+		printComments(f);
 		print("function");
 		if (f.getFunctionName() != null) {
 			print(" ");
@@ -479,6 +496,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	@Override
 	public void visitStatements(Statements s, Boolean param) {
+		printComments(s);
 		for (Node stmt : s) {
 			visitorSupport.accept(stmt, this, param);
 		}
@@ -556,6 +574,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	@Override
 	public void visitVariableDeclaration(VariableDeclaration v, Boolean param) {
+		printComments(v);
 		if (v.isStatement()) {
 			startPosition(v);
 		}
