@@ -18,4 +18,9 @@ public class TypesGeneratorTest {
 		generate(Types2.class);
 	}
 
+	@Test
+	public void testAllowedrrays() {
+		// should not break in the annotation's array
+		generate(Types3.class);
+	}
 }

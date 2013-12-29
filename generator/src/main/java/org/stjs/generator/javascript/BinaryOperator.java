@@ -15,7 +15,7 @@ import com.sun.source.tree.Tree.Kind;
 public enum BinaryOperator {
 	// math
 	MULTIPLY(Kind.MULTIPLY, Token.MUL), DIVIDE(Kind.DIVIDE, Token.DIV), REMAINDER(Kind.REMAINDER, Token.MOD), //
-	PLUS(Kind.PLUS, Token.ADD), MINUS(Kind.MINUS, Token.DEC),
+	PLUS(Kind.PLUS, Token.ADD), MINUS(Kind.MINUS, Token.SUB),
 
 	// bit
 	LEFT_SHIFT(Kind.LEFT_SHIFT, Token.LSH), RIGHT_SHIFT(Kind.RIGHT_SHIFT, Token.RSH), //
