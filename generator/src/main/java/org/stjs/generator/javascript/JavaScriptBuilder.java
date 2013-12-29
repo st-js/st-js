@@ -104,4 +104,6 @@ public interface JavaScriptBuilder<T> {
 	SourceMapGenerator writeJavaScript(T javascriptRoot, File inputFile, boolean generateSourceMap, Writer writer);
 
 	T comment(@Nullable T node, @Nullable String comment);
+
+	T throwStatement(@Nonnull T expr);
 }

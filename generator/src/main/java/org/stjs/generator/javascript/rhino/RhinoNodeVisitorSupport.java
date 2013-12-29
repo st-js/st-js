@@ -36,6 +36,7 @@ import org.mozilla.javascript.ast.ReturnStatement;
 import org.mozilla.javascript.ast.StringLiteral;
 import org.mozilla.javascript.ast.SwitchCase;
 import org.mozilla.javascript.ast.SwitchStatement;
+import org.mozilla.javascript.ast.ThrowStatement;
 import org.mozilla.javascript.ast.TryStatement;
 import org.mozilla.javascript.ast.UnaryExpression;
 import org.mozilla.javascript.ast.VariableDeclaration;
@@ -289,6 +290,12 @@ public class RhinoNodeVisitorSupport {
 			@Override
 			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
 				visitor.visitExpressionStatement((ExpressionStatement) node, param);
+			}
+		});
+		addCaller(ThrowStatement.class, new Caller() {
+			@Override
+			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
+				visitor.visitThrowStatement((ThrowStatement) node, param);
 			}
 		});
 	}

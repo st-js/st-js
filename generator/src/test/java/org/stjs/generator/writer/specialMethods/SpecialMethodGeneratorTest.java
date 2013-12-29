@@ -11,19 +11,19 @@ public class SpecialMethodGeneratorTest {
 	@Test
 	public void testSpecialGet() {
 		// x.$get -> x[]
-		assertCodeContains(SpecialMethod1.class, "this[\"3\"]");
+		assertCodeContains(SpecialMethod1.class, "{}[\"3\"]");
 	}
 
 	@Test
 	public void testSpecialSet() {
 		// x.$set -> x[x]
-		assertCodeContains(SpecialMethod2.class, "this[\"3\"]=4");
+		assertCodeContains(SpecialMethod2.class, "[][\"3\"]=4");
 	}
 
 	@Test
 	public void testSpecialPut() {
 		// x.$put -> x[x]
-		assertCodeContains(SpecialMethod3.class, "this[\"3\"]=4");
+		assertCodeContains(SpecialMethod3.class, "map[\"3\"]=4");
 	}
 
 	@Test
@@ -44,11 +44,11 @@ public class SpecialMethodGeneratorTest {
 		assertCodeContains(SpecialMethod5.class, "{\"key\":1}");
 	}
 
-	@Test
-	public void testSpecialNumber() {
-		// $map(k,v) -> {k:v}
-		assertCodeContains(SpecialMethod5a.class, "{2:1}");
-	}
+	// @Test
+	// public void testSpecialNumber() {
+	// // $map(k,v) -> {k:v}
+	// assertCodeContains(SpecialMethod5a.class, "{2:1}");
+	// }
 
 	@Test(
 			expected = JavascriptFileGenerationException.class)
@@ -66,19 +66,19 @@ public class SpecialMethodGeneratorTest {
 	@Test
 	public void testSpecialMethodAsProp1() {
 		// x.$length() -> x.length
-		assertCodeContains(SpecialMethod7.class, "this.length;");
+		assertCodeContains(SpecialMethod7.class, "new TestBridge().length;");
 	}
 
-	@Test
-	public void testSpecialMethodAsProp2() {
-		// x.$length(y) -> x.length = y
-		assertCodeContains(SpecialMethod8.class, "this.length = 1");
-	}
+	// @Test
+	// public void testSpecialMethodAsProp2() {
+	// // x.$length(y) -> x.length = y
+	// assertCodeContains(SpecialMethod8.class, "this.length = 1");
+	// }
 
 	@Test
 	public void testSpecialLengthAppliedToString() {
-		// $length(x, y) -> x.length = y
-		assertCodeContains(SpecialMethod13.class, "(this).length = 1");
+		// x.$length(y) -> x.length = y
+		assertCodeContains(SpecialMethod13.class, "new TestBridge().length = 1");
 	}
 
 	@Test
@@ -114,7 +114,7 @@ public class SpecialMethodGeneratorTest {
 	@Test
 	public void testSpecialGetObject() {
 		// $get(x,y) -> x[y]
-		assertCodeContains(SpecialMethod12.class, "(obj)[\"a\"]");
+		assertCodeContains(SpecialMethod12.class, "obj[\"a\"]");
 	}
 
 	@Test
@@ -126,7 +126,7 @@ public class SpecialMethodGeneratorTest {
 	@Test
 	public void testSpecialDelete() {
 		// x.$delete(key) -> delete x[key]
-		assertCodeContains(SpecialMethod15.class, "delete this[\"key\"]");
+		assertCodeContains(SpecialMethod15.class, "delete {}[\"key\"]");
 	}
 
 	@Test
@@ -164,8 +164,8 @@ public class SpecialMethodGeneratorTest {
 	}
 
 	@Test
-	public void testTemplateNode() {
-		assertCodeContains(SpecialMethod22.class, "n = m.$get(0)");
+	public void testTemplateNone() {
+		assertCodeContains(SpecialMethod22.class, "n = new TestBridge().$get(0)");
 	}
 
 	@Test
@@ -180,6 +180,6 @@ public class SpecialMethodGeneratorTest {
 
 	@Test
 	public void testPrefix() {
-		assertCodeContains(SpecialMethod24.class, "n = this.prefix()");
+		assertCodeContains(SpecialMethod24.class, "n = new TestBridge().prefix()");
 	}
 }

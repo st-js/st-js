@@ -278,4 +278,10 @@ public class SouceJavaScriptBuilder implements JavaScriptBuilder<String> {
 		return null;
 	}
 
+	@Override
+	public String throwStatement(String expr) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

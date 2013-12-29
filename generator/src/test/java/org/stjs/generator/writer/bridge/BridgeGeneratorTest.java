@@ -4,6 +4,7 @@ import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
+import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.writer.bridge.pack.Bridge4;
 
 public class BridgeGeneratorTest {
@@ -29,5 +30,11 @@ public class BridgeGeneratorTest {
 	public void testBridgePackageAnnotation() {
 		// the class is a bridge so no code is actually generated
 		generate(Bridge4.class);
+	}
+
+	@Test(
+			expected = JavascriptFileGenerationException.class)
+	public void testTemplateOutsideBridge() {
+		generate(Bridge5.class);
 	}
 }

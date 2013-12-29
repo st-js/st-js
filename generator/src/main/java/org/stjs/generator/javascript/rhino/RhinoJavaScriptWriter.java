@@ -42,6 +42,7 @@ import org.mozilla.javascript.ast.ReturnStatement;
 import org.mozilla.javascript.ast.StringLiteral;
 import org.mozilla.javascript.ast.SwitchCase;
 import org.mozilla.javascript.ast.SwitchStatement;
+import org.mozilla.javascript.ast.ThrowStatement;
 import org.mozilla.javascript.ast.TryStatement;
 import org.mozilla.javascript.ast.UnaryExpression;
 import org.mozilla.javascript.ast.VariableDeclaration;
@@ -60,6 +61,7 @@ import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
  * @author acraciun
  * 
  */
+@SuppressWarnings("PMD.ExcessivePublicCount")
 public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	private static final String INDENT = "    ";
 	private static final String START_JAVA_DOC = "/**";
@@ -602,6 +604,15 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		visitorSupport.accept(w.getCondition(), this, param);
 		println(")");
 		printStatementAsBlock(w.getBody(), param);
+		endPosition();
+	}
+
+	@Override
+	public void visitThrowStatement(ThrowStatement e, Boolean param) {
+		startPosition(e);
+		print(" throw ");
+		visitorSupport.accept(e.getExpression(), this, param);
+		println(";");
 		endPosition();
 	}
 

@@ -20,6 +20,7 @@ import java.util.List;
 
 import javax.script.ScriptException;
 
+import org.stjs.generator.BridgeClass;
 import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
 import org.stjs.generator.GenerationDirectory;
@@ -158,6 +159,7 @@ public final class GeneratorTestHelper {
 		File generationPath = new File("target", TEMP_GENERATION_PATH);
 		GenerationDirectory generationFolder = new GenerationDirectory(generationPath, new File(TEMP_GENERATION_PATH), new File(""));
 		String sourcePath = "src/test/java";
+		File resourcePath = new File("src/test/resources");
 		ClassWithJavascript stjsClass = gen.generateJavascript(Thread.currentThread().getContextClassLoader(), clazz.getName(), new File(
 				sourcePath), generationFolder, new File("target", "test-classes"),
 				new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript").allowedPackage("org.stjs.generator")
@@ -171,7 +173,11 @@ public final class GeneratorTestHelper {
 					.getContextClassLoader());
 			for (ClassWithJavascript dep : allDeps) {
 				for (URI js : dep.getJavascriptFiles()) {
-					javascriptFiles.add(new File(generationPath, js.getPath()));
+					if (dep instanceof BridgeClass) {
+						javascriptFiles.add(new File(resourcePath, js.getPath()));
+					} else {
+						javascriptFiles.add(new File(generationPath, js.getPath()));
+					}
 				}
 			}
 			ExecutionResult execResult = new RhinoExecutor().run(javascriptFiles, !execute);

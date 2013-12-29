@@ -125,7 +125,28 @@ public final class JavaNodes {
 		return null;
 	}
 
+	// TODO add non-static cache
+	// private static Map<String, String> cache = Maps.newHashMap();
+	// private static final String NULL = new String();
+	//
+	// public static String getMethodTemplate(Elements elements, Element element) {
+	// String key = ElementUtils.getQualifiedClassName(element) + "." + element.getSimpleName();
+	//
+	// String ret = cache.get(key);
+	// if (ret != null) {
+	// return ret == NULL ? null : ret;
+	// }
+	// ret = getMethodTemplate0(elements, element);
+	// if (ret != null) {
+	// cache.put(key, ret);
+	// } else {
+	// cache.put(key, NULL);
+	// }
+	// return ret;
+	// }
+
 	public static String getMethodTemplate(Elements elements, Element element) {
+
 		Template t = element.getAnnotation(Template.class);
 		if (t != null) {
 			return t.value();

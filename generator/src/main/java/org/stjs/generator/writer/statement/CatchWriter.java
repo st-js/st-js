@@ -13,7 +13,7 @@ public class CatchWriter<JS> implements WriterContributor<CatchTree, JS> {
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, CatchTree tree, GenerationContext<JS> context) {
-		JS condition = visitor.scan(tree.getParameter(), context);
+		JS condition = context.js().name(tree.getParameter().getName());
 		JS body = visitor.scan(tree.getBlock(), context);
 		return context.withPosition(tree, context.js().catchClause(condition, body));
 	}

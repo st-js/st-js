@@ -23,7 +23,7 @@ public class DumpTest {
 			}
 		};
 		th.setDaemon(true);
-		th.start();
+		// th.start();
 
 	}
 }

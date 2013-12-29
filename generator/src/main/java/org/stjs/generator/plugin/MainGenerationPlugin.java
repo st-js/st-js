@@ -10,6 +10,7 @@ import org.stjs.generator.check.declaration.ClassGlobalInstanceMembersCheck;
 import org.stjs.generator.check.declaration.ClassImplementJavascriptFunctionCheck;
 import org.stjs.generator.check.declaration.ClassNamespaceCheck;
 import org.stjs.generator.check.declaration.FieldInitializerCheck;
+import org.stjs.generator.check.declaration.MethodDeclarationTemplateCheck;
 import org.stjs.generator.check.declaration.MethodOverloadCheck;
 import org.stjs.generator.check.declaration.MethodSynchronizedCheck;
 import org.stjs.generator.check.declaration.MethodVarArgParamCheck;
@@ -64,6 +65,7 @@ import org.stjs.generator.writer.statement.LabeledStatementWriter;
 import org.stjs.generator.writer.statement.ReturnWriter;
 import org.stjs.generator.writer.statement.SwitchWriter;
 import org.stjs.generator.writer.statement.SynchronizedWriter;
+import org.stjs.generator.writer.statement.ThrowWriter;
 import org.stjs.generator.writer.statement.TryWriter;
 import org.stjs.generator.writer.statement.VariableWriter;
 import org.stjs.generator.writer.statement.WhileLoopWriter;
@@ -111,6 +113,7 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(new ClassGlobalInstanceMembersCheck());
 		visitor.contribute(new ClassNamespaceCheck());
 		visitor.contribute(new MethodOverloadCheck());
+
 		visitor.contribute(new NewClassObjectInitCheck());
 		visitor.contribute(new ClassForbidExtendsSyntheticTypeCheck());
 		visitor.contribute(new MethodInvocationOuterScopeCheck());
@@ -118,14 +121,17 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(new ArrayTypeForbiddenCheck());
 		visitor.contribute(new ClassEnumWithoutMembersCheck());
 		visitor.contribute(new NewArrayForbiddenCheck());
+
 		visitor.contribute(new BlockInstanceCheck());
 		visitor.contribute(new MethodInvocationMapConstructorCheck());
 		visitor.contribute(new SynchronizedCheck());
 		visitor.contribute(new MethodSynchronizedCheck());
-		visitor.contribute(new AssertCheck());
 
+		visitor.contribute(new AssertCheck());
 		visitor.contribute(new IdentifierGlobalScopeNameClashCheck());
 		visitor.contribute(new MemberSelectGlobalScopeNameClashCheck());
+
+		visitor.contribute(new MethodDeclarationTemplateCheck());
 	}
 
 	public void contributeWriteVisitor(WriterVisitor<JS> visitor) {
@@ -169,6 +175,7 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(new TryWriter<JS>());
 		visitor.contribute(new VariableWriter<JS>());
 		visitor.contribute(new WhileLoopWriter<JS>());
+		visitor.contribute(new ThrowWriter<JS>());
 
 		addMethodCallTemplates(visitor);
 		addJavaDocCommentFilter(visitor);

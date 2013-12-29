@@ -134,4 +134,9 @@ public class StatementsGeneratorTest {
 		// assert not supported
 		generate(Statements18.class);
 	}
+
+	@Test
+	public void testCatch() {
+		assertCodeContains(Statements19.class, "catch(e){throw new RuntimeException(e);}");
+	}
 }

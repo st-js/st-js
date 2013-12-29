@@ -42,6 +42,7 @@ import org.mozilla.javascript.ast.ReturnStatement;
 import org.mozilla.javascript.ast.StringLiteral;
 import org.mozilla.javascript.ast.SwitchCase;
 import org.mozilla.javascript.ast.SwitchStatement;
+import org.mozilla.javascript.ast.ThrowStatement;
 import org.mozilla.javascript.ast.TryStatement;
 import org.mozilla.javascript.ast.UnaryExpression;
 import org.mozilla.javascript.ast.VariableDeclaration;
@@ -530,6 +531,13 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 			node.setJsDocNode(new Comment(0, comment.length(), CommentType.JSDOC, comment));
 		}
 		return node;
+	}
+
+	@Override
+	public AstNode throwStatement(AstNode expr) {
+		ThrowStatement s = new ThrowStatement();
+		s.setExpression(expr);
+		return s;
 	}
 
 }
