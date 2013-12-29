@@ -9,11 +9,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 
 import javax.tools.JavaFileObject;
 
 import org.stjs.generator.STJSRuntimeException;
+
+import com.google.common.collect.Maps;
 
 /**
  * this class looks for packages in the classpath
@@ -21,9 +24,11 @@ import org.stjs.generator.STJSRuntimeException;
  * @author acraciun
  * 
  */
-class PackageInternalsFinder {
+public class PackageInternalsFinder {
 	private final ClassLoader classLoader;
 	private static final String CLASS_FILE_EXTENSION = ".class";
+
+	private final Map<String, List<JavaFileObject>> cachePackageEntries = Maps.newHashMap();
 
 	public PackageInternalsFinder(ClassLoader classLoader) {
 		this.classLoader = classLoader;
@@ -32,7 +37,13 @@ class PackageInternalsFinder {
 	public List<JavaFileObject> find(String packageName) throws IOException {
 		String javaPackageName = packageName.replaceAll("\\.", "/");
 
-		List<JavaFileObject> result = new ArrayList<JavaFileObject>();
+		List<JavaFileObject> result = cachePackageEntries.get(javaPackageName);
+		if (result != null) {
+			return result;
+		}
+
+		result = new ArrayList<JavaFileObject>();
+		cachePackageEntries.put(javaPackageName, result);
 
 		Enumeration<URL> urlEnumeration = classLoader.getResources(javaPackageName);
 		while (urlEnumeration.hasMoreElements()) { // one URL for each jar on the classpath that has the given package
@@ -54,6 +65,7 @@ class PackageInternalsFinder {
 
 	private List<JavaFileObject> processJar(URL packageFolderURL) {
 		List<JavaFileObject> result = new ArrayList<JavaFileObject>();
+
 		try {
 			String jarUri = packageFolderURL.toExternalForm().split("!")[0];
 

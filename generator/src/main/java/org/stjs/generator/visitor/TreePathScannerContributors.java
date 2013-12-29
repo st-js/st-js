@@ -29,15 +29,19 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 		super();
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public TreePathScannerContributors(TreePathScannerContributors<R, P, V> copy) {
 		super();
 		// deep clone the maps
 		contributors.clear();
-		contributors.putAll(copy.contributors);
+		for (Map.Entry<Class<?>, ContributorHolder<? extends Tree>> entry : copy.contributors.entrySet()) {
+			contributors.put(entry.getKey(), new ContributorHolder(entry.getValue()));
+		}
 
 		contributorsWithDiscriminator.clear();
-		contributorsWithDiscriminator.putAll(copy.contributorsWithDiscriminator);
+		for (Map.Entry<DiscriminatorKey, ContributorHolder<? extends Tree>> entry : copy.contributorsWithDiscriminator.entrySet()) {
+			contributorsWithDiscriminator.put(entry.getKey(), new ContributorHolder(entry.getValue()));
+		}
 
 		continueScanning = copy.continueScanning;
 		onlyOneFinalContributor = copy.continueScanning;
@@ -212,6 +216,15 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 		private final List<VisitorFilterContributor<T, R, P, V>> filters = Lists.newArrayList();
 		private final List<VisitorContributor<T, R, P, V>> contributors = Lists.newArrayList();
 
+		public ContributorHolder() {
+			//
+		}
+
+		public ContributorHolder(ContributorHolder<T> copy) {
+			filters.addAll(copy.filters);
+			contributors.addAll(copy.contributors);
+		}
+
 		public void addFilter(VisitorFilterContributor<T, R, P, V> f) {
 			filters.add(f);
 		}
@@ -246,6 +259,7 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 			}
 			return lastR;
 		}
+
 	}
 
 	/**

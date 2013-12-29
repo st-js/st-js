@@ -32,6 +32,7 @@ import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;
 import org.stjs.javascript.Map;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
@@ -39,9 +40,13 @@ import com.google.common.io.Files;
 @SuppressWarnings("PMD")
 public final class GeneratorTestHelper {
 	private static final String TEMP_GENERATION_PATH = "temp-generated-js";
+	private static Generator gen = new Generator();
+
+	static {
+		gen.init(Thread.currentThread().getContextClassLoader(), Charsets.UTF_8.name());
+	}
 
 	private GeneratorTestHelper() {
-		//
 	}
 
 	/**
@@ -149,7 +154,6 @@ public final class GeneratorTestHelper {
 	 * @return the javascript code generator from the given class
 	 */
 	private static Object executeOrGenerate(Class<?> clazz, boolean execute, boolean withSourceMap) {
-		Generator gen = new Generator();
 
 		File generationPath = new File("target", TEMP_GENERATION_PATH);
 		GenerationDirectory generationFolder = new GenerationDirectory(generationPath, new File(TEMP_GENERATION_PATH), new File(""));

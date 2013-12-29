@@ -56,9 +56,19 @@ public class Generator {
 
 	private static final String STJS_FILE = "stjs.js";
 	private final GenerationPlugins plugins;
+	private StandardJavaFileManager fileManager;
+	private JavaFileManager classLoaderFileManager;
 
 	public Generator() {
 		plugins = new GenerationPlugins();
+	}
+
+	public void init(ClassLoader builtProjectClassLoader, String sourceEncoding) {
+		// nothing to do
+	}
+
+	public void close() {
+		Closeables.closeQuietly(fileManager);
 	}
 
 	public File getOutputFile(File generationFolder, String className) {
@@ -114,26 +124,25 @@ public class Generator {
 		JavaScriptNameProvider names = new DefaultJavaScriptNameProvider();
 		GenerationContext context = new GenerationContext(inputFile, configuration, names, null);
 
-		CompilationUnitTree cu = parseAndResolve(builtProjectClassLoader, inputFile, context, configuration.getSourceEncoding());
+		CompilationUnitTree cu = parseAndResolve(inputFile, context, builtProjectClassLoader, configuration.getSourceEncoding());
 		BufferedWriter writer = null;
 
 		try {
 			GenerationPlugins currentClassPlugins = plugins.forClass(clazz);
 
-			Timers.start("check-java");
 			// check the code
+			Timers.start("check-java");
 			currentClassPlugins.getCheckVisitor().scan(cu, context);
-
 			context.getChecks().check();
 			Timers.end("check-java");
 
-			Timers.start("write-js-ast");
 			// generate the javascript code
+			Timers.start("write-js-ast");
 			AstRoot javascriptRoot = (AstRoot) currentClassPlugins.getWriterVisitor().scan(cu, context);
 			Timers.end("write-js-ast");
 
-			Timers.start("dump-js");
 			// dump the ast to a file
+			Timers.start("dump-js");
 			writer = Files.newWriter(outputFile, Charset.forName(configuration.getSourceEncoding()));
 			context.writeJavaScript(javascriptRoot, writer);
 			writer.flush();
@@ -222,22 +231,30 @@ public class Generator {
 		}
 	}
 
-	private CompilationUnitTree parseAndResolve(ClassLoader builtProjectClassLoader, File inputFile, GenerationContext context,
-			String sourceEncoding) {
-		StandardJavaFileManager fileManager = null;
-		try {
-			// create it directly to avoid ClassLoader problems
-			JavaCompiler compiler = JavacTool.create();
-			if (compiler == null) {
-				throw new JavascriptFileGenerationException(inputFile, null,
-						"A Java compiler is not available for this project. You may have configured your environment to run with JRE instead of a JDK");
-			}
+	private JavaCompiler getCompiler(ClassLoader builtProjectClassLoader, String sourceEncoding) {
+		// create it directly to avoid ClassLoader problems
+		JavaCompiler compiler = JavacTool.create();
+		if (compiler == null) {
+			throw new STJSRuntimeException(
+					"A Java compiler is not available for this project. You may have configured your environment to run with JRE instead of a JDK");
+		}
+		if (fileManager == null) {
+			// reuse the file managers
 			fileManager = compiler.getStandardFileManager(null, null, Charset.forName(sourceEncoding));
-			JavaFileManager classLoaderFileManager = new CustomClassloaderJavaFileManager(builtProjectClassLoader, fileManager);
+			classLoaderFileManager = new CustomClassloaderJavaFileManager(builtProjectClassLoader, fileManager);
+		}
+		return compiler;
+	}
 
+	private CompilationUnitTree parseAndResolve(File inputFile, GenerationContext context, ClassLoader builtProjectClassLoader,
+			String sourceEncoding) {
+		JavaCompiler.CompilationTask task = null;
+		JavacTask javacTask = null;
+		try {
+			JavaCompiler compiler = getCompiler(builtProjectClassLoader, sourceEncoding);
 			Iterable<? extends JavaFileObject> fileObjects = fileManager.getJavaFileObjectsFromFiles(Collections.singleton(inputFile));
-			JavaCompiler.CompilationTask task = compiler.getTask(null, classLoaderFileManager, null, null, null, fileObjects);
-			JavacTask javacTask = (JavacTask) task;
+			task = compiler.getTask(null, classLoaderFileManager, null, null, null, fileObjects);
+			javacTask = (JavacTask) task;
 
 			context.setTrees(Trees.instance(javacTask));
 			context.setElements(javacTask.getElements());
@@ -257,10 +274,6 @@ public class Generator {
 		}
 		catch (IOException e) {
 			throw new JavascriptFileGenerationException(context.getInputFile(), null, "Cannot parse the Java file:" + e);
-		}
-
-		finally {
-			Closeables.closeQuietly(fileManager);
 		}
 
 	}

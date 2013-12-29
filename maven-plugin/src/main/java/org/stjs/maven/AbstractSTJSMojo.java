@@ -170,6 +170,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 		ClassLoader builtProjectClassLoader = getBuiltProjectClassLoader();
 		Generator generator = new Generator();
+		generator.init(builtProjectClassLoader, sourceEncoding);
 
 		GeneratorConfigurationBuilder configBuilder = new GeneratorConfigurationBuilder();
 		configBuilder.generateArrayHasOwnProperty(generateArrayHasOwnProperty);
@@ -248,6 +249,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			filesGenerated(generator, gendir);
 		}
 
+		generator.close();
 		if (hasFailures) {
 			throw new MojoFailureException("Errors generating JavaScript");
 		}
