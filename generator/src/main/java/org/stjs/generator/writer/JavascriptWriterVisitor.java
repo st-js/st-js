@@ -471,7 +471,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				TypeWrapper type = resolvedType(n);
 				if (type instanceof ClassWrapper && ((ClassWrapper) type).getClazz().isPrimitive()) {
 					Object defaultValue = Defaults.defaultValue(((ClassWrapper) type).getClazz());
-					printer.printNumberLiteral(defaultValue.toString());
+					printer.printLiteral(defaultValue.toString());
 				} else {
 					printer.print(JavascriptKeywords.NULL);
 				}
@@ -500,8 +500,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	public void visit(FieldDeclaration n, GenerationContext context) {
 		TypeWrapper type = resolvedType(parent(n));
 		boolean global = isGlobal(type) && isStatic(n.getModifiers());
+		
 		for (VariableDeclarator v : n.getVariables()) {
-			if (!global) {
+			if (global){
+				printer.print("var ");
+			}else {
 				if (isStatic(n.getModifiers())) {
 					printer.print(JavascriptKeywords.CONSTRUCTOR).print(".");
 				} else {

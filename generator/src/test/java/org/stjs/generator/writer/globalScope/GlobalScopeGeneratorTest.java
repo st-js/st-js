@@ -75,4 +75,10 @@ public class GlobalScopeGeneratorTest {
 	public void testInstanceMembersNotAllowded2() {
 		generate(GlobalScope11.class);
 	}
+
+	@Test(
+			expected = JavascriptFileGenerationException.class)
+	public void testInner() {
+		generate(GlobalScope12.class);
+	}
 }

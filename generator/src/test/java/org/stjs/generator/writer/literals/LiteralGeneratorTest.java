@@ -19,4 +19,14 @@ public class LiteralGeneratorTest {
 	public void testFloatNumbers() {
 		assertCodeContains(Literal2.class, "field=2;");
 	}
+
+	@Test
+	public void testDoubleNumbers() {
+		assertCodeContains(Literal3.class, "method(0.01);");
+	}
+
+	@Test
+	public void testBoolean() {
+		assertCodeContains(Literal4.class, "field=false;");
+	}
 }

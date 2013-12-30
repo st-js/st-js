@@ -81,7 +81,7 @@ public class JavascriptWriter {
 	public JavascriptWriter printNumberLiteral(String value) {
 		String n = value;
 		// remove and ending type coercion. i.e 123L -> 123
-		if (!value.startsWith("0")) {
+		if (!value.startsWith("0x")) {
 			// without hexa and binary 0x...
 			n = value.replaceAll(NUMERIC_LITERAL_ENDING, "");
 		}

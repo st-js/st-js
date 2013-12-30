@@ -394,6 +394,10 @@ public final class Checks {
 					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
 							"Only static constructions can be used in a @GlobalScope class");
 				}
+				if (member instanceof ClassOrInterfaceDeclaration || member instanceof EnumDeclaration) {
+					throw new JavascriptFileGenerationException(context.getInputFile(), new SourcePosition(n),
+							"Inner types cannot be defined in a @GlobalScope class. Please define this type outside the class");
+				}
 			}
 		}
 	}
