@@ -14,8 +14,8 @@ import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.utils.JavaNodes;
 
+import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.IdentifierTree;
-import com.sun.source.tree.Scope;
 
 public class IdentifierAccessOuterScopeCheck implements CheckContributor<IdentifierTree> {
 	/**
@@ -29,6 +29,11 @@ public class IdentifierAccessOuterScopeCheck implements CheckContributor<Identif
 			return element;
 		}
 		return element.getSuperclass() instanceof DeclaredType ? (TypeElement) ((DeclaredType) element.getSuperclass()).asElement() : element;
+	}
+
+	public static boolean isSubtype(GenerationContext<Void> context, TypeElement currentScopeClassElement, TypeElement ownerElement) {
+		return context.getTypes().isSubtype(context.getTypes().erasure(currentScopeClassElement.asType()),
+				context.getTypes().erasure(ownerElement.asType()));
 	}
 
 	@Override
@@ -48,13 +53,14 @@ public class IdentifierAccessOuterScopeCheck implements CheckContributor<Identif
 			return null;
 		}
 		try {
-			Scope currentScope = context.getTrees().getScope(context.getCurrentPath());
+			ClassTree enclosingClassTree = TreeUtils.enclosingClass(context.getCurrentPath());
 
-			Element currentScopeClassElement = getEnclosingElementSkipAnonymousInitializer(currentScope.getEnclosingClass());
-			Element fieldOwnerElement = fieldElement.getEnclosingElement();
-			if (!context.getTypes().isSubtype(currentScopeClassElement.asType(), fieldOwnerElement.asType())) {
-				context.addError(tree, "In Javascript you cannot call methods or fields from the outer type. "
-						+ "You should define a variable var that=this outside your function definition and call the methods on this object");
+			TypeElement currentScopeClassElement = getEnclosingElementSkipAnonymousInitializer(TreeUtils
+					.elementFromDeclaration(enclosingClassTree));
+			TypeElement fieldOwnerElement = (TypeElement) fieldElement.getEnclosingElement();
+			if (!isSubtype(context, currentScopeClassElement, fieldOwnerElement)) {
+				context.addError(tree, "In Javascript you cannot access a field from the outer type. "
+						+ "You should define a variable var that=this outside your function definition and use the property of this object");
 			}
 		} catch (Throwable e) {
 			throw new STJSRuntimeException("Error gettting scope from:" + tree, e);

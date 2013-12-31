@@ -66,7 +66,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	private static final String LINE_JAVA_DOC = " * ";
 	private static final String INDENT = "    ";
 	private static final String START_JAVA_DOC = "/**";
-	private static final String END_JAVA_DOC = "*/";
+	private static final String END_JAVA_DOC = " */";
 	private int level;
 
 	private boolean indented;

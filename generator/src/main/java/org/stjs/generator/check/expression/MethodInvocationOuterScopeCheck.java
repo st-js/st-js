@@ -1,6 +1,7 @@
 package org.stjs.generator.check.expression;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
@@ -10,9 +11,9 @@ import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
 
+import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MethodInvocationTree;
-import com.sun.source.tree.Scope;
 
 /**
  * this check verifies that you don't call a method from the outer type as in javaScript this scope is not accessible.
@@ -22,12 +23,12 @@ import com.sun.source.tree.Scope;
  */
 public class MethodInvocationOuterScopeCheck implements CheckContributor<MethodInvocationTree> {
 	private void checkScope(Element methodElement, MethodInvocationTree tree, GenerationContext<Void> context) {
-		Scope currentScope = context.getTrees().getScope(context.getCurrentPath());
+		ClassTree enclosingClassTree = TreeUtils.enclosingClass(context.getCurrentPath());
 
-		Element currentScopeClassElement = IdentifierAccessOuterScopeCheck.getEnclosingElementSkipAnonymousInitializer(currentScope
-				.getEnclosingClass());
-		Element methodOwnerElement = methodElement.getEnclosingElement();
-		if (!context.getTypes().isSubtype(currentScopeClassElement.asType(), methodOwnerElement.asType())) {
+		TypeElement currentScopeClassElement = IdentifierAccessOuterScopeCheck.getEnclosingElementSkipAnonymousInitializer(TreeUtils
+				.elementFromDeclaration(enclosingClassTree));
+		TypeElement methodOwnerElement = (TypeElement) methodElement.getEnclosingElement();
+		if (!IdentifierAccessOuterScopeCheck.isSubtype(context, currentScopeClassElement, methodOwnerElement)) {
 			context.addError(tree, "In Javascript you cannot call methods or fields from the outer type. "
 					+ "You should define a variable var that=this outside your function definition and call the methods on this object");
 		}
