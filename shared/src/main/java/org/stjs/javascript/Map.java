@@ -32,14 +32,14 @@ import org.stjs.javascript.annotation.Template;
  * @author acraciun
  */
 @SyntheticType
-public final class Map<K extends String, V> implements Iterable<K> {
+public class Map<K extends String, V> implements Iterable<K> {
 	private final java.util.Map<K, V> map = new HashMap<K, V>();
 
 	/**
 	 * Constructor is package private, it isn't supposed to be used directly by clients of the API. Use
 	 * <tt>JSCollections.$map()</tt> instead.
 	 */
-	Map() {
+	protected Map() {
 		super();
 	}
 
