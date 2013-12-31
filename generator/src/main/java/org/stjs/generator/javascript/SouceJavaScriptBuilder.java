@@ -141,6 +141,12 @@ public class SouceJavaScriptBuilder implements JavaScriptBuilder<String> {
 	}
 
 	@Override
+	public String addStatementBeginning(String blockOrStatement, String statement) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public String labeledStatement(String label, String statement) {
 		// TODO Auto-generated method stub
 		return null;

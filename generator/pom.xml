@@ -17,8 +17,6 @@
 	</properties>
 
 
-
-
 	<dependencies>
 		<dependency>
 			<groupId>org.st-js</groupId>
@@ -48,7 +46,12 @@
 			<version>r1810</version>
 		</dependency>
 
-	
+<!-- 			<dependency> -->
+<!-- 			<groupId>org.jvnet.sorcerer</groupId> -->
+<!-- 			<artifactId>sorcerer-javac</artifactId> -->
+<!-- 			<version>0.8</version> -->
+<!-- 		</dependency> -->
+
 
 		<!-- test deps -->
 		<dependency>
@@ -59,7 +62,7 @@
 <!-- 			<scope>test</scope> -->
 		</dependency>
 
-	
+
 		<dependency>
 			<groupId>org.st-js</groupId>
 			<artifactId>server</artifactId>
@@ -67,7 +70,7 @@
 			<scope>test</scope>
 		</dependency>
 
-	
+
 
 		<dependency>
 			<groupId>org.mozilla</groupId>

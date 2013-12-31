@@ -77,6 +77,8 @@ public interface JavaScriptBuilder<T> {
 
 	T addStatement(@Nullable T blockOrStatement, @Nullable T statement);
 
+	T addStatementBeginning(@Nullable T blockOrStatement, @Nullable T statement);
+
 	T labeledStatement(@Nonnull T label, @Nonnull T statement);
 
 	T returnStatement(@Nullable T returnValue);

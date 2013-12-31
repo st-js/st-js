@@ -24,8 +24,11 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Set;
 
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticListener;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
@@ -94,8 +97,7 @@ public class Generator {
 	private Class<?> getClazz(ClassLoader builtProjectClassLoader, String className) {
 		try {
 			return builtProjectClassLoader.loadClass(className);
-		}
-		catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException e) {
 			throw new JavascriptClassGenerationException(className, "Cannot load class:" + e);
 		}
 	}
@@ -147,11 +149,9 @@ public class Generator {
 			context.writeJavaScript(javascriptRoot, writer);
 			writer.flush();
 			Timers.end("dump-js");
-		}
-		catch (IOException e1) {
+		} catch (IOException e1) {
 			throw new STJSRuntimeException("Could not open output file " + outputFile + ":" + e1, e1);
-		}
-		finally {
+		} finally {
 			Closeables.closeQuietly(writer);
 		}
 
@@ -195,11 +195,9 @@ public class Generator {
 			if (!stjsPropFile.equals(copyStjsPropFile)) {
 				Files.copy(stjsPropFile, copyStjsPropFile);
 			}
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new STJSRuntimeException("Could generate source map:" + e, e);
-		}
-		finally {
+		} finally {
 			if (sourceMapWriter != null) {
 				Closeables.closeQuietly(sourceMapWriter);
 			}
@@ -225,8 +223,7 @@ public class Generator {
 			// return new URI(file.getPath().replace('\\', '/'));
 			// }
 			// return getOutputFile(generationFolder, className).toURI();
-		}
-		catch (URISyntaxException e) {
+		} catch (URISyntaxException e) {
 			throw new JavascriptClassGenerationException(className, e);
 		}
 	}
@@ -240,7 +237,13 @@ public class Generator {
 		}
 		if (fileManager == null) {
 			// reuse the file managers
-			fileManager = compiler.getStandardFileManager(null, null, Charset.forName(sourceEncoding));
+			DiagnosticListener<JavaFileObject> diag = new DiagnosticListener<JavaFileObject>() {
+				@Override
+				public void report(Diagnostic<? extends JavaFileObject> diagnostic) {
+					System.out.println("ERR:" + diagnostic.getMessage(Locale.getDefault()));
+				}
+			};
+			fileManager = compiler.getStandardFileManager(diag, null, Charset.forName(sourceEncoding));
 			classLoaderFileManager = new CustomClassloaderJavaFileManager(builtProjectClassLoader, fileManager);
 		}
 		return compiler;
@@ -271,8 +274,7 @@ public class Generator {
 			context.setCompilationUnit(cu);
 
 			return cu;
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new JavascriptFileGenerationException(context.getInputFile(), null, "Cannot parse the Java file:" + e);
 		}
 
@@ -292,11 +294,9 @@ public class Generator {
 		File outputFile = new File(folder, STJS_FILE);
 		try {
 			Files.copy(new InputStreamSupplier(stjs), outputFile);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new STJSRuntimeException("Could not copy the " + STJS_FILE + " file to the folder " + folder + ":" + e.getMessage(), e);
-		}
-		finally {
+		} finally {
 			Closeables.closeQuietly(stjs);
 		}
 	}
@@ -352,8 +352,7 @@ public class Generator {
 			Class<?> clazz;
 			try {
 				clazz = builtProjectClassLoader.loadClass(parentClassName);
-			}
-			catch (ClassNotFoundException e) {
+			} catch (ClassNotFoundException e) {
 				throw new STJSRuntimeException(e);
 			}
 			if (ClassUtils.isBridge(clazz)) {

@@ -16,7 +16,7 @@ import com.sun.source.tree.Tree.Kind;
 public enum UnaryOperator {
 	// increments
 	POSTFIX_INCREMENT(Kind.POSTFIX_INCREMENT, true, Token.INC), POSTFIX_DECREMENT(Kind.POSTFIX_DECREMENT, true, Token.DEC), PREFIX_INCREMENT(
-			Kind.PREFIX_INCREMENT, false, Token.INC), PREFIX_DECREMENT(Kind.PREFIX_INCREMENT, false, Token.DEC),
+			Kind.PREFIX_INCREMENT, false, Token.INC), PREFIX_DECREMENT(Kind.PREFIX_DECREMENT, false, Token.DEC),
 
 	//
 	UNARY_PLUS(Kind.UNARY_PLUS, false, Token.ADD), UNARY_MINUS(Kind.UNARY_MINUS, false, Token.SUB), BITWISE_COMPLEMENT(Kind.BITWISE_COMPLEMENT,

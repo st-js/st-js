@@ -8,6 +8,7 @@ import javax.lang.model.type.DeclaredType;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.javac.TreeUtils;
@@ -46,14 +47,19 @@ public class IdentifierAccessOuterScopeCheck implements CheckContributor<Identif
 			// getScope breaks if the identifier is "this"
 			return null;
 		}
-		Scope currentScope = context.getTrees().getScope(context.getCurrentPath());
+		try {
+			Scope currentScope = context.getTrees().getScope(context.getCurrentPath());
 
-		Element currentScopeClassElement = getEnclosingElementSkipAnonymousInitializer(currentScope.getEnclosingClass());
-		Element fieldOwnerElement = fieldElement.getEnclosingElement();
-		if (!context.getTypes().isSubtype(currentScopeClassElement.asType(), fieldOwnerElement.asType())) {
-			context.addError(tree, "In Javascript you cannot call methods or fields from the outer type. "
-					+ "You should define a variable var that=this outside your function definition and call the methods on this object");
+			Element currentScopeClassElement = getEnclosingElementSkipAnonymousInitializer(currentScope.getEnclosingClass());
+			Element fieldOwnerElement = fieldElement.getEnclosingElement();
+			if (!context.getTypes().isSubtype(currentScopeClassElement.asType(), fieldOwnerElement.asType())) {
+				context.addError(tree, "In Javascript you cannot call methods or fields from the outer type. "
+						+ "You should define a variable var that=this outside your function definition and call the methods on this object");
+			}
+		} catch (Throwable e) {
+			throw new STJSRuntimeException("Error gettting scope from:" + tree, e);
 		}
+
 		return null;
 	}
 }

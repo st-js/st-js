@@ -6,6 +6,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -80,13 +81,26 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 		}
 	}
 
+	private boolean hasOnlyFields(Collection<Element> sameName) {
+		for (Element el : sameName) {
+			if (!(el instanceof VariableElement)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	private void checkField(Tree member, GenerationContext<Void> context, Multimap<String, Element> existingNames) {
 		if (member instanceof VariableTree) {
 			String name = ((VariableTree) member).getName().toString();
 			Element variableElement = TreeUtils.elementFromDeclaration((VariableTree) member);
-			if (existingNames.containsKey(name)) {
-				context.addError(member, "The type (or one of its parents) contains already a method or a field called [" + name
-						+ "] with a different signature. Javascript cannot distinguish methods/fields with the same name");
+			Collection<Element> sameName = existingNames.get(name);
+			if (!sameName.isEmpty()) {
+				if (!hasOnlyFields(sameName)) {
+					// accept fields with the same name, but not methods and fields
+					context.addError(member, "The type (or one of its parents) contains already a method called [" + name
+							+ "]. Javascript cannot distinguish methods/fields with the same name");
+				}
 			} else {
 				existingNames.put(name, variableElement);
 			}

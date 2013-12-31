@@ -37,7 +37,7 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 			String namespace = JavaNodes.getNamespace(rootTypeElement);
 			return (namespace == null ? "" : namespace + ".") + name;
 		}
-		throw new IllegalArgumentException("Don't know what how to get the name of this type:" + type);
+		return type.toString();
 	}
 
 	private void addResolvedType(Element rootTypeElement) {

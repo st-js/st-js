@@ -49,8 +49,7 @@ import org.mozilla.javascript.ast.WhileLoop;
  * 
  * @author acraciun
  */
-@edu.umd.cs.findbugs.annotations.SuppressWarnings(
-		justification = "The type check is done by looking in the map", value = "BC_UNCONFIRMED_CAST")
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(justification = "The type check is done by looking in the map", value = "BC_UNCONFIRMED_CAST")
 @SuppressWarnings("PMD.CouplingBetweenObjects")
 public class RhinoNodeVisitorSupport {
 	private static Map<Class<?>, Caller> callers = new HashMap<Class<?>, Caller>();
@@ -296,6 +295,12 @@ public class RhinoNodeVisitorSupport {
 			@Override
 			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
 				visitor.visitThrowStatement((ThrowStatement) node, param);
+			}
+		});
+		addCaller(CodeFragment.class, new Caller() {
+			@Override
+			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
+				visitor.visitCodeFragment((CodeFragment) node, param);
 			}
 		});
 	}

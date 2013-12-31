@@ -14,12 +14,9 @@ import org.stjs.generator.check.declaration.MethodDeclarationTemplateCheck;
 import org.stjs.generator.check.declaration.MethodOverloadCheck;
 import org.stjs.generator.check.declaration.MethodSynchronizedCheck;
 import org.stjs.generator.check.declaration.MethodVarArgParamCheck;
-import org.stjs.generator.check.expression.IdentifierAccessOuterScopeCheck;
 import org.stjs.generator.check.expression.IdentifierGlobalScopeNameClashCheck;
 import org.stjs.generator.check.expression.MemberSelectGlobalScopeNameClashCheck;
-import org.stjs.generator.check.expression.MemberSelectOuterScopeCheck;
 import org.stjs.generator.check.expression.MethodInvocationMapConstructorCheck;
-import org.stjs.generator.check.expression.MethodInvocationOuterScopeCheck;
 import org.stjs.generator.check.expression.NewArrayForbiddenCheck;
 import org.stjs.generator.check.expression.NewClassInlineFunctionCheck;
 import org.stjs.generator.check.expression.NewClassObjectInitCheck;
@@ -101,13 +98,13 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		return null;
 	}
 
+	@Override
 	public void contributeCheckVisitor(CheckVisitor visitor) {
 		visitor.contribute(new VariableFinalInLoopCheck());
 		visitor.contribute(new VariableWrongNameCheck());
 		visitor.contribute(new MethodVarArgParamCheck());
 		visitor.contribute(new FieldInitializerCheck());
 		visitor.contribute(new ClassDuplicateMemberNameCheck());
-		visitor.contribute(new IdentifierAccessOuterScopeCheck());
 		visitor.contribute(new NewClassInlineFunctionCheck());
 		visitor.contribute(new ClassImplementJavascriptFunctionCheck());
 		visitor.contribute(new ClassGlobalInstanceMembersCheck());
@@ -116,8 +113,6 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 
 		visitor.contribute(new NewClassObjectInitCheck());
 		visitor.contribute(new ClassForbidExtendsSyntheticTypeCheck());
-		visitor.contribute(new MethodInvocationOuterScopeCheck());
-		visitor.contribute(new MemberSelectOuterScopeCheck());
 		visitor.contribute(new ArrayTypeForbiddenCheck());
 		visitor.contribute(new ClassEnumWithoutMembersCheck());
 		visitor.contribute(new NewArrayForbiddenCheck());
@@ -132,8 +127,13 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(new MemberSelectGlobalScopeNameClashCheck());
 
 		visitor.contribute(new MethodDeclarationTemplateCheck());
+
+		// visitor.contribute(new IdentifierAccessOuterScopeCheck());
+		// visitor.contribute(new MethodInvocationOuterScopeCheck());
+		// visitor.contribute(new MemberSelectOuterScopeCheck());
 	}
 
+	@Override
 	public void contributeWriteVisitor(WriterVisitor<JS> visitor) {
 		visitor.contribute(new CompilationUnitWriter<JS>());
 

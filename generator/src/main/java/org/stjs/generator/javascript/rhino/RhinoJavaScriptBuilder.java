@@ -5,7 +5,6 @@ import java.io.Writer;
 import java.util.Iterator;
 import java.util.List;
 
-import org.mozilla.javascript.Parser;
 import org.mozilla.javascript.Token.CommentType;
 import org.mozilla.javascript.ast.ArrayLiteral;
 import org.mozilla.javascript.ast.Assignment;
@@ -166,8 +165,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	}
 
 	@SuppressWarnings("unchecked")
-	@edu.umd.cs.findbugs.annotations.SuppressWarnings(
-			justification = "Checked cast", value = "BC_UNCONFIRMED_CAST")
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings(justification = "Checked cast", value = "BC_UNCONFIRMED_CAST")
 	private <T extends AstNode> T cast(AstNode node, Class<T> clazz) {
 		if (node == null) {
 			return null;
@@ -303,6 +301,25 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	}
 
 	@Override
+	public AstNode addStatementBeginning(AstNode blockOrStatement, AstNode statement) {
+		if (blockOrStatement instanceof Block) {
+			if (statement != null) {
+				blockOrStatement.addChildrenToFront(statement);
+				statement.setParent(blockOrStatement);
+			}
+			return blockOrStatement;
+		}
+		Block block = new Block();
+		if (statement != null) {
+			block.addStatement(statement);
+		}
+		if (blockOrStatement != null) {
+			block.addStatement(blockOrStatement);
+		}
+		return block;
+	}
+
+	@Override
 	public AstNode labeledStatement(AstNode label, AstNode statement) {
 		LabeledStatement s = new LabeledStatement();
 		s.addLabel(cast(label, Label.class));
@@ -406,7 +423,9 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 
 	@Override
 	public AstNode code(String code) {
-		return new Parser().parse(code, "inline", 0);
+		CodeFragment c = new CodeFragment();
+		c.setCode(code);
+		return c;
 	}
 
 	@Override

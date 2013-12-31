@@ -136,8 +136,8 @@ public class GenerationContext<JS> implements TreePathHolder {
 			return;
 		}
 		long startPos = trees.getSourcePositions().getStartPosition(compilationUnit, tree);
-		SourcePosition pos = new SourcePosition((int) compilationUnit.getLineMap().getLineNumber(startPos), (int) compilationUnit.getLineMap()
-				.getColumnNumber(startPos));
+		SourcePosition pos = startPos >= 0 ? new SourcePosition((int) compilationUnit.getLineMap().getLineNumber(startPos),
+				(int) compilationUnit.getLineMap().getColumnNumber(startPos)) : new SourcePosition(0, 0);
 		checks.addError(new JavascriptFileGenerationException(inputFile, pos, message));
 	}
 
@@ -153,8 +153,8 @@ public class GenerationContext<JS> implements TreePathHolder {
 			return node;
 		}
 		long startPos = trees.getSourcePositions().getStartPosition(compilationUnit, tree);
-		int line = (int) compilationUnit.getLineMap().getLineNumber(startPos);
-		int column = (int) compilationUnit.getLineMap().getColumnNumber(startPos);
+		int line = startPos >= 0 ? (int) compilationUnit.getLineMap().getLineNumber(startPos) : 0;
+		int column = startPos >= 0 ? (int) compilationUnit.getLineMap().getColumnNumber(startPos) : 0;
 		return javaScriptBuilder.position(node, line, column);
 	}
 
@@ -167,7 +167,7 @@ public class GenerationContext<JS> implements TreePathHolder {
 			return -1;
 		}
 		long startPos = trees.getSourcePositions().getStartPosition(compilationUnit, tree);
-		return (int) compilationUnit.getLineMap().getLineNumber(startPos);
+		return (int) (startPos >= 0 ? compilationUnit.getLineMap().getLineNumber(startPos) : 0);
 	}
 
 	public JavaScriptBuilder<JS> js() {

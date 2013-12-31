@@ -63,6 +63,7 @@ import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
  */
 @SuppressWarnings("PMD.ExcessivePublicCount")
 public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
+	private static final String LINE_JAVA_DOC = " * ";
 	private static final String INDENT = "    ";
 	private static final String START_JAVA_DOC = "/**";
 	private static final String END_JAVA_DOC = "*/";
@@ -104,8 +105,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		for (int i = 0; i < level; i++) {
 			try {
 				writer.append(INDENT);
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				throw new STJSRuntimeException("Writing problem:" + e, e);
 			}
 			currentColumn += INDENT.length();
@@ -119,8 +119,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		}
 		try {
 			writer.append(arg);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new STJSRuntimeException("Writing problem:" + e, e);
 		}
 		// TODO check for newlines in the string
@@ -131,11 +130,12 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	protected RhinoJavaScriptWriter printComments(AstNode node) {
 		String comment = node.getJsDoc();
 		if (comment != null) {
-			comment = START_JAVA_DOC + comment + END_JAVA_DOC;
+			println(START_JAVA_DOC);
 			String[] lines = comment.split("\n");
 			for (String line : lines) {
-				println(line);
+				print(LINE_JAVA_DOC).println(line);
 			}
+			println(END_JAVA_DOC);
 		}
 		return this;
 	}
@@ -149,8 +149,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	public RhinoJavaScriptWriter println() {
 		try {
 			writer.append('\n');
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new STJSRuntimeException("Writing problem:" + e, e);
 		}
 		indented = false;
@@ -295,9 +294,15 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	}
 
 	private void printStatementAsBlock(AstNode stmt, Boolean param) {
+		printStatementAsBlock(stmt, param, true);
+	}
+
+	private void printStatementAsBlock(AstNode stmt, Boolean param, boolean addNewLineAfterBlock) {
 		if (stmt instanceof Block) {
 			visitorSupport.accept(stmt, this, param);
-			println();
+			if (addNewLineAfterBlock) {
+				println();
+			}
 		} else {
 			println().indent();
 			visitorSupport.accept(stmt, this, param);
@@ -368,7 +373,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		print("if (");
 		visitorSupport.accept(ifs.getCondition(), this, param);
 		print(") ");
-		printStatementAsBlock(ifs.getThenPart(), param);
+		printStatementAsBlock(ifs.getThenPart(), param, ifs.getElsePart() == null);
 		if (ifs.getElsePart() instanceof IfStatement) {
 			print(" else ");
 			visitorSupport.accept(ifs.getElsePart(), this, param);
@@ -640,6 +645,13 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	public SourceMapGenerator getSourceMapGenerator() {
 		return sourceMapGenerator;
+	}
+
+	@Override
+	public void visitCodeFragment(CodeFragment c, Boolean param) {
+		if (c.getCode() != null) {
+			print(c.getCode());
+		}
 	}
 
 }

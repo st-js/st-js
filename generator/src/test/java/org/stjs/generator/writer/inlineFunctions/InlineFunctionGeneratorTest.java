@@ -12,8 +12,12 @@ public class InlineFunctionGeneratorTest {
 		assertCodeContains(InlineFunctions1.class, "method(function(arg){arg=arg+1;})");
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test
+	public void testInlineFunctionWithJavaFuncAnnotation() {
+		assertCodeContains(InlineFunctions1.class, "method(function(arg){arg=arg+1;})");
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testInterfaceAndParamForbidden() {
 		assertCodeContains(InlineFunctions2.class, "stjs.extend(function(){}, null, [FunctionInterface],");
 	}
@@ -42,8 +46,7 @@ public class InlineFunctionGeneratorTest {
 		assertCodeContains(InlineFunctions5.class, "method(function(){})");
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testImplementInlinefunction() {
 		// implement is forbidden
 		generate(InlineFunctions6.class);

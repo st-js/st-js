@@ -58,7 +58,7 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 								Collections.singleton(js.name(tree.getVariable().getName()))));
 
 		JS ifs = js.ifStatement(not, js.continueStatement(null), null);
-		return js.addStatement(body, ifs);
+		return js.addStatementBeginning(body, ifs);
 	}
 
 	@Override

@@ -117,4 +117,6 @@ public interface AstVisitor<T> {
 	void visitExpressionStatement(ExpressionStatement e, T param);
 
 	void visitThrowStatement(ThrowStatement e, T param);
+
+	void visitCodeFragment(CodeFragment c, T param);
 }

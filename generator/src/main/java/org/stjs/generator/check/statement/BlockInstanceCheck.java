@@ -35,7 +35,8 @@ public class BlockInstanceCheck implements CheckContributor<BlockTree> {
 			return null;
 		}
 		if (!tree.isStatic()) {
-			context.addError(tree, "Initializing blocks are not supported by Javascript. Check also wrongly placed semicolumns.");
+			context.addError(tree,
+					"Initializing blocks are not supported by Javascript. Check also wrongly placed semicolons or double semicolons - ;;");
 		}
 		return null;
 	}

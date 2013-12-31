@@ -146,16 +146,18 @@ public final class JavaNodes {
 	// }
 
 	public static String getMethodTemplate(Elements elements, Element element) {
-
+		if (!(element instanceof ExecutableElement)) {
+			// make sure we're only doing it for methods
+			return null;
+		}
+		if ("<init>".equals(element.getSimpleName())) {
+			return null;
+		}
 		Template t = element.getAnnotation(Template.class);
 		if (t != null) {
 			return t.value();
 		}
 
-		if (!(element instanceof ExecutableElement)) {
-			// make sure we're only doing it for methods
-			return null;
-		}
 		// give it a second chance (for classes in another jars or in the JDK, by using ...)
 		t = getAnnotationInHelpers(elements, (ExecutableElement) element, Template.class);
 		if (t != null) {
