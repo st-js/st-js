@@ -500,11 +500,11 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 	public void visit(FieldDeclaration n, GenerationContext context) {
 		TypeWrapper type = resolvedType(parent(n));
 		boolean global = isGlobal(type) && isStatic(n.getModifiers());
-		
+
 		for (VariableDeclarator v : n.getVariables()) {
-			if (global){
-				printer.print("var ");
-			}else {
+			if (global) {
+				printer.print(JavascriptKeywords.VAR).print(" ");
+			} else {
 				if (isStatic(n.getModifiers())) {
 					printer.print(JavascriptKeywords.CONSTRUCTOR).print(".");
 				} else {
@@ -512,7 +512,7 @@ public class JavascriptWriterVisitor implements VoidVisitor<GenerationContext> {
 				}
 			}
 			printVariableDeclarator(v, context, true);
-			printer.print(";");
+			printer.printLn(";");
 		}
 	}
 
