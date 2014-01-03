@@ -32,8 +32,7 @@ import com.sun.tools.javac.code.Symbol;
 /**
  * A Utility class for analyzing {@code Element}s.
  */
-@edu.umd.cs.findbugs.annotations.SuppressWarnings(
-		justification = "copied code", value = "BC_UNCONFIRMED_CAST")
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(justification = "copied code", value = "BC_UNCONFIRMED_CAST")
 @SuppressWarnings("PMD")
 public final class ElementUtils {
 
@@ -231,8 +230,8 @@ public final class ElementUtils {
 			Symbol.ClassSymbol clss = (Symbol.ClassSymbol) elt;
 			if (null != clss.classfile) {
 				// The class file could be a .java file
-				return (clss.classfile.getName().endsWith(".class") || clss.classfile.getName().endsWith(".class)") || clss.classfile.getName()
-						.endsWith(".class)]"));
+				return clss.classfile.getName().endsWith(".class") || clss.classfile.getName().endsWith(".class)")
+						|| clss.classfile.getName().endsWith(".class)]");
 			} else {
 				return false;
 			}
@@ -285,6 +284,10 @@ public final class ElementUtils {
 	 * com.sun.tools.javac.model.JavacElements.getAllMembers(TypeElement)?
 	 */
 	public static List<TypeElement> getSuperTypes(TypeElement type) {
+		return getSuperTypes(type, true);
+	}
+
+	public static List<TypeElement> getSuperTypes(TypeElement type, boolean addInterfaces) {
 
 		List<TypeElement> superelems = new ArrayList<TypeElement>();
 		if (type == null) {
@@ -309,16 +312,18 @@ public final class ElementUtils {
 					superelems.add(supercls);
 				}
 			}
-			for (TypeMirror supertypeitf : current.getInterfaces()) {
-				TypeElement superitf = (TypeElement) ((DeclaredType) supertypeitf).asElement();
-				if (!superelems.contains(superitf)) {
-					stack.push(superitf);
-					superelems.add(superitf);
+			if (addInterfaces) {
+				for (TypeMirror supertypeitf : current.getInterfaces()) {
+					TypeElement superitf = (TypeElement) ((DeclaredType) supertypeitf).asElement();
+					if (!superelems.contains(superitf)) {
+						stack.push(superitf);
+						superelems.add(superitf);
+					}
 				}
 			}
 		}
 
-		return Collections.<TypeElement>unmodifiableList(superelems);
+		return Collections.<TypeElement> unmodifiableList(superelems);
 	}
 
 	/**
@@ -332,7 +337,7 @@ public final class ElementUtils {
 		for (TypeElement atype : alltypes) {
 			fields.addAll(ElementFilter.fieldsIn(atype.getEnclosedElements()));
 		}
-		return Collections.<VariableElement>unmodifiableList(fields);
+		return Collections.<VariableElement> unmodifiableList(fields);
 	}
 
 	/**
@@ -341,13 +346,49 @@ public final class ElementUtils {
 	 * getSuperTypes?
 	 */
 	public static List<ExecutableElement> getAllMethodsIn(TypeElement type) {
+		return getAllMethodsIn(type, true);
+	}
+
+	public static List<ExecutableElement> getAllMethodsIn(TypeElement type, boolean addInterfaces) {
 		List<ExecutableElement> meths = new ArrayList<ExecutableElement>();
 		meths.addAll(ElementFilter.methodsIn(type.getEnclosedElements()));
 
-		List<TypeElement> alltypes = getSuperTypes(type);
+		List<TypeElement> alltypes = getSuperTypes(type, addInterfaces);
 		for (TypeElement atype : alltypes) {
 			meths.addAll(ElementFilter.methodsIn(atype.getEnclosedElements()));
 		}
-		return Collections.<ExecutableElement>unmodifiableList(meths);
+		return Collections.<ExecutableElement> unmodifiableList(meths);
+	}
+
+	public static boolean sameSignature(ExecutableElement m1, ExecutableElement m2) {
+		if (!m1.getSimpleName().equals(m2.getSimpleName())) {
+			return false;
+		}
+		if (m1.getParameters().size() != m2.getParameters().size()) {
+			return false;
+		}
+		for (int i = 0; i < m1.getParameters().size(); ++i) {
+			if (!m1.getParameters().get(i).asType().equals(m2.getParameters().get(i).asType())) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * 
+	 * @param model
+	 * @return the methods from the parent classes having the same signature as the given method. it's useful when llong
+	 *         for annotations.
+	 */
+	public static List<ExecutableElement> getSameMethodFromParents(ExecutableElement model) {
+		List<ExecutableElement> allMethods = ElementUtils.getAllMethodsIn(ElementUtils.enclosingClass(model), false);
+		List<ExecutableElement> similar = new ArrayList<ExecutableElement>();
+		for (ExecutableElement method : allMethods) {
+			if (sameSignature(model, method)) {
+				similar.add(method);
+			}
+		}
+		return similar;
 	}
 }

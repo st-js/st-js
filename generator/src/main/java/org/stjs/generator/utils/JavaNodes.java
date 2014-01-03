@@ -158,14 +158,12 @@ public final class JavaNodes {
 		if (t != null) {
 			return t.value();
 		}
-
-		List<ExecutableElement> allMethods = ElementUtils.getAllMethodsIn(ElementUtils.enclosingClass(element));
-		for (ExecutableElement method : allMethods) {
-			if (elements.overrides((ExecutableElement) element, method, (TypeElement) method.getEnclosingElement())) {
-				t = method.getAnnotation(Template.class);
-				if (t != null) {
-					return t.value();
-				}
+		// look into the definition in the super class
+		List<ExecutableElement> similar = ElementUtils.getSameMethodFromParents((ExecutableElement) element);
+		for (ExecutableElement method : similar) {
+			t = method.getAnnotation(Template.class);
+			if (t != null) {
+				return t.value();
 			}
 		}
 		// give it a second chance (for classes in another jars or in the JDK, by using ...)
