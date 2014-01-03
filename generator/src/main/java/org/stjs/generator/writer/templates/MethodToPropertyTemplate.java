@@ -3,7 +3,6 @@ package org.stjs.generator.writer.templates;
 import javax.lang.model.element.ExecutableElement;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.utils.JavaNodes;
@@ -26,8 +25,7 @@ public class MethodToPropertyTemplate<JS> implements WriterContributor<MethodInv
 	public JS visit(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		int argCount = tree.getArguments().size();
 		if (argCount > 2) {
-			throw new JavascriptFileGenerationException(context.getInputFile(), null,
-					"A 'toProperty' template can only be applied for methods with 0 or 1 parameters");
+			throw context.addError(tree, "A 'toProperty' template can only be applied for methods with 0 or 1 parameters");
 		}
 
 		JS target = null;

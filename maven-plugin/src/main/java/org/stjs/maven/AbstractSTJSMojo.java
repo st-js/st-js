@@ -52,6 +52,7 @@ import org.stjs.generator.GenerationDirectory;
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.MultipleFileGenerationException;
 import org.stjs.generator.STJSClass;
 
 import com.google.common.io.Closeables;
@@ -227,8 +228,15 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 				} catch (InclusionScanException e) {
 					throw new MojoExecutionException("Cannot scan the source directory:" + e, e);
+				} catch (MultipleFileGenerationException e) {
+					for (JavascriptFileGenerationException jse : e.getExceptions()) {
+						buildContext.addMessage(jse.getSourcePosition().getFile(), jse.getSourcePosition().getLine(), jse.getSourcePosition()
+								.getColumn(), jse.getMessage(), BuildContext.SEVERITY_ERROR, null);
+					}
+					hasFailures = true;
+					// continue with the next file
 				} catch (JavascriptFileGenerationException e) {
-					buildContext.addMessage(e.getInputFile(), e.getSourcePosition().getLine(), e.getSourcePosition().getColumn(),
+					buildContext.addMessage(e.getSourcePosition().getFile(), e.getSourcePosition().getLine(), e.getSourcePosition().getColumn(),
 							e.getMessage(), BuildContext.SEVERITY_ERROR, null);
 					hasFailures = true;
 					// continue with the next file

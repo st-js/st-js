@@ -257,6 +257,11 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	}
 
 	@Override
+	public AstNode emptyExpression() {
+		return new EmptyExpression();
+	}
+
+	@Override
 	public AstNode forInLoop(AstNode iterator, AstNode iterated, AstNode body) {
 		ForInLoop loop = new ForInLoop();
 		loop.setIteratedObject(iterated);

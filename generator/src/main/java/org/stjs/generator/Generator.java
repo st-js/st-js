@@ -124,7 +124,7 @@ public class Generator {
 		File inputFile = getInputFile(sourceFolder, className);
 		File outputFile = getOutputFile(generationFolder.getAbsolutePath(), className);
 		JavaScriptNameProvider names = new DefaultJavaScriptNameProvider();
-		GenerationContext context = new GenerationContext(inputFile, configuration, names, null);
+		GenerationContext context = new GenerationContext(inputFile, configuration, names, null, builtProjectClassLoader);
 
 		CompilationUnitTree cu = parseAndResolve(inputFile, context, builtProjectClassLoader, configuration.getSourceEncoding());
 		BufferedWriter writer = null;
@@ -275,7 +275,7 @@ public class Generator {
 
 			return cu;
 		} catch (IOException e) {
-			throw new JavascriptFileGenerationException(context.getInputFile(), null, "Cannot parse the Java file:" + e);
+			throw new JavascriptFileGenerationException(new SourcePosition(context.getInputFile(), 0, 0), "Cannot parse the Java file:" + e);
 		}
 
 	}

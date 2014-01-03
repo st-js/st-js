@@ -87,6 +87,12 @@ public class SpecialMethodGeneratorTest {
 	}
 
 	@Test
+	public void testSpecialOrFromSuperclass() {
+		// $or(a,b) -> a || b
+		assertCodeContains(SpecialMethod9b.class, "3 || 4");
+	}
+
+	@Test
 	public void testSpecialEquals() {
 		// no longer [x.equals(y) -> x == y], but keep equals as is
 		assertCodeContains(SpecialMethod10.class, "x.equals(2)");

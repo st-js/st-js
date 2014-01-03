@@ -48,8 +48,7 @@ public class IdentifierAccessOuterScopeCheck implements CheckContributor<Identif
 			return null;
 		}
 
-		if (GeneratorConstants.THIS.equals(tree.getName().toString())) {
-			// getScope breaks if the identifier is "this"
+		if (GeneratorConstants.THIS.equals(tree.getName().toString()) || GeneratorConstants.SUPER.equals(tree.getName().toString())) {
 			return null;
 		}
 		try {
@@ -59,8 +58,11 @@ public class IdentifierAccessOuterScopeCheck implements CheckContributor<Identif
 					.elementFromDeclaration(enclosingClassTree));
 			TypeElement fieldOwnerElement = (TypeElement) fieldElement.getEnclosingElement();
 			if (!isSubtype(context, currentScopeClassElement, fieldOwnerElement)) {
-				context.addError(tree, "In Javascript you cannot access a field from the outer type. "
-						+ "You should define a variable var that=this outside your function definition and use the property of this object");
+				context.addError(
+						tree,
+						"In Javascript you cannot access a field from the outer type. "
+								+ "You should define a variable var that=this outside your function definition and use the property of this object. The field: "
+								+ tree);
 			}
 		} catch (Throwable e) {
 			throw new STJSRuntimeException("Error gettting scope from:" + tree, e);

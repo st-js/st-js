@@ -15,14 +15,11 @@
  */
 package org.stjs.generator.writer;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.JavascriptFileGenerationException;
-import org.stjs.generator.SourcePosition;
 
 import com.sun.source.tree.Tree;
 
@@ -41,7 +38,7 @@ public final class JavascriptKeywords {
 	public static final String THIS = "this";
 	public static final String NULL = "null";
 
-	private static final Set<String> KEYWORDS = new HashSet<String>(Arrays.asList(new String[]{ "break", "case", "catch", "continue",
+	private static final Set<String> KEYWORDS = new HashSet<String>(Arrays.asList(new String[] { "break", "case", "catch", "continue",
 			"debugger", "default", "delete", "do", "else", "finally", "for", "function", "if", "in", "instanceof", "new", "return", "switch",
 			"this", "throw", "try", "typeof", "var", "void", "while", "with", "class", "enum", "export", "extends", "import", "super",
 			"implements", "interface", "let", "package", "private", "protected", "public", "static", "yield" }));
@@ -60,9 +57,4 @@ public final class JavascriptKeywords {
 		return KEYWORDS.contains(identifier);
 	}
 
-	public static void checkMethod(File inputFile, SourcePosition sourcePosition, String name) {
-		if (KEYWORDS.contains(name)) {
-			throw new JavascriptFileGenerationException(inputFile, sourcePosition, "Wrong usage of Javascript keyword:" + name);
-		}
-	}
 }

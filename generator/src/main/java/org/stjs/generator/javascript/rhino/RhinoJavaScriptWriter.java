@@ -285,6 +285,11 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	}
 
 	@Override
+	public void visitEmptyExpression(EmptyExpression s, Boolean param) {
+		// do nothing
+	}
+
+	@Override
 	public void visitExpressionStatement(ExpressionStatement e, Boolean param) {
 		printComments(e);
 		startPosition(e);
@@ -561,6 +566,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 			print(" finally ");
 			visitorSupport.accept(t.getFinallyBlock(), this, param);
 		}
+		println();
 		endPosition();
 	}
 
@@ -607,7 +613,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		startPosition(w);
 		print(" while (");
 		visitorSupport.accept(w.getCondition(), this, param);
-		println(")");
+		print(")");
 		printStatementAsBlock(w.getBody(), param);
 		endPosition();
 	}

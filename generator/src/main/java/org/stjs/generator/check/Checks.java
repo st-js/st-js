@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.MultipleFileGenerationException;
 
 /**
  * keeps the list of errors found during the check of a Java AST.
@@ -21,7 +22,7 @@ public class Checks {
 	public void check() {
 		// TODO tmp
 		if (!errors.isEmpty()) {
-			throw errors.get(0);
+			throw new MultipleFileGenerationException(errors);
 		}
 	}
 }

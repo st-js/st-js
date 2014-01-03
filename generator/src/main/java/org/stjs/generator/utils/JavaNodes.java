@@ -1,6 +1,7 @@
 package org.stjs.generator.utils;
 
 import java.lang.annotation.Annotation;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -158,6 +159,15 @@ public final class JavaNodes {
 			return t.value();
 		}
 
+		List<ExecutableElement> allMethods = ElementUtils.getAllMethodsIn(ElementUtils.enclosingClass(element));
+		for (ExecutableElement method : allMethods) {
+			if (elements.overrides((ExecutableElement) element, method, (TypeElement) method.getEnclosingElement())) {
+				t = method.getAnnotation(Template.class);
+				if (t != null) {
+					return t.value();
+				}
+			}
+		}
 		// give it a second chance (for classes in another jars or in the JDK, by using ...)
 		t = getAnnotationInHelpers(elements, (ExecutableElement) element, Template.class);
 		if (t != null) {

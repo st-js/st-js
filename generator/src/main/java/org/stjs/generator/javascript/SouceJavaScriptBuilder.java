@@ -290,4 +290,10 @@ public class SouceJavaScriptBuilder implements JavaScriptBuilder<String> {
 		return null;
 	}
 
+	@Override
+	public String emptyExpression() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

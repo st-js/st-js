@@ -7,8 +7,8 @@ import javax.lang.model.element.Element;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.NameValue;
-import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 
@@ -53,10 +53,10 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 	/**
 	 * special construction for object initialization new Object(){{x = 1; y = 2; }};
 	 */
-	private JS getObjectInitializer(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {
+	private JS getObjectInitializer(WriterVisitor<JS> visitor, TreeWrapper<NewClassTree, JS> tw) {
+		NewClassTree tree = tw.getTree();
 		BlockTree initBlock = getDoubleBracesBlock(tree);
-		Element type = TreeUtils.elementFromUse(tree.getIdentifier());
-		if (initBlock == null && !JavaNodes.isSyntheticType(type)) {
+		if (initBlock == null && !tw.child(tree.getIdentifier()).isSyntheticType()) {
 			return null;
 		}
 
@@ -65,10 +65,10 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 			for (StatementTree stmt : initBlock.getStatements()) {
 				// check the right type of statements x=y is done in NewClassObjectInitCheck
 				AssignmentTree assign = (AssignmentTree) ((ExpressionStatementTree) stmt).getExpression();
-				props.add(NameValue.of(getPropertyName(assign.getVariable()), visitor.scan(assign.getExpression(), context)));
+				props.add(NameValue.of(getPropertyName(assign.getVariable()), visitor.scan(assign.getExpression(), tw.getContext())));
 			}
 		}
-		return context.js().object(props);
+		return tw.getContext().js().object(props);
 	}
 
 	/**
@@ -89,17 +89,16 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 	 * }
 	 * </pre>
 	 */
-	private JS getInlineFunctionDeclaration(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {
+	private JS getInlineFunctionDeclaration(WriterVisitor<JS> visitor, TreeWrapper<NewClassTree, JS> tw) {
 		// special construction for inline function definition
-		Element type = TreeUtils.elementFromUse(tree.getIdentifier());
-		if (!JavaNodes.isJavaScriptFunction(type)) {
+		if (!tw.child(tw.getTree().getIdentifier()).isJavaScriptFunction()) {
 			return null;
 		}
 
 		// the check verifies the existence of a single method (first is the generated
 		// constructor)
-		Tree method = tree.getClassBody().getMembers().get(1);
-		return visitor.scan(method, context);
+		Tree method = tw.getTree().getClassBody().getMembers().get(1);
+		return visitor.scan(method, tw.getContext());
 	}
 
 	private JS getAnonymousClassDeclaration(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {
@@ -128,12 +127,13 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {
-		JS js = getObjectInitializer(visitor, tree, context);
+		TreeWrapper<NewClassTree, JS> tw = context.getCurrentWrapper();
+		JS js = getInlineFunctionDeclaration(visitor, tw);
 		if (js != null) {
 			return js;
 		}
 
-		js = getInlineFunctionDeclaration(visitor, tree, context);
+		js = getObjectInitializer(visitor, tw);
 		if (js != null) {
 			return js;
 		}

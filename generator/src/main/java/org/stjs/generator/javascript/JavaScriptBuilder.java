@@ -69,6 +69,8 @@ public interface JavaScriptBuilder<T> {
 
 	T emptyStatement();
 
+	T emptyExpression();
+
 	T forInLoop(@Nullable T iterator, @Nullable T iterated, @Nullable T body);
 
 	T forLoop(@Nullable T init, @Nullable T condition, @Nullable T update, @Nullable T body);

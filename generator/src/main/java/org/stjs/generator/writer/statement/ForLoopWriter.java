@@ -10,18 +10,39 @@ import org.stjs.generator.writer.WriterVisitor;
 import com.sun.source.tree.ExpressionStatementTree;
 import com.sun.source.tree.ForLoopTree;
 import com.sun.source.tree.Tree;
+import com.sun.source.tree.VariableTree;
 
 /**
  * @author acraciun
  */
 public class ForLoopWriter<JS> implements WriterContributor<ForLoopTree, JS> {
+	private MultipleVariableWriter<JS> initializerWriter = new MultipleVariableWriter<JS>();
 
+	/**
+	 * if have basically 3 cases: <br>
+	 * 1) empty initializers for(;i < 10; ++i) <br>
+	 * 2) variables: for(int i =0, j =2; ..) <br>
+	 * 3) expressions: for(i =0; j =2; ...)
+	 */
+	@SuppressWarnings("unchecked")
 	private JS initializer(WriterVisitor<JS> visitor, ForLoopTree tree, GenerationContext<JS> p) {
-		List<JS> jsNodes = new ArrayList<JS>();
-		for (Tree u : tree.getInitializer()) {
-			jsNodes.add(visitor.scan(u, p));
+		if (tree.getInitializer().isEmpty()) {
+			// 1) empty
+			return p.js().emptyExpression();
 		}
-		return p.js().asExpressionList(jsNodes);
+		if (tree.getInitializer().get(0) instanceof VariableTree) {
+			// 2) variables
+			return initializerWriter.visit(visitor, (List<VariableTree>) tree.getInitializer(), p, false);
+		}
+
+		// 3) expressionns
+		List<JS> nodes = new ArrayList<JS>();
+		for (Tree u : tree.getInitializer()) {
+			if (u instanceof ExpressionStatementTree) {
+				nodes.add(visitor.scan(((ExpressionStatementTree) u).getExpression(), p));
+			}
+		}
+		return p.js().asExpressionList(nodes);
 	}
 
 	private JS condition(WriterVisitor<JS> visitor, ForLoopTree tree, GenerationContext<JS> p) {

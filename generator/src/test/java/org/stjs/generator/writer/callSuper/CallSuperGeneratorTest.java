@@ -32,6 +32,11 @@ public class CallSuperGeneratorTest {
 	}
 
 	@Test
+	public void testInstanceCallSuperIFromAnonymous() {
+		assertCodeContains(CallSuper4c.class, "prototype.someMethod = function(){ SuperClass3.prototype.instanceMethod.call(this, arg);}");
+	}
+
+	@Test
 	public void testInstanceCallStaticSuperExplicit() {
 		assertCodeContains(CallSuper5.class, "prototype.instanceMethod = function(arg){ SuperClass.staticMethod(arg);}");
 	}

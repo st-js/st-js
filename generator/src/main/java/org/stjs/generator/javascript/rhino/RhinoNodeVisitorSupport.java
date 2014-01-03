@@ -14,6 +14,7 @@ import org.mozilla.javascript.ast.ConditionalExpression;
 import org.mozilla.javascript.ast.ContinueStatement;
 import org.mozilla.javascript.ast.DoLoop;
 import org.mozilla.javascript.ast.ElementGet;
+import org.mozilla.javascript.ast.EmptyExpression;
 import org.mozilla.javascript.ast.EmptyStatement;
 import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.ForInLoop;
@@ -301,6 +302,12 @@ public class RhinoNodeVisitorSupport {
 			@Override
 			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
 				visitor.visitCodeFragment((CodeFragment) node, param);
+			}
+		});
+		addCaller(EmptyExpression.class, new Caller() {
+			@Override
+			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
+				visitor.visitEmptyExpression((EmptyExpression) node, param);
 			}
 		});
 	}

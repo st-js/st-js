@@ -1,7 +1,6 @@
 package org.stjs.generator.writer.templates;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 
@@ -20,11 +19,10 @@ public class JsTemplate<JS> implements WriterContributor<MethodInvocationTree, J
 	public JS visit(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		int argCount = tree.getArguments().size();
 		if (argCount != 1) {
-			throw new JavascriptFileGenerationException(context.getInputFile(), null,
-					"A 'js' template can only be applied for methods with 1 parameter");
+			throw context.addError(tree, "A 'js' template can only be applied for methods with 1 parameter");
 		}
 		if (tree.getArguments().get(0).getKind() != Tree.Kind.STRING_LITERAL) {
-			throw new JavascriptFileGenerationException(context.getInputFile(), null, "$js can be used only with string literals");
+			throw context.addError(tree, "$js can be used only with string literals");
 		}
 
 		String code = ((LiteralTree) tree.getArguments().get(0)).getValue().toString();

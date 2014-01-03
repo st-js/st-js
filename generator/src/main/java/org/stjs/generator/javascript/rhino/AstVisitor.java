@@ -10,6 +10,7 @@ import org.mozilla.javascript.ast.ConditionalExpression;
 import org.mozilla.javascript.ast.ContinueStatement;
 import org.mozilla.javascript.ast.DoLoop;
 import org.mozilla.javascript.ast.ElementGet;
+import org.mozilla.javascript.ast.EmptyExpression;
 import org.mozilla.javascript.ast.EmptyStatement;
 import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.ForInLoop;
@@ -73,6 +74,8 @@ public interface AstVisitor<T> {
 	void visitDoLoop(DoLoop d, T param);
 
 	void visitEmptyStatement(EmptyStatement s, T param);
+
+	void visitEmptyExpression(EmptyExpression s, T param);
 
 	void visitForInLoop(ForInLoop f, T param);
 

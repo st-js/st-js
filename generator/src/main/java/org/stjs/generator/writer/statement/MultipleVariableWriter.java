@@ -16,15 +16,12 @@ import com.sun.source.tree.VariableTree;
  * @author acraciun
  */
 public class MultipleVariableWriter<JS> {
-	public JS visit(WriterVisitor<JS> visitor, List<VariableTree> trees, GenerationContext<JS> context) {
+	public JS visit(WriterVisitor<JS> visitor, List<VariableTree> trees, GenerationContext<JS> context, boolean isStatement) {
 		// if it's the init part of a for, mark it as expression, not statement
-		boolean isStatement = true;
-		// if (isLoopInitializer(context)) {
-		// stmt.setIsStatement(false);
-		// } else {
-		// stmt.setIsStatement(true);
-		// }
 
+		if (trees.isEmpty()) {
+			return context.js().emptyStatement();
+		}
 		List<NameValue<JS>> vars = new ArrayList<NameValue<JS>>();
 		for (VariableTree tree : trees) {
 			JS init = null;

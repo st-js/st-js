@@ -134,4 +134,19 @@ public class StatementsGeneratorTest {
 	public void testCatch() {
 		assertCodeContains(Statements19.class, "catch(e){throw new RuntimeException(e);}");
 	}
+
+	@Test
+	public void testForDoubleInit() {
+		assertCodeContains(Statements20.class, "for(var i = 0, j = 1; i < 10; ++i){}");
+	}
+
+	@Test
+	public void testForDoubleInit2() {
+		assertCodeContains(Statements20b.class, "for( i = 0, j = 1; i < 10; ++i){}");
+	}
+
+	@Test
+	public void testForNoInit() {
+		assertCodeContains(Statements20c.class, "for(; i < 10; ++i){}");
+	}
 }

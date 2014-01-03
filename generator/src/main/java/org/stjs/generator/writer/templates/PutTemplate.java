@@ -1,7 +1,6 @@
 package org.stjs.generator.writer.templates;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
@@ -21,8 +20,7 @@ public class PutTemplate<JS> implements WriterContributor<MethodInvocationTree, 
 	public JS visit(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		int argCount = tree.getArguments().size();
 		if (argCount < MIN_ARGS_COUNT && argCount > MIN_ARGS_COUNT + 1) {
-			throw new JavascriptFileGenerationException(context.getInputFile(), null,
-					"A 'put' template can only be applied for methods with 2 or 3 parameters");
+			throw context.addError(tree, "A 'put' template can only be applied for methods with 2 or 3 parameters");
 		}
 
 		JS target = null;

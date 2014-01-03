@@ -23,6 +23,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 import org.stjs.generator.check.Checks;
+import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.javascript.rhino.RhinoJavaScriptBuilder;
 import org.stjs.generator.name.JavaScriptNameProvider;
@@ -64,13 +65,17 @@ public class GenerationContext<JS> implements TreePathHolder {
 
 	private SourceMapGenerator sourceMapGenerator;
 
-	public GenerationContext(File inputFile, GeneratorConfiguration configuration, JavaScriptNameProvider names, Trees trees) {
+	private final ClassLoader builtProjectClassLoader;
+
+	public GenerationContext(File inputFile, GeneratorConfiguration configuration, JavaScriptNameProvider names, Trees trees,
+			ClassLoader builtProjectClassLoader) {
 		this.inputFile = inputFile;
 		this.configuration = configuration;
 		this.names = names;
 		this.trees = trees;
 		this.checks = new Checks();
 		this.javaScriptBuilder = (JavaScriptBuilder<JS>) new RhinoJavaScriptBuilder();
+		this.builtProjectClassLoader = builtProjectClassLoader;
 	}
 
 	public File getInputFile() {
@@ -131,14 +136,16 @@ public class GenerationContext<JS> implements TreePathHolder {
 		this.compilationUnit = compilationUnit;
 	}
 
-	public void addError(Tree tree, String message) {
+	public JavascriptFileGenerationException addError(Tree tree, String message) {
 		if (compilationUnit == null) {
-			return;
+			return new JavascriptFileGenerationException(new SourcePosition(inputFile, 0, 0), message);
 		}
 		long startPos = trees.getSourcePositions().getStartPosition(compilationUnit, tree);
-		SourcePosition pos = startPos >= 0 ? new SourcePosition((int) compilationUnit.getLineMap().getLineNumber(startPos),
-				(int) compilationUnit.getLineMap().getColumnNumber(startPos)) : new SourcePosition(0, 0);
-		checks.addError(new JavascriptFileGenerationException(inputFile, pos, message));
+		SourcePosition pos = startPos >= 0 ? new SourcePosition(inputFile, (int) compilationUnit.getLineMap().getLineNumber(startPos),
+				(int) compilationUnit.getLineMap().getColumnNumber(startPos)) : new SourcePosition(inputFile, 0, 0);
+		JavascriptFileGenerationException ex = new JavascriptFileGenerationException(pos, message);
+		checks.addError(ex);
+		return ex;
 	}
 
 	/**
@@ -185,4 +192,19 @@ public class GenerationContext<JS> implements TreePathHolder {
 		}
 		sourceMapGenerator.appendTo(sourceMapWriter, inputFile.getName().replaceAll("\\.java$", ".js"));
 	}
+
+	public <T extends Tree> TreeWrapper<T, JS> getCurrentWrapper() {
+		// TODO use cache
+		return new TreeWrapper<T, JS>(currentPath, this);
+	}
+
+	public <T extends Tree> TreeWrapper<T, JS> wrap(TreePath path) {
+		// TODO use cache
+		return new TreeWrapper<T, JS>(path, this);
+	}
+
+	public ClassLoader getBuiltProjectClassLoader() {
+		return builtProjectClassLoader;
+	}
+
 }

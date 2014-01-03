@@ -15,6 +15,7 @@
  */
 package org.stjs.generator;
 
+import java.io.File;
 import java.io.Serializable;
 
 import javax.annotation.concurrent.Immutable;
@@ -33,12 +34,14 @@ public final class SourcePosition implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	private final File file;
 	private final int line;
 	private final int column;
 
-	public SourcePosition(int beginLine, int beginColumn) {
+	public SourcePosition(File file, int beginLine, int beginColumn) {
 		this.line = beginLine;
 		this.column = beginColumn;
+		this.file = file;
 	}
 
 	public int getLine() {
@@ -49,11 +52,16 @@ public final class SourcePosition implements Serializable {
 		return column;
 	}
 
+	public File getFile() {
+		return file;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + column;
+		result = prime * result + (file == null ? 0 : file.hashCode());
 		result = prime * result + line;
 		return result;
 	}
@@ -71,6 +79,13 @@ public final class SourcePosition implements Serializable {
 		}
 		SourcePosition other = (SourcePosition) obj;
 		if (column != other.column) {
+			return false;
+		}
+		if (file == null) {
+			if (other.file != null) {
+				return false;
+			}
+		} else if (!file.equals(other.file)) {
 			return false;
 		}
 		if (line != other.line) {
