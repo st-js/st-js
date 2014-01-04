@@ -12,6 +12,11 @@ public class InlineFunctionGeneratorTest {
 		assertCodeContains(InlineFunctions1.class, "method(function(arg){arg=arg+1;})");
 	}
 
+	@Test
+	public void testInlineFunctionWithJavaFuncAnnotation() {
+		assertCodeContains(InlineFunctions1.class, "method(function(arg){arg=arg+1;})");
+	}
+
 	@Test(expected = JavascriptFileGenerationException.class)
 	public void testInterfaceAndParamForbidden() {
 		assertCodeContains(InlineFunctions2.class, "stjs.extend(function(){}, null, [FunctionInterface],");
@@ -26,8 +31,7 @@ public class InlineFunctionGeneratorTest {
 
 	@Test
 	public void testInterfaceTwoMethods() {
-		assertCodeContains(InlineFunctions3.class,
-				"stjs.extend(function InlineFunctions3$1(){}, null, [FunctionInterface2], ");
+		assertCodeContains(InlineFunctions3.class, "stjs.extend(function InlineFunctions3$1(){}, null, [FunctionInterface2], ");
 		assertCodeContains(InlineFunctions3.class, "prototype.$invoke=function(arg){arg=arg+1;};"
 				+ "prototype.$invoke2=function(arg2){arg2=arg2+1;};");
 	}

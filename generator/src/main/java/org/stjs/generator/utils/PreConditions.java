@@ -16,7 +16,6 @@
 package org.stjs.generator.utils;
 
 import static java.lang.String.format;
-import japa.parser.ast.Node;
 
 public final class PreConditions {
 	private PreConditions() {
@@ -27,20 +26,6 @@ public final class PreConditions {
 		if (!check) {
 			throw new IllegalArgumentException(format(message, args));
 		}
-	}
-
-	public static void checkStateNode(Node node, boolean check, String message, Object... args) {
-		if (!check) {
-			throw new IllegalArgumentException("Line " + node.getBeginLine() + ":" + format(message, args));
-		}
-	}
-
-	@SuppressWarnings("PMD.AvoidThrowingNullPointerException")
-	public static void checkStateNodeNotNull(Node node, Object toTest, String message, Object... args) {
-		if (toTest == null) {
-			throw new NullPointerException("Line " + node.getBeginLine() + ":" + format(message, args));
-		}
-
 	}
 
 	public static <T> T checkNotNull(T obj) {

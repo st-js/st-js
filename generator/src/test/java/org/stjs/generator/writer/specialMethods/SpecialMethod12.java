@@ -1,15 +1,13 @@
 package org.stjs.generator.writer.specialMethods;
 
-import org.stjs.javascript.annotation.Template;
+import static org.stjs.javascript.JSCollections.$map;
+
+import org.stjs.javascript.Map;
 
 public class SpecialMethod12 {
-	@Template("get")
-	public Long $get(String obj, String prop) {
-		return 1l;
-	}
 
 	public void method() {
-		String obj = "";
-		this.$get(obj, "a");
+		Map<String, Object> obj = $map();
+		obj.$get("a");
 	}
 }

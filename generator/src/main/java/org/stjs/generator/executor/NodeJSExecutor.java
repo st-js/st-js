@@ -28,18 +28,18 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 public class NodeJSExecutor {
 	private static final String NODE_JS = "node";
 
-	@SuppressWarnings(value = "REC_CATCH_EXCEPTION")
+	@SuppressWarnings(
+			value = "REC_CATCH_EXCEPTION")
 	public ExecutionResult run(File srcFile) {
 		try {
-			Process p = Runtime.getRuntime().exec(new String[] { NODE_JS, srcFile.getAbsolutePath() });
+			Process p = Runtime.getRuntime().exec(new String[]{ NODE_JS, srcFile.getAbsolutePath() });
 			int exitValue = p.waitFor();
 			return new ExecutionResult(null, readStream(p.getInputStream()), readStream(p.getErrorStream()), exitValue);
 		}
 		catch (IOException e) {
 			// TODO : this is not really going to be working on all OS!
 			if (e.getMessage().contains("Cannot run program")) {
-				String errMsg =
-						"Please install node.js to use this feature https://github.com/joyent/node/wiki/Installation";
+				String errMsg = "Please install node.js to use this feature https://github.com/joyent/node/wiki/Installation";
 				throw new STJSRuntimeException(errMsg, e);
 			}
 			throw new STJSRuntimeException(e);

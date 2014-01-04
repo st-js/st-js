@@ -12,22 +12,26 @@ public class TypeDescTest {
 
 	@Test
 	public void testArrayOfBasicField() {
-		assertCodeContains(TypeDesc2.class, "{\"x\":{name:\"Array\", arguments:[null]}});");
+		assertCodeContains(TypeDesc2.class, "{x:{name:\"Array\", arguments:[null]}});");
 	}
 
 	@Test
 	public void testNonBasicField() {
-		assertCodeContains(TypeDesc3.class, "{\"x\":\"Date\"});");
+		assertCodeContains(TypeDesc3.class, "{x:\"Date\"});");
 	}
 
 	@Test
 	public void testArrayOfNonBasicField() {
-		assertCodeContains(TypeDesc4.class, "{\"x\":{name:\"Array\", arguments:[\"Date\"]}});");
+		assertCodeContains(TypeDesc4.class, "{x:{name:\"Array\", arguments:[\"Date\"]}});");
 	}
 
 	@Test
 	public void testMapOfNonBasicField() {
-		assertCodeContains(TypeDesc5.class, "{\"x\":{name:\"Map\", arguments:[null,\"Date\"]}});");
+		assertCodeContains(TypeDesc5.class, "{x:{name:\"Map\", arguments:[null,\"Date\"]}});");
 	}
 
+	@Test
+	public void testEnum() {
+		assertCodeContains(TypeDesc6.class, "{x:{name:\"Enum\", arguments:[\"TypeDesc6.Type\"]}});");
+	}
 }

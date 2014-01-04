@@ -259,6 +259,14 @@ stjs.copyProps=function(from, to){
 	return to;
 };
 
+stjs.copyInexistentProps=function(from, to){
+	for(key in from){
+		if (!stjs.skipCopy[key] && !to[key])
+			to[key]	= from[key];
+	}
+	return to;
+};
+
 stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescription){
 	if(typeof(_typeDescription) !== "object"){
 		// stjs 1.3+ always passes an non-null object to _typeDescription => The code calling stjs.extend
@@ -287,9 +295,10 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 		_constructor.$inherit.push(_super);
 	}
 
-	// copy static properties for interfaces
+	// copy static properties and default methods from interfaces
 	for(a = 0; a < _implements.length; ++a){
 		stjs.copyProps(_implements[a], _constructor);
+		stjs.copyInexistentProps(_implements[a].prototype, _constructor.prototype);
 		_constructor.$inherit.push(_implements[a]);
 	}
 

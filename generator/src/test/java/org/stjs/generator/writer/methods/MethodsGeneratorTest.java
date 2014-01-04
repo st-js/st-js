@@ -63,13 +63,15 @@ public class MethodsGeneratorTest {
 		assertCodeContains(Methods14.class, "var x = (String).fromCharCode(65,66,67)");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testVarArgsMethod1() {
 		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
 		generate(Methods9.class);
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testVarArgsMethod2() {
 		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
 		generate(Methods10.class);
@@ -95,5 +97,12 @@ public class MethodsGeneratorTest {
 	public void testAbstractMethod() {
 		// the class only contains abstract methods, therefore nothing must be generated
 		assertCodeContains(Methods15.class, "stjs.extend(Methods15, null, [], null, {});");
+	}
+
+	@Test(
+			expected = JavascriptFileGenerationException.class)
+	public void testSynchronizedMethod() {
+		// synchronized is forbidden
+		generate(Methods16.class);
 	}
 }

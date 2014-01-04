@@ -25,12 +25,14 @@ public class OverloadConstructorTest {
 		assertCodeContains(Overload3c.class, "Overload3c=function(param1){}");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testLessGenericType() {
 		generate(Overload4c.class);
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testTwoWithBody() {
 		generate(Overload5c.class);
 	}

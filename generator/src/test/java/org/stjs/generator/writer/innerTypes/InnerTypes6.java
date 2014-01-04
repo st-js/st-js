@@ -1,12 +1,11 @@
 package org.stjs.generator.writer.innerTypes;
 
 public class InnerTypes6 {
-	public void method() {
-	}
+	int n = 0;
 
 	class InnerType {
 		public void $invoke() {
-			InnerTypes6.this.method();
+			int m = n;
 		}
 	}
 

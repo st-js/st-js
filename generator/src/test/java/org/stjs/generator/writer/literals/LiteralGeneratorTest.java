@@ -7,17 +7,17 @@ import org.junit.Test;
 public class LiteralGeneratorTest {
 	@Test
 	public void testHexaNumbers() {
-		assertCodeContains(Literal1.class, "0xFFFF");
+		assertCodeContains(Literal1.class, "65535");
 	}
 
 	@Test
 	public void testNegativeHexaNumbers() {
-		assertCodeContains(Literal1a.class, "-0xFFFF");
+		assertCodeContains(Literal1a.class, "-65535");
 	}
 
 	@Test
 	public void testFloatNumbers() {
-		assertCodeContains(Literal2.class, "field=2;");
+		assertCodeContains(Literal2.class, "field=2.0;");
 	}
 
 	@Test

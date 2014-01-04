@@ -25,8 +25,8 @@ public class GeneratorConfiguration {
 	private final boolean generateSourceMap;
 	private final String sourceEncoding;
 
-	GeneratorConfiguration(Collection<String> allowedPackages, Set<String> allowedJavaLangClasses,
-			boolean generateArrayHasOwnProperty, boolean generateSourceMap, String sourceEncoding) {
+	GeneratorConfiguration(Collection<String> allowedPackages, Set<String> allowedJavaLangClasses, boolean generateArrayHasOwnProperty,
+			boolean generateSourceMap, String sourceEncoding) {
 		this.allowedPackages = allowedPackages;
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
 		this.generateArrayHasOwnProperty = generateArrayHasOwnProperty;

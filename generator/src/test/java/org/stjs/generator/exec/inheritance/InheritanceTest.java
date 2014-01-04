@@ -23,8 +23,7 @@ public class InheritanceTest {
 	 */
 	@Test
 	public void testExtendCompatibilityWith12() {
-		assertEquals("4 2 WXYZ undefined",
-				GeneratorTestHelper.execute("src/test/resources/javascript/Inheritance-generated-with-1.2.js"));
+		assertEquals("4 2 WXYZ undefined", GeneratorTestHelper.execute("src/test/resources/javascript/Inheritance-generated-with-1.2.js"));
 	}
 
 	@Test

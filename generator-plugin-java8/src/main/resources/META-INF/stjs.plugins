@@ -1,0 +1,2 @@
+java.version=1.8
+java8=org.stjs.generator.plugin.java8.Java8Plugin

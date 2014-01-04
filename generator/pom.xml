@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -9,13 +10,11 @@
 	<parent>
 		<groupId>org.st-js</groupId>
 		<artifactId>stjs</artifactId>
-		<version>2.1.1-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 	</parent>
 
 	<properties>
 	</properties>
-
-
 
 
 	<dependencies>
@@ -27,9 +26,11 @@
 
 
 		<dependency>
-			<groupId>com.google.code.javaparser</groupId>
-			<artifactId>javaparser</artifactId>
-			<version>1.0.8</version>
+			<groupId>com.sun</groupId>
+			<artifactId>tools</artifactId>
+			<version>1.6.0</version>
+			<scope>system</scope>
+			<systemPath>${java.home}/../lib/tools.jar</systemPath>
 		</dependency>
 
 
@@ -45,11 +46,11 @@
 			<version>r1810</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache.bcel</groupId>
-			<artifactId>bcel</artifactId>
-			<version>5.2</version>
-		</dependency>
+<!-- 			<dependency> -->
+<!-- 			<groupId>org.jvnet.sorcerer</groupId> -->
+<!-- 			<artifactId>sorcerer-javac</artifactId> -->
+<!-- 			<version>0.8</version> -->
+<!-- 		</dependency> -->
 
 
 		<!-- test deps -->
@@ -57,15 +58,10 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.1</version>
-			<scope>test</scope>
+			<optional>true</optional>
+<!-- 			<scope>test</scope> -->
 		</dependency>
 
-		<dependency>
-			<groupId>dom4j</groupId>
-			<artifactId>dom4j</artifactId>
-			<version>1.6.1</version>
-			<scope>test</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>org.st-js</groupId>
@@ -75,11 +71,12 @@
 		</dependency>
 		
 
+
+
 		<dependency>
 			<groupId>org.mozilla</groupId>
 			<artifactId>rhino</artifactId>
 			<version>1.7R4</version>
-			<scope>test</scope>
 		</dependency>
 
 
@@ -89,6 +86,8 @@
 			<version>2.0.0</version>
 		</dependency>
 
+
 	</dependencies>
+
 
 </project>

@@ -16,10 +16,9 @@ public class StacktraceTest {
 		generateWithSourcemap(Sourcemap2.class);
 
 		// when
-		String jsError =
-				"at prototype.method2 (http://localhost:8055/org/stjs/generator/sourcemap/Sourcemap2.js:4:11)\n" //
-						+ "at prototype.method1 (http://localhost:8055/org/stjs/generator/sourcemap/Sourcemap1.js:5:11)\n" //
-						+ "at window.onload (http://localhost:8055/url?browserId=2430328:17:16)";
+		String jsError = "at prototype.method2 (http://localhost:8055/org/stjs/generator/sourcemap/Sourcemap2.js:4:11)\n" //
+				+ "at prototype.method1 (http://localhost:8055/org/stjs/generator/sourcemap/Sourcemap1.js:5:11)\n" //
+				+ "at window.onload (http://localhost:8055/url?browserId=2430328:17:16)";
 		JavascriptToJava js2java = new JavascriptToJava(buildClassLoader());
 		StackTraceElement[] elements = js2java.buildStacktrace(jsError, "\n");
 

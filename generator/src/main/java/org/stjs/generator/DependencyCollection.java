@@ -30,6 +30,7 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
  * This class is used to arrange the list of all dependencies coming from the root classes, such that classes depend on
  * other classes found in the dependency list before they appear. This can be used for example to build the include list
  * of the scripts for a given html page. As in Java cyclic dependency is possible the list may be incorrect.
+ * 
  * @author acraciun
  */
 public class DependencyCollection {
@@ -41,10 +42,12 @@ public class DependencyCollection {
 		 * -1: if "b" or any child type of "b" (at any level) extends from "a" or any of "a"'s child type <br>
 		 * 1: the other way around<br>
 		 * 0: if none of the cases
+		 * 
 		 * @param a
 		 * @param b
 		 * @return
-		 * @throws if there is a situation where the method cannot decide weather it should return -1 or 1
+		 * @throws if
+		 *             there is a situation where the method cannot decide weather it should return -1 or 1
 		 */
 		@Override
 		public int compare(Class<?> a, Class<?> b) {
@@ -64,8 +67,7 @@ public class DependencyCollection {
 			int inverse = tryCompare(b, a, false);
 
 			if (direct == -1 && inverse == -1) {
-				throw new IllegalArgumentException("Cannot decide the dependency order between the types:" + a
-						+ " and " + b);
+				throw new IllegalArgumentException("Cannot decide the dependency order between the types:" + a + " and " + b);
 			}
 			if (direct != 0) {
 				return direct;
@@ -152,8 +154,7 @@ public class DependencyCollection {
 	/**
 	 * use topological sort to find the order of processing cells
 	 */
-	private void visit(Set<ClassWithJavascript> visited, Set<ClassWithJavascript> path, List<ClassWithJavascript> deps,
-			ClassWithJavascript cj) {
+	private void visit(Set<ClassWithJavascript> visited, Set<ClassWithJavascript> path, List<ClassWithJavascript> deps, ClassWithJavascript cj) {
 		if (path.contains(cj)) {
 			// cyclic dependency here
 			return;
@@ -172,7 +173,8 @@ public class DependencyCollection {
 		}
 	}
 
-	@SuppressWarnings(value = "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", justification = "This comparator will not be used with Serializable lists")
+	@SuppressWarnings(
+			value = "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", justification = "This comparator will not be used with Serializable lists")
 	private static class ClassWithJavascriptComparator implements Comparator<ClassWithJavascript> {
 
 		private final ClassLoader classLoader;

@@ -47,23 +47,24 @@ public class NamespaceGeneratorTest {
 		assertCodeContains(Namespace5.class, "a.b.Namespace5.staticMethod()");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testWrongNs() {
 		generate(Namespace6.class);
 	}
 
 	@Test
 	public void testTypeDesc() {
-		assertCodeContains(Namespace7.class, "\"field\":\"a.b.Namespace7\"");
+		assertCodeContains(Namespace7.class, "field:\"a.b.Namespace7\"");
 	}
 
 	@Test
 	public void testInlineConstruct() {
-		assertCodeContains(Namespace8.class,
-				"stjs.extend(function Namespace8$1(){a.b.Namespace8.apply(this, arguments);}, a.b.Namespace8, [], ");
+		assertCodeContains(Namespace8.class, "stjs.extend(function Namespace8$1(){a.b.Namespace8.call(this);}, a.b.Namespace8, [], ");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testReservedWordsInNamespace() {
 		generate(Namespace9.class);
 	}
