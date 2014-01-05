@@ -117,7 +117,7 @@ public class Array<V> implements Iterable<String> {
 	@BrowserCompatibility("none")
 	public Iterator<String> iterator() {
 		return new Iterator<String>() {
-			private Iterator<Entry<V>> arrayIter = array.entryIterator();
+			private Iterator<Entry<V>> arrayIter = array.entryIterator(0);
 			private Iterator<String> nonArrayIter = nonArrayElements.keySet().iterator();
 
 			@Override
@@ -360,8 +360,7 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+")
 	public int indexOf(V element) {
-		// return array.indexOf(element);
-		return 0;
+		return indexOf(element, 0);
 	}
 
 	/**
@@ -390,12 +389,30 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+")
 	public int indexOf(V element, int start) {
-		// int pos = array.subList(start, array.size()).indexOf(element);
-		// if (pos < 0) {
-		// return pos;
-		// }
-		// return pos + start;
-		return 0;
+		long actualStart;
+		if (start < 0) {
+			actualStart = (long) Math.max(0, this.$length() + start);
+		} else {
+			actualStart = (long) Math.min(this.$length(), start);
+		}
+
+		Iterator<Entry<V>> iter = this.array.entryIterator(actualStart);
+		while (iter.hasNext()) {
+			Entry<V> entry = iter.next();
+			// Double.equals has an annoying behavior that we must correct for
+			// this implementation to be as close to JS as possible
+			// ie: myDouble.equals(Double.NaN) will return true if myDouble.isNan()
+			// but myDouble == Double.NaN will return false...
+			// In JS, there is no such distinction, and any NaN is not equal to anything
+			boolean isNan = entry.value instanceof Double && Double.isNaN((Double) entry.value);
+			if (!isNan && //
+					(entry.value != null && entry.value.equals(element) || //
+					entry.value == null && element == null) //
+			) {
+				return (int) entry.key;
+			}
+		}
+		return -1;
 	}
 
 	/**
@@ -1121,7 +1138,7 @@ public class Array<V> implements Iterable<String> {
 				that = new PackedArrayStore<E>();
 			}
 
-			Iterator<Entry<E>> entries = this.entryIterator();
+			Iterator<Entry<E>> entries = this.entryIterator(0);
 			while (entries.hasNext()) {
 				Entry<E> entry = entries.next();
 				that.set(entry.key, entry.value);
@@ -1138,7 +1155,7 @@ public class Array<V> implements Iterable<String> {
 
 		abstract long getSetElements(long firstIncluded, long lastExcluded);
 
-		abstract Iterator<Entry<E>> entryIterator();
+		abstract Iterator<Entry<E>> entryIterator(long actualStart);
 
 		abstract boolean isEfficientStoreFor(long newLength, long newElementCount);
 
@@ -1226,9 +1243,9 @@ public class Array<V> implements Iterable<String> {
 		}
 
 		@Override
-		Iterator<Entry<E>> entryIterator() {
+		Iterator<Entry<E>> entryIterator(final long actualStart) {
 			return new Iterator<Entry<E>>() {
-				private int nextIndex = 0;
+				private int nextIndex = (int) actualStart;
 
 				@Override
 				public boolean hasNext() {
@@ -1403,8 +1420,9 @@ public class Array<V> implements Iterable<String> {
 		}
 
 		@Override
-		Iterator<Entry<E>> entryIterator() {
-			final Iterator<java.util.Map.Entry<Long, E>> it = elements.entrySet().iterator();
+		Iterator<Entry<E>> entryIterator(long actualStart) {
+			java.util.Map<Long, E> range = elements.subMap(actualStart, true, elements.lastKey(), true);
+			final Iterator<java.util.Map.Entry<Long, E>> it = range.entrySet().iterator();
 			return new Iterator<Entry<E>>() {
 				@Override
 				public boolean hasNext() {
