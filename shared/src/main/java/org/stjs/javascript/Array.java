@@ -17,8 +17,8 @@ package org.stjs.javascript;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -52,7 +52,7 @@ public class Array<V> implements Iterable<String> {
 	private ArrayStore<V> array = new PackedArrayStore<V>();
 	private long length = 0;
 	private long setElements = 0;
-	private java.util.Map<String, V> nonArrayElements = new HashMap<String, V>();
+	private java.util.Map<String, V> nonArrayElements = new LinkedHashMap<String, V>();
 
 	/**
 	 * Constructs a new empty <tt>Array</tt>.
@@ -116,28 +116,28 @@ public class Array<V> implements Iterable<String> {
 	@Deprecated
 	@BrowserCompatibility("none")
 	public Iterator<String> iterator() {
-		// return new Iterator<String>() {
-		// private int current = 0;
-		//
-		// @Override
-		// public boolean hasNext() {
-		// return current < array.size();
-		// }
-		//
-		// @Override
-		// public String next() {
-		// if (!hasNext()) {
-		// throw new NoSuchElementException();
-		// }
-		// return Integer.toString(current++);
-		// }
-		//
-		// @Override
-		// public void remove() {
-		// throw new UnsupportedOperationException();
-		// }
-		// };
-		return null;
+		return new Iterator<String>() {
+			private Iterator<Entry<V>> arrayIter = array.entryIterator();
+			private Iterator<String> nonArrayIter = nonArrayElements.keySet().iterator();
+
+			@Override
+			public boolean hasNext() {
+				return arrayIter.hasNext() || nonArrayIter.hasNext();
+			}
+
+			@Override
+			public String next() {
+				if (arrayIter.hasNext()) {
+					return Long.toString(arrayIter.next().key);
+				}
+				return nonArrayIter.next();
+			}
+
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+		};
 	}
 
 	/**
@@ -1222,7 +1222,7 @@ public class Array<V> implements Iterable<String> {
 
 		@Override
 		boolean isSet(long index) {
-			return index < this.elements.size() && this.get(index) != UNSET;
+			return index < this.elements.size() && this.elements.get((int) index) != UNSET;
 		}
 
 		@Override
@@ -1232,19 +1232,24 @@ public class Array<V> implements Iterable<String> {
 
 				@Override
 				public boolean hasNext() {
-					while (nextIndex < elements.size() && !isSet(nextIndex)) {
-						nextIndex++;
-					}
+					skipToNext();
 					return nextIndex < elements.size();
 				}
 
 				@Override
 				public Entry<E> next() {
+					skipToNext();
 					Entry<E> entry = new Entry<E>();
 					entry.key = nextIndex;
 					entry.value = get(nextIndex);
 					nextIndex++;
 					return entry;
+				}
+
+				private void skipToNext() {
+					while (nextIndex < elements.size() && !isSet(nextIndex)) {
+						nextIndex++;
+					}
 				}
 
 				@Override
