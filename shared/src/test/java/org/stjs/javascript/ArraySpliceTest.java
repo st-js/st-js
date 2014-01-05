@@ -52,7 +52,7 @@ public class ArraySpliceTest {
 		Array<Integer> x = $array(0, 1, 2, 3);
 		Array<Integer> arr = x.splice(0, 5);
 
-		assertArrayEquals($array(1, 2, 3), arr);
+		assertArrayEquals($array(0, 1, 2, 3), arr);
 		assertArrayEquals(new Array<Integer>(), x);
 	}
 

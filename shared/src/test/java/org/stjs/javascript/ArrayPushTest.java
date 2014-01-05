@@ -68,4 +68,21 @@ public class ArrayPushTest {
 		assertEquals(3, x.$get(10003).intValue());
 		assertEquals(4, x.$get(10004).intValue());
 	}
+
+	@Test
+	public void testPush04() {
+		// tests push on a PackedArrayStore, with holes in the array
+		Array<Integer> x = $array();
+		x.$length(10);
+
+		int push = x.push(0, 1, 2, 3, 4);
+
+		assertEquals(15, push);
+		assertEquals(15, x.$length());
+		assertEquals(0, x.$get(10).intValue());
+		assertEquals(1, x.$get(11).intValue());
+		assertEquals(2, x.$get(12).intValue());
+		assertEquals(3, x.$get(13).intValue());
+		assertEquals(4, x.$get(14).intValue());
+	}
 }

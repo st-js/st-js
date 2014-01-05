@@ -129,10 +129,10 @@ public class ArraySliceTest {
 
 		assertEquals(5, arr.$length());
 		assertEquals(0, arr.$get(0).intValue());
-		assertEquals(0, arr.$get(1).intValue());
-		assertEquals(0, arr.$get(2).intValue());
-		assertEquals(0, arr.$get(3).intValue());
-		assertEquals(0, arr.$get(4).intValue());
+		assertEquals(1, arr.$get(1).intValue());
+		assertEquals(2, arr.$get(2).intValue());
+		assertEquals(3, arr.$get(3).intValue());
+		assertEquals(4, arr.$get(4).intValue());
 		assertEquals(null, arr.$get(5));
 	}
 
@@ -143,8 +143,8 @@ public class ArraySliceTest {
 
 		assertEquals(3, arr.$length());
 		assertEquals(0, arr.$get(0).intValue());
-		assertEquals(0, arr.$get(1).intValue());
-		assertEquals(0, arr.$get(2).intValue());
+		assertEquals(1, arr.$get(1).intValue());
+		assertEquals(2, arr.$get(2).intValue());
 		assertEquals(null, arr.$get(3));
 	}
 
@@ -182,8 +182,8 @@ public class ArraySliceTest {
 
 		assertEquals(3, arr.$length());
 		assertEquals(0, arr.$get(0).intValue());
-		assertEquals(0, arr.$get(1).intValue());
-		assertEquals(0, arr.$get(2).intValue());
+		assertEquals(1, arr.$get(1).intValue());
+		assertEquals(2, arr.$get(2).intValue());
 		assertEquals(null, arr.$get(3));
 	}
 

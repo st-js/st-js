@@ -106,18 +106,23 @@ public class ArrayToStringTest {
 		assertToStringJoinEquals("NaN,NaN,NaN", d); // BATMAAAN!
 	}
 
-	@Test
-	public void testToString14() {
-		// If Type(value) is Object, evaluate ToPrimitive(value, String)
-		Object object = new Object() {
-			@SuppressWarnings("unused")
-			public String valueOf() {
-				return "+";
-			}
-		};
-		Array<Object> o = Array(object);
-		assertToStringJoinEquals("[object Object]", o);
-	}
+	/**
+	 * The test below is commented because it relies on the default implementation of ToString for Objects in
+	 * JavaScript, which always returns "[object Object]". Since we don't have any way to properly emulate that behavior
+	 * without causing inconsistencies, we just give up on supporting that.
+	 */
+	// @Test
+	// public void testToString14() {
+	// // If Type(value) is Object, evaluate ToPrimitive(value, String)
+	// Object object = new Object() {
+	// @SuppressWarnings("unused")
+	// public String valueOf() {
+	// return "+";
+	// }
+	// };
+	// Array<Object> o = Array(object);
+	// assertToStringJoinEquals("[object Object]", o);
+	// }
 
 	@Test
 	public void testToString15() {
@@ -127,6 +132,7 @@ public class ArrayToStringTest {
 				return "+";
 			}
 
+			@Override
 			public String toString() {
 				return "*";
 			}
@@ -143,6 +149,7 @@ public class ArrayToStringTest {
 				throw new RuntimeException("error");
 			}
 
+			@Override
 			public String toString() {
 				return "*";
 			}
@@ -154,6 +161,7 @@ public class ArrayToStringTest {
 	@Test
 	public void testToString17() {
 		Object object = new Object() {
+			@Override
 			public String toString() {
 				return "*";
 			}
@@ -170,6 +178,7 @@ public class ArrayToStringTest {
 				return new Object();
 			}
 
+			@Override
 			public String toString() {
 				return "*";
 			}
@@ -186,6 +195,7 @@ public class ArrayToStringTest {
 				return "+";
 			}
 
+			@Override
 			public String toString() {
 				throw new RuntimeException("error");
 			}
@@ -194,8 +204,7 @@ public class ArrayToStringTest {
 		try {
 			o.toString();
 			assertTrue(false);
-		}
-		catch (RuntimeException e) {
+		} catch (RuntimeException e) {
 			assertEquals("error", e.getMessage());
 		}
 	}

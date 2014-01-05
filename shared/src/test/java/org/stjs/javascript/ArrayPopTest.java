@@ -52,16 +52,41 @@ public class ArrayPopTest {
 		Array<Integer> x = $array();
 		x.$set(0, 0);
 		x.$set(3, 3);
-		int pop = x.pop();
 
-		assertEquals(3, pop);
+		Integer pop = x.pop();
+		assertEquals(Integer.valueOf(3), pop);
 		assertEquals(3, x.$length());
 		assertEquals(null, x.$get(3));
 		assertEquals(null, x.$get(2));
 
-		x.$length(1);
 		pop = x.pop();
-		assertEquals(0, pop);
+		assertEquals(null, pop);
+		assertEquals(2, x.$length());
+		assertEquals(null, x.$get(2));
+
+		pop = x.pop();
+		assertEquals(null, pop);
+		assertEquals(1, x.$length());
+
+		pop = x.pop();
+		assertEquals(Integer.valueOf(0), pop);
 		assertEquals(0, x.$length());
+	}
+
+	@Test
+	public void testPop05() {
+		Array<Integer> x = $array();
+		x.$set(0, 0);
+		x.$length(4);
+
+		Integer pop3 = x.pop();
+		Integer pop2 = x.pop();
+		Integer pop1 = x.pop();
+		Integer pop0 = x.pop();
+
+		assertEquals(null, pop3);
+		assertEquals(null, pop2);
+		assertEquals(null, pop1);
+		assertEquals(Integer.valueOf(0), pop0);
 	}
 }

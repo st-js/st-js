@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.stjs.javascript.annotation.BrowserCompatibility;
@@ -235,18 +236,21 @@ public class Array<V> implements Iterable<String> {
 	private void $set(long index, V value) {
 		// check if store type is correct for setting this value
 		boolean isSet = array.isSet(index);
+		long newLength = (long) Math.max(this.length, index + 1);
+		long newSetElements = this.setElements;
 		if (!isSet) {
 			// unsetElement, we may need to convert between stores
-			this.length = (long) Math.max(this.length, index + 1);
-			this.setElements++;
-			if (!this.array.isEfficientStoreFor(this.length, this.setElements)) {
-				// it looks like we must change the type of store for efficiency
-				this.array = this.array.switchStoreType();
-			}
+			newSetElements++;
+			this.switchStoreIfNeeded(newLength, newSetElements);
 		}
 
 		// store type is now correct, let's do the actual setting
+		if (newLength > this.length) {
+			array.padTo(newLength);
+		}
 		array.set(index, value);
+		this.length = newLength;
+		this.setElements = newSetElements;
 	}
 
 	/**
@@ -265,21 +269,40 @@ public class Array<V> implements Iterable<String> {
 	 * 
 	 * <p>
 	 * Attempting to set the length property of this <tt>Array</tt> to a value that is numerically less than or equal to
-	 * the largest index contained within this <tt>Array</tt> will result in the length being set to a value that is one
-	 * greater than that largest index contained within this <tt>Array</tt>.
+	 * the largest index contained within this <tt>Array</tt> will result in the <tt>Array</tt> being truncated to the
+	 * new length.
 	 * 
 	 * @param newLength
 	 *            the new length of this <tt>Array</tt>
 	 */
 	@Template("toProperty")
 	public void $length(int newLength) {
-		if (newLength >= this.length) {
-			// no problem, easy case
+		if (newLength == this.length) {
+			// nothing to do, we are not changing the length of the array
+			return;
+
+		} else if (newLength > this.length) {
+			// growing the array
+			this.switchStoreIfNeeded(newLength, this.setElements);
+			this.array.padTo(newLength);
 			this.length = newLength;
 
 		} else {
-			// harder case, we cannot truncate the array
-			this.length = array.getLastIndex() + 1;
+			// truncating the array
+			long newSetElements = 0;
+			if (newLength > 0) {
+				newSetElements = this.setElements - this.array.getSetElements(newLength - 1, this.length);
+			}
+			this.switchStoreIfNeeded(newLength, newSetElements);
+			this.array.truncateFrom(newLength);
+			this.length = newLength;
+			this.setElements = newSetElements;
+		}
+	}
+
+	private void switchStoreIfNeeded(long newLength, long newSetElements) {
+		if (!this.array.isEfficientStoreFor(newLength, newSetElements)) {
+			this.array = this.array.switchStoreType();
 		}
 	}
 
@@ -293,14 +316,12 @@ public class Array<V> implements Iterable<String> {
 	 * @return a new <tt>Array</tt>, containing all the elements of the joined <tt>Arrays</tt>.
 	 */
 	public Array<V> concat(Array<V>... arrays) {
-		// Array<V> ret = new Array<V>();
-		// ret.array.addAll(this.array);
+		// Array<V> concat = new Array<V>();
 		// for (Array<V> a : arrays) {
-		// for (int i = 0; i < a.$length(); ++i) {
-		// ret.array.add(a.$get(i));
+		// concat.splice(concat.$length(), 0, a.toArray());
 		// }
-		// }
-		// return ret;
+		// this.splice(this.$length(), 0, concat.toArray());
+		// return concat;
 		return null;
 	}
 
@@ -314,8 +335,10 @@ public class Array<V> implements Iterable<String> {
 	 * @return a new <tt>Array</tt>, containing all the elements of the joined <tt>Arrays</tt>.
 	 */
 	public Array<V> concat(V... values) {
-		// TODO Auto-generated method stub
-		return null;
+		Array<V> concat = new Array<V>();
+		concat.splice(0, 0, values);
+		this.splice(this.$length(), 0, values);
+		return concat;
 	}
 
 	/**
@@ -398,15 +421,17 @@ public class Array<V> implements Iterable<String> {
 	 * @return the string representation of the values in this <tt>Array</tt>, separated by the specified separator.
 	 */
 	public String join(String separator) {
-		// StringBuilder sb = new StringBuilder();
-		// for (V value : array) {
-		// if (sb.length() != 0) {
-		// sb.append(separator);
-		// }
-		// sb.append(value != null ? value.toString() : "");
-		// }
-		// return sb.toString();
-		return "";
+		StringBuilder builder = new StringBuilder();
+		String realSeparator = "";
+		for (int i = 0; i < this.length; i++) {
+			builder.append(realSeparator);
+			realSeparator = separator;
+			V item = this.array.get(i);
+			if (item != null) {
+				builder.append(JSAbstractOperations.ToString(item));
+			}
+		}
+		return builder.toString();
 	}
 
 	/**
@@ -418,11 +443,11 @@ public class Array<V> implements Iterable<String> {
 	 * @return the last element from this <tt>Array</tt>
 	 */
 	public V pop() {
-		// if (array.size() == 0) {
-		// return null;
-		// }
-		// return array.remove(array.size() - 1);
-		return null;
+		if (this.length == 0) {
+			return null;
+		}
+		Array<V> removed = this.splice((int) (this.length - 1), 1);
+		return removed.$get(0);
 	}
 
 	/**
@@ -434,15 +459,7 @@ public class Array<V> implements Iterable<String> {
 	 * @return the new length of this <tt>Array</tt>
 	 */
 	public int push(V... values) {
-		this.length += values.length;
-		this.setElements += values.length;
-
-		if (!this.array.isEfficientStoreFor(this.length, this.setElements)) {
-			// it looks like we must change the type of store for efficiency
-			this.array = this.array.switchStoreType();
-		}
-
-		this.array.push(values);
+		this.splice(this.$length(), 0, values);
 		return (int) this.length;
 	}
 
@@ -462,15 +479,15 @@ public class Array<V> implements Iterable<String> {
 	 * Removes the first element from this <tt>Array</tt> and returns it.
 	 * 
 	 * <p>
-	 * If this <tt>Array</tt> is empty, <tt>undefined</tt> is returned.
+	 * If this <tt>Array</tt> is empty, <tt>null</tt> is returned.
 	 * 
 	 * @return the first element of this <tt>Array</tt>.
 	 */
 	public V shift() {
-		// if (array.size() == 0) {
-		// return null;
-		// }
-		// return array.remove(0);
+		Array<V> removed = this.splice(0, 1);
+		if (removed.$length() == 1) {
+			return removed.$get(0);
+		}
 		return null;
 	}
 
@@ -491,11 +508,7 @@ public class Array<V> implements Iterable<String> {
 	 *         index until the end of the <tt>Array</tt>.
 	 */
 	public Array<V> slice(int start) {
-		// if (start < 0) {
-		// return slice(java.lang.Math.max(0, array.size() - start), array.size());
-		// }
-		// return slice(start, array.size());
-		return null;
+		return slice(start, this.$length());
 	}
 
 	/**
@@ -519,16 +532,21 @@ public class Array<V> implements Iterable<String> {
 	 *         index and ending at the given end index
 	 */
 	public Array<V> slice(int start, int end) {
-		// int s = start < 0 ? java.lang.Math.max(0, array.size() - start) : start;
-		// s = java.lang.Math.min(s, array.size());
-		// int e = java.lang.Math.min(end, array.size());
-		// if (s <= e) {
-		// return new Array<V>();
-		// }
-		// Array<V> ret = new Array<V>();
-		// ret.array.addAll(array.subList(s, e));
-		// return ret;
-		return null;
+		long actualStart;
+		if (start < 0) {
+			actualStart = (long) Math.max(this.$length() + start, 0);
+		} else {
+			actualStart = (long) Math.min(start, this.$length());
+		}
+
+		long actualEnd;
+		if (end < 0) {
+			actualEnd = (long) Math.max(this.$length() + end, 0);
+		} else {
+			actualEnd = (long) Math.min(end, this.$length());
+		}
+
+		return this.array.slice(actualStart, actualEnd);
 	}
 
 	/**
@@ -546,15 +564,7 @@ public class Array<V> implements Iterable<String> {
 	 * @return a new <tt>Array</tt> containing the deleted elements (if any)
 	 */
 	public Array<V> splice(int start, int deleteCount) {
-		// Array<V> ret = new Array<V>();
-		// for (int i = 0; i < deleteCount; ++i) {
-		// if (start >= array.size()) {
-		// break;
-		// }
-		// ret.array.add(array.remove(start));
-		// }
-		// return ret;
-		return null;
+		return this.splice(start, deleteCount, (V[]) null);
 	}
 
 	/**
@@ -575,10 +585,38 @@ public class Array<V> implements Iterable<String> {
 	 * @return a new <tt>Array</tt> containing the deleted elements (if any)
 	 */
 	public Array<V> splice(int start, int deleteCount, V... values) {
-		// Array<V> removed = splice(start, deleteCount);
-		// array.addAll(start, Arrays.asList(values));
-		// return removed;
-		return null;
+		long actualStart;
+		if (start < 0) {
+			actualStart = (long) Math.max(this.length + start, 0);
+		} else {
+			actualStart = (long) Math.min(this.length, start);
+		}
+
+		long actualDeleteCount = (long) Math.min(Math.max(deleteCount, 0), this.length - actualStart);
+
+		if (values == null) {
+			@SuppressWarnings("unchecked")
+			V[] tmp = (V[]) new Object[0];
+			values = tmp;
+		}
+
+		if (actualDeleteCount == 0 && values.length == 0) {
+			// we are not deleting or adding anything. This is basically a NOP
+			return new Array<V>();
+		}
+
+		long newLength = this.length - actualDeleteCount + values.length;
+		long newSetElements = this.setElements + values.length
+				- this.array.getSetElements(actualStart, actualStart + deleteCount);
+
+		this.switchStoreIfNeeded(newLength, newSetElements);
+
+		Array<V> deleted = this.slice((int) actualStart, (int) (actualStart + actualDeleteCount));
+		this.array.splice(actualStart, actualDeleteCount, values);
+
+		this.length = newLength;
+		this.setElements = newSetElements;
+		return deleted;
 	}
 
 	/**
@@ -645,9 +683,8 @@ public class Array<V> implements Iterable<String> {
 	 * @return the new length of this <tt>Array</tt>
 	 */
 	public int unshift(V... values) {
-		// array.addAll(0, Arrays.asList(values));
-		// return array.size();
-		return 0;
+		this.splice(0, 0, values);
+		return this.$length();
 	}
 
 	/**
@@ -716,26 +753,7 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@Override
 	public String toString() {
-		// ArrayList.toString() look like this "[1, 2, 3, 4, 5]" (with spaces
-		// between elements and enclosed in []
-		// but in Array.toString() must actually look like "1,2,3,4,5" (no spaces,
-		// no [])
-		// StringBuilder builder = new StringBuilder();
-		// boolean first = true;
-		// for (V item : array) {
-		// if (!first) {
-		// builder.append(",");
-		// } else {
-		// first = false;
-		// }
-		// if (item == null) {
-		// builder.append("null");
-		// } else {
-		// builder.append(item.toString());
-		// }
-		// }
-		// return builder.toString();
-		return null;
+		return join();
 	}
 
 	/**
@@ -1112,19 +1130,17 @@ public class Array<V> implements Iterable<String> {
 			return that;
 		}
 
-		abstract long getLastIndex();
+		abstract void truncateFrom(long newLength);
+
+		abstract void padTo(long newLength);
+
+		abstract void splice(long actualStart, long actualDeleteCount, E[] values);
+
+		abstract long getSetElements(long firstIncluded, long lastExcluded);
 
 		abstract Iterator<Entry<E>> entryIterator();
 
 		abstract boolean isEfficientStoreFor(long newLength, long newElementCount);
-
-		abstract void shift();
-
-		abstract void unshift();
-
-		abstract void pop();
-
-		abstract void push(E[] values);
 
 		abstract void set(long index, E value);
 
@@ -1132,7 +1148,7 @@ public class Array<V> implements Iterable<String> {
 
 		abstract E get(long index);
 
-		abstract void slice(long from, long to);
+		abstract Array<E> slice(long fromIncluded, long toExcluded);
 	}
 
 	private final class PackedArrayStore<E> extends ArrayStore<E> {
@@ -1156,7 +1172,7 @@ public class Array<V> implements Iterable<String> {
 				// between both types of ArrayStore
 				return true;
 			}
-			if ((newLength / newElementCount) >= 6) {
+			if (newElementCount == 0 || (newLength / newElementCount) >= 6) {
 				// if we have more than 5/6 unset elements, we're better off with SparseArrayStore
 				// thresholds between the two ArrayStore types don't match: see length condition
 				return false;
@@ -1166,34 +1182,15 @@ public class Array<V> implements Iterable<String> {
 		}
 
 		@Override
-		void shift() {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		void unshift() {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		void pop() {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		void push(E[] values) {
-			this.elements.addAll(Arrays.asList(values));
-		}
-
-		@Override
 		void set(long index, E value) {
-			for (int i = elements.size(); i <= index; i++) {
+			this.elements.set((int) index, value);
+		}
+
+		@Override
+		public void padTo(long newLength) {
+			while (this.elements.size() < newLength) {
 				this.elements.add(UNSET);
 			}
-			this.elements.set((int) index, value);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -1202,13 +1199,25 @@ public class Array<V> implements Iterable<String> {
 			if (index > Integer.MAX_VALUE || index >= elements.size()) {
 				return null;
 			}
-			return (E) this.elements.get((int) index);
+
+			Object value = this.elements.get((int) index);
+			if (value == UNSET) {
+				return null;
+			}
+			return (E) value;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
-		void slice(long from, long to) {
-			// TODO Auto-generated method stub
-
+		Array<E> slice(long fromIncluded, long toExcluded) {
+			Array<E> result = new Array<E>();
+			for (int i = (int) fromIncluded, n = 0; i < toExcluded && i < this.elements.size(); i++, n++) {
+				Object value = this.elements.get(i);
+				if (value != UNSET) {
+					result.$set(n, (E) this.elements.get(i));
+				}
+			}
+			return result;
 		}
 
 		@Override
@@ -1246,12 +1255,81 @@ public class Array<V> implements Iterable<String> {
 		}
 
 		@Override
-		long getLastIndex() {
-			// TODO Auto-generated method stub
+		long getSetElements(long firstIncluded, long lastExcluded) {
+			int setElements = 0;
+			for (int i = (int) firstIncluded; i < this.elements.size() && i < lastExcluded; i++) {
+				if (this.elements.get(i) != UNSET) {
+					setElements++;
+				}
+			}
+			return setElements;
+		}
 
-			// Hmm....
+		@Override
+		void splice(long actualStart, long actualDeleteCount, E[] values) {
 
-			return 0;
+			// we must try to avoid splicing in 0(n^2) if possible
+			// let's compute the cost of two different methods of splicing in number of moves
+			long trailingElements = this.elements.size() - actualStart - actualDeleteCount;
+			long inplaceCost = (long) Math.abs(actualDeleteCount - values.length) * trailingElements;
+			long rebuildCost = this.elements.size() + values.length - actualDeleteCount;
+
+			// execute the cheapest strategy. We give an unfair advantage to inplace, because rebuild has
+			// uses more memory (2n), so we only want to pick it when it's really worth it
+			if (inplaceCost > 2 * rebuildCost) {
+				// Rebuild the underlying ArrayList from scratch.
+
+				// add the head untouched elements
+				ArrayList<Object> newElements = new ArrayList<Object>((int) rebuildCost);
+				newElements.addAll(this.elements.subList(0, (int) actualStart));
+
+				// add the inserted elements
+				newElements.addAll(Arrays.asList(values));
+
+				// add the trailing untouched elements
+				newElements
+						.addAll(this.elements.subList((int) (actualStart + actualDeleteCount), this.elements.size()));
+
+				this.elements = newElements;
+
+			} else {
+				// add/remove/set the elements in place, trying to add or remove as few elements as possible
+
+				// as long as the deleted and added elements overlap, we can use Set instead of insert + delete
+				// it's a lot cheaper to do it that way on an ArrayList
+				int overlap = (int) Math.min(values.length, actualDeleteCount);
+				for (int i = 0; i < overlap; i++) {
+					this.elements.set((int) actualStart + i, values[i]);
+				}
+
+				// more deletions than insertions, we have a few more elements to delete
+				// remove elements starting from the end, so we have to move fewer elements
+				// in the backing array every time one element is removed
+				for (int i = (int) (actualStart + actualDeleteCount - 1); i >= actualStart + overlap; i--) {
+					this.elements.remove(i);
+				}
+
+				// more insertions than deletions, we have a few more element to insert
+				// (this loop is mutually exclusive with the loop above)
+				for (int i = overlap; i < values.length; i++) {
+					this.elements.add((int) actualStart + i, values[i]);
+				}
+			}
+
+		}
+
+		@Override
+		void truncateFrom(long newLength) {
+			if (newLength < this.elements.size() / 4) {
+				// if newLength is small enough, it's faster to just copy the remaining values instead of deleting the
+				// truncated ones
+				this.elements = new ArrayList<Object>(this.elements.subList(0, (int) newLength));
+
+			} else {
+				for (int i = this.elements.size() - 1; i >= newLength; i--) {
+					this.elements.remove(i);
+				}
+			}
 		}
 	}
 
@@ -1282,32 +1360,6 @@ public class Array<V> implements Iterable<String> {
 		}
 
 		@Override
-		void shift() {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		void unshift() {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		void pop() {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		void push(E[] values) {
-			long startIndex = Array.this.length - values.length;
-			for (int i = 0; i < values.length; i++) {
-				this.elements.put(startIndex + i, values[i]);
-			}
-		}
-
-		@Override
 		void set(long index, E value) {
 			this.elements.put(index, value);
 		}
@@ -1318,9 +1370,26 @@ public class Array<V> implements Iterable<String> {
 		}
 
 		@Override
-		void slice(long from, long to) {
-			// TODO Auto-generated method stub
+		Array<E> slice(long fromIncluded, long toExcluded) {
+			Array<E> result = new Array<E>();
 
+			Long firstKey = this.elements.ceilingKey(fromIncluded);
+			Long lastKey = this.elements.lowerKey(toExcluded);
+
+			if (firstKey != null && lastKey != null) {
+				// only add stuff to the array if the selected range actually contains something
+				// if we don't have a key that is higher than fromIncluded, it means the slice is empty
+				// if we don't have a key that is smaller than toExcluded, it means the slice is empty
+				java.util.Map<Long, E> selected = this.elements.subMap(firstKey, lastKey);
+
+				for (java.util.Map.Entry<Long, E> entry : selected.entrySet()) {
+					result.$set(entry.getKey(), entry.getValue());
+				}
+			}
+
+			// we must also set the length, just in case the last element that was requested was unset
+			result.$length((int) (toExcluded - fromIncluded));
+			return result;
 		}
 
 		@Override
@@ -1354,8 +1423,53 @@ public class Array<V> implements Iterable<String> {
 		}
 
 		@Override
-		long getLastIndex() {
-			return elements.lastKey();
+		long getSetElements(long firstIncluded, long lastExcluded) {
+			Long actualFirstIncluded = this.elements.ceilingKey(firstIncluded);
+			Long actualLastExcluded = this.elements.lowerKey(lastExcluded);
+			if (actualFirstIncluded == null || actualLastExcluded == null) {
+				// there are no keys greater than first included OR
+				// there are no keys smaller than last included
+				// => the corresponding submap would be empty
+				return 0;
+			}
+			return this.elements.subMap(actualFirstIncluded, actualLastExcluded).size();
+		}
+
+		@Override
+		void splice(long actualStart, long actualDeleteCount, E[] values) {
+
+			// as long as the deleted and added elements overlap, we can use put() instead of insert + delete
+			// this gives only one lookup in the tree instead of two
+			long overlap = (long) Math.min(values.length, actualDeleteCount);
+			for (int i = 0; i < overlap; i++) {
+				this.elements.put(actualStart + i, values[i]);
+			}
+
+			// more deletions than insertions, we have a few more elements to delete
+			for (int i = (int) actualDeleteCount - 1; i >= overlap; i--) {
+				this.elements.remove((int) actualStart + overlap + i);
+			}
+
+			// more insertions than deletions, we have a few more element to insert
+			// (this loop is mutually exclusive with the loop above)
+			for (int i = (int) overlap; i < values.length; i++) {
+				this.elements.put(actualStart + i, values[i]);
+			}
+		}
+
+		@Override
+		void truncateFrom(long newLength) {
+			Long ceil = this.elements.ceilingKey(newLength);
+			if (ceil != null) {
+				// there are keys larger than newLength
+				SortedMap<Long, E> toRemove = this.elements.subMap(ceil, true, this.elements.lastKey(), true);
+				toRemove.clear();
+			}
+		}
+
+		@Override
+		void padTo(long newLength) {
+			// no padding needed
 		}
 	}
 
