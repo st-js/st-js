@@ -7,9 +7,10 @@ import org.stjs.generator.GenerationContext;
 import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.javac.InternalUtils;
-import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.utils.JavaNodes;
 
+import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
 
@@ -30,8 +31,8 @@ public class NewClassInlineFunctionCheck implements CheckContributor<NewClassTre
 
 	@Override
 	public Void visit(CheckVisitor visitor, NewClassTree tree, GenerationContext<Void> context) {
-		Element type = TreeUtils.elementFromUse(tree.getIdentifier());
-		if (!JavaNodes.isJavaScriptFunction(type)) {
+		TreeWrapper<ClassTree, Void> tw = context.getCurrentWrapper();
+		if (!tw.child(tree.getIdentifier()).isJavaScriptFunction()) {
 			return null;
 		}
 		boolean hasMethod = false;

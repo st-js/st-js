@@ -50,6 +50,7 @@ import org.sonatype.plexus.build.incremental.BuildContext;
 import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.GenerationDirectory;
 import org.stjs.generator.Generator;
+import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.MultipleFileGenerationException;
@@ -157,7 +158,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				runtimeUrls[i] = new File(element).toURI().toURL();
 			}
 			return new URLClassLoader(runtimeUrls, Thread.currentThread().getContextClassLoader());
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			throw new MojoExecutionException("Cannot get builtProjectClassLoader " + ex, ex);
 		}
 	}
@@ -170,8 +172,6 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		getLog().info("Generating JavaScript files to " + gendir.getAbsolutePath());
 
 		ClassLoader builtProjectClassLoader = getBuiltProjectClassLoader();
-		Generator generator = new Generator();
-		generator.init(builtProjectClassLoader, sourceEncoding);
 
 		GeneratorConfigurationBuilder configBuilder = new GeneratorConfigurationBuilder();
 		configBuilder.generateArrayHasOwnProperty(generateArrayHasOwnProperty);
@@ -193,6 +193,10 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			Collection<String> packages = accumulatePackages(sourceDir);
 			configBuilder.allowedPackages(packages);
 		}
+
+		GeneratorConfiguration configuration = configBuilder.build();
+		Generator generator = new Generator();
+		generator.init(builtProjectClassLoader, sourceEncoding);
 
 		int generatedFiles = 0;
 		boolean hasFailures = false;
@@ -222,25 +226,29 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 						continue;
 					}
 					String className = getClassNameForSource(source.getPath());
-					generator.generateJavascript(builtProjectClassLoader, className, sourceDir, gendir, getBuildOutputDirectory(),
-							configBuilder.build());
+					generator
+							.generateJavascript(builtProjectClassLoader, className, sourceDir, gendir, getBuildOutputDirectory(), configuration);
 					++generatedFiles;
 
-				} catch (InclusionScanException e) {
+				}
+				catch (InclusionScanException e) {
 					throw new MojoExecutionException("Cannot scan the source directory:" + e, e);
-				} catch (MultipleFileGenerationException e) {
+				}
+				catch (MultipleFileGenerationException e) {
 					for (JavascriptFileGenerationException jse : e.getExceptions()) {
 						buildContext.addMessage(jse.getSourcePosition().getFile(), jse.getSourcePosition().getLine(), jse.getSourcePosition()
 								.getColumn(), jse.getMessage(), BuildContext.SEVERITY_ERROR, null);
 					}
 					hasFailures = true;
 					// continue with the next file
-				} catch (JavascriptFileGenerationException e) {
+				}
+				catch (JavascriptFileGenerationException e) {
 					buildContext.addMessage(e.getSourcePosition().getFile(), e.getSourcePosition().getLine(), e.getSourcePosition().getColumn(),
 							e.getMessage(), BuildContext.SEVERITY_ERROR, null);
 					hasFailures = true;
 					// continue with the next file
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					// TODO - maybe should filter more here
 					buildContext.addMessage(absoluteSource, 1, 1, e.toString(), BuildContext.SEVERITY_ERROR, e);
 					hasFailures = true;
@@ -248,13 +256,13 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				}
 			}
 		}
+		generator.close();
 		long t2 = System.currentTimeMillis();
 		getLog().info("Generated " + generatedFiles + " JavaScript files in " + (t2 - t1) + " ms");
 		if (generatedFiles > 0) {
 			filesGenerated(generator, gendir);
 		}
 
-		generator.close();
 		if (hasFailures) {
 			throw new MojoFailureException("Errors generating JavaScript");
 		}
@@ -331,9 +339,11 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				}
 			}
 
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			throw new MojoFailureException("Error when packing files:" + ex.getMessage(), ex);
-		} finally {
+		}
+		finally {
 			Closeables.closeQuietly(allSourcesFile);
 		}
 
@@ -343,7 +353,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		// copy the javascript support
 		try {
 			generator.copyJavascriptSupport(getGeneratedSourcesDirectory().getAbsolutePath());
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			throw new MojoFailureException("Error when copying support files:" + ex.getMessage(), ex);
 		}
 
@@ -365,7 +376,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		ds.setFollowSymlinks(true);
 		ds.addDefaultExcludes();
 		ds.setBasedir(sourceDir);
-		ds.setIncludes(new String[] { "**/*.java" });
+		ds.setIncludes(new String[]{ "**/*.java" });
 		ds.scan();
 		for (String fileName : ds.getIncludedFiles()) {
 			File file = new File(fileName);
@@ -413,7 +424,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			try {
 				staleFiles.addAll(jsScanner.getIncludedSources(f.getParentFile(), gendir.getAbsolutePath()));
 				staleFiles.addAll(stjsScanner.getIncludedSources(f.getParentFile(), getBuildOutputDirectory()));
-			} catch (InclusionScanException e) {
+			}
+			catch (InclusionScanException e) {
 				throw new MojoExecutionException("Error scanning source root: \'" + sourceDir.getPath() + "\' "
 						+ "for stale files to recompile.", e);
 			}

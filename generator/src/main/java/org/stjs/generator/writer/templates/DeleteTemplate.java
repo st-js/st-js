@@ -21,7 +21,7 @@ public class DeleteTemplate<JS> implements WriterContributor<MethodInvocationTre
 		if (argCount != 1) {
 			throw context.addError(tree, "A 'delete' template can only be applied for methods with 1 parameter");
 		}
-		JS target = MethodInvocationWriter.buildTarget(visitor, tree, context);
+		JS target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree>getCurrentWrapper());
 		JS prop = context.js().elementGet(target, visitor.scan(tree.getArguments().get(0), context));
 		return context.js().unary(UnaryOperator.DELETE_PROPERTY, prop);
 	}

@@ -38,7 +38,7 @@ public class MethodToPropertyTemplate<JS> implements WriterContributor<MethodInv
 			target = context.js().paren(visitor.scan(tree.getArguments().get(arg++), context));
 		} else {
 			// $method() or $method(x)
-			target = MethodInvocationWriter.buildTarget(visitor, tree, context);
+			target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree>getCurrentWrapper());
 		}
 
 		// NAME

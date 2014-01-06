@@ -18,20 +18,26 @@ package org.stjs.generator;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.annotation.Annotation;
+import java.util.Map;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 import org.stjs.generator.check.Checks;
+import org.stjs.generator.javac.AnnotationHelper;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.javascript.rhino.RhinoJavaScriptBuilder;
 import org.stjs.generator.name.JavaScriptNameProvider;
 import org.stjs.generator.visitor.TreePathHolder;
 
+import com.google.common.collect.Maps;
 import com.google.debugging.sourcemap.SourceMapGenerator;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.Tree;
+import com.sun.source.tree.TreeVisitor;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
 
@@ -42,6 +48,8 @@ import com.sun.source.util.Trees;
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class GenerationContext<JS> implements TreePathHolder {
+
+	private static final Object NULL = new String();
 
 	private final File inputFile;
 
@@ -67,8 +75,12 @@ public class GenerationContext<JS> implements TreePathHolder {
 
 	private final ClassLoader builtProjectClassLoader;
 
+	private final Map<AnnotationCacheKey, Object> cacheAnnotations;
+	private final Map<Tree, TreeWrapper<?, JS>> cacheWrappers = Maps.newIdentityHashMap();
+	private final Map<Element, TreeWrapper<?, JS>> cacheWrappersByElement = Maps.newIdentityHashMap();
+
 	public GenerationContext(File inputFile, GeneratorConfiguration configuration, JavaScriptNameProvider names, Trees trees,
-			ClassLoader builtProjectClassLoader) {
+			ClassLoader builtProjectClassLoader, Map<AnnotationCacheKey, Object> cacheAnnotations) {
 		this.inputFile = inputFile;
 		this.configuration = configuration;
 		this.names = names;
@@ -76,6 +88,7 @@ public class GenerationContext<JS> implements TreePathHolder {
 		this.checks = new Checks();
 		this.javaScriptBuilder = (JavaScriptBuilder<JS>) new RhinoJavaScriptBuilder();
 		this.builtProjectClassLoader = builtProjectClassLoader;
+		this.cacheAnnotations = cacheAnnotations;
 	}
 
 	public File getInputFile() {
@@ -194,17 +207,125 @@ public class GenerationContext<JS> implements TreePathHolder {
 	}
 
 	public <T extends Tree> TreeWrapper<T, JS> getCurrentWrapper() {
-		// TODO use cache
-		return new TreeWrapper<T, JS>(currentPath, this);
+		return wrap(currentPath);
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T extends Tree> TreeWrapper<T, JS> wrap(TreePath path) {
-		// TODO use cache
-		return new TreeWrapper<T, JS>(path, this);
+		TreeWrapper<T, JS> tw = (TreeWrapper<T, JS>) cacheWrappers.get(path.getLeaf());
+		if (tw == null) {
+			tw = new TreeWrapper<T, JS>(path, this);
+			cacheWrappers.put(path.getLeaf(), tw);
+		}
+		return tw;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends Tree> TreeWrapper<T, JS> wrap(Element enclosingElement) {
+		TreeWrapper<T, JS> tw = (TreeWrapper<T, JS>) cacheWrappersByElement.get(enclosingElement);
+		if (tw == null) {
+
+			TreePath path = trees.getPath(enclosingElement);
+			if (path == null) {
+				Tree tree = trees.getTree(enclosingElement);
+				if (tree == null) {
+					tree = new DummyTree();
+				}
+				// XXX: this is ugly, null is better here?
+				path = new TreePath(new TreePath(compilationUnit), tree);
+			}
+			tw = new TreeWrapper<T, JS>(enclosingElement, path, this);
+			cacheWrappersByElement.put(enclosingElement, tw);
+		}
+
+		return tw;
 	}
 
 	public ClassLoader getBuiltProjectClassLoader() {
 		return builtProjectClassLoader;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends Annotation> T getAnnotation(Element element, Class<T> annotationType) {
+		AnnotationCacheKey key = new AnnotationCacheKey(annotationType, element);
+		Object ret = cacheAnnotations.get(key);
+		if (ret != null) {
+			return ret == NULL ? null : (T) ret;
+		}
+		ret = AnnotationHelper.getAnnotation(elements, element, annotationType);
+		if (ret != null) {
+			cacheAnnotations.put(key, ret);
+		} else {
+			cacheAnnotations.put(key, NULL);
+		}
+		return (T) ret;
+	}
+
+	public static class AnnotationCacheKey {
+		private final Class<? extends Annotation> annotationType;
+		private final Element element;
+
+		public AnnotationCacheKey(Class<? extends Annotation> annotationType, Element element) {
+			this.annotationType = annotationType;
+			this.element = element;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((annotationType == null) ? 0 : annotationType.hashCode());
+			result = prime * result + ((element == null) ? 0 : element.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			AnnotationCacheKey other = (AnnotationCacheKey) obj;
+			if (annotationType == null) {
+				if (other.annotationType != null) {
+					return false;
+				}
+			} else if (!annotationType.equals(other.annotationType)) {
+				return false;
+			}
+			if (element == null) {
+				if (other.element != null) {
+					return false;
+				}
+			} else if (!element.equals(other.element)) {
+				return false;
+			}
+			return true;
+		}
+
+	}
+
+	/**
+	 * 
+	 * this is a dummy try just to have the wrapper thing working for cases where only the element is available
+	 * 
+	 */
+	public static class DummyTree implements Tree {
+		@Override
+		public <R, D> R accept(TreeVisitor<R, D> arg0, D arg1) {
+			return null;
+		}
+
+		@Override
+		public Kind getKind() {
+			return Kind.ERRONEOUS;
+		}
+
 	}
 
 }

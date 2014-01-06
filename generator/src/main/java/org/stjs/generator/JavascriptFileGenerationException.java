@@ -15,6 +15,7 @@
  */
 package org.stjs.generator;
 
+import javax.annotation.Nonnull;
 
 /**
  * This is the exception thrown by the Generator.
@@ -26,17 +27,17 @@ public class JavascriptFileGenerationException extends STJSRuntimeException {
 
 	private final SourcePosition sourcePosition;
 
-	public JavascriptFileGenerationException(SourcePosition sourcePosition, String message, Throwable cause) {
+	public JavascriptFileGenerationException(@Nonnull SourcePosition sourcePosition, String message, Throwable cause) {
 		super(message, cause);
 		this.sourcePosition = sourcePosition;
 	}
 
-	public JavascriptFileGenerationException(SourcePosition sourcePosition, String message) {
+	public JavascriptFileGenerationException(@Nonnull SourcePosition sourcePosition, String message) {
 		super(message);
 		this.sourcePosition = sourcePosition;
 	}
 
-	public JavascriptFileGenerationException(SourcePosition sourcePosition, Throwable cause) {
+	public JavascriptFileGenerationException(@Nonnull SourcePosition sourcePosition, Throwable cause) {
 		super(cause);
 		this.sourcePosition = sourcePosition;
 	}
@@ -50,9 +51,7 @@ public class JavascriptFileGenerationException extends STJSRuntimeException {
 		StringBuilder sb = new StringBuilder();
 		sb.append(super.toString());
 		sb.append('(').append(sourcePosition.getFile().getName());
-		if (sourcePosition != null) {
-			sb.append(':').append(sourcePosition.getLine());
-		}
+		sb.append(':').append(sourcePosition.getLine());
 		sb.append(')');
 
 		return sb.toString();

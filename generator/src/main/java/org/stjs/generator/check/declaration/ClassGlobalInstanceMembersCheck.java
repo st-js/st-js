@@ -6,7 +6,7 @@ import org.stjs.generator.GenerationContext;
 import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.javac.InternalUtils;
-import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.utils.JavaNodes;
 
 import com.sun.source.tree.BlockTree;
@@ -35,8 +35,8 @@ public class ClassGlobalInstanceMembersCheck implements CheckContributor<ClassTr
 
 	@Override
 	public Void visit(CheckVisitor visitor, ClassTree tree, GenerationContext<Void> context) {
-		Element element = TreeUtils.elementFromDeclaration(tree);
-		if (!JavaNodes.isGlobal(element)) {
+		TreeWrapper<ClassTree, Void> tw = context.getCurrentWrapper();
+		if (!tw.isGlobal()) {
 			// only applies to global classes
 			return null;
 		}

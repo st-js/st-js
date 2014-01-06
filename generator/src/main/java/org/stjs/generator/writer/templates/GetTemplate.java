@@ -25,7 +25,7 @@ public class GetTemplate<JS> implements WriterContributor<MethodInvocationTree, 
 		int arg = 0;
 		if (argCount == 1) {
 			// array.$get(x) -> array[x]
-			target = MethodInvocationWriter.buildTarget(visitor, tree, context);
+			target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree>getCurrentWrapper());
 		} else {
 			// $get(obj, prop) -> obj[prop]
 			target = context.js().paren(visitor.scan(tree.getArguments().get(arg++), context));

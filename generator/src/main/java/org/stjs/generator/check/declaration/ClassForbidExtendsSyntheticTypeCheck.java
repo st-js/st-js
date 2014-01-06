@@ -1,17 +1,14 @@
 package org.stjs.generator.check.declaration;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
-import org.stjs.generator.javac.TreeUtils;
-import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.javac.TreeWrapper;
 
 import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.Tree;
 
 /**
@@ -22,27 +19,26 @@ import com.sun.source.tree.Tree;
  * @author acraciun
  */
 public class ClassForbidExtendsSyntheticTypeCheck implements CheckContributor<ClassTree> {
-	private void checkInterface(Tree iface, ClassTree tree, GenerationContext<Void> context) {
-		Element ifaceType = TreeUtils.elementFromUse((ExpressionTree) iface);
-		if (JavaNodes.isSyntheticType(ifaceType)) {
-			context.addError(tree, "You cannot implement an interface that is marked as synthetic (@SyntheticType)");
+	private void checkInterface(TreeWrapper<Tree, Void> iface) {
+		if (iface.isSyntheticType()) {
+			iface.addError("You cannot implement an interface that is marked as synthetic (@SyntheticType)");
 		}
 	}
 
 	@Override
 	public Void visit(CheckVisitor visitor, ClassTree tree, GenerationContext<Void> context) {
-		TypeElement element = TreeUtils.elementFromDeclaration(tree);
+		TreeWrapper<ClassTree, Void> tw = context.getCurrentWrapper();
+		TypeElement element = (TypeElement) tw.getElement();
 		if (element.getNestingKind() == NestingKind.ANONYMOUS) {
 			return null;
 		}
 		if (tree.getExtendsClause() != null) {
-			Element superType = TreeUtils.elementFromUse((ExpressionTree) tree.getExtendsClause());
-			if (JavaNodes.isSyntheticType(superType)) {
+			if (tw.child(tree.getExtendsClause()).isSyntheticType()) {
 				context.addError(tree, "You cannot extend from a class that is marked as synthetic (@SyntheticType)");
 			}
 		}
 		for (Tree iface : tree.getImplementsClause()) {
-			checkInterface(iface, tree, context);
+			checkInterface(tw.child(iface));
 		}
 
 		return null;

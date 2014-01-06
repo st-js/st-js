@@ -5,9 +5,8 @@ import javax.lang.model.element.ElementKind;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
-import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.Keyword;
-import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
@@ -22,7 +21,7 @@ import com.sun.source.tree.IdentifierTree;
 public class IdentifierWriter<JS> implements WriterContributor<IdentifierTree, JS> {
 
 	private JS visitField(Element def, IdentifierTree tree, GenerationContext<JS> context) {
-		return context.js().property(MemberWriters.buildTarget(context, def), tree.getName());
+		return context.js().property(MemberWriters.buildTarget(context.getCurrentWrapper()), tree.getName());
 	}
 
 	private JS visitEnumConstant(Element def, IdentifierTree tree, GenerationContext<JS> context) {
@@ -39,8 +38,9 @@ public class IdentifierWriter<JS> implements WriterContributor<IdentifierTree, J
 		if (GeneratorConstants.SPECIAL_THIS.equals(name) || GeneratorConstants.THIS.equals(name)) {
 			return context.js().keyword(Keyword.THIS);
 		}
-		Element def = TreeUtils.elementFromUse(tree);
-		assert def != null : "Cannot find the definition for variable " + tree.getName();
+		TreeWrapper<IdentifierTree, JS> tw = context.getCurrentWrapper();
+
+		Element def = tw.getElement();
 
 		if (def.getKind() == ElementKind.PACKAGE) {
 			return null;
@@ -52,7 +52,7 @@ public class IdentifierWriter<JS> implements WriterContributor<IdentifierTree, J
 			return visitEnumConstant(def, tree, context);
 		}
 		if (def.getKind() == ElementKind.CLASS || def.getKind() == ElementKind.ENUM || def.getKind() == ElementKind.INTERFACE) {
-			if (JavaNodes.isGlobal(def)) {
+			if (tw.isGlobal()) {
 				return null;
 			}
 			name = context.getNames().getTypeName(context, def);
@@ -61,5 +61,4 @@ public class IdentifierWriter<JS> implements WriterContributor<IdentifierTree, J
 		// assume variable
 		return context.js().name(name);
 	}
-
 }

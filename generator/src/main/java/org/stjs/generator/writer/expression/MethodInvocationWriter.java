@@ -3,11 +3,9 @@ package org.stjs.generator.writer.expression;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.lang.model.element.ExecutableElement;
-
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.TreeUtils;
-import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.visitor.DiscriminatorKey;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
@@ -21,23 +19,21 @@ import com.sun.source.tree.Tree;
 
 public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvocationTree, JS> {
 
-	public static <JS> JS buildTarget(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
-		ExpressionTree select = tree.getMethodSelect();
-		ExecutableElement methodDecl = TreeUtils.elementFromUse(tree);
-		assert methodDecl != null : "Cannot find the definition for method  " + tree.getMethodSelect();
+	public static <JS, T extends MethodInvocationTree> JS buildTarget(WriterVisitor<JS> visitor, TreeWrapper<T, JS> tw) {
+		ExpressionTree select = tw.getTree().getMethodSelect();
 
 		if (select instanceof IdentifierTree) {
 			// simple call: method(args)
-			return MemberWriters.buildTarget(context, methodDecl);
+			return MemberWriters.buildTarget(tw);
 		}
 		// calls with target: target.method(args)
-		if (TreeUtils.isSuperCall(tree)) {
+		if (TreeUtils.isSuperCall(tw.getTree())) {
 			// this is a call of type super.staticMethod(args) -> it should be handled as a simple call to
 			// staticMethod
-			return MemberWriters.buildTarget(context, methodDecl);
+			return MemberWriters.buildTarget(tw);
 		}
 		MemberSelectTree memberSelect = (MemberSelectTree) select;
-		return visitor.scan(memberSelect.getExpression(), context);
+		return visitor.scan(memberSelect.getExpression(), tw.getContext());
 	}
 
 	public static String buildMethodName(MethodInvocationTree tree) {
@@ -60,12 +56,11 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 	}
 
 	public static <JS> String buildTemplateName(MethodInvocationTree tree, GenerationContext<JS> context) {
-		ExecutableElement methodDecl = TreeUtils.elementFromUse(tree);
-		String name = JavaNodes.getMethodTemplate(context.getElements(), methodDecl);
+		String name = context.getCurrentWrapper().getMethodTemplate();
 		if (name != null) {
 			return name;
 		}
-		return JavaNodes.isJavaScriptFunction(methodDecl.getEnclosingElement()) ? "invoke" : "none";
+		return context.getCurrentWrapper().getEnclosingType().isJavaScriptFunction() ? "invoke" : "none";
 	}
 
 	@Override

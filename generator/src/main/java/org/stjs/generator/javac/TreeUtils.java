@@ -191,6 +191,30 @@ public final class TreeUtils {
 	}
 
 	/**
+	 * Gets the first enclosing tree in path, with any one of the specified kinds.
+	 * 
+	 * @param path
+	 *            the path defining the tree node
+	 * @param kinds
+	 *            the set of kinds of the desired tree
+	 * @return the enclosing tree of the given type as given by the path
+	 */
+	public static <T extends Tree> TreePath enclosingPathOfType(final TreePath path, final Class<T> clz) {
+		TreePath p = path;
+
+		while (p != null) {
+			Tree leaf = p.getLeaf();
+			assert leaf != null; /* nninvariant */
+			if (clz.isAssignableFrom(leaf.getClass())) {
+				return p;
+			}
+			p = p.getParentPath();
+		}
+
+		return null;
+	}
+
+	/**
 	 * Gets path to the the first enclosing class tree, where class is defined by the classTreeKinds method.
 	 * 
 	 * @param path

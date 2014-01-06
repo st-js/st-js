@@ -18,7 +18,7 @@ public class InvokeTemplate<JS> implements WriterContributor<MethodInvocationTre
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
-		JS target = MethodInvocationWriter.buildTarget(visitor, tree, context);
+		JS target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree>getCurrentWrapper());
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
 
 		return context.js().functionCall(target, arguments);

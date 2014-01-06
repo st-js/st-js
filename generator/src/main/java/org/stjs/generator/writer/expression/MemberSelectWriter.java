@@ -5,12 +5,13 @@ import javax.lang.model.element.ElementKind;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
-import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 
+import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MemberSelectTree;
 
 /**
@@ -34,13 +35,13 @@ public class MemberSelectWriter<JS> implements WriterContributor<MemberSelectTre
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, MemberSelectTree tree, GenerationContext<JS> context) {
 		// this is only for fields. Methods are handled in MethodInvocationWriter
-
-		Element element = TreeUtils.elementFromUse(tree);
+		TreeWrapper<IdentifierTree, JS> tw = context.getCurrentWrapper();
+		Element element = tw.getElement();
 		if (element == null || element.getKind() == ElementKind.PACKAGE) {
 			// package names are ignored
 			return null;
 		}
-		if (element.getKind() == ElementKind.CLASS && JavaNodes.isGlobal(element)) {
+		if (element.getKind() == ElementKind.CLASS && tw.isGlobal()) {
 			// global classes are ignored
 			return null;
 		}

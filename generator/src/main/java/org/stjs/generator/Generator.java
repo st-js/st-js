@@ -24,17 +24,19 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
-import javax.tools.Diagnostic;
-import javax.tools.DiagnosticListener;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 
 import org.mozilla.javascript.ast.AstRoot;
+import org.stjs.generator.GenerationContext.AnnotationCacheKey;
 import org.stjs.generator.javac.CustomClassloaderJavaFileManager;
 import org.stjs.generator.name.DefaultJavaScriptNameProvider;
 import org.stjs.generator.name.JavaScriptNameProvider;
@@ -42,6 +44,7 @@ import org.stjs.generator.plugin.GenerationPlugins;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.Timers;
 
+import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
@@ -56,11 +59,13 @@ import com.sun.tools.javac.api.JavacTool;
  * @author acraciun
  */
 public class Generator {
-
 	private static final String STJS_FILE = "stjs.js";
 	private final GenerationPlugins plugins;
 	private StandardJavaFileManager fileManager;
 	private JavaFileManager classLoaderFileManager;
+	private final Map<AnnotationCacheKey, Object> cacheAnnotations = Maps.newHashMap();
+	private Executor taskExecutor;
+	private String sourceEncoding;
 
 	public Generator() {
 		plugins = new GenerationPlugins();
@@ -68,10 +73,29 @@ public class Generator {
 
 	public void init(ClassLoader builtProjectClassLoader, String sourceEncoding) {
 		// nothing to do
+		cacheAnnotations.clear();
+		// taskExecutor = Executors.newFixedThreadPool(4);
+		taskExecutor = new Executor() {
+			@Override
+			public void execute(Runnable command) {
+				command.run();
+			}
+		};
+		this.sourceEncoding = sourceEncoding;
 	}
 
 	public void close() {
 		Closeables.closeQuietly(fileManager);
+		if (taskExecutor instanceof ExecutorService) {
+			ExecutorService es = (ExecutorService) taskExecutor;
+			es.shutdown();
+			try {
+				es.awaitTermination(10, TimeUnit.SECONDS);
+			}
+			catch (InterruptedException e) {
+				// do nothing
+			}
+		}
 	}
 
 	public File getOutputFile(File generationFolder, String className) {
@@ -97,7 +121,8 @@ public class Generator {
 	private Class<?> getClazz(ClassLoader builtProjectClassLoader, String className) {
 		try {
 			return builtProjectClassLoader.loadClass(className);
-		} catch (ClassNotFoundException e) {
+		}
+		catch (ClassNotFoundException e) {
 			throw new JavascriptClassGenerationException(className, "Cannot load class:" + e);
 		}
 	}
@@ -124,84 +149,34 @@ public class Generator {
 		File inputFile = getInputFile(sourceFolder, className);
 		File outputFile = getOutputFile(generationFolder.getAbsolutePath(), className);
 		JavaScriptNameProvider names = new DefaultJavaScriptNameProvider();
-		GenerationContext context = new GenerationContext(inputFile, configuration, names, null, builtProjectClassLoader);
+		GenerationContext context = new GenerationContext(inputFile, configuration, names, null, builtProjectClassLoader, cacheAnnotations);
 
 		CompilationUnitTree cu = parseAndResolve(inputFile, context, builtProjectClassLoader, configuration.getSourceEncoding());
-		BufferedWriter writer = null;
 
-		try {
-			GenerationPlugins currentClassPlugins = plugins.forClass(clazz);
+		GenerationPlugins currentClassPlugins = plugins.forClass(clazz);
 
-			// check the code
-			Timers.start("check-java");
-			currentClassPlugins.getCheckVisitor().scan(cu, context);
-			context.getChecks().check();
-			Timers.end("check-java");
+		// check the code
+		Timers.start("check-java");
+		currentClassPlugins.getCheckVisitor().scan(cu, context);
+		context.getChecks().check();
+		Timers.end("check-java");
 
-			// generate the javascript code
-			Timers.start("write-js-ast");
-			AstRoot javascriptRoot = (AstRoot) currentClassPlugins.getWriterVisitor().scan(cu, context);
-			Timers.end("write-js-ast");
+		// generate the javascript code
+		Timers.start("write-js-ast");
+		AstRoot javascriptRoot = (AstRoot) currentClassPlugins.getWriterVisitor().scan(cu, context);
+		Timers.end("write-js-ast");
 
-			// dump the ast to a file
-			Timers.start("dump-js");
-			writer = Files.newWriter(outputFile, Charset.forName(configuration.getSourceEncoding()));
-			context.writeJavaScript(javascriptRoot, writer);
-			writer.flush();
-			Timers.end("dump-js");
-		} catch (IOException e1) {
-			throw new STJSRuntimeException("Could not open output file " + outputFile + ":" + e1, e1);
-		} finally {
-			Closeables.closeQuietly(writer);
-		}
-
-		Timers.start("write-props");
-		// write properties
 		STJSClass stjsClass = new STJSClass(dependencyResolver, targetFolder, className);
 		Set<String> resolvedClasses = new LinkedHashSet<String>(names.getResolvedTypes());
 		resolvedClasses.remove(className);
 		stjsClass.setDependencies(resolvedClasses);
 		stjsClass.setGeneratedJavascriptFile(relative(generationFolder, className));
-		stjsClass.store();
-		Timers.end("write-props");
 
-		if (configuration.isGenerateSourceMap()) {
-			generateSourceMap(generationFolder, configuration, context, outputFile, stjsClass);
-		}
+		// dump the ast to a file
+		taskExecutor.execute(new DumpFilesTask(outputFile, context, javascriptRoot, stjsClass, generationFolder, configuration
+				.isGenerateSourceMap()));
+
 		return stjsClass;
-	}
-
-	/**
-	 * generate the source map for the given class
-	 */
-	private void generateSourceMap(GenerationDirectory generationFolder, GeneratorConfiguration configuration, GenerationContext context,
-			File outputFile, STJSClass stjsClass) {
-		BufferedWriter sourceMapWriter = null;
-
-		try {
-			// write the source map
-			sourceMapWriter = Files.newWriter(getSourceMapFile(generationFolder.getAbsolutePath(), stjsClass.getClassName()),
-					Charset.forName(configuration.getSourceEncoding()));
-			context.writeSourceMap(sourceMapWriter);
-			sourceMapWriter.flush();
-
-			// copy the source aside the generated js to be able to have it delivered to the browser for debugging
-			Files.copy(context.getInputFile(), new File(outputFile.getParentFile(), context.getInputFile().getName()));
-			// copy the STJS properties file in the same folder as the Javascript file (if this folder is different
-			// to be
-			// able to do backward analysis: i.e fine the class name corresponding to a JS)
-			File stjsPropFile = stjsClass.getStjsPropertiesFile();
-			File copyStjsPropFile = new File(generationFolder.getAbsolutePath(), ClassUtils.getPropertiesFileName(stjsClass.getClassName()));
-			if (!stjsPropFile.equals(copyStjsPropFile)) {
-				Files.copy(stjsPropFile, copyStjsPropFile);
-			}
-		} catch (IOException e) {
-			throw new STJSRuntimeException("Could generate source map:" + e, e);
-		} finally {
-			if (sourceMapWriter != null) {
-				Closeables.closeQuietly(sourceMapWriter);
-			}
-		}
 	}
 
 	private URI relative(GenerationDirectory generationFolder, String className) {
@@ -223,7 +198,8 @@ public class Generator {
 			// return new URI(file.getPath().replace('\\', '/'));
 			// }
 			// return getOutputFile(generationFolder, className).toURI();
-		} catch (URISyntaxException e) {
+		}
+		catch (URISyntaxException e) {
 			throw new JavascriptClassGenerationException(className, e);
 		}
 	}
@@ -236,14 +212,7 @@ public class Generator {
 					"A Java compiler is not available for this project. You may have configured your environment to run with JRE instead of a JDK");
 		}
 		if (fileManager == null) {
-			// reuse the file managers
-			DiagnosticListener<JavaFileObject> diag = new DiagnosticListener<JavaFileObject>() {
-				@Override
-				public void report(Diagnostic<? extends JavaFileObject> diagnostic) {
-					System.out.println("ERR:" + diagnostic.getMessage(Locale.getDefault()));
-				}
-			};
-			fileManager = compiler.getStandardFileManager(diag, null, Charset.forName(sourceEncoding));
+			fileManager = compiler.getStandardFileManager(null, null, Charset.forName(sourceEncoding));
 			classLoaderFileManager = new CustomClassloaderJavaFileManager(builtProjectClassLoader, fileManager);
 		}
 		return compiler;
@@ -274,7 +243,8 @@ public class Generator {
 			context.setCompilationUnit(cu);
 
 			return cu;
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new JavascriptFileGenerationException(new SourcePosition(context.getInputFile(), 0, 0), "Cannot parse the Java file:" + e);
 		}
 
@@ -294,9 +264,11 @@ public class Generator {
 		File outputFile = new File(folder, STJS_FILE);
 		try {
 			Files.copy(new InputStreamSupplier(stjs), outputFile);
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new STJSRuntimeException("Could not copy the " + STJS_FILE + " file to the folder " + folder + ":" + e.getMessage(), e);
-		} finally {
+		}
+		finally {
 			Closeables.closeQuietly(stjs);
 		}
 	}
@@ -352,7 +324,8 @@ public class Generator {
 			Class<?> clazz;
 			try {
 				clazz = builtProjectClassLoader.loadClass(parentClassName);
-			} catch (ClassNotFoundException e) {
+			}
+			catch (ClassNotFoundException e) {
 				throw new STJSRuntimeException(e);
 			}
 			if (ClassUtils.isBridge(clazz)) {
@@ -378,6 +351,93 @@ public class Generator {
 	 */
 	public ClassWithJavascript getExistingStjsClass(ClassLoader classLoader, Class<?> testClass) {
 		return new GeneratorDependencyResolver(classLoader, null, null, null, null).resolve(testClass.getName());
+	}
+
+	private class DumpFilesTask<JS> implements Runnable {
+		private final File outputFile;
+		private final GenerationContext<JS> context;
+		private final JS javascriptRoot;
+		private final STJSClass stjsClass;
+		private final GenerationDirectory generationFolder;
+		private final boolean generateSourceMap;
+
+		public DumpFilesTask(File outputFile, GenerationContext<JS> context, JS javascriptRoot, STJSClass stjsClass,
+				GenerationDirectory generationFolder, boolean generateSourceMap) {
+			this.outputFile = outputFile;
+			this.context = context;
+			this.javascriptRoot = javascriptRoot;
+			this.stjsClass = stjsClass;
+			this.generationFolder = generationFolder;
+			this.generateSourceMap = generateSourceMap;
+		}
+
+		@Override
+		public void run() {
+			writeJavaScript();
+			writePropertiesFile();
+			writeSourceMap();
+		}
+
+		private void writeJavaScript() {
+			BufferedWriter writer = null;
+			try {
+				Timers.start("dump-js");
+				writer = Files.newWriter(outputFile, Charset.forName(sourceEncoding));
+				context.writeJavaScript(javascriptRoot, writer);
+				writer.flush();
+				Timers.end("dump-js");
+			}
+			catch (IOException e) {
+				throw new STJSRuntimeException("Could not open output file " + outputFile + ":" + e, e);
+			}
+			finally {
+				Closeables.closeQuietly(writer);
+			}
+		}
+
+		// write properties
+
+		private void writePropertiesFile() {
+			Timers.start("write-props");
+			stjsClass.store();
+			Timers.end("write-props");
+		}
+
+		private void writeSourceMap() {
+			if (generateSourceMap) {
+				BufferedWriter sourceMapWriter = null;
+
+				try {
+					// write the source map
+					sourceMapWriter = Files.newWriter(getSourceMapFile(generationFolder.getAbsolutePath(), stjsClass.getClassName()),
+							Charset.forName(sourceEncoding));
+					context.writeSourceMap(sourceMapWriter);
+					sourceMapWriter.flush();
+
+					// copy the source aside the generated js to be able to have it delivered to the browser for
+					// debugging
+					Files.copy(context.getInputFile(), new File(outputFile.getParentFile(), context.getInputFile().getName()));
+					// copy the STJS properties file in the same folder as the Javascript file (if this folder is
+					// different
+					// to be
+					// able to do backward analysis: i.e fine the class name corresponding to a JS)
+					File stjsPropFile = stjsClass.getStjsPropertiesFile();
+					File copyStjsPropFile = new File(generationFolder.getAbsolutePath(), ClassUtils.getPropertiesFileName(stjsClass
+							.getClassName()));
+					if (!stjsPropFile.equals(copyStjsPropFile)) {
+						Files.copy(stjsPropFile, copyStjsPropFile);
+					}
+				}
+				catch (IOException e) {
+					throw new STJSRuntimeException("Could generate source map:" + e, e);
+				}
+				finally {
+					if (sourceMapWriter != null) {
+						Closeables.closeQuietly(sourceMapWriter);
+					}
+				}
+			}
+		}
 	}
 
 }

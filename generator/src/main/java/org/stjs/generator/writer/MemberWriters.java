@@ -1,24 +1,24 @@
 package org.stjs.generator.writer;
 
-import javax.lang.model.element.Element;
-
-import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.Keyword;
-import org.stjs.generator.utils.JavaNodes;
+
+import com.sun.source.tree.Tree;
 
 public final class MemberWriters {
 	private MemberWriters() {
 		//
 	}
 
-	public static <JS> JS buildTarget(GenerationContext<JS> context, Element memberDecl) {
-		if (JavaNodes.isGlobal(memberDecl.getEnclosingElement())) {
+	public static <JS, T extends Tree> JS buildTarget(TreeWrapper<T, JS> tw) {
+		if (tw.getEnclosingType().isGlobal()) {
 			return null;
 		}
-		if (JavaNodes.isStatic(memberDecl)) {
-			return context.js().name(context.getNames().getTypeName(context, memberDecl.getEnclosingElement()));
+
+		if (tw.isStatic()) {
+			return tw.getContext().js().name(tw.getEnclosingType().getTypeName());
 		}
-		return context.js().keyword(Keyword.THIS);
+		return tw.getContext().js().keyword(Keyword.THIS);
 	}
 
 }

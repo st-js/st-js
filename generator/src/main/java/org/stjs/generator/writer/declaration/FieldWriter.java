@@ -8,8 +8,7 @@ import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.STJSRuntimeException;
-import org.stjs.generator.javac.TreeUtils;
-import org.stjs.generator.javac.TypesUtils;
+import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.writer.WriterContributor;
@@ -57,11 +56,11 @@ public class FieldWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, VariableTree tree, GenerationContext<JS> context) {
+		TreeWrapper<VariableTree, JS> tw = context.getCurrentWrapper();
 		JS initializer = null;
 		if (tree.getInitializer() == null) {
-			Element element = TreeUtils.elementFromDeclaration(tree);
-			if (TypesUtils.isPrimitive(element.asType())) {
-				initializer = getPrimitiveDefaultValue(element, context);
+			if (tw.isPrimitiveType()) {
+				initializer = getPrimitiveDefaultValue(tw.getElement(), context);
 			} else {
 				initializer = context.js().keyword(Keyword.NULL);
 			}
@@ -70,7 +69,11 @@ public class FieldWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		}
 
 		String fieldName = tree.getName().toString();
-		JS member = context.js().property(getMemberTarget(tree, context), fieldName);
+		if (tw.getEnclosingType().isGlobal()) {
+			// var field = init; //for global types
+			return context.js().variableDeclaration(true, fieldName, initializer);
+		}
+		JS member = context.js().property(getMemberTarget(tw), fieldName);
 		return context.js().expressionStatement(context.js().assignment(AssignOperator.ASSIGN, member, initializer));
 	}
 }

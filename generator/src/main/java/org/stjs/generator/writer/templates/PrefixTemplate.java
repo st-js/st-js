@@ -19,7 +19,7 @@ public class PrefixTemplate<JS> implements WriterContributor<MethodInvocationTre
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
-		JS target = MethodInvocationWriter.buildTarget(visitor, tree, context);
+		JS target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree>getCurrentWrapper());
 		String name = MethodInvocationWriter.buildMethodName(tree);
 		name = name.substring(1);
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);

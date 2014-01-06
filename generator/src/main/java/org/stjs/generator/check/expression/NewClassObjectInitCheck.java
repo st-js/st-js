@@ -1,16 +1,14 @@
 package org.stjs.generator.check.expression;
 
-import javax.lang.model.element.Element;
-
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
-import org.stjs.generator.javac.TreeUtils;
-import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.writer.expression.NewClassWriter;
 
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BlockTree;
+import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionStatementTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.StatementTree;
@@ -39,8 +37,9 @@ public class NewClassObjectInitCheck implements CheckContributor<NewClassTree> {
 	@Override
 	public Void visit(CheckVisitor visitor, NewClassTree tree, GenerationContext<Void> context) {
 		BlockTree initBlock = NewClassWriter.getDoubleBracesBlock(tree);
-		Element type = TreeUtils.elementFromUse(tree.getIdentifier());
-		if (initBlock == null && !JavaNodes.isSyntheticType(type)) {
+		TreeWrapper<ClassTree, Void> tw = context.getCurrentWrapper();
+
+		if (initBlock == null && !tw.child(tree.getIdentifier()).isSyntheticType()) {
 			return null;
 		}
 

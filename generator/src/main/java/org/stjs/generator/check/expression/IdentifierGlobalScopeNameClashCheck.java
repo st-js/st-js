@@ -2,14 +2,13 @@ package org.stjs.generator.check.expression;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.javac.TreeUtils;
-import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.javac.TreeWrapper;
 
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionTree;
@@ -98,8 +97,9 @@ public class IdentifierGlobalScopeNameClashCheck implements CheckContributor<Ide
 			return null;
 		}
 
-		TypeElement typeElement = (TypeElement) fieldElement.getEnclosingElement();
-		if (!JavaNodes.isGlobal(typeElement)) {
+		TreeWrapper<ExpressionTree, Void> tw = context.getCurrentWrapper();
+
+		if (!tw.getEnclosingType().isGlobal()) {
 			// check only global fields
 			return null;
 		}

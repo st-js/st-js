@@ -10,6 +10,7 @@ import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.WriterContributor;
@@ -18,8 +19,8 @@ import org.stjs.generator.writer.WriterVisitor;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewClassTree;
+import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
-import com.sun.source.util.TreePath;
 
 public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements WriterContributor<MethodTree, JS> {
 
@@ -34,14 +35,15 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 	/**
 	 * @return true if this method is the unique method of an online declaration
 	 */
-	private boolean isMethodOfJavascriptFunction(TreePath path) {
-		if (path.getParentPath().getLeaf() instanceof NewClassTree) {
-			return JavaNodes.isJavaScriptFunction(TreeUtils.elementFromUse(((NewClassTree) path.getParentPath().getLeaf()).getIdentifier()));
+	private boolean isMethodOfJavascriptFunction(TreeWrapper<Tree, JS> treeWrapper) {
+		TreeWrapper<Tree, JS> parent = treeWrapper.parent().parent();
+		if (parent.getTree() instanceof NewClassTree) {
+			return parent.child(((NewClassTree) parent.getTree()).getIdentifier()).isJavaScriptFunction();
 		}
 		return false;
 	}
 
-	private String getAnonymousTypeConstructorName(MethodTree tree, GenerationContext context) {
+	private String getAnonymousTypeConstructorName(MethodTree tree, GenerationContext<JS> context) {
 		if (!JavaNodes.isConstructor(tree)) {
 			return null;
 		}
@@ -66,8 +68,8 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, MethodTree tree, GenerationContext<JS> context) {
-		Element element = JavaNodes.elementFromDeclaration(tree);
-		if (JavaNodes.isNative(element)) {
+		TreeWrapper<MethodTree, JS> tw = context.getCurrentWrapper();
+		if (tw.isNative()) {
 			// native methods are there only to indicate already existing javascript code - or to allow method
 			// overloading
 			return null;
@@ -87,9 +89,13 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		JS decl = context.js().function(name, params, body);
 
 		// add the constructor.<name> or prototype.<name> if needed
-		if (!JavaNodes.isConstructor(tree) && !isMethodOfJavascriptFunction(context.getCurrentPath())) {
+		if (!JavaNodes.isConstructor(tree) && !isMethodOfJavascriptFunction(context.getCurrentWrapper())) {
 			String methodName = context.getNames().getMethodName(context, tree, context.getCurrentPath());
-			JS member = context.js().property(getMemberTarget(tree, context), methodName);
+			if (tw.getEnclosingType().isGlobal()) {
+				// var method=function() ...; //for global types
+				return context.js().variableDeclaration(true, methodName, decl);
+			}
+			JS member = context.js().property(getMemberTarget(tw), methodName);
 			return context.js().expressionStatement(context.js().assignment(AssignOperator.ASSIGN, member, decl));
 		}
 

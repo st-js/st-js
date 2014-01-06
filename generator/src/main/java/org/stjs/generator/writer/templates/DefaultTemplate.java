@@ -66,7 +66,7 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 			return callToSuperConstructor(visitor, tree, context);
 		}
 
-		JS target = MethodInvocationWriter.buildTarget(visitor, tree, context);
+		JS target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree>getCurrentWrapper());
 		String name = MethodInvocationWriter.buildMethodName(tree);
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
 		return context.js().functionCall(context.js().property(target, name), arguments);

@@ -187,7 +187,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			return;
 		}
 		TypeElement type = TreeUtils.elementFromDeclaration(clazz);
-		JS target = JavaNodes.isGlobal(type) ? null : context.js().name(context.getNames().getTypeName(context, type));
+		JS target = context.getCurrentWrapper().isGlobal() ? null : context.js().name(context.getNames().getTypeName(context, type));
 
 		JavaScriptBuilder<JS> js = context.js();
 		JS condition = js.unary(UnaryOperator.LOGICAL_COMPLEMENT, js.property(js.name(GeneratorConstants.STJS), "mainCallDisabled"));
@@ -299,8 +299,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	 * class must appear nowhere.
 	 */
 	private boolean generateGlobal(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
-		Element type = TreeUtils.elementFromDeclaration(tree);
-		if (!JavaNodes.isGlobal(type)) {
+		if (!context.getCurrentWrapper().isGlobal()) {
 			return false;
 		}
 
