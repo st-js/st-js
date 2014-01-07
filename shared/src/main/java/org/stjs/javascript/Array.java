@@ -233,6 +233,70 @@ public class Array<V> implements Iterable<String> {
 		}
 	}
 
+	/**
+	 * Deletes the element at the specified index from this <tt>Array</tt>, leaving an empty hole. Unlike
+	 * <tt>splice()</tt> This method does not affect the length of this <tt>Array</tt>, it only unsets the value at the
+	 * specified index. After <tt>$delete()</tt> is called on an index, that index will not be iterated over any more in
+	 * for-each loops on this <tt>Array</tt>. <tt>$delete()</tt> can also be used to remove non-array elements from this
+	 * <tt>Array</tt> (e.g. <tt>myArray.$delete("foobar")</tt>).
+	 * <p>
+	 * <tt>myArray.$delete(index)</tt> is translated to <tt>delete myArray[index]</tt> in JavaScript.
+	 * 
+	 * @param index
+	 *            the index
+	 * @return true
+	 */
+	@Template("delete")
+	public boolean $delete(String index) {
+		Long i = this.toArrayIndex(index);
+		if (i == null) {
+			this.nonArrayElements.remove(index);
+		} else {
+			this.$delete(i);
+		}
+		return true;
+	}
+
+	/**
+	 * Deletes the element at the specified index from this <tt>Array</tt>, leaving an empty hole. Unlike
+	 * <tt>splice()</tt> This method does not affect the length of this <tt>Array</tt>, it only unsets the value at the
+	 * specified index. After <tt>$delete()</tt> is called on an index, that index will not be iterated over any more in
+	 * for-each loops on this <tt>Array</tt>. <tt>$delete()</tt> can also be used to remove non-array elements from this
+	 * <tt>Array</tt> (e.g. <tt>myArray.$delete("foobar")</tt>)
+	 * <p>
+	 * <tt>myArray.$delete(index)</tt> is translated to <tt>delete myArray[index]</tt> in JavaScript.
+	 * 
+	 * @param index
+	 *            the index
+	 * @return true
+	 */
+	@Template("delete")
+	public boolean $delete(int index) {
+		if (index < 0) {
+			// not an array index. Remove the property from the non-array properties
+			this.nonArrayElements.remove(JSAbstractOperations.ToString(index));
+		} else {
+			this.$delete((long) index);
+		}
+		return true;
+	}
+
+	private void $delete(long index) {
+		if (index >= this.$length()) {
+			// nothing to do
+			return;
+		}
+
+		boolean isSet = array.isSet(index);
+		long newSetElements = this.setElements;
+		if (isSet) {
+			newSetElements--;
+		}
+
+		this.switchStoreIfNeeded(this.length, newSetElements);
+		this.array.delete(index);
+	}
+
 	private void $set(long index, V value) {
 		// check if store type is correct for setting this value
 		boolean isSet = array.isSet(index);
@@ -1163,6 +1227,8 @@ public class Array<V> implements Iterable<String> {
 
 		abstract boolean isSet(long index);
 
+		abstract void delete(long index);
+
 		abstract E get(long index);
 
 		abstract Array<E> slice(long fromIncluded, long toExcluded);
@@ -1353,6 +1419,11 @@ public class Array<V> implements Iterable<String> {
 				}
 			}
 		}
+
+		@Override
+		void delete(long index) {
+			this.elements.set((int) index, UNSET);
+		}
 	}
 
 	private final class SparseArrayStore<E> extends ArrayStore<E> {
@@ -1493,6 +1564,11 @@ public class Array<V> implements Iterable<String> {
 		@Override
 		void padTo(long newLength) {
 			// no padding needed
+		}
+
+		@Override
+		void delete(long index) {
+			this.elements.remove(index);
 		}
 	}
 
