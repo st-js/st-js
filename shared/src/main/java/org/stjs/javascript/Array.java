@@ -934,7 +934,7 @@ public class Array<V> implements Iterable<String> {
 	 *         <tt>false</tt> if not
 	 */
 	@BrowserCompatibility("IE:9+")
-	public boolean every(Function3<V, Integer, Array<V>, Boolean> callbackfn) {
+	public boolean every(Function3<V, Long, Array<V>, Boolean> callbackfn) {
 		// TODO Auto-generated method stub
 		return false;
 	}
