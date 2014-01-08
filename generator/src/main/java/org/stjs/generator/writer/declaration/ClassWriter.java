@@ -18,6 +18,7 @@ import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javac.TypesUtils;
 import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.javascript.JavaScriptBuilder;
@@ -31,7 +32,6 @@ import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.Tree;
 
@@ -64,8 +64,12 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			return context.js().keyword(Keyword.NULL);
 		}
 
-		Element superType = TreeUtils.elementFromUse((ExpressionTree) clazz.getExtendsClause());
-		return context.js().name(context.getNames().getTypeName(context, superType));
+		TreeWrapper<Tree, JS> superType = context.getCurrentWrapper().child(clazz.getExtendsClause());
+		if (superType.isSyntheticType()) {
+			return context.js().keyword(Keyword.NULL);
+		}
+
+		return context.js().name(superType.getTypeName());
 	}
 
 	/**
@@ -75,14 +79,18 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	private JS getInterfaces(ClassTree clazz, GenerationContext<JS> context) {
 		List<JS> ifaces = new ArrayList<JS>();
 		for (Tree iface : clazz.getImplementsClause()) {
-			Element ifaceType = TreeUtils.elementFromUse((ExpressionTree) iface);
-			ifaces.add(context.js().name(context.getNames().getTypeName(context, ifaceType)));
+			TreeWrapper<Tree, JS> ifaceType = context.getCurrentWrapper().child(iface);
+			if (!ifaceType.isSyntheticType()) {
+				ifaces.add(context.js().name(ifaceType.getTypeName()));
+			}
 		}
 
 		Element type = TreeUtils.elementFromDeclaration(clazz);
 		if (clazz.getExtendsClause() != null && type.getKind() == ElementKind.INTERFACE) {
-			Element superType = TreeUtils.elementFromUse((ExpressionTree) clazz.getExtendsClause());
-			ifaces.add(0, context.js().name(context.getNames().getTypeName(context, superType)));
+			TreeWrapper<Tree, JS> superType = context.getCurrentWrapper().child(clazz.getExtendsClause());
+			if (!superType.isSyntheticType()) {
+				ifaces.add(0, context.js().name(superType.getTypeName()));
+			}
 		}
 		return context.js().array(ifaces);
 	}
@@ -101,7 +109,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			}
 		}
 		// no constructor found : interfaces, return an empty function
-		return context.js().function(null, Collections.<JS>emptyList(), null);
+		return context.js().function(null, Collections.<JS> emptyList(), null);
 	}
 
 	private List<Tree> getAllMembersExceptConstructors(ClassTree clazz) {
@@ -191,7 +199,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 
 		JavaScriptBuilder<JS> js = context.js();
 		JS condition = js.unary(UnaryOperator.LOGICAL_COMPLEMENT, js.property(js.name(GeneratorConstants.STJS), "mainCallDisabled"));
-		JS thenPart = js.expressionStatement(js.functionCall(js.property(target, "main"), Collections.<JS>emptyList()));
+		JS thenPart = js.expressionStatement(js.functionCall(js.property(target, "main"), Collections.<JS> emptyList()));
 		stmts.add(js.ifStatement(condition, thenPart, null));
 	}
 

@@ -1,10 +1,8 @@
 package org.stjs.generator.writer.inheritance;
 
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
-import org.stjs.generator.JavascriptFileGenerationException;
 
 public class InheritanceGeneratorTest {
 
@@ -34,16 +32,14 @@ public class InheritanceGeneratorTest {
 		assertCodeContains(Inheritance5.class, "stjs.extend(Inheritance5, null, [MyInterface3],");
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test
 	public void testImplementsSyntheticType() {
-		generate(Inheritance6.class);
+		assertCodeContains(Inheritance6.class, "stjs.extend(Inheritance6, null, [],");
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test
 	public void testExtendsSyntheticType() {
-		generate(Inheritance9.class);
+		assertCodeContains(Inheritance9.class, "stjs.extend(Inheritance9, null, [],");
 	}
 
 	@Test

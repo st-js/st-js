@@ -51,6 +51,11 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 			return null;
 		}
 
+		// avoid call to super for synthetic types
+		if (GeneratorConstants.SUPER.equals(methodName) && context.getCurrentWrapper().getEnclosingType().isSyntheticType()) {
+			return null;
+		}
+
 		// transform it into superType.[prototype.method].call(this, args..);
 		String typeName = context.getNames().getTypeName(context, typeElement);
 		JS superType = context.js().name(GeneratorConstants.SUPER.equals(methodName) ? typeName : typeName + ".prototype." + methodName);
@@ -66,7 +71,7 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 			return callToSuperConstructor(visitor, tree, context);
 		}
 
-		JS target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree>getCurrentWrapper());
+		JS target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree> getCurrentWrapper());
 		String name = MethodInvocationWriter.buildMethodName(tree);
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
 		return context.js().functionCall(context.js().property(target, name), arguments);
