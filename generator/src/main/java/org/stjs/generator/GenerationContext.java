@@ -29,7 +29,6 @@ import org.stjs.generator.check.Checks;
 import org.stjs.generator.javac.AnnotationHelper;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.JavaScriptBuilder;
-import org.stjs.generator.javascript.rhino.RhinoJavaScriptBuilder;
 import org.stjs.generator.name.JavaScriptNameProvider;
 import org.stjs.generator.visitor.TreePathHolder;
 
@@ -49,7 +48,7 @@ import com.sun.source.util.Trees;
  */
 public class GenerationContext<JS> implements TreePathHolder {
 
-	private static final Object NULL = new String();
+	private static final Object NULL = new Object();
 
 	private final File inputFile;
 
@@ -80,13 +79,13 @@ public class GenerationContext<JS> implements TreePathHolder {
 	private final Map<Element, TreeWrapper<?, JS>> cacheWrappersByElement = Maps.newIdentityHashMap();
 
 	public GenerationContext(File inputFile, GeneratorConfiguration configuration, JavaScriptNameProvider names, Trees trees,
-			ClassLoader builtProjectClassLoader, Map<AnnotationCacheKey, Object> cacheAnnotations) {
+			ClassLoader builtProjectClassLoader, Map<AnnotationCacheKey, Object> cacheAnnotations, JavaScriptBuilder<JS> javaScriptBuilder) {
 		this.inputFile = inputFile;
 		this.configuration = configuration;
 		this.names = names;
 		this.trees = trees;
 		this.checks = new Checks();
-		this.javaScriptBuilder = (JavaScriptBuilder<JS>) new RhinoJavaScriptBuilder();
+		this.javaScriptBuilder = javaScriptBuilder;
 		this.builtProjectClassLoader = builtProjectClassLoader;
 		this.cacheAnnotations = cacheAnnotations;
 	}
@@ -220,21 +219,24 @@ public class GenerationContext<JS> implements TreePathHolder {
 		return tw;
 	}
 
+	private TreePath getTreePath(Element enclosingElement) {
+		TreePath path = trees.getPath(enclosingElement);
+		if (path == null) {
+			Tree tree = trees.getTree(enclosingElement);
+			if (tree == null) {
+				tree = new DummyTree();
+			}
+			// XXX: this is ugly, null is better here?
+			path = new TreePath(new TreePath(compilationUnit), tree);
+		}
+		return path;
+	}
+
 	@SuppressWarnings("unchecked")
 	public <T extends Tree> TreeWrapper<T, JS> wrap(Element enclosingElement) {
 		TreeWrapper<T, JS> tw = (TreeWrapper<T, JS>) cacheWrappersByElement.get(enclosingElement);
 		if (tw == null) {
-
-			TreePath path = trees.getPath(enclosingElement);
-			if (path == null) {
-				Tree tree = trees.getTree(enclosingElement);
-				if (tree == null) {
-					tree = new DummyTree();
-				}
-				// XXX: this is ugly, null is better here?
-				path = new TreePath(new TreePath(compilationUnit), tree);
-			}
-			tw = new TreeWrapper<T, JS>(enclosingElement, path, this);
+			tw = new TreeWrapper<T, JS>(enclosingElement, getTreePath(enclosingElement), this);
 			cacheWrappersByElement.put(enclosingElement, tw);
 		}
 
@@ -250,13 +252,13 @@ public class GenerationContext<JS> implements TreePathHolder {
 		AnnotationCacheKey key = new AnnotationCacheKey(annotationType, element);
 		Object ret = cacheAnnotations.get(key);
 		if (ret != null) {
-			return ret == NULL ? null : (T) ret;
+			return NULL.equals(ret) ? null : (T) ret;
 		}
 		ret = AnnotationHelper.getAnnotation(elements, element, annotationType);
-		if (ret != null) {
-			cacheAnnotations.put(key, ret);
-		} else {
+		if (ret == null) {
 			cacheAnnotations.put(key, NULL);
+		} else {
+			cacheAnnotations.put(key, ret);
 		}
 		return (T) ret;
 	}

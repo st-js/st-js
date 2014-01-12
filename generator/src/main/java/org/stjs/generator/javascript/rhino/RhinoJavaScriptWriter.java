@@ -105,7 +105,8 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		for (int i = 0; i < level; i++) {
 			try {
 				writer.append(INDENT);
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				throw new STJSRuntimeException("Writing problem:" + e, e);
 			}
 			currentColumn += INDENT.length();
@@ -119,7 +120,8 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		}
 		try {
 			writer.append(arg);
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new STJSRuntimeException("Writing problem:" + e, e);
 		}
 		// TODO check for newlines in the string
@@ -149,7 +151,8 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	public RhinoJavaScriptWriter println() {
 		try {
 			writer.append('\n');
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new STJSRuntimeException("Writing problem:" + e, e);
 		}
 		indented = false;

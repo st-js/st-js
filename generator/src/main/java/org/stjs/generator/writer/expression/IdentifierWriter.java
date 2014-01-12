@@ -20,7 +20,7 @@ import com.sun.source.tree.IdentifierTree;
  */
 public class IdentifierWriter<JS> implements WriterContributor<IdentifierTree, JS> {
 
-	private JS visitField(Element def, IdentifierTree tree, GenerationContext<JS> context) {
+	private JS visitField(IdentifierTree tree, GenerationContext<JS> context) {
 		return context.js().property(MemberWriters.buildTarget(context.getCurrentWrapper()), tree.getName());
 	}
 
@@ -46,7 +46,7 @@ public class IdentifierWriter<JS> implements WriterContributor<IdentifierTree, J
 			return null;
 		}
 		if (def.getKind() == ElementKind.FIELD) {
-			return visitField(def, tree, context);
+			return visitField(tree, context);
 		}
 		if (def.getKind() == ElementKind.ENUM_CONSTANT) {
 			return visitEnumConstant(def, tree, context);

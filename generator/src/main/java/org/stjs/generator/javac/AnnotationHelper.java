@@ -21,9 +21,7 @@ public final class AnnotationHelper {
 			// make sure we're only doing it for methods
 			return null;
 		}
-		if ("<init>".equals(element.getSimpleName())) {
-			return null;
-		}
+
 		T t = element.getAnnotation(annotationType);
 		if (t != null) {
 			return t;

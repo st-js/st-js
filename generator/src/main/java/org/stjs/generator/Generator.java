@@ -35,9 +35,10 @@ import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 
-import org.mozilla.javascript.ast.AstRoot;
 import org.stjs.generator.GenerationContext.AnnotationCacheKey;
 import org.stjs.generator.javac.CustomClassloaderJavaFileManager;
+import org.stjs.generator.javascript.JavaScriptBuilder;
+import org.stjs.generator.javascript.rhino.RhinoJavaScriptBuilder;
 import org.stjs.generator.name.DefaultJavaScriptNameProvider;
 import org.stjs.generator.name.JavaScriptNameProvider;
 import org.stjs.generator.plugin.GenerationPlugins;
@@ -59,8 +60,9 @@ import com.sun.tools.javac.api.JavacTool;
  * @author acraciun
  */
 public class Generator {
+	private static final int EXECUTOR_TERMINAL_TIMEOUT = 10;
 	private static final String STJS_FILE = "stjs.js";
-	private final GenerationPlugins plugins;
+	private final GenerationPlugins<Object> plugins;
 	private StandardJavaFileManager fileManager;
 	private JavaFileManager classLoaderFileManager;
 	private final Map<AnnotationCacheKey, Object> cacheAnnotations = Maps.newHashMap();
@@ -68,9 +70,10 @@ public class Generator {
 	private String sourceEncoding;
 
 	public Generator() {
-		plugins = new GenerationPlugins();
+		plugins = new GenerationPlugins<Object>();
 	}
 
+	@SuppressWarnings("PMD.DoNotUseThreads")
 	public void init(ClassLoader builtProjectClassLoader, String sourceEncoding) {
 		// nothing to do
 		cacheAnnotations.clear();
@@ -84,16 +87,17 @@ public class Generator {
 		this.sourceEncoding = sourceEncoding;
 	}
 
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings("BC_UNCONFIRMED_CAST")
 	public void close() {
 		Closeables.closeQuietly(fileManager);
 		if (taskExecutor instanceof ExecutorService) {
 			ExecutorService es = (ExecutorService) taskExecutor;
 			es.shutdown();
 			try {
-				es.awaitTermination(10, TimeUnit.SECONDS);
+				es.awaitTermination(EXECUTOR_TERMINAL_TIMEOUT, TimeUnit.SECONDS);
 			}
 			catch (InterruptedException e) {
-				// do nothing
+				return;
 			}
 		}
 	}
@@ -127,6 +131,12 @@ public class Generator {
 		}
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private JavaScriptBuilder<Object> getJavaScriptBuilder() {
+		// TODO: here we my return SourceJavaScript builder as well.
+		return (JavaScriptBuilder) new RhinoJavaScriptBuilder();
+	}
+
 	/**
 	 * @param builtProjectClassLoader
 	 * @param inputFile
@@ -134,6 +144,7 @@ public class Generator {
 	 * @param configuration
 	 * @return the list of imports needed by the generated class
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ClassWithJavascript generateJavascript(ClassLoader builtProjectClassLoader, String className, File sourceFolder,
 			GenerationDirectory generationFolder, File targetFolder, GeneratorConfiguration configuration)
 			throws JavascriptFileGenerationException {
@@ -149,21 +160,22 @@ public class Generator {
 		File inputFile = getInputFile(sourceFolder, className);
 		File outputFile = getOutputFile(generationFolder.getAbsolutePath(), className);
 		JavaScriptNameProvider names = new DefaultJavaScriptNameProvider();
-		GenerationContext context = new GenerationContext(inputFile, configuration, names, null, builtProjectClassLoader, cacheAnnotations);
+		GenerationPlugins<Object> currentClassPlugins = plugins.forClass(clazz);
+
+		GenerationContext<Object> context = new GenerationContext<Object>(inputFile, configuration, names, null, builtProjectClassLoader,
+				cacheAnnotations, getJavaScriptBuilder());
 
 		CompilationUnitTree cu = parseAndResolve(inputFile, context, builtProjectClassLoader, configuration.getSourceEncoding());
 
-		GenerationPlugins currentClassPlugins = plugins.forClass(clazz);
-
 		// check the code
 		Timers.start("check-java");
-		currentClassPlugins.getCheckVisitor().scan(cu, context);
+		currentClassPlugins.getCheckVisitor().scan(cu, (GenerationContext) context);
 		context.getChecks().check();
 		Timers.end("check-java");
 
 		// generate the javascript code
 		Timers.start("write-js-ast");
-		AstRoot javascriptRoot = (AstRoot) currentClassPlugins.getWriterVisitor().scan(cu, context);
+		Object javascriptRoot = currentClassPlugins.getWriterVisitor().scan(cu, context);
 		Timers.end("write-js-ast");
 
 		STJSClass stjsClass = new STJSClass(dependencyResolver, targetFolder, className);
@@ -173,7 +185,7 @@ public class Generator {
 		stjsClass.setGeneratedJavascriptFile(relative(generationFolder, className));
 
 		// dump the ast to a file
-		taskExecutor.execute(new DumpFilesTask(outputFile, context, javascriptRoot, stjsClass, generationFolder, configuration
+		taskExecutor.execute(new DumpFilesTask<Object>(outputFile, context, javascriptRoot, stjsClass, generationFolder, configuration
 				.isGenerateSourceMap()));
 
 		return stjsClass;
@@ -218,7 +230,7 @@ public class Generator {
 		return compiler;
 	}
 
-	private CompilationUnitTree parseAndResolve(File inputFile, GenerationContext context, ClassLoader builtProjectClassLoader,
+	private <JS> CompilationUnitTree parseAndResolve(File inputFile, GenerationContext<JS> context, ClassLoader builtProjectClassLoader,
 			String sourceEncoding) {
 		JavaCompiler.CompilationTask task = null;
 		JavacTask javacTask = null;
@@ -353,6 +365,7 @@ public class Generator {
 		return new GeneratorDependencyResolver(classLoader, null, null, null, null).resolve(testClass.getName());
 	}
 
+	@SuppressWarnings("PMD.DoNotUseThreads")
 	private class DumpFilesTask<JS> implements Runnable {
 		private final File outputFile;
 		private final GenerationContext<JS> context;

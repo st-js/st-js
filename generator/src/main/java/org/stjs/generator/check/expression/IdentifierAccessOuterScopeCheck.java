@@ -8,7 +8,6 @@ import javax.lang.model.type.DeclaredType;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
-import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.javac.TreeUtils;
@@ -36,36 +35,39 @@ public class IdentifierAccessOuterScopeCheck implements CheckContributor<Identif
 				context.getTypes().erasure(ownerElement.asType()));
 	}
 
-	@Override
-	public Void visit(CheckVisitor visitor, IdentifierTree tree, GenerationContext<Void> context) {
-		Element fieldElement = TreeUtils.elementFromUse(tree);
+	private boolean isRegularInstanceField(Element fieldElement, IdentifierTree tree) {
 		if (fieldElement == null || fieldElement.getKind() != ElementKind.FIELD) {
 			// only meant for fields
-			return null;
+			return false;
 		}
 		if (JavaNodes.isStatic(fieldElement)) {
 			// only instance fieds
-			return null;
+			return false;
 		}
 
 		if (GeneratorConstants.THIS.equals(tree.getName().toString()) || GeneratorConstants.SUPER.equals(tree.getName().toString())) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public Void visit(CheckVisitor visitor, IdentifierTree tree, GenerationContext<Void> context) {
+		Element fieldElement = TreeUtils.elementFromUse(tree);
+		if (!isRegularInstanceField(fieldElement, tree)) {
 			return null;
 		}
-		try {
-			ClassTree enclosingClassTree = TreeUtils.enclosingClass(context.getCurrentPath());
 
-			TypeElement currentScopeClassElement = getEnclosingElementSkipAnonymousInitializer(TreeUtils
-					.elementFromDeclaration(enclosingClassTree));
-			TypeElement fieldOwnerElement = (TypeElement) fieldElement.getEnclosingElement();
-			if (!isSubtype(context, currentScopeClassElement, fieldOwnerElement)) {
-				context.addError(
-						tree,
-						"In Javascript you cannot access a field from the outer type. "
-								+ "You should define a variable var that=this outside your function definition and use the property of this object. The field: "
-								+ tree);
-			}
-		} catch (Throwable e) {
-			throw new STJSRuntimeException("Error gettting scope from:" + tree, e);
+		ClassTree enclosingClassTree = TreeUtils.enclosingClass(context.getCurrentPath());
+
+		TypeElement currentScopeClassElement = getEnclosingElementSkipAnonymousInitializer(TreeUtils.elementFromDeclaration(enclosingClassTree));
+		TypeElement fieldOwnerElement = (TypeElement) fieldElement.getEnclosingElement();
+		if (!isSubtype(context, currentScopeClassElement, fieldOwnerElement)) {
+			context.addError(
+					tree,
+					"In Javascript you cannot access a field from the outer type. "
+							+ "You should define a variable var that=this outside your function definition and use the property of this object. The field: "
+							+ tree);
 		}
 
 		return null;

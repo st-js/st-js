@@ -22,6 +22,31 @@ import com.sun.source.tree.Tree;
  */
 public class MethodInvocationSuperSynthCheck implements CheckContributor<MethodInvocationTree> {
 
+	private boolean checkSuperConstructor(MethodInvocationTree tree, GenerationContext<Void> context) {
+		String name = MethodInvocationWriter.buildMethodName(tree);
+		if (GeneratorConstants.SUPER.equals(name)) {
+			if (!InternalUtils.isSyntheticConstructor(TreeUtils.enclosingOfKind(context.getCurrentPath(), Tree.Kind.METHOD))) {
+				context.addError(tree, "You cannot call the super constructor if that belongs to a @SyntheticType");
+			}
+			return true;
+		}
+		return false;
+	}
+
+	private boolean checkSuperMethodCall(MethodInvocationTree tree, GenerationContext<Void> context) {
+		if (!(tree.getMethodSelect() instanceof MemberSelectTree)) {
+			// check for Outer.this check
+			return true;
+		}
+
+		MemberSelectTree select = (MemberSelectTree) tree.getMethodSelect();
+		if (GeneratorConstants.SUPER.equals(select.getExpression().toString())) {
+			context.addError(tree, "You cannot call the super method if that belongs to a @SyntheticType");
+			return true;
+		}
+		return false;
+	}
+
 	@Override
 	public Void visit(CheckVisitor visitor, MethodInvocationTree tree, GenerationContext<Void> context) {
 		TreeWrapper<MethodInvocationTree, Void> tw = context.getCurrentWrapper();
@@ -29,24 +54,11 @@ public class MethodInvocationSuperSynthCheck implements CheckContributor<MethodI
 			return null;
 		}
 
-		String name = MethodInvocationWriter.buildMethodName(tree);
-		if (GeneratorConstants.SUPER.equals(name)) {
-			if (!InternalUtils.isSyntheticConstructor(TreeUtils.enclosingOfKind(context.getCurrentPath(), Tree.Kind.METHOD))) {
-				context.addError(tree, "You cannot call the super constructor if that belongs to a @SyntheticType");
-			}
+		if (checkSuperConstructor(tree, context)) {
 			return null;
 		}
 
-		if (!(tree.getMethodSelect() instanceof MemberSelectTree)) {
-			// check for Outer.this check
-			return null;
-		}
-
-		MemberSelectTree select = (MemberSelectTree) tree.getMethodSelect();
-		if (GeneratorConstants.SUPER.equals(select.getExpression().toString())) {
-			context.addError(tree, "You cannot call the super method if that belongs to a @SyntheticType");
-			return null;
-		}
+		checkSuperMethodCall(tree, context);
 		return null;
 	}
 }

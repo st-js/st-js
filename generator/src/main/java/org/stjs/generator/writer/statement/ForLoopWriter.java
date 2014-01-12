@@ -16,7 +16,7 @@ import com.sun.source.tree.VariableTree;
  * @author acraciun
  */
 public class ForLoopWriter<JS> implements WriterContributor<ForLoopTree, JS> {
-	private MultipleVariableWriter<JS> initializerWriter = new MultipleVariableWriter<JS>();
+	private final MultipleVariableWriter<JS> initializerWriter = new MultipleVariableWriter<JS>();
 
 	/**
 	 * if have basically 3 cases: <br>

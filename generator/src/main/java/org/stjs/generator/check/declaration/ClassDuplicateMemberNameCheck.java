@@ -95,14 +95,14 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 			String name = ((VariableTree) member).getName().toString();
 			Element variableElement = TreeUtils.elementFromDeclaration((VariableTree) member);
 			Collection<Element> sameName = existingNames.get(name);
-			if (!sameName.isEmpty()) {
+			if (sameName.isEmpty()) {
+				existingNames.put(name, variableElement);
+			} else {
 				if (!hasOnlyFields(sameName)) {
 					// accept fields with the same name, but not methods and fields
 					context.addError(member, "The type (or one of its parents) contains already a method called [" + name
 							+ "]. Javascript cannot distinguish methods/fields with the same name");
 				}
-			} else {
-				existingNames.put(name, variableElement);
 			}
 		}
 	}

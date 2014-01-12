@@ -32,10 +32,8 @@ public class ClassForbidExtendsSyntheticTypeCheck implements CheckContributor<Cl
 		if (element.getNestingKind() == NestingKind.ANONYMOUS) {
 			return null;
 		}
-		if (tree.getExtendsClause() != null) {
-			if (tw.child(tree.getExtendsClause()).isSyntheticType()) {
-				context.addError(tree, "You cannot extend from a class that is marked as synthetic (@SyntheticType)");
-			}
+		if (tree.getExtendsClause() != null && tw.child(tree.getExtendsClause()).isSyntheticType()) {
+			context.addError(tree, "You cannot extend from a class that is marked as synthetic (@SyntheticType)");
 		}
 		for (Tree iface : tree.getImplementsClause()) {
 			checkInterface(tw.child(iface));

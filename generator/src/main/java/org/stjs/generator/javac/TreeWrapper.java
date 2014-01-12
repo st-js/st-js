@@ -182,6 +182,6 @@ public class TreeWrapper<T extends Tree, JS> {
 
 	public String getMethodTemplate() {
 		Template tpl = context.getAnnotation(element, Template.class);
-		return tpl != null ? tpl.value() : null;
+		return tpl == null ? null : tpl.value();
 	}
 }
