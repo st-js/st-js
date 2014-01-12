@@ -34,23 +34,21 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 	private void checkCandidate(Element overrideCandidate, ExecutableElement methodElement, TypeElement classElement, Tree member,
 			GenerationContext<Void> context) {
 
-		boolean error = false;
 		boolean isMethod = overrideCandidate instanceof ExecutableElement;
 		boolean isFieldOrInnerType = !isMethod;
 
+		String name = methodElement.getSimpleName().toString();
 		if (isFieldOrInnerType) {
 			// it's a field or inner type -> this is illegal
-			error = true;
+			context.addError(member, "There is already a field with the same name as this method in the type or one of its parents: "
+					+ ((TypeElement) overrideCandidate.getEnclosingElement()).getQualifiedName() + "." + overrideCandidate.getSimpleName());
 		} else if (!context.getElements().overrides(methodElement, (ExecutableElement) overrideCandidate, classElement)) {
-			error = true;
-		}
-		if (error) {
-			String name = methodElement.getSimpleName().toString();
 			context.addError(member, "Only maximum one method with the name [" + name
 					+ "] is allowed to have a body. The other methods must be marked as native."
-					+ " The type (or one of its parents) may contain already a method or a field called [" + name
-					+ "] with a different signature. ");
+					+ " The type (or one of its parents) may contain already the method: " + overrideCandidate
+					+ " that has a different signature");
 		}
+
 	}
 
 	private void checkMethod(TypeElement classElement, Tree member, GenerationContext<Void> context, Multimap<String, Element> existingNames) {
