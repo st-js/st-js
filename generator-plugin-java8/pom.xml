@@ -32,16 +32,16 @@
 			<systemPath>${env.JAVA8_HOME}/lib/tools.jar</systemPath>
 		</dependency>
 
-		<!-- test deps -->		
+		<!-- test deps -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.1</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!-- to be removed -->
-			<dependency>
+		<dependency>
 			<groupId>org.st-js.bridge</groupId>
 			<artifactId>html</artifactId>
 			<version>4.01.0</version>
@@ -74,6 +74,15 @@
 				<configuration>
 					<jvm>${env.JAVA8_HOME}/bin/java</jvm>
 					<forkMode>once</forkMode>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.7</version>
+				<configuration>
+					<javadocExecutable>${env.JAVA8_HOME}/bin/javadoc</javadocExecutable>
 				</configuration>
 			</plugin>
 		</plugins>
