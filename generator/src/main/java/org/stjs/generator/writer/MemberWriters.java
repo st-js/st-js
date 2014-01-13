@@ -12,6 +12,8 @@ public final class MemberWriters {
 
 	public static <JS, T extends Tree> JS buildTarget(TreeWrapper<T, JS> tw) {
 		if (tw.getEnclosingType().isGlobal()) {
+			// do this to register the type name as needed
+			tw.getEnclosingType().getTypeName();
 			return null;
 		}
 

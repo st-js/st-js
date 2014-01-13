@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -199,6 +200,17 @@ public final class GeneratorTestHelper {
 		}
 		finally {
 			Timers.end("js-exec");
+		}
+	}
+
+	public static ClassWithJavascript stjsClass(Class<?> clazz) {
+		try {
+			URL[] urls = { new File(TEMP_GENERATION_PATH).toURI().toURL() };
+			ClassLoader cl = new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
+			return gen.getExistingStjsClass(cl, clazz);
+		}
+		catch (MalformedURLException ex) {
+			throw new STJSRuntimeException(ex);
 		}
 	}
 

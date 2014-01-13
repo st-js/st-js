@@ -210,7 +210,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		// TODO have it inject it here
 		// NameProvider names = new DefaultNameProvider();
 		// TypeWrapper type = TypeWrappers.wrap(clazz);
-		return clazz.getName();
+		return clazz.getSimpleName();
 	}
 
 	/**

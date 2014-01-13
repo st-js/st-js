@@ -1,9 +1,18 @@
 package org.stjs.generator.deps;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.stjs.generator.utils.GeneratorTestHelper.generate;
+import static org.stjs.generator.utils.GeneratorTestHelper.stjsClass;
+
+import java.util.List;
 
 import org.junit.Test;
+import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
+import org.stjs.javascript.JSGlobal;
 
 public class DependencyTest {
 	@Test
@@ -34,5 +43,25 @@ public class DependencyTest {
 			expected = IllegalArgumentException.class)
 	public void test5() {
 		DependencyCollection.DEPENDENCY_COMPARATOR.compare(Err1.class, Err2.class);
+	}
+
+	@Test
+	public void testGlobalScopeDep() {
+		generate(Dep5.class);
+		ClassWithJavascript jsClass = stjsClass(Dep5.class);
+
+		assertNotNull(jsClass);
+		assertTrue(!jsClass.getDirectDependencies().isEmpty());
+		assertDependency(jsClass.getDirectDependencies(), JSGlobal.class);
+	}
+
+	private void assertDependency(List<ClassWithJavascript> directDependencies, Class<?> clz) {
+		for (ClassWithJavascript c : directDependencies) {
+			if (clz.getName().equals(c.getClassName())) {
+				return;
+			}
+		}
+
+		fail("Could not find the class:" + clz + " in the dependency list:" + directDependencies);
 	}
 }
