@@ -84,7 +84,11 @@ public class Generator {
 				command.run();
 			}
 		};
-		this.sourceEncoding = sourceEncoding;
+		if (sourceEncoding == null) {
+			this.sourceEncoding = Charset.defaultCharset().name();
+		} else {
+			this.sourceEncoding = sourceEncoding;
+		}
 	}
 
 	@edu.umd.cs.findbugs.annotations.SuppressWarnings("BC_UNCONFIRMED_CAST")
