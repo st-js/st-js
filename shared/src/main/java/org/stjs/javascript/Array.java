@@ -73,7 +73,7 @@ public class Array<V> implements Iterable<String> {
 		if (signedLen != unsignedLen) {
 			throw new Error("RangeError", len + " is out of range for Array length");
 		}
-		this.$length();
+		this.$length((int) unsignedLen);
 	}
 
 	/**
@@ -92,7 +92,7 @@ public class Array<V> implements Iterable<String> {
 			if (signedLen != unsignedLen) {
 				throw new Error("RangeError", signedLen + " is out of range for Array length");
 			}
-			this.$length();
+			this.$length((int) unsignedLen);
 		} else {
 			this.push(values);
 		}
@@ -117,7 +117,7 @@ public class Array<V> implements Iterable<String> {
 	@BrowserCompatibility("none")
 	public Iterator<String> iterator() {
 		return new Iterator<String>() {
-			private Iterator<Entry<V>> arrayIter = array.entryIterator(0);
+			private Iterator<Entry<V>> arrayIter = array.entryIterator(0, true);
 			private Iterator<String> nonArrayIter = nonArrayElements.keySet().iterator();
 
 			@Override
@@ -380,13 +380,31 @@ public class Array<V> implements Iterable<String> {
 	 * @return a new <tt>Array</tt>, containing all the elements of the joined <tt>Arrays</tt>.
 	 */
 	public Array<V> concat(Array<V>... arrays) {
-		// Array<V> concat = new Array<V>();
-		// for (Array<V> a : arrays) {
-		// concat.splice(concat.$length(), 0, a.toArray());
-		// }
-		// this.splice(this.$length(), 0, concat.toArray());
-		// return concat;
-		return null;
+		Array<V> result = new Array<V>();
+
+		// Add the elements of this array
+		long i = 0;
+		Iterator<Entry<V>> iter = this.array.entryIterator(0, true);
+		while (iter.hasNext()) {
+			Entry<V> entry = iter.next();
+			result.$set(i + entry.key, entry.value);
+		}
+		i = this.$length();
+
+		if (arrays != null) {
+			// add the elements of all the other specified arrays
+			for (Array<V> arr : arrays) {
+				iter = arr.array.entryIterator(0, true);
+				while (iter.hasNext()) {
+					Entry<V> entry = iter.next();
+					result.$set(i + entry.key, entry.value);
+				}
+				i += arr.$length();
+			}
+		}
+
+		result.$length((int) i);
+		return result;
 	}
 
 	/**
@@ -399,10 +417,26 @@ public class Array<V> implements Iterable<String> {
 	 * @return a new <tt>Array</tt>, containing all the elements of the joined <tt>Arrays</tt>.
 	 */
 	public Array<V> concat(V... values) {
-		Array<V> concat = new Array<V>();
-		concat.splice(0, 0, values);
-		this.splice(this.$length(), 0, values);
-		return concat;
+		Array<V> result = new Array<V>();
+
+		// add the elements of this array
+		long i = 0;
+		Iterator<Entry<V>> iter = this.array.entryIterator(0, true);
+		while (iter.hasNext()) {
+			Entry<V> entry = iter.next();
+			result.$set(i + entry.key, entry.value);
+		}
+		i = this.$length();
+		result.$length(this.$length());
+
+		if (values != null) {
+			// add the specified values
+			for (int j = 0; j < values.length; j++) {
+				result.$set(i + j, values[j]);
+			}
+		}
+
+		return result;
 	}
 
 	/**
@@ -460,7 +494,12 @@ public class Array<V> implements Iterable<String> {
 			actualStart = (long) Math.min(this.$length(), start);
 		}
 
-		Iterator<Entry<V>> iter = this.array.entryIterator(actualStart);
+		Iterator<Entry<V>> iter = this.array.entryIterator(actualStart, true);
+		return indexOf(element, iter);
+	}
+
+	private int indexOf(V element, Iterator<Entry<V>> iter) {
+		// this method doesn't depend on the order of iteration, and is used both by indexOf and lastIndexOf
 		while (iter.hasNext()) {
 			Entry<V> entry = iter.next();
 			// Double.equals has an annoying behavior that we must correct for
@@ -847,8 +886,17 @@ public class Array<V> implements Iterable<String> {
 	 *         separator
 	 */
 	public String toLocaleString() {
-		// TODO Auto-generated method stub
-		return null;
+		StringBuilder builder = new StringBuilder();
+		String sep = "";
+		for (int i = 0; i < this.length; i++) {
+			builder.append(sep);
+			sep = ",";
+			V item = this.array.get(i);
+			if (item != null) {
+				builder.append(JSObjectAdapter.toLocaleString(item));
+			}
+		}
+		return builder.toString();
 	}
 
 	/**
@@ -868,8 +916,7 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+")
 	public int lastIndexOf(V searchElement) {
-		// TODO Auto-generated method stub
-		return 0;
+		return lastIndexOf(searchElement, this.$length() - 1);
 	}
 
 	/**
@@ -896,8 +943,16 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+")
 	public int lastIndexOf(V searchElement, int fromIndex) {
-		// TODO Auto-generated method stub
-		return 0;
+		long actualStart;
+
+		if (fromIndex < 0) {
+			actualStart = (long) Math.max(-1, this.$length() + fromIndex);
+		} else {
+			actualStart = (long) Math.min(this.$length() - 1, fromIndex);
+		}
+
+		Iterator<Entry<V>> iter = this.array.entryIterator(actualStart, false);
+		return indexOf(searchElement, iter);
 	}
 
 	/**
@@ -1202,7 +1257,7 @@ public class Array<V> implements Iterable<String> {
 				that = new PackedArrayStore<E>();
 			}
 
-			Iterator<Entry<E>> entries = this.entryIterator(0);
+			Iterator<Entry<E>> entries = this.entryIterator(0, true);
 			while (entries.hasNext()) {
 				Entry<E> entry = entries.next();
 				that.set(entry.key, entry.value);
@@ -1219,7 +1274,7 @@ public class Array<V> implements Iterable<String> {
 
 		abstract long getSetElements(long firstIncluded, long lastExcluded);
 
-		abstract Iterator<Entry<E>> entryIterator(long actualStart);
+		abstract Iterator<Entry<E>> entryIterator(long actualStart, boolean isForward);
 
 		abstract boolean isEfficientStoreFor(long newLength, long newElementCount);
 
@@ -1309,14 +1364,18 @@ public class Array<V> implements Iterable<String> {
 		}
 
 		@Override
-		Iterator<Entry<E>> entryIterator(final long actualStart) {
+		Iterator<Entry<E>> entryIterator(final long actualStart, final boolean isForward) {
 			return new Iterator<Entry<E>>() {
 				private int nextIndex = (int) actualStart;
 
 				@Override
 				public boolean hasNext() {
 					skipToNext();
-					return nextIndex < elements.size();
+					if (isForward) {
+						return nextIndex < elements.size();
+					} else {
+						return nextIndex >= 0;
+					}
 				}
 
 				@Override
@@ -1325,13 +1384,23 @@ public class Array<V> implements Iterable<String> {
 					Entry<E> entry = new Entry<E>();
 					entry.key = nextIndex;
 					entry.value = get(nextIndex);
-					nextIndex++;
+					if (isForward) {
+						nextIndex++;
+					} else {
+						nextIndex--;
+					}
 					return entry;
 				}
 
 				private void skipToNext() {
-					while (nextIndex < elements.size() && !isSet(nextIndex)) {
-						nextIndex++;
+					if (isForward) {
+						while (nextIndex < elements.size() && !isSet(nextIndex)) {
+							nextIndex++;
+						}
+					} else {
+						while (nextIndex >= 0 && !isSet(nextIndex)) {
+							nextIndex--;
+						}
 					}
 				}
 
@@ -1491,8 +1560,13 @@ public class Array<V> implements Iterable<String> {
 		}
 
 		@Override
-		Iterator<Entry<E>> entryIterator(long actualStart) {
-			java.util.Map<Long, E> range = elements.subMap(actualStart, true, elements.lastKey(), true);
+		Iterator<Entry<E>> entryIterator(long actualStart, boolean isForward) {
+			java.util.Map<Long, E> range;
+			if (isForward) {
+				range = elements.subMap(actualStart, true, elements.lastKey(), true);
+			} else {
+				range = elements.subMap(0L, true, actualStart, true).descendingMap();
+			}
 			final Iterator<java.util.Map.Entry<Long, E>> it = range.entrySet().iterator();
 			return new Iterator<Entry<E>>() {
 				@Override

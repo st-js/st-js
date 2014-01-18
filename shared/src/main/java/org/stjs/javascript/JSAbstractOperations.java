@@ -86,9 +86,11 @@ class JSAbstractOperations {
 				// note: no need to check if the return value is a primitive type as the spec specifies,
 				// because Java guarantees that we can only get a String, null or an exception
 				return callToString(arg);
-			} catch (InvocationTargetException e) {
+			}
+			catch (InvocationTargetException e) {
 				throw new Error("TypeError", e.getTargetException().getMessage(), e.getTargetException());
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new Error("TypeError", e.getMessage(), e);
 			}
 
@@ -102,9 +104,11 @@ class JSAbstractOperations {
 					if (isJsPrimitiveEquivalent(value)) {
 						return value;
 					}
-				} catch (InvocationTargetException e) {
+				}
+				catch (InvocationTargetException e) {
 					throw new Error("TypeError", e.getTargetException().getMessage(), e.getTargetException());
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					// we can still get exception like SecurityException or IllegalAccessException here
 					throw new Error("TypeError", e.getMessage(), e);
 				}
@@ -114,9 +118,11 @@ class JSAbstractOperations {
 				// note: no need to check if the return value is a primitive type as the spec specifies,
 				// because Java guarantees that we can only get a String, null or an exception
 				return callToString(arg);
-			} catch (InvocationTargetException e) {
+			}
+			catch (InvocationTargetException e) {
 				throw new Error("TypeError", e.getTargetException().getMessage(), e.getTargetException());
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new Error("TypeError", e.getMessage(), e);
 			}
 		}
@@ -141,7 +147,8 @@ class JSAbstractOperations {
 	private static boolean isValueOfCallable(Object target) {
 		try {
 			return target.getClass().getMethod("valueOf") != null;
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			return false;
 		}
 	}
@@ -274,7 +281,8 @@ class JSAbstractOperations {
 			// parse as a hexadecimal digit
 			try {
 				return Long.decode(trimmed).doubleValue();
-			} catch (NumberFormatException e) {
+			}
+			catch (NumberFormatException e) {
 				return Double.NaN;
 			}
 		}
@@ -282,7 +290,8 @@ class JSAbstractOperations {
 		// parse as a decimal number
 		try {
 			return Double.parseDouble(trimmed);
-		} catch (NumberFormatException e) {
+		}
+		catch (NumberFormatException e) {
 			return Double.NaN;
 		}
 	}

@@ -1,7 +1,7 @@
 package org.stjs.javascript;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.stjs.javascript.JSGlobal.Array;
 
 import org.junit.Test;
@@ -16,14 +16,14 @@ public class ArrayConstructorTest {
 		// When the constructor of Array is passed exactly 1 parameter, then the first parameter
 		// is treated as the length of the array
 		Array<Integer> x = Array(2);
-		assertFalse(x.$length() == 1);
-		assertFalse(x.$get(0) == Integer.valueOf(2));
+		assertEquals(2, x.$length());
+		assertNull(x.$get(0));
 
 		// should also work the same when using varargs
 		Object length = 2;
 		Array<Object> y = Array(length); // not the same constructor as above, Array(Object...)
-		assertFalse(y.$length() == 1);
-		assertFalse(y.$get(0) == Integer.valueOf(2));
+		assertEquals(2, x.$length());
+		assertNull(x.$get(0));
 	}
 
 	@Test
