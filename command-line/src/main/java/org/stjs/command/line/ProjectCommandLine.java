@@ -31,8 +31,10 @@ public class ProjectCommandLine {
 		File srcPath = new File(path);
 		for (File file : files) {
 			// remove the leading srcPath from each file to get the source name
-			CommandLine.generate(path, file.getAbsolutePath().substring(srcPath.getAbsolutePath().length() + 1)
-					.replace(".java", "").replace(File.separatorChar, '.'), dependencies, outputDir);
+			CommandLine.generate(
+					path,
+					file.getAbsolutePath().substring(srcPath.getAbsolutePath().length() + 1).replace(".java", "")
+							.replace(File.separatorChar, '.'), dependencies, outputDir);
 		}
 	}
 

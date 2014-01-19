@@ -38,6 +38,7 @@ public class CommandLine {
 	}
 
 	static void generate(final String path, final String className, List<File> dependencies, String outputDir) {
+		Generator gen = new Generator();
 		try {
 			List<URL> classpathElements = new ArrayList<URL>();
 			classpathElements.add(new File(path).toURI().toURL());
@@ -54,10 +55,15 @@ public class CommandLine {
 			GeneratorConfigurationBuilder configBuilder = new GeneratorConfigurationBuilder();
 			configBuilder.allowedPackage(builtProjectClassLoader.loadClass(className).getPackage().getName());
 			GeneratorConfiguration configuration = configBuilder.build();
-			new Generator().generateJavascript(builtProjectClassLoader, className, sourceFolder, targetFolder, generationFolder, configuration);
+
+			gen.init(builtProjectClassLoader, configuration.getSourceEncoding());
+			gen.generateJavascript(builtProjectClassLoader, className, sourceFolder, targetFolder, generationFolder, configuration);
 		}
 		catch (Exception e) {
 			throw Throwables.propagate(e);
+		}
+		finally {
+			gen.close();
 		}
 	}
 
