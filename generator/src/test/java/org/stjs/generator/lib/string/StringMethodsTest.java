@@ -34,12 +34,12 @@ public class StringMethodsTest {
 
 	@Test
 	public void testCompareTo() {
-		assertEquals(-1.0, GeneratorTestHelper.execute(String6.class));
+		assertEquals(-1.0, GeneratorTestHelper.executeAndReturnNumber(String6.class), 0);
 	}
 
 	@Test
 	public void testCompareToIgnoreCase() {
-		assertEquals(-1.0, GeneratorTestHelper.execute(String7.class));
+		assertEquals(-1.0, GeneratorTestHelper.executeAndReturnNumber(String7.class), 0);
 	}
 
 	@Test
@@ -49,7 +49,7 @@ public class StringMethodsTest {
 
 	@Test
 	public void testCodePointAt() {
-		assertEquals(98, GeneratorTestHelper.execute(String9.class));
+		assertEquals(98.0, GeneratorTestHelper.executeAndReturnNumber(String9.class), 0);
 	}
 
 	@Test

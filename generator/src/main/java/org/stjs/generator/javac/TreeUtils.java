@@ -221,9 +221,9 @@ public final class TreeUtils {
 	 *            the path defining the tree node
 	 * @return the path to the enclosing class tree
 	 */
-	public static TreePath pathTillClass(final TreePath path) {
-		return pathTillOfKind(path, classTreeKinds());
-	}
+	// public static TreePath pathTillClass(final TreePath path) {
+	// return pathTillOfKind(path, classTreeKinds());
+	// }
 
 	/**
 	 * Gets path to the the first enclosing tree of the specified kind.
@@ -294,7 +294,7 @@ public final class TreeUtils {
 	 * @return the enclosing class (or interface) as given by the path, or null if one does not exist.
 	 */
 	public static/* @Nullable */ClassTree enclosingClass(final/* @Nullable */TreePath path) {
-		return (ClassTree) enclosingOfKind(path, classTreeKinds());
+		return enclosingOfClass(path, ClassTree.class);
 	}
 
 	/**
@@ -623,31 +623,6 @@ public final class TreeUtils {
 
 		// Receiver is now really just the receiver tree.
 		return TreeUtils.skipParens(receiver);
-	}
-
-	// TODO: What about anonymous classes?
-	// Adding Tree.Kind.NEW_CLASS here doesn't work, because then a
-	// tree gets cast to ClassTree when it is actually a NewClassTree,
-	// for example in enclosingClass above.
-	private final static Set<Tree.Kind> classTreeKinds = EnumSet.of(Tree.Kind.CLASS/*
-																					 * , Tree.Kind.ENUM,
-																					 * Tree.Kind.INTERFACE,
-																					 * Tree.Kind.ANNOTATION_TYPE
-																					 */);
-
-	public static Set<Tree.Kind> classTreeKinds() {
-		return classTreeKinds;
-	}
-
-	/**
-	 * Is the given tree kind a class, i.e. a class, enum, interface, or annotation type.
-	 * 
-	 * @param tree
-	 *            the tree to test
-	 * @return true, iff the given kind is a class kind
-	 */
-	public static boolean isClassTree(Tree tree) {
-		return classTreeKinds().contains(tree.getKind());
 	}
 
 	private final static Set<Tree.Kind> typeTreeKinds = EnumSet.of(Tree.Kind.PRIMITIVE_TYPE, Tree.Kind.PARAMETERIZED_TYPE,

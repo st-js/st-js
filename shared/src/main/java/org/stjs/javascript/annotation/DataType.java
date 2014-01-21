@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  * @deprecated Use {@link SyntheticType} instead
  * @author acraciun
  */
-@Target({ ElementType.TYPE })
+@Target({ ElementType.TYPE, ElementType.PACKAGE })
 @Retention(RetentionPolicy.RUNTIME)
 @Deprecated()
 public @interface DataType {//

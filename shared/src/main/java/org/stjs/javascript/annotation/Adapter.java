@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  * 
  * @author acraciun
  */
-@Target({ ElementType.TYPE })
+@Target({ ElementType.TYPE, ElementType.PACKAGE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Adapter {
 

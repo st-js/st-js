@@ -17,6 +17,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.script.ScriptException;
 
@@ -74,6 +75,17 @@ public final class GeneratorTestHelper {
 		return convert(executeOrGenerate(clazz, true, false));
 	}
 
+	public static double executeAndReturnNumber(Class<?> clazz) {
+		Object obj = convert(executeOrGenerate(clazz, true, false));
+		if (obj == null) {
+			return Double.NaN;
+		}
+		if (obj instanceof Number) {
+			return ((Number) obj).doubleValue();
+		}
+		return Double.NaN;
+	}
+
 	public static Object execute(String preGeneratedJs) {
 		try {
 			File jsfile = new File(preGeneratedJs);
@@ -97,6 +109,10 @@ public final class GeneratorTestHelper {
 		}
 		if (result.getClass().getName().contains("NativeDate")) {
 			return convertToDate(result);
+		}
+		if (result.getClass().getName().contains("ScriptObjectMirror")) {
+			// java 8 specific
+			return convertScriptObject(result);
 		}
 		return result;
 	}
@@ -145,6 +161,23 @@ public final class GeneratorTestHelper {
 		Object[] ids = (Object[]) invoke(result, "getIds", 0);
 		for (Object key : ids) {
 			Object value = invoke(result, "get", 2, key.toString(), null);
+			js.$put(key.toString(), convert(value));
+		}
+		return js;
+	}
+
+	private static final int CALL_MEMBER_METHOD_ARG_COUNT = 2;
+
+	private static Object convertScriptObject(Object result) {
+		String cls = (String) invoke(result, "getClassName", 0);
+		if ("Date".equals(cls)) {
+			Double time = (Double) invoke(result, "callMember", CALL_MEMBER_METHOD_ARG_COUNT, "getTime", null);
+			return new Date(time.longValue());
+		}
+		Map<String, Object> js = $map();
+		Set<String> ids = (Set<String>) invoke(result, "keySet", 0);
+		for (String key : ids) {
+			Object value = invoke(result, "get", 1, key.toString());
 			js.$put(key.toString(), convert(value));
 		}
 		return js;

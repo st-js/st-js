@@ -21,7 +21,7 @@ public class ParseJsonTest {
 			} else if (bean instanceof Array) {
 				bean = ((Array<?>) bean).$get(p);
 			} else {
-				fail(bean + " is not a map or array");
+				fail(bean + " is not a map or array. Type is:" + bean.getClass().getName());
 				return null;
 			}
 		}
@@ -30,6 +30,9 @@ public class ParseJsonTest {
 
 	private void assertProperty(Object expected, Object obj, String... props) {
 		Object bean = getProperty(obj, props);
+		if (bean instanceof Number) {
+			bean = new Double(((Number) bean).doubleValue());
+		}
 		assertEquals(expected, bean);
 	}
 
