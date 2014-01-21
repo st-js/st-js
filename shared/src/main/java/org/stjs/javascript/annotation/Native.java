@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  * 
  * @author acraciun
  */
-@Target({ ElementType.CONSTRUCTOR })
+@Target({ ElementType.CONSTRUCTOR, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Native {//
 
