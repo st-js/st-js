@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +71,12 @@ public class PackageInternalsFinder {
 		try {
 			String jarUri = packageFolderURL.toExternalForm().split("!")[0];
 
-			JarURLConnection jarConn = (JarURLConnection) packageFolderURL.openConnection();
+			URLConnection urlConnection = packageFolderURL.openConnection();
+			if (!(urlConnection instanceof JarURLConnection)) {
+				// weird file in the classpath
+				return Collections.emptyList();
+			}
+			JarURLConnection jarConn = (JarURLConnection) urlConnection;
 			String rootEntryName = jarConn.getEntryName();
 			int rootEnd = rootEntryName.length() + 1;
 
