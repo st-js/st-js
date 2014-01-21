@@ -9,7 +9,7 @@ public class ProjectCommandLine {
 
 	public static void main(String[] args) {
 		if (args.length != 3) {
-			System.err.println("Usate: CommandLine <srcDir> <libDir> <outputDir>");
+			System.err.println("Usage: st-js <srcDir> <libDir> <outputDir>");
 			return;
 		}
 		String path = args[0];
