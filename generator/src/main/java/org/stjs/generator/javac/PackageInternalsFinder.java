@@ -65,17 +65,27 @@ public class PackageInternalsFinder {
 		} // maybe there can be something else for more involved class loaders
 	}
 
+	private void addFileObject(String jarUri, String name, String rootEntryName, int rootEnd, List<JavaFileObject> result) {
+		if (name.startsWith(rootEntryName) && name.indexOf('/', rootEnd) == -1 && name.endsWith(CLASS_FILE_EXTENSION)) {
+			URI uri = URI.create(jarUri + "!/" + name);
+			String binaryName = name.replaceAll("/", ".");
+			binaryName = binaryName.replaceAll(CLASS_FILE_EXTENSION + "$", "");
+
+			result.add(new CustomJavaFileObject(binaryName, uri));
+		}
+	}
+
 	private List<JavaFileObject> processJar(URL packageFolderURL) {
 		List<JavaFileObject> result = new ArrayList<JavaFileObject>();
 
 		try {
-			String jarUri = packageFolderURL.toExternalForm().split("!")[0];
 
 			URLConnection urlConnection = packageFolderURL.openConnection();
 			if (!(urlConnection instanceof JarURLConnection)) {
 				// weird file in the classpath
 				return Collections.emptyList();
 			}
+			String jarUri = packageFolderURL.toExternalForm().split("!")[0];
 			JarURLConnection jarConn = (JarURLConnection) urlConnection;
 			String rootEntryName = jarConn.getEntryName();
 			int rootEnd = rootEntryName.length() + 1;
@@ -84,13 +94,7 @@ public class PackageInternalsFinder {
 			while (entryEnum.hasMoreElements()) {
 				JarEntry jarEntry = entryEnum.nextElement();
 				String name = jarEntry.getName();
-				if (name.startsWith(rootEntryName) && name.indexOf('/', rootEnd) == -1 && name.endsWith(CLASS_FILE_EXTENSION)) {
-					URI uri = URI.create(jarUri + "!/" + name);
-					String binaryName = name.replaceAll("/", ".");
-					binaryName = binaryName.replaceAll(CLASS_FILE_EXTENSION + "$", "");
-
-					result.add(new CustomJavaFileObject(binaryName, uri));
-				}
+				addFileObject(jarUri, name, rootEntryName, rootEnd, result);
 			}
 		}
 		catch (IOException e) {

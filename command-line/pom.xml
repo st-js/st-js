@@ -79,8 +79,9 @@
 					</execution>
 				</executions>
 				<configuration>
+					<basedir>${project.basedir}</basedir>
 					<includes>
-						<include>target/appassembler/bin/st-js*</include>
+						<include>target/appassembler/bin/*</include>
 					</includes>
 					<replacements>
 						<replacement>
