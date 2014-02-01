@@ -168,6 +168,7 @@ public final class GeneratorTestHelper {
 
 	private static final int CALL_MEMBER_METHOD_ARG_COUNT = 2;
 
+	@SuppressWarnings("unchecked")
 	private static Object convertScriptObject(Object result) {
 		String cls = (String) invoke(result, "getClassName", 0);
 		if ("Date".equals(cls)) {
@@ -177,8 +178,8 @@ public final class GeneratorTestHelper {
 		Map<String, Object> js = $map();
 		Set<String> ids = (Set<String>) invoke(result, "keySet", 0);
 		for (String key : ids) {
-			Object value = invoke(result, "get", 1, key.toString());
-			js.$put(key.toString(), convert(value));
+			Object value = invoke(result, "get", 1, key);
+			js.$put(key, convert(value));
 		}
 		return js;
 	}

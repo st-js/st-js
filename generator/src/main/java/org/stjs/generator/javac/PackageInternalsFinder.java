@@ -36,7 +36,7 @@ public class PackageInternalsFinder {
 		this.classLoader = classLoader;
 	}
 
-	public List<JavaFileObject> find(String packageName) throws IOException {
+	public List<JavaFileObject> find(String packageName, boolean recursive) throws IOException {
 		String javaPackageName = packageName.replaceAll("\\.", "/");
 
 		List<JavaFileObject> result = cachePackageEntries.get(javaPackageName);
@@ -50,23 +50,24 @@ public class PackageInternalsFinder {
 		Enumeration<URL> urlEnumeration = classLoader.getResources(javaPackageName);
 		while (urlEnumeration.hasMoreElements()) { // one URL for each jar on the classpath that has the given package
 			URL packageFolderURL = urlEnumeration.nextElement();
-			result.addAll(listUnder(packageName, packageFolderURL));
+			result.addAll(listUnder(packageName, packageFolderURL, recursive));
 		}
 
 		return result;
 	}
 
-	private Collection<JavaFileObject> listUnder(String packageName, URL packageFolderURL) {
+	private Collection<JavaFileObject> listUnder(String packageName, URL packageFolderURL, boolean recursive) {
 		File directory = new File(packageFolderURL.getFile());
 		if (directory.isDirectory()) { // browse local .class files - useful for local execution
-			return processDir(packageName, directory);
+			return processDir(packageName, directory, recursive);
 		} else { // browse a jar file
-			return processJar(packageFolderURL);
+			return processJar(packageFolderURL, recursive);
 		} // maybe there can be something else for more involved class loaders
 	}
 
-	private void addFileObject(String jarUri, String name, String rootEntryName, int rootEnd, List<JavaFileObject> result) {
-		if (name.startsWith(rootEntryName) && name.indexOf('/', rootEnd) == -1 && name.endsWith(CLASS_FILE_EXTENSION)) {
+	private void addFileObject(String jarUri, String name, String rootEntryName, int rootEnd, List<JavaFileObject> result, boolean recursive) {
+		boolean acceptCurrentFolder = recursive || name.indexOf('/', rootEnd) == -1;
+		if (acceptCurrentFolder && name.startsWith(rootEntryName) && name.endsWith(CLASS_FILE_EXTENSION)) {
 			URI uri = URI.create(jarUri + "!/" + name);
 			String binaryName = name.replaceAll("/", ".");
 			binaryName = binaryName.replaceAll(CLASS_FILE_EXTENSION + "$", "");
@@ -75,7 +76,7 @@ public class PackageInternalsFinder {
 		}
 	}
 
-	private List<JavaFileObject> processJar(URL packageFolderURL) {
+	private List<JavaFileObject> processJar(URL packageFolderURL, boolean recursive) {
 		List<JavaFileObject> result = new ArrayList<JavaFileObject>();
 
 		try {
@@ -94,7 +95,7 @@ public class PackageInternalsFinder {
 			while (entryEnum.hasMoreElements()) {
 				JarEntry jarEntry = entryEnum.nextElement();
 				String name = jarEntry.getName();
-				addFileObject(jarUri, name, rootEntryName, rootEnd, result);
+				addFileObject(jarUri, name, rootEntryName, rootEnd, result, recursive);
 			}
 		}
 		catch (IOException e) {
@@ -103,7 +104,7 @@ public class PackageInternalsFinder {
 		return result;
 	}
 
-	private List<JavaFileObject> processDir(String packageName, File directory) {
+	private List<JavaFileObject> processDir(String packageName, File directory, boolean recursive) {
 		List<JavaFileObject> result = new ArrayList<JavaFileObject>();
 
 		File[] childFiles = directory.listFiles();
@@ -114,6 +115,8 @@ public class PackageInternalsFinder {
 				binaryName = binaryName.replaceAll(CLASS_FILE_EXTENSION + "$", "");
 
 				result.add(new CustomJavaFileObject(binaryName, childFile.toURI()));
+			} else if (recursive && childFile.isDirectory()) {
+				result.addAll(processDir(packageName + "." + childFile.getName(), childFile, recursive));
 			}
 		}
 

@@ -1,6 +1,8 @@
 package org.stjs.generator.javac;
 
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
@@ -20,15 +22,22 @@ public class CustomClassloaderJavaFileManager implements JavaFileManager {
 	private final StandardJavaFileManager standardFileManager;
 	private final PackageInternalsFinder finder;
 
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+			value = "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED", justification = "harmless")
 	public CustomClassloaderJavaFileManager(ClassLoader classLoader, StandardJavaFileManager standardFileManager) {
-		this.classLoader = classLoader;
+		// acraciun: for an unclear reason Java 7 screws up with the classloader and getResource gets in trouble. issue
+		// #41
+		this.classLoader = new URLClassLoader(new URL[0], classLoader);
 		this.standardFileManager = standardFileManager;
-		finder = new PackageInternalsFinder(classLoader);
+		finder = new PackageInternalsFinder(this.classLoader);
 	}
 
 	@Override
 	public ClassLoader getClassLoader(Location location) {
-		return classLoader;
+		if (location == StandardLocation.CLASS_PATH) {
+			return classLoader;
+		}
+		return standardFileManager.getClassLoader(location);
 	}
 
 	@Override
@@ -109,7 +118,7 @@ public class CustomClassloaderJavaFileManager implements JavaFileManager {
 													// manager with those of my finder here
 				return standardFileManager.list(location, packageName, kinds, recurse);
 			} else { // app specific classes are here
-				return finder.find(packageName);
+				return finder.find(packageName, recurse);
 			}
 		}
 		return Collections.emptyList();

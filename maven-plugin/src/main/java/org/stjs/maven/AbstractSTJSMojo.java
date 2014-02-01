@@ -157,7 +157,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				getLog().debug("Classpath:" + element);
 				runtimeUrls[i] = new File(element).toURI().toURL();
 			}
-			return new URLClassLoader(runtimeUrls, Thread.currentThread().getContextClassLoader());
+			return new URLClassLoader(runtimeUrls, Thread.currentThread().getContextClassLoader().getParent());
 		}
 		catch (Exception ex) {
 			throw new MojoExecutionException("Cannot get builtProjectClassLoader " + ex, ex);
