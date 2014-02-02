@@ -18,6 +18,7 @@ package org.stjs.generator.utils;
 import java.lang.annotation.Annotation;
 import java.util.regex.Pattern;
 
+import org.stjs.generator.JavascriptClassGenerationException;
 import org.stjs.javascript.annotation.STJSBridge;
 
 public final class ClassUtils {
@@ -26,15 +27,24 @@ public final class ClassUtils {
 	 */
 	private static final Pattern IMPLICIT_BRIDGE = Pattern.compile("java\\.lang.*|org\\.junit.*");
 
-
 	// private static Map<Class<?>, String> primitiveArrayId;
 
 	private ClassUtils() {
 		//
 	}
 
-	public static boolean isBridge(Class<?> clazz) {
-		boolean ok = hasAnnotation(clazz, STJSBridge.class);
+	public static Class<?> getClazz(ClassLoader builtProjectClassLoader, String className) {
+		try {
+			return builtProjectClassLoader.loadClass(className);
+		}
+		catch (ClassNotFoundException e) {
+			throw new JavascriptClassGenerationException(className, "Cannot load class:" + e);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static boolean isBridge(ClassLoader builtProjectClassLoader, Class<?> clazz) {
+		boolean ok = hasAnnotation(clazz, (Class<? extends Annotation>) getClazz(builtProjectClassLoader, STJSBridge.class.getName()));
 		if (ok) {
 			return ok;
 		}
@@ -64,7 +74,6 @@ public final class ClassUtils {
 
 		return clazz.getPackage().getAnnotation(annotationClass);
 	}
-
 
 	public static String getPropertiesFileName(String className) {
 		return className.replace('.', '/') + ".stjs";

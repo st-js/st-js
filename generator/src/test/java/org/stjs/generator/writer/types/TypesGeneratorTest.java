@@ -23,4 +23,10 @@ public class TypesGeneratorTest {
 		// should not break in the annotation's array
 		generate(Types3.class);
 	}
+
+	@Test(
+			expected = JavascriptFileGenerationException.class)
+	public void testUseForbiddenTypes() {
+		generate(Types4.class);
+	}
 }

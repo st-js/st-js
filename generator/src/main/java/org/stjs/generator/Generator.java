@@ -128,15 +128,6 @@ public class Generator {
 		return new File(sourceFolder, className.replace('.', File.separatorChar) + ".java");
 	}
 
-	private Class<?> getClazz(ClassLoader builtProjectClassLoader, String className) {
-		try {
-			return builtProjectClassLoader.loadClass(className);
-		}
-		catch (ClassNotFoundException e) {
-			throw new JavascriptClassGenerationException(className, "Cannot load class:" + e);
-		}
-	}
-
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private JavaScriptBuilder<Object> getJavaScriptBuilder() {
 		// TODO: here we my return SourceJavaScript builder as well.
@@ -158,8 +149,8 @@ public class Generator {
 		DependencyResolver dependencyResolver = new GeneratorDependencyResolver(builtProjectClassLoader, sourceFolder, generationFolder,
 				targetFolder, configuration);
 
-		Class<?> clazz = getClazz(builtProjectClassLoader, className);
-		if (ClassUtils.isBridge(clazz)) {
+		Class<?> clazz = ClassUtils.getClazz(builtProjectClassLoader, className);
+		if (ClassUtils.isBridge(builtProjectClassLoader, clazz)) {
 			return new BridgeClass(dependencyResolver, clazz);
 		}
 
@@ -182,6 +173,8 @@ public class Generator {
 		// generate the javascript code
 		Timers.start("write-js-ast");
 		Object javascriptRoot = currentClassPlugins.getWriterVisitor().scan(cu, context);
+		// check for any error arriving during writing
+		context.getChecks().check();
 		Timers.end("write-js-ast");
 
 		STJSClass stjsClass = new STJSClass(dependencyResolver, targetFolder, className);
@@ -347,7 +340,7 @@ public class Generator {
 			catch (ClassNotFoundException e) {
 				throw new STJSRuntimeException(e);
 			}
-			if (ClassUtils.isBridge(clazz)) {
+			if (ClassUtils.isBridge(builtProjectClassLoader, clazz)) {
 				return new BridgeClass(this, clazz);
 			}
 
