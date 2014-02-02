@@ -22,8 +22,10 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -241,7 +243,8 @@ public class Generator {
 		try {
 			JavaCompiler compiler = getCompiler(builtProjectClassLoader, sourceEncoding);
 			Iterable<? extends JavaFileObject> fileObjects = fileManager.getJavaFileObjectsFromFiles(Collections.singleton(inputFile));
-			task = compiler.getTask(null, classLoaderFileManager, null, null, null, fileObjects);
+			List<String> options = Arrays.asList("-proc:none");
+			task = compiler.getTask(null, classLoaderFileManager, null, options, null, fileObjects);
 			javacTask = (JavacTask) task;
 
 			context.setTrees(Trees.instance(javacTask));
