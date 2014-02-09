@@ -250,6 +250,18 @@ public class Array<V> implements Iterable<String> {
 		}
 	}
 
+	/**
+	 * this method does exactly as {@link #forEach(Callback1)}, but allows in java 8 the usage of lambda easily as the
+	 * forEach method overloads the method from the new Iterable interface. The generated code is, as expected, forEach
+	 * 
+	 * @param callback
+	 */
+	@Template("prefix")
+	public void $forEach(Callback1<V> callback) {
+		forEach(callback);
+	}
+
+	@Override
 	public String toString() {
 		// ArrayList.toString() look like this "[1, 2, 3, 4, 5]" (with spaces
 		// between elements and enclosed in []
