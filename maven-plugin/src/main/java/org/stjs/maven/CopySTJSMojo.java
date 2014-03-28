@@ -31,11 +31,11 @@ import org.sonatype.plexus.build.incremental.BuildContext;
 
 /**
  * This Maven plugin copies the Javascript (generated or bridged) from dependencies to the final artifact
- * 
+ *
  * @goal copy-js
  * @phase prepare-package
  * @requiresDependencyResolution compile
- * 
+ *
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class CopySTJSMojo extends AbstractMojo {
@@ -57,7 +57,7 @@ public class CopySTJSMojo extends AbstractMojo {
 	/**
 	 * Sets the granularity in milliseconds of the last modification date for testing whether a source needs
 	 * recompilation.
-	 * 
+	 *
 	 * @parameter expression="${lastModGranularityMs}" default-value="0"
 	 */
 	protected int staleMillis;
@@ -66,7 +66,7 @@ public class CopySTJSMojo extends AbstractMojo {
 	 * <p>
 	 * Specify where to place generated source files
 	 * </p>
-	 * 
+	 *
 	 * @parameter default-value="${project.build.directory}/${project.build.finalName}/generated-js"
 	 */
 	private File generatedSourcesDirectory;
@@ -91,12 +91,14 @@ public class CopySTJSMojo extends AbstractMojo {
 				try {
 					if (dep.getPath().endsWith(".jar")) {// TODO: is this enough !?
 						Manifest manifest = new JarInputStream(dep.openStream()).getManifest();
-						String isStjsLibrary = manifest.getMainAttributes().getValue(STJS_LIBRARY_ENTRY);
-						if ("true".equals(isStjsLibrary)) {
-							// these are directories relative to the jar's root
-							URL jsDirectoryURL = new URL("jar:" + dep + "!/");
-							getLog().info("Copy directory:" + jsDirectoryURL);
-							FileCopier.copyResourcesRecursively(jsDirectoryURL, generatedSourcesDirectory, skipClasses);
+						if (manifest != null) {
+							String isStjsLibrary = manifest.getMainAttributes().getValue(STJS_LIBRARY_ENTRY);
+							if ("true".equals(isStjsLibrary)) {
+								// these are directories relative to the jar's root
+								URL jsDirectoryURL = new URL("jar:" + dep + "!/");
+								getLog().info("Copy directory:" + jsDirectoryURL);
+								FileCopier.copyResourcesRecursively(jsDirectoryURL, generatedSourcesDirectory, skipClasses);
+							}
 						}
 					}
 				} catch (IOException notfound) {
