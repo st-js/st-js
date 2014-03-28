@@ -30,8 +30,13 @@ public class CommandLineIntegrationTest {
 		URL projectUrl = Thread.currentThread().getContextClassLoader().getResource("test-project");
 		assertNotNull(projectUrl);
 
-		ProcessBuilder pb = new ProcessBuilder(windows ? WINDOWS_PATH : UNIX_PATH, new File(projectUrl.getPath(), "src").getAbsolutePath(),
-				new File(projectUrl.getPath(), "lib").getAbsolutePath(), OUTPUT_DIR);
+		ProcessBuilder pb = windows ? new ProcessBuilder(WINDOWS_PATH , new File(projectUrl.getPath(), "src").getAbsolutePath(),
+				new File(projectUrl.getPath(), "lib").getAbsolutePath(), OUTPUT_DIR):
+					//unix - need to call /bin/sh because the script does not have the execution flags set
+					new ProcessBuilder("/bin/sh", UNIX_PATH , new File(projectUrl.getPath(), "src").getAbsolutePath(),
+							new File(projectUrl.getPath(), "lib").getAbsolutePath(), OUTPUT_DIR);
+					
+		
 
 		try {
 			Process p = pb.start();
