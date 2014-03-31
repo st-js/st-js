@@ -53,6 +53,8 @@ public class IdentifierWriter<JS> implements WriterContributor<IdentifierTree, J
 		}
 		if (def.getKind() == ElementKind.CLASS || def.getKind() == ElementKind.ENUM || def.getKind() == ElementKind.INTERFACE) {
 			if (tw.isGlobal()) {
+				// use this to register the class name - to build the dependencies
+				context.getNames().getTypeName(context, def);
 				return null;
 			}
 			name = context.getNames().getTypeName(context, def);

@@ -16,11 +16,16 @@
 package org.stjs.maven;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -58,6 +63,10 @@ import org.stjs.generator.STJSClass;
 
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
+import com.google.debugging.sourcemap.SourceMapFormat;
+import com.google.debugging.sourcemap.SourceMapGenerator;
+import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
+import com.google.debugging.sourcemap.SourceMapSection;
 
 /**
  * This is the Maven plugin that launches the Javascript generator. The plugin needs a list of packages containing the
@@ -158,8 +167,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				runtimeUrls[i] = new File(element).toURI().toURL();
 			}
 			return new URLClassLoader(runtimeUrls, Thread.currentThread().getContextClassLoader().getParent());
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			throw new MojoExecutionException("Cannot get builtProjectClassLoader " + ex, ex);
 		}
 	}
@@ -230,25 +238,21 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 							.generateJavascript(builtProjectClassLoader, className, sourceDir, gendir, getBuildOutputDirectory(), configuration);
 					++generatedFiles;
 
-				}
-				catch (InclusionScanException e) {
+				} catch (InclusionScanException e) {
 					throw new MojoExecutionException("Cannot scan the source directory:" + e, e);
-				}
-				catch (MultipleFileGenerationException e) {
+				} catch (MultipleFileGenerationException e) {
 					for (JavascriptFileGenerationException jse : e.getExceptions()) {
 						buildContext.addMessage(jse.getSourcePosition().getFile(), jse.getSourcePosition().getLine(), jse.getSourcePosition()
 								.getColumn(), jse.getMessage(), BuildContext.SEVERITY_ERROR, null);
 					}
 					hasFailures = true;
 					// continue with the next file
-				}
-				catch (JavascriptFileGenerationException e) {
+				} catch (JavascriptFileGenerationException e) {
 					buildContext.addMessage(e.getSourcePosition().getFile(), e.getSourcePosition().getLine(), e.getSourcePosition().getColumn(),
 							e.getMessage(), BuildContext.SEVERITY_ERROR, null);
 					hasFailures = true;
 					// continue with the next file
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					// TODO - maybe should filter more here
 					buildContext.addMessage(absoluteSource, 1, 1, e.toString(), BuildContext.SEVERITY_ERROR, e);
 					hasFailures = true;
@@ -281,6 +285,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			return;
 		}
 		OutputStream allSourcesFile = null;
+		Writer packMapStream = null;
 		ClassLoader builtProjectClassLoader = getBuiltProjectClassLoader();
 		Map<String, File> currentProjectsFiles = new HashMap<String, File>();
 
@@ -328,33 +333,64 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 						+ "\n Please fix the problem before continuing or disable the packing");
 			}
 			// dump all the files in the dependency order in the pack file
+			List<SourceMapSection> sourceMapSections = new ArrayList<SourceMapSection>();
+
+			int currentLine = 0;
 			Iterator<String> it = new TopologicalOrderIterator<String, DefaultEdge>(dependencyGraph);
 			while (it.hasNext()) {
 				File targetFile = currentProjectsFiles.get(it.next());
 				if (targetFile != null) {
 					// for this project's files
-					Files.copy(targetFile, allSourcesFile);
+					if (generateSourceMap) {
+						currentLine = appendFileSkipSourceMap(targetFile, outputFile, allSourcesFile, currentLine, sourceMapSections);
+					} else {
+						Files.copy(targetFile, allSourcesFile);
+					}
 					allSourcesFile.write('\n');
 					allSourcesFile.flush();
 				}
 			}
 
-		}
-		catch (Exception ex) {
+			if (generateSourceMap) {
+				SourceMapGenerator packSourceMap = SourceMapGeneratorFactory.getInstance(SourceMapFormat.V3);
+				File packMapFile = new File(gendir.getAbsolutePath(), project.getArtifactId() + ".map");
+				packMapStream = new BufferedWriter(new FileWriter(packMapFile));
+				packSourceMap.appendIndexMapTo(packMapStream, outputFile.getName(), sourceMapSections);
+			}
+
+		} catch (Exception ex) {
 			throw new MojoFailureException("Error when packing files:" + ex.getMessage(), ex);
-		}
-		finally {
+		} finally {
 			Closeables.closeQuietly(allSourcesFile);
+			Closeables.closeQuietly(packMapStream);
 		}
 
+	}
+
+	private int appendFileSkipSourceMap(File targetFile, File packFile, OutputStream allSourcesFile, int currentLine,
+			List<SourceMapSection> sections) throws IOException {
+		List<String> lines = Files.readLines(targetFile, sourceEncoding != null ? Charset.forName(sourceEncoding) : Charset.defaultCharset());
+		// remove the @SourceMap stuff
+		for (int i = 0; i < lines.size() - 1; ++i) {
+			allSourcesFile.write(lines.get(i).getBytes());
+			allSourcesFile.write('\n');
+		}
+
+		sections.add(SourceMapSection.forMap(getRelativeSourceMapFileName(targetFile, packFile), currentLine, 0));
+		return currentLine + lines.size() - 1;
+	}
+
+	private String getRelativeSourceMapFileName(File targetFile, File packFile) {
+		// remove the common folder name from the target file name
+		String relativeName = targetFile.getAbsolutePath().substring(packFile.getParentFile().getAbsolutePath().length() + 1);
+		return relativeName.replace(".js", ".map");
 	}
 
 	protected void filesGenerated(Generator generator, GenerationDirectory gendir) throws MojoFailureException, MojoExecutionException {
 		// copy the javascript support
 		try {
 			generator.copyJavascriptSupport(getGeneratedSourcesDirectory().getAbsolutePath());
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			throw new MojoFailureException("Error when copying support files:" + ex.getMessage(), ex);
 		}
 
@@ -376,7 +412,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		ds.setFollowSymlinks(true);
 		ds.addDefaultExcludes();
 		ds.setBasedir(sourceDir);
-		ds.setIncludes(new String[]{ "**/*.java" });
+		ds.setIncludes(new String[] { "**/*.java" });
 		ds.scan();
 		for (String fileName : ds.getIncludedFiles()) {
 			File file = new File(fileName);
@@ -424,8 +460,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			try {
 				staleFiles.addAll(jsScanner.getIncludedSources(f.getParentFile(), gendir.getAbsolutePath()));
 				staleFiles.addAll(stjsScanner.getIncludedSources(f.getParentFile(), getBuildOutputDirectory()));
-			}
-			catch (InclusionScanException e) {
+			} catch (InclusionScanException e) {
 				throw new MojoExecutionException("Error scanning source root: \'" + sourceDir.getPath() + "\' "
 						+ "for stale files to recompile.", e);
 			}
