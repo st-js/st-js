@@ -197,7 +197,7 @@ public final class GeneratorTestHelper {
 		ClassWithJavascript stjsClass = gen.generateJavascript(Thread.currentThread().getContextClassLoader(), clazz.getName(), new File(
 				sourcePath), generationFolder, new File("target", "test-classes"),
 				new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript").allowedPackage("org.stjs.generator")
-						.generateSourceMap(withSourceMap).build());
+						.allowedPackage(clazz.getPackage().getName()).generateSourceMap(withSourceMap).build());
 		Timers.start("js-exec");
 		List<File> javascriptFiles = new ArrayList<File>();
 		try {
