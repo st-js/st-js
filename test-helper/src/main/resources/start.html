@@ -59,7 +59,7 @@
 		}
 		iframe.src = '/getNextTest' +
 				'?browserId=' + browserId +
-				'&result=' + result +
+				'&result=' + encodeURIComponent(result) +
 				'&location=' + location +
 				'&isAssert=' + isAssert +
 				'&rand=' + Math.random();
