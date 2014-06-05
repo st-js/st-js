@@ -41,10 +41,10 @@
 		if (result != "OK" && console) {
 			var errorStack = printStackTrace({e:result});
 			console.error(errorStack.join("\n"));
-			//take first non-junit stack trace element
+            location = encodeURIComponent(errorStack.join(";"));
+            //take first non-junit stack trace element
 			errorStack.splice(0,1);
-			location = encodeURIComponent(errorStack.join(";"));
-			for(var i = 0; 1 < errorStack.length; ++i){
+			for(var i = 0; i < errorStack.length; ++i){
 				if (errorStack[i].indexOf("junit.js") < 0) {
 					isAssert = (i > 1);
 					break;

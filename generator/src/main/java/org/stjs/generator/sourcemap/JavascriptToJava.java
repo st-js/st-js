@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,7 +21,9 @@ import com.google.debugging.sourcemap.SourceMapParseException;
 import com.google.debugging.sourcemap.SourceMapping;
 
 public class JavascriptToJava {
-	private final static Pattern STACKTRACE_JS_PATTERN = Pattern.compile("\\s*at\\s*(?:(.+)\\.)?(\\w+)\\s*\\((.+)\\)");
+	private final static Pattern STACKTRACE_UNIVERSAL_JS_PATTERN = Pattern
+			.compile("\\s*(?:at)?\\s*(?:(\\w+)\\.)?(\\w*\\s?\\w+)[\\s\\@]?\\(?([^\\)]+)\\)?");
+	private final static Pattern STACKTRACE_FIREFOX_JS_PATTERN = Pattern.compile("(?:(\\w+)\\.)?(\\w*\\s?\\w+)\\@([^\\)]+)");
 	private final static int STACKTRACE_GROUP_METHOD = 2;
 	private final static int STACKTRACE_GROUP_LOCATION = 3;
 
@@ -75,13 +78,13 @@ public class JavascriptToJava {
 	 * // the format is the one given by stacktrace.js: // <br>
 	 * at prototype.method (url) <br>
 	 * where url is http://localhost:xxxx/org/stjs/TestClass.js:row:col
-	 * 
+	 *
 	 * @param stacktraceLine
 	 * @return
 	 */
 	private StackTraceElement buildStacktraceElement(String stacktraceLine) {
 
-		Matcher m = STACKTRACE_JS_PATTERN.matcher(stacktraceLine);
+		Matcher m = STACKTRACE_UNIVERSAL_JS_PATTERN.matcher(stacktraceLine);
 		if (!m.matches()) {
 			// wrong pattern !?
 			throw new STJSRuntimeException("Unknown location format:" + stacktraceLine);
@@ -120,22 +123,23 @@ public class JavascriptToJava {
 
 	/**
 	 * the string is in stacktrace.js format.
-	 * 
+	 *
 	 * <pre>
 	 *  at prototype.method (url)
 	 *  at prototype.method (url)
 	 *  at prototype.method (url)
 	 * </pre>
-	 * 
+	 *
 	 * where url is in the form of http://localhost:xxxx/org/stjs/TestClass.js:row:col
-	 * 
+	 *
 	 * @param javascriptStacktrace
 	 * @return
 	 */
 	public StackTraceElement[] buildStacktrace(String javascriptStacktrace, String lineSeparator) {
 		PreConditions.checkNotNull(javascriptStacktrace);
 
-		String[] lines = javascriptStacktrace.split(lineSeparator);
+		String[] linesOriginal = javascriptStacktrace.split(lineSeparator);
+		String[] lines = extractStacktrace(linesOriginal);
 
 		// first line is the message
 		StackTraceElement[] stackTrace = new StackTraceElement[lines.length];
@@ -143,5 +147,12 @@ public class JavascriptToJava {
 			stackTrace[i] = buildStacktraceElement(lines[i]);
 		}
 		return stackTrace;
+	}
+
+	private String[] extractStacktrace(String[] linesOriginal) {
+		if (linesOriginal.length > 1 && !STACKTRACE_FIREFOX_JS_PATTERN.matcher(linesOriginal[0]).matches()) {
+			return Arrays.copyOfRange(linesOriginal, 1, linesOriginal.length);
+		}
+		return linesOriginal;
 	}
 }
