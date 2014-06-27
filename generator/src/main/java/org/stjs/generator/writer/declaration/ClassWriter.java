@@ -255,9 +255,19 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 				// what to do with fields of generic parameters !?
 				continue;
 			}
-			props.add(NameValue.of(member.getSimpleName(), getFieldTypeDesc(memberType, context)));
+			if (!skipTypeDescForField(member)) {
+				props.add(NameValue.of(member.getSimpleName(), getFieldTypeDesc(memberType, context)));
+			}
 		}
 		return context.js().object(props);
+	}
+
+	private boolean skipTypeDescForField(Element member) {
+		if (((TypeElement) member.getEnclosingElement()).getQualifiedName().toString().startsWith("java.lang.")) {
+			//maybe we should rather skip the bridge classes here
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -303,8 +313,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	}
 
 	/**
-	 * Special generation for classes marked with {@link org.stjs.javascript.annotation.GlobalScope}. The name of the
-	 * class must appear nowhere.
+	 * Special generation for classes marked with {@link org.stjs.javascript.annotation.GlobalScope}. The name of the class must appear nowhere.
 	 */
 	private boolean generateGlobal(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
 		if (!context.getCurrentWrapper().isGlobal()) {
@@ -381,8 +390,9 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		addConstructorStatement(visitor, tree, context, stmts);
 
 		@SuppressWarnings("unchecked")
-		JS extendsCall = js.functionCall(js.property(js.name(GeneratorConstants.STJS), "extend"),
-				Arrays.asList(name, superClazz, interfaces, members, typeDesc));
+		JS extendsCall =
+				js.functionCall(js.property(js.name(GeneratorConstants.STJS), "extend"),
+						Arrays.asList(name, superClazz, interfaces, members, typeDesc));
 		if (anonymousClass) {
 			stmts.add(extendsCall);
 		} else {

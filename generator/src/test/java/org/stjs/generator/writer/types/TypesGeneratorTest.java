@@ -12,8 +12,7 @@ public class TypesGeneratorTest {
 		assertCodeContains(Types1.class, "var Types1 = function(){};");
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testForbidArrays() {
 		generate(Types2.class);
 	}
@@ -24,9 +23,14 @@ public class TypesGeneratorTest {
 		generate(Types3.class);
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testUseForbiddenTypes() {
 		generate(Types4.class);
+	}
+
+	@Test
+	public void testExtendsException() {
+		// should not break in the annotation's array
+		generate(Types5.class);
 	}
 }

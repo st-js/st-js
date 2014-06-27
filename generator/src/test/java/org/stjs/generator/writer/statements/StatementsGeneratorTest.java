@@ -94,6 +94,11 @@ public class StatementsGeneratorTest {
 	}
 
 	@Test
+	public void testForEachArrayWithCast() {
+		assertCodeContains(Statements12b.class, "if (!(a).hasOwnProperty(i)) continue;");
+	}
+
+	@Test
 	public void testForEachMapBlock() {
 		assertCodeDoesNotContain(Statements13.class, "hasOwnProperty");
 	}

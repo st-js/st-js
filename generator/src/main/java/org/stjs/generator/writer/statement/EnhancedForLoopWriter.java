@@ -2,10 +2,10 @@ package org.stjs.generator.writer.statement;
 
 import java.util.Collections;
 
-import javax.lang.model.element.Element;
+import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TypesUtils;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.javascript.UnaryOperator;
@@ -29,7 +29,6 @@ import com.sun.source.tree.EnhancedForLoopTree;
  * </pre>
  * 
  * Warning: the iteration is on indexes as in JavaScript, not on values as in Java!
- * 
  * @author acraciun
  */
 public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForLoopTree, JS> {
@@ -38,22 +37,17 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 		if (!context.getConfiguration().isGenerateArrayHasOwnProperty()) {
 			return body;
 		}
-		// TODO check
-		// TypeWrapper iterated = resolvedType(n.getIterable());
-		//
-		// if (!iterated.isAssignableFrom(TypeWrappers.wrap(Array.class))) {
-		// return;
-		// }
 
-		Element iteratedElement = TreeUtils.elementFromUse(tree.getExpression());
-		if (!TypesUtils.isDeclaredOfName(iteratedElement.asType(), Array.class.getName())) {
+		TypeMirror iteratedType = InternalUtils.typeOf(tree.getExpression());
+		if (!TypesUtils.isDeclaredOfName(iteratedType, Array.class.getName())) {
 			return body;
 		}
 		JavaScriptBuilder<JS> js = context.js();
 
 		// !(iterated).hasOwnProperty(tree.getVariable().getName())
-		JS not = js
-				.unary(UnaryOperator.LOGICAL_COMPLEMENT,
+		JS not =
+				js.unary(
+						UnaryOperator.LOGICAL_COMPLEMENT,
 						js.functionCall(js.property(js.paren(iterated), "hasOwnProperty"),
 								Collections.singleton(js.name(tree.getVariable().getName()))));
 
