@@ -24,9 +24,7 @@ import com.sun.source.util.TreePath;
 
 /**
  * This class implements the naming strategy transforming Java element names in JavaScript names.
- * 
  * @author acraciun
- * 
  */
 public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 	private static final String JAVA_LANG_PACKAGE = "java.lang.";
@@ -46,8 +44,8 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 			DeclaredType declaredType = (DeclaredType) type;
 			String name = InternalUtils.getSimpleName(declaredType.asElement());
 			Element rootTypeElement = declaredType.asElement();
-			for (DeclaredType enclosingType = JavaNodes.getEnclosingType(declaredType); enclosingType != null; enclosingType = JavaNodes
-					.getEnclosingType(enclosingType)) {
+			for (DeclaredType enclosingType = JavaNodes.getEnclosingType(declaredType); enclosingType != null; enclosingType =
+					JavaNodes.getEnclosingType(enclosingType)) {
 				rootTypeElement = enclosingType.asElement();
 				name = InternalUtils.getSimpleName(rootTypeElement) + "." + name;
 			}
@@ -95,12 +93,15 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 		if (name.startsWith(JAVA_LANG_PACKAGE)) {
 			return false;
 		}
+
 		return ClassUtils.isBridge(context.getBuiltProjectClassLoader(), ClassUtils.getClazz(context.getBuiltProjectClassLoader(), name));
 	}
 
 	private void checkAllowedType(Element rootTypeElement, GenerationContext<?> context) {
 		String name = ElementUtils.getQualifiedClassName(rootTypeElement).toString();
-
+		if (name.isEmpty()) {
+			return;
+		}
 		if (isJavaLangClassAllowed(context, name)) {
 			return;
 		}

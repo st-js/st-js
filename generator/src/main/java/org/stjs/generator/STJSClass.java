@@ -37,11 +37,10 @@ import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 
 /**
- * This class represents a class and the corresponding generated javascript file. The information about dependencies and
- * sources are stored at generation time in a properties file that has as name [class-name].stjs (and it's packed along
- * with the source file in the same folder). Thus, if a STJS library is built, it will be delivered with all this
- * information, as the original Java code will no longer be available with the library.
- * 
+ * This class represents a class and the corresponding generated javascript file. The information about dependencies and sources are stored at
+ * generation time in a properties file that has as name [class-name].stjs (and it's packed along with the source file in the same folder). Thus,
+ * if a STJS library is built, it will be delivered with all this information, as the original Java code will no longer be available with the
+ * library.
  * @author acraciun
  */
 public class STJSClass implements ClassWithJavascript {
@@ -78,7 +77,6 @@ public class STJSClass implements ClassWithJavascript {
 
 	/**
 	 * constructor for loading
-	 * 
 	 * @param builtProjectClassLoader
 	 * @param className
 	 */
@@ -181,11 +179,19 @@ public class STJSClass implements ClassWithJavascript {
 		}
 	}
 
-	public void setDependencies(Collection<String> dependencies) {
-		this.dependencies = new ArrayList<String>(dependencies);
-		if (dependencies == null) {
+	public void setDependencies(Collection<String> deps) {
+
+		if (deps == null) {
 			properties.remove(DEPENDENCIES_PROP);
+			this.dependencies = new ArrayList<String>();
 		} else {
+			this.dependencies = new ArrayList<String>(deps.size());
+			//filter out anonymous classes
+			for (String dep : deps) {
+				if (!dep.isEmpty()) {
+					this.dependencies.add(dep);
+				}
+			}
 			properties.put(DEPENDENCIES_PROP, dependencies.toString());
 		}
 	}

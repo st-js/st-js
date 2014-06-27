@@ -149,4 +149,9 @@ public class StatementsGeneratorTest {
 	public void testForNoInit() {
 		assertCodeContains(Statements20c.class, "for(; i < 10; ++i){}");
 	}
+
+	@Test
+	public void testStaticBlock() {
+		assertCodeContains(Statements21.class, "new (stjs.extend(function Statements21$1(){}");
+	}
 }
