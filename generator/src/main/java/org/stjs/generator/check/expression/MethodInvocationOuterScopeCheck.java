@@ -17,18 +17,15 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * this check verifies that you don't call a method from the outer type as in javaScript this scope is not accessible.
- * 
  * @author acraciun
- * 
  */
 public class MethodInvocationOuterScopeCheck implements CheckContributor<MethodInvocationTree> {
 	private void checkScope(Element methodElement, MethodInvocationTree tree, GenerationContext<Void> context) {
-		ClassTree enclosingClassTree = TreeUtils.enclosingClass(context.getCurrentPath());
+		ClassTree enclosingClassTree = IdentifierAccessOuterScopeCheck.enclosingClassSkipAnonymousInitializer(context.getCurrentPath());
 
-		TypeElement currentScopeClassElement = IdentifierAccessOuterScopeCheck.getEnclosingElementSkipAnonymousInitializer(TreeUtils
-				.elementFromDeclaration(enclosingClassTree));
+		TypeElement currentScopeClassElement = TreeUtils.elementFromDeclaration(enclosingClassTree);
 		TypeElement methodOwnerElement = (TypeElement) methodElement.getEnclosingElement();
-		if (!IdentifierAccessOuterScopeCheck.isSubtype(context, currentScopeClassElement, methodOwnerElement)) {
+		if (IdentifierAccessOuterScopeCheck.isOuterType(context, methodOwnerElement, currentScopeClassElement)) {
 			context.addError(tree, "In Javascript you cannot call methods or fields from the outer type. "
 					+ "You should define a variable var that=this outside your function definition and call the methods on this object");
 		}

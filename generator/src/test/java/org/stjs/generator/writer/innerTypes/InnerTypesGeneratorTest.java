@@ -43,26 +43,22 @@ public class InnerTypesGeneratorTest {
 		assertCodeContains(InnerTypes5.class, "stjs.extend(InnerTypes5.InnerType, MySuperClass, [], ");
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testCallToQualifiedOuterType() {
 		generate(InnerTypes6.class);
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testCallFieldToQualifiedOuterType() {
 		generate(InnerTypes6a.class);
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testCallMethodOuterType() {
 		generate(InnerTypes6b.class);
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testCallMethodToQualifiedOuterType() {
 		generate(InnerTypes6c.class);
 	}
@@ -168,5 +164,15 @@ public class InnerTypesGeneratorTest {
 		Object result = execute(InnerTypes21.class);
 		assertNotNull(result);
 		assertEquals(5, ((Number) result).intValue());
+	}
+
+	@Test
+	public void testCallPrivateMethodFromAnonymous() {
+		assertCodeContains(InnerTypes22.class, "return this.privateMethod()");
+	}
+
+	@Test
+	public void testCallOuterMethodFromAnonymousInit() {
+		assertCodeContains(InnerTypes23.class, "x: this.outerMethod()");
 	}
 }
