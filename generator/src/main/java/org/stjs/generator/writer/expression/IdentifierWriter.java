@@ -5,6 +5,7 @@ import javax.lang.model.element.ElementKind;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.writer.MemberWriters;
@@ -15,7 +16,6 @@ import com.sun.source.tree.IdentifierTree;
 
 /**
  * this class deal with identifiers likes variable, field references.
- * 
  * @author acraciun
  */
 public class IdentifierWriter<JS> implements WriterContributor<IdentifierTree, JS> {
@@ -51,7 +51,7 @@ public class IdentifierWriter<JS> implements WriterContributor<IdentifierTree, J
 		if (def.getKind() == ElementKind.ENUM_CONSTANT) {
 			return visitEnumConstant(def, tree, context);
 		}
-		if (def.getKind() == ElementKind.CLASS || def.getKind() == ElementKind.ENUM || def.getKind() == ElementKind.INTERFACE) {
+		if (ElementUtils.isTypeKind(def)) {
 			if (tw.isGlobal()) {
 				// use this to register the class name - to build the dependencies
 				context.getNames().getTypeName(context, def);

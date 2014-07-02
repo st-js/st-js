@@ -5,20 +5,21 @@ import javax.lang.model.element.ElementKind;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MemberSelectTree;
+import com.sun.source.tree.Tree;
 
 /**
  * write member select access, for fields, types and methods.
- * 
  * @author acraciun
- * 
  * @param <JS>
  */
 public class MemberSelectWriter<JS> implements WriterContributor<MemberSelectTree, JS> {
@@ -28,8 +29,16 @@ public class MemberSelectWriter<JS> implements WriterContributor<MemberSelectTre
 			// super.field does not make sense, so convert it to this
 			return context.js().keyword(Keyword.THIS);
 		}
-		return visitor.scan(tree.getExpression(), context);
 
+		TreeWrapper<IdentifierTree, JS> tw = context.getCurrentWrapper();
+		Tree target = tree.getExpression();
+		JS targetJS = visitor.scan(target, context);
+		if (tw.isStatic() && !ElementUtils.isTypeKind(tw.child(target).getElement())) {
+			//this is static method called from an instances: e.g. x.staticField
+			targetJS = tw.getContext().js().property(targetJS, JavascriptKeywords.CONSTRUCTOR);
+		}
+
+		return targetJS;
 	}
 
 	@Override

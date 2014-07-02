@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.visitor.DiscriminatorKey;
+import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
@@ -33,7 +35,13 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 			return MemberWriters.buildTarget(tw);
 		}
 		MemberSelectTree memberSelect = (MemberSelectTree) select;
-		return visitor.scan(memberSelect.getExpression(), tw.getContext());
+		JS targetJS = visitor.scan(memberSelect.getExpression(), tw.getContext());
+		if (tw.isStatic() && !ElementUtils.isTypeKind(tw.child(memberSelect).child(memberSelect.getExpression()).getElement())) {
+			//this is static method called from an instances: e.g. x.staticMethod()
+			targetJS = tw.getContext().js().property(targetJS, JavascriptKeywords.CONSTRUCTOR);
+		}
+
+		return targetJS;
 	}
 
 	public static String buildMethodName(MethodInvocationTree tree) {
