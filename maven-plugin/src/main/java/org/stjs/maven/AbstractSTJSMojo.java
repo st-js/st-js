@@ -15,12 +15,29 @@
  */
 package org.stjs.maven;
 
-import com.google.common.io.Closeables;
-import com.google.common.io.Files;
-import com.google.debugging.sourcemap.SourceMapFormat;
-import com.google.debugging.sourcemap.SourceMapGenerator;
-import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
-import com.google.debugging.sourcemap.SourceMapSection;
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -37,15 +54,21 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.sonatype.plexus.build.incremental.BuildContext;
-import org.stjs.generator.*;
+import org.stjs.generator.ClassWithJavascript;
+import org.stjs.generator.GenerationDirectory;
+import org.stjs.generator.Generator;
+import org.stjs.generator.GeneratorConfiguration;
+import org.stjs.generator.GeneratorConfigurationBuilder;
+import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.MultipleFileGenerationException;
+import org.stjs.generator.STJSClass;
 
-import java.io.*;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.charset.Charset;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.google.common.io.Closeables;
+import com.google.common.io.Files;
+import com.google.debugging.sourcemap.SourceMapFormat;
+import com.google.debugging.sourcemap.SourceMapGenerator;
+import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
+import com.google.debugging.sourcemap.SourceMapSection;
 
 /**
  * This is the Maven plugin that launches the Javascript generator. The plugin needs a list of packages containing the
