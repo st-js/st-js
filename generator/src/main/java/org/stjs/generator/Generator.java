@@ -31,6 +31,8 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileManager;
@@ -62,6 +64,7 @@ import com.sun.tools.javac.api.JavacTool;
  * @author acraciun
  */
 public class Generator {
+	private static final Logger LOG = Logger.getLogger(Generator.class.getName());
 	private static final int EXECUTOR_TERMINAL_TIMEOUT = 10;
 	private static final String STJS_FILE = "stjs.js";
 	private final GenerationPlugins<Object> plugins;
@@ -95,7 +98,12 @@ public class Generator {
 
 	@edu.umd.cs.findbugs.annotations.SuppressWarnings("BC_UNCONFIRMED_CAST")
 	public void close() {
-		Closeables.closeQuietly(fileManager);
+		try {
+			Closeables.close(fileManager, true);
+		}
+		catch (IOException e) {
+			LOG.log(Level.SEVERE, "IOException should not have been thrown.", e);
+		}
 		if (taskExecutor instanceof ExecutorService) {
 			ExecutorService es = (ExecutorService) taskExecutor;
 			es.shutdown();
@@ -404,7 +412,12 @@ public class Generator {
 				throw new STJSRuntimeException("Could not open output file " + outputFile + ":" + e, e);
 			}
 			finally {
-				Closeables.closeQuietly(writer);
+				try {
+					Closeables.close(writer, true);
+				}
+				catch (IOException e) {
+					LOG.log(Level.SEVERE, "IOException should not have been thrown.", e);
+				}
 			}
 		}
 
@@ -446,7 +459,12 @@ public class Generator {
 				}
 				finally {
 					if (sourceMapWriter != null) {
-						Closeables.closeQuietly(sourceMapWriter);
+						try {
+							Closeables.close(sourceMapWriter, true);
+						}
+						catch (IOException e) {
+							LOG.log(Level.SEVERE, "IOException should not have been thrown.", e);
+						}
 					}
 				}
 			}
