@@ -34,4 +34,9 @@ public class TypeDescTest {
 	public void testEnum() {
 		assertCodeContains(TypeDesc6.class, "{x:{name:\"Enum\", arguments:[\"TypeDesc6.Type\"]}});");
 	}
+
+	@Test
+	public void testWildcards() {
+		assertCodeContains(TypeDesc7.class, "{field:{name:\"MyType1\", arguments:[\"Object\"]}});");
+	}
 }

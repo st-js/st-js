@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.WildcardType;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConfiguration;
@@ -57,6 +58,11 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 			fullName = (namespace == null ? "" : namespace + ".") + name;
 			resolvedTypes.put(type, fullName);
 			return fullName;
+		}
+		if (type instanceof WildcardType) {
+			//? extends Type1 super Type2
+			//XXX what to return here !?
+			return "Object";
 		}
 		return type.toString();
 	}

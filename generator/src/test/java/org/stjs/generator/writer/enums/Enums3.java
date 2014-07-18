@@ -6,12 +6,12 @@ public class Enums3 {
 	}
 
 	public void main() {
-		Value x = null;
+		Value x = Value.c;
 		switch (x) {
-		case a:
-			break;
-		case b:
-			break;
+			case a:
+				break;
+			case b:
+				break;
 		}
 	}
 }
