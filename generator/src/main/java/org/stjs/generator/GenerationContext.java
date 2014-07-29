@@ -41,9 +41,7 @@ import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
 
 /**
- * This class can resolve an identifier or a method in the given source context. There is one context create for each
- * generation process.
- * 
+ * This class can resolve an identifier or a method in the given source context. There is one context create for each generation process.
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class GenerationContext<JS> implements TreePathHolder {
@@ -153,8 +151,9 @@ public class GenerationContext<JS> implements TreePathHolder {
 			return new JavascriptFileGenerationException(new SourcePosition(inputFile, 0, 0), message);
 		}
 		long startPos = trees.getSourcePositions().getStartPosition(compilationUnit, tree);
-		SourcePosition pos = startPos >= 0 ? new SourcePosition(inputFile, (int) compilationUnit.getLineMap().getLineNumber(startPos),
-				(int) compilationUnit.getLineMap().getColumnNumber(startPos)) : new SourcePosition(inputFile, 0, 0);
+		SourcePosition pos =
+				startPos >= 0 ? new SourcePosition(inputFile, (int) compilationUnit.getLineMap().getLineNumber(startPos), (int) compilationUnit
+						.getLineMap().getColumnNumber(startPos)) : new SourcePosition(inputFile, 0, 0);
 		JavascriptFileGenerationException ex = new JavascriptFileGenerationException(pos, message);
 		checks.addError(ex);
 		return ex;
@@ -162,7 +161,6 @@ public class GenerationContext<JS> implements TreePathHolder {
 
 	/**
 	 * add the position of the Java original node in the generated node.
-	 * 
 	 * @param tree
 	 * @param node
 	 * @return
@@ -174,7 +172,12 @@ public class GenerationContext<JS> implements TreePathHolder {
 		long startPos = trees.getSourcePositions().getStartPosition(compilationUnit, tree);
 		int line = startPos >= 0 ? (int) compilationUnit.getLineMap().getLineNumber(startPos) : 0;
 		int column = startPos >= 0 ? (int) compilationUnit.getLineMap().getColumnNumber(startPos) : 0;
-		return javaScriptBuilder.position(node, line, column);
+
+		long endPos = trees.getSourcePositions().getEndPosition(compilationUnit, tree);
+		int endLine = endPos >= 0 ? (int) compilationUnit.getLineMap().getLineNumber(endPos) : 0;
+		int endColumn = endPos >= 0 ? (int) compilationUnit.getLineMap().getColumnNumber(endPos) : 0;
+
+		return javaScriptBuilder.position(node, line, column, endLine, endColumn);
 	}
 
 	/**
@@ -276,8 +279,8 @@ public class GenerationContext<JS> implements TreePathHolder {
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + ((annotationType == null) ? 0 : annotationType.hashCode());
-			result = prime * result + ((element == null) ? 0 : element.hashCode());
+			result = prime * result + (annotationType == null ? 0 : annotationType.hashCode());
+			result = prime * result + (element == null ? 0 : element.hashCode());
 			return result;
 		}
 
@@ -313,9 +316,7 @@ public class GenerationContext<JS> implements TreePathHolder {
 	}
 
 	/**
-	 * 
 	 * this is a dummy try just to have the wrapper thing working for cases where only the element is available
-	 * 
 	 */
 	public static class DummyTree implements Tree {
 		@Override
