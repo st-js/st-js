@@ -57,6 +57,7 @@ import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
 
 /**
  * This class visits a JavaScript AST tree and generate the corresponding source code. It handles also the source maps.
+ * 
  * @author acraciun
  */
 @SuppressWarnings("PMD.ExcessivePublicCount")
@@ -169,13 +170,15 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	/**
 	 * this is only for statements on several lines to be able to catch end of inline function defintions
+	 * 
 	 * @param node
 	 */
 	protected void endPosition(AstNode node) {
 		if (generateSourceMap) {
-			if (javaScriptPosition != null && javaScriptPosition.getLine() != currentLine) {
-				javaPosition =
-						new FilePosition(RhinoJavaScriptBuilder.getEndLineNumber(node) - 1, RhinoJavaScriptBuilder.getEndColumnNumber(node) - 1);
+			boolean hasPosition = javaScriptPosition != null && javaScriptPosition.getLine() != currentLine;
+			if (hasPosition) {
+				javaPosition = new FilePosition(RhinoJavaScriptBuilder.getEndLineNumber(node) - 1,
+						RhinoJavaScriptBuilder.getEndColumnNumber(node) - 1);
 				javaScriptPosition = new FilePosition(currentLine, currentColumn);
 			}
 		}
@@ -435,23 +438,23 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	@Override
 	public void visitKeywordLiteral(KeywordLiteral k, Boolean param) {
 		switch (k.getType()) {
-			case Token.THIS:
-				print("this");
-				break;
-			case Token.NULL:
-				print("null");
-				break;
-			case Token.TRUE:
-				print("true");
-				break;
-			case Token.FALSE:
-				print("false");
-				break;
-			case Token.DEBUGGER:
-				println("debugger;");
-				break;
-			default:
-				break;
+		case Token.THIS:
+			print("this");
+			break;
+		case Token.NULL:
+			print("null");
+			break;
+		case Token.TRUE:
+			print("true");
+			break;
+		case Token.FALSE:
+			print("false");
+			break;
+		case Token.DEBUGGER:
+			println("debugger;");
+			break;
+		default:
+			break;
 		}
 	}
 
