@@ -6,7 +6,7 @@ public class Enums3 {
 	}
 
 	public void main() {
-		Value x = null;
+		Value x = Value.a;
 		switch (x) {
 		case a:
 			break;

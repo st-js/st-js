@@ -509,7 +509,7 @@ stjs.parseJSON = (function () {
 			if (type.name) {
 				if (type.name == "Map")
 					return {};
-				if (type.name == "Map")
+				if (type.name == "Array")
 					return [];
 				return constr(type.name);
 			}
