@@ -33,6 +33,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Set;
 
@@ -78,6 +80,7 @@ import com.google.debugging.sourcemap.SourceMapSection;
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 abstract public class AbstractSTJSMojo extends AbstractMojo {
+	private static final Logger LOG = Logger.getLogger(AbstractSTJSMojo.class.getName());
 
 	private static final Object PACKAGE_INFO_JAVA = "package-info.java";
 
@@ -361,8 +364,20 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		} catch (Exception ex) {
 			throw new MojoFailureException("Error when packing files:" + ex.getMessage(), ex);
 		} finally {
-			Closeables.closeQuietly(allSourcesFile);
-			Closeables.closeQuietly(packMapStream);
+
+			try {
+				Closeables.close(allSourcesFile, true);
+			}
+			catch (IOException e) {
+				LOG.log(Level.SEVERE, "IOException should not have been thrown.", e);
+			}
+
+			try {
+				Closeables.close(packMapStream, true);
+			}
+			catch (IOException e) {
+				LOG.log(Level.SEVERE, "IOException should not have been thrown.", e);
+			}
 		}
 
 	}

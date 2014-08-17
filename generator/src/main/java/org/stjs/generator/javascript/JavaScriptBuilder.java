@@ -10,7 +10,6 @@ import com.google.debugging.sourcemap.SourceMapGenerator;
 
 /**
  * .
- * 
  * @author acraciun
  */
 @SuppressWarnings("PMD.ExcessivePublicCount")
@@ -53,7 +52,7 @@ public interface JavaScriptBuilder<T> {
 
 	T paren(@Nonnull T expr);
 
-	T position(@Nonnull T node, int javaLineNumber, int javaColumnNumber);
+	T position(@Nonnull T node, int javaStartLineNumber, int javaStartColumnNumber, int javaEndLineNumber, int javaEndColumnNumber);
 
 	T property(@Nullable T target, @Nonnull CharSequence name);
 
@@ -110,4 +109,5 @@ public interface JavaScriptBuilder<T> {
 	T comment(@Nullable T node, @Nullable String comment);
 
 	T throwStatement(@Nonnull T expr);
+
 }

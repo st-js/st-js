@@ -51,7 +51,7 @@ public class SouceJavaScriptBuilder implements JavaScriptBuilder<String> {
 	}
 
 	@Override
-	public String position(String node, int javaLineNumber, int javaColumnNumber) {
+	public String position(String node, int javaStartLineNumber, int javaStartColumnNumber, int javaEndLineNumber, int javaEndColumnNumber) {
 		// TODO Auto-generated method stub
 		return null;
 	}

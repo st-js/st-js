@@ -60,15 +60,15 @@ import com.google.common.collect.Lists;
 import com.google.debugging.sourcemap.SourceMapGenerator;
 
 /**
- * 
  * this JavaScript builder uses the rhino AST nodes to build the synthax tree.
- * 
  * @author acraciun
  */
 @SuppressWarnings("PMD.ExcessivePublicCount")
 public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	private static final int PROP_JAVA_LINE_NO = AstNode.LAST_PROP + 1;
 	private static final int PROP_JAVA_COLUMN_NO = AstNode.LAST_PROP + 2;
+	private static final int PROP_JAVA_END_LINE_NO = AstNode.LAST_PROP + 3;
+	private static final int PROP_JAVA_END_COLUMN_NO = AstNode.LAST_PROP + 4;
 
 	@Override
 	public AstNode name(CharSequence name) {
@@ -143,9 +143,11 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	}
 
 	@Override
-	public AstNode position(AstNode node, int javaLineNumber, int javaColumnNumber) {
-		node.putIntProp(PROP_JAVA_LINE_NO, javaLineNumber);
-		node.putIntProp(PROP_JAVA_COLUMN_NO, javaColumnNumber);
+	public AstNode position(AstNode node, int javaStartLineNumber, int javaStartColumnNumber, int javaEndLineNumber, int javaEndColumnNumber) {
+		node.putIntProp(PROP_JAVA_LINE_NO, javaStartLineNumber);
+		node.putIntProp(PROP_JAVA_COLUMN_NO, javaStartColumnNumber);
+		node.putIntProp(PROP_JAVA_END_LINE_NO, javaEndLineNumber);
+		node.putIntProp(PROP_JAVA_END_COLUMN_NO, javaEndColumnNumber);
 		return node;
 	}
 
@@ -155,6 +157,14 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 
 	public static int getColumnNumber(AstNode node) {
 		return node.getIntProp(PROP_JAVA_COLUMN_NO, -1);
+	}
+
+	public static int getEndLineNumber(AstNode node) {
+		return node.getIntProp(PROP_JAVA_END_LINE_NO, -1);
+	}
+
+	public static int getEndColumnNumber(AstNode node) {
+		return node.getIntProp(PROP_JAVA_END_COLUMN_NO, -1);
 	}
 
 	@Override
