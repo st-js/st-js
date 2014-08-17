@@ -66,8 +66,8 @@ public class ParseJsonTest {
 		Object result = GeneratorTestHelper.execute(Json4.class);
 		assertProperty("Class4", result, "type");
 		Date d = (Date) getProperty(result, "date");
-		assertEquals(11, d.getUTCMonth(), 0.1);
-		assertEquals(18, d.getUTCHours(), 0.1);
+		assertEquals(11, d.getMonth(), 0.1);
+		assertEquals(18, d.getHours(), 0.1);
 	}
 
 	@Test
