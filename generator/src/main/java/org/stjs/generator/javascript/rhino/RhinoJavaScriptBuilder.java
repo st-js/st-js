@@ -61,14 +61,16 @@ import com.google.debugging.sourcemap.SourceMapGenerator;
 
 /**
  * this JavaScript builder uses the rhino AST nodes to build the synthax tree.
+ * 
  * @author acraciun
  */
 @SuppressWarnings("PMD.ExcessivePublicCount")
 public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
-	private static final int PROP_JAVA_LINE_NO = AstNode.LAST_PROP + 1;
-	private static final int PROP_JAVA_COLUMN_NO = AstNode.LAST_PROP + 2;
-	private static final int PROP_JAVA_END_LINE_NO = AstNode.LAST_PROP + 3;
-	private static final int PROP_JAVA_END_COLUMN_NO = AstNode.LAST_PROP + 4;
+	private static int propId = AstNode.LAST_PROP + 1;
+	private static final int PROP_JAVA_LINE_NO = propId++;
+	private static final int PROP_JAVA_COLUMN_NO = propId++;
+	private static final int PROP_JAVA_END_LINE_NO = propId++;
+	private static final int PROP_JAVA_END_COLUMN_NO = propId++;
 
 	@Override
 	public AstNode name(CharSequence name) {
