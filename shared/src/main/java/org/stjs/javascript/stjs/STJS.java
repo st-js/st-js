@@ -1,5 +1,7 @@
 package org.stjs.javascript.stjs;
 
+import org.stjs.javascript.Array;
+
 /**
  * 
  * this is a wrapper around some of the stjs functions provided in the stjs.js javascript.
@@ -32,4 +34,34 @@ public final class STJS {
 	 * @return
 	 */
 	public native <T> T parseJSON(String json, Class<T> clazz);
+
+	/**
+	 * using the type description, it converts a POJO (i.e arrived as JSON in your client) to an object of the given
+	 * type, transforming recursively the fields. You need to include stjs-ext.js
+	 * 
+	 * @param obj
+	 * @param cls
+	 * @return
+	 */
+	public native <T> T typefy(T obj, Class<T> cls);
+
+	/**
+	 * using the type description, it converts an array of POJOs (i.e arrived as JSON in your client) to an object of
+	 * the given type, transforming recursively the fields.You need to include stjs-ext.js
+	 * 
+	 * @param obj
+	 * @param cls
+	 * @return
+	 */
+	public native <T> Array<T> typefy(Array<T> obj, Class<T> cls);
+
+	/**
+	 * using the type description it converts the fields of the object in strings or other primitve types to be able to
+	 * send the object via AJAX for example.You need to include stjs-ext.js
+	 * 
+	 * @param obj
+	 * @param cls
+	 * @return
+	 */
+	public native <T> T stringify(T obj, Class<T> cls);
 }
