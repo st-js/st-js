@@ -19,10 +19,9 @@ import org.stjs.javascript.annotation.GlobalScope;
 import org.stjs.javascript.annotation.Template;
 
 /**
- * this class offers map and array builders for both client and server side. For the server side, it delegates the
- * execution to an instance of {@link JSCollectionsImplementor}. On the client side, it simply throws an
- * {@link UnsupportedOperationException} like all the client-side bridges.
- * 
+ * this class offers map and array builders for both client and server side. For the server side, it delegates the execution to an instance of
+ * {@link JSCollectionsImplementor}. On the client side, it simply throws an {@link UnsupportedOperationException} like all the client-side
+ * bridges.
  * @author acraciun
  */
 @GlobalScope
@@ -88,15 +87,14 @@ public class JSCollections {
 
 	@Template("map")
 	@SuppressWarnings("unchecked")
-	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5,
-			K k6, Object... morePairs) {
+	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, Object... morePairs) {
 		Map<K, V> m = new Map<K, V>();
 		m.$put(k1, v1);
 		m.$put(k2, v2);
 		m.$put(k3, v3);
 		m.$put(k4, v4);
 		m.$put(k5, v5);
-		for (int i = 0; i < (morePairs.length - 1); i += 2) {
+		for (int i = 0; i < morePairs.length - 1; i += 2) {
 			m.$put((K) morePairs[i], (V) morePairs[i + 1]);
 		}
 		return m;

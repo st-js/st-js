@@ -27,16 +27,13 @@ import org.stjs.javascript.annotation.Template;
 import org.stjs.javascript.functions.Callback1;
 
 /**
- * This interface represents an array from Javascript.The value may be typed. The iteration is done on the indexes to
- * have the javascript equivalent of <br>
+ * This interface represents an array from Javascript.The value may be typed. The iteration is done on the indexes to have the javascript
+ * equivalent of <br>
  * <b>for(var key in array)</b> <br>
  * The methods are prefixed with $ to let the generator know that is should generate braket access instead, i.e <br>
  * array.$get(key) => array[key] <br>
- * array.$set(key, value) => array[key]=value
- * 
- * It is generally a bad idea for code written in ST-JS to create subclasses of Array, as that will not be translated
- * properly. However, it may be useful for some bridges.
- * 
+ * array.$set(key, value) => array[key]=value It is generally a bad idea for code written in ST-JS to create subclasses of Array, as that will
+ * not be translated properly. However, it may be useful for some bridges.
  * @author acraciun
  */
 public class Array<V> implements Iterable<String> {
@@ -83,7 +80,7 @@ public class Array<V> implements Iterable<String> {
 
 	@Template("get")
 	public V $get(int index) {
-		if ((index < 0) || (index >= array.size())) {
+		if (index < 0 || index >= array.size()) {
 			return null;
 		}
 		return array.get(index);
@@ -142,7 +139,11 @@ public class Array<V> implements Iterable<String> {
 		return array.indexOf(element);
 	}
 
-	public int indexOf(V element, int start) {
+	public int indexOf(V element, int aStart) {
+		int start = aStart >= 0 ? aStart : array.size() + aStart;
+		if (start >= array.size()) {
+			return -1;
+		}
 		int pos = array.subList(start, array.size()).indexOf(element);
 		if (pos < 0) {
 			return pos;
@@ -179,8 +180,9 @@ public class Array<V> implements Iterable<String> {
 		return array.size();
 	}
 
-	public void reverse() {
+	public Array<V> reverse() {
 		Collections.reverse(array);
+		return this;
 	}
 
 	public V shift() {
@@ -190,18 +192,26 @@ public class Array<V> implements Iterable<String> {
 		return array.remove(0);
 	}
 
-	public Array<V> slice(int start) {
-		if (start < 0) {
-			return slice(java.lang.Math.max(0, array.size() - start), array.size());
+	// If start is positive, use min(start, length).
+	// If start is negative, use max(start + length, 0).
+	// If end is positive, use min(end, length)
+	// If end is negative, use max(end + length, 0)
+
+	private int fixIndex(int idx) {
+		if (idx >= 0) {
+			return java.lang.Math.min(idx, array.size());
 		}
-		return slice(start, array.size());
+		return java.lang.Math.max(0, array.size() + idx);
+	}
+
+	public Array<V> slice(int start) {
+		return slice(fixIndex(start), array.size());
 	}
 
 	public Array<V> slice(int start, int end) {
-		int s = start < 0 ? java.lang.Math.max(0, array.size() - start) : start;
-		s = java.lang.Math.min(s, array.size());
-		int e = java.lang.Math.min(end, array.size());
-		if (s <= e) {
+		int s = fixIndex(start);
+		int e = fixIndex(end);
+		if (s > e) {
 			return new Array<V>();
 		}
 		Array<V> ret = new Array<V>();
@@ -214,23 +224,46 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	public Array<V> splice(int start, int howMany) {
+		int s = fixIndex(start);
 		Array<V> ret = new Array<V>();
 		for (int i = 0; i < howMany; ++i) {
-			if (start >= array.size()) {
+			if (s >= array.size()) {
 				break;
 			}
-			ret.array.add(array.remove(start));
+			ret.array.add(array.remove(s));
 		}
 		return ret;
 	}
 
 	public Array<V> splice(int start, int howMany, V... values) {
+		int s = fixIndex(start);
 		Array<V> removed = splice(start, howMany);
-		array.addAll(start, Arrays.asList(values));
+		array.addAll(s, Arrays.asList(values));
 		return removed;
 	}
 
-	public void sort(final SortFunction<V> function) {
+	private SortFunction<V> defaultSortFunction() {
+		return new SortFunction<V>() {
+			@Override
+			public int $invoke(V a, V b) {
+				if (a == null) {
+					return 1;
+				}
+				if (b == null) {
+					return -1;
+				}
+
+				return a.toString().compareTo(b.toString());
+			}
+		};
+	}
+
+	public void sort() {
+		sort(defaultSortFunction());
+	}
+
+	public void sort(final SortFunction<V> aFunction) {
+		final SortFunction<V> function = aFunction != null ? aFunction : defaultSortFunction();
 		Collections.sort(array, new Comparator<V>() {
 			@Override
 			public int compare(V a, V b) {
@@ -251,9 +284,8 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * this method does exactly as {@link #forEach(Callback1)}, but allows in java 8 the usage of lambda easily as the
-	 * forEach method overloads the method from the new Iterable interface. The generated code is, as expected, forEach
-	 * 
+	 * this method does exactly as {@link #forEach(Callback1)}, but allows in java 8 the usage of lambda easily as the forEach method overloads
+	 * the method from the new Iterable interface. The generated code is, as expected, forEach
 	 * @param callback
 	 */
 	@Template("prefix")
