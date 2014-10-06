@@ -29,6 +29,7 @@ import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
+import org.stjs.javascript.annotation.ServerSide;
 
 import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.ClassTree;
@@ -73,7 +74,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	}
 
 	/**
-	 * 
+	 *
 	 @return the list of implemented interfaces. for intefaces, the super class goes also in the interfaces list
 	 */
 	private JS getInterfaces(ClassTree clazz, GenerationContext<JS> context) {
@@ -265,6 +266,9 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	private boolean skipTypeDescForField(Element member) {
 		if (((TypeElement) member.getEnclosingElement()).getQualifiedName().toString().startsWith("java.lang.")) {
 			//maybe we should rather skip the bridge classes here
+			return true;
+		}
+		if (member.getAnnotation(ServerSide.class) != null) {
 			return true;
 		}
 		return false;

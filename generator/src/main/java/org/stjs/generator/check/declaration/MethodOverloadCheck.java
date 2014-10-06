@@ -14,15 +14,18 @@ import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.writer.MemberWriters;
+import org.stjs.javascript.annotation.ServerSide;
 
 import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.Tree;
 
 /**
- * this check verifies that only one method (or constructor) with a given name has actually a body, all the other should
- * be marked as native (or @Native). More the method having the body must be the more generic than the other overloaded
- * methods, so , when generated in the JavaScript, it knows how to handle all the calls.
- * 
+ * this check verifies that only one method (or constructor) with a given name has actually a body, all the other should be marked as native (or
+ * @Native). More the method having the body must be the more generic than the other overloaded methods, so , when generated in the JavaScript,
+ *           it knows how to handle all the calls.
  * @author acraciun
  */
 public class MethodOverloadCheck implements CheckContributor<MethodTree> {
@@ -51,9 +54,7 @@ public class MethodOverloadCheck implements CheckContributor<MethodTree> {
 	}
 
 	/**
-	 * return true if the "more" method can be called with arguments that have the type of the "less" method. i.e. is
-	 * more generic
-	 * 
+	 * return true if the "more" method can be called with arguments that have the type of the "less" method. i.e. is more generic
 	 * @param context
 	 * @param more
 	 * @param less
@@ -98,16 +99,24 @@ public class MethodOverloadCheck implements CheckContributor<MethodTree> {
 			// no need to check the native ones - only the one with the body
 			return null;
 		}
+		TreeWrapper<Tree, Void> tw = context.getCurrentWrapper();
+		if (MemberWriters.shouldSkip(tw)) {
+			return null;
+		}
+
 		boolean hasVarArgs = tree.getParameters().size() == 1 && InternalUtils.isVarArg(tree.getParameters().get(0));
 
 		TypeElement typeElement = (TypeElement) methodElement.getEnclosingElement();
 		// for constructors take only the class's other constructors. For regular methods, checks agains all the methods
 		// in the class' hierarchy
-		List<? extends Element> allMembers = methodElement.getKind() == ElementKind.CONSTRUCTOR ? typeElement.getEnclosedElements() : context
-				.getElements().getAllMembers(typeElement);
+		List<? extends Element> allMembers =
+				methodElement.getKind() == ElementKind.CONSTRUCTOR ? typeElement.getEnclosedElements() : context.getElements().getAllMembers(
+						typeElement);
 
 		for (Element memberElement : allMembers) {
-			checkMember(memberElement, methodElement, tree, context, hasVarArgs);
+			if (memberElement.getAnnotation(ServerSide.class) == null) {
+				checkMember(memberElement, methodElement, tree, context, hasVarArgs);
+			}
 		}
 
 		return null;

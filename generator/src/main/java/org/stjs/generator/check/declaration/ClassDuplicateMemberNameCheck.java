@@ -15,7 +15,9 @@ import org.stjs.generator.GenerationContext;
 import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.writer.MemberWriters;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
@@ -26,7 +28,6 @@ import com.sun.source.tree.VariableTree;
 
 /**
  * checks the a field name or method exists only once in the class and its hierchy
- * 
  * @author acraciun
  */
 public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree> {
@@ -53,6 +54,7 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 
 	private void checkMethod(TypeElement classElement, Tree member, GenerationContext<Void> context, Multimap<String, Element> existingNames) {
 		if (member instanceof MethodTree) {
+			TreeWrapper<Tree, Void> tw = context.getCurrentWrapper().child(member);
 			MethodTree method = (MethodTree) member;
 			ExecutableElement methodElement = TreeUtils.elementFromDeclaration(method);
 			if (JavaNodes.isNative(methodElement)) {
@@ -61,10 +63,14 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 				// generic version of the overloaded method
 				return;
 			}
+			if (MemberWriters.shouldSkip(tw)) {
+				return;
+			}
 			if (methodElement.getKind() != ElementKind.METHOD) {
 				// skip the constructors
 				return;
 			}
+
 			String name = method.getName().toString();
 
 			Collection<Element> sameName = existingNames.get(name);
@@ -92,6 +98,11 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 		if (member instanceof VariableTree) {
 			String name = ((VariableTree) member).getName().toString();
 			Element variableElement = TreeUtils.elementFromDeclaration((VariableTree) member);
+			TreeWrapper<Tree, Void> tw = context.getCurrentWrapper().child(member);
+			if (MemberWriters.shouldSkip(tw)) {
+				return;
+			}
+
 			Collection<Element> sameName = existingNames.get(name);
 			if (sameName.isEmpty()) {
 				existingNames.put(name, variableElement);

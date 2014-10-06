@@ -13,6 +13,7 @@ import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 
@@ -72,6 +73,9 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		if (tw.isNative()) {
 			// native methods are there only to indicate already existing javascript code - or to allow method
 			// overloading
+			return null;
+		}
+		if (MemberWriters.shouldSkip(tw)) {
 			return null;
 		}
 		if (tree.getModifiers().getFlags().contains(Modifier.ABSTRACT)) {

@@ -15,11 +15,14 @@ import org.stjs.generator.check.declaration.MethodOverloadCheck;
 import org.stjs.generator.check.declaration.MethodSynchronizedCheck;
 import org.stjs.generator.check.declaration.MethodVarArgParamCheck;
 import org.stjs.generator.check.expression.IdentifierAccessOuterScopeCheck;
+import org.stjs.generator.check.expression.IdentifierAccessServerSideCheck;
 import org.stjs.generator.check.expression.IdentifierGlobalScopeNameClashCheck;
 import org.stjs.generator.check.expression.MemberSelectGlobalScopeNameClashCheck;
 import org.stjs.generator.check.expression.MemberSelectOuterScopeCheck;
+import org.stjs.generator.check.expression.MemberSelectServerSideCheck;
 import org.stjs.generator.check.expression.MethodInvocationMapConstructorCheck;
 import org.stjs.generator.check.expression.MethodInvocationOuterScopeCheck;
+import org.stjs.generator.check.expression.MethodInvocationServerSideCheck;
 import org.stjs.generator.check.expression.MethodInvocationSuperSynthCheck;
 import org.stjs.generator.check.expression.NewArrayForbiddenCheck;
 import org.stjs.generator.check.expression.NewClassInlineFunctionCheck;
@@ -93,7 +96,6 @@ import com.sun.source.tree.VariableTree;
 
 /**
  * this is the main generation plugin that adds all the needed checks and writers.
- * 
  * @author acraciun
  */
 public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
@@ -137,6 +139,11 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 
 		visitor.contribute(new ClassGlobalForbidInnerCheck());
 		visitor.contribute(new MethodInvocationSuperSynthCheck());
+
+		visitor.contribute(new IdentifierAccessServerSideCheck());
+		visitor.contribute(new MemberSelectServerSideCheck());
+		visitor.contribute(new MethodInvocationServerSideCheck());
+
 	}
 
 	@Override

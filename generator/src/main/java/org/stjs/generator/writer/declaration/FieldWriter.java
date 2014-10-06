@@ -11,6 +11,7 @@ import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.javascript.Keyword;
+import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 
@@ -21,7 +22,6 @@ import com.sun.source.tree.VariableTree;
 /**
  * This will add the declaration of a field. This contributor is not added directly, but redirect from
  * {@link org.stjs.generator.writer.statement.VariableWriter}
- * 
  * @author acraciun
  */
 public class FieldWriter<JS> extends AbstractMemberWriter<JS> implements WriterContributor<VariableTree, JS> {
@@ -57,6 +57,10 @@ public class FieldWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, VariableTree tree, GenerationContext<JS> context) {
 		TreeWrapper<VariableTree, JS> tw = context.getCurrentWrapper();
+		if (MemberWriters.shouldSkip(tw)) {
+			return null;
+		}
+
 		JS initializer = null;
 		if (tree.getInitializer() == null) {
 			if (tw.isPrimitiveType()) {

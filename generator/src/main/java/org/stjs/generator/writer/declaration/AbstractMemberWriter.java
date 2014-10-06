@@ -13,4 +13,5 @@ public class AbstractMemberWriter<JS> {
 		}
 		return tw.getContext().js().name(tw.isStatic() ? JavascriptKeywords.CONSTRUCTOR : JavascriptKeywords.PROTOTYPE);
 	}
+
 }

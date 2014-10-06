@@ -17,6 +17,7 @@ import org.stjs.javascript.annotation.GlobalScope;
 import org.stjs.javascript.annotation.JavascriptFunction;
 import org.stjs.javascript.annotation.Namespace;
 import org.stjs.javascript.annotation.Native;
+import org.stjs.javascript.annotation.ServerSide;
 import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.annotation.Template;
 
@@ -26,10 +27,7 @@ import com.sun.source.tree.Tree;
 import com.sun.source.util.TreePath;
 
 /**
- * 
- * this class is a wrapper around a {@link Tree} node to give you easier access to the most important methods of the
- * elements in the AST
- * 
+ * this class is a wrapper around a {@link Tree} node to give you easier access to the most important methods of the elements in the AST
  * @author acraciun
  */
 public class TreeWrapper<T extends Tree, JS> {
@@ -146,6 +144,10 @@ public class TreeWrapper<T extends Tree, JS> {
 		return element.getModifiers().contains(Modifier.NATIVE) || element.getAnnotation(Native.class) != null;
 	}
 
+	public boolean isServerSide() {
+		return element.getAnnotation(ServerSide.class) != null;
+	}
+
 	public boolean isJavaScriptPrimitive() {
 		TypeMirror type = element.asType();
 		return TypesUtils.isPrimitive(type) || TypesUtils.isBoxedPrimitive(type) || TypesUtils.isString(type);
@@ -169,7 +171,6 @@ public class TreeWrapper<T extends Tree, JS> {
 	}
 
 	/**
-	 * 
 	 * @return the type's name if the tree belongs to a type, undefined otherwise
 	 */
 	public String getTypeName() {
@@ -184,4 +185,5 @@ public class TreeWrapper<T extends Tree, JS> {
 		Template tpl = context.getAnnotation(element, Template.class);
 		return tpl == null ? null : tpl.value();
 	}
+
 }

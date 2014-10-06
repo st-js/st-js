@@ -7,9 +7,12 @@ import org.stjs.generator.GenerationContext;
 import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.writer.MemberWriters;
 
 import com.sun.source.tree.LiteralTree;
+import com.sun.source.tree.Tree;
 import com.sun.source.tree.UnaryTree;
 import com.sun.source.tree.VariableTree;
 
@@ -36,6 +39,11 @@ public class FieldInitializerCheck implements CheckContributor<VariableTree> {
 		Element element = TreeUtils.elementFromDeclaration(tree);
 		if (element.getKind() != ElementKind.FIELD) {
 			// only deals with fields
+			return null;
+		}
+
+		TreeWrapper<Tree, Void> tw = context.getCurrentWrapper();
+		if (MemberWriters.shouldSkip(tw)) {
 			return null;
 		}
 

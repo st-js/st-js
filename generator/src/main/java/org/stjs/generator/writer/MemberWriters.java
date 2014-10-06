@@ -23,4 +23,7 @@ public final class MemberWriters {
 		return tw.getContext().js().keyword(Keyword.THIS);
 	}
 
+	public static <JS, T extends Tree> boolean shouldSkip(TreeWrapper<T, JS> tw) {
+		return tw.isServerSide();
+	}
 }

@@ -13,7 +13,6 @@ import com.sun.source.tree.VariableTree;
 
 /**
  * variable declaration. Covers also the fields.
- * 
  * @author acraciun
  */
 public class VariableWriter<JS> implements WriterContributor<VariableTree, JS> {
@@ -24,19 +23,17 @@ public class VariableWriter<JS> implements WriterContributor<VariableTree, JS> {
 		return parent instanceof ForLoopTree || parent instanceof EnhancedForLoopTree;
 	}
 
-	private JS fieldDeclaration(WriterVisitor<JS> visitor, VariableTree tree, GenerationContext<JS> context) {
+	private boolean isFieldDeclaration(WriterVisitor<JS> visitor, VariableTree tree, GenerationContext<JS> context) {
 		if (context.getCurrentPath().getParentPath().getLeaf() instanceof ClassTree) {
-			return fieldWriter.visit(visitor, tree, context);
+			return true;
 		}
-		return null;
+		return false;
 	}
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, VariableTree tree, GenerationContext<JS> context) {
-		JS js = null;
-		js = fieldDeclaration(visitor, tree, context);
-		if (js != null) {
-			return js;
+		if (isFieldDeclaration(visitor, tree, context)) {
+			return fieldWriter.visit(visitor, tree, context);
 		}
 		// if it's the init part of a for, mark it as expression, not statement
 		boolean isStatement = !isLoopInitializer(context);
