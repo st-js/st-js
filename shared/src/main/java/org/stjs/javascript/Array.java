@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.stjs.javascript.annotation.ServerSide;
 import org.stjs.javascript.annotation.Template;
 import org.stjs.javascript.functions.Callback1;
 
@@ -37,20 +38,56 @@ import org.stjs.javascript.functions.Callback1;
  * @author acraciun
  */
 public class Array<V> implements Iterable<String> {
-	private final List<V> array = new ArrayList<V>();
+	private final List<V> array;
 
 	public Array() {
+		this(new ArrayList<V>());
+	}
+
+	private Array(List<V> elements) {
+		array = elements;
 	}
 
 	public Array(Number size) {
+		this();
 		this.$length(size.intValue());
 	}
 
 	@SuppressWarnings("unchecked")
 	public Array(V first, V second, V... others) {
+		this();
 		this.push(first);
 		this.push(second);
 		this.push(others);
+	}
+
+	/**
+	 * constructors used on the server side only. It only wraps the given list, no copy is done
+	 * @param list
+	 * @return
+	 */
+	@ServerSide
+	public static <T> Array<T> wrap(List<T> list) {
+		return new Array<T>(list);
+	}
+
+	/**
+	 * constructors used on the server side only. It copies the given parameter
+	 * @param list
+	 * @return
+	 */
+	@ServerSide
+	public static <T> Array<T> copyOf(List<T> list) {
+		return new Array<T>(new ArrayList<T>(list));
+	}
+
+	/**
+	 * this gives access to the java implementation. used on the server side only
+	 * @return
+	 */
+	@ServerSide
+	public List<V> java() {
+		return array;
 	}
 
 	@Override
