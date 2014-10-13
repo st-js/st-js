@@ -639,7 +639,7 @@ function setAssertHandler(a) {
 }
 
 function assertArgEquals(position, code, expectedValue, testValue) {
-	if (expepectedValue != testValue && stjsAssertHandler)
+	if (expectedValue != testValue && stjsAssertHandler)
 		stjsAssertHandler(position, code, "Wrong argument. Expected: " + expectedValue + ", got:" + testValue);
 }
 
@@ -654,13 +654,13 @@ function assertArgTrue(position, code, condition) {
 }
 
 function assertStateEquals(position, code, expectedValue, testValue) {
-	if (expepectedValue != testValue && stjsAssertHandler)
+	if (expectedValue != testValue && stjsAssertHandler)
 		stjsAssertHandler(position, code, "Wrong state. Expected: " + expectedValue + ", got:" + testValue);
 }
 
 function assertStateNotNull(position, code, testValue) {
 	if (testValue == null && stjsAssertHandler)
-		stjsAssertHandler("Wrong state. Null value");
+		stjsAssertHandler(position, code, "Wrong state. Null value");
 }
 
 function assertStateTrue(position, code, condition) {
