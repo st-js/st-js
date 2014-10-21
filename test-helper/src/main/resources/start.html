@@ -5,7 +5,7 @@
 	var browserId = -1;
 	var lastTestSrc = null;
 	var lastTestStarted = new Date();
-	var logDiv, statusDiv;
+	var logDiv, statusDiv, stackDiv;
 	var iframe;
 	var queryStringParameters;
 	var persistent;
@@ -15,11 +15,26 @@
 	}
 
 	function log(s){
-		logDiv.innerHTML += "<span class='time'>" + new Date().toLocaleTimeString() + "</span> " + s + "<br>";
+		logDiv.innerHTML += "<span class='time'>" + new Date().toLocaleTimeString() + "</span> " + s;
 	}
+	function logAppend(s){
+		logDiv.innerHTML += s;
+	}
+	function logAppendError(s, stacktrace){
+		logDiv.innerHTML += "<span class='error' title='" + stacktrace + "' onclick='showStack(this.title)'>" + s + "</span>";
+	}
+	function logn(s){
+		log(s);
+		logAppend("<br>");
+	}
+	
+	function showStack(s){
+		stackDiv.innerHTML = s;
+	}
+	
 
 	function startingTest(testedClassName, methodName){
-		log('<b>' + testedClassName + '</b>.' + methodName);
+		log('<b>' + testedClassName + '</b>.' + methodName + ": ");
 		lastTestStarted = new Date();
 	}
 
@@ -38,9 +53,11 @@
 	function reportResultAndRunNextTest(result, stacktrace, firstTest){
 		var location = stacktrace;
 		var isAssert = false;
-		if (result != "OK" && console) {
-			var errorStack = printStackTrace({e:result});
-			console.error(errorStack.join("\n"));
+		var errorStack = "";
+		if (result != "OK") {
+			errorStack = printStackTrace({e:result});
+			if (console)
+				console.error(errorStack.join("\n"));
             location = encodeURIComponent(errorStack.join(";"));
             //take first non-junit stack trace element
 			errorStack.splice(0,1);
@@ -52,7 +69,10 @@
 			}
 		}
 		if(!firstTest){
-			log(result);
+			if (result == "OK")
+				logAppend(result + "<br>");
+			else
+				logAppendError(result + "<br>", errorStack.join("<br>"));
 		}
 		if(persistent){
 			setTimeout(checkLoad, 500);
@@ -88,6 +108,7 @@
 	onload = function() {
 		iframe = document.getElementById("iframe");
 		logDiv = document.getElementById("log");
+		stackDiv = document.getElementById("stack");
 		statusDiv = document.getElementById("status");
 		queryStringParameters = decodeParameters();
 		browserId = queryStringParameters['browserId'];
@@ -106,17 +127,30 @@
 	}
 	#iframe {
 		float:left;
+		border: solid 1px #ddd;
 	}
 	#log {
 		float:left;
-		width:400px;
 		padding-left: 20px;
 		font-size: .8em;
 		height: 90%;
 		overflow-y: auto;
 	}
+	#stack {
+		font-size: .8em;
+		position:absolute;
+		top: 450px;
+		width: 600px;
+		overflow-x: auto;
+		padding-bottom: 20px;
+	}
+	
 	.time {
 		color:lightgray;
+	}
+	.error {
+		color: red;
+		cursor: pointer;
 	}
 </style>
 </head>
@@ -124,5 +158,6 @@
 	<div id="status"></div>
 	<iframe id="iframe" src="about:blank" width=600 height=400></iframe>
 	<div id="log"></div>
+	<div id="stack"></div>
 </body>
 </html>
