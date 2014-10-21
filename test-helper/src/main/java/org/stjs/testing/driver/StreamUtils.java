@@ -15,6 +15,7 @@
  */
 package org.stjs.testing.driver;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -24,7 +25,9 @@ import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Date;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
@@ -32,9 +35,7 @@ import com.google.common.io.Closeables;
 import com.sun.net.httpserver.HttpExchange;
 
 /**
- * 
  * utils to copy different urls to an output stream
- * 
  * @author acraciun
  */
 @SuppressWarnings("restriction")
@@ -57,7 +58,8 @@ public class StreamUtils {
 		try {
 			CharStreams.copy(reader, out);
 			out.flush();
-		} finally {
+		}
+		finally {
 			reader.close();
 		}
 		return true;
@@ -72,13 +74,34 @@ public class StreamUtils {
 				n++;
 			}
 			return n;
-		} finally {
+		}
+		finally {
 			Closeables.closeQuietly(is);
 		}
 	}
 
-	public static boolean copy(ClassLoader classLoader, String url, HttpExchange exchange) throws IOException,
-			URISyntaxException {
+	public static Date getResourceModifiedDate(ClassLoader classLoader, String url) throws URISyntaxException {
+		URI uri = new URI(url);
+
+		if (uri.getPath() == null) {
+			throw new IllegalArgumentException("Wrong path in uri:" + url);
+		}
+		URL resourceUrl = classLoader.getResource(uri.getPath().substring(1));
+		if (resourceUrl.getProtocol().equals("file")) {
+			File file = new File(resourceUrl.getFile());
+			return new Date(file.lastModified());
+		}
+		if (resourceUrl.getProtocol().equals("jar")) {
+			String fullPath = resourceUrl.getFile();
+			String jarFile = fullPath.replace("file:", "").replaceAll("!.+", "");
+			File file = new File(jarFile);
+			return new Date(file.lastModified());
+		}
+		//return now
+		return new Date();
+	}
+
+	public static boolean copy(ClassLoader classLoader, String url, HttpExchange exchange) throws IOException, URISyntaxException {
 		URI uri = new URI(url);
 
 		if (uri.getPath() == null) {
@@ -91,16 +114,17 @@ public class StreamUtils {
 			return false;
 		}
 		try {
-			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK,
-					getResourceSize(classLoader, uri.getPath().substring(1)));
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, getResourceSize(classLoader, uri.getPath().substring(1)));
 			OutputStream out = exchange.getResponseBody();
 			ByteStreams.copy(is, out);
 			out.flush();
-		} finally {
+		}
+		finally {
 			is.close();
 		}
 
 		// TODO handle remote urls too
 		return true;
 	}
+
 }

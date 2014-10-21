@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,12 +29,11 @@ import com.sun.net.httpserver.HttpServer;
 
 /**
  * Manages the HTTP server that is used to send tests to the browsers.
- * 
  * @author lordofthepigs
  */
 @SuppressWarnings("restriction")
 public class HttpLongPollingServer implements AsyncProcess {
-
+	private static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 	public static final String NEXT_TEST_URI = "/getNextTest";
 	public static final String BLANK_URI = "/about:blank";
 
@@ -51,7 +51,8 @@ public class HttpLongPollingServer implements AsyncProcess {
 		InetSocketAddress address = new InetSocketAddress(config.getPort());
 		try {
 			httpServer = HttpServer.create(address, 0);
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -88,9 +89,9 @@ public class HttpLongPollingServer implements AsyncProcess {
 	}
 
 	/**
-	 * Registers the specified browser session with this HTTP server, so that this server knows how to respond to HTTP
-	 * requests containing the specified session's id. This method is expected to be called many times in a row before
-	 * any unit test is started, once per browser session.
+	 * Registers the specified browser session with this HTTP server, so that this server knows how to respond to HTTP requests containing the
+	 * specified session's id. This method is expected to be called many times in a row before any unit test is started, once per browser
+	 * session.
 	 */
 	public long registerBrowserSession(LongPollingBrowser browser) {
 		long id = browsers.size();
@@ -109,7 +110,6 @@ public class HttpLongPollingServer implements AsyncProcess {
 
 				// add some common response headers
 				exchange.getResponseHeaders().add("Date", formatDateHeader(new Date()));
-				exchange.getResponseHeaders().add("Last-Modified", formatDateHeader(new Date()));
 				exchange.getResponseHeaders().add("Connection", "Keep-Alive");
 				exchange.getResponseHeaders().add("Server", "STJS");
 
@@ -123,10 +123,12 @@ public class HttpLongPollingServer implements AsyncProcess {
 				} else {
 					handleResource(path, exchange);
 				}
-			} catch (Exception ex) {
+			}
+			catch (Exception ex) {
 				System.err.println("Error processing request:" + ex);
 				ex.printStackTrace();
-			} finally {
+			}
+			finally {
 				exchange.close();
 			}
 		}
@@ -139,15 +141,14 @@ public class HttpLongPollingServer implements AsyncProcess {
 		}
 
 		/**
-		 * Called when this HTTP server receives a request for the next test from a browser. This method blocks until
-		 * one of these to conditions are met:<br>
+		 * Called when this HTTP server receives a request for the next test from a browser. This method blocks until one of these to conditions
+		 * are met:<br>
 		 * <ol>
-		 * <li>This server receives a new test to send to the browser session that made the request (via the
-		 * queueTest()) method.
+		 * <li>This server receives a new test to send to the browser session that made the request (via the queueTest()) method.
 		 * <li>This server is notified that no more tests are remaining (via AsyncBrowserSession.notifyNoMoreTest())
 		 * </ol>
-		 * Once one of these events has happened, this HTTP server sends the appropriate HTML/javascript response before
-		 * returning from this method.
+		 * Once one of these events has happened, this HTTP server sends the appropriate HTML/javascript response before returning from this
+		 * method.
 		 */
 		private void handleNextTest(Map<String, String> params, HttpExchange exchange) {
 			// Read the test results returned by the browser, if any
@@ -161,8 +162,7 @@ public class HttpLongPollingServer implements AsyncProcess {
 				// We only have a method under execution, if the HTTP request that is being
 				// handled is not the first one the server has received
 				if (config.isDebugEnabled()) {
-					System.out.println("Server received test results for method " + completedMethod.toString()
-							+ " from browser " + browserId);
+					System.out.println("Server received test results for method " + completedMethod.toString() + " from browser " + browserId);
 				}
 
 				// notify JUnit of the result of this test. When the last browser notifies
@@ -183,12 +183,12 @@ public class HttpLongPollingServer implements AsyncProcess {
 			MultiTestMethod nextMethod = browser.awaitNextTest();
 			if (nextMethod != null) {
 				if (config.isDebugEnabled()) {
-					System.out.println("Server is sending test for method " + nextMethod.toString() + " to browser "
-							+ browserId);
+					System.out.println("Server is sending test for method " + nextMethod.toString() + " to browser " + browserId);
 				}
 				try {
 					browser.sendTestFixture(nextMethod, exchange);
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					// we failed to send the fixture. This means that the browser will not request the next test,
 					// it is therefore essentially dead.
 					browser.markAsDead(e, exchange.getRequestHeaders().getFirst("User-Agent"));
@@ -198,7 +198,8 @@ public class HttpLongPollingServer implements AsyncProcess {
 			} else {
 				try {
 					browser.sendNoMoreTestFixture(exchange);
-				} catch (IOException ioe) {
+				}
+				catch (IOException ioe) {
 					// sending a 500 error has basically the same effect as sending a proper response. The browser may
 					// not cleanup properly, but hey, this is disaster recovery
 					throw new RuntimeException(ioe);
@@ -207,9 +208,8 @@ public class HttpLongPollingServer implements AsyncProcess {
 		}
 
 		/**
-		 * this method returns an id of a registered browser when the id received from the client does not correspond to
-		 * an existing one - i.e. it's randomly generated on the client.
-		 * 
+		 * this method returns an id of a registered browser when the id received from the client does not correspond to an existing one - i.e.
+		 * it's randomly generated on the client.
 		 * @param browserId
 		 * @return
 		 */
@@ -228,15 +228,26 @@ public class HttpLongPollingServer implements AsyncProcess {
 			throw new RuntimeException("More browser connections than configured browsers");
 		}
 
-		private synchronized void handleResource(String path, HttpExchange exchange) throws IOException,
-				URISyntaxException {
+		private synchronized void handleResource(String path, HttpExchange exchange) throws IOException, URISyntaxException {
 			if (path.endsWith(".js")) {
 				exchange.getResponseHeaders().add("Content-Type", "text/javascript");
 			} else if (path.endsWith(".html")) {
 				exchange.getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
 			}
+
+			String ifModifiedSinceHeader = exchange.getRequestHeaders().getFirst("If-Modified-Since");
+			Date ifModifiedSince = parseDateHeader(ifModifiedSinceHeader);
+
 			// XXX: legacy fix
 			String cleanPath = path.replaceFirst("file:/+target", "target");
+
+			Date lastModified = StreamUtils.getResourceModifiedDate(config.getClassLoader(), cleanPath);
+			exchange.getResponseHeaders().add("Last-Modified", formatDateHeader(lastModified));
+
+			if (ifModifiedSince != null && !lastModified.after(ifModifiedSince)) {
+				exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_MODIFIED, 1);
+				return;
+			}
 			if (!StreamUtils.copy(config.getClassLoader(), cleanPath, exchange)) {
 				System.err.println(cleanPath + " was not found in classpath");
 			}
@@ -254,7 +265,8 @@ public class HttpLongPollingServer implements AsyncProcess {
 				if (x.length == 2) {
 					try {
 						params.put(x[0], URLDecoder.decode(x[1], Charsets.UTF_8.name()));
-					} catch (UnsupportedEncodingException e) {
+					}
+					catch (UnsupportedEncodingException e) {
 						throw new RuntimeException(e);
 					}
 				}
@@ -262,8 +274,22 @@ public class HttpLongPollingServer implements AsyncProcess {
 			return params;
 		}
 
+		private Date parseDateHeader(String header) {
+			if (header == null) {
+				return null;
+			}
+			DateFormat df = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.ENGLISH);
+			try {
+				return df.parse(header);
+			}
+			catch (ParseException e) {
+				System.err.println("Cannot parse date header:" + e);
+				return null;
+			}
+		}
+
 		private String formatDateHeader(Date date) {
-			DateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss ZZZ", Locale.ENGLISH);
+			DateFormat df = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.ENGLISH);
 			df.setTimeZone(TimeZone.getTimeZone("GMT"));
 			return df.format(date);
 		}
@@ -274,7 +300,8 @@ public class HttpLongPollingServer implements AsyncProcess {
 			}
 			try {
 				return Long.parseLong(s);
-			} catch (Exception ex) {
+			}
+			catch (Exception ex) {
 				return defaultValue;
 			}
 		}
