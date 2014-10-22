@@ -163,7 +163,8 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	 * Reports this browser as dead to the specified test method. The test will be failed.
 	 */
 	private void reportAsDead(MultiTestMethod method) {
-		method.notifyExecutionResult(TestResult.deadBrowser(this.getClass().getSimpleName(), "Browser is dead"));
+		method.notifyExecutionResult(TestResult.deadBrowser(this.getClass().getSimpleName(), getConfig().getTestTimeout()
+				+ " seconds passed and the browser didn't contact back the ST-JS JUnit runner"));
 	}
 
 	/**
