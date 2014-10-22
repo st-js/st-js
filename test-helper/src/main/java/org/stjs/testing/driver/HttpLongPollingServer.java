@@ -11,8 +11,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -41,6 +43,7 @@ public class HttpLongPollingServer implements AsyncProcess {
 	private final HttpServer httpServer;
 	private final Map<Long, LongPollingBrowser> browsers = new ConcurrentHashMap<Long, LongPollingBrowser>();
 	private final Map<Long, Long> selfAssignedBrowserIds = new ConcurrentHashMap<Long, Long>();
+	private final Set<String> notFound = new HashSet<String>();
 
 	/**
 	 * Configures and starts the HTTP server
@@ -100,6 +103,7 @@ public class HttpLongPollingServer implements AsyncProcess {
 	}
 
 	private final class AsyncHttpHandler implements HttpHandler {
+
 		@Override
 		public void handle(HttpExchange exchange) throws IOException {
 			if (config.isDebugEnabled()) {
@@ -229,6 +233,10 @@ public class HttpLongPollingServer implements AsyncProcess {
 		}
 
 		private synchronized void handleResource(String path, HttpExchange exchange) throws IOException, URISyntaxException {
+			if (notFound.contains(path)) {
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, -1);
+			return;
+			}
 			if (path.endsWith(".js")) {
 				exchange.getResponseHeaders().add("Content-Type", "text/javascript");
 			} else if (path.endsWith(".html")) {
@@ -245,10 +253,11 @@ public class HttpLongPollingServer implements AsyncProcess {
 			exchange.getResponseHeaders().add("Last-Modified", formatDateHeader(lastModified));
 
 			if (ifModifiedSince != null && !lastModified.after(ifModifiedSince)) {
-				exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_MODIFIED, 1);
+				exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_MODIFIED, -1);
 				return;
 			}
 			if (!StreamUtils.copy(config.getClassLoader(), cleanPath, exchange)) {
+				notFound.add(path);
 				System.err.println(cleanPath + " was not found in classpath");
 			}
 		}

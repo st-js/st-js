@@ -87,6 +87,10 @@ public class StreamUtils {
 			throw new IllegalArgumentException("Wrong path in uri:" + url);
 		}
 		URL resourceUrl = classLoader.getResource(uri.getPath().substring(1));
+		if (resourceUrl == null) {
+			return new Date();
+		}
+
 		if (resourceUrl.getProtocol().equals("file")) {
 			File file = new File(resourceUrl.getFile());
 			return new Date(file.lastModified());
@@ -110,7 +114,7 @@ public class StreamUtils {
 
 		InputStream is = classLoader.getResourceAsStream(uri.getPath().substring(1));
 		if (is == null) {
-			exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, 0);
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, -1);
 			return false;
 		}
 		try {
