@@ -22,12 +22,22 @@ public class TestResult {
 	private final String location;
 	private final String userAgent;
 	private final boolean isAssert;
+	private final boolean dead;
 
 	public TestResult(String userAgent, String message, String location, boolean isAssert) {
+		this(userAgent, message, location, isAssert, false);
+	}
+
+	public TestResult(String userAgent, String message, String location, boolean isAssert, boolean dead) {
 		this.userAgent = userAgent;
 		this.message = message;
 		this.location = location;
 		this.isAssert = isAssert;
+		this.dead = dead;
+	}
+
+	public static TestResult deadBrowser(String userAgent, String message) {
+		return new TestResult(userAgent, message, null, false, true);
 	}
 
 	public String getMessage() {
@@ -42,9 +52,17 @@ public class TestResult {
 		return "OK".equals(message);
 	}
 
+	public boolean isDead() {
+		return dead;
+	}
+
 	public Throwable buildException(ClassLoader testClassLoader) {
-		Throwable ex = isAssert ? new AssertionError(message + ", user agent: " + userAgent) : new RuntimeException(
-				message + ", user agent: " + userAgent);
+		if (dead) {
+			return new Error("Browser is dead or unable to contact back the STJS JUnit runner: " + message + ", user agent: " + userAgent);
+		}
+		Throwable ex =
+				isAssert ? new AssertionError(message + ", user agent: " + userAgent) : new RuntimeException(message + ", user agent: "
+						+ userAgent);
 		StackTraceElement[] stackTrace = new JavascriptToJava(testClassLoader).buildStacktrace(location, ";");
 		ex.setStackTrace(stackTrace);
 		return ex;

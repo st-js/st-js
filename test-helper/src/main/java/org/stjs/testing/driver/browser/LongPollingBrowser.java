@@ -36,18 +36,15 @@ import com.google.common.base.Strings;
 import com.sun.net.httpserver.HttpExchange;
 
 /**
- * Represents a testing session opened with one instance of a browser that uses long-polling to fetch new tests to
- * execute from the HTTP server. LongPollingBrowser handles multithreading synchronization between the browser, the HTTP
- * server and the JUnit runner. The JUnit runner notifies this browser that a new test method must be executed by
- * calling executeTest(MultiTestMethod), or that it has finished executing all the tests by calling notifyNoMoreTests().
- * The HTTP server waits for a new test to send to the browser by calling awaitNewTestReady(). <br>
+ * Represents a testing session opened with one instance of a browser that uses long-polling to fetch new tests to execute from the HTTP server.
+ * LongPollingBrowser handles multithreading synchronization between the browser, the HTTP server and the JUnit runner. The JUnit runner notifies
+ * this browser that a new test method must be executed by calling executeTest(MultiTestMethod), or that it has finished executing all the tests
+ * by calling notifyNoMoreTests(). The HTTP server waits for a new test to send to the browser by calling awaitNewTestReady(). <br>
  * <br>
- * On top of that, LongPollinBrowser delegates the details of starting and stopping the browser itself to its concrete
- * subclasses.
- * 
+ * On top of that, LongPollinBrowser delegates the details of starting and stopping the browser itself to its concrete subclasses.
  * @author lordofthepigs
  */
-@SuppressWarnings({ "restriction", "deprecation" })
+@SuppressWarnings({"restriction", "deprecation"})
 public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	private final Exchanger<MultiTestMethod> exchanger = new Exchanger<MultiTestMethod>();
@@ -75,11 +72,10 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	}
 
 	/**
-	 * Starts the browser session. This will open a browser and navigate it to some page where the unit testing
-	 * procedure can be started. The decision about exactly which browser binary is started, how it is started and which
-	 * page is opened is delegated to the Browser implementation that this AsynBrowserSession was constructed with. This
-	 * method performs some error handling, and the real implementation of the browser starting procedure is delegated
-	 * to doStart().
+	 * Starts the browser session. This will open a browser and navigate it to some page where the unit testing procedure can be started. The
+	 * decision about exactly which browser binary is started, how it is started and which page is opened is delegated to the Browser
+	 * implementation that this AsynBrowserSession was constructed with. This method performs some error handling, and the real implementation of
+	 * the browser starting procedure is delegated to doStart().
 	 */
 	@Override
 	public void start() throws InitializationError {
@@ -99,12 +95,11 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	protected abstract void doStart() throws InitializationError;
 
 	/**
-	 * Blocks until JUnit notifies this browser session that either a new test must be executed (ie: executeTest() is
-	 * called), or there are no more tests (ie: notifyNoMoreTests() is called). If there is a new test to execute, then
-	 * this method returns it. If there are no more tests, this method returns null.<br>
+	 * Blocks until JUnit notifies this browser session that either a new test must be executed (ie: executeTest() is called), or there are no
+	 * more tests (ie: notifyNoMoreTests() is called). If there is a new test to execute, then this method returns it. If there are no more
+	 * tests, this method returns null.<br>
 	 * <br>
 	 * This method is typically called right after the results of the previous test were reported.
-	 * 
 	 * @return The next test to execute, or null if there isn't any
 	 */
 	public MultiTestMethod awaitNextTest() {
@@ -134,13 +129,10 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	}
 
 	/**
-	 * Notifies this browser that the specified test must be executed. This method blocks until this browser picks up
-	 * the test by calling awaitNextTest(). If the browser does not pick up the test within the timeout specified in
-	 * DriverConfiguration.getTestTimeout(), then the browser is assumed to be dead. The test is failed, and the browser
-	 * does not receive any more tests at all.
-	 * 
-	 * @param method
-	 *            The test to execute.
+	 * Notifies this browser that the specified test must be executed. This method blocks until this browser picks up the test by calling
+	 * awaitNextTest(). If the browser does not pick up the test within the timeout specified in DriverConfiguration.getTestTimeout(), then the
+	 * browser is assumed to be dead. The test is failed, and the browser does not receive any more tests at all.
+	 * @param method The test to execute.
 	 */
 	@Override
 	public void executeTest(MultiTestMethod method) {
@@ -171,13 +163,13 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	 * Reports this browser as dead to the specified test method. The test will be failed.
 	 */
 	private void reportAsDead(MultiTestMethod method) {
-		method.notifyExecutionResult(new TestResult(this.getClass().getSimpleName(), "Browser is dead", null, false));
+		method.notifyExecutionResult(TestResult.deadBrowser(this.getClass().getSimpleName(), "Browser is dead"));
 	}
 
 	/**
-	 * Notifies this browser that there are no more tests to execute. This method blocks until this browser attempts to
-	 * pick up a new test by calling awaitNewTestReady(). If the browser does not attempt to pick up a new test within
-	 * the timeout specified in DriverConfiguration.getTestTimeout(), then the browser is assumed to be dead.
+	 * Notifies this browser that there are no more tests to execute. This method blocks until this browser attempts to pick up a new test by
+	 * calling awaitNewTestReady(). If the browser does not attempt to pick up a new test within the timeout specified in
+	 * DriverConfiguration.getTestTimeout(), then the browser is assumed to be dead.
 	 */
 	@Override
 	public void notifyNoMoreTests() {
@@ -214,15 +206,10 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	}
 
 	/**
-	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser to execute the
-	 * specified test.
-	 * 
-	 * @param meth
-	 *            The test to send to the browser
-	 * @param browserSession
-	 *            The session to which the test is sent
-	 * @param exchange
-	 *            contains the HTTP response that must be written to
+	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser to execute the specified test.
+	 * @param meth The test to send to the browser
+	 * @param browserSession The session to which the test is sent
+	 * @param exchange contains the HTTP response that must be written to
 	 */
 	public void sendTestFixture(MultiTestMethod meth, HttpExchange exchange) throws Exception {
 		Class<?> testClass = meth.getTestClass().getJavaClass();
@@ -344,13 +331,9 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	}
 
 	/**
-	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser understand that
-	 * there will be no more tests.
-	 * 
-	 * @param browserSession
-	 *            The session to be notified
-	 * @param exchange
-	 *            contains the HTTP response that must be written to
+	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser understand that there will be no more tests.
+	 * @param browserSession The session to be notified
+	 * @param exchange contains the HTTP response that must be written to
 	 * @throws IOException
 	 */
 	public void sendNoMoreTestFixture(HttpExchange exchange) throws IOException {
@@ -369,7 +352,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	public void markAsDead(Throwable throwable, String userAgent) {
 		this.isDead = true;
-		this.methodUnderExecution.notifyExecutionResult(new TestResult(userAgent, throwable.getMessage(), null, false));
+		this.methodUnderExecution.notifyExecutionResult(TestResult.deadBrowser(userAgent, throwable.getMessage()));
 	}
 
 	public long getId() {
