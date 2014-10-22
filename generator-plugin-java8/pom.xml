@@ -28,7 +28,7 @@
 			<artifactId>tools</artifactId>
 			<version>1.8.0</version>
 			<scope>system</scope>
-			<systemPath>${env.JAVA8_HOME}/lib/tools.jar</systemPath>
+			<systemPath>/softwares/java-1.8/lib/tools.jar</systemPath>
 		</dependency>
 
 		<!-- test deps -->

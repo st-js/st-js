@@ -27,4 +27,13 @@ public class LambdaGeneratorTest {
 		assertCodeContains(Lambda4.class, "method(function(x){return x.length + 1;})");
 	}
 
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testLambaAccessFieldOuterScope() {
+		generate(Lambda5.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testLambaAccessMethodOuterScope() {
+		generate(Lambda6.class);
+	}
 }

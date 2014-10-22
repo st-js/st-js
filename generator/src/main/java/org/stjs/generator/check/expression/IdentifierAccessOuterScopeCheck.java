@@ -65,7 +65,7 @@ public class IdentifierAccessOuterScopeCheck implements CheckContributor<Identif
 		return subTypeErasure.toString().startsWith(outerTypeErasure + ".");
 	}
 
-	private boolean isRegularInstanceField(Element fieldElement, IdentifierTree tree) {
+	public static boolean isRegularInstanceField(Element fieldElement, IdentifierTree tree) {
 		if (fieldElement == null || fieldElement.getKind() != ElementKind.FIELD) {
 			// only meant for fields
 			return false;
