@@ -396,6 +396,7 @@ stjs.enumeration=function(){
 	return e;
 };
 
+
 /**
  * if true the execution of generated main methods is disabled.
  * this is useful when executing unit tests, to no have the main methods executing before the tests
@@ -720,3 +721,18 @@ var RuntimeException = function(message, cause){
 };
 stjs.extend(RuntimeException, Exception, [], function(constructor, prototype){
 }, {});
+
+/** stjs field manipulation */
+stjs.setField=function(obj, field, value, returnOldValue){
+	if (stjs.setFieldHandler)
+		return stjs.setFieldHandler(obj, field, value, returnOldValue);
+	var toReturn = returnOldValue ? obj[field] : value;
+	obj[field] = value;
+	return toReturn;
+}
+
+stjs.getField=function(obj, field){
+	if (stjs.getFieldHandler)
+		return stjs.getFieldHandler(obj, field);
+	return obj[field];
+}

@@ -89,6 +89,15 @@ import org.stjs.generator.writer.templates.PropertiesTemplate;
 import org.stjs.generator.writer.templates.PutTemplate;
 import org.stjs.generator.writer.templates.SetTemplate;
 import org.stjs.generator.writer.templates.TypeOfTemplate;
+import org.stjs.generator.writer.templates.fields.DefaultAssignmentTemplate;
+import org.stjs.generator.writer.templates.fields.DefaultCompoundAssignmentTemplate;
+import org.stjs.generator.writer.templates.fields.DefaultUnaryTemplate;
+import org.stjs.generator.writer.templates.fields.GlobalSetterAssignmentTemplate;
+import org.stjs.generator.writer.templates.fields.GlobalSetterCompoundAssignmentTemplate;
+import org.stjs.generator.writer.templates.fields.GlobalSetterUnaryTemplate;
+import org.stjs.generator.writer.templates.fields.SetterAssignmentTemplate;
+import org.stjs.generator.writer.templates.fields.SetterCompoundAssignmentTemplate;
+import org.stjs.generator.writer.templates.fields.SetterUnaryTemplate;
 
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.MethodTree;
@@ -191,6 +200,7 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(new ThrowWriter<JS>());
 
 		addMethodCallTemplates(visitor);
+		addFieldTemplates(visitor);
 		addJavaDocCommentFilter(visitor);
 	}
 
@@ -203,6 +213,18 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 
 	private DiscriminatorKey template(String name) {
 		return DiscriminatorKey.of(MethodInvocationWriter.class.getSimpleName(), name);
+	}
+
+	private DiscriminatorKey assignTemplate(String name) {
+		return DiscriminatorKey.of(AssignmentWriter.class.getSimpleName(), name);
+	}
+
+	private DiscriminatorKey unaryTemplate(String name) {
+		return DiscriminatorKey.of(UnaryWriter.class.getSimpleName(), name);
+	}
+
+	private DiscriminatorKey compoundAssignTemplate(String name) {
+		return DiscriminatorKey.of(CompoundAssignmentWriter.class.getSimpleName(), name);
 	}
 
 	protected void addMethodCallTemplates(WriterVisitor<JS> visitor) {
@@ -222,6 +244,27 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(template("typeOf"), new TypeOfTemplate<JS>());
 		visitor.contribute(template("assert"), new AssertTemplate<JS>());
 		visitor.contribute(template("none"), new DefaultTemplate<JS>());
+	}
+
+	protected void addFieldTemplates(WriterVisitor<JS> visitor) {
+		String none = "none";
+		visitor.contribute(assignTemplate(none), new DefaultAssignmentTemplate<JS>());
+		visitor.contribute(assignTemplate("setter"), new SetterAssignmentTemplate<JS>());
+		visitor.contribute(assignTemplate("property"), new SetterAssignmentTemplate<JS>());
+		visitor.contribute(assignTemplate("gsetter"), new GlobalSetterAssignmentTemplate<JS>());
+		visitor.contribute(assignTemplate("gproperty"), new GlobalSetterAssignmentTemplate<JS>());
+
+		visitor.contribute(unaryTemplate(none), new DefaultUnaryTemplate<JS>());
+		visitor.contribute(unaryTemplate("setter"), new SetterUnaryTemplate<JS>());
+		visitor.contribute(unaryTemplate("property"), new SetterUnaryTemplate<JS>());
+		visitor.contribute(unaryTemplate("gsetter"), new GlobalSetterUnaryTemplate<JS>());
+		visitor.contribute(unaryTemplate("gproperty"), new GlobalSetterUnaryTemplate<JS>());
+
+		visitor.contribute(compoundAssignTemplate(none), new DefaultCompoundAssignmentTemplate<JS>());
+		visitor.contribute(compoundAssignTemplate("setter"), new SetterCompoundAssignmentTemplate<JS>());
+		visitor.contribute(compoundAssignTemplate("property"), new SetterCompoundAssignmentTemplate<JS>());
+		visitor.contribute(compoundAssignTemplate("gsetter"), new GlobalSetterCompoundAssignmentTemplate<JS>());
+		visitor.contribute(compoundAssignTemplate("gproperty"), new GlobalSetterCompoundAssignmentTemplate<JS>());
 	}
 
 	@Override

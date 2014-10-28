@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.Modifier;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
@@ -67,19 +66,26 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		return params;
 	}
 
-	@Override
-	public JS visit(WriterVisitor<JS> visitor, MethodTree tree, GenerationContext<JS> context) {
-		TreeWrapper<MethodTree, JS> tw = context.getCurrentWrapper();
+	protected boolean accept(TreeWrapper<MethodTree, JS> tw) {
 		if (tw.isNative()) {
 			// native methods are there only to indicate already existing javascript code - or to allow method
 			// overloading
-			return null;
+			return false;
 		}
 		if (MemberWriters.shouldSkip(tw)) {
-			return null;
+			return false;
 		}
-		if (tree.getModifiers().getFlags().contains(Modifier.ABSTRACT)) {
+		if (tw.isAbstract()) {
 			// abstract methods (from interfaces) are not generated
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public JS visit(WriterVisitor<JS> visitor, MethodTree tree, GenerationContext<JS> context) {
+		TreeWrapper<MethodTree, JS> tw = context.getCurrentWrapper();
+		if (!accept(tw)) {
 			return null;
 		}
 

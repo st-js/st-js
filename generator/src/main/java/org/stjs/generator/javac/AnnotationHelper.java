@@ -18,8 +18,7 @@ public final class AnnotationHelper {
 
 	public static <T extends Annotation> T getAnnotation(Elements elements, Element element, Class<T> annotationType) {
 		if (!(element instanceof ExecutableElement)) {
-			// make sure we're only doing it for methods
-			return null;
+			return element == null ? null : element.getAnnotation(annotationType);
 		}
 
 		T t = element.getAnnotation(annotationType);
@@ -54,8 +53,9 @@ public final class AnnotationHelper {
 		// 1st letter capitalized) attached
 		// and the suffix "Annotated"
 		String ownerClassName = ((TypeElement) methodElement.getEnclosingElement()).getQualifiedName().toString();
-		T annotation = getAnnotationInHelperClass(elements, ANNOTATED_PACKAGE + ownerClassName
-				+ capitalize(methodElement.getSimpleName().toString()), methodElement, annotationClass);
+		T annotation =
+				getAnnotationInHelperClass(elements, ANNOTATED_PACKAGE + ownerClassName + capitalize(methodElement.getSimpleName().toString()),
+						methodElement, annotationClass);
 		if (annotation != null) {
 			return annotation;
 		}

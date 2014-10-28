@@ -74,6 +74,11 @@ public class TreeWrapper<T extends Tree, JS> {
 		return modifiers.contains(Modifier.STATIC);
 	}
 
+	public boolean isAbstract() {
+		Set<Modifier> modifiers = element.getModifiers();
+		return modifiers.contains(Modifier.ABSTRACT);
+	}
+
 	public boolean isSuper() {
 		if (!(getTree() instanceof IdentifierTree)) {
 			return false;
@@ -182,6 +187,11 @@ public class TreeWrapper<T extends Tree, JS> {
 	}
 
 	public String getMethodTemplate() {
+		Template tpl = context.getAnnotation(element, Template.class);
+		return tpl == null ? null : tpl.value();
+	}
+
+	public String getFieldTemplate() {
 		Template tpl = context.getAnnotation(element, Template.class);
 		return tpl == null ? null : tpl.value();
 	}

@@ -52,9 +52,23 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 
 	}
 
+	private void checkMethodName(TypeElement classElement, MethodTree method, ExecutableElement methodElement, GenerationContext<Void> context,
+			Multimap<String, Element> existingNames) {
+		String name = method.getName().toString();
+
+		Collection<Element> sameName = existingNames.get(name);
+		if (sameName.isEmpty()) {
+			existingNames.put(name, methodElement);
+		} else {
+			// try to see if it's not in fact a method override
+			for (Element overrideCandidate : sameName) {
+				checkCandidate(overrideCandidate, methodElement, classElement, method, context);
+			}
+		}
+	}
+
 	private void checkMethod(TypeElement classElement, Tree member, GenerationContext<Void> context, Multimap<String, Element> existingNames) {
 		if (member instanceof MethodTree) {
-			TreeWrapper<Tree, Void> tw = context.getCurrentWrapper().child(member);
 			MethodTree method = (MethodTree) member;
 			ExecutableElement methodElement = TreeUtils.elementFromDeclaration(method);
 			if (JavaNodes.isNative(methodElement)) {
@@ -63,6 +77,7 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 				// generic version of the overloaded method
 				return;
 			}
+			TreeWrapper<Tree, Void> tw = context.getCurrentWrapper().child(member);
 			if (MemberWriters.shouldSkip(tw)) {
 				return;
 			}
@@ -70,18 +85,7 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 				// skip the constructors
 				return;
 			}
-
-			String name = method.getName().toString();
-
-			Collection<Element> sameName = existingNames.get(name);
-			if (sameName.isEmpty()) {
-				existingNames.put(name, methodElement);
-			} else {
-				// try to see if it's not in fact a method override
-				for (Element overrideCandidate : sameName) {
-					checkCandidate(overrideCandidate, methodElement, classElement, member, context);
-				}
-			}
+			checkMethodName(classElement, method, methodElement, context, existingNames);
 		}
 	}
 
@@ -96,15 +100,15 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 
 	private void checkField(Tree member, GenerationContext<Void> context, Multimap<String, Element> existingNames) {
 		if (member instanceof VariableTree) {
-			String name = ((VariableTree) member).getName().toString();
-			Element variableElement = TreeUtils.elementFromDeclaration((VariableTree) member);
 			TreeWrapper<Tree, Void> tw = context.getCurrentWrapper().child(member);
 			if (MemberWriters.shouldSkip(tw)) {
 				return;
 			}
 
+			String name = ((VariableTree) member).getName().toString();
 			Collection<Element> sameName = existingNames.get(name);
 			if (sameName.isEmpty()) {
+				Element variableElement = TreeUtils.elementFromDeclaration((VariableTree) member);
 				existingNames.put(name, variableElement);
 			} else {
 				if (!hasOnlyFields(sameName)) {
