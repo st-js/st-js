@@ -31,10 +31,15 @@ import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.javascript.annotation.ServerSide;
 
+import com.sun.source.tree.AnnotationTree;
+import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.NewArrayTree;
 import com.sun.source.tree.Tree;
+import com.sun.source.tree.VariableTree;
 
 public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 
@@ -282,6 +287,88 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		return JavascriptKeywords.CONSTRUCTOR + typeName.substring(pos);
 	}
 
+	private JS writeAnnotationValue(WriterVisitor<JS> visitor, ExpressionTree expr, GenerationContext<JS> context) {
+		if (expr instanceof NewArrayTree) {
+			//special case for array initializer
+			List<JS> items = new ArrayList<JS>();
+			for (ExpressionTree item : ((NewArrayTree) expr).getInitializers()) {
+				items.add(visitor.scan(item, context));
+			}
+			return context.js().array(items);
+		}
+		return visitor.scan(expr, context);
+	}
+
+	private void addAnnotationsForElement(String name, List<NameValue<JS>> props, WriterVisitor<JS> visitor,
+			List<? extends AnnotationTree> annotations, GenerationContext<JS> context) {
+		if (annotations.isEmpty()) {
+			return;
+		}
+		List<NameValue<JS>> annotationsDesc = new ArrayList<NameValue<JS>>();
+		for (AnnotationTree ann : annotations) {
+			//build "annotationType": {arg1, arg2, ...}
+			//XXX: should use here type names?
+			String annEntryKey = ann.getAnnotationType().toString();
+			List<NameValue<JS>> annotationArgsDesc = new ArrayList<NameValue<JS>>();
+			for (ExpressionTree arg : ann.getArguments()) {
+				AssignmentTree assign = (AssignmentTree) arg;
+				annotationArgsDesc.add(NameValue.of(assign.getVariable().toString(),
+						writeAnnotationValue(visitor, assign.getExpression(), context)));
+			}
+			JS annotationArgs = context.js().object(annotationArgsDesc);
+
+			//XXX: hack here to quote the type name - to change when using the type names
+			annotationsDesc.add(NameValue.of("\"" + annEntryKey + "\"", annotationArgs));
+		}
+		props.add(NameValue.of(name, context.js().object(annotationsDesc)));
+	}
+
+	private void addAnnotationsForMethod(MethodTree method, List<NameValue<JS>> props, WriterVisitor<JS> visitor, GenerationContext<JS> context) {
+		addAnnotationsForElement(method.getName().toString(), props, visitor, method.getModifiers().getAnnotations(), context);
+		for (int i = 0; i < method.getParameters().size(); ++i) {
+			addAnnotationsForElement(method.getName().toString() + "$" + i, props, visitor, method.getParameters().get(i).getModifiers()
+					.getAnnotations(), context);
+		}
+	}
+
+	/**
+	 * build the annotation description element
+	 *
+	 * <pre>
+	 * $annotations : {
+	 * _: {....}
+	 * field1: {...}
+	 * method1: {...}
+	 * method1$0:  {...}
+	 * method1$1:  {...}...
+	 * }
+	 * </pre>
+	 *
+	 * for each annotation list you have:
+	 *
+	 * <pre>
+	 * {
+	 * "annotationType1": [expr1, expr2, expr3],
+	 * "annotationType2": []
+	 * }
+	 * </pre>
+	 */
+	private JS getAnnotationDescription(WriterVisitor<JS> visitor, ClassTree classTree, GenerationContext<JS> context) {
+		List<NameValue<JS>> props = new ArrayList<NameValue<JS>>();
+		addAnnotationsForElement("_", props, visitor, classTree.getModifiers().getAnnotations(), context);
+
+		for (Tree member : classTree.getMembers()) {
+			if (member instanceof VariableTree) {
+				VariableTree field = (VariableTree) member;
+				addAnnotationsForElement(field.getName().toString(), props, visitor, field.getModifiers().getAnnotations(), context);
+			} else if (member instanceof MethodTree) {
+				addAnnotationsForMethod((MethodTree) member, props, visitor, context);
+			}
+		}
+
+		return context.js().object(props);
+	}
+
 	@SuppressWarnings("unused")
 	private boolean generareEnum(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
 		Element type = TreeUtils.elementFromDeclaration(tree);
@@ -385,6 +472,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		JS interfaces = getInterfaces(tree, context);
 		JS members = getMembers(visitor, tree, context);
 		JS typeDesc = getTypeDescription(visitor, tree, context);
+		JS annotationDesc = getAnnotationDescription(visitor, tree, context);
 		boolean anonymousClass = tree.getSimpleName().length() == 0;
 
 		if (anonymousClass) {
@@ -396,7 +484,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		@SuppressWarnings("unchecked")
 		JS extendsCall =
 				js.functionCall(js.property(js.name(GeneratorConstants.STJS), "extend"),
-						Arrays.asList(name, superClazz, interfaces, members, typeDesc));
+						Arrays.asList(name, superClazz, interfaces, members, typeDesc, annotationDesc));
 		if (anonymousClass) {
 			stmts.add(extendsCall);
 		} else {

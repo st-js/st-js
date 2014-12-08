@@ -1,6 +1,7 @@
 package org.stjs.javascript.stjs;
 
 import org.stjs.javascript.Array;
+import org.stjs.javascript.Map;
 import org.stjs.javascript.functions.Function2;
 import org.stjs.javascript.functions.Function3;
 
@@ -73,4 +74,36 @@ public final class STJS {
 	 * the call will be getFieldHandler-$invoke(object, field)
 	 */
 	public Function2<Object, String, Object> getFieldHandler;
+
+	/**
+	 * return the annotations of the given type in the format:
+	 *
+	 * <pre>
+	 *  $annotations : {
+	 * _: {....}
+	 * field1: {...}
+	 * method1: {...}
+	 * method1$0:  {...}
+	 * method1$1:  {...}...
+	 * }
+	 * </pre>
+	 *
+	 * for each annotation list you have:
+	 *
+	 * <pre>
+	 * {
+	 * "annotationType1": {value:"v1", value2: "v2"},
+	 * "annotationType2": {}
+	 * }
+	 * </pre>
+	 * @param clazz
+	 * @return
+	 */
+	public native Map<String, Map<String, Map<String, Object>>> getAnnotations(Class<?> clazz);
+
+	public native Map<String, Object> getTypeAnnotation(Class<?> clazz, String annTypeName);
+
+	public native Map<String, Object> getMemberAnnotation(Class<?> clazz, String memberName, String annTypeName);
+
+	public native Map<String, Object> getParameterAnnotation(Class<?> clazz, String methodName, int idx, String annTypeName);
 }
