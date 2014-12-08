@@ -55,6 +55,9 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 			addResolvedType(rootTypeElement);
 
 			String namespace = JavaNodes.getNamespace(rootTypeElement);
+			if (namespace == null) {
+				namespace = context.getConfiguration().getNamespace();
+			}
 			fullName = (namespace == null ? "" : namespace + ".") + name;
 			resolvedTypes.put(type, fullName);
 			return fullName;

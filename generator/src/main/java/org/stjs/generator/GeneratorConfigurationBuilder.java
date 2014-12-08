@@ -22,7 +22,6 @@ import java.util.Set;
 
 /**
  * Use this class to build a configuration needed by the {@link Generator}
- * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class GeneratorConfigurationBuilder {
@@ -31,6 +30,7 @@ public class GeneratorConfigurationBuilder {
 	private boolean generateArrayHasOwnProperty = true;
 	private boolean generateSourceMap;
 	private String sourceEncoding = Charset.defaultCharset().name();
+	private String namespace;
 
 	public GeneratorConfigurationBuilder allowedPackage(String packageName) {
 		allowedPackages.add(packageName);
@@ -67,6 +67,11 @@ public class GeneratorConfigurationBuilder {
 		return this;
 	}
 
+	public GeneratorConfigurationBuilder namespace(String namespace) {
+		this.namespace = namespace;
+		return this;
+	}
+
 	public GeneratorConfiguration build() {
 		allowedJavaLangClasses.add("Object");
 		allowedJavaLangClasses.add("Class");
@@ -90,7 +95,7 @@ public class GeneratorConfigurationBuilder {
 		allowedPackages.add("java.lang");
 
 		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, generateArrayHasOwnProperty, generateSourceMap,
-				sourceEncoding);
+				sourceEncoding, namespace);
 	}
 
 }
