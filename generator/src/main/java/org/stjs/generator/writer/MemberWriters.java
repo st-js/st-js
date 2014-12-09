@@ -24,6 +24,10 @@ public final class MemberWriters {
 	}
 
 	public static <JS, T extends Tree> boolean shouldSkip(TreeWrapper<T, JS> tw) {
+		if (tw.getElement() == null) {
+			//static initializer
+			return true;
+		}
 		return tw.isServerSide();
 	}
 }

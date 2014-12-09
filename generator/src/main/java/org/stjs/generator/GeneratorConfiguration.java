@@ -25,15 +25,17 @@ public class GeneratorConfiguration {
 	private final boolean generateSourceMap;
 	private final String sourceEncoding;
 	private final String namespace;
+	private final Set<String> skippedAnnotations;
 
 	GeneratorConfiguration(Collection<String> allowedPackages, Set<String> allowedJavaLangClasses, boolean generateArrayHasOwnProperty,
-			boolean generateSourceMap, String sourceEncoding, String namespace) {
+			boolean generateSourceMap, String sourceEncoding, String namespace, Set<String> skippedAnnotations) {
 		this.allowedPackages = allowedPackages;
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
 		this.generateArrayHasOwnProperty = generateArrayHasOwnProperty;
 		this.generateSourceMap = generateSourceMap;
 		this.sourceEncoding = sourceEncoding;
 		this.namespace = namespace;
+		this.skippedAnnotations = skippedAnnotations;
 	}
 
 	/**
@@ -66,6 +68,10 @@ public class GeneratorConfiguration {
 	 */
 	public String getNamespace() {
 		return namespace;
+	}
+
+	public Set<String> getSkippedAnnotations() {
+		return skippedAnnotations;
 	}
 
 }

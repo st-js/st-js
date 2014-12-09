@@ -27,6 +27,7 @@ import java.util.Set;
 public class GeneratorConfigurationBuilder {
 	private final Collection<String> allowedPackages = new HashSet<String>();
 	private final Set<String> allowedJavaLangClasses = new HashSet<String>();
+	private final Set<String> skippedAnnotations = new HashSet<String>();
 	private boolean generateArrayHasOwnProperty = true;
 	private boolean generateSourceMap;
 	private String sourceEncoding = Charset.defaultCharset().name();
@@ -72,6 +73,11 @@ public class GeneratorConfigurationBuilder {
 		return this;
 	}
 
+	public GeneratorConfigurationBuilder skippedAnnotations(Collection<String> annotationNames) {
+		skippedAnnotations.addAll(annotationNames);
+		return this;
+	}
+
 	public GeneratorConfiguration build() {
 		allowedJavaLangClasses.add("Object");
 		allowedJavaLangClasses.add("Class");
@@ -94,8 +100,15 @@ public class GeneratorConfigurationBuilder {
 
 		allowedPackages.add("java.lang");
 
+		//TODO we need a better
+		skippedAnnotations.add("Native");
+		skippedAnnotations.add("GlobalScope");
+		skippedAnnotations.add("SyntheticType");
+		skippedAnnotations.add("Template");
+		skippedAnnotations.add("STJSBridge");
+
 		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, generateArrayHasOwnProperty, generateSourceMap,
-				sourceEncoding, namespace);
+				sourceEncoding, namespace, skippedAnnotations);
 	}
 
 }

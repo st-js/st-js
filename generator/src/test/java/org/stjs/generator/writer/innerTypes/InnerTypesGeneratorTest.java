@@ -156,7 +156,8 @@ public class InnerTypesGeneratorTest {
 		assertEquals(2, ((Number) result).intValue());
 
 		assertCodeContains(InnerTypes20.class, "constructor.Holder = function(){};"
-				+ "stjs.extend(InnerTypes20.Holder, null, [], function(constructor, prototype){" + "       constructor.VALUE = 2;" + "}, {});");
+				+ "stjs.extend(InnerTypes20.Holder, null, [], function(constructor, prototype){" + "       constructor.VALUE = 2;"
+				+ "}, {}, {});");
 	}
 
 	@Test

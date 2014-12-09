@@ -1,6 +1,8 @@
 package org.stjs.generator.javac;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Locale;
 
@@ -8,6 +10,9 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
+
+import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.Tree;
 
 public final class AnnotationHelper {
 	private static final String ANNOTATED_PACKAGE = "annotation.";
@@ -84,5 +89,17 @@ public final class AnnotationHelper {
 	private static boolean sameSignature(ExecutableElement member, ExecutableElement methodElement) {
 		// TODO Auto-generated method stub
 		return member.getSimpleName().equals(methodElement.getSimpleName());
+	}
+
+	public static RetentionPolicy getRetentionType(Tree annotationType) {
+		if (!(annotationType instanceof ExpressionTree)) {
+			return null;
+		}
+		Element annotationElement = TreeUtils.elementFromUse((ExpressionTree) annotationType);
+		Retention retention = annotationElement.getAnnotation(Retention.class);
+		if (retention == null) {
+			return null;
+		}
+		return retention.value();
 	}
 }

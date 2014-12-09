@@ -1,6 +1,7 @@
 package org.stjs.generator.writer.annotations;
 
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
+import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
 
 import org.junit.Test;
 
@@ -33,6 +34,11 @@ public class AnnotationGeneratorTest {
 	@Test
 	public void testMethodParamAnnotationWithValue() {
 		assertCodeContains(Annotation5.class, "method$1:{\"MyAnnotations.WithMultipleValues\":{n:2+3}}");
+	}
+
+	@Test
+	public void testSkipSourceAnnotation() {
+		assertCodeDoesNotContain(Annotation6.class, "Override");
 	}
 
 }

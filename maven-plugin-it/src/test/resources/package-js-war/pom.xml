@@ -34,7 +34,7 @@
 			<!-- STJS -->
 			<plugin>
 				<groupId>org.st-js</groupId>
-				<artifactId>maven-plugin</artifactId>
+				<artifactId>stjs-maven-plugin</artifactId>
 				<version>${stjs.version}</version>
 				<executions>
 					<execution>

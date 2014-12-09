@@ -1,5 +1,6 @@
 package org.stjs.generator.writer.declaration;
 
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,6 +17,7 @@ import javax.lang.model.type.TypeVariable;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javac.AnnotationHelper;
 import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TreeWrapper;
@@ -27,6 +29,7 @@ import org.stjs.generator.javascript.NameValue;
 import org.stjs.generator.javascript.UnaryOperator;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.JavascriptKeywords;
+import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.javascript.annotation.ServerSide;
@@ -311,7 +314,14 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		for (AnnotationTree ann : annotations) {
 			//build "annotationType": {arg1, arg2, ...}
 			//XXX: should use here type names?
+			if (AnnotationHelper.getRetentionType(ann.getAnnotationType()) == RetentionPolicy.SOURCE) {
+				continue;
+			}
+
 			String annEntryKey = ann.getAnnotationType().toString();
+			if (context.getConfiguration().getSkippedAnnotations().contains(annEntryKey)) {
+				continue;
+			}
 			List<NameValue<JS>> annotationArgsDesc = new ArrayList<NameValue<JS>>();
 			for (ExpressionTree arg : ann.getArguments()) {
 				AssignmentTree assign = (AssignmentTree) arg;
@@ -323,11 +333,18 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			//XXX: hack here to quote the type name - to change when using the type names
 			annotationsDesc.add(NameValue.of("\"" + annEntryKey + "\"", annotationArgs));
 		}
-		props.add(NameValue.of(name, context.js().object(annotationsDesc)));
+		if (!annotationsDesc.isEmpty()) {
+			props.add(NameValue.of(name, context.js().object(annotationsDesc)));
+		}
 	}
 
 	private void addAnnotationsForMethod(MethodTree method, List<NameValue<JS>> props, WriterVisitor<JS> visitor, GenerationContext<JS> context) {
-		addAnnotationsForElement(method.getName().toString(), props, visitor, method.getModifiers().getAnnotations(), context);
+		String name = method.getName().toString();
+		if (name.equals("<init>")) {
+			name = "_init_";
+		}
+
+		addAnnotationsForElement(name, props, visitor, method.getModifiers().getAnnotations(), context);
 		for (int i = 0; i < method.getParameters().size(); ++i) {
 			addAnnotationsForElement(method.getName().toString() + "$" + i, props, visitor, method.getParameters().get(i).getModifiers()
 					.getAnnotations(), context);
@@ -361,6 +378,9 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		addAnnotationsForElement("_", props, visitor, classTree.getModifiers().getAnnotations(), context);
 
 		for (Tree member : classTree.getMembers()) {
+			if (MemberWriters.shouldSkip(context.getCurrentWrapper().child(member))) {
+				continue;
+			}
 			if (member instanceof VariableTree) {
 				VariableTree field = (VariableTree) member;
 				addAnnotationsForElement(field.getName().toString(), props, visitor, field.getModifiers().getAnnotations(), context);
