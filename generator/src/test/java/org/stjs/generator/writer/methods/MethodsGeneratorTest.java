@@ -102,4 +102,10 @@ public class MethodsGeneratorTest {
 		// synchronized is forbidden
 		generate(Methods16.class);
 	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testWrongName() {
+		//keywords are forbidden
+		generate(Methods17.class);
+	}
 }
