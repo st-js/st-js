@@ -305,6 +305,26 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		return visitor.scan(expr, context);
 	}
 
+	private JS getAnnotationForElement(AnnotationTree ann, WriterVisitor<JS> visitor, GenerationContext<JS> context) {
+		//build "annotationType": {arg1, arg2, ...}
+		//XXX: should use here type names?
+		if (AnnotationHelper.getRetentionType(ann.getAnnotationType()) == RetentionPolicy.SOURCE) {
+			return null;
+		}
+		String annEntryKey = ann.getAnnotationType().toString();
+		if (context.getConfiguration().getSkippedAnnotations().contains(annEntryKey)) {
+			return null;
+		}
+
+		List<NameValue<JS>> annotationArgsDesc = new ArrayList<NameValue<JS>>();
+		for (ExpressionTree arg : ann.getArguments()) {
+			AssignmentTree assign = (AssignmentTree) arg;
+			annotationArgsDesc
+					.add(NameValue.of(assign.getVariable().toString(), writeAnnotationValue(visitor, assign.getExpression(), context)));
+		}
+		return context.js().object(annotationArgsDesc);
+	}
+
 	private void addAnnotationsForElement(String name, List<NameValue<JS>> props, WriterVisitor<JS> visitor,
 			List<? extends AnnotationTree> annotations, GenerationContext<JS> context) {
 		if (annotations.isEmpty()) {
@@ -312,26 +332,12 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		}
 		List<NameValue<JS>> annotationsDesc = new ArrayList<NameValue<JS>>();
 		for (AnnotationTree ann : annotations) {
-			//build "annotationType": {arg1, arg2, ...}
-			//XXX: should use here type names?
-			if (AnnotationHelper.getRetentionType(ann.getAnnotationType()) == RetentionPolicy.SOURCE) {
-				continue;
+			JS annotationArgs = getAnnotationForElement(ann, visitor, context);
+			if (annotationArgs != null) {
+				//XXX: hack here to quote the type name - to change when using the type names
+				String annEntryKey = ann.getAnnotationType().toString();
+				annotationsDesc.add(NameValue.of("\"" + annEntryKey + "\"", annotationArgs));
 			}
-
-			String annEntryKey = ann.getAnnotationType().toString();
-			if (context.getConfiguration().getSkippedAnnotations().contains(annEntryKey)) {
-				continue;
-			}
-			List<NameValue<JS>> annotationArgsDesc = new ArrayList<NameValue<JS>>();
-			for (ExpressionTree arg : ann.getArguments()) {
-				AssignmentTree assign = (AssignmentTree) arg;
-				annotationArgsDesc.add(NameValue.of(assign.getVariable().toString(),
-						writeAnnotationValue(visitor, assign.getExpression(), context)));
-			}
-			JS annotationArgs = context.js().object(annotationArgsDesc);
-
-			//XXX: hack here to quote the type name - to change when using the type names
-			annotationsDesc.add(NameValue.of("\"" + annEntryKey + "\"", annotationArgs));
 		}
 		if (!annotationsDesc.isEmpty()) {
 			props.add(NameValue.of(name, context.js().object(annotationsDesc)));
@@ -340,7 +346,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 
 	private void addAnnotationsForMethod(MethodTree method, List<NameValue<JS>> props, WriterVisitor<JS> visitor, GenerationContext<JS> context) {
 		String name = method.getName().toString();
-		if (name.equals("<init>")) {
+		if ("<init>".equals(name)) {
 			name = "_init_";
 		}
 

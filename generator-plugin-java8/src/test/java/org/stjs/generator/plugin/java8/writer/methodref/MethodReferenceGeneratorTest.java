@@ -3,8 +3,10 @@ package org.stjs.generator.plugin.java8.writer.methodref;
 import static org.junit.Assert.assertEquals;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 import static org.stjs.generator.utils.GeneratorTestHelper.execute;
+import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
+import org.stjs.generator.JavascriptFileGenerationException;
 
 public class MethodReferenceGeneratorTest {
 	@Test
@@ -30,5 +32,20 @@ public class MethodReferenceGeneratorTest {
 	public void testNewMethodRef() {
 		assertCodeContains(MethodRef4.class, "calculate(function(){return new MethodRef4(arguments[0]);}, 1)");
 		assertEquals(Integer.valueOf(1), execute(MethodRef4.class));
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testForbidUsageOfThisMethodRef() {
+		generate(MethodRef5.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testForbidUsageOFieldMethodRef() {
+		generate(MethodRef6.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testForbidUsageOMethodMethodRef() {
+		generate(MethodRef7.class);
 	}
 }

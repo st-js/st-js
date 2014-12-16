@@ -12,6 +12,7 @@ import org.stjs.generator.writer.expression.MethodInvocationWriter;
 
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.LambdaExpressionTree;
+import com.sun.source.tree.MemberReferenceTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.util.TreePath;
 
@@ -41,6 +42,15 @@ public class MethodAccessFromLambdaCheck implements CheckContributor<MethodInvoc
 			context.addError(tree, "In Javascript you cannot access a method from the outer type. "
 					+ "You should define a variable var that=this outside your lamda expression and use the method of this object. The method: "
 					+ tree);
+		}
+
+		TreePath enclosingMethodReferencePath = TreeUtils.enclosingPathOfType(context.getCurrentPath(), MemberReferenceTree.class);
+		if (enclosingMethodReferencePath != null) {
+			context.addError(
+					tree,
+					"In Javascript you cannot access a method from the outer type. "
+							+ "You should define a variable var that=this outside your member reference expression and use the method of this object. The method: "
+							+ tree);
 		}
 
 		return null;

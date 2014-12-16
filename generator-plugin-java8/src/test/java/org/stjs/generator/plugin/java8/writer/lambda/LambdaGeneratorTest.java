@@ -33,6 +33,11 @@ public class LambdaGeneratorTest {
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
+	public void testLambaAccessQualifiedFieldOuterScope() {
+		generate(Lambda5b.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testLambaAccessMethodOuterScope() {
 		generate(Lambda6.class);
 	}

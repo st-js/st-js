@@ -34,6 +34,14 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 	private final Set<String> resolvedRootTypes = new HashSet<String>();
 	private final Map<TypeMirror, String> resolvedTypes = new HashMap<TypeMirror, String>();
 
+	private String addNameSpace(Element rootTypeElement, GenerationContext<?> context, String name) {
+		String namespace = JavaNodes.getNamespace(rootTypeElement);
+		if (namespace == null) {
+			namespace = context.getConfiguration().getNamespace();
+		}
+		return (namespace == null ? "" : namespace + ".") + name;
+	}
+
 	@Override
 	public String getTypeName(GenerationContext<?> context, TypeMirror type) {
 		String fullName = resolvedTypes.get(type);
@@ -54,11 +62,7 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 			checkAllowedType(rootTypeElement, context);
 			addResolvedType(rootTypeElement);
 
-			String namespace = JavaNodes.getNamespace(rootTypeElement);
-			if (namespace == null) {
-				namespace = context.getConfiguration().getNamespace();
-			}
-			fullName = (namespace == null ? "" : namespace + ".") + name;
+			fullName = addNameSpace(rootTypeElement, context, name);
 			resolvedTypes.put(type, fullName);
 			return fullName;
 		}
