@@ -16,4 +16,5 @@ public class MethodRef6 {
 	public void test() {
 		calculate(field::method);
 	}
+
 }

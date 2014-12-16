@@ -41,4 +41,21 @@ public class LambdaGeneratorTest {
 	public void testLambaAccessMethodOuterScope() {
 		generate(Lambda6.class);
 	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testLambaAccessLoopFinal() {
+		generate(Lambda7.class);
+	}
+
+	@Test
+	public void testLambaAccessOutsideLoop() {
+		//this should not raise an exception
+		generate(Lambda8.class);
+	}
+
+	@Test
+	public void testLambaAccessInsideLambda() {
+		//this should not raise an exception
+		generate(Lambda9.class);
+	}
 }
