@@ -456,6 +456,15 @@ stjs.converters = {
 	}
 };
 
+/**
+ * this functions is used to be able to send method references as callbacks
+ */
+stjs.bind=function(obj, methodName) {
+	return function(){
+		return obj[methodName].apply(obj, arguments);
+	};
+}
+
 /** *********** global ************** */
 function exception(err){
 	return err;

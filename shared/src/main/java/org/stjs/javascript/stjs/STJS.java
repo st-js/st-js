@@ -2,6 +2,7 @@ package org.stjs.javascript.stjs;
 
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Map;
+import org.stjs.javascript.functions.CallbackOrFunction;
 import org.stjs.javascript.functions.Function2;
 import org.stjs.javascript.functions.Function3;
 
@@ -106,4 +107,9 @@ public final class STJS {
 	public native Map<String, Object> getMemberAnnotation(Class<?> clazz, String memberName, String annTypeName);
 
 	public native Map<String, Object> getParameterAnnotation(Class<?> clazz, String methodName, int idx, String annTypeName);
+
+	/**
+	 * this functions is used to be able to send method references as callbacks
+	 */
+	public native <T extends CallbackOrFunction> T bind(Object object, String methodName);
 }

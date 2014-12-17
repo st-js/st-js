@@ -11,7 +11,6 @@ import org.stjs.generator.javac.TreeUtils;
 
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.LambdaExpressionTree;
-import com.sun.source.tree.MemberReferenceTree;
 import com.sun.source.util.TreePath;
 
 public class FieldAccessFromLambdaCheck implements CheckContributor<IdentifierTree> {
@@ -33,14 +32,6 @@ public class FieldAccessFromLambdaCheck implements CheckContributor<IdentifierTr
 							+ tree);
 		}
 
-		TreePath enclosingMethodReferencePath = TreeUtils.enclosingPathOfType(context.getCurrentPath(), MemberReferenceTree.class);
-		if (enclosingMethodReferencePath != null) {
-			context.addError(
-					tree,
-					"In Javascript you cannot access a field from the outer type. "
-							+ "You should define a variable var that=this outside your member reference expression and use the property of this object. The field: "
-							+ tree);
-		}
 		return null;
 	}
 }

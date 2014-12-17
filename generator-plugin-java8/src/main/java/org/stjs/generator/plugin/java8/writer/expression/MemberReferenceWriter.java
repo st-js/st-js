@@ -1,6 +1,7 @@
 package org.stjs.generator.plugin.java8.writer.expression;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,30 +22,25 @@ import com.sun.source.util.TreePath;
 
 /**
  * this class is for reference to a member like:<br>
- * 
- * Static method reference: String::valueOf
- * 
- * Non-static method reference: Object::toString
- * 
- * Capturing method reference: x::toString
- * 
+ * Static method reference: String::valueOf <br>
+ * Non-static method reference: Object::toString <br>
+ * Capturing method reference: x::toString <br>
  * Constructor reference: ArrayList::new
- * 
  * @author acraciun
- * 
  */
 public class MemberReferenceWriter<JS> implements WriterContributor<MemberReferenceTree, JS> {
 
 	private List<JS> generateArguments(GenerationContext<JS> context, int n) {
 		JavaScriptBuilder<JS> js = context.js();
 		List<JS> args = new ArrayList<>();
-		for (int i = 0; i < n; ++i)
+		for (int i = 0; i < n; ++i) {
 			args.add(js.elementGet(js.name("arguments"), js.number(i)));
+		}
 		return args;
 	}
 
 	/**
-	 * generate Type.method
+	 * Type::method -> generate Type.method
 	 */
 	private JS generateStaticRef(MemberReferenceTree tree, GenerationContext<JS> context, ExecutableElement methodElement) {
 		JavaScriptBuilder<JS> js = context.js();
@@ -54,7 +50,7 @@ public class MemberReferenceWriter<JS> implements WriterContributor<MemberRefere
 	}
 
 	/**
-	 * generate function() {return Type.prototype.method.call(arguments[0], arguments[1], ...);}
+	 * Type::method -> function() {return Type.prototype.method.call(arguments[0], arguments[1], ...);}
 	 */
 	private JS generateInstanceRef(MemberReferenceTree tree, GenerationContext<JS> context, ExecutableElement methodElement) {
 		JavaScriptBuilder<JS> js = context.js();
@@ -69,18 +65,19 @@ public class MemberReferenceWriter<JS> implements WriterContributor<MemberRefere
 	}
 
 	/**
-	 * generate function() { return x.method(arguments[0], arguments[1]);}
+	 * x::method -> stjs.bind(x, "method")
 	 */
 	private JS generateCapturingRef(WriterVisitor<JS> visitor, MemberReferenceTree tree, GenerationContext<JS> context,
 			ExecutableElement methodElement) {
 		JavaScriptBuilder<JS> js = context.js();
-		JS methodName = js.property(visitor.scan(tree.getQualifierExpression(), context), tree.getName());
-		JS methodCall = js.functionCall(methodName, generateArguments(context, methodElement.getParameters().size()));
-		return js.function(null, Collections.emptyList(), js.returnStatement(methodCall));
+		JS target = visitor.scan(tree.getQualifierExpression(), context);
+		JS methodName = js.string(tree.getName().toString());
+		JS stjsBind = context.js().property(context.js().name("stjs"), "bind");
+		return js.functionCall(stjsBind, Arrays.asList(target, methodName));
 	}
 
 	/**
-	 * generate function() {new Type(arguments[0], arguments[1]);}
+	 * Type::new -> function() {new Type(arguments[0], arguments[1]);}
 	 */
 	private JS generateConstructorRef(GenerationContext<JS> context, ExecutableElement methodElement) {
 		JavaScriptBuilder<JS> js = context.js();

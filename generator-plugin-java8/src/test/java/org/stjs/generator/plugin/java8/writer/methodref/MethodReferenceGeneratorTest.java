@@ -3,10 +3,8 @@ package org.stjs.generator.plugin.java8.writer.methodref;
 import static org.junit.Assert.assertEquals;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 import static org.stjs.generator.utils.GeneratorTestHelper.execute;
-import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
-import org.stjs.generator.JavascriptFileGenerationException;
 
 public class MethodReferenceGeneratorTest {
 	@Test
@@ -24,7 +22,7 @@ public class MethodReferenceGeneratorTest {
 
 	@Test
 	public void testInstanceWithTargetMethodRef() {
-		assertCodeContains(MethodRef3.class, "calculate(function(){return ref.inc2(arguments[0]);}, 1)");
+		assertCodeContains(MethodRef3.class, "calculate(stjs.bind(ref, \"inc2\"), 1)");
 		assertEquals(Integer.valueOf(4), execute(MethodRef3.class));
 	}
 
@@ -34,18 +32,18 @@ public class MethodReferenceGeneratorTest {
 		assertEquals(Integer.valueOf(1), execute(MethodRef4.class));
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
-	public void testForbidUsageOfThisMethodRef() {
-		generate(MethodRef5.class);
+	@Test
+	public void testUsageOfThisMethodRef() {
+		assertCodeContains(MethodRef5.class, "calculate(stjs.bind(this, \"method\"))");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
-	public void testForbidUsageOFieldMethodRef() {
-		generate(MethodRef6.class);
+	@Test
+	public void testUsageOFieldMethodRef() {
+		assertCodeContains(MethodRef6.class, "calculate(stjs.bind(this.field, \"method\"))");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
-	public void testForbidUsageOMethodMethodRef() {
-		generate(MethodRef7.class);
+	@Test
+	public void testUsageOMethodMethodRef() {
+		assertCodeContains(MethodRef7.class, "calculate(stjs.bind(this.method2(), \"method\"))");
 	}
 }
