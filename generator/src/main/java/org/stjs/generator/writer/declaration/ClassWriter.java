@@ -312,7 +312,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			return null;
 		}
 		String annEntryKey = ann.getAnnotationType().toString();
-		if (context.getConfiguration().getSkippedAnnotations().contains(annEntryKey)) {
+		if (!context.getConfiguration().getAnnotations().contains(annEntryKey)) {
 			return null;
 		}
 

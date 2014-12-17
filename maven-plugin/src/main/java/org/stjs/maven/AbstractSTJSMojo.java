@@ -146,6 +146,12 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	 */
 	protected String namespace;
 
+	/**
+	 * A list of annotations to be generated
+	 * @parameter
+	 */
+	protected Set<String> annotations = new HashSet<String>();
+
 	abstract protected List<String> getCompileSourceRoots();
 
 	abstract protected GenerationDirectory getGeneratedSourcesDirectory();
@@ -193,6 +199,9 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 		if (allowedPackages != null) {
 			configBuilder.allowedPackages(allowedPackages);
+		}
+		if (annotations != null) {
+			configBuilder.annotations(annotations);
 		}
 
 		// scan all the packages

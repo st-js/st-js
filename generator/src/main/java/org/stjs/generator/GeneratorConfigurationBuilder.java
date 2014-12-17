@@ -16,6 +16,7 @@
 package org.stjs.generator;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,11 +28,27 @@ import java.util.Set;
 public class GeneratorConfigurationBuilder {
 	private final Collection<String> allowedPackages = new HashSet<String>();
 	private final Set<String> allowedJavaLangClasses = new HashSet<String>();
-	private final Set<String> skippedAnnotations = new HashSet<String>();
+	private final Set<String> annotations = new HashSet<String>();
 	private boolean generateArrayHasOwnProperty = true;
 	private boolean generateSourceMap;
 	private String sourceEncoding = Charset.defaultCharset().name();
 	private String namespace;
+
+	public GeneratorConfigurationBuilder() {
+		this(null);
+	}
+
+	public GeneratorConfigurationBuilder(GeneratorConfiguration baseConfig) {
+		if (baseConfig != null) {
+			allowedPackages(baseConfig.getAllowedPackages());
+			allowedJavaLangClasses(baseConfig.getAllowedJavaLangClasses());
+			annotations(baseConfig.getAnnotations());
+			generateArrayHasOwnProperty(baseConfig.isGenerateArrayHasOwnProperty());
+			generateSourceMap(baseConfig.isGenerateSourceMap());
+			sourceEncoding(baseConfig.getSourceEncoding());
+			namespace(baseConfig.getNamespace());
+		}
+	}
 
 	public GeneratorConfigurationBuilder allowedPackage(String packageName) {
 		allowedPackages.add(packageName);
@@ -73,8 +90,13 @@ public class GeneratorConfigurationBuilder {
 		return this;
 	}
 
-	public GeneratorConfigurationBuilder skippedAnnotations(Collection<String> annotationNames) {
-		skippedAnnotations.addAll(annotationNames);
+	public GeneratorConfigurationBuilder annotations(String... annotationNames) {
+		annotations.addAll(Arrays.asList(annotationNames));
+		return this;
+	}
+
+	public GeneratorConfigurationBuilder annotations(Collection<String> annotationNames) {
+		annotations.addAll(annotationNames);
 		return this;
 	}
 
@@ -100,15 +122,8 @@ public class GeneratorConfigurationBuilder {
 
 		allowedPackages.add("java.lang");
 
-		//TODO we need a better
-		skippedAnnotations.add("Native");
-		skippedAnnotations.add("GlobalScope");
-		skippedAnnotations.add("SyntheticType");
-		skippedAnnotations.add("Template");
-		skippedAnnotations.add("STJSBridge");
-
 		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, generateArrayHasOwnProperty, generateSourceMap,
-				sourceEncoding, namespace, skippedAnnotations);
+				sourceEncoding, namespace, annotations);
 	}
 
 }

@@ -192,6 +192,9 @@ public class TreeWrapper<T extends Tree, JS> {
 	}
 
 	public String getFieldTemplate() {
+		if (element == null || element.getKind() != ElementKind.FIELD) {
+			return null;
+		}
 		Template tpl = context.getAnnotation(element, Template.class);
 		return tpl == null ? null : tpl.value();
 	}

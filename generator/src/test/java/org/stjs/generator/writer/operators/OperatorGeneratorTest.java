@@ -9,4 +9,9 @@ public class OperatorGeneratorTest {
 	public void testXor() {
 		assertCodeContains(Operator1.class, "test(x^y)");
 	}
+
+	@Test
+	public void testBugNot() {
+		assertCodeContains(Operator2.class, "if (!this.func())");
+	}
 }

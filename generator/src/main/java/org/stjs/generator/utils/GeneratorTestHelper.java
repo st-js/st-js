@@ -26,6 +26,7 @@ import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
 import org.stjs.generator.GenerationDirectory;
 import org.stjs.generator.Generator;
+import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.executor.ExecutionResult;
@@ -63,6 +64,14 @@ public final class GeneratorTestHelper {
 	 * @param clazz
 	 * @return the javascript code generator from the given class
 	 */
+	public static String generate(Class<?> clazz, GeneratorConfiguration config) {
+		return (String) executeOrGenerate(clazz, false, false, config);
+	}
+
+	/**
+	 * @param clazz
+	 * @return the javascript code generator from the given class
+	 */
 	public static String generateWithSourcemap(Class<?> clazz) {
 		return (String) executeOrGenerate(clazz, false, true);
 	}
@@ -76,7 +85,11 @@ public final class GeneratorTestHelper {
 	}
 
 	public static double executeAndReturnNumber(Class<?> clazz) {
-		Object obj = convert(executeOrGenerate(clazz, true, false));
+		return executeAndReturnNumber(clazz, null);
+	}
+
+	public static double executeAndReturnNumber(Class<?> clazz, GeneratorConfiguration extraConfig) {
+		Object obj = convert(executeOrGenerate(clazz, true, false, extraConfig));
 		if (obj == null) {
 			return Double.NaN;
 		}
@@ -184,20 +197,25 @@ public final class GeneratorTestHelper {
 		return js;
 	}
 
+	private static Object executeOrGenerate(Class<?> clazz, boolean execute, boolean withSourceMap) {
+		return executeOrGenerate(clazz, execute, withSourceMap, null);
+	}
+
 	/**
 	 * @param clazz
+	 * @param extraConfig
 	 * @return the javascript code generator from the given class
 	 */
-	private static Object executeOrGenerate(Class<?> clazz, boolean execute, boolean withSourceMap) {
+	private static Object executeOrGenerate(Class<?> clazz, boolean execute, boolean withSourceMap, GeneratorConfiguration extraConfig) {
 
 		File generationPath = new File("target", TEMP_GENERATION_PATH);
 		GenerationDirectory generationFolder = new GenerationDirectory(generationPath, new File(TEMP_GENERATION_PATH), new File(""));
 		String sourcePath = "src/test/java";
 		File resourcePath = new File("src/test/resources");
 		ClassWithJavascript stjsClass = gen.generateJavascript(Thread.currentThread().getContextClassLoader(), clazz.getName(), new File(
-				sourcePath), generationFolder, new File("target", "test-classes"),
-				new GeneratorConfigurationBuilder().allowedPackage("org.stjs.javascript").allowedPackage("org.stjs.generator")
-						.allowedPackage(clazz.getPackage().getName()).generateSourceMap(withSourceMap).build());
+				sourcePath), generationFolder, new File("target", "test-classes"), new GeneratorConfigurationBuilder(extraConfig)
+				.allowedPackage("org.stjs.javascript").allowedPackage("org.stjs.generator").allowedPackage(clazz.getPackage().getName())
+				.generateSourceMap(withSourceMap).build());
 		Timers.start("js-exec");
 		List<File> javascriptFiles = new ArrayList<File>();
 		try {
@@ -244,9 +262,13 @@ public final class GeneratorTestHelper {
 		assertCodeContains(generate(clazz), snippet);
 	}
 
+	public static void assertCodeContains(Class<?> clazz, String snippet, GeneratorConfiguration extraConfig) {
+		assertCodeContains(generate(clazz, extraConfig), snippet);
+	}
+
 	/**
 	 * checks if the searched snippet is found inside the given code. The whitespaces are not taken into account
-	 * 
+	 *
 	 * @param code
 	 * @param search
 	 */
@@ -260,9 +282,13 @@ public final class GeneratorTestHelper {
 		assertCodeDoesNotContain(generate(clazz), snippet);
 	}
 
+	public static void assertCodeDoesNotContain(Class<?> clazz, String snippet, GeneratorConfiguration extraConfig) {
+		assertCodeDoesNotContain(generate(clazz, extraConfig), snippet);
+	}
+
 	/**
 	 * checks if the searched snippet is not found inside the given code. The whitespaces are not taken into account
-	 * 
+	 *
 	 * @param code
 	 * @param search
 	 */
@@ -299,8 +325,8 @@ public final class GeneratorTestHelper {
 		}
 	}
 
-	@edu.umd.cs.findbugs.annotations.SuppressWarnings(
-			value = "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED", justification = "this is for tests only")
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED",
+			justification = "this is for tests only")
 	public static ClassLoader buildClassLoader() {
 		File generationPath = new File("target", TEMP_GENERATION_PATH);
 		try {
