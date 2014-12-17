@@ -13,6 +13,11 @@ public class IntsTest {
 	}
 
 	@Test
+	public void testCastIntLonger() {
+		assertEquals(1413492112445.0, GeneratorTestHelper.executeAndReturnNumber(Ints1b.class), 0);
+	}
+
+	@Test
 	public void testCastLong() {
 		assertEquals(2.0, GeneratorTestHelper.executeAndReturnNumber(Ints2.class), 0);
 	}

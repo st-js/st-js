@@ -435,10 +435,14 @@ stjs.isEnum=function(obj){
 	return obj != null && obj.constructor == stjs.enumEntry;
 }
 
-stjs.trunc=function(n) {
-	if (n == null)
-		return null;
-	return n | 0;
+if (typeof Math.trunc === "function") {
+	stjs.trunc = Math.trunc;
+} else {
+	stjs.trunc=function(n) {
+		if (n == null)
+			return null;
+		return n >= 0 ? Math.floor(n) : Math.ceil(n);
+	}
 }
 
 stjs.converters = {
