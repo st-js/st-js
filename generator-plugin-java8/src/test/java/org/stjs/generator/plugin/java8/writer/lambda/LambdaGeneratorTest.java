@@ -1,6 +1,8 @@
 package org.stjs.generator.plugin.java8.writer.lambda;
 
+import static org.junit.Assert.assertEquals;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
+import static org.stjs.generator.utils.GeneratorTestHelper.execute;
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
@@ -27,19 +29,24 @@ public class LambdaGeneratorTest {
 		assertCodeContains(Lambda4.class, "method(function(x){return x.length + 1;})");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test
 	public void testLambaAccessFieldOuterScope() {
-		generate(Lambda5.class);
+		assertCodeContains(Lambda5.class, "var c = stjs.bind(this, function() {return this.field + 1;});");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test
 	public void testLambaAccessQualifiedFieldOuterScope() {
-		generate(Lambda5b.class);
+		assertCodeContains(Lambda5b.class, "var c = stjs.bind(this, function() {return this.field + 1;});");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test
 	public void testLambaAccessMethodOuterScope() {
-		generate(Lambda6.class);
+		assertCodeContains(Lambda6.class, "var c = stjs.bind(this, function() {return this.outerMethod() + 1;});");
+	}
+
+	@Test
+	public void testLambaAccessMethodOuterScopeExecute() {
+		assertEquals(Integer.valueOf(4), execute(Lambda6b.class));
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)

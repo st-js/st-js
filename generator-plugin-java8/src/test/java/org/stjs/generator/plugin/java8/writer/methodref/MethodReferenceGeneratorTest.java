@@ -46,4 +46,9 @@ public class MethodReferenceGeneratorTest {
 	public void testUsageOMethodMethodRef() {
 		assertCodeContains(MethodRef7.class, "calculate(stjs.bind(this.method2(), \"method\"))");
 	}
+
+	@Test
+	public void testUsageOfChainMethodMethodRef() {
+		assertCodeContains(MethodRef8.class, "calculate(stjs.bind(this.x.x.method2(), \"method\"))");
+	}
 }

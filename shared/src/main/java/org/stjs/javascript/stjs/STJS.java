@@ -112,4 +112,10 @@ public final class STJS {
 	 * this functions is used to be able to send method references as callbacks
 	 */
 	public native <T extends CallbackOrFunction> T bind(Object object, String methodName);
+
+	/**
+	 * this functions is used to be able to atach lambdas to an object
+	 */
+	public native <T extends CallbackOrFunction> T bind(Object object, CallbackOrFunction func);
+
 }

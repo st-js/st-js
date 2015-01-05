@@ -463,9 +463,12 @@ stjs.converters = {
 /**
  * this functions is used to be able to send method references as callbacks
  */
-stjs.bind=function(obj, methodName) {
+stjs.bind=function(obj, method) {
 	return function(){
-		return obj[methodName].apply(obj, arguments);
+		if (typeof method === "string")
+			return obj[method].apply(obj, arguments);
+		else
+			return method.apply(obj, arguments);
 	};
 }
 
