@@ -49,7 +49,7 @@ import org.codehaus.plexus.compiler.util.scan.mapping.SourceMapping;
 import org.codehaus.plexus.compiler.util.scan.mapping.SuffixMapping;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.alg.CycleDetector;
+import org.jgrapht.alg.StrongConnectivityInspector;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
@@ -62,6 +62,7 @@ import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.MultipleFileGenerationException;
 import org.stjs.generator.STJSClass;
+import org.stjs.generator.name.DependencyType;
 
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
@@ -285,6 +286,23 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		}
 	}
 
+	private void detectCycles(DirectedGraph<String, DefaultEdge> dependencyGraph) throws Exception {
+		StrongConnectivityInspector<String, DefaultEdge> inspector = new StrongConnectivityInspector<String, DefaultEdge>(dependencyGraph);
+		List<Set<String>> components = inspector.stronglyConnectedSets();
+
+		for (Iterator<Set<String>> it = components.iterator(); it.hasNext();) {
+			Set<String> component = it.next();
+			if (component.size() == 1) {
+				it.remove();
+			}
+		}
+
+		if (!components.isEmpty()) {
+			throw new Exception(components.size() + " cycles are detected in the dependency graph:\n" + components.toString().replace(',', '\n')
+					+ "\n Please fix the problem before continuing or disable the packing");
+		}
+	}
+
 	/**
 	 * packs all the files in a single file
 	 * @param generator
@@ -328,10 +346,12 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 					ClassWithJavascript cjs =
 							generator.getExistingStjsClass(builtProjectClassLoader, builtProjectClassLoader.loadClass(className));
 					dependencyGraph.addVertex(className);
-					for (ClassWithJavascript dep : cjs.getDirectDependencies()) {
-						if (dep instanceof STJSClass) {
-							dependencyGraph.addVertex(dep.getClassName());
-							dependencyGraph.addEdge(dep.getClassName(), className);
+					for (Map.Entry<ClassWithJavascript, DependencyType> dep : cjs.getDirectDependencyMap().entrySet()) {
+						if (dep.getKey() instanceof STJSClass) {
+							dependencyGraph.addVertex(dep.getKey().getClassName());
+							if (dep.getValue() != DependencyType.OTHER) {
+								dependencyGraph.addEdge(dep.getKey().getClassName(), className);
+							}
 						}
 					}
 
@@ -339,11 +359,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			}
 
 			// check for cycles
-			Set<String> cycles = new CycleDetector<String, DefaultEdge>(dependencyGraph).findCycles();
-			if (!cycles.isEmpty()) {
-				throw new Exception("Cycles are detected in the dependency graph:\n" + cycles.toString().replace(',', '\n')
-						+ "\n Please fix the problem before continuing or disable the packing");
-			}
+			detectCycles(dependencyGraph);
+
 			// dump all the files in the dependency order in the pack file
 			List<SourceMapSection> sourceMapSections = new ArrayList<SourceMapSection>();
 

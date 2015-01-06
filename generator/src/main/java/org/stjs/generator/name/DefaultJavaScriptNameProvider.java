@@ -1,10 +1,7 @@
 package org.stjs.generator.name;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
@@ -25,14 +22,34 @@ import com.sun.source.util.TreePath;
 
 /**
  * This class implements the naming strategy transforming Java element names in JavaScript names.
+ *
  * @author acraciun
  */
 public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 	private static final String JAVA_LANG_PACKAGE = "java.lang.";
 	private static final int JAVA_LANG_LENGTH = JAVA_LANG_PACKAGE.length();
 
-	private final Set<String> resolvedRootTypes = new HashSet<String>();
-	private final Map<TypeMirror, String> resolvedTypes = new HashMap<TypeMirror, String>();
+	private class TypeInfo {
+		private final String fullName;
+		private final Element rootTypeElement;
+
+		public TypeInfo(String fullName, Element rootTypeElement) {
+			this.fullName = fullName;
+			this.rootTypeElement = rootTypeElement;
+		}
+
+		public String getFullName() {
+			return fullName;
+		}
+
+		public Element getRootTypeElement() {
+			return rootTypeElement;
+		}
+
+	}
+
+	private final Map<String, DependencyType> resolvedRootTypes = new HashMap<String, DependencyType>();
+	private final Map<TypeMirror, TypeInfo> resolvedTypes = new HashMap<TypeMirror, TypeInfo>();
 
 	private String addNameSpace(Element rootTypeElement, GenerationContext<?> context, String name) {
 		String namespace = JavaNodes.getNamespace(rootTypeElement);
@@ -43,32 +60,34 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 	}
 
 	@Override
-	public String getTypeName(GenerationContext<?> context, TypeMirror type) {
-		String fullName = resolvedTypes.get(type);
-		if (fullName != null) {
-			return fullName;
+	public String getTypeName(GenerationContext<?> context, TypeMirror type, DependencyType dependencyType) {
+		TypeInfo typeInfo = resolvedTypes.get(type);
+		if (typeInfo != null) {
+			// make sure we have the strictest dep type
+			addResolvedType(typeInfo.getRootTypeElement(), dependencyType);
+			return typeInfo.getFullName();
 		}
 
 		if (type instanceof DeclaredType) {
 			DeclaredType declaredType = (DeclaredType) type;
 			String name = InternalUtils.getSimpleName(declaredType.asElement());
 			Element rootTypeElement = declaredType.asElement();
-			for (DeclaredType enclosingType = JavaNodes.getEnclosingType(declaredType); enclosingType != null; enclosingType =
-					JavaNodes.getEnclosingType(enclosingType)) {
+			for (DeclaredType enclosingType = JavaNodes.getEnclosingType(declaredType); enclosingType != null; enclosingType = JavaNodes
+					.getEnclosingType(enclosingType)) {
 				rootTypeElement = enclosingType.asElement();
 				name = InternalUtils.getSimpleName(rootTypeElement) + "." + name;
 			}
 
 			checkAllowedType(rootTypeElement, context);
-			addResolvedType(rootTypeElement);
+			addResolvedType(rootTypeElement, dependencyType);
 
-			fullName = addNameSpace(rootTypeElement, context, name);
-			resolvedTypes.put(type, fullName);
+			String fullName = addNameSpace(rootTypeElement, context, name);
+			resolvedTypes.put(type, new TypeInfo(fullName, rootTypeElement));
 			return fullName;
 		}
 		if (type instanceof WildcardType) {
-			//? extends Type1 super Type2
-			//XXX what to return here !?
+			// ? extends Type1 super Type2
+			// XXX what to return here !?
 			return "Object";
 		}
 		return type.toString();
@@ -140,10 +159,13 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 		return context.getBuiltProjectClassLoader().getResource(stjsPropertiesName) != null;
 	}
 
-	private void addResolvedType(Element rootTypeElement) {
+	private void addResolvedType(Element rootTypeElement, DependencyType depType) {
 		String name = ElementUtils.getQualifiedClassName(rootTypeElement).toString();
 		if (!name.startsWith("java.lang.")) {
-			resolvedRootTypes.add(name);
+			DependencyType prevDepType = resolvedRootTypes.get(name);
+			if (prevDepType == null || depType.isStricter(prevDepType)) {
+				resolvedRootTypes.put(name, depType);
+			}
 		}
 	}
 
@@ -165,12 +187,15 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 	}
 
 	@Override
-	public String getTypeName(GenerationContext<?> context, Element type) {
-		return getTypeName(context, type.asType());
+	public String getTypeName(GenerationContext<?> context, Element type, DependencyType dependencyType) {
+		if (type == null) {
+			return null;
+		}
+		return getTypeName(context, type.asType(), dependencyType);
 	}
 
 	@Override
-	public Collection<String> getResolvedTypes() {
+	public Map<String, DependencyType> getResolvedTypes() {
 		return resolvedRootTypes;
 	}
 

@@ -8,6 +8,7 @@ import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.Keyword;
+import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
@@ -16,6 +17,7 @@ import com.sun.source.tree.IdentifierTree;
 
 /**
  * this class deal with identifiers likes variable, field references.
+ *
  * @author acraciun
  */
 public class IdentifierWriter<JS> implements WriterContributor<IdentifierTree, JS> {
@@ -25,7 +27,7 @@ public class IdentifierWriter<JS> implements WriterContributor<IdentifierTree, J
 	}
 
 	private JS visitEnumConstant(Element def, IdentifierTree tree, GenerationContext<JS> context) {
-		JS target = context.js().name(context.getNames().getTypeName(context, def.getEnclosingElement()));
+		JS target = context.js().name(context.getNames().getTypeName(context, def.getEnclosingElement(), DependencyType.STATIC));
 		return context.js().property(target, tree.getName());
 	}
 
@@ -54,10 +56,10 @@ public class IdentifierWriter<JS> implements WriterContributor<IdentifierTree, J
 		if (ElementUtils.isTypeKind(def)) {
 			if (tw.isGlobal()) {
 				// use this to register the class name - to build the dependencies
-				context.getNames().getTypeName(context, def);
+				context.getNames().getTypeName(context, def, DependencyType.STATIC);
 				return null;
 			}
-			name = context.getNames().getTypeName(context, def);
+			name = context.getNames().getTypeName(context, def, DependencyType.STATIC);
 		}
 
 		// assume variable

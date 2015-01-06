@@ -11,6 +11,7 @@ import javax.lang.model.element.ExecutableElement;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javascript.JavaScriptBuilder;
+import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.WriterContributor;
@@ -45,7 +46,7 @@ public class MemberReferenceWriter<JS> implements WriterContributor<MemberRefere
 	private JS generateStaticRef(MemberReferenceTree tree, GenerationContext<JS> context, ExecutableElement methodElement) {
 		JavaScriptBuilder<JS> js = context.js();
 		Element type = methodElement.getEnclosingElement();
-		JS typeName = js.name(context.getNames().getTypeName(context, type));
+		JS typeName = js.name(context.getNames().getTypeName(context, type, DependencyType.STATIC));
 		return js.property(typeName, tree.getName());
 	}
 
@@ -55,7 +56,7 @@ public class MemberReferenceWriter<JS> implements WriterContributor<MemberRefere
 	private JS generateInstanceRef(MemberReferenceTree tree, GenerationContext<JS> context, ExecutableElement methodElement) {
 		JavaScriptBuilder<JS> js = context.js();
 		Element type = methodElement.getEnclosingElement();
-		JS typeName = js.name(context.getNames().getTypeName(context, type));
+		JS typeName = js.name(context.getNames().getTypeName(context, type, DependencyType.STATIC));
 		JS proto = js.property(typeName, JavascriptKeywords.PROTOTYPE);
 		JS method = js.property(proto, tree.getName());
 		JS methoCall = js.property(method, "call");
@@ -83,7 +84,7 @@ public class MemberReferenceWriter<JS> implements WriterContributor<MemberRefere
 		JavaScriptBuilder<JS> js = context.js();
 		Element type = methodElement.getEnclosingElement();
 
-		JS typeName = js.name(context.getNames().getTypeName(context, type));
+		JS typeName = js.name(context.getNames().getTypeName(context, type, DependencyType.STATIC));
 		JS newExpr = context.js().newExpression(typeName, generateArguments(context, methodElement.getParameters().size()));
 		return js.function(null, Collections.emptyList(), js.returnStatement(newExpr));
 	}

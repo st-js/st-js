@@ -9,6 +9,7 @@ import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javascript.Keyword;
+import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
@@ -18,7 +19,7 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * this is the standard generation template
- * 
+ *
  * @author acraciun
  */
 public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
@@ -57,7 +58,7 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		}
 
 		// transform it into superType.[prototype.method].call(this, args..);
-		String typeName = context.getNames().getTypeName(context, typeElement);
+		String typeName = context.getNames().getTypeName(context, typeElement, DependencyType.STATIC);
 		JS superType = context.js().name(GeneratorConstants.SUPER.equals(methodName) ? typeName : typeName + ".prototype." + methodName);
 
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);

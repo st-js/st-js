@@ -24,10 +24,9 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -44,6 +43,7 @@ import org.stjs.generator.javac.CustomClassloaderJavaFileManager;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.javascript.rhino.RhinoJavaScriptBuilder;
 import org.stjs.generator.name.DefaultJavaScriptNameProvider;
+import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.name.JavaScriptNameProvider;
 import org.stjs.generator.plugin.GenerationPlugins;
 import org.stjs.generator.utils.ClassUtils;
@@ -60,7 +60,7 @@ import com.sun.tools.javac.api.JavacTool;
 
 /**
  * This class parses a Java source file, launches several visitors and finally generate the corresponding Javascript.
- * 
+ *
  * @author acraciun
  */
 public class Generator {
@@ -186,7 +186,7 @@ public class Generator {
 		Timers.end("write-js-ast");
 
 		STJSClass stjsClass = new STJSClass(dependencyResolver, targetFolder, className);
-		Set<String> resolvedClasses = new LinkedHashSet<String>(names.getResolvedTypes());
+		Map<String, DependencyType> resolvedClasses = new LinkedHashMap<String, DependencyType>(names.getResolvedTypes());
 		resolvedClasses.remove(className);
 		stjsClass.setDependencies(resolvedClasses);
 		stjsClass.setGeneratedJavascriptFile(relative(generationFolder, className));
@@ -273,7 +273,7 @@ public class Generator {
 	/**
 	 * This method copies the Javascript support file (stjs.js currently) to the desired folder. This method should be
 	 * called after the processing of all the files.
-	 * 
+	 *
 	 * @param folder
 	 */
 	public void copyJavascriptSupport(File folder) {
@@ -366,7 +366,7 @@ public class Generator {
 
 	/**
 	 * This method assumes the javascript code for the given class was already generated
-	 * 
+	 *
 	 * @param testClass
 	 */
 	public ClassWithJavascript getExistingStjsClass(ClassLoader classLoader, Class<?> testClass) {

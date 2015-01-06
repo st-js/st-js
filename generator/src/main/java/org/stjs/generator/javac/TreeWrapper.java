@@ -12,6 +12,7 @@ import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.name.DependencyType;
 import org.stjs.javascript.annotation.DataType;
 import org.stjs.javascript.annotation.GlobalScope;
 import org.stjs.javascript.annotation.JavascriptFunction;
@@ -27,7 +28,9 @@ import com.sun.source.tree.Tree;
 import com.sun.source.util.TreePath;
 
 /**
- * this class is a wrapper around a {@link Tree} node to give you easier access to the most important methods of the elements in the AST
+ * this class is a wrapper around a {@link Tree} node to give you easier access to the most important methods of the
+ * elements in the AST
+ * 
  * @author acraciun
  */
 public class TreeWrapper<T extends Tree, JS> {
@@ -178,8 +181,8 @@ public class TreeWrapper<T extends Tree, JS> {
 	/**
 	 * @return the type's name if the tree belongs to a type, undefined otherwise
 	 */
-	public String getTypeName() {
-		return context.getNames().getTypeName(context, element);
+	public String getTypeName(DependencyType depType) {
+		return context.getNames().getTypeName(context, element, depType);
 	}
 
 	public void addError(String message) {

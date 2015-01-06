@@ -11,6 +11,7 @@ import com.sun.source.tree.Tree;
 
 /**
  * this class verifies that you use @Template only inside a bridge
+ * 
  * @author acraciun
  */
 public class MethodDeclarationTemplateCheck implements CheckContributor<MethodTree> {
@@ -22,7 +23,7 @@ public class MethodDeclarationTemplateCheck implements CheckContributor<MethodTr
 			return null;
 		}
 		if (context.getCurrentWrapper().getMethodTemplate() != null) {
-			context.addError(tree, "You can only use @Template annotation in bridge classes");
+			context.addError(tree, "You can only use @Template annotation for methods in bridge classes");
 			return null;
 		}
 

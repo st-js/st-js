@@ -27,6 +27,7 @@ import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.javascript.NameValue;
 import org.stjs.generator.javascript.UnaryOperator;
+import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.MemberWriters;
@@ -81,7 +82,16 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			return context.js().keyword(Keyword.NULL);
 		}
 
-		return context.js().name(superType.getTypeName());
+		DependencyType depType = getDependencyTypeForClassDef(type);
+		return context.js().name(superType.getTypeName(depType));
+	}
+
+	private DependencyType getDependencyTypeForClassDef(Element type) {
+		if (JavaNodes.isInnerType(type)) {
+			// this is an inner (anonymous or not) class -> STATIC dep type instead
+			return DependencyType.STATIC;
+		}
+		return DependencyType.EXTENDS;
 	}
 
 	/**
@@ -89,19 +99,21 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	 @return the list of implemented interfaces. for intefaces, the super class goes also in the interfaces list
 	 */
 	private JS getInterfaces(ClassTree clazz, GenerationContext<JS> context) {
+		Element type = TreeUtils.elementFromDeclaration(clazz);
+		DependencyType depType = getDependencyTypeForClassDef(type);
+
 		List<JS> ifaces = new ArrayList<JS>();
 		for (Tree iface : clazz.getImplementsClause()) {
 			TreeWrapper<Tree, JS> ifaceType = context.getCurrentWrapper().child(iface);
 			if (!ifaceType.isSyntheticType()) {
-				ifaces.add(context.js().name(ifaceType.getTypeName()));
+				ifaces.add(context.js().name(ifaceType.getTypeName(depType)));
 			}
 		}
 
-		Element type = TreeUtils.elementFromDeclaration(clazz);
 		if (clazz.getExtendsClause() != null && type.getKind() == ElementKind.INTERFACE) {
 			TreeWrapper<Tree, JS> superType = context.getCurrentWrapper().child(clazz.getExtendsClause());
 			if (!superType.isSyntheticType()) {
-				ifaces.add(0, context.js().name(superType.getTypeName()));
+				ifaces.add(0, context.js().name(superType.getTypeName(DependencyType.EXTENDS)));
 			}
 		}
 		return context.js().array(ifaces);
@@ -207,7 +219,8 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			return;
 		}
 		TypeElement type = TreeUtils.elementFromDeclaration(clazz);
-		JS target = context.getCurrentWrapper().isGlobal() ? null : context.js().name(context.getNames().getTypeName(context, type));
+		JS target = context.getCurrentWrapper().isGlobal() ? null : context.js().name(
+				context.getNames().getTypeName(context, type, DependencyType.STATIC));
 
 		JavaScriptBuilder<JS> js = context.js();
 		JS condition = js.unary(UnaryOperator.LOGICAL_COMPLEMENT, js.property(js.name(GeneratorConstants.STJS), "mainCallDisabled"));
@@ -221,7 +234,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		if (JavaNodes.isJavaScriptPrimitive(type)) {
 			return js.keyword(Keyword.NULL);
 		}
-		JS typeName = js.string(context.getNames().getTypeName(context, type));
+		JS typeName = js.string(context.getNames().getTypeName(context, type, DependencyType.OTHER));
 
 		if (type instanceof DeclaredType) {
 			DeclaredType declaredType = (DeclaredType) type;
@@ -276,7 +289,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 
 	private boolean skipTypeDescForField(Element member) {
 		if (((TypeElement) member.getEnclosingElement()).getQualifiedName().toString().startsWith("java.lang.")) {
-			//maybe we should rather skip the bridge classes here
+			// maybe we should rather skip the bridge classes here
 			return true;
 		}
 		if (member.getAnnotation(ServerSide.class) != null) {
@@ -295,7 +308,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 
 	private JS writeAnnotationValue(WriterVisitor<JS> visitor, ExpressionTree expr, GenerationContext<JS> context) {
 		if (expr instanceof NewArrayTree) {
-			//special case for array initializer
+			// special case for array initializer
 			List<JS> items = new ArrayList<JS>();
 			for (ExpressionTree item : ((NewArrayTree) expr).getInitializers()) {
 				items.add(visitor.scan(item, context));
@@ -306,8 +319,8 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	}
 
 	private JS getAnnotationForElement(AnnotationTree ann, WriterVisitor<JS> visitor, GenerationContext<JS> context) {
-		//build "annotationType": {arg1, arg2, ...}
-		//XXX: should use here type names?
+		// build "annotationType": {arg1, arg2, ...}
+		// XXX: should use here type names?
 		if (AnnotationHelper.getRetentionType(ann.getAnnotationType()) == RetentionPolicy.SOURCE) {
 			return null;
 		}
@@ -334,7 +347,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		for (AnnotationTree ann : annotations) {
 			JS annotationArgs = getAnnotationForElement(ann, visitor, context);
 			if (annotationArgs != null) {
-				//XXX: hack here to quote the type name - to change when using the type names
+				// XXX: hack here to quote the type name - to change when using the type names
 				String annEntryKey = ann.getAnnotationType().toString();
 				annotationsDesc.add(NameValue.of("\"" + annEntryKey + "\"", annotationArgs));
 			}
@@ -417,7 +430,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 
 		JS enumConstructor = js.functionCall(js.property(js.name(GeneratorConstants.STJS), "enumeration"), enumEntries);
 
-		String typeName = context.getNames().getTypeName(context, type);
+		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
 		if (typeName.contains(".")) {
 			// inner class or namespace
 			boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
@@ -433,7 +446,8 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	}
 
 	/**
-	 * Special generation for classes marked with {@link org.stjs.javascript.annotation.GlobalScope}. The name of the class must appear nowhere.
+	 * Special generation for classes marked with {@link org.stjs.javascript.annotation.GlobalScope}. The name of the
+	 * class must appear nowhere.
 	 */
 	private boolean generateGlobal(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
 		if (!context.getCurrentWrapper().isGlobal()) {
@@ -461,7 +475,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 
 		JavaScriptBuilder<JS> js = context.js();
 		Element type = TreeUtils.elementFromDeclaration(tree);
-		String typeName = context.getNames().getTypeName(context, type);
+		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
 
 		if (typeName.contains(".")) {
 			// inner class or namespace
@@ -494,7 +508,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		}
 
 		Element type = TreeUtils.elementFromDeclaration(tree);
-		String typeName = context.getNames().getTypeName(context, type);
+		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
 		JS name = js.name(typeName);
 
 		JS superClazz = getSuperClass(tree, context);
@@ -511,9 +525,8 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		addConstructorStatement(visitor, tree, context, stmts);
 
 		@SuppressWarnings("unchecked")
-		JS extendsCall =
-				js.functionCall(js.property(js.name(GeneratorConstants.STJS), "extend"),
-						Arrays.asList(name, superClazz, interfaces, members, typeDesc, annotationDesc));
+		JS extendsCall = js.functionCall(js.property(js.name(GeneratorConstants.STJS), "extend"),
+				Arrays.asList(name, superClazz, interfaces, members, typeDesc, annotationDesc));
 		if (anonymousClass) {
 			stmts.add(extendsCall);
 		} else {

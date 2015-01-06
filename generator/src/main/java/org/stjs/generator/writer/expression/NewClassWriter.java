@@ -9,6 +9,7 @@ import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.NameValue;
+import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 
@@ -74,16 +75,16 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 	/**
 	 * check by {@link org.stjs.generator.check.expression.NewClassInlineFunctionCheck} generate the code for inline
 	 * functions:
-	 * 
+	 *
 	 * <pre>
 	 * new FunctionInterface(){
 	 * 	  public void $invoke(args){
 	 *    }
 	 * }
 	 * </pre>
-	 * 
+	 *
 	 * is transformed in
-	 * 
+	 *
 	 * <pre>
 	 * function(args){
 	 * }
@@ -121,7 +122,7 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 
 	private JS getRegularNewExpression(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {
 		Element type = TreeUtils.elementFromUse(tree.getIdentifier());
-		JS typeName = context.js().name(context.getNames().getTypeName(context, type));
+		JS typeName = context.js().name(context.getNames().getTypeName(context, type, DependencyType.STATIC));
 		return context.js().newExpression(typeName, arguments(visitor, tree, context));
 	}
 

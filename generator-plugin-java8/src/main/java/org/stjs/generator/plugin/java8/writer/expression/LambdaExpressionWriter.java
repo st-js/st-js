@@ -3,6 +3,7 @@ package org.stjs.generator.plugin.java8.writer.expression;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.lang.model.element.Element;
 
@@ -17,7 +18,6 @@ import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.declaration.MethodWriter;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
-import org.stjs.javascript.Reference;
 
 import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.ClassTree;
@@ -47,8 +47,7 @@ import com.sun.source.util.TreeScanner;
 public class LambdaExpressionWriter<JS> implements WriterContributor<LambdaExpressionTree, JS> {
 
 	private boolean accessOuterScope(WriterVisitor<JS> visitor, LambdaExpressionTree lambda, GenerationContext<JS> context) {
-		Reference<Boolean> outerScopeAccess = new Reference<Boolean>();
-		outerScopeAccess.value = false;
+		AtomicBoolean outerScopeAccess = new AtomicBoolean(false);
 
 		lambda.accept(new TreeScanner<Void, Void>() {
 			private boolean checkStopped;
@@ -58,7 +57,7 @@ public class LambdaExpressionWriter<JS> implements WriterContributor<LambdaExpre
 				Element fieldElement = TreeUtils.elementFromUse(tree);
 				if (IdentifierAccessOuterScopeCheck.isRegularInstanceField(fieldElement, tree)
 						|| GeneratorConstants.THIS.equals(tree.getName().toString())) {
-					outerScopeAccess.value = true;
+					outerScopeAccess.set(true);
 				}
 				return super.visitIdentifier(tree, arg1);
 			}
@@ -88,12 +87,12 @@ public class LambdaExpressionWriter<JS> implements WriterContributor<LambdaExpre
 					// check for Outer.this check
 					return super.visitMethodInvocation(tree, arg1);
 				}
-				outerScopeAccess.value = true;
+				outerScopeAccess.set(true);
 				return super.visitMethodInvocation(tree, arg1);
 			}
 		}, null);
 
-		return outerScopeAccess.value;
+		return outerScopeAccess.get();
 	}
 
 	@Override

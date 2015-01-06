@@ -22,13 +22,14 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.PreConditions;
 
@@ -37,10 +38,11 @@ import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 
 /**
- * This class represents a class and the corresponding generated javascript file. The information about dependencies and sources are stored at
- * generation time in a properties file that has as name [class-name].stjs (and it's packed along with the source file in the same folder). Thus,
- * if a STJS library is built, it will be delivered with all this information, as the original Java code will no longer be available with the
- * library.
+ * This class represents a class and the corresponding generated javascript file. The information about dependencies and
+ * sources are stored at generation time in a properties file that has as name [class-name].stjs (and it's packed along
+ * with the source file in the same folder). Thus, if a STJS library is built, it will be delivered with all this
+ * information, as the original Java code will no longer be available with the library.
+ *
  * @author acraciun
  */
 public class STJSClass implements ClassWithJavascript {
@@ -54,8 +56,9 @@ public class STJSClass implements ClassWithJavascript {
 	private final Properties properties;
 
 	private final DependencyResolver dependencyResolver;
-	private List<String> dependencies = Collections.emptyList();
+	private Map<String, DependencyType> dependencies = Collections.emptyMap();
 	private List<ClassWithJavascript> directDependencies;
+	private Map<ClassWithJavascript, DependencyType> directDependenciesMap;
 
 	private URI generatedJavascriptFile;
 
@@ -77,6 +80,7 @@ public class STJSClass implements ClassWithJavascript {
 
 	/**
 	 * constructor for loading
+	 *
 	 * @param builtProjectClassLoader
 	 * @param className
 	 */
@@ -119,17 +123,32 @@ public class STJSClass implements ClassWithJavascript {
 		return props;
 	}
 
-	private List<String> readDependeciesProperty() {
+	private Map<String, DependencyType> readDependeciesProperty() {
 		String depProp = properties.getProperty(DEPENDENCIES_PROP);
 		if (depProp != null) {
 			// remove []
 			depProp = depProp.trim();
 			if (depProp.length() > 2) {
 				String deps[] = depProp.substring(1, depProp.length() - 1).split(",");
-				return Arrays.asList(deps);
+				Map<String, DependencyType> depMap = new HashMap<String, DependencyType>();
+				for (String dep : deps) {
+					depMap.put(DependencyType.getTypeName(dep), DependencyType.getDependencyType(dep));
+				}
+				return depMap;
 			}
 		}
-		return Collections.emptyList();
+		return Collections.emptyMap();
+	}
+
+	private String writeDependeciesProperty(Map<String, DependencyType> deps) {
+		StringBuilder s = new StringBuilder();
+		for (Map.Entry<String, DependencyType> entry : deps.entrySet()) {
+			if (s.length() > 0) {
+				s.append(',');
+			}
+			s.append(DependencyType.getTypeWithPrefix(entry.getKey(), entry.getValue()));
+		}
+		return "[" + s.toString() + "]";
 	}
 
 	private URI readGeneratedJavascriptFileProperty() {
@@ -179,20 +198,16 @@ public class STJSClass implements ClassWithJavascript {
 		}
 	}
 
-	public void setDependencies(Collection<String> deps) {
+	public void setDependencies(Map<String, DependencyType> deps) {
 
 		if (deps == null) {
 			properties.remove(DEPENDENCIES_PROP);
-			this.dependencies = new ArrayList<String>();
+			this.dependencies = new HashMap<String, DependencyType>();
 		} else {
-			this.dependencies = new ArrayList<String>(deps.size());
-			//filter out anonymous classes
-			for (String dep : deps) {
-				if (!dep.isEmpty()) {
-					this.dependencies.add(dep);
-				}
-			}
-			properties.put(DEPENDENCIES_PROP, dependencies.toString());
+			this.dependencies = new HashMap<String, DependencyType>(deps);
+			// filter out anonymous classes
+			this.dependencies.remove("");
+			properties.put(DEPENDENCIES_PROP, writeDependeciesProperty(dependencies));
 		}
 	}
 
@@ -223,11 +238,22 @@ public class STJSClass implements ClassWithJavascript {
 	public List<ClassWithJavascript> getDirectDependencies() {
 		if (directDependencies == null) {
 			directDependencies = new ArrayList<ClassWithJavascript>(dependencies.size());
-			for (String className : dependencies) {
-				directDependencies.add(dependencyResolver.resolve(className.trim()));
+			for (String depClassName : dependencies.keySet()) {
+				directDependencies.add(dependencyResolver.resolve(depClassName.trim()));
 			}
 		}
 		return directDependencies;
+	}
+
+	@Override
+	public Map<ClassWithJavascript, DependencyType> getDirectDependencyMap() {
+		if (directDependenciesMap == null) {
+			directDependenciesMap = new HashMap<ClassWithJavascript, DependencyType>(dependencies.size());
+			for (Map.Entry<String, DependencyType> entry : dependencies.entrySet()) {
+				directDependenciesMap.put(dependencyResolver.resolve(entry.getKey().trim()), entry.getValue());
+			}
+		}
+		return directDependenciesMap;
 	}
 
 	@Override

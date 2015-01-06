@@ -1,6 +1,7 @@
 package org.stjs.generator.writer.statement;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.declaration.FieldWriter;
@@ -13,6 +14,7 @@ import com.sun.source.tree.VariableTree;
 
 /**
  * variable declaration. Covers also the fields.
+ *
  * @author acraciun
  */
 public class VariableWriter<JS> implements WriterContributor<VariableTree, JS> {
@@ -35,6 +37,8 @@ public class VariableWriter<JS> implements WriterContributor<VariableTree, JS> {
 		if (isFieldDeclaration(context)) {
 			return fieldWriter.visit(visitor, tree, context);
 		}
+		// load the type of the variable
+		context.getCurrentWrapper().child(tree.getType()).getTypeName(DependencyType.OTHER);
 		// if it's the init part of a for, mark it as expression, not statement
 		boolean isStatement = !isLoopInitializer(context);
 
