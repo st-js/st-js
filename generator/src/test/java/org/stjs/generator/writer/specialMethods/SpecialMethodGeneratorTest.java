@@ -193,4 +193,14 @@ public class SpecialMethodGeneratorTest {
 	public void testPrefix() {
 		assertCodeContains(SpecialMethod24.class, "n = new TestBridge().prefix()");
 	}
+
+	@Test
+	public void testPrefixWithParameter() {
+		assertCodeContains(SpecialMethod25.class, "n = new TestBridge().say()");
+	}
+
+	@Test
+	public void testSuffixWithParameter() {
+		assertCodeContains(SpecialMethod26.class, "new TestBridge().say()");
+	}
 }

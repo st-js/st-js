@@ -9,3 +9,7 @@ TestBridge.prototype.prefix=function(){
 TestBridge.prototype.$get=function(){
 	return "";
 }
+
+TestBridge.prototype.say=function(){
+	return "";
+}

@@ -17,4 +17,10 @@ public class TestBridge {
 
 	@Template("none")
 	public native String $get(int n);
+
+	@Template("prefix(then)")
+	public native String thenSay();
+
+	@Template("suffix(Special)")
+	public native void saySpecial();
 }
