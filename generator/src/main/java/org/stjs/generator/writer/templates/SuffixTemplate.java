@@ -26,20 +26,9 @@ public class SuffixTemplate<JS> implements WriterContributor<MethodInvocationTre
 	public JS visit(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		JS target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree>getCurrentWrapper());
 		String name = MethodInvocationWriter.buildMethodName(tree);
-		String[] prefixParams = getSuffixParams(context.getCurrentWrapper().getMethodTemplate());
-		name = transformMethodName(name, prefixParams);
+		name = transformMethodName(name, context.getCurrentWrapper().getMethodTemplateParameters());
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
 		return context.js().functionCall(context.js().property(target, name), arguments);
-	}
-
-	private String[] getSuffixParams(String templateString) {
-		int paramIndex = templateString.indexOf('(');
-		if (paramIndex < 0) {
-			return new String[ 0 ];
-		}
-
-		String params = templateString.trim().substring(paramIndex + 1, templateString.length() - 1);
-		return params.split("\\s*,\\s*");
 	}
 
 	private String transformMethodName(String original, String[] prefixParams) {

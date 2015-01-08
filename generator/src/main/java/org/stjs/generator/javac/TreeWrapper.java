@@ -2,7 +2,6 @@ package org.stjs.generator.javac;
 
 import java.lang.annotation.Annotation;
 import java.util.Set;
-
 import javax.annotation.Nonnull;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -30,7 +29,7 @@ import com.sun.source.util.TreePath;
 /**
  * this class is a wrapper around a {@link Tree} node to give you easier access to the most important methods of the
  * elements in the AST
- * 
+ *
  * @author acraciun
  */
 public class TreeWrapper<T extends Tree, JS> {
@@ -190,16 +189,56 @@ public class TreeWrapper<T extends Tree, JS> {
 	}
 
 	public String getMethodTemplate() {
-		Template tpl = context.getAnnotation(element, Template.class);
-		return tpl == null ? null : tpl.value();
+		return stripParameters(getTemplateValue());
+	}
+
+	public String[] getMethodTemplateParameters() {
+		return getTemplateParameters(getTemplateValue());
 	}
 
 	public String getFieldTemplate() {
 		if (element == null || element.getKind() != ElementKind.FIELD) {
 			return null;
 		}
-		Template tpl = context.getAnnotation(element, Template.class);
-		return tpl == null ? null : tpl.value();
+		return stripParameters(getTemplateValue());
 	}
 
+	public String[] getFieldTemplateParameters() {
+		if (element == null || element.getKind() != ElementKind.FIELD) {
+			return new String[ 0 ];
+		}
+		return getTemplateParameters(getTemplateValue());
+	}
+
+	private String stripParameters(String templateValue) {
+		if (templateValue == null) {
+			return null;
+		}
+		int paramListIndex = templateValue.indexOf('(');
+		if (paramListIndex >= 0) {
+			return templateValue.substring(0, paramListIndex).trim();
+		}
+		return templateValue;
+	}
+
+	private String[] getTemplateParameters(String templateValue) {
+		if (templateValue == null) {
+			return new String[ 0 ];
+		}
+		int paramIndex = templateValue.indexOf('(');
+		if (paramIndex < 0) {
+			return new String[ 0 ];
+		}
+
+		String params = templateValue.trim().substring(paramIndex + 1, templateValue.length() - 1);
+		return params.split("\\s*,\\s*");
+	}
+
+	private String getTemplateValue() {
+		Template tpl = context.getAnnotation(element, Template.class);
+		if (tpl == null) {
+			return null;
+		}
+		return tpl.value();
+	}
 }

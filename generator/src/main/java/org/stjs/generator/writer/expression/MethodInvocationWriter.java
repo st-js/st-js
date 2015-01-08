@@ -66,10 +66,6 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 	public static <JS> String buildTemplateName(MethodInvocationTree tree, GenerationContext<JS> context) {
 		String name = context.getCurrentWrapper().getMethodTemplate();
 		if (name != null) {
-			int paramListIndex = name.indexOf('(');
-			if (paramListIndex >= 0) {
-				name = name.substring(0, paramListIndex).trim();
-			}
 			return name;
 		}
 		return context.getCurrentWrapper().getEnclosingType().isJavaScriptFunction() ? "invoke" : "none";
