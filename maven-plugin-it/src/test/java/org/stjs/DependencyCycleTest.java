@@ -23,7 +23,7 @@ public class DependencyCycleTest {
 			// it should break here
 		}
 
-		verifier.verifyTextInLog("Cycles are detected");
+		verifier.verifyTextInLog("cycles are detected");
 
 	}
 }

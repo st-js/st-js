@@ -530,7 +530,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		if (anonymousClass) {
 			stmts.add(extendsCall);
 		} else {
-			stmts.add(js.expressionStatement(extendsCall));
+			stmts.add(context.withPosition(tree, js.expressionStatement(extendsCall)));
 		}
 		addStaticInitializers(visitor, tree, context, stmts);
 		addMainMethodCall(tree, stmts, context);

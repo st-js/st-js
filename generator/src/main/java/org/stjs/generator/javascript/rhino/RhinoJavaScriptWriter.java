@@ -57,7 +57,7 @@ import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
 
 /**
  * This class visits a JavaScript AST tree and generate the corresponding source code. It handles also the source maps.
- * 
+ *
  * @author acraciun
  */
 @SuppressWarnings("PMD.ExcessivePublicCount")
@@ -170,7 +170,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	/**
 	 * this is only for statements on several lines to be able to catch end of inline function defintions
-	 * 
+	 *
 	 * @param node
 	 */
 	protected void endPosition(AstNode node) {
@@ -666,6 +666,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	public void addSourceMapURL() {
 		if (generateSourceMap) {
+			addMapping();
 			print("//@ sourceMappingURL=").print(inputFile.getName().replaceAll("\\.java$", ".map"));
 		}
 	}

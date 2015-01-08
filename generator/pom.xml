@@ -27,7 +27,7 @@
 		<dependency>
 			<groupId>com.sun</groupId>
 			<artifactId>tools</artifactId>
-			<version>1.6.0</version>
+			<version>1.7.0</version>
 			<scope>system</scope>
 			<systemPath>${java.home}/../lib/tools.jar</systemPath>
 		</dependency>
@@ -42,7 +42,7 @@
 		<dependency>
 			<groupId>com.google.javascript</groupId>
 			<artifactId>closure-compiler</artifactId>
-			<version>r1810</version>
+			<version>v20141215</version>
 		</dependency>
 
 <!-- 			<dependency> -->

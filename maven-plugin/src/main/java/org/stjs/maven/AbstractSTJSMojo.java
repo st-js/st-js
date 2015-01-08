@@ -25,7 +25,6 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -67,9 +66,8 @@ import org.stjs.generator.name.DependencyType;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import com.google.debugging.sourcemap.SourceMapFormat;
-import com.google.debugging.sourcemap.SourceMapGenerator;
 import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
-import com.google.debugging.sourcemap.SourceMapSection;
+import com.google.debugging.sourcemap.SourceMapGeneratorV3;
 
 /**
  * This is the Maven plugin that launches the Javascript generator. The plugin needs a list of packages containing the Java classes that will
@@ -362,29 +360,33 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			detectCycles(dependencyGraph);
 
 			// dump all the files in the dependency order in the pack file
-			List<SourceMapSection> sourceMapSections = new ArrayList<SourceMapSection>();
+			SourceMapGeneratorV3 packSourceMap = (SourceMapGeneratorV3) SourceMapGeneratorFactory.getInstance(SourceMapFormat.V3);
 
 			int currentLine = 0;
 			Iterator<String> it = new TopologicalOrderIterator<String, DefaultEdge>(dependencyGraph);
 			while (it.hasNext()) {
 				File targetFile = currentProjectsFiles.get(it.next());
+				//target file is absolute
 				if (targetFile != null) {
 					// for this project's files
 					if (generateSourceMap) {
-						currentLine = appendFileSkipSourceMap(targetFile, outputFile, allSourcesFile, currentLine, sourceMapSections);
+						currentLine =
+								SourceMapUtils.appendFileSkipSourceMap(gendir.getAbsolutePath(), allSourcesFile, targetFile, currentLine,
+										packSourceMap, sourceEncoding);
 					} else {
 						Files.copy(targetFile, allSourcesFile);
 					}
-					allSourcesFile.write('\n');
 					allSourcesFile.flush();
 				}
 			}
 
 			if (generateSourceMap) {
-				SourceMapGenerator packSourceMap = SourceMapGeneratorFactory.getInstance(SourceMapFormat.V3);
 				File packMapFile = new File(gendir.getAbsolutePath(), project.getArtifactId() + ".map");
 				packMapStream = new BufferedWriter(new FileWriter(packMapFile));
-				packSourceMap.appendIndexMapTo(packMapStream, outputFile.getName(), sourceMapSections);
+				packSourceMap.appendTo(packMapStream, project.getArtifactId() + ".js");
+
+				allSourcesFile.write(("//@ sourceMappingURL=" + project.getArtifactId() + ".map\n").getBytes());
+				allSourcesFile.flush();
 			}
 
 		}
@@ -408,25 +410,6 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			}
 		}
 
-	}
-
-	private int appendFileSkipSourceMap(File targetFile, File packFile, OutputStream allSourcesFile, int currentLine,
-			List<SourceMapSection> sections) throws IOException {
-		List<String> lines = Files.readLines(targetFile, sourceEncoding != null ? Charset.forName(sourceEncoding) : Charset.defaultCharset());
-		// remove the @SourceMap stuff
-		for (int i = 0; i < lines.size() - 1; ++i) {
-			allSourcesFile.write(lines.get(i).getBytes());
-			allSourcesFile.write('\n');
-		}
-
-		sections.add(SourceMapSection.forMap(getRelativeSourceMapFileName(targetFile, packFile), currentLine, 0));
-		return currentLine + lines.size() - 1;
-	}
-
-	private String getRelativeSourceMapFileName(File targetFile, File packFile) {
-		// remove the common folder name from the target file name
-		String relativeName = targetFile.getAbsolutePath().substring(packFile.getParentFile().getAbsolutePath().length() + 1);
-		return relativeName.replace(".js", ".map");
 	}
 
 	protected void filesGenerated(Generator generator, GenerationDirectory gendir) throws MojoFailureException, MojoExecutionException {

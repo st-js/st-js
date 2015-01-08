@@ -6,7 +6,7 @@ import java.io.Writer;
 import com.google.debugging.sourcemap.SourceMapGenerator;
 
 @SuppressWarnings("PMD.ExcessivePublicCount")
-public class SouceJavaScriptBuilder implements JavaScriptBuilder<String> {
+public class StringJavaScriptBuilder implements JavaScriptBuilder<String> {
 
 	@Override
 	public String asExpressionList(Iterable<String> nodes) {

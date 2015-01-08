@@ -29,6 +29,9 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 	private static final String JAVA_LANG_PACKAGE = "java.lang.";
 	private static final int JAVA_LANG_LENGTH = JAVA_LANG_PACKAGE.length();
 
+	private final Map<String, DependencyType> resolvedRootTypes = new HashMap<String, DependencyType>();
+	private final Map<TypeMirror, TypeInfo> resolvedTypes = new HashMap<TypeMirror, TypeInfo>();
+
 	private class TypeInfo {
 		private final String fullName;
 		private final Element rootTypeElement;
@@ -47,9 +50,6 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 		}
 
 	}
-
-	private final Map<String, DependencyType> resolvedRootTypes = new HashMap<String, DependencyType>();
-	private final Map<TypeMirror, TypeInfo> resolvedTypes = new HashMap<TypeMirror, TypeInfo>();
 
 	private String addNameSpace(Element rootTypeElement, GenerationContext<?> context, String name) {
 		String namespace = JavaNodes.getNamespace(rootTypeElement);
