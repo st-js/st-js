@@ -116,14 +116,22 @@ public class HttpLongPollingServer implements AsyncProcess {
 				exchange.getResponseHeaders().add("Date", formatDateHeader(new Date()));
 				exchange.getResponseHeaders().add("Connection", "Keep-Alive");
 				exchange.getResponseHeaders().add("Server", "STJS");
+				boolean dryRun = false;
+
+				if(exchange.getRequestMethod().equals("HEAD") || exchange.getRequestMethod().equals("OPTIONS")){
+					exchange = new NoBodyHttpExchange(exchange);
+					dryRun = true;
+				}
 
 				// now really handle the request
 				Map<String, String> params = parseQueryString(exchange.getRequestURI().getRawQuery());
 				String path = exchange.getRequestURI().getPath();
 				if (NEXT_TEST_URI.equals(path)) {
-					handleNextTest(params, exchange);
+					handleNextTest(params, exchange, dryRun);
+
 				} else if (BLANK_URI.equals(path)) {
 					handleAboutBlank(exchange);
+
 				} else {
 					handleResource(path, exchange);
 				}
@@ -154,7 +162,7 @@ public class HttpLongPollingServer implements AsyncProcess {
 		 * Once one of these events has happened, this HTTP server sends the appropriate HTML/javascript response before returning from this
 		 * method.
 		 */
-		private void handleNextTest(Map<String, String> params, HttpExchange exchange) {
+		private void handleNextTest(Map<String, String> params, HttpExchange exchange, boolean dryRun) {
 			// Read the test results returned by the browser, if any
 			long browserId = parseLong(params.get("browserId"), -1);
 			LongPollingBrowser browser = browsers.get(browserId);
@@ -172,8 +180,10 @@ public class HttpLongPollingServer implements AsyncProcess {
 				// notify JUnit of the result of this test. When the last browser notifies
 				// the MultiTestMethod, the JUnit thread will become unblocked and the test result
 				// will be reported
-				TestResult result = browser.buildResult(params, exchange);
-				completedMethod.notifyExecutionResult(result);
+				if(!dryRun) {
+					TestResult result = browser.buildResult(params, exchange);
+					completedMethod.notifyExecutionResult(result);
+				}
 			} else {
 				if (config.isDebugEnabled()) {
 					System.out.println("Server received request for the first test from browser " + browserId);
@@ -184,7 +194,10 @@ public class HttpLongPollingServer implements AsyncProcess {
 			// until we have a new test to send to the browser or the server is shutdown,
 			// whichever comes first. Basically, we are not sending the HTTP response to the
 			// browser until we have received a new test
-			MultiTestMethod nextMethod = browser.awaitNextTest();
+			MultiTestMethod nextMethod = null;
+			if(!dryRun){
+				nextMethod = browser.awaitNextTest();
+			}
 			if (nextMethod != null) {
 				if (config.isDebugEnabled()) {
 					System.out.println("Server is sending test for method " + nextMethod.toString() + " to browser " + browserId);
@@ -201,6 +214,9 @@ public class HttpLongPollingServer implements AsyncProcess {
 
 			} else {
 				try {
+					// Note: This case will always be triggered for a dry run (ie: in response to HEAD or
+					// OPTIONS requests). However, it really doesn't matter because in those cases, the HttpExchange
+					// is always an instance of NoBodyHttpExchange which never really sends the response body anyway.
 					browser.sendNoMoreTestFixture(exchange);
 				}
 				catch (IOException ioe) {
