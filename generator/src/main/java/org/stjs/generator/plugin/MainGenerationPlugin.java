@@ -89,6 +89,7 @@ import org.stjs.generator.writer.templates.PrefixTemplate;
 import org.stjs.generator.writer.templates.PropertiesTemplate;
 import org.stjs.generator.writer.templates.PutTemplate;
 import org.stjs.generator.writer.templates.SetTemplate;
+import org.stjs.generator.writer.templates.SuffixTemplate;
 import org.stjs.generator.writer.templates.TypeOfTemplate;
 import org.stjs.generator.writer.templates.fields.DefaultAssignmentTemplate;
 import org.stjs.generator.writer.templates.fields.DefaultCompoundAssignmentTemplate;
@@ -240,6 +241,7 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(template("toProperty"), new MethodToPropertyTemplate<JS>());
 		visitor.contribute(template("or"), new OrTemplate<JS>());
 		visitor.contribute(template("prefix"), new PrefixTemplate<JS>());
+		visitor.contribute(template("suffix"), new SuffixTemplate<JS>());
 		visitor.contribute(template("properties"), new PropertiesTemplate<JS>());
 		visitor.contribute(template("put"), new PutTemplate<JS>());
 		visitor.contribute(template("set"), new SetTemplate<JS>());

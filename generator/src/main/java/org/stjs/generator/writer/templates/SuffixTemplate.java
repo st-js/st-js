@@ -10,30 +10,29 @@ import org.stjs.generator.writer.expression.MethodInvocationWriter;
 import com.sun.source.tree.MethodInvocationTree;
 
 /**
- * This template can be used to prefix the name of a method that can be Java keyword.<br>
- * When used without parameters as <tt>@Template("prefix")</tt>, this template simply strips the
- * leading character of the Java method name<br>
- * $method() => method() or _method() => method() <br>
+ * This template can be used to suffix the name of a method that can be Java keyword.<br>
+ * When used without parameters as <tt>@Template("suffix")</tt>, this template simply strips the
+ * trailing character of the Java method name<br>
+ * method_() => method() or method$() => method() <br>
  *
- * When used with a single parameters, this template removes the first <tt>param.length</tt> characters
- * from the java method name and makes the first letter of the resulting identifier lowercase<br>
- * @Template("prefix(special)") specialMethod() => method(), or @Template("prefix(foo)") fooBar() => bar()
+ * When used with a single parameters, this template removes the last <tt>param.length</tt> characters
+ * @Template("suffix(Extended)") methodExtended() => method(), or @Template("suffix(Bar)") fooBar() => foo()
  *
  * @author acraciun
  */
-public class PrefixTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
+public class SuffixTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		JS target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree>getCurrentWrapper());
 		String name = MethodInvocationWriter.buildMethodName(tree);
-		String[] prefixParams = getPrefixParams(context.getCurrentWrapper().getMethodTemplate());
+		String[] prefixParams = getSuffixParams(context.getCurrentWrapper().getMethodTemplate());
 		name = transformMethodName(name, prefixParams);
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
 		return context.js().functionCall(context.js().property(target, name), arguments);
 	}
 
-	private String[] getPrefixParams(String templateString) {
+	private String[] getSuffixParams(String templateString) {
 		int paramIndex = templateString.indexOf('(');
 		if (paramIndex < 0) {
 			return new String[ 0 ];
@@ -45,11 +44,9 @@ public class PrefixTemplate<JS> implements WriterContributor<MethodInvocationTre
 
 	private String transformMethodName(String original, String[] prefixParams) {
 		if (prefixParams.length == 0) {
-			// backwards compatible behavior
-			return original.substring(1);
+			// no parameter behavior is analogous to PrefixTemplate
+			return original.substring(0, original.length() - 1);
 		}
-		String transformed = original.substring(prefixParams[ 0 ].length());
-		transformed = Character.toLowerCase(transformed.charAt(0)) + transformed.substring(1);
-		return transformed;
+		return original.substring(0, original.length() - prefixParams[0].length());
 	}
 }
