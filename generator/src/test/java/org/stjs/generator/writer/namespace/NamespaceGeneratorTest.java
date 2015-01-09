@@ -6,6 +6,7 @@ import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
 import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.writer.namespace.packageLevel.PackageNamespace1;
 
 public class NamespaceGeneratorTest {
 	@Test
@@ -67,5 +68,10 @@ public class NamespaceGeneratorTest {
 			expected = JavascriptFileGenerationException.class)
 	public void testReservedWordsInNamespace() {
 		generate(Namespace9.class);
+	}
+
+	@Test()
+	public void testAnnotationAtPackageLevel(){
+		assertCodeContains(PackageNamespace1.class, "package.level.PackageNamespace1=function()");
 	}
 }
