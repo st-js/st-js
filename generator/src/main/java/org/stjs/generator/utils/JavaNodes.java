@@ -1,10 +1,10 @@
 package org.stjs.generator.utils;
 
 import java.util.Set;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
@@ -72,7 +72,45 @@ public final class JavaNodes {
 		if (ns != null) {
 			return ns.value();
 		}
+
+		return resolvePackageNamespace(type);
+	}
+
+	private static String resolvePackageNamespace(Element rootTypeElement) {
+		Element enclosing = rootTypeElement.getEnclosingElement();
+		if (enclosing instanceof PackageElement) {
+			PackageElement packageElement = (PackageElement) enclosing;
+			Package pack = Package.getPackage(packageElement.getQualifiedName().toString());
+			return resolvePackageNamespace(pack);
+		}
 		return null;
+	}
+
+	private static String resolvePackageNamespace(Package pack) {
+		if (pack == null) {
+			return null;
+		}
+
+		Namespace ns = pack.getAnnotation(Namespace.class);
+		if (ns != null) {
+			return ns.value();
+		}
+
+		// not found in this package. Let's see if we can find it in the parent package
+		// Note that it is possible for a parent package to be empty, and so it is possible for the parent package
+		// not to exist, so we'll just keep looking until we find an ancestor that has the annotation.
+		String parentName = pack.getName();
+		while (true) {
+			int lastDotIndex = parentName.lastIndexOf('.');
+			if (lastDotIndex < 0) {
+				return null;
+			}
+			parentName = parentName.substring(0, lastDotIndex);
+			Package parent = Package.getPackage(parentName);
+			if (parent != null) {
+				return resolvePackageNamespace(parent);
+			}
+		}
 	}
 
 	public static boolean isInnerType(Element type) {

@@ -7,6 +7,7 @@ import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 import org.junit.Test;
 import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.writer.namespace.packageLevel.PackageNamespace1;
+import org.stjs.generator.writer.namespace.packageLevel.empty.deep.PackageNamespace2;
 
 public class NamespaceGeneratorTest {
 	@Test
@@ -72,6 +73,11 @@ public class NamespaceGeneratorTest {
 
 	@Test()
 	public void testAnnotationAtPackageLevel(){
-		assertCodeContains(PackageNamespace1.class, "package.level.PackageNamespace1=function()");
+		assertCodeContains(PackageNamespace1.class, "a.b.PackageNamespace1 = function()");
+	}
+
+	@Test()
+	public void testAnnotationAtPackageLevelRecursive(){
+		assertCodeContains(PackageNamespace2.class, "a.b.PackageNamespace2 = function()");
 	}
 }
