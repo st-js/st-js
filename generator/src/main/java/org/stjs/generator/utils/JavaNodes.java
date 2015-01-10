@@ -1,6 +1,7 @@
 package org.stjs.generator.utils;
 
 import java.util.Set;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
@@ -106,11 +107,28 @@ public final class JavaNodes {
 				return null;
 			}
 			parentName = parentName.substring(0, lastDotIndex);
-			Package parent = Package.getPackage(parentName);
+			Package parent = getPackage(parentName);
 			if (parent != null) {
 				return resolvePackageNamespace(parent);
 			}
 		}
+	}
+
+	private static Package getPackage(String packageName) {
+		Package pack = Package.getPackage(packageName);
+		if (pack != null) {
+			return pack;
+		}
+		// try to load the package info class to force the package loading
+		try {
+			Class.forName(packageName + ".package-info");
+		}
+		catch (ClassNotFoundException e) {
+			// no class;
+			return null;
+		}
+		// try again
+		return Package.getPackage(packageName);
 	}
 
 	public static boolean isInnerType(Element type) {

@@ -24,9 +24,9 @@ import com.sun.source.util.TreeScanner;
  * It prevents cases likes this one:<br>
  * 
  * <pre>
- *   	for(var x = 0; x < 3; ++x) { 
- *   		setTimeout(function(){console.info("x=" + x);}, 0); 
- *   	}
+ *     	for(var x = 0; x &lt; 3; ++x) { 
+ *     		setTimeout(function(){console.info("x=" + x);}, 0); 
+ *     	}
  * </pre>
  * 
  * will display: "x=3" - 3 times!
