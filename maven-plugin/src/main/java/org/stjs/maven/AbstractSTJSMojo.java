@@ -70,8 +70,10 @@ import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
 import com.google.debugging.sourcemap.SourceMapGeneratorV3;
 
 /**
- * This is the Maven plugin that launches the Javascript generator. The plugin needs a list of packages containing the Java classes that will
- * processed to generate the corresponding Javascript classes. The Javascript files are generated in a configured target folder.
+ * This is the Maven plugin that launches the Javascript generator. The plugin needs a list of packages containing the
+ * Java classes that will processed to generate the corresponding Javascript classes. The Javascript files are generated
+ * in a configured target folder.
+ * 
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 abstract public class AbstractSTJSMojo extends AbstractMojo {
@@ -92,37 +94,44 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	protected BuildContext buildContext;
 	/**
 	 * The list of packages that can be referenced from the classes that will be processed by the generator
+	 * 
 	 * @parameter
 	 */
 	protected List<String> allowedPackages;
 
 	/**
 	 * A list of inclusion filters for the compiler.
+	 * 
 	 * @parameter
 	 */
 	protected Set<String> includes = new HashSet<String>();
 
 	/**
 	 * A list of exclusion filters for the compiler.
+	 * 
 	 * @parameter
 	 */
 	protected Set<String> excludes = new HashSet<String>();
 
 	/**
-	 * Sets the granularity in milliseconds of the last modification date for testing whether a source needs recompilation.
+	 * Sets the granularity in milliseconds of the last modification date for testing whether a source needs
+	 * recompilation.
+	 * 
 	 * @parameter expression="${lastModGranularityMs}" default-value="0"
 	 */
 	protected int staleMillis;
 
 	/**
 	 * If true the check, if (!array.hasOwnProperty(index)) continue; is added in each "for" array iteration
+	 * 
 	 * @parameter expression="${generateArrayHasOwnProperty}" default-value="true"
 	 */
 	protected boolean generateArrayHasOwnProperty;
 
 	/**
-	 * If true, it generates for each JavaScript the corresponding source map back to the corresponding Java file. It also copies the Java source
-	 * file in the same folder as the generated Javascript file.
+	 * If true, it generates for each JavaScript the corresponding source map back to the corresponding Java file. It
+	 * also copies the Java source file in the same folder as the generated Javascript file.
+	 * 
 	 * @parameter expression="${generateSourceMap}" default-value="false"
 	 */
 	protected boolean generateSourceMap;
@@ -130,6 +139,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	/**
 	 * If true, it packs all the generated Javascript file (using the correct dependency order) into a single file named
 	 * ${project.artifactName}.js
+	 * 
 	 * @parameter expression="${pack}" default-value="false"
 	 */
 	protected boolean pack;
@@ -141,12 +151,14 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 	/**
 	 * Uses this namespace for all the classes in this artifact where no @Namespace annotation is used.
+	 * 
 	 * @parameter expression="${namespace}"
 	 */
 	protected String namespace;
 
 	/**
 	 * A list of annotations to be generated
+	 * 
 	 * @parameter
 	 */
 	protected Set<String> annotations = new HashSet<String>();
@@ -303,6 +315,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 	/**
 	 * packs all the files in a single file
+	 * 
 	 * @param generator
 	 * @param gendir
 	 * @throws MojoFailureException
@@ -341,8 +354,11 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 					}
 					// add this file to the hashmap to know that this class is part of the project
 					currentProjectsFiles.put(className, absoluteTarget);
-					ClassWithJavascript cjs =
-							generator.getExistingStjsClass(builtProjectClassLoader, builtProjectClassLoader.loadClass(className));
+					if (getLog().isDebugEnabled()) {
+						getLog().debug("Packing " + absoluteTarget);
+					}
+					ClassWithJavascript cjs = generator.getExistingStjsClass(builtProjectClassLoader,
+							builtProjectClassLoader.loadClass(className));
 					dependencyGraph.addVertex(className);
 					for (Map.Entry<ClassWithJavascript, DependencyType> dep : cjs.getDirectDependencyMap().entrySet()) {
 						if (dep.getKey() instanceof STJSClass) {
@@ -366,13 +382,12 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			Iterator<String> it = new TopologicalOrderIterator<String, DefaultEdge>(dependencyGraph);
 			while (it.hasNext()) {
 				File targetFile = currentProjectsFiles.get(it.next());
-				//target file is absolute
+				// target file is absolute
 				if (targetFile != null) {
 					// for this project's files
 					if (generateSourceMap) {
-						currentLine =
-								SourceMapUtils.appendFileSkipSourceMap(gendir.getAbsolutePath(), allSourcesFile, targetFile, currentLine,
-										packSourceMap, sourceEncoding);
+						currentLine = SourceMapUtils.appendFileSkipSourceMap(gendir.getAbsolutePath(), allSourcesFile, targetFile, currentLine,
+								packSourceMap, sourceEncoding);
 					} else {
 						Files.copy(targetFile, allSourcesFile);
 					}
@@ -426,8 +441,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	}
 
 	/**
-	 * @return the list of Java source files to processed (those which are older than the corresponding Javascript file). The returned files are
-	 *         relative to the given source directory.
+	 * @return the list of Java source files to processed (those which are older than the corresponding Javascript
+	 *         file). The returned files are relative to the given source directory.
 	 */
 	private Collection<String> accumulatePackages(File sourceDir) throws MojoExecutionException {
 		final Collection<String> result = new HashSet<String>();
@@ -439,7 +454,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		ds.setFollowSymlinks(true);
 		ds.addDefaultExcludes();
 		ds.setBasedir(sourceDir);
-		ds.setIncludes(new String[] {"**/*.java"});
+		ds.setIncludes(new String[]{ "**/*.java" });
 		ds.scan();
 		for (String fileName : ds.getIncludedFiles()) {
 			File file = new File(fileName);
@@ -461,8 +476,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	}
 
 	/**
-	 * @return the list of Java source files to processed (those which are older than the corresponding Javascript file). The returned files are
-	 *         relative to the given source directory.
+	 * @return the list of Java source files to processed (those which are older than the corresponding Javascript
+	 *         file). The returned files are relative to the given source directory.
 	 */
 	@SuppressWarnings("unchecked")
 	private List<File> accumulateSources(GenerationDirectory gendir, File sourceDir, SourceMapping jsMapping, SourceMapping stjsMapping,

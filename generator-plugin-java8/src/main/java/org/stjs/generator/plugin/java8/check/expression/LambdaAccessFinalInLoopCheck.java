@@ -19,7 +19,18 @@ import com.sun.source.util.TreePath;
 import com.sun.source.util.TreeScanner;
 
 /**
- * This check class verifies that all final variables are declared at the method level, as the block scope does not exists in JavaScript.
+ * This check class verifies that all final variables used in loops are declared at the method level, as the block scope
+ * does not exists in JavaScript. <br>
+ * It prevents cases likes this one:<br>
+ * 
+ * <pre>
+ *   	for(var x = 0; x < 3; ++x) { 
+ *   		setTimeout(function(){console.info("x=" + x);}, 0); 
+ *   	}
+ * </pre>
+ * 
+ * will display: "x=3" - 3 times!
+ * 
  * @author acraciun
  */
 public class LambdaAccessFinalInLoopCheck implements CheckContributor<VariableTree> {
@@ -33,13 +44,28 @@ public class LambdaAccessFinalInLoopCheck implements CheckContributor<VariableTr
 		return tree instanceof MethodTree || tree instanceof ClassTree;
 	}
 
+	private boolean isVariable(GenerationContext<Void> context) {
+		if (context.getCurrentPath().getParentPath().getLeaf() instanceof ClassTree) {
+			return false;
+		}
+		if (context.getCurrentPath().getParentPath().getLeaf() instanceof MethodTree) {
+			return false;
+		}
+		if (context.getCurrentPath().getParentPath().getLeaf() instanceof LambdaExpressionTree) {
+			return false;
+		}
+		return true;
+	}
+
 	private void checkVarInLambda(Name outsideVarName, LambdaExpressionTree lambda, GenerationContext<Void> context) {
 		lambda.accept(new TreeScanner<Void, Void>() {
 			@Override
 			public Void visitIdentifier(IdentifierTree ident, Void arg1) {
 				if (ident.getName().equals(outsideVarName)) {
-					context.addError(ident,
-							"To prevent unexpected behaviour in Javascript, final (or effectively final) variables must be declared at method level and not inside loops");
+					context.addError(
+							ident,
+							"To prevent unexpected behaviour in Javascript, final (or effectively final) variables must be declared at method level and not inside loops. Variable to be moved: "
+									+ ident.getName());
 				}
 				return super.visitIdentifier(ident, arg1);
 			}
@@ -49,7 +75,7 @@ public class LambdaAccessFinalInLoopCheck implements CheckContributor<VariableTr
 	}
 
 	private void checkUsageInLambdas(VariableTree tree, GenerationContext<Void> context) {
-		//this is the block containing the var definition
+		// this is the block containing the var definition
 		TreePath blockPath = context.getCurrentPath().getParentPath();
 		blockPath.getLeaf().accept(new TreeScanner<Void, Void>() {
 			@Override
@@ -63,6 +89,8 @@ public class LambdaAccessFinalInLoopCheck implements CheckContributor<VariableTr
 
 	@Override
 	public Void visit(CheckVisitor visitor, VariableTree tree, GenerationContext<Void> context) {
+		if (!isVariable(context))
+			return null;
 		for (TreePath p = context.getCurrentPath(); p != null; p = p.getParentPath()) {
 			if (isLoop(p)) {
 				checkUsageInLambdas(tree, context);

@@ -337,7 +337,8 @@ public class Generator {
 		public ClassWithJavascript resolve(String className) {
 			String parentClassName = className;
 			int pos = parentClassName.indexOf('$');
-			if (pos > 0) {
+			if (pos > 0 && parentClassName.charAt(pos - 1) != '.') {
+				// avoid classes like angularjs.$Timeout
 				parentClassName = parentClassName.substring(0, pos);
 			}
 			// try first if to see if it's a bridge class

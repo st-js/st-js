@@ -41,6 +41,7 @@ import com.sun.source.util.TreeScanner;
  * 	return x + y;
  * }
  * </pre>
+ * 
  * @author acraciun
  * @param <JS>
  */
@@ -54,6 +55,9 @@ public class LambdaExpressionWriter<JS> implements WriterContributor<LambdaExpre
 
 			@Override
 			public Void visitIdentifier(IdentifierTree tree, Void arg1) {
+				if (checkStopped) {
+					return super.visitIdentifier(tree, arg1);
+				}
 				Element fieldElement = TreeUtils.elementFromUse(tree);
 				if (IdentifierAccessOuterScopeCheck.isRegularInstanceField(fieldElement, tree)
 						|| GeneratorConstants.THIS.equals(tree.getName().toString())) {
@@ -71,6 +75,9 @@ public class LambdaExpressionWriter<JS> implements WriterContributor<LambdaExpre
 
 			@Override
 			public Void visitMethodInvocation(MethodInvocationTree tree, Void arg1) {
+				if (checkStopped) {
+					return super.visitMethodInvocation(tree, arg1);
+				}
 				Element methodElement = TreeUtils.elementFromUse(tree);
 				if (JavaNodes.isStatic(methodElement)) {
 					// only instance methods
@@ -110,7 +117,7 @@ public class LambdaExpressionWriter<JS> implements WriterContributor<LambdaExpre
 		}
 		JS lambdaFunc = js.function(null, params, body);
 		if (accessOuterScope(visitor, tree, context)) {
-			//bind for lamdas accessing the outher scope
+			// bind for lamdas accessing the outher scope
 			JS target = js.keyword(Keyword.THIS);
 			JS stjsBind = js.property(context.js().name("stjs"), "bind");
 			return js.functionCall(stjsBind, Arrays.asList(target, lambdaFunc));

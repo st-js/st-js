@@ -15,6 +15,7 @@ import com.google.debugging.sourcemap.SourceMapParseException;
 
 /**
  * remake the source map merge of closure compiler in order to allow the rewrite of the original source map's path
+ * 
  * @author acraciun
  */
 public class SourceMapUtils {
@@ -60,8 +61,8 @@ public class SourceMapUtils {
 		@Override
 		public void visit(String sourceName, String symbolName, FilePosition sourceStartPosition, FilePosition startPosition,
 				FilePosition endPosition) {
-			packSourcemap.addMapping(new File(sourceMapFile.getParentFile(), sourceName).getPath(), symbolName, sourceStartPosition,
-					startPosition, endPosition);
+			packSourcemap.addMapping(new File(sourceMapFile.getParentFile(), sourceName).getPath().replace(File.separatorChar, '/'), symbolName,
+					sourceStartPosition, startPosition, endPosition);
 		}
 	}
 }

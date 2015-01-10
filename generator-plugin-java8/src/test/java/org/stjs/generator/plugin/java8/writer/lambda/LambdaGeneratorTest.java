@@ -2,6 +2,7 @@ package org.stjs.generator.plugin.java8.writer.lambda;
 
 import static org.junit.Assert.assertEquals;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
+import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
 import static org.stjs.generator.utils.GeneratorTestHelper.execute;
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
@@ -50,19 +51,51 @@ public class LambdaGeneratorTest {
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
-	public void testLambaAccessLoopFinal() {
+	public void testLambdaAccessLoopFinal() {
 		generate(Lambda7.class);
 	}
 
 	@Test
+	public void testLambdaAccessLoopFinalBug() {
+		// b was wrongly reported
+		generate(Lambda7b.class);
+	}
+
+	@Test
+	public void testLambdaAccessLoopFinalBug2() {
+		// b was wrongly reported
+		generate(Lambda7c.class);
+	}
+
+	@Test
 	public void testLambaAccessOutsideLoop() {
-		//this should not raise an exception
+		// this should not raise an exception
 		generate(Lambda8.class);
 	}
 
 	@Test
 	public void testLambaAccessInsideLambda() {
-		//this should not raise an exception
+		// this should not raise an exception
 		generate(Lambda9.class);
+	}
+
+	@Test
+	public void testGenerateBindOuterScope() {
+		assertCodeContains(Lambda10.class, "stjs.bind");
+	}
+
+	@Test
+	public void testDoNotGenerateBindStaticOuterScope() {
+		assertCodeDoesNotContain(Lambda11.class, "stjs.bind");
+	}
+
+	@Test
+	public void testDoNotGenerateBindLambdaParam() {
+		assertCodeDoesNotContain(Lambda12.class, "stjs.bind");
+	}
+
+	@Test
+	public void testDoNotGenerateBindLambdaAnnnonInit() {
+		assertCodeDoesNotContain(Lambda13.class, "stjs.bind");
 	}
 }
