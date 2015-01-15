@@ -32,7 +32,6 @@ public class GeneratorConfigurationBuilder {
 	private boolean generateArrayHasOwnProperty = true;
 	private boolean generateSourceMap;
 	private String sourceEncoding = Charset.defaultCharset().name();
-	private String namespace;
 
 	public GeneratorConfigurationBuilder() {
 		this(null);
@@ -46,7 +45,6 @@ public class GeneratorConfigurationBuilder {
 			generateArrayHasOwnProperty(baseConfig.isGenerateArrayHasOwnProperty());
 			generateSourceMap(baseConfig.isGenerateSourceMap());
 			sourceEncoding(baseConfig.getSourceEncoding());
-			namespace(baseConfig.getNamespace());
 		}
 	}
 
@@ -85,11 +83,6 @@ public class GeneratorConfigurationBuilder {
 		return this;
 	}
 
-	public GeneratorConfigurationBuilder namespace(String namespace) {
-		this.namespace = namespace;
-		return this;
-	}
-
 	public GeneratorConfigurationBuilder annotations(String... annotationNames) {
 		annotations.addAll(Arrays.asList(annotationNames));
 		return this;
@@ -123,7 +116,7 @@ public class GeneratorConfigurationBuilder {
 		allowedPackages.add("java.lang");
 
 		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, generateArrayHasOwnProperty, generateSourceMap,
-				sourceEncoding, namespace, annotations);
+				sourceEncoding, annotations);
 	}
 
 }

@@ -142,12 +142,6 @@ public class TreeWrapper<T extends Tree, JS> {
 			return ns;
 		}
 
-		// Not found, do we have to add a default namespace as configured in the context?
-		ns = getNamespaceFromContext();
-		if (ns != null) {
-			return ns;
-		}
-
 		// No namespace
 		return "";
 	}
@@ -193,16 +187,6 @@ public class TreeWrapper<T extends Tree, JS> {
 
 	private String getTypeNamespace(String qualifiedName) {
 		return NamespaceUtil.resolveNamespace(qualifiedName, context.getBuiltProjectClassLoader());
-	}
-
-	private String getNamespaceFromContext() {
-		if (!(element instanceof TypeElement)) {
-			return null;
-		}
-
-		// TODO: how can we tell if the type is part of the set of all types that are being built?
-
-		return null;
 	}
 
 	public boolean isInnerType() {
