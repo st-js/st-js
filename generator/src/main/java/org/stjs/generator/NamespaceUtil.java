@@ -17,7 +17,7 @@ public final class NamespaceUtil {
 
 	public static String resolveNamespace(Class<?> clazz) {
 		String ns = resolveNamespaceSimple(clazz);
-		if (ns == null) {
+		if (ns == null && clazz.getPackage() != null) {
 			// the class is not annotated, let's see if its package is
 			return resolvePackageNamespace(clazz.getPackage().getName(), clazz.getClassLoader());
 		}
