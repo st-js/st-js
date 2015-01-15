@@ -7,10 +7,12 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.NamespaceUtil;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.javascript.annotation.DataType;
 import org.stjs.javascript.annotation.GlobalScope;
@@ -120,11 +122,50 @@ public class TreeWrapper<T extends Tree, JS> {
 	}
 
 	public String getNamespace() {
-		Namespace ns = element.getAnnotation(Namespace.class);
-		if (ns != null) {
-			return ns.value();
+		// Check if we can find the namespace directly at the source level
+		Namespace nsAnnotation = element.getAnnotation(Namespace.class);
+		if (nsAnnotation != null) {
+			return nsAnnotation.value();
+		}
+
+		String ns = null;
+		// Out of luck, we don't have it. Let's attempt to get it via reflection
+		if (element instanceof PackageElement) {
+			ns = getPackageNamespace(((PackageElement) element).getQualifiedName().toString());
+
+		} else if (element instanceof TypeElement) {
+			ns = getTypeElementNamespace();
+		}
+
+		if (ns == null) {
+			// we really couldn't find a namespace, there must be none
+			return "";
+		}
+		return ns;
+	}
+
+	private String getTypeElementNamespace() {
+		// inner types inherit their namespace from their topmost containing class, so lets find it
+		TypeElement root = (TypeElement) element;
+		while (root.getEnclosingElement() instanceof TypeElement) {
+			root = (TypeElement) root.getEnclosingElement();
+		}
+
+		// if the enclosing type of the topmost containing class is not package,
+		// then we are actually in an anonymous class. Those cannot have namespaces, and cannot be
+		// looked up because they have no name either.
+		if (root.getEnclosingElement().getKind() == ElementKind.PACKAGE) {
+			return getTypeNamespace(root.getQualifiedName().toString());
 		}
 		return null;
+	}
+
+	private String getPackageNamespace(String qualifiedName) {
+		return NamespaceUtil.resolvePackageNamespace(qualifiedName, context.getBuiltProjectClassLoader());
+	}
+
+	private String getTypeNamespace(String qualifiedName) {
+		return NamespaceUtil.resolveNamespace(qualifiedName, context.getBuiltProjectClassLoader());
 	}
 
 	public boolean isInnerType() {

@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.concurrent.Immutable;
 
 import org.stjs.generator.name.DependencyType;
@@ -38,16 +37,29 @@ import org.stjs.javascript.annotation.STJSBridge;
 @Immutable
 public class BridgeClass implements ClassWithJavascript {
 	private final Class<?> clazz;
+	private final String jsNamespace;
 
 	public BridgeClass(DependencyResolver dependencyResolver, Class<?> clazz) {
 		PreConditions.checkNotNull(dependencyResolver);
 		PreConditions.checkNotNull(clazz);
 		this.clazz = clazz;
+		String ns = NamespaceUtil.resolveNamespace(clazz);
+		if (ns == null) {
+			// If we can't find a namespace in the bridge stuff, then we have to assume
+			// there is no namespace
+			ns = "";
+		}
+		this.jsNamespace = ns;
 	}
 
 	@Override
 	public String getClassName() {
 		return clazz.getName();
+	}
+
+	@Override
+	public String getJavascriptNamespace() {
+		return this.jsNamespace;
 	}
 
 	private boolean hasSourceAnnotation(STJSBridge bridgeAnnotation) {

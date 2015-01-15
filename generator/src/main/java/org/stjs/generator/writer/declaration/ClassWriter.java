@@ -56,11 +56,11 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			// this is an inner (anonymous or not) class - no namespace declaration is generated
 			return;
 		}
-		String namespace = JavaNodes.getNamespace(type);
+		String namespace = context.getCurrentWrapper().getNamespace();
 		if (namespace == null) {
 			namespace = context.getConfiguration().getNamespace();
 		}
-		if (namespace != null) {
+		if (namespace != null && !namespace.isEmpty()) {
 			JavaScriptBuilder<JS> js = context.js();
 			JS target = js.property(js.name(GeneratorConstants.STJS), "ns");
 			stmts.add(js.expressionStatement(js.functionCall(target, Collections.singleton(js.string(namespace)))));

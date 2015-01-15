@@ -190,6 +190,7 @@ public class Generator {
 		resolvedClasses.remove(className);
 		stjsClass.setDependencies(resolvedClasses);
 		stjsClass.setGeneratedJavascriptFile(relative(generationFolder, className));
+		// stjsClass.setJavascriptNamespace(jsNamespace);
 
 		// dump the ast to a file
 		taskExecutor.execute(new DumpFilesTask<Object>(outputFile, context, javascriptRoot, stjsClass, generationFolder, configuration
