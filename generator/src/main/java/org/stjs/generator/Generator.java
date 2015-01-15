@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import javax.lang.model.element.TypeElement;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
@@ -190,7 +190,9 @@ public class Generator {
 		resolvedClasses.remove(className);
 		stjsClass.setDependencies(resolvedClasses);
 		stjsClass.setGeneratedJavascriptFile(relative(generationFolder, className));
-		// stjsClass.setJavascriptNamespace(jsNamespace);
+
+		TypeElement classElement = context.getElements().getTypeElement(clazz.getCanonicalName());
+		stjsClass.setJavascriptNamespace(context.wrap(classElement).getNamespace());
 
 		// dump the ast to a file
 		taskExecutor.execute(new DumpFilesTask<Object>(outputFile, context, javascriptRoot, stjsClass, generationFolder, configuration

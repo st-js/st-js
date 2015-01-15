@@ -38,6 +38,7 @@ public class TreeWrapper<T extends Tree, JS> {
 	private final TreePath path;
 	private final GenerationContext<JS> context;
 	private final Element element;
+	private String jsNamespace;
 
 	public TreeWrapper(@Nonnull TreePath path, @Nonnull GenerationContext<JS> context) {
 		this.context = context;
@@ -122,26 +123,52 @@ public class TreeWrapper<T extends Tree, JS> {
 	}
 
 	public String getNamespace() {
+		if (jsNamespace == null) {
+			jsNamespace = doGetNamespace();
+		}
+		return jsNamespace;
+	}
+
+	private String doGetNamespace() {
 		// Check if we can find the namespace directly at the source level
-		Namespace nsAnnotation = element.getAnnotation(Namespace.class);
-		if (nsAnnotation != null) {
-			return nsAnnotation.value();
+		String ns = getNamespaceFromElement();
+		if (ns != null) {
+			return ns;
 		}
 
+		// Not found, loading it from the classpath or by reflection
+		ns = getNamespaceByReflection();
+		if (ns != null) {
+			return ns;
+		}
+
+		// Not found, do we have to add a default namespace as configured in the context?
+		ns = getNamespaceFromContext();
+		if (ns != null) {
+			return ns;
+		}
+
+		// No namespace
+		return "";
+	}
+
+	private String getNamespaceByReflection() {
 		String ns = null;
-		// Out of luck, we don't have it. Let's attempt to get it via reflection
 		if (element instanceof PackageElement) {
 			ns = getPackageNamespace(((PackageElement) element).getQualifiedName().toString());
 
 		} else if (element instanceof TypeElement) {
 			ns = getTypeElementNamespace();
 		}
-
-		if (ns == null) {
-			// we really couldn't find a namespace, there must be none
-			return "";
-		}
 		return ns;
+	}
+
+	private String getNamespaceFromElement() {
+		Namespace nsAnnotation = element.getAnnotation(Namespace.class);
+		if (nsAnnotation != null) {
+			return nsAnnotation.value();
+		}
+		return null;
 	}
 
 	private String getTypeElementNamespace() {
@@ -166,6 +193,16 @@ public class TreeWrapper<T extends Tree, JS> {
 
 	private String getTypeNamespace(String qualifiedName) {
 		return NamespaceUtil.resolveNamespace(qualifiedName, context.getBuiltProjectClassLoader());
+	}
+
+	private String getNamespaceFromContext() {
+		if (!(element instanceof TypeElement)) {
+			return null;
+		}
+
+		// TODO: how can we tell if the type is part of the set of all types that are being built?
+
+		return null;
 	}
 
 	public boolean isInnerType() {

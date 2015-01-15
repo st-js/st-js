@@ -1,8 +1,11 @@
 package org.stjs.generator;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Properties;
 
 import org.stjs.javascript.annotation.Namespace;
 
@@ -27,7 +30,7 @@ public final class NamespaceUtil {
 			return resolveNamespace(clazz);
 		}
 		catch (ClassNotFoundException cnfe) {
-			throw new JavascriptClassGenerationException(className, cnfe);
+			throw new STJSRuntimeException(cnfe);
 		}
 	}
 
@@ -56,12 +59,44 @@ public final class NamespaceUtil {
 			return resolveNamespaceSimple(clazz);
 		}
 		catch (ClassNotFoundException cnfe) {
-			throw new JavascriptClassGenerationException(className, cnfe);
+			throw new STJSRuntimeException(cnfe);
 		}
 	}
 
 	public static String resolveNamespaceSimple(Class<?> clazz) {
-		return getNamespaceAnnotationValue(clazz, clazz.getClassLoader());
+		String ns = getNamespaceAnnotationValue(clazz, clazz.getClassLoader());
+		if (ns != null) {
+			return ns;
+		}
+
+		// Annotation not found, maybe we have a namespace in the corresponding.stjs file.
+		return getNamespacePropertyValue(clazz);
+	}
+
+	private static String getNamespacePropertyValue(Class<?> clazz) {
+		if (clazz.getClassLoader() == null) {
+			// the class was loaded by the system classloader.
+			// There is nothing in the system ClassLoader that could possibly have been annotated with
+			// @Namespace
+			return null;
+		}
+
+		String propertiesPath = clazz.getName().replace(".", "/") + ".stjs";
+		InputStream in = clazz.getClassLoader().getResourceAsStream(propertiesPath);
+		if (in == null) {
+			// the properties file does not exist
+			return null;
+		}
+
+		try {
+			Properties props = new Properties();
+			props.load(in);
+			return props.getProperty(STJSClass.JS_NAMESPACE);
+		}
+		catch (IOException e) {
+			// Properties exists, but we couldn't read it for some reason.
+			throw new STJSRuntimeException(e);
+		}
 	}
 
 	private static String getNamespaceAnnotationValue(AnnotatedElement element, ClassLoader classLoader) {

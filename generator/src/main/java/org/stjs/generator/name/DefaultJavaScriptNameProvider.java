@@ -52,11 +52,7 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 
 	private String addNameSpace(Element rootTypeElement, GenerationContext<?> context, String name) {
 		String namespace = context.wrap(rootTypeElement).getNamespace();
-		if (namespace == null) {
-			namespace = context.getConfiguration().getNamespace();
-		}
-
-		if (namespace == null || namespace.isEmpty()) {
+		if (namespace.isEmpty()) {
 			return name;
 		}
 		return namespace + "." + name;

@@ -51,7 +51,7 @@ public class STJSClass implements ClassWithJavascript {
 	private static final String DEPENDENCIES_PROP = "dependencies";
 	public static final String CLASS_PROP = "class";
 	private static final String GENERATED_JS_FILE_PROP = "js";
-	private static final String JS_NAMESPACE = "jsNamespace";
+	public static final String JS_NAMESPACE = "jsNamespace";
 
 	private final Properties properties;
 
@@ -228,6 +228,7 @@ public class STJSClass implements ClassWithJavascript {
 
 	public void setJavascriptNamespace(String jsNamespace) {
 		this.javascriptNamespace = jsNamespace;
+		properties.put(JS_NAMESPACE, jsNamespace);
 	}
 
 	public void setDependencies(Map<String, DependencyType> deps) {

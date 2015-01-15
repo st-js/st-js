@@ -57,10 +57,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			return;
 		}
 		String namespace = context.getCurrentWrapper().getNamespace();
-		if (namespace == null) {
-			namespace = context.getConfiguration().getNamespace();
-		}
-		if (namespace != null && !namespace.isEmpty()) {
+		if (!namespace.isEmpty()) {
 			JavaScriptBuilder<JS> js = context.js();
 			JS target = js.property(js.name(GeneratorConstants.STJS), "ns");
 			stmts.add(js.expressionStatement(js.functionCall(target, Collections.singleton(js.string(namespace)))));
