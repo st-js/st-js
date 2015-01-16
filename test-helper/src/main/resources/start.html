@@ -61,6 +61,7 @@
             location = encodeURIComponent(errorStack.join(";"));
             //take first non-junit stack trace element
 			errorStack.splice(0,1);
+			errorStack.splice(-1,1); //remove window.onload ... 
 			for(var i = 0; i < errorStack.length; ++i){
 				if (errorStack[i].indexOf("junit.js") < 0) {
 					isAssert = (i > 1);
