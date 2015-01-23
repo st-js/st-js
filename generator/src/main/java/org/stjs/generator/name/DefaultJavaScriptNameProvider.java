@@ -2,7 +2,6 @@ package org.stjs.generator.name;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -52,11 +51,11 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 	}
 
 	private String addNameSpace(Element rootTypeElement, GenerationContext<?> context, String name) {
-		String namespace = JavaNodes.getNamespace(rootTypeElement);
-		if (namespace == null) {
-			namespace = context.getConfiguration().getNamespace();
+		String namespace = context.wrap(rootTypeElement).getNamespace();
+		if (namespace.isEmpty()) {
+			return name;
 		}
-		return (namespace == null ? "" : namespace + ".") + name;
+		return namespace + "." + name;
 	}
 
 	@Override

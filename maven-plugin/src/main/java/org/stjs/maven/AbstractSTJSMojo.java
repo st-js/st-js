@@ -141,12 +141,6 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	private String sourceEncoding;
 
 	/**
-	 * Uses this namespace for all the classes in this artifact where no @Namespace annotation is used.
-	 * @parameter expression="${namespace}"
-	 */
-	protected String namespace;
-
-	/**
 	 * A list of annotations to be generated
 	 * @parameter
 	 */
@@ -191,7 +185,6 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		if (sourceEncoding != null) {
 			configBuilder.sourceEncoding(sourceEncoding);
 		}
-		configBuilder.namespace(namespace);
 
 		// configBuilder.allowedPackage("org.stjs.javascript");
 		configBuilder.allowedPackage("org.junit");

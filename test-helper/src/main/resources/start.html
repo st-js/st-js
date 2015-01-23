@@ -81,8 +81,6 @@
 		if(persistent){
 			setTimeout(checkLoad, 500);
 		}
-		console.info("RESULT:" + encodeURIComponent(result));
-		console.info("LOCATION:" + location);		
 		iframe.src = '/getNextTest' +
 				'?browserId=' + browserId +
 				'&result=' + encodeURIComponent(result) +

@@ -298,6 +298,7 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 
 	// copy static properties and default methods from interfaces
 	for(a = 0; a < _implements.length; ++a){
+		if (!_implements[a]) continue;
 		stjs.copyProps(_implements[a], _constructor);
 		stjs.copyInexistentProps(_implements[a].prototype, _constructor.prototype);
 		_constructor.$inherit.push(_implements[a]);

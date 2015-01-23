@@ -50,8 +50,8 @@ public class STJSClass implements ClassWithJavascript {
 
 	private static final String DEPENDENCIES_PROP = "dependencies";
 	public static final String CLASS_PROP = "class";
-
 	private static final String GENERATED_JS_FILE_PROP = "js";
+	public static final String JS_NAMESPACE = "jsNamespace";
 
 	private final Properties properties;
 
@@ -59,6 +59,8 @@ public class STJSClass implements ClassWithJavascript {
 	private Map<String, DependencyType> dependencies = Collections.emptyMap();
 	private List<ClassWithJavascript> directDependencies;
 	private Map<ClassWithJavascript, DependencyType> directDependenciesMap;
+	// null means namespace is unknown, empty string means no namespace
+	private String javascriptNamespace;
 
 	private URI generatedJavascriptFile;
 
@@ -76,6 +78,7 @@ public class STJSClass implements ClassWithJavascript {
 		this.className = className;
 		this.properties = new Properties();
 		this.dependencyResolver = dependencyResolver;
+		this.javascriptNamespace = null;
 	}
 
 	/**
@@ -99,6 +102,13 @@ public class STJSClass implements ClassWithJavascript {
 
 		// js file
 		generatedJavascriptFile = readGeneratedJavascriptFileProperty();
+
+		javascriptNamespace = readJavascriptNamespaceProperty();
+		if (javascriptNamespace == null) {
+			// Old versions of ST-JS did not set the jsNamespace property, so we must look into the compiled
+			// class to figure out the namespace
+			javascriptNamespace = readJavascriptNamespaceAnnotation(classLoader);
+		}
 	}
 
 	private Properties loadProperties(ClassLoader classLoader) {
@@ -164,6 +174,24 @@ public class STJSClass implements ClassWithJavascript {
 		return null;
 	}
 
+	private String readJavascriptNamespaceProperty() {
+		return properties.getProperty(JS_NAMESPACE);
+	}
+
+	private String readJavascriptNamespaceAnnotation(ClassLoader loader) {
+		// If the jsNamespace property is not defined, it means that class was
+		// generated with a version of ST-JS earlier than 3.1.2 that did not write that property down. Fortunately for us
+		// it also means that any namespace can be read by inspecting the @Namespace annotation directly on that
+		// class.
+		String ns = NamespaceUtil.resolveNamespaceSimple(this.className, loader);
+		if (ns == null) {
+			// With earlier versions of ST-JS (pre 3.1.2) if no namespace is found on the class, then there is
+			// no namespace at all
+			ns = "";
+		}
+		return ns;
+	}
+
 	public File getStjsPropertiesFile() {
 		File propFile = new File(targetFolder, ClassUtils.getPropertiesFileName(className));
 		if (!propFile.getParentFile().exists() && !propFile.getParentFile().mkdirs()) {
@@ -198,6 +226,11 @@ public class STJSClass implements ClassWithJavascript {
 		}
 	}
 
+	public void setJavascriptNamespace(String jsNamespace) {
+		this.javascriptNamespace = jsNamespace;
+		properties.put(JS_NAMESPACE, jsNamespace);
+	}
+
 	public void setDependencies(Map<String, DependencyType> deps) {
 
 		if (deps == null) {
@@ -224,6 +257,11 @@ public class STJSClass implements ClassWithJavascript {
 	@Override
 	public String getClassName() {
 		return className;
+	}
+
+	@Override
+	public String getJavascriptNamespace() {
+		return this.javascriptNamespace;
 	}
 
 	@Override

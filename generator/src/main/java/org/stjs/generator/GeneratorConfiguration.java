@@ -24,17 +24,15 @@ public class GeneratorConfiguration {
 	private final boolean generateArrayHasOwnProperty;
 	private final boolean generateSourceMap;
 	private final String sourceEncoding;
-	private final String namespace;
 	private final Set<String> annotations;
 
 	GeneratorConfiguration(Collection<String> allowedPackages, Set<String> allowedJavaLangClasses, boolean generateArrayHasOwnProperty,
-			boolean generateSourceMap, String sourceEncoding, String namespace, Set<String> annotations) {
+			boolean generateSourceMap, String sourceEncoding, Set<String> annotations) {
 		this.allowedPackages = allowedPackages;
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
 		this.generateArrayHasOwnProperty = generateArrayHasOwnProperty;
 		this.generateSourceMap = generateSourceMap;
 		this.sourceEncoding = sourceEncoding;
-		this.namespace = namespace;
 		this.annotations = annotations;
 	}
 
@@ -60,14 +58,6 @@ public class GeneratorConfiguration {
 
 	public String getSourceEncoding() {
 		return sourceEncoding;
-	}
-
-	/**
-	 * this is the default namespace in the whole artifact build by the generator, if no namespace was provided
-	 * @return
-	 */
-	public String getNamespace() {
-		return namespace;
 	}
 
 	/**
