@@ -43,13 +43,22 @@ public final class STJS {
 	public native <T> T typefy(T obj, Class<T> cls);
 
 	/**
+	 * using the type description, it converts a POJO (i.e arrived as JSON in your client) to an object of the given type, transforming
+	 * recursively the fields. You need to include stjs-ext.js
+	 * @param obj
+	 * @param cls
+	 * @return
+	 */
+	public native <T> T typefy(Map<String, ? extends Object> obj, Class<T> cls);
+
+	/**
 	 * using the type description, it converts an array of POJOs (i.e arrived as JSON in your client) to an object of the given type,
 	 * transforming recursively the fields.You need to include stjs-ext.js
 	 * @param obj
 	 * @param cls
 	 * @return
 	 */
-	public native <T> Array<T> typefy(Array<T> obj, Class<T> cls);
+	public native <T> Array<T> typefy(Array<Object> obj, Class<T> cls);
 
 	/**
 	 * using the type description it converts the fields of the object in strings or other primitve types to be able to send the object via AJAX
@@ -58,7 +67,7 @@ public final class STJS {
 	 * @param cls
 	 * @return
 	 */
-	public native <T> T stringify(T obj, Class<T> cls);
+	public native <T> Map<String, ? extends Object> stringify(T obj, Class<T> cls);
 
 	/**
 	 * this handler will be called any time a field annotated with the template "gsetter" is set. For a statement like this:<br>
