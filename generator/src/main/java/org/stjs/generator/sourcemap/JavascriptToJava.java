@@ -22,8 +22,8 @@ import com.google.debugging.sourcemap.SourceMapping;
 
 public class JavascriptToJava {
 	private final static Pattern STACKTRACE_UNIVERSAL_JS_PATTERN = Pattern
-			.compile("\\s*(?:at)?\\s*(?:(\\w+)\\.)?(\\w*\\s?\\w+)[\\s\\@]?\\(?([^\\)]+)\\)?");
-	private final static Pattern STACKTRACE_FIREFOX_JS_PATTERN = Pattern.compile("(?:(\\w+)\\.)?(\\w*\\s?\\w+)\\@([^\\)]+)");
+			.compile("\\s*(?:at)?\\s*(?:([\\w$]+)\\.)*(\\w*\\s?\\w+)[\\s\\@]?\\(?([^\\)]+)\\)?");
+	private final static Pattern STACKTRACE_FIREFOX_JS_PATTERN = Pattern.compile("(?:(\\w+)\\.)*(\\w*\\s?\\w+)\\@([^\\)]+)");
 	private final static int STACKTRACE_GROUP_METHOD = 2;
 	private final static int STACKTRACE_GROUP_LOCATION = 3;
 
