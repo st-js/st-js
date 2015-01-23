@@ -94,7 +94,19 @@ public class MethodsGeneratorTest {
 	@Test
 	public void testAbstractMethod() {
 		// the class only contains abstract methods, therefore nothing must be generated
-		assertCodeContains(Methods15.class, "stjs.extend(Methods15, null, [], null, {}, {});");
+		assertCodeContains(Methods15.class, "stjs.extend(Methods15, null, [], function(constructor, prototype){" //
+				+ "prototype.doSomething=function(){};" //
+				+ "prototype.doSomethingElse=function(){};" //
+				+ "}, {}, {});");
+	}
+
+	@Test
+	public void testInterfaceMethods() {
+		// the class only contains abstract methods, therefore nothing must be generated
+		assertCodeContains(Methods15b.class, "stjs.extend(Methods15b, null, [], function(constructor, prototype){" //
+				+ "prototype.doSomething=function(){};" //
+				+ "prototype.doSomethingElse=function(){};" //
+				+ "}, {}, {});");
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
@@ -105,7 +117,7 @@ public class MethodsGeneratorTest {
 
 	@Test(expected = JavascriptFileGenerationException.class)
 	public void testWrongName() {
-		//keywords are forbidden
+		// keywords are forbidden
 		generate(Methods17.class);
 	}
 }

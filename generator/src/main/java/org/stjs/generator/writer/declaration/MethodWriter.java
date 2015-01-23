@@ -75,10 +75,7 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		if (MemberWriters.shouldSkip(tw)) {
 			return false;
 		}
-		if (tw.isAbstract()) {
-			// abstract methods (from interfaces) are not generated
-			return false;
-		}
+
 		return true;
 	}
 

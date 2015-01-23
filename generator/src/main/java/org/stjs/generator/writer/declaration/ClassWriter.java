@@ -136,7 +136,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	private List<Tree> getAllMembersExceptConstructors(ClassTree clazz) {
 		List<Tree> nonConstructors = new ArrayList<Tree>();
 		for (Tree member : clazz.getMembers()) {
-			if (!JavaNodes.isConstructor(member) && !isAbstractInstanceMethod(member) && !(member instanceof BlockTree)) {
+			if (!JavaNodes.isConstructor(member) && !(member instanceof BlockTree)) {
 				nonConstructors.add(member);
 			}
 		}
