@@ -52,4 +52,9 @@ public class InlineFunctionGeneratorTest {
 		generate(InlineFunctions6.class);
 	}
 
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testAccessOuterScope() {
+		generate(InlineFunctions7.class);
+	}
+
 }
