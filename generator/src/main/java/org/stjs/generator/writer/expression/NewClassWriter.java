@@ -1,6 +1,7 @@
 package org.stjs.generator.writer.expression;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.lang.model.element.Element;
@@ -8,10 +9,13 @@ import javax.lang.model.element.Element;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TreeWrapper;
+import org.stjs.generator.javascript.JavaScriptBuilder;
+import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.javascript.NameValue;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
+import org.stjs.generator.writer.declaration.MethodWriter;
 
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BlockTree;
@@ -19,6 +23,7 @@ import com.sun.source.tree.ExpressionStatementTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MemberSelectTree;
+import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.Tree;
@@ -99,7 +104,22 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 		// the check verifies the existence of a single method (first is the generated
 		// constructor)
 		Tree method = tw.getTree().getClassBody().getMembers().get(1);
-		return visitor.scan(method, tw.getContext());
+		JS func = visitor.scan(method, tw.getContext());
+
+		int specialThisParamPos = MethodWriter.getTHISParamPos(((MethodTree) method).getParameters());
+		// accessOuterScope(visitor, tree, context) ||
+		if (specialThisParamPos >= 0) {
+			// bind for inline functions accessing the outher scope or with special this
+			JavaScriptBuilder<JS> js = tw.getContext().js();
+			JS target = js.keyword(Keyword.THIS);
+			JS stjsBind = js.property(js.name("stjs"), "bind");
+			if (specialThisParamPos < 0) {
+				return js.functionCall(stjsBind, Arrays.asList(target, func));
+			}
+			return js.functionCall(stjsBind, Arrays.asList(target, func, js.number(specialThisParamPos)));
+		}
+
+		return func;
 	}
 
 	private JS getAnonymousClassDeclaration(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {

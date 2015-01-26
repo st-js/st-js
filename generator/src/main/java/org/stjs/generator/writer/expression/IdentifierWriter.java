@@ -37,7 +37,7 @@ public class IdentifierWriter<JS> implements WriterContributor<IdentifierTree, J
 
 		String name = tree.getName().toString();
 
-		if (GeneratorConstants.SPECIAL_THIS.equals(name) || GeneratorConstants.THIS.equals(name)) {
+		if (GeneratorConstants.THIS.equals(name)) {
 			return context.js().keyword(Keyword.THIS);
 		}
 		TreeWrapper<IdentifierTree, JS> tw = context.getCurrentWrapper();

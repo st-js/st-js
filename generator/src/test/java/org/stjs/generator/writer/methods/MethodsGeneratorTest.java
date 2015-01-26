@@ -50,7 +50,7 @@ public class MethodsGeneratorTest {
 	@Test
 	public void testSpecialThis() {
 		// the special parameter THIS should not be added
-		assertCodeContains(Methods7.class, "prototype.method=function(arg2){");
+		assertCodeContains(Methods7.class, "prototype.method=function(THIS, arg2){");
 	}
 
 	@Test

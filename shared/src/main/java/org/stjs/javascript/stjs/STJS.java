@@ -127,4 +127,9 @@ public final class STJS {
 	 */
 	public native <T extends CallbackOrFunction> T bind(Object object, CallbackOrFunction func);
 
+	/**
+	 * this functions is used to be able to atach lambdas to an object
+	 */
+	public native <T extends CallbackOrFunction> T bind(Object object, CallbackOrFunction func, int THISParamPosition);
+
 }

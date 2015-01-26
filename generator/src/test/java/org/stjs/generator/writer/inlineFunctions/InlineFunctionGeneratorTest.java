@@ -1,6 +1,8 @@
 package org.stjs.generator.writer.inlineFunctions;
 
+import static org.junit.Assert.assertEquals;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
+import static org.stjs.generator.utils.GeneratorTestHelper.executeAndReturnNumber;
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
@@ -55,6 +57,13 @@ public class InlineFunctionGeneratorTest {
 	@Test(expected = JavascriptFileGenerationException.class)
 	public void testAccessOuterScope() {
 		generate(InlineFunctions7.class);
+	}
+
+	@Test
+	public void testUsingTHISParam() {
+		// assertCodeContains(InlineFunctions8.class, "method(function(){})");
+		double n = executeAndReturnNumber(InlineFunctions8.class);
+		assertEquals(10.0, n, 0);
 	}
 
 }

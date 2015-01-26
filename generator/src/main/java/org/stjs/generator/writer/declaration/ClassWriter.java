@@ -167,14 +167,6 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		return context.js().function(null, params, context.js().block(stmts));
 	}
 
-	private boolean isAbstractInstanceMethod(Tree member) {
-		if (!(member instanceof MethodTree)) {
-			return false;
-		}
-		MethodTree methodTree = (MethodTree) member;
-		return methodTree.getBody() == null;
-	}
-
 	private void addStaticInitializers(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
 		for (Tree member : tree.getMembers()) {
 			if (member instanceof BlockTree) {

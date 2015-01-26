@@ -58,12 +58,19 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 	public static <JS> List<JS> getParams(List<? extends VariableTree> treeParams, GenerationContext<JS> context) {
 		List<JS> params = new ArrayList<JS>();
 		for (VariableTree param : treeParams) {
-			if (GeneratorConstants.SPECIAL_THIS.equals(param.getName().toString())) {
-				continue;
-			}
 			params.add(context.js().name(changeName(param.getName().toString())));
 		}
 		return params;
+	}
+
+	public static int getTHISParamPos(List<? extends VariableTree> parameters) {
+		for (int i = 0; i < parameters.size(); ++i) {
+			VariableTree param = parameters.get(i);
+			if (GeneratorConstants.SPECIAL_THIS.equals(param.getName().toString())) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	protected boolean accept(TreeWrapper<MethodTree, JS> tw) {
@@ -108,4 +115,5 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 
 		return decl;
 	}
+
 }

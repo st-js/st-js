@@ -63,11 +63,12 @@ public class IdentifierAccessOuterScopeCheck implements CheckContributor<Identif
 	 */
 	public static boolean isOuterType(GenerationContext<Void> context, TypeElement outerType, TypeElement subType) {
 		TypeMirror subTypeErasure = context.getTypes().erasure(subType.asType());
-		TypeMirror outerTypeErasure = context.getTypes().erasure(outerType.asType());
 
 		if (!(subTypeErasure instanceof DeclaredType)) {
 			return false;
 		}
+
+		TypeMirror outerTypeErasure = context.getTypes().erasure(outerType.asType());
 		for (TypeMirror type = ((DeclaredType) subTypeErasure).getEnclosingType(); type != null; type = ((DeclaredType) type).getEnclosingType()) {
 			if (isSameType(type, outerTypeErasure)) {
 				return true;

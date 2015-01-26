@@ -481,14 +481,19 @@ stjs.serializers = {
 /**
  * this functions is used to be able to send method references as callbacks
  */
-stjs.bind=function(obj, method) {
-	return function(){
+stjs.bind=function(obj, method, thisParamPos) {
+	var f = function(){
+		var args = arguments;
+		if (thisParamPos != null)
+			Array.prototype.splice.call(args, thisParamPos, 0, this);
 		if (typeof method === "string")
-			return obj[method].apply(obj, arguments);
+			return obj[method].apply(obj, args);
 		else
-			return method.apply(obj, arguments);
-	};
+			return method.apply(obj, args);
+	};	
+	return f;
 }
+
 
 /** *********** global ************** */
 function exception(err){

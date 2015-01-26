@@ -41,13 +41,12 @@ import com.sun.source.util.TreeScanner;
  * 	return x + y;
  * }
  * </pre>
- * 
  * @author acraciun
  * @param <JS>
  */
 public class LambdaExpressionWriter<JS> implements WriterContributor<LambdaExpressionTree, JS> {
 
-	private boolean accessOuterScope(WriterVisitor<JS> visitor, LambdaExpressionTree lambda, GenerationContext<JS> context) {
+	private boolean accessOuterScope(LambdaExpressionTree lambda) {
 		AtomicBoolean outerScopeAccess = new AtomicBoolean(false);
 
 		lambda.accept(new TreeScanner<Void, Void>() {
@@ -116,13 +115,17 @@ public class LambdaExpressionWriter<JS> implements WriterContributor<LambdaExpre
 			body = js.block(Collections.singleton(body));
 		}
 		JS lambdaFunc = js.function(null, params, body);
-		if (accessOuterScope(visitor, tree, context)) {
+		int specialThisParamPos = MethodWriter.getTHISParamPos(tree.getParameters());
+
+		if (accessOuterScope(tree) || specialThisParamPos >= 0) {
 			// bind for lamdas accessing the outher scope
 			JS target = js.keyword(Keyword.THIS);
 			JS stjsBind = js.property(context.js().name("stjs"), "bind");
-			return js.functionCall(stjsBind, Arrays.asList(target, lambdaFunc));
+			if (specialThisParamPos < 0) {
+				return js.functionCall(stjsBind, Arrays.asList(target, lambdaFunc));
+			}
+			return js.functionCall(stjsBind, Arrays.asList(target, lambdaFunc, js.number(specialThisParamPos)));
 		}
 		return lambdaFunc;
 	}
-
 }
