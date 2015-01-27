@@ -32,6 +32,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileManager;
@@ -267,7 +268,7 @@ public class Generator {
 
 			return cu;
 		}
-		catch (IOException e) {
+		catch (Throwable e) {
 			throw new JavascriptFileGenerationException(new SourcePosition(context.getInputFile(), 0, 0), "Cannot parse the Java file:" + e);
 		}
 
