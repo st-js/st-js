@@ -241,6 +241,7 @@ public class Generator {
 		return compiler;
 	}
 
+	@SuppressWarnings("PMD.AvoidCatchingThrowable") // JavaCompiler throws an Error, so catching Throwable is intentional
 	private <JS> CompilationUnitTree parseAndResolve(File inputFile, GenerationContext<JS> context, ClassLoader builtProjectClassLoader,
 			String sourceEncoding) {
 		JavaCompiler.CompilationTask task = null;
