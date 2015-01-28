@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
 import static org.stjs.generator.utils.GeneratorTestHelper.execute;
+import static org.stjs.generator.utils.GeneratorTestHelper.executeAndReturnNumber;
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
@@ -97,5 +98,13 @@ public class LambdaGeneratorTest {
 	@Test
 	public void testDoNotGenerateBindLambdaAnnnonInit() {
 		assertCodeDoesNotContain(Lambda13.class, "stjs.bind");
+	}
+
+	@Test
+	public void testUsingTHISParamAndOuterScope() {
+		//		assertCodeContains(Lambda14.class, "method(function(){})");
+
+		double n = executeAndReturnNumber(Lambda14.class);
+		assertEquals(15.0, n, 0);
 	}
 }

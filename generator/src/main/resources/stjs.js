@@ -298,6 +298,7 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 
 	// copy static properties and default methods from interfaces
 	for(a = 0; a < _implements.length; ++a){
+		if (!_implements[a]) continue;
 		stjs.copyProps(_implements[a], _constructor);
 		stjs.copyInexistentProps(_implements[a].prototype, _constructor.prototype);
 		_constructor.$inherit.push(_implements[a]);
@@ -460,17 +461,39 @@ stjs.converters = {
 	}
 };
 
+
+stjs.serializers = {
+	Date : function(d, type) {
+		function pad(n){
+			return n < 10 ? "0" + n : "" + n;
+		}
+		if (d) {
+			return "" + d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+		}
+		return null;
+	},
+
+	Enum : function(e, type){
+		return e != null ? e.toString() : null;
+	}
+};
+
 /**
  * this functions is used to be able to send method references as callbacks
  */
-stjs.bind=function(obj, method) {
-	return function(){
+stjs.bind=function(obj, method, thisParamPos) {
+	var f = function(){
+		var args = arguments;
+		if (thisParamPos != null)
+			Array.prototype.splice.call(args, thisParamPos, 0, this);
 		if (typeof method === "string")
-			return obj[method].apply(obj, arguments);
+			return obj[method].apply(obj, args);
 		else
-			return method.apply(obj, arguments);
-	};
+			return method.apply(obj, args);
+	};	
+	return f;
 }
+
 
 /** *********** global ************** */
 function exception(err){
@@ -671,6 +694,117 @@ stjs.parseJSON = (function () {
 	  };
 })();
 
+
+
+
+stjs.isArray=function( obj ) {
+    return stjs.toString.call(obj) === "[object Array]";
+};
+
+/**
+ * cls can by the type of the return. 
+ * If it's an array it can be either the type of an element or the type definition of the field.
+ * TODO - for other collections and classes is not done yet
+ */
+stjs.typefy=function(obj, cls){
+	if (stjs.isArray(obj)){
+		var result = [];
+		for(var idx in obj){
+			result.push(stjs.typefy(obj[idx], elementType(cls)));
+		}
+		return result;
+	}
+	 var constructors = {};
+	 function constr(name, param){
+		  var c = constructors[name];
+		  if (!c)
+			  constructors[name] = c = eval(name);
+		  return new c(param);
+	  }
+
+	 function elementType(type){
+		 if (typeof type == "function")
+			 return type;
+		 if (type.arguments) {
+			 return eval(type.arguments[0]);
+		 }
+		 if (typeof type == "string")
+			 return eval(type);
+		 return Object;
+	  }
+
+	 
+	function convert(type, json){
+		  if (!type)
+			  return json;
+		  var cv = stjs.converters[type.name || type];
+		  if (cv)
+			  return cv(json, type);
+		  //hopefully the type has a string constructor
+		 return constr(type, json);
+	  }
+
+	 function builder(type){
+		  if (!type)
+			  return {};
+			if (typeof type == "function")
+				return new type();
+			if (type.name) {
+				if (type.name == "Map")
+					return {};
+				if (type.name == "Array")
+					return [];
+				return constr(type.name);
+			}
+			return constr(type);
+	  }
+	 
+	  if (obj == null)
+		  return null;
+	  
+	  var ret = new cls();
+	  for(var key in obj){
+		  var prop = obj[key];
+		  if (prop == null)
+			  continue;
+		  var td = cls.$typeDescription[key];
+		  if (!td) {
+			  ret[key] = prop;
+			  continue;
+		  }
+		  if (typeof prop == "string")
+			  ret[key] = convert(td, prop);
+		  else if (typeof prop == "object")
+			  ret[key] = stjs.typefy(prop, td);
+	  }
+	  return ret;
+};
+
+stjs.stringify=function(obj, cls){
+	 if (obj == null)
+		  return null;
+	  
+	 var ret = {};
+	  for(var key in obj){
+		  var td = cls.$typeDescription[key];
+		  var prop = obj[key];
+		  var ser = td != null ? stjs.serializers[td.name || td] : null;
+		  
+		  if (typeof prop == "function")
+			  continue;
+		  
+		  if (!td || !ser) {
+			  ret[key] = prop;
+			  continue;
+		  }
+		  if (typeof prop != "string") 
+			  if (ser)
+				  ret[key] = ser(prop, td);
+			  else
+				  ret[key] = stjs.typefy(prop, td);
+	  }
+	  return ret;
+};
 /************* STJS asserts ***************/
 var stjsAssertHandler = function(position, code, msg) {
 	throw msg + " at " + position;

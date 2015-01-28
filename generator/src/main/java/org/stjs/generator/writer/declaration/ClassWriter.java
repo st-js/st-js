@@ -136,7 +136,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	private List<Tree> getAllMembersExceptConstructors(ClassTree clazz) {
 		List<Tree> nonConstructors = new ArrayList<Tree>();
 		for (Tree member : clazz.getMembers()) {
-			if (!JavaNodes.isConstructor(member) && !isAbstractInstanceMethod(member) && !(member instanceof BlockTree)) {
+			if (!JavaNodes.isConstructor(member) && !(member instanceof BlockTree)) {
 				nonConstructors.add(member);
 			}
 		}
@@ -165,14 +165,6 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		}
 
 		return context.js().function(null, params, context.js().block(stmts));
-	}
-
-	private boolean isAbstractInstanceMethod(Tree member) {
-		if (!(member instanceof MethodTree)) {
-			return false;
-		}
-		MethodTree methodTree = (MethodTree) member;
-		return methodTree.getBody() == null;
 	}
 
 	private void addStaticInitializers(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {

@@ -71,11 +71,38 @@ public class ParseJsonTest {
 	}
 
 	@Test
+	public void testDateWithTypefy() {
+		Object result = GeneratorTestHelper.execute(Json4b.class);
+		assertProperty("Class4", result, "type");
+		Date d = (Date) getProperty(result, "date");
+		assertEquals(11, d.getMonth(), 0.1);
+		assertEquals(18, d.getHours(), 0.1);
+	}
+
+	@Test
 	public void testEnum() {
 		Object result = GeneratorTestHelper.execute(Json5.class);
 		assertProperty("Class5", result, "type");
 		assertProperty(1.0, result, "e", "_ordinal");
 		assertProperty("b", result, "e", "_name");
+	}
+
+	@Test
+	public void testEnumWithTypefy() {
+		Object result = GeneratorTestHelper.execute(Json5b.class);
+		assertProperty("Class5", result, "type");
+		assertProperty(1.0, result, "e", "_ordinal");
+		assertProperty("b", result, "e", "_name");
+	}
+
+	@Test
+	public void testEnumWithStringify() {
+		Object result = GeneratorTestHelper.execute(Json5c.class);
+		assertProperty("Class5", result, "type");
+		assertProperty(2.0, result, "number");
+		assertProperty("b", result, "e");
+		assertProperty(4.0, result, "child", "number");
+		assertProperty(null, result, "equals");
 	}
 
 	@Test

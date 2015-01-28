@@ -9,6 +9,7 @@
 	var iframe;
 	var queryStringParameters;
 	var persistent;
+	var stacktraces = [];
 
 	function status(s){
 		statusDiv.innerHTML = s;
@@ -21,15 +22,16 @@
 		logDiv.innerHTML += s;
 	}
 	function logAppendError(s, stacktrace){
-		logDiv.innerHTML += "<span class='error' title='" + stacktrace + "' onclick='showStack(this.title)'>" + s + "</span>";
+		stacktraces.push(stacktrace);
+		logDiv.innerHTML += "<span class='error' onclick='showStack(" + (stacktraces.length - 1) + ")'>" + s + "</span>";
 	}
 	function logn(s){
 		log(s);
 		logAppend("<br>");
 	}
 	
-	function showStack(s){
-		stackDiv.innerHTML = s;
+	function showStack(idx){
+		stackDiv.innerHTML = stacktraces[idx];
 	}
 	
 
@@ -58,9 +60,11 @@
 			errorStack = printStackTrace({e:result});
 			if (console)
 				console.error(errorStack.join("\n"));
+            //take first non-junit stack trace element and the last one
+			//errorStack.splice(0,1);
+			errorStack.splice(errorStack.length - 1,1);
             location = encodeURIComponent(errorStack.join(";"));
-            //take first non-junit stack trace element
-			errorStack.splice(0,1);
+			
 			for(var i = 0; i < errorStack.length; ++i){
 				if (errorStack[i].indexOf("junit.js") < 0) {
 					isAssert = (i > 1);

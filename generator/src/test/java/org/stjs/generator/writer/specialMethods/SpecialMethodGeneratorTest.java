@@ -50,8 +50,7 @@ public class SpecialMethodGeneratorTest {
 	// assertCodeContains(SpecialMethod5a.class, "{2:1}");
 	// }
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testWrongMapKey() {
 		// $map(k,v) -> {k:v}
 		generate(SpecialMethod5b.class);
@@ -125,7 +124,6 @@ public class SpecialMethodGeneratorTest {
 
 	@Test
 	public void testAssertMethods() {
-		// the special parameter THIS should not be added
 		assertCodeContains(SpecialMethod14.class, "assertArgEquals(\"SpecialMethod14.java:8\",\"assertArgEquals(\\\"123\\\", x)\", \"123\", x);");
 	}
 
