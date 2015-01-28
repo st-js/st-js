@@ -710,6 +710,18 @@ function assertStateTrue(position, code, condition) {
 }
 /** exception **/
 var Throwable = function(message, cause){
+	Error.call(this);
+	if(typeof Error.captureStackTrace === 'function'){
+		// nice way to capture the stack trace for chrome
+		Error.captureStackTrace(this, arguments.callee);
+	} else {
+		// alternate way to capture the stack trace for other browsers
+		try{
+			throw new Error();
+		}catch(e){
+			this.stack = e.stack;
+		}
+	}
 	if (typeof message === "string"){
 		this.detailMessage  = message;
 		this.message = message;
@@ -739,12 +751,10 @@ stjs.extend(Throwable, Error, [], function(constructor, prototype){
 	        return (message != null) ? (s + ": " + message) : s;
 	 };
 
-	 //TODO use stacktrace.js script
 	 prototype.getStackTrace = function() {
 		 return this.stack;
 	 };
 
-	 //TODO use stacktrace.js script
 	 prototype.printStackTrace = function(){
 		 console.error(this.getStackTrace());
 	 };
