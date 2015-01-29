@@ -1,5 +1,6 @@
 package org.stjs.testing.driver.browser;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
@@ -19,7 +20,13 @@ import org.junit.runners.model.InitializationError;
 import org.stjs.generator.BridgeClass;
 import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
+import org.stjs.generator.DependencyResolver;
+import org.stjs.generator.GenerationDirectory;
 import org.stjs.generator.Generator;
+import org.stjs.generator.GeneratorConfiguration;
+import org.stjs.generator.STJSClass;
+import org.stjs.generator.STJSRuntimeException;
+import org.stjs.generator.utils.ClassUtils;
 import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.Scripts;
 import org.stjs.testing.annotation.ScriptsAfter;
@@ -199,17 +206,22 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		return methodUnderExecution;
 	}
 
-	private String getTypeName(Class<?> clazz) {
-		// TODO have it inject it here
-		// NameProvider names = new DefaultNameProvider();
-		// TypeWrapper type = TypeWrappers.wrap(clazz);
-		return clazz.getSimpleName();
+	private String getTypeName(Class<?> clazz, ClassWithJavascript stjsClass) {
+		String simpleName = clazz.getSimpleName();
+		String ns = stjsClass.getJavascriptNamespace();
+		if(ns != null && !ns.isEmpty()){
+			return ns + "." + simpleName;
+		}
+		return simpleName;
+	}
+
+	private String getTypeName(Class<?> clazz){
+		return getTypeName(clazz, new NullDependencyResolver().resolve(clazz.getName()));
 	}
 
 	/**
 	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser to execute the specified test.
 	 * @param meth The test to send to the browser
-	 * @param browserSession The session to which the test is sent
 	 * @param exchange contains the HTTP response that must be written to
 	 */
 	public void sendTestFixture(MultiTestMethod meth, HttpExchange exchange) throws Exception {
@@ -280,13 +292,19 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		// Adapter between generated assert (not global) and JS-test-driver assert (which is a
 		// set of global methods)
 		resp.append("    Assert=window;\n");
-
-		String testedClassName = testClass.getSimpleName();
-		resp.append("    parent.startingTest('" + testedClassName + "', '" + method.getName() + "');");
-		resp.append("    var stjsTest = new " + testedClassName + "();\n");
-		resp.append("    var stjsResult = 'OK';\n");
-		resp.append("    var expectedException = " + (test.expected() != Test.None.class ? getTypeName(test.expected()) : null) + ";\n");
 		resp.append("    try{\n");
+
+		String testedClassName = getTypeName(testClass, stjsClass);
+		resp.append("        parent.startingTest('" + testedClassName + "', '" + method.getName() + "');");
+		resp.append("        var stjsTest = new " + testedClassName + "();\n");
+		resp.append("        var stjsResult = 'OK';\n");
+
+		String expectedExceptionConstructor = "null";
+		if(test.expected() != Test.None.class){
+			expectedExceptionConstructor = getTypeName(test.expected());
+		}
+		resp.append("        var expectedException = " + expectedExceptionConstructor + ";\n");
+
 		// call before methods
 		for (FrameworkMethod beforeMethod : beforeMethods) {
 			resp.append("      stjsTest." + beforeMethod.getName() + "();\n");
@@ -333,7 +351,6 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	/**
 	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser understand that there will be no more tests.
-	 * @param browserSession The session to be notified
 	 * @param exchange contains the HTTP response that must be written to
 	 * @throws IOException
 	 */
@@ -358,5 +375,34 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	public long getId() {
 		return this.id;
+	}
+
+	private class NullDependencyResolver implements DependencyResolver {
+
+		public NullDependencyResolver() {
+		}
+
+		@Override
+		public ClassWithJavascript resolve(String className) {
+			String parentClassName = className;
+			int pos = parentClassName.indexOf('$');
+			if (pos > 0 && parentClassName.charAt(pos - 1) != '.') {
+				// avoid classes like angularjs.$Timeout
+				parentClassName = parentClassName.substring(0, pos);
+			}
+			// try first if to see if it's a bridge class
+			Class<?> clazz;
+			try {
+				clazz = getConfig().getClassLoader().loadClass(parentClassName);
+			}
+			catch (ClassNotFoundException e) {
+				throw new STJSRuntimeException(e);
+			}
+			if (ClassUtils.isBridge(getConfig().getClassLoader(), clazz)) {
+				return new BridgeClass(this, clazz);
+			}
+
+			return new STJSClass(this, getConfig().getClassLoader(), parentClassName);
+		}
 	}
 }
