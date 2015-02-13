@@ -80,4 +80,9 @@ public class NamespaceGeneratorTest {
 	public void testAnnotationAtPackageLevelRecursive(){
 		assertCodeContains(PackageNamespace2.class, "a.b.PackageNamespace2 = function()");
 	}
+
+	@Test()
+	 public void testNamespaceWithFullyQualifiedStaticMethodName(){
+		assertCodeContains(Namespace10.class, "a.b.Namespace1.staticMethod()");
+	}
 }
