@@ -202,7 +202,7 @@ public class ArrayEveryTest {
 			}
 		};
 
-		assertTrue(arr.every(callbackfn));
+		assertFalse(arr.every(callbackfn));
 	}
 
 	@Test

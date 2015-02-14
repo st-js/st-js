@@ -551,7 +551,7 @@ public class Date {
 	 * Sets the year field of this <tt>Date</tt> 
 	 * interpreted in the local time zone.
 	 * 
-	 * @param yearm the new year
+	 * @param year the new year
 	 */
 	public void setFullYear(int year) {
 		setFullYear(year, (int)getMonth());
@@ -561,7 +561,7 @@ public class Date {
 	 * Sets the year and month fields of this <tt>Date</tt> 
 	 * interpreted in the local time zone.
 	 * 
-	 * @param yearm the new year
+	 * @param year the new year
 	 * @param month the new month
 	 */
 	public void setFullYear(int year, int month) {
@@ -572,7 +572,7 @@ public class Date {
 	 * Sets the year, month and day of month fields of this <tt>Date</tt> 
 	 * interpreted in the local time zone.
 	 * 
-	 * @param yearm the new year
+	 * @param year the new year
 	 * @param month the new month
 	 * @param day the new day of month
 	 */
@@ -814,7 +814,7 @@ public class Date {
 	/**
 	 * Sets the day of month field of this <tt>Date</tt> interpreted in UTC.
 	 * 
-	 * @param day the new day of month
+	 * @param n the new day of month
 	 */
 	public void setUTCDate(int n) {
 		setField(getUTC(true), Calendar.DAY_OF_MONTH, n);
@@ -847,7 +847,7 @@ public class Date {
 	 * Sets the year field of this <tt>Date</tt> 
 	 * interpreted in UTC.
 	 * 
-	 * @param yearm the new year
+	 * @param year the new year
 	 */
 	public void setUTCFullYear(int year) {
 		setUTCFullYear(year, (int)getUTCMonth());
@@ -857,7 +857,7 @@ public class Date {
 	 * Sets the year and month fields of this <tt>Date</tt> 
 	 * interpreted in UTC.
 	 * 
-	 * @param yearm the new year
+	 * @param year the new year
 	 * @param month the new month
 	 */
 	public void setUTCFullYear(int year, int month) {
@@ -867,8 +867,8 @@ public class Date {
 	/**
 	 * Sets the year, month and day of month fields of this <tt>Date</tt> 
 	 * interpreted in UTC.
-	 * 
-	 * @param yearm the new year
+	 *
+	 * @param year the new year
 	 * @param month the new month
 	 * @param day the new day of month
 	 */
