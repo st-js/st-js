@@ -82,7 +82,17 @@ public class NamespaceGeneratorTest {
 	}
 
 	@Test()
-	 public void testNamespaceWithFullyQualifiedStaticMethodName(){
+	public void testNamespaceWithFullyQualifiedStaticMethodName(){
 		assertCodeContains(Namespace10.class, "a.b.Namespace1.staticMethod()");
+	}
+
+	@Test()
+	public void testNamespaceWithStaticMethodInAnotherClass(){
+		assertCodeContains(Namespace11.class, "a.b.Namespace1.staticMethod()");
+	}
+
+	@Test()
+	public void testNamespaceWithStaticMethodInAnotherClassAndStaticImport(){
+		assertCodeContains(Namespace12.class, "a.b.Namespace1.staticMethod()");
 	}
 }
