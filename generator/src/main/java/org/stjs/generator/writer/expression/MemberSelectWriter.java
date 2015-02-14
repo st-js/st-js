@@ -8,6 +8,7 @@ import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.Keyword;
+import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.WriterContributor;
@@ -50,9 +51,15 @@ public class MemberSelectWriter<JS> implements WriterContributor<MemberSelectTre
 			// package names are ignored
 			return null;
 		}
-		if (element.getKind() == ElementKind.CLASS && tw.isGlobal()) {
-			// global classes are ignored
-			return null;
+		if (element.getKind() == ElementKind.CLASS){
+			if(tw.isGlobal()) {
+				// global classes are ignored
+				return null;
+
+			} else {
+				// Non global classes however, are not ignored and a translated taking the namespace into account
+				return context.js().name(context.getNames().getTypeName(context, element, DependencyType.OTHER));
+			}
 		}
 
 		JS target = getTarget(visitor, tree, context);
