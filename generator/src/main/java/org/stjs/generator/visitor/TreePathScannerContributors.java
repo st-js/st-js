@@ -79,26 +79,26 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 
 	public <T extends Tree, C extends VisitorContributor<T, R, P, V>, N> void contribute(@Nonnull C contributor) {
 		if (onlyOneFinalContributor) {
-			this.<T>getHolder(contributor.getClass()).setContributor(contributor);
+			this.<T> getHolder(contributor.getClass()).setContributor(contributor);
 		} else {
-			this.<T>getHolder(contributor.getClass()).addContributor(contributor);
+			this.<T> getHolder(contributor.getClass()).addContributor(contributor);
 		}
 	}
 
 	public <T extends Tree, C extends VisitorContributor<T, R, P, V>, N> void contribute(@Nonnull C contributor, Class<T> nodeClass) {
 		if (onlyOneFinalContributor) {
-			this.<T>getHolder(nodeClass).setContributor(contributor);
+			this.<T> getHolder(nodeClass).setContributor(contributor);
 		} else {
-			this.<T>getHolder(nodeClass).addContributor(contributor);
+			this.<T> getHolder(nodeClass).addContributor(contributor);
 		}
 	}
 
 	public <T extends Tree, F extends VisitorFilterContributor<T, R, P, V>> void addFilter(@Nonnull F filter) {
-		this.<T>getHolder(filter.getClass()).addFilter(filter);
+		this.<T> getHolder(filter.getClass()).addFilter(filter);
 	}
 
 	public <T extends Tree, F extends VisitorFilterContributor<T, R, P, V>> void addFilter(@Nonnull F filter, Class<?> nodeClass) {
-		this.<T>getHolder(nodeClass).addFilter(filter);
+		this.<T> getHolder(nodeClass).addFilter(filter);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -114,15 +114,15 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 	public <T extends Tree, C extends VisitorContributor<T, R, P, V>> void contribute(@Nonnull DiscriminatorKey discriminatorKey,
 			@Nonnull C contributor) {
 		if (onlyOneFinalContributor) {
-			this.<T>getHolder(discriminatorKey).setContributor(contributor);
+			this.<T> getHolder(discriminatorKey).setContributor(contributor);
 		} else {
-			this.<T>getHolder(discriminatorKey).addContributor(contributor);
+			this.<T> getHolder(discriminatorKey).addContributor(contributor);
 		}
 	}
 
 	public <T extends Tree, F extends VisitorFilterContributor<T, R, P, V>> void addFilter(@Nonnull DiscriminatorKey discriminatorKey,
 			@Nonnull F filter) {
-		this.<T>getHolder(discriminatorKey).addFilter(filter);
+		this.<T> getHolder(discriminatorKey).addFilter(filter);
 	}
 
 	private Class<?> getTreeNodeClassFromInteface(Type iface) {
@@ -175,6 +175,7 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 			// here i should be sure i have the right type
 			return ((VisitorContributor<T, R, P, V>) contributor).visit((V) this, node, param);
 		}
+		System.err.println("No contributor found with key:" + discriminator);
 		return null;
 	}
 
@@ -207,9 +208,9 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 	}
 
 	/**
-	 * 
+	 *
 	 * Keeps the list of filters and contributors for a given type of node
-	 * 
+	 *
 	 * @param <T>
 	 */
 	private class ContributorHolder<T extends Tree> implements VisitorContributor<T, R, P, V> {
@@ -263,9 +264,9 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 	}
 
 	/**
-	 * 
+	 *
 	 * a filter is created for each visit in a node
-	 * 
+	 *
 	 * @param <T>
 	 */
 	private class FilterChain<T extends Tree> implements VisitorContributor<T, R, P, V> {

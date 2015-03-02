@@ -119,26 +119,36 @@ public class FieldsGeneratorTest {
 
 	@Test
 	public void testTemplatePostIncrement() {
-		assertCodeContains(Fields19.class, "this.set(\"field\", this.field + 1, true)");
+		assertCodeContains(Fields19.class, "this.set(\"field\", this.get(\"field\") + 1, true)");
 	}
 
 	@Test
 	public void testTemplatePreIncrement() {
-		assertCodeContains(Fields20.class, "this.set(\"field\", this.field + 1)");
+		assertCodeContains(Fields20.class, "this.set(\"field\", this.get(\"field\") + 1)");
 	}
 
 	@Test
 	public void testTemplateGlobalPostIncrement() {
-		assertCodeContains(Fields21.class, "stjs.setField(this, \"field\", this.field + 1, true)");
+		assertCodeContains(Fields21.class, "stjs.setField(this, \"field\", stjs.getField(this, \"field\") + 1, true)");
 	}
 
 	@Test
 	public void testTemplateAddAssign() {
-		assertCodeContains(Fields22.class, "this.set(\"field\", this.field | (2))");
+		assertCodeContains(Fields22.class, "this.set(\"field\", this.get(\"field\")  | (2))");
 	}
 
 	@Test
 	public void testTemplateGlobalDivideAssign() {
-		assertCodeContains(Fields23.class, "stjs.setField(this, \"field\", stjs.trunc(this.field / (2)))");
+		assertCodeContains(Fields23.class, "stjs.setField(this, \"field\", stjs.trunc(stjs.getField(this, \"field\") / (2)))");
+	}
+
+	@Test
+	public void testTemplateIdentifier() {
+		assertCodeContains(Fields24.class, "this.get(\"field\")");
+	}
+
+	@Test
+	public void testTemplateMemberSelect() {
+		assertCodeContains(Fields25.class, "obj.get(\"field\")");
 	}
 }
