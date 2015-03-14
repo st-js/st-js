@@ -83,4 +83,23 @@ public class ArrayReverseTest {
 		assertEquals("NaN", x.$get(7));
 		assertEquals("-1", x.$get(8));
 	}
+
+	@Test
+	public void testReverse05(){
+		// test reverse in a sparse store
+		Array<Object> x = $array();
+		x.$set(0, 0);
+		x.$set(1, 1);
+		x.$set(1000, 1000);
+
+		Array<Object> reverse = x.reverse();
+
+		assertSame(x, reverse);
+		assertEquals(1000, x.$get(0));
+		assertEquals(null, x.$get(1));
+		assertEquals(null, x.$get(2));
+		assertEquals(null, x.$get(998));
+		assertEquals(1, x.$get(999));
+		assertEquals(0, x.$get(1000));
+	}
 }

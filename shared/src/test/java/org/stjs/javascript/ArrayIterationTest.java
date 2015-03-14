@@ -101,7 +101,7 @@ public class ArrayIterationTest {
 		assertEquals("0", keyIter.next());
 		x.$length(2);
 		assertEquals("1", keyIter.next());
-		assertFalse(!keyIter.hasNext());
+		assertFalse(keyIter.hasNext());
 	}
 
 	private void assertIteratedKeys(Array<Integer> x, String... expectedKeys) {

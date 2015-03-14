@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.stjs.javascript.JSCollections.$array;
+import static org.stjs.javascript.JSGlobal.Array;
 import static org.stjs.javascript.JSGlobal.String;
 
 import org.junit.Test;
@@ -16,7 +17,7 @@ public class ArraySortTest {
 
 	@Test
 	public void testSort01() {
-		Array<Integer> x = $array(2); // remember, this makes an empty array with length=2
+		Array<Integer> x = Array(2); // remember, this makes an empty array with length=2
 		x.sort();
 
 		assertEquals(2, x.$length());
@@ -26,7 +27,7 @@ public class ArraySortTest {
 
 	@Test
 	public void testSort02() {
-		Array<Integer> x = $array(2); // remember, this makes an empty array with length=2
+		Array<Integer> x = Array(2); // remember, this makes an empty array with length=2
 		x.$set(1, 1);
 		x.sort();
 
@@ -58,7 +59,7 @@ public class ArraySortTest {
 			}
 		};
 
-		Array<Integer> x = $array(2); // remember, this makes an empty array with length=2
+		Array<Integer> x = Array(2); // remember, this makes an empty array with length=2
 		x.$set(1, 1);
 		x.sort(myComparefn);
 
@@ -66,7 +67,7 @@ public class ArraySortTest {
 		assertEquals(1, x.$get(0).intValue());
 		assertEquals(null, x.$get(1));
 
-		x = $array(2); // remember, this makes an empty array with length=2
+		x = Array(2); // remember, this makes an empty array with length=2
 		x.$set(0, 1);
 		x.sort(myComparefn);
 

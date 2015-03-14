@@ -15,12 +15,7 @@
  */
 package org.stjs.javascript;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.stjs.javascript.annotation.BrowserCompatibility;
 import org.stjs.javascript.annotation.Template;
@@ -116,18 +111,25 @@ public class Array<V> implements Iterable<String> {
 	@BrowserCompatibility("none")
 	public Iterator<String> iterator() {
 		return new Iterator<String>() {
-			private Iterator<Entry<V>> arrayIter = array.entryIterator(0, true);
+			private ArrayStore<V> prevStore = array;
+			private Long prevKey = 0L;
+
+			private Iterator<Entry<V>> arrayIter = array.entryIterator(0, $length(), true);
 			private Iterator<String> nonArrayIter = nonArrayElements.keySet().iterator();
 
 			@Override
 			public boolean hasNext() {
+				updateEntryIterator();
 				return arrayIter.hasNext() || nonArrayIter.hasNext();
 			}
 
 			@Override
 			public String next() {
+				updateEntryIterator();
 				if (arrayIter.hasNext()) {
-					return Long.toString(arrayIter.next().key);
+					Entry<V> nextEntry = arrayIter.next();
+					prevKey = nextEntry.key;
+					return Long.toString(prevKey);
 				}
 				return nonArrayIter.next();
 			}
@@ -135,6 +137,13 @@ public class Array<V> implements Iterable<String> {
 			@Override
 			public void remove() {
 				throw new UnsupportedOperationException();
+			}
+
+			private void updateEntryIterator(){
+				if(prevStore != array){
+					prevStore = array;
+					arrayIter = array.entryIterator(prevKey + 1, $length(), true);
+				}
 			}
 		};
 	}
@@ -365,7 +374,7 @@ public class Array<V> implements Iterable<String> {
 
 	private void switchStoreIfNeeded(long newLength, long newSetElements) {
 		if (!this.array.isEfficientStoreFor(newLength, newSetElements)) {
-			this.array = this.array.switchStoreType();
+			this.array = this.array.switchStoreType(newLength);
 		}
 	}
 
@@ -383,7 +392,7 @@ public class Array<V> implements Iterable<String> {
 
 		// Add the elements of this array
 		long i = 0;
-		Iterator<Entry<V>> iter = this.array.entryIterator(0, true);
+		Iterator<Entry<V>> iter = this.array.entryIterator(0, this.$length(), true);
 		while (iter.hasNext()) {
 			Entry<V> entry = iter.next();
 			result.$set(i + entry.key, entry.value);
@@ -393,7 +402,7 @@ public class Array<V> implements Iterable<String> {
 		if (arrays != null) {
 			// add the elements of all the other specified arrays
 			for (Array<V> arr : arrays) {
-				iter = arr.array.entryIterator(0, true);
+				iter = arr.array.entryIterator(0, arr.$length(), true);
 				while (iter.hasNext()) {
 					Entry<V> entry = iter.next();
 					result.$set(i + entry.key, entry.value);
@@ -420,7 +429,7 @@ public class Array<V> implements Iterable<String> {
 
 		// add the elements of this array
 		long i = 0;
-		Iterator<Entry<V>> iter = this.array.entryIterator(0, true);
+		Iterator<Entry<V>> iter = this.array.entryIterator(0, this.$length(), true);
 		while (iter.hasNext()) {
 			Entry<V> entry = iter.next();
 			result.$set(i + entry.key, entry.value);
@@ -493,7 +502,7 @@ public class Array<V> implements Iterable<String> {
 			actualStart = (long) Math.min(this.$length(), start);
 		}
 
-		Iterator<Entry<V>> iter = this.array.entryIterator(actualStart, true);
+		Iterator<Entry<V>> iter = this.array.entryIterator(actualStart, this.$length(), true);
 		return indexOf(element, iter);
 	}
 
@@ -589,8 +598,7 @@ public class Array<V> implements Iterable<String> {
 	 * @return this <tt>Array</tt>
 	 */
 	public Array<V> reverse() {
-		// Collections.reverse(array);
-		// return this;
+		this.array.reverse();
 		return this;
 	}
 
@@ -960,7 +968,7 @@ public class Array<V> implements Iterable<String> {
 			actualStart = (long) Math.min(this.$length() - 1, fromIndex);
 		}
 
-		Iterator<Entry<V>> iter = this.array.entryIterator(actualStart, false);
+		Iterator<Entry<V>> iter = this.array.entryIterator(actualStart, -1, false);
 		return indexOf(searchElement, iter);
 	}
 
@@ -999,7 +1007,7 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+")
 	public boolean every(Function3<V, Long, Array<V>, Boolean> callbackfn) {
-		Iterator<Entry<V>> iter = this.array.entryIterator(0, true);
+		Iterator<Entry<V>> iter = this.array.entryIterator(0, this.$length(), true);
 		while (iter.hasNext()) {
 			Entry<V> entry = iter.next();
 			Boolean result = callbackfn.$invoke(entry.value, entry.key, this);
@@ -1266,15 +1274,16 @@ public class Array<V> implements Iterable<String> {
 
 	private abstract class ArrayStore<E> {
 
-		ArrayStore<E> switchStoreType() {
+		ArrayStore<E> switchStoreType(long newLength) {
 			ArrayStore<E> that;
 			if (this instanceof PackedArrayStore) {
-				that = new SparseArrayStore<E>();
+				that = new SparseArrayStore<>();
 			} else {
-				that = new PackedArrayStore<E>();
+				that = new PackedArrayStore<>();
 			}
 
-			Iterator<Entry<E>> entries = this.entryIterator(0, true);
+			that.padTo(newLength);
+			Iterator<Entry<E>> entries = this.entryIterator(0, newLength, true);
 			while (entries.hasNext()) {
 				Entry<E> entry = entries.next();
 				that.set(entry.key, entry.value);
@@ -1291,7 +1300,7 @@ public class Array<V> implements Iterable<String> {
 
 		abstract long getSetElements(long firstIncluded, long lastExcluded);
 
-		abstract Iterator<Entry<E>> entryIterator(long actualStart, boolean isForward);
+		abstract Iterator<Entry<E>> entryIterator(long actualStart, long actualEndExcluded, boolean isForward);
 
 		abstract boolean isEfficientStoreFor(long newLength, long newElementCount);
 
@@ -1304,6 +1313,8 @@ public class Array<V> implements Iterable<String> {
 		abstract E get(long index);
 
 		abstract Array<E> slice(long fromIncluded, long toExcluded);
+
+		abstract void reverse();
 	}
 
 	private final class PackedArrayStore<E> extends ArrayStore<E> {
@@ -1312,7 +1323,7 @@ public class Array<V> implements Iterable<String> {
 		 * We can't use <E> instead of <Object> here, because we must be able to make a difference between elements set
 		 * to null, and unset elements (represented by UNSET).
 		 */
-		private ArrayList<Object> elements = new ArrayList<Object>();
+		private ArrayList<Object> elements = new ArrayList<>();
 
 		@Override
 		boolean isEfficientStoreFor(long newLength, long newElementCount) {
@@ -1376,12 +1387,17 @@ public class Array<V> implements Iterable<String> {
 		}
 
 		@Override
+		void reverse() {
+			Collections.reverse(this.elements);
+		}
+
+		@Override
 		boolean isSet(long index) {
 			return index < this.elements.size() && this.elements.get((int) index) != UNSET;
 		}
 
 		@Override
-		Iterator<Entry<E>> entryIterator(final long actualStart, final boolean isForward) {
+		Iterator<Entry<E>> entryIterator(final long actualStart, final long actualEndExcluded, final boolean isForward) {
 			return new Iterator<Entry<E>>() {
 				private int nextIndex = (int) actualStart;
 
@@ -1389,9 +1405,9 @@ public class Array<V> implements Iterable<String> {
 				public boolean hasNext() {
 					skipToNext();
 					if (isForward) {
-						return nextIndex < elements.size();
+						return nextIndex < actualEndExcluded;
 					} else {
-						return nextIndex >= 0;
+						return nextIndex > actualEndExcluded;
 					}
 				}
 
@@ -1411,11 +1427,11 @@ public class Array<V> implements Iterable<String> {
 
 				private void skipToNext() {
 					if (isForward) {
-						while (nextIndex < elements.size() && !isSet(nextIndex)) {
+						while (nextIndex < actualEndExcluded && !isSet(nextIndex)) {
 							nextIndex++;
 						}
 					} else {
-						while (nextIndex >= 0 && !isSet(nextIndex)) {
+						while (nextIndex > actualEndExcluded && !isSet(nextIndex)) {
 							nextIndex--;
 						}
 					}
@@ -1572,17 +1588,45 @@ public class Array<V> implements Iterable<String> {
 		}
 
 		@Override
+		void reverse() {
+			long lenght = $length();
+			Set<Long> indices = new HashSet<>(this.elements.keySet()); // new instance to avoid concurrent modification
+			Set<Long> alreadySwitched = new HashSet<>();
+			for(Long index : indices){
+				if(alreadySwitched.contains(index)){
+					continue;
+				}
+
+				E value = this.elements.get(index);
+				long newIndex = length - 1 - index;
+				if(this.elements.containsKey(newIndex)){
+					// there is already an element at this index, we must exchange both values
+					// and record the one at that location as already switched
+					E temp = this.elements.get(newIndex);
+					this.elements.put(newIndex, value);
+					this.elements.put(index, temp);
+					alreadySwitched.add(newIndex);
+
+				} else {
+					// we can simply move the value to the new index
+					this.elements.remove(index);
+					this.elements.put(newIndex, value);
+				}
+			}
+		}
+
+		@Override
 		boolean isSet(long index) {
 			return elements.containsKey(index);
 		}
 
 		@Override
-		Iterator<Entry<E>> entryIterator(long actualStart, boolean isForward) {
+		Iterator<Entry<E>> entryIterator(long actualStart, long actualEndExcluded, boolean isForward) {
 			java.util.Map<Long, E> range;
 			if (isForward) {
-				range = elements.subMap(actualStart, true, elements.lastKey(), true);
+				range = elements.subMap(actualStart, true, actualEndExcluded - 1, true);
 			} else {
-				range = elements.subMap(0L, true, actualStart, true).descendingMap();
+				range = elements.subMap(actualEndExcluded + 1, true, actualStart, true).descendingMap();
 			}
 			final Iterator<java.util.Map.Entry<Long, E>> it = range.entrySet().iterator();
 			return new Iterator<Entry<E>>() {
