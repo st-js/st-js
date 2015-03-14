@@ -13,17 +13,21 @@ import org.junit.Test;
  * This integration test checks if a war is correctly packaged
  * 
  * @author acraciun
- * 
  */
 public class STJSPackageWarTest {
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testPackageIt() throws Exception {
 
 		File testDir = ResourceExtractor.simpleExtractResources(getClass(), "/package-js-war");
 
 		Verifier verifier = new Verifier(testDir.getAbsolutePath());
+
 		verifier.deleteArtifact("org.st-js", "package-js-war", "1.0.0-SNAPSHOT", "war");
+
+		// coming from the configuration of surefire plugin outside
+		verifier.getCliOptions().add("-Dstjs.version=" + System.getProperty("stjs.version"));
 
 		verifier.executeGoal("install");
 

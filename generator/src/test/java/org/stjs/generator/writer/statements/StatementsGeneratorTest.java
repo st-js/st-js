@@ -34,31 +34,48 @@ public class StatementsGeneratorTest {
 		assertCodeContains(Statements4.class, "default: break");
 	}
 
-	@Ignore
-	// arrays are not allowed
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testArray1() {
-		assertCodeContains(Statements5.class, "x = [1,2,3]");
+		generate(Statements5.class);
 	}
 
-	@Test
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testArray2() {
-		assertCodeContains(Statements6.class, "method(([1,2,3]))");
+		// java array creation is forbidden
+		generate(Statements6.class);
 	}
 
-	@Test
+	@Ignore
+	// comments are currenly disabled
 	public void testLineComment() {
 		assertCodeContains(Statements7.class, "//line comment");
 	}
 
-	@Test
+	@Ignore
+	// comments are currenly disabled
 	public void testBlockComment() {
 		assertCodeContains(Statements8.class, "/* * block comment */");
 	}
 
 	@Test
+	public void testJavadocCommentMethod() {
+		assertCodeContains(Statements8b.class, "/** * javadoc comment */");
+	}
+
+	@Test
+	public void testJavadocCommentClass() {
+		assertCodeContains(Statements8c.class, "/** *javadoc comment */");
+	}
+
+	@Test
+	public void testJavadocCommentField() {
+		assertCodeContains(Statements8d.class, "/** * javadoc comment */");
+	}
+
+	@Test
 	public void testLiterals() {
 		// "abc", "\"", "'", 'a', '\'', 1D, 2f, 1l);
-		assertCodeContains(Statements9.class, "\"abc\", \"\\\"\", \"'\", 'a', '\\'', 1, 2, 1");
+		assertCodeContains(Statements9.class, "\"abc\", \"\\\"\", \"'\", 'a', '\\'', 1.0, 2.0, 1");
 	}
 
 	@Test
@@ -68,12 +85,17 @@ public class StatementsGeneratorTest {
 
 	@Test
 	public void testForEachArrayOneLine() {
-		assertCodeContains(Statements11.class, "if (!(a).hasOwnProperty(i)) continue;");
+		assertCodeContains(Statements11.class, "if (!(a).hasOwnProperty(i)) continue;parseInt");
 	}
 
 	@Test
 	public void testForEachArrayBlock() {
-		assertCodeContains(Statements12.class, "if (!(a).hasOwnProperty(i)) continue;");
+		assertCodeContains(Statements12.class, "if (!(a).hasOwnProperty(i)) continue;var x");
+	}
+
+	@Test
+	public void testForEachArrayWithCast() {
+		assertCodeContains(Statements12b.class, "if (!(a).hasOwnProperty(i)) continue;");
 	}
 
 	@Test
@@ -99,5 +121,42 @@ public class StatementsGeneratorTest {
 		// We must do the weird (Number).intValue() because for some reason the execution returns the
 		// integer 2 when run from eclipse, but return the double 2.0 when run from maven...
 		assertEquals(2, ((Number) execute(Statements16.class)).intValue());
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testSynchronizedBlock() {
+		// synchronized not supported
+		generate(Statements17.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testAssert() {
+		// assert not supported
+		generate(Statements18.class);
+	}
+
+	@Test
+	public void testCatch() {
+		assertCodeContains(Statements19.class, "catch(e){throw new RuntimeException(e);}");
+	}
+
+	@Test
+	public void testForDoubleInit() {
+		assertCodeContains(Statements20.class, "for(var i = 0, j = 1; i < 10; ++i){}");
+	}
+
+	@Test
+	public void testForDoubleInit2() {
+		assertCodeContains(Statements20b.class, "for( i = 0, j = 1; i < 10; ++i){}");
+	}
+
+	@Test
+	public void testForNoInit() {
+		assertCodeContains(Statements20c.class, "for(; i < 10; ++i){}");
+	}
+
+	@Test
+	public void testStaticBlock() {
+		assertCodeContains(Statements21.class, "new (stjs.extend(function Statements21$1(){}");
 	}
 }

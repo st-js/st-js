@@ -25,12 +25,14 @@ public class OverloadTest {
 		assertCodeContains(Overload3.class, "{prototype.method=function(param1){};}");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testLessGenericType() {
 		generate(Overload4.class);
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testTwoWithBody() {
 		generate(Overload5.class);
 	}

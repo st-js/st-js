@@ -22,13 +22,14 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.PreConditions;
 
@@ -41,6 +42,7 @@ import com.google.common.io.Files;
  * sources are stored at generation time in a properties file that has as name [class-name].stjs (and it's packed along
  * with the source file in the same folder). Thus, if a STJS library is built, it will be delivered with all this
  * information, as the original Java code will no longer be available with the library.
+ *
  * @author acraciun
  */
 public class STJSClass implements ClassWithJavascript {
@@ -48,14 +50,17 @@ public class STJSClass implements ClassWithJavascript {
 
 	private static final String DEPENDENCIES_PROP = "dependencies";
 	public static final String CLASS_PROP = "class";
-
 	private static final String GENERATED_JS_FILE_PROP = "js";
+	public static final String JS_NAMESPACE = "jsNamespace";
 
 	private final Properties properties;
 
 	private final DependencyResolver dependencyResolver;
-	private List<String> dependencies = Collections.emptyList();
+	private Map<String, DependencyType> dependencies = Collections.emptyMap();
 	private List<ClassWithJavascript> directDependencies;
+	private Map<ClassWithJavascript, DependencyType> directDependenciesMap;
+	// null means namespace is unknown, empty string means no namespace
+	private String javascriptNamespace;
 
 	private URI generatedJavascriptFile;
 
@@ -73,10 +78,12 @@ public class STJSClass implements ClassWithJavascript {
 		this.className = className;
 		this.properties = new Properties();
 		this.dependencyResolver = dependencyResolver;
+		this.javascriptNamespace = null;
 	}
 
 	/**
 	 * constructor for loading
+	 *
 	 * @param builtProjectClassLoader
 	 * @param className
 	 */
@@ -95,6 +102,13 @@ public class STJSClass implements ClassWithJavascript {
 
 		// js file
 		generatedJavascriptFile = readGeneratedJavascriptFileProperty();
+
+		javascriptNamespace = readJavascriptNamespaceProperty();
+		if (javascriptNamespace == null) {
+			// Old versions of ST-JS did not set the jsNamespace property, so we must look into the compiled
+			// class to figure out the namespace
+			javascriptNamespace = readJavascriptNamespaceAnnotation(classLoader);
+		}
 	}
 
 	private Properties loadProperties(ClassLoader classLoader) {
@@ -119,17 +133,32 @@ public class STJSClass implements ClassWithJavascript {
 		return props;
 	}
 
-	private List<String> readDependeciesProperty() {
+	private Map<String, DependencyType> readDependeciesProperty() {
 		String depProp = properties.getProperty(DEPENDENCIES_PROP);
 		if (depProp != null) {
 			// remove []
 			depProp = depProp.trim();
 			if (depProp.length() > 2) {
 				String deps[] = depProp.substring(1, depProp.length() - 1).split(",");
-				return Arrays.asList(deps);
+				Map<String, DependencyType> depMap = new HashMap<String, DependencyType>();
+				for (String dep : deps) {
+					depMap.put(DependencyType.getTypeName(dep), DependencyType.getDependencyType(dep));
+				}
+				return depMap;
 			}
 		}
-		return Collections.emptyList();
+		return Collections.emptyMap();
+	}
+
+	private String writeDependeciesProperty(Map<String, DependencyType> deps) {
+		StringBuilder s = new StringBuilder();
+		for (Map.Entry<String, DependencyType> entry : deps.entrySet()) {
+			if (s.length() > 0) {
+				s.append(',');
+			}
+			s.append(DependencyType.getTypeWithPrefix(entry.getKey(), entry.getValue()));
+		}
+		return "[" + s.toString() + "]";
 	}
 
 	private URI readGeneratedJavascriptFileProperty() {
@@ -145,11 +174,28 @@ public class STJSClass implements ClassWithJavascript {
 		return null;
 	}
 
+	private String readJavascriptNamespaceProperty() {
+		return properties.getProperty(JS_NAMESPACE);
+	}
+
+	private String readJavascriptNamespaceAnnotation(ClassLoader loader) {
+		// If the jsNamespace property is not defined, it means that class was
+		// generated with a version of ST-JS earlier than 3.1.2 that did not write that property down. Fortunately for us
+		// it also means that any namespace can be read by inspecting the @Namespace annotation directly on that
+		// class.
+		String ns = NamespaceUtil.resolveNamespaceSimple(this.className, loader);
+		if (ns == null) {
+			// With earlier versions of ST-JS (pre 3.1.2) if no namespace is found on the class, then there is
+			// no namespace at all
+			ns = "";
+		}
+		return ns;
+	}
+
 	public File getStjsPropertiesFile() {
 		File propFile = new File(targetFolder, ClassUtils.getPropertiesFileName(className));
 		if (!propFile.getParentFile().exists() && !propFile.getParentFile().mkdirs()) {
-			throw new JavascriptClassGenerationException(className,
-					"Unable to create parent folder for the properties file:" + propFile);
+			throw new JavascriptClassGenerationException(className, "Unable to create parent folder for the properties file:" + propFile);
 		}
 		return propFile;
 	}
@@ -165,8 +211,7 @@ public class STJSClass implements ClassWithJavascript {
 			properties.store(propertiesWriter, "Generated by STJS ");
 		}
 		catch (IOException e1) {
-			throw new JavascriptClassGenerationException(className, "Could not open properties file "
-					+ getStjsPropertiesFile() + ":" + e1, e1);
+			throw new JavascriptClassGenerationException(className, "Could not open properties file " + getStjsPropertiesFile() + ":" + e1, e1);
 		}
 		finally {
 			try {
@@ -181,12 +226,21 @@ public class STJSClass implements ClassWithJavascript {
 		}
 	}
 
-	public void setDependencies(Collection<String> dependencies) {
-		this.dependencies = new ArrayList<String>(dependencies);
-		if (dependencies == null) {
+	public void setJavascriptNamespace(String jsNamespace) {
+		this.javascriptNamespace = jsNamespace;
+		properties.put(JS_NAMESPACE, jsNamespace);
+	}
+
+	public void setDependencies(Map<String, DependencyType> deps) {
+
+		if (deps == null) {
 			properties.remove(DEPENDENCIES_PROP);
+			this.dependencies = new HashMap<String, DependencyType>();
 		} else {
-			properties.put(DEPENDENCIES_PROP, dependencies.toString());
+			this.dependencies = new HashMap<String, DependencyType>(deps);
+			// filter out anonymous classes
+			this.dependencies.remove("");
+			properties.put(DEPENDENCIES_PROP, writeDependeciesProperty(dependencies));
 		}
 	}
 
@@ -206,6 +260,11 @@ public class STJSClass implements ClassWithJavascript {
 	}
 
 	@Override
+	public String getJavascriptNamespace() {
+		return this.javascriptNamespace;
+	}
+
+	@Override
 	public List<URI> getJavascriptFiles() {
 		if (generatedJavascriptFile == null) {
 			return Collections.emptyList();
@@ -217,11 +276,22 @@ public class STJSClass implements ClassWithJavascript {
 	public List<ClassWithJavascript> getDirectDependencies() {
 		if (directDependencies == null) {
 			directDependencies = new ArrayList<ClassWithJavascript>(dependencies.size());
-			for (String className : dependencies) {
-				directDependencies.add(dependencyResolver.resolve(className.trim()));
+			for (String depClassName : dependencies.keySet()) {
+				directDependencies.add(dependencyResolver.resolve(depClassName.trim()));
 			}
 		}
 		return directDependencies;
+	}
+
+	@Override
+	public Map<ClassWithJavascript, DependencyType> getDirectDependencyMap() {
+		if (directDependenciesMap == null) {
+			directDependenciesMap = new HashMap<ClassWithJavascript, DependencyType>(dependencies.size());
+			for (Map.Entry<String, DependencyType> entry : dependencies.entrySet()) {
+				directDependenciesMap.put(dependencyResolver.resolve(entry.getKey().trim()), entry.getValue());
+			}
+		}
+		return directDependenciesMap;
 	}
 
 	@Override

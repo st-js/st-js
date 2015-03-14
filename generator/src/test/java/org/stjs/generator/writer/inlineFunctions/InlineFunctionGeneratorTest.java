@@ -1,6 +1,8 @@
 package org.stjs.generator.writer.inlineFunctions;
 
+import static org.junit.Assert.assertEquals;
 import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
+import static org.stjs.generator.utils.GeneratorTestHelper.executeAndReturnNumber;
 import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
@@ -9,6 +11,11 @@ import org.stjs.generator.JavascriptFileGenerationException;
 public class InlineFunctionGeneratorTest {
 	@Test
 	public void testInlineFunction() {
+		assertCodeContains(InlineFunctions1.class, "method(function(arg){arg=arg+1;})");
+	}
+
+	@Test
+	public void testInlineFunctionWithJavaFuncAnnotation() {
 		assertCodeContains(InlineFunctions1.class, "method(function(arg){arg=arg+1;})");
 	}
 
@@ -26,8 +33,7 @@ public class InlineFunctionGeneratorTest {
 
 	@Test
 	public void testInterfaceTwoMethods() {
-		assertCodeContains(InlineFunctions3.class,
-				"stjs.extend(function InlineFunctions3$1(){}, null, [FunctionInterface2], ");
+		assertCodeContains(InlineFunctions3.class, "stjs.extend(function InlineFunctions3$1(){}, null, [FunctionInterface2], ");
 		assertCodeContains(InlineFunctions3.class, "prototype.$invoke=function(arg){arg=arg+1;};"
 				+ "prototype.$invoke2=function(arg2){arg2=arg2+1;};");
 	}
@@ -46,6 +52,18 @@ public class InlineFunctionGeneratorTest {
 	public void testImplementInlinefunction() {
 		// implement is forbidden
 		generate(InlineFunctions6.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testAccessOuterScope() {
+		generate(InlineFunctions7.class);
+	}
+
+	@Test
+	public void testUsingTHISParam() {
+		// assertCodeContains(InlineFunctions8.class, "method(function(){})");
+		double n = executeAndReturnNumber(InlineFunctions8.class);
+		assertEquals(10.0, n, 0);
 	}
 
 }

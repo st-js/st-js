@@ -2,6 +2,7 @@ package org.stjs.generator;
 
 /**
  * throw this exception when you have the name of the class for which you generate the exception
+ * 
  * @author acraciun
  */
 public class JavascriptClassGenerationException extends STJSRuntimeException {

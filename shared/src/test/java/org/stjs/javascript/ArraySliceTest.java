@@ -21,6 +21,15 @@ import org.junit.Test;
 public class ArraySliceTest {
 
 	@Test
+	public void slice_simple() {
+		Array<String> a = $array("1", "2", "3", "4");
+		Array<String> b = a.slice(1, 2);
+
+		assertEquals("1,2,3,4", a.toString()); // make sure I have sliced and not spliced
+		assertEquals("2", b.toString());
+	}
+
+	@Test
 	public void testSlice01() {
 		Array<Integer> x = $array(0, 1, 2, 3, 4);
 		Array<Integer> arr = x.slice(0, 3);

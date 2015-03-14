@@ -16,6 +16,7 @@
 package org.stjs.generator;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,9 +28,25 @@ import java.util.Set;
 public class GeneratorConfigurationBuilder {
 	private final Collection<String> allowedPackages = new HashSet<String>();
 	private final Set<String> allowedJavaLangClasses = new HashSet<String>();
+	private final Set<String> annotations = new HashSet<String>();
 	private boolean generateArrayHasOwnProperty = true;
 	private boolean generateSourceMap;
 	private String sourceEncoding = Charset.defaultCharset().name();
+
+	public GeneratorConfigurationBuilder() {
+		this(null);
+	}
+
+	public GeneratorConfigurationBuilder(GeneratorConfiguration baseConfig) {
+		if (baseConfig != null) {
+			allowedPackages(baseConfig.getAllowedPackages());
+			allowedJavaLangClasses(baseConfig.getAllowedJavaLangClasses());
+			annotations(baseConfig.getAnnotations());
+			generateArrayHasOwnProperty(baseConfig.isGenerateArrayHasOwnProperty());
+			generateSourceMap(baseConfig.isGenerateSourceMap());
+			sourceEncoding(baseConfig.getSourceEncoding());
+		}
+	}
 
 	public GeneratorConfigurationBuilder allowedPackage(String packageName) {
 		allowedPackages.add(packageName);
@@ -66,8 +83,19 @@ public class GeneratorConfigurationBuilder {
 		return this;
 	}
 
+	public GeneratorConfigurationBuilder annotations(String... annotationNames) {
+		annotations.addAll(Arrays.asList(annotationNames));
+		return this;
+	}
+
+	public GeneratorConfigurationBuilder annotations(Collection<String> annotationNames) {
+		annotations.addAll(annotationNames);
+		return this;
+	}
+
 	public GeneratorConfiguration build() {
 		allowedJavaLangClasses.add("Object");
+		allowedJavaLangClasses.add("Class");
 		allowedJavaLangClasses.add("String");
 		allowedJavaLangClasses.add("Number");
 		allowedJavaLangClasses.add("Double");
@@ -79,6 +107,7 @@ public class GeneratorConfigurationBuilder {
 		allowedJavaLangClasses.add("Character");
 		allowedJavaLangClasses.add("Byte");
 		allowedJavaLangClasses.add("Void");
+		allowedJavaLangClasses.add("Math");
 
 		allowedJavaLangClasses.add("Throwable");
 		allowedJavaLangClasses.add("Exception");
@@ -86,8 +115,8 @@ public class GeneratorConfigurationBuilder {
 
 		allowedPackages.add("java.lang");
 
-		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, generateArrayHasOwnProperty,
-				generateSourceMap, sourceEncoding);
+		return new GeneratorConfiguration(allowedPackages, allowedJavaLangClasses, generateArrayHasOwnProperty, generateSourceMap,
+				sourceEncoding, annotations);
 	}
 
 }

@@ -15,14 +15,12 @@ import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.codehaus.plexus.util.StringUtils;
+import com.google.common.base.Strings;
 
 /**
  * This class is used to copy files from a folder (inside a jar or on the disk) to another folder. copied from
  * http://stackoverflow.com/questions/1386809/copy-directory-from-a-jar-file
- * 
  * @author acraciun
- * 
  */
 public class FileCopier {
 	public static boolean copyFile(final File toCopy, final File destFile) {
@@ -57,8 +55,8 @@ public class FileCopier {
 		return true;
 	}
 
-	public static boolean copyJarResourcesRecursively(final File destDir, final JarURLConnection jarConnection,
-			FilenameFilter filter) throws IOException {
+	public static boolean copyJarResourcesRecursively(final File destDir, final JarURLConnection jarConnection, FilenameFilter filter)
+			throws IOException {
 
 		final JarFile jarFile = jarConnection.getJarFile();
 
@@ -139,7 +137,7 @@ public class FileCopier {
 	}
 
 	public static String removeStart(String str, String remove) {
-		if (StringUtils.isEmpty(str) || StringUtils.isEmpty(remove)) {
+		if (Strings.isNullOrEmpty(str) || Strings.isNullOrEmpty(remove)) {
 			return str;
 		}
 		if (str.startsWith(remove)) {

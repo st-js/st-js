@@ -50,7 +50,7 @@ public class MethodsGeneratorTest {
 	@Test
 	public void testSpecialThis() {
 		// the special parameter THIS should not be added
-		assertCodeContains(Methods7.class, "prototype.method=function(arg2){");
+		assertCodeContains(Methods7.class, "prototype.method=function(THIS, arg2){");
 	}
 
 	@Test
@@ -94,6 +94,30 @@ public class MethodsGeneratorTest {
 	@Test
 	public void testAbstractMethod() {
 		// the class only contains abstract methods, therefore nothing must be generated
-		assertCodeContains(Methods15.class, "stjs.extend(Methods15, null, [], null, {});");
+		assertCodeContains(Methods15.class, "stjs.extend(Methods15, null, [], function(constructor, prototype){" //
+				+ "prototype.doSomething=function(){};" //
+				+ "prototype.doSomethingElse=function(){};" //
+				+ "}, {}, {});");
+	}
+
+	@Test
+	public void testInterfaceMethods() {
+		// the class only contains abstract methods, therefore nothing must be generated
+		assertCodeContains(Methods15b.class, "stjs.extend(Methods15b, null, [], function(constructor, prototype){" //
+				+ "prototype.doSomething=function(){};" //
+				+ "prototype.doSomethingElse=function(){};" //
+				+ "}, {}, {});");
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testSynchronizedMethod() {
+		// synchronized is forbidden
+		generate(Methods16.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testWrongName() {
+		// keywords are forbidden
+		generate(Methods17.class);
 	}
 }

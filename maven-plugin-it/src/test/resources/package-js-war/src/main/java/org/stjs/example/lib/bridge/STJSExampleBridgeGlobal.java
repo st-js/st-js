@@ -14,7 +14,7 @@ import org.stjs.javascript.annotation.STJSBridge;
 @STJSBridge(sources = "/stjs/example/stjs-lib-example.js")
 public class STJSExampleBridgeGlobal {
 	public static int globalFunc(int x) {
-		throw new UnsupportedOperationException();
+		throw new RuntimeException();
 	}
 
 	public static STJSExampleModuleBridge STJSExampleModule;

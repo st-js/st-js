@@ -269,6 +269,7 @@ public class ArraySortTest {
 				return 1;
 			}
 
+			@Override
 			public String toString() {
 				return "-2";
 			}
@@ -301,6 +302,7 @@ public class ArraySortTest {
 				return 1;
 			}
 
+			@Override
 			public String toString() {
 				return "-2";
 			}

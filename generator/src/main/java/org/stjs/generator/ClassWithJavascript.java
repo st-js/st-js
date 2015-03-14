@@ -17,18 +17,26 @@ package org.stjs.generator;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
+
+import org.stjs.generator.name.DependencyType;
 
 /**
  * this interface represents the link between a java class and corresponding Javascript file (or files). As we need the
  * full dependencies list at compile time, they are set either during the code generation (for generated files) or
  * during the bridge construction
+ *
  * @author acraciun
  */
 public interface ClassWithJavascript {
 	String getClassName();
 
+	String getJavascriptNamespace();
+
 	List<URI> getJavascriptFiles();
 
 	List<ClassWithJavascript> getDirectDependencies();
+
+	Map<ClassWithJavascript, DependencyType> getDirectDependencyMap();
 
 }

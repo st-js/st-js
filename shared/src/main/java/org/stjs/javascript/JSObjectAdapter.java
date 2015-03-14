@@ -27,7 +27,11 @@ import org.stjs.javascript.annotation.Template;
  * @author acraciun
  */
 @Adapter
-public class JSObjectAdapter {
+public final class JSObjectAdapter {
+	private JSObjectAdapter() {
+		//
+	}
+
 	@Template("get")
 	public native static Object $get(Object obj, String property);
 

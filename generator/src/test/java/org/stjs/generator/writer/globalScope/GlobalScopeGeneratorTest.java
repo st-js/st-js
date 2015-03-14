@@ -14,9 +14,9 @@ public class GlobalScopeGeneratorTest {
 	public void testGlobalScopeGeneration() {
 		assertCodeDoesNotContain(Globals.class, "stjs.extends");
 		assertCodeDoesNotContain(Globals.class, "Globals");
-		assertCodeContains(Globals.class, "field=null");
-		assertCodeContains(Globals.class, "method=function(");
-		assertCodeContains(Globals.class, "one=null;two=null;");
+		assertCodeContains(Globals.class, "var field=null");
+		assertCodeContains(Globals.class, "var method=function(");
+		assertCodeContains(Globals.class, "var one=0;var two=0;");
 		assertCodeContains(Globals.class, "main()");
 		assertCodeContains(Globals.class, "(function(){var n = method();})()");
 	}
@@ -64,13 +64,21 @@ public class GlobalScopeGeneratorTest {
 		assertCodeContains(GlobalScope9.class, "s = field");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testInstanceMembersNotAllowded1() {
 		generate(GlobalScope10.class);
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testInstanceMembersNotAllowded2() {
 		generate(GlobalScope11.class);
+	}
+
+	@Test(
+			expected = JavascriptFileGenerationException.class)
+	public void testInner() {
+		generate(GlobalScope12.class);
 	}
 }

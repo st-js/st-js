@@ -3,16 +3,10 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
+	<groupId>org.st-js</groupId>
 	<artifactId>package-js-war</artifactId>
 	<packaging>war</packaging>
 	<version>1.0.0-SNAPSHOT</version>
-
-	<parent>
-		<groupId>org.st-js</groupId>
-		<artifactId>stjs</artifactId>
-		<version>2.1.0-SNAPSHOT</version>
-	</parent>
-
 
 	<dependencies>
 		<!-- for the java libraries -->
@@ -40,8 +34,8 @@
 			<!-- STJS -->
 			<plugin>
 				<groupId>org.st-js</groupId>
-				<artifactId>maven-plugin</artifactId>
-				<version>${parent.version}</version>
+				<artifactId>stjs-maven-plugin</artifactId>
+				<version>${stjs.version}</version>
 				<executions>
 					<execution>
 						<goals>

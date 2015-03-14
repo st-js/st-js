@@ -11,8 +11,18 @@ import org.stjs.generator.JavascriptFileGenerationException;
 
 public class FieldsGeneratorTest {
 	@Test
-	public void testInstanceField() {
-		assertCodeContains(Fields1.class, "prototype.x = null;");
+	public void testPrimitiveIntInstanceField() {
+		assertCodeContains(Fields1.class, "prototype.x = 0;");
+	}
+
+	@Test
+	public void testWrapperIntInstanceField() {
+		assertCodeContains(Fields1a.class, "prototype.x = null;");
+	}
+
+	@Test
+	public void testPrimitiveDoubleField() {
+		assertCodeContains(Fields1b.class, "prototype.x = 0.0;");
 	}
 
 	@Test
@@ -80,5 +90,65 @@ public class FieldsGeneratorTest {
 		Object result = execute(Fields14.class);
 		assertNotNull(result);
 		assertEquals(2, ((Number) result).intValue());
+	}
+
+	@Test
+	public void testTemplateSetter1() {
+		assertCodeContains(Fields15.class, "this.set(\"field\", n)");
+	}
+
+	@Test
+	public void testTemplateSetter2() {
+		assertCodeContains(Fields16.class, "f.set(\"field\", n)");
+	}
+
+	@Test
+	public void testTemplateSetter3() {
+		assertCodeContains(Fields15a.class, "Fields15a.set(\"field\", n)");
+	}
+
+	@Test
+	public void testTemplateGlobalSetter1() {
+		assertCodeContains(Fields17.class, "stjs.setField(this, \"field\", n)");
+	}
+
+	@Test
+	public void testTemplateGlobalSetter2() {
+		assertCodeContains(Fields18.class, "stjs.setField(f, \"field\", n)");
+	}
+
+	@Test
+	public void testTemplatePostIncrement() {
+		assertCodeContains(Fields19.class, "this.set(\"field\", this.get(\"field\") + 1, true)");
+	}
+
+	@Test
+	public void testTemplatePreIncrement() {
+		assertCodeContains(Fields20.class, "this.set(\"field\", this.get(\"field\") + 1)");
+	}
+
+	@Test
+	public void testTemplateGlobalPostIncrement() {
+		assertCodeContains(Fields21.class, "stjs.setField(this, \"field\", stjs.getField(this, \"field\") + 1, true)");
+	}
+
+	@Test
+	public void testTemplateAddAssign() {
+		assertCodeContains(Fields22.class, "this.set(\"field\", this.get(\"field\")  | (2))");
+	}
+
+	@Test
+	public void testTemplateGlobalDivideAssign() {
+		assertCodeContains(Fields23.class, "stjs.setField(this, \"field\", stjs.trunc(stjs.getField(this, \"field\") / (2)))");
+	}
+
+	@Test
+	public void testTemplateIdentifier() {
+		assertCodeContains(Fields24.class, "this.get(\"field\")");
+	}
+
+	@Test
+	public void testTemplateMemberSelect() {
+		assertCodeContains(Fields25.class, "obj.get(\"field\")");
 	}
 }

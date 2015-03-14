@@ -15,10 +15,11 @@ public class EnumGeneratorTest {
 	@Test
 	public void testEnumReference() {
 		assertCodeContains(Enums2.class, "Enums2.Value.a");
-		assertCodeContains(Enums2.class, "Enums2.Value = stjs.enumeration(\"a\", \"b\", \"c\");");
+		assertCodeContains(Enums2.class, "constructor.Value = stjs.enumeration(\"a\", \"b\", \"c\");");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test(
+			expected = JavascriptFileGenerationException.class)
 	public void testEnumWithFieldsDeclaration() {
 		// fields are not supported
 		generate(Enums9.class);
@@ -27,18 +28,18 @@ public class EnumGeneratorTest {
 	@Test
 	public void testEnumOrdinal() {
 		assertCodeContains(Enums5.class, "Enums5.Value.a.ordinal()");
-		assertCodeContains(Enums5.class, "Enums5.Value = stjs.enumeration(\"a\", \"b\", \"c\");");
+		assertCodeContains(Enums5.class, "constructor.Value = stjs.enumeration(\"a\", \"b\", \"c\");");
 	}
 
 	@Test
 	public void testEnumValues() {
 		assertCodeContains(Enums6.class, "for(var v in Enums6.Value.values())");
-		assertCodeContains(Enums6.class, "Enums6.Value = stjs.enumeration(\"a\", \"b\", \"c\");");
+		assertCodeContains(Enums6.class, "constructor.Value = stjs.enumeration(\"a\", \"b\", \"c\");");
 	}
 
 	@Test
 	public void testEnumDeclarationInInterface() {
-		assertCodeContains(Enums8.class, "Enums8.MyEnum = stjs.enumeration(\"a\", \"b\", \"c\");");
+		assertCodeContains(Enums8.class, "constructor.MyEnum = stjs.enumeration(\"a\", \"b\", \"c\");");
 	}
 
 	@Test

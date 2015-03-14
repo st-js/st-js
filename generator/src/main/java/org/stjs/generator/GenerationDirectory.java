@@ -23,6 +23,7 @@ import java.io.File;
  * that is saved within the .stjs files, that should be used later one (for example when this project is used as a
  * dependency - jar/war).<br>
  * The 3 parts are different for the files generated for the main classes compared to the test classes
+ * 
  * @author acraciun
  */
 public class GenerationDirectory {
@@ -50,8 +51,8 @@ public class GenerationDirectory {
 
 	@Override
 	public String toString() {
-		return "GenerationDirectory [absolutePath=" + absolutePath + ", classpath=" + classpath
-				+ ", relativeToClasspath=" + relativeToClasspath + "]";
+		return "GenerationDirectory [absolutePath=" + absolutePath + ", classpath=" + classpath + ", relativeToClasspath=" + relativeToClasspath
+				+ "]";
 	}
 
 }

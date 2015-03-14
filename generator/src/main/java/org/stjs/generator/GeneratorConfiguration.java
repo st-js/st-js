@@ -24,19 +24,21 @@ public class GeneratorConfiguration {
 	private final boolean generateArrayHasOwnProperty;
 	private final boolean generateSourceMap;
 	private final String sourceEncoding;
+	private final Set<String> annotations;
 
-	GeneratorConfiguration(Collection<String> allowedPackages, Set<String> allowedJavaLangClasses,
-			boolean generateArrayHasOwnProperty, boolean generateSourceMap, String sourceEncoding) {
+	GeneratorConfiguration(Collection<String> allowedPackages, Set<String> allowedJavaLangClasses, boolean generateArrayHasOwnProperty,
+			boolean generateSourceMap, String sourceEncoding, Set<String> annotations) {
 		this.allowedPackages = allowedPackages;
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
 		this.generateArrayHasOwnProperty = generateArrayHasOwnProperty;
 		this.generateSourceMap = generateSourceMap;
 		this.sourceEncoding = sourceEncoding;
+		this.annotations = annotations;
 	}
 
 	/**
-	 * @return the parent packages that contain the classes that can be called from the processed source file. Note that
-	 *         sub-packages of a package from this collection are also allowed. java.lang is implicit
+	 * @return the parent packages that contain the classes that can be called from the processed source file. Note that sub-packages of a
+	 *         package from this collection are also allowed. java.lang is implicit
 	 */
 	public Collection<String> getAllowedPackages() {
 		return allowedPackages;
@@ -56,6 +58,14 @@ public class GeneratorConfiguration {
 
 	public String getSourceEncoding() {
 		return sourceEncoding;
+	}
+
+	/**
+	 * these are annotations to be generated
+	 * @return
+	 */
+	public Set<String> getAnnotations() {
+		return annotations;
 	}
 
 }

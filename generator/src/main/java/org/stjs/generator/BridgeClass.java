@@ -20,9 +20,10 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
+import java.util.Map;
 import javax.annotation.concurrent.Immutable;
 
+import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.PreConditions;
 import org.stjs.javascript.annotation.STJSBridge;
@@ -30,21 +31,35 @@ import org.stjs.javascript.annotation.STJSBridge;
 /**
  * This class represents a bridge class. As javascript files it has the corresponding source files from the javascript
  * library. As dependencies it can have other bridge classes or even stjs classes.
+ *
  * @author acraciun
  */
 @Immutable
 public class BridgeClass implements ClassWithJavascript {
 	private final Class<?> clazz;
+	private final String jsNamespace;
 
 	public BridgeClass(DependencyResolver dependencyResolver, Class<?> clazz) {
 		PreConditions.checkNotNull(dependencyResolver);
 		PreConditions.checkNotNull(clazz);
 		this.clazz = clazz;
+		String ns = NamespaceUtil.resolveNamespace(clazz);
+		if (ns == null) {
+			// If we can't find a namespace in the bridge stuff, then we have to assume
+			// there is no namespace
+			ns = "";
+		}
+		this.jsNamespace = ns;
 	}
 
 	@Override
 	public String getClassName() {
 		return clazz.getName();
+	}
+
+	@Override
+	public String getJavascriptNamespace() {
+		return this.jsNamespace;
 	}
 
 	private boolean hasSourceAnnotation(STJSBridge bridgeAnnotation) {
@@ -79,16 +94,22 @@ public class BridgeClass implements ClassWithJavascript {
 	}
 
 	@Override
+	public Map<ClassWithJavascript, DependencyType> getDirectDependencyMap() {
+		// TODO use annotations
+		return Collections.emptyMap();
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = (prime * result) + clazz.getName().hashCode();
+		result = prime * result + clazz.getName().hashCode();
 		return result;
 	}
 
-	public Class<?> getClazz() {
-		return clazz;
-	}
+	// public Class<?> getClazz() {
+	// return clazz;
+	// }
 
 	@Override
 	public boolean equals(Object obj) {

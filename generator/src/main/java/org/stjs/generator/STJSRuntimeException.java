@@ -2,6 +2,7 @@ package org.stjs.generator;
 
 /**
  * this class is used to wrap checked exceptions that occur within the STJS code
+ * 
  * @author acraciun
  */
 public class STJSRuntimeException extends RuntimeException {

@@ -9,12 +9,12 @@ public class InheritanceTest {
 
 	@Test
 	public void testReenteringSuper() {
-		assertEquals(4.0, GeneratorTestHelper.execute(Inheritance1.class));
+		assertEquals(4.0, GeneratorTestHelper.executeAndReturnNumber(Inheritance1.class), 0);
 	}
 
 	@Test
 	public void testCopyPrototype() {
-		assertEquals(2.0, GeneratorTestHelper.execute(Inheritance2.class));
+		assertEquals(2.0, GeneratorTestHelper.executeAndReturnNumber(Inheritance2.class), 0);
 	}
 
 	/**
@@ -23,22 +23,21 @@ public class InheritanceTest {
 	 */
 	@Test
 	public void testExtendCompatibilityWith12() {
-		assertEquals("4 2 WXYZ undefined",
-				GeneratorTestHelper.execute("src/test/resources/javascript/Inheritance-generated-with-1.2.js"));
+		assertEquals("4 2 WXYZ undefined", GeneratorTestHelper.execute("src/test/resources/javascript/Inheritance-generated-with-1.2.js"));
 	}
 
 	@Test
 	public void testInstanceofSuperClass() {
-		assertEquals(1.0, GeneratorTestHelper.execute(Inheritance3.class));
+		assertEquals(1.0, GeneratorTestHelper.executeAndReturnNumber(Inheritance3.class), 0);
 	}
 
 	@Test
 	public void testInstanceofInterface() {
-		assertEquals(1.0, GeneratorTestHelper.execute(Inheritance4.class));
+		assertEquals(1.0, GeneratorTestHelper.executeAndReturnNumber(Inheritance4.class), 0);
 	}
 
 	@Test
 	public void testInstanceofSuperInterface() {
-		assertEquals(1.0, GeneratorTestHelper.execute(Inheritance5.class));
+		assertEquals(1.0, GeneratorTestHelper.executeAndReturnNumber(Inheritance5.class), 0);
 	}
 }

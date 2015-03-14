@@ -30,19 +30,18 @@ import org.stjs.javascript.functions.Function3;
 import org.stjs.javascript.functions.Function4;
 
 /**
- * This interface represents an array from Javascript.The value may be typed. The iteration is done on the indexes to
- * have the javascript equivalent of <br>
+ * This interface represents an array from Javascript.The value may be typed. The iteration is done on the indexes to have the javascript
+ * equivalent of <br>
  * <b>for(var key in array)</b> <br>
  * The methods are prefixed with $ to let the generator know that is should generate braket access instead, i.e <br>
  * array.$get(key) => array[key] <br>
- * array.$set(key, value) => array[key]=value
- * 
+ * array.$set(key, value) => array[key]=value It is generally a bad idea for code written in ST-JS to create subclasses of Array, as that will
+ * not be translated properly. However, it may be useful for some bridges.
  * <p>
  * The documentation of this class is mostly adapted from the ECMAScript 5.1 Specification:
  * http://www.ecma-international.org/ecma-262/5.1/
  * <p>
  * Browser compatibility information comes from: http://kangax.github.io/es5-compat-table
- * 
  * @author acraciun, npiguet
  */
 public class Array<V> implements Iterable<String> {
@@ -99,6 +98,35 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
+	 * constructors used on the server side only. It only wraps the given list, no copy is done
+	 * @param list
+	 * @return
+	 */
+	@ServerSide
+	public static <T> Array<T> wrap(List<T> list) {
+		return new Array<T>(list);
+	}
+
+	/**
+	 * constructors used on the server side only. It copies the given parameter
+	 * @param list
+	 * @return
+	 */
+	@ServerSide
+	public static <T> Array<T> copyOf(List<T> list) {
+		return new Array<T>(new ArrayList<T>(list));
+	}
+
+	/**
+	 * this gives access to the java implementation. used on the server side only
+	 * @return
+	 */
+	@ServerSide
+	public List<V> java() {
+		return array;
+	}
+
+	/**	
 	 * Returns an <tt>Iterator</tt> that allow this <tt>Array</tt> to be used in foreach statements. The returned
 	 * iterator is designed to make Java for-each statements on <tt>Arrays</tt> match the corresponding JavaScript
 	 * for-in statement. As a result, the returned iterator will iterate over the indices of the <tt>Array</tt>
@@ -486,7 +514,6 @@ public class Array<V> implements Iterable<String> {
 	 * @return the index at which the element was found, -1 if not found
 	 */
 	@BrowserCompatibility("IE:9+")
-	public int indexOf(V element, int start) {
 		long actualStart;
 		if (start < 0) {
 			actualStart = (long) Math.max(0, this.$length() + start);
@@ -865,6 +892,16 @@ public class Array<V> implements Iterable<String> {
 
 	}
 
+	/**
+	 * this method does exactly as {@link #forEach(Callback1)}, but allows in java 8 the usage of lambda easily as the forEach method overloads
+	 * the method from the new Iterable interface. The generated code is, as expected, forEach
+	 * @param callback
+	 */
+	@Template("prefix")
+	public void $forEach(Callback1<V> callback) {
+		forEach(callback);
+	}
+	
 	/**
 	 * Converts all the elements of this <tt>Array</tt> to their String representation, concatenates them using a comma
 	 * as a separator. Calling this method is equivalent to calling <tt>join()</tt>.

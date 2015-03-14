@@ -5,21 +5,38 @@
 	var browserId = -1;
 	var lastTestSrc = null;
 	var lastTestStarted = new Date();
-	var logDiv, statusDiv;
+	var logDiv, statusDiv, stackDiv;
 	var iframe;
 	var queryStringParameters;
 	var persistent;
+	var stacktraces = [];
 
 	function status(s){
 		statusDiv.innerHTML = s;
 	}
 
 	function log(s){
-		logDiv.innerHTML += "<span class='time'>" + new Date().toLocaleTimeString() + "</span> " + s + "<br>";
+		logDiv.innerHTML += "<span class='time'>" + new Date().toLocaleTimeString() + "</span> " + s;
 	}
+	function logAppend(s){
+		logDiv.innerHTML += s;
+	}
+	function logAppendError(s, stacktrace){
+		stacktraces.push(stacktrace);
+		logDiv.innerHTML += "<span class='error' onclick='showStack(" + (stacktraces.length - 1) + ")'>" + s + "</span>";
+	}
+	function logn(s){
+		log(s);
+		logAppend("<br>");
+	}
+	
+	function showStack(idx){
+		stackDiv.innerHTML = stacktraces[idx];
+	}
+	
 
 	function startingTest(testedClassName, methodName){
-		log('<b>' + testedClassName + '</b>.' + methodName);
+		log('<b>' + testedClassName + '</b>.' + methodName + ": ");
 		lastTestStarted = new Date();
 	}
 
@@ -38,13 +55,17 @@
 	function reportResultAndRunNextTest(result, stacktrace, firstTest){
 		var location = stacktrace;
 		var isAssert = false;
-		if (result != "OK" && console) {
-			var errorStack = printStackTrace({e:result});
-			console.error(errorStack.join("\n"));
-			//take first non-junit stack trace element
-			errorStack.splice(0,1);
-			location = encodeURIComponent(errorStack.join(";"));
-			for(var i = 0; 1 < errorStack.length; ++i){
+		var errorStack = "";
+		if (result != "OK") {
+			errorStack = printStackTrace({e:result});
+			if (console)
+				console.error(errorStack.join("\n"));
+            //take first non-junit stack trace element and the last one
+			//errorStack.splice(0,1);
+			errorStack.splice(errorStack.length - 1,1);
+            location = encodeURIComponent(errorStack.join(";"));
+			
+			for(var i = 0; i < errorStack.length; ++i){
 				if (errorStack[i].indexOf("junit.js") < 0) {
 					isAssert = (i > 1);
 					break;
@@ -52,14 +73,17 @@
 			}
 		}
 		if(!firstTest){
-			log(result);
+			if (result == "OK")
+				logAppend(result + "<br>");
+			else
+				logAppendError(result + "<br>", errorStack.join("<br>"));
 		}
 		if(persistent){
 			setTimeout(checkLoad, 500);
 		}
 		iframe.src = '/getNextTest' +
 				'?browserId=' + browserId +
-				'&result=' + result +
+				'&result=' + encodeURIComponent(result) +
 				'&location=' + location +
 				'&isAssert=' + isAssert +
 				'&rand=' + Math.random();
@@ -88,6 +112,7 @@
 	onload = function() {
 		iframe = document.getElementById("iframe");
 		logDiv = document.getElementById("log");
+		stackDiv = document.getElementById("stack");
 		statusDiv = document.getElementById("status");
 		queryStringParameters = decodeParameters();
 		browserId = queryStringParameters['browserId'];
@@ -106,17 +131,30 @@
 	}
 	#iframe {
 		float:left;
+		border: solid 1px #ddd;
 	}
 	#log {
 		float:left;
-		width:400px;
 		padding-left: 20px;
 		font-size: .8em;
 		height: 90%;
 		overflow-y: auto;
 	}
+	#stack {
+		font-size: .8em;
+		position:absolute;
+		top: 450px;
+		width: 600px;
+		overflow-x: auto;
+		padding-bottom: 20px;
+	}
+	
 	.time {
 		color:lightgray;
+	}
+	.error {
+		color: red;
+		cursor: pointer;
 	}
 </style>
 </head>
@@ -124,5 +162,6 @@
 	<div id="status"></div>
 	<iframe id="iframe" src="about:blank" width=600 height=400></iframe>
 	<div id="log"></div>
+	<div id="stack"></div>
 </body>
 </html>

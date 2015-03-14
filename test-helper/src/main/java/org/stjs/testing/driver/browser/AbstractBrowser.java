@@ -1,6 +1,9 @@
 package org.stjs.testing.driver.browser;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -16,7 +19,7 @@ import org.stjs.testing.driver.TestResult;
 
 import com.sun.net.httpserver.HttpExchange;
 
-@SuppressWarnings({ "restriction" })
+@SuppressWarnings({"restriction"})
 public abstract class AbstractBrowser implements Browser {
 
 	private DriverConfiguration config;
@@ -36,8 +39,13 @@ public abstract class AbstractBrowser implements Browser {
 			if (config.isDebugEnabled()) {
 				System.out.println("Started " + builder.command().get(0));
 			}
+			if (config.isDebugEnabled()) {
+				StreamGobbler outputGobbler = new StreamGobbler(p.getInputStream());
+				outputGobbler.start();
+			}
 			return p;
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new InitializationError(e);
 		}
 	}
@@ -47,7 +55,9 @@ public abstract class AbstractBrowser implements Browser {
 		if (executableName == null) {
 			executableName = locator.findBrowserLocationOrFail().launcherFilePath();
 		}
-		return new ProcessBuilder(executableName, url);
+		ProcessBuilder builder = new ProcessBuilder(executableName, url);
+		builder.redirectErrorStream(true);
+		return builder;
 	}
 
 	@Override
@@ -70,7 +80,8 @@ public abstract class AbstractBrowser implements Browser {
 		byte[] response;
 		try {
 			response = content.getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) {
+		}
+		catch (UnsupportedEncodingException e) {
 			// Cannot happen. UTF-8 is part of the character sets that must be supported by any implementation of java
 			throw new RuntimeException(e);
 		}
@@ -82,8 +93,8 @@ public abstract class AbstractBrowser implements Browser {
 	}
 
 	/**
-	 * Reads the result of the last unit test from the specified HTTP request. The default implementation builds the
-	 * test result by reading the "result" and "location" query string parameters
+	 * Reads the result of the last unit test from the specified HTTP request. The default implementation builds the test result by reading the
+	 * "result" and "location" query string parameters
 	 */
 	public TestResult buildResult(Map<String, String> queryStringParameters, HttpExchange exchange) {
 		String userAgent = exchange.getRequestHeaders().getFirst("User-Agent");
@@ -110,4 +121,29 @@ public abstract class AbstractBrowser implements Browser {
 		}
 		return deps;
 	}
+
+	class StreamGobbler extends Thread {
+		InputStream is;
+
+		// reads everything from is until empty.
+		StreamGobbler(InputStream is) {
+			this.is = is;
+		}
+
+		@Override
+		public void run() {
+			try {
+				InputStreamReader isr = new InputStreamReader(is);
+				BufferedReader br = new BufferedReader(isr);
+				String line = null;
+				while ((line = br.readLine()) != null) {
+					System.out.println("<<" + line + ">>");
+				}
+			}
+			catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
+		}
+	}
+
 }

@@ -9,26 +9,41 @@ public class IntsTest {
 
 	@Test
 	public void testCastInt() {
-		assertEquals(2.0, GeneratorTestHelper.execute(Ints1.class));
+		assertEquals(2.0, GeneratorTestHelper.executeAndReturnNumber(Ints1.class), 0);
+	}
+
+	@Test
+	public void testCastIntLonger() {
+		assertEquals(1413492112445.0, GeneratorTestHelper.executeAndReturnNumber(Ints1b.class), 0);
 	}
 
 	@Test
 	public void testCastLong() {
-		assertEquals(2.0, GeneratorTestHelper.execute(Ints2.class));
+		assertEquals(2.0, GeneratorTestHelper.executeAndReturnNumber(Ints2.class), 0);
 	}
 
 	@Test
 	public void testIntegerDivision() {
-		assertEquals(2.0, GeneratorTestHelper.execute(Ints3.class));
+		assertEquals(2.0, GeneratorTestHelper.executeAndReturnNumber(Ints3.class), 0);
 	}
 
 	@Test
 	public void testDoubleDivision1() {
-		assertEquals(2.5, GeneratorTestHelper.execute(Ints4.class));
+		assertEquals(2.5, GeneratorTestHelper.executeAndReturnNumber(Ints4.class), 0);
 	}
 
 	@Test
 	public void testDoubleDivision2() {
-		assertEquals(2.5, GeneratorTestHelper.execute(Ints5.class));
+		assertEquals(2.5, GeneratorTestHelper.executeAndReturnNumber(Ints5.class), 0);
+	}
+
+	@Test
+	public void testIntegerDivisionAndAssign() {
+		assertEquals(2.0, GeneratorTestHelper.executeAndReturnNumber(Ints6.class), 0);
+	}
+
+	@Test
+	public void testIntegerDivisionAndAssign2() {
+		assertEquals(2.0, GeneratorTestHelper.executeAndReturnNumber(Ints7.class), 0);
 	}
 }

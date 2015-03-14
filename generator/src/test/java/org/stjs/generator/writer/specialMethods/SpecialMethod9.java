@@ -1,12 +1,8 @@
 package org.stjs.generator.writer.specialMethods;
 
-import org.stjs.javascript.annotation.Template;
+import static org.stjs.javascript.JSGlobal.$or;
 
 public class SpecialMethod9 {
-	@Template("or")
-	public static Object $or(Object... arguments) {
-		return 0;
-	}
 
 	public void method() {
 		@SuppressWarnings("unused")

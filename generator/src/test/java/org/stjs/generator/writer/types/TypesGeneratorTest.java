@@ -17,4 +17,20 @@ public class TypesGeneratorTest {
 		generate(Types2.class);
 	}
 
+	@Test
+	public void testAllowedrrays() {
+		// should not break in the annotation's array
+		generate(Types3.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testUseForbiddenTypes() {
+		generate(Types4.class);
+	}
+
+	@Test
+	public void testExtendsException() {
+		// should not break in the annotation's array
+		generate(Types5.class);
+	}
 }

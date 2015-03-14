@@ -21,7 +21,7 @@ public class ParseJsonTest {
 			} else if (bean instanceof Array) {
 				bean = ((Array<?>) bean).$get(p);
 			} else {
-				fail(bean + " is not a map or array");
+				fail(bean + " is not a map or array. Type is:" + bean.getClass().getName());
 				return null;
 			}
 		}
@@ -30,6 +30,9 @@ public class ParseJsonTest {
 
 	private void assertProperty(Object expected, Object obj, String... props) {
 		Object bean = getProperty(obj, props);
+		if (bean instanceof Number) {
+			bean = new Double(((Number) bean).doubleValue());
+		}
 		assertEquals(expected, bean);
 	}
 
@@ -63,8 +66,17 @@ public class ParseJsonTest {
 		Object result = GeneratorTestHelper.execute(Json4.class);
 		assertProperty("Class4", result, "type");
 		Date d = (Date) getProperty(result, "date");
-		assertEquals(11, d.getUTCMonth(), 0.1);
-		assertEquals(18, d.getUTCHours(), 0.1);
+		assertEquals(11, d.getMonth(), 0.1);
+		assertEquals(18, d.getHours(), 0.1);
+	}
+
+	@Test
+	public void testDateWithTypefy() {
+		Object result = GeneratorTestHelper.execute(Json4b.class);
+		assertProperty("Class4", result, "type");
+		Date d = (Date) getProperty(result, "date");
+		assertEquals(11, d.getMonth(), 0.1);
+		assertEquals(18, d.getHours(), 0.1);
 	}
 
 	@Test
@@ -73,6 +85,24 @@ public class ParseJsonTest {
 		assertProperty("Class5", result, "type");
 		assertProperty(1.0, result, "e", "_ordinal");
 		assertProperty("b", result, "e", "_name");
+	}
+
+	@Test
+	public void testEnumWithTypefy() {
+		Object result = GeneratorTestHelper.execute(Json5b.class);
+		assertProperty("Class5", result, "type");
+		assertProperty(1.0, result, "e", "_ordinal");
+		assertProperty("b", result, "e", "_name");
+	}
+
+	@Test
+	public void testEnumWithStringify() {
+		Object result = GeneratorTestHelper.execute(Json5c.class);
+		assertProperty("Class5", result, "type");
+		assertProperty(2.0, result, "number");
+		assertProperty("b", result, "e");
+		assertProperty(4.0, result, "child", "number");
+		assertProperty(null, result, "equals");
 	}
 
 	@Test

@@ -9,7 +9,7 @@ public class StatementTest {
 
 	@Test
 	public void testTypeOf() {
-		assertEquals(0.0, GeneratorTestHelper.execute(Statements1.class));
+		assertEquals(0.0, GeneratorTestHelper.executeAndReturnNumber(Statements1.class), 0);
 	}
 
 }

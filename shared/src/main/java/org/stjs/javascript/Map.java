@@ -18,27 +18,64 @@ package org.stjs.javascript;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.stjs.javascript.annotation.ServerSide;
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.annotation.Template;
 
 /**
- * This interface represents a normal object in javascript (that acts as a map). The key can be only be a String! is
- * done on the keys to have the javascript equivalent of <br>
+ * This interface represents a normal object in javascript (that acts as a map). The key can be only be a String! is done on the keys to have the
+ * javascript equivalent of <br>
  * <b>for(var key in map)</b> <br>
  * The methods are prefixed with $ to let the generator know that is should generate bracket access instead, i.e <br>
  * map.$get(key) => map[key] <br>
  * map.$put(key, value) => map[key]=value
- * 
  * @author acraciun
  */
-public final class Map<K extends String, V> implements Iterable<K> {
-	private final java.util.Map<K, V> map = new HashMap<K, V>();
+@SyntheticType
+public class Map<K extends String, V> implements Iterable<K> {
+	private final java.util.Map<K, V> map;
 
 	/**
-	 * Constructor is package private, it isn't supposed to be used directly by clients of the API. Use
-	 * <tt>JSCollections.$map()</tt> instead.
+	 * Constructor is package private, it isn't supposed to be used directly by clients of the API. Use <tt>JSCollections.$map()</tt> instead.
 	 */
-	Map() {
-		super();
+	protected Map() {
+		this(new HashMap<K, V>());
+	}
+
+	/**
+	 * Constructor is package private, it isn't supposed to be used directly by clients of the API. Use <tt>JSCollections.$map()</tt> instead.
+	 */
+	private Map(java.util.Map<K, V> map) {
+		this.map = map;
+	}
+
+	/**
+	 * constructors used on the server side only. It only wraps the given map, no copy is done
+	 * @param list
+	 * @return
+	 */
+	@ServerSide
+	public static <KK extends String, VV> Map<KK, VV> wrap(java.util.Map<KK, VV> map) {
+		return new Map<KK, VV>(map);
+	}
+
+	/**
+	 * constructors used on the server side only. It copies the given parameter
+	 * @param list
+	 * @return
+	 */
+	@ServerSide
+	public static <KK extends String, VV> Map<KK, VV> copyOf(java.util.Map<KK, VV> map) {
+		return new Map<KK, VV>(new HashMap<KK, VV>(map));
+	}
+
+	/**
+	 * this gives access to the java implementation. used on the server side only
+	 * @return
+	 */
+	@ServerSide
+	public java.util.Map<K, V> java() {
+		return map;
 	}
 
 	public Iterator<K> iterator() {
@@ -60,6 +97,7 @@ public final class Map<K extends String, V> implements Iterable<K> {
 		map.remove(key);
 	}
 
+	@Override
 	public String toString() {
 		return map.toString();
 	}

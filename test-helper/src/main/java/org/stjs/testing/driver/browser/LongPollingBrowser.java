@@ -1,5 +1,6 @@
 package org.stjs.testing.driver.browser;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
@@ -19,11 +20,13 @@ import org.junit.runners.model.InitializationError;
 import org.stjs.generator.BridgeClass;
 import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
+import org.stjs.generator.DependencyResolver;
+import org.stjs.generator.GenerationDirectory;
 import org.stjs.generator.Generator;
-import org.stjs.generator.name.DefaultNameProvider;
-import org.stjs.generator.name.NameProvider;
-import org.stjs.generator.type.TypeWrapper;
-import org.stjs.generator.type.TypeWrappers;
+import org.stjs.generator.GeneratorConfiguration;
+import org.stjs.generator.STJSClass;
+import org.stjs.generator.STJSRuntimeException;
+import org.stjs.generator.utils.ClassUtils;
 import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.Scripts;
 import org.stjs.testing.annotation.ScriptsAfter;
@@ -40,18 +43,15 @@ import com.google.common.base.Strings;
 import com.sun.net.httpserver.HttpExchange;
 
 /**
- * Represents a testing session opened with one instance of a browser that uses long-polling to fetch new tests to
- * execute from the HTTP server. LongPollingBrowser handles multithreading synchronization between the browser, the HTTP
- * server and the JUnit runner. The JUnit runner notifies this browser that a new test method must be executed by
- * calling executeTest(MultiTestMethod), or that it has finished executing all the tests by calling notifyNoMoreTests().
- * The HTTP server waits for a new test to send to the browser by calling awaitNewTestReady(). <br>
+ * Represents a testing session opened with one instance of a browser that uses long-polling to fetch new tests to execute from the HTTP server.
+ * LongPollingBrowser handles multithreading synchronization between the browser, the HTTP server and the JUnit runner. The JUnit runner notifies
+ * this browser that a new test method must be executed by calling executeTest(MultiTestMethod), or that it has finished executing all the tests
+ * by calling notifyNoMoreTests(). The HTTP server waits for a new test to send to the browser by calling awaitNewTestReady(). <br>
  * <br>
- * On top of that, LongPollinBrowser delegates the details of starting and stopping the browser itself to its concrete
- * subclasses.
- * 
+ * On top of that, LongPollinBrowser delegates the details of starting and stopping the browser itself to its concrete subclasses.
  * @author lordofthepigs
  */
-@SuppressWarnings({ "restriction", "deprecation" })
+@SuppressWarnings({"restriction", "deprecation"})
 public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	private final Exchanger<MultiTestMethod> exchanger = new Exchanger<MultiTestMethod>();
@@ -79,20 +79,21 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	}
 
 	/**
-	 * Starts the browser session. This will open a browser and navigate it to some page where the unit testing
-	 * procedure can be started. The decision about exactly which browser binary is started, how it is started and which
-	 * page is opened is delegated to the Browser implementation that this AsynBrowserSession was constructed with. This
-	 * method performs some error handling, and the real implementation of the browser starting procedure is delegated
-	 * to doStart().
+	 * Starts the browser session. This will open a browser and navigate it to some page where the unit testing procedure can be started. The
+	 * decision about exactly which browser binary is started, how it is started and which page is opened is delegated to the Browser
+	 * implementation that this AsynBrowserSession was constructed with. This method performs some error handling, and the real implementation of
+	 * the browser starting procedure is delegated to doStart().
 	 */
 	@Override
 	public void start() throws InitializationError {
 		try {
 			this.doStart();
-		} catch (InitializationError ie) {
+		}
+		catch (InitializationError ie) {
 			this.markAsDead();
 			throw ie;
-		} catch (Throwable t) {
+		}
+		catch (Throwable t) {
 			this.markAsDead();
 			throw new InitializationError(t);
 		}
@@ -101,12 +102,11 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	protected abstract void doStart() throws InitializationError;
 
 	/**
-	 * Blocks until JUnit notifies this browser session that either a new test must be executed (ie: executeTest() is
-	 * called), or there are no more tests (ie: notifyNoMoreTests() is called). If there is a new test to execute, then
-	 * this method returns it. If there are no more tests, this method returns null.<br>
+	 * Blocks until JUnit notifies this browser session that either a new test must be executed (ie: executeTest() is called), or there are no
+	 * more tests (ie: notifyNoMoreTests() is called). If there is a new test to execute, then this method returns it. If there are no more
+	 * tests, this method returns null.<br>
 	 * <br>
 	 * This method is typically called right after the results of the previous test were reported.
-	 * 
 	 * @return The next test to execute, or null if there isn't any
 	 */
 	public MultiTestMethod awaitNextTest() {
@@ -123,26 +123,23 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 			if (getConfig().isDebugEnabled()) {
 				if (methodUnderExecution != null) {
-					System.out.println("Browser " + this.id + " has picked up the test "
-							+ methodUnderExecution.getMethod().getMethod());
+					System.out.println("Browser " + this.id + " has picked up the test " + methodUnderExecution.getMethod().getMethod());
 				} else {
 					System.out.println("Browser " + this.id + " has no more tests");
 				}
 			}
 			return methodUnderExecution;
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	/**
-	 * Notifies this browser that the specified test must be executed. This method blocks until this browser picks up
-	 * the test by calling awaitNextTest(). If the browser does not pick up the test within the timeout specified in
-	 * DriverConfiguration.getTestTimeout(), then the browser is assumed to be dead. The test is failed, and the browser
-	 * does not receive any more tests at all.
-	 * 
-	 * @param method
-	 *            The test to execute.
+	 * Notifies this browser that the specified test must be executed. This method blocks until this browser picks up the test by calling
+	 * awaitNextTest(). If the browser does not pick up the test within the timeout specified in DriverConfiguration.getTestTimeout(), then the
+	 * browser is assumed to be dead. The test is failed, and the browser does not receive any more tests at all.
+	 * @param method The test to execute.
 	 */
 	@Override
 	public void executeTest(MultiTestMethod method) {
@@ -158,9 +155,11 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 			if (getConfig().isDebugEnabled()) {
 				System.out.println("Browser " + this.id + " has picked up the new test");
 			}
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			throw new RuntimeException(e);
-		} catch (TimeoutException e) {
+		}
+		catch (TimeoutException e) {
 			// the browser failed to pick up the test in time.
 			this.markAsDead();
 			this.reportAsDead(method);
@@ -171,13 +170,14 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	 * Reports this browser as dead to the specified test method. The test will be failed.
 	 */
 	private void reportAsDead(MultiTestMethod method) {
-		method.notifyExecutionResult(new TestResult(this.getClass().getSimpleName(), "Browser is dead", null, false));
+		method.notifyExecutionResult(TestResult.deadBrowser(this.getClass().getSimpleName(), getConfig().getTestTimeout()
+				+ " seconds passed and the browser didn't contact back the ST-JS JUnit runner"));
 	}
 
 	/**
-	 * Notifies this browser that there are no more tests to execute. This method blocks until this browser attempts to
-	 * pick up a new test by calling awaitNewTestReady(). If the browser does not attempt to pick up a new test within
-	 * the timeout specified in DriverConfiguration.getTestTimeout(), then the browser is assumed to be dead.
+	 * Notifies this browser that there are no more tests to execute. This method blocks until this browser attempts to pick up a new test by
+	 * calling awaitNewTestReady(). If the browser does not attempt to pick up a new test within the timeout specified in
+	 * DriverConfiguration.getTestTimeout(), then the browser is assumed to be dead.
 	 */
 	@Override
 	public void notifyNoMoreTests() {
@@ -189,9 +189,11 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 				System.out.println("Browser " + this.id + " has been notified that no more tests are coming");
 			}
 			exchanger.exchange(null, getConfig().getTestTimeout(), TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			throw new RuntimeException(e);
-		} catch (TimeoutException e) {
+		}
+		catch (TimeoutException e) {
 			// the browser failed to pick up the test in time.
 			this.markAsDead();
 		}
@@ -204,23 +206,23 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		return methodUnderExecution;
 	}
 
-	private String getTypeName(Class<?> clazz) {
-		// TODO have it inject it here
-		NameProvider names = new DefaultNameProvider();
-		TypeWrapper type = TypeWrappers.wrap(clazz);
-		return names.getTypeName(type);
+	private String getTypeName(Class<?> clazz, ClassWithJavascript stjsClass) {
+		String simpleName = clazz.getSimpleName();
+		String ns = stjsClass.getJavascriptNamespace();
+		if(ns != null && !ns.isEmpty()){
+			return ns + "." + simpleName;
+		}
+		return simpleName;
+	}
+
+	private String getTypeName(Class<?> clazz){
+		return getTypeName(clazz, new NullDependencyResolver().resolve(clazz.getName()));
 	}
 
 	/**
-	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser to execute the
-	 * specified test.
-	 * 
-	 * @param meth
-	 *            The test to send to the browser
-	 * @param browserSession
-	 *            The session to which the test is sent
-	 * @param exchange
-	 *            contains the HTTP response that must be written to
+	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser to execute the specified test.
+	 * @param meth The test to send to the browser
+	 * @param exchange contains the HTTP response that must be written to
 	 */
 	public void sendTestFixture(MultiTestMethod meth, HttpExchange exchange) throws Exception {
 		Class<?> testClass = meth.getTestClass().getJavaClass();
@@ -259,8 +261,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		}
 
 		Set<URI> jsFiles = new LinkedHashSet<URI>();
-		for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(getConfig()
-				.getClassLoader())) {
+		for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(getConfig().getClassLoader())) {
 
 			if (addedScripts != null && dep instanceof BridgeClass) {
 				// bridge dependencies are not added when using @Scripts
@@ -291,14 +292,19 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		// Adapter between generated assert (not global) and JS-test-driver assert (which is a
 		// set of global methods)
 		resp.append("    Assert=window;\n");
-
-		String testedClassName = testClass.getSimpleName();
-		resp.append("    parent.startingTest('" + testedClassName + "', '" + method.getName() + "');");
-		resp.append("    var stjsTest = new " + testedClassName + "();\n");
-		resp.append("    var stjsResult = 'OK';\n");
-		resp.append("    var expectedException = "
-				+ (test.expected() != Test.None.class ? getTypeName(test.expected()) : null) + ";\n");
 		resp.append("    try{\n");
+
+		String testedClassName = getTypeName(testClass, stjsClass);
+		resp.append("        parent.startingTest('" + testedClassName + "', '" + method.getName() + "');");
+		resp.append("        var stjsTest = new " + testedClassName + "();\n");
+		resp.append("        var stjsResult = 'OK';\n");
+
+		String expectedExceptionConstructor = "null";
+		if(test.expected() != Test.None.class){
+			expectedExceptionConstructor = getTypeName(test.expected());
+		}
+		resp.append("        var expectedException = " + expectedExceptionConstructor + ";\n");
+
 		// call before methods
 		for (FrameworkMethod beforeMethod : beforeMethods) {
 			resp.append("      stjsTest." + beforeMethod.getName() + "();\n");
@@ -344,13 +350,8 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	}
 
 	/**
-	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser understand that
-	 * there will be no more tests.
-	 * 
-	 * @param browserSession
-	 *            The session to be notified
-	 * @param exchange
-	 *            contains the HTTP response that must be written to
+	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser understand that there will be no more tests.
+	 * @param exchange contains the HTTP response that must be written to
 	 * @throws IOException
 	 */
 	public void sendNoMoreTestFixture(HttpExchange exchange) throws IOException {
@@ -369,10 +370,39 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	public void markAsDead(Throwable throwable, String userAgent) {
 		this.isDead = true;
-		this.methodUnderExecution.notifyExecutionResult(new TestResult(userAgent, throwable.getMessage(), null, false));
+		this.methodUnderExecution.notifyExecutionResult(TestResult.deadBrowser(userAgent, throwable.getMessage()));
 	}
 
 	public long getId() {
 		return this.id;
+	}
+
+	private class NullDependencyResolver implements DependencyResolver {
+
+		public NullDependencyResolver() {
+		}
+
+		@Override
+		public ClassWithJavascript resolve(String className) {
+			String parentClassName = className;
+			int pos = parentClassName.indexOf('$');
+			if (pos > 0 && parentClassName.charAt(pos - 1) != '.') {
+				// avoid classes like angularjs.$Timeout
+				parentClassName = parentClassName.substring(0, pos);
+			}
+			// try first if to see if it's a bridge class
+			Class<?> clazz;
+			try {
+				clazz = getConfig().getClassLoader().loadClass(parentClassName);
+			}
+			catch (ClassNotFoundException e) {
+				throw new STJSRuntimeException(e);
+			}
+			if (ClassUtils.isBridge(getConfig().getClassLoader(), clazz)) {
+				return new BridgeClass(this, clazz);
+			}
+
+			return new STJSClass(this, getConfig().getClassLoader(), parentClassName);
+		}
 	}
 }

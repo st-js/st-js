@@ -27,8 +27,8 @@ public class NamesGeneratorTest {
 
 	@Test
 	public void testSpecialThis() {
-		// the special parameter THIS should be transformed in this
-		assertCodeContains(Names5.class, "return this.field");
+		// the special parameter THIS is no longer changed
+		assertCodeContains(Names5.class, "return THIS.field");
 	}
 
 	@Test
@@ -54,5 +54,25 @@ public class NamesGeneratorTest {
 	@Test
 	public void testThatInInner() {
 		assertCodeContains(Names10.class, "that.method()");
+	}
+
+	@Test
+	public void testStaticAccessFromInstanceVar() {
+		assertCodeContains(Names11.class, "n.constructor.staticMethod()");
+	}
+
+	@Test
+	public void testStaticAccessFromInstanceNew() {
+		assertCodeContains(Names12.class, "new Names12().constructor.staticMethod()");
+	}
+
+	@Test
+	public void testStaticAccessFromInstanceMethodReturn() {
+		assertCodeContains(Names13.class, "instance().constructor.staticMethod()");
+	}
+
+	@Test
+	public void testStaticFieldAccessFromInstanceMethodReturn() {
+		assertCodeContains(Names14.class, "instance().constructor.staticField");
 	}
 }

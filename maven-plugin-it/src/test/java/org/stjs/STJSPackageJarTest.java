@@ -13,10 +13,10 @@ import org.junit.Test;
  * This integration test checks if a jar is correctly packaged
  * 
  * @author acraciun
- * 
  */
 public class STJSPackageJarTest {
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testPackageIt() throws Exception {
 
@@ -24,6 +24,10 @@ public class STJSPackageJarTest {
 
 		Verifier verifier = new Verifier(testDir.getAbsolutePath());
 		verifier.deleteArtifact("org.st-js", "package-js-jar", "1.0.0-SNAPSHOT", "jar");
+
+		// coming from the configuration of surefire plugin outside
+		verifier.getCliOptions().add("-Dstjs.version=" + System.getProperty("stjs.version"));
+
 		verifier.executeGoal("install");
 
 		verifier.verifyErrorFreeLog();
