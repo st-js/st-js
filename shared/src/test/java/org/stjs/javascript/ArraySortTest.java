@@ -1,6 +1,7 @@
 package org.stjs.javascript;
 
 import static java.lang.Double.NaN;
+import static java.lang.Double.POSITIVE_INFINITY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -9,6 +10,8 @@ import static org.stjs.javascript.JSGlobal.Array;
 import static org.stjs.javascript.JSGlobal.String;
 
 import org.junit.Test;
+
+import java.util.Objects;
 
 // ============================================
 // Tests section 15.4.4.11 of the ECMA-262 Spec
@@ -35,7 +38,7 @@ public class ArraySortTest {
 		assertEquals(1, x.$get(0).intValue());
 		assertEquals(null, x.$get(1));
 
-		x = $array(2); // remember, this makes an empty array with length=2
+		x = Array(2); // remember, this makes an empty array with length=2
 		x.$set(0, 1);
 		x.sort();
 
@@ -105,14 +108,16 @@ public class ArraySortTest {
 
 	@Test
 	public void testSort06() {
+		// this function sorts nulls last. By default nulls are sorted before numbers because
+		// the string "null" is alphabetically smaller than all numeric strings (except maybe Infinity).
 		SortFunction<Integer> myComparefn = new SortFunction<Integer>() {
 			@Override
 			public int $invoke(Integer x, Integer y) {
 				if (x == null) {
-					return -1;
+					return 1;
 				}
 				if (y == null) {
-					return 1;
+					return -1;
 				}
 				return 0;
 			}
@@ -275,8 +280,8 @@ public class ArraySortTest {
 				return "-2";
 			}
 		};
-		Array<Object> alphabetR = $array(null, 2, 1, "X", -1, "a", true, obj, NaN, Double.POSITIVE_INFINITY);
-		Array<Object> alphabet = $array(-1, obj, 1, 2, Double.POSITIVE_INFINITY, NaN, "X", "a", true, null);
+		Array<Object> alphabetR = $array(null, 2, 1, "X", -1, "a", true, obj, NaN, POSITIVE_INFINITY);
+		Array<Object> alphabet = $array(-1, obj, 1, 2, POSITIVE_INFINITY, NaN, "X", "a", null, true);
 
 		alphabetR.sort();
 
@@ -286,7 +291,7 @@ public class ArraySortTest {
 			Object b = alphabet.$get(i);
 
 			if (!(a instanceof Double && b instanceof Double && Double.isNaN((Double) a) && Double.isNaN((Double) b))) {
-				if (!a.equals(b)) {
+				if (!Objects.equals(a, b)) {
 					result = false;
 					break;
 				}
@@ -315,14 +320,14 @@ public class ArraySortTest {
 				// inverse function from the normal comparison, should sort in descending order
 				String xS = String(x);
 				String yS = String(y);
-				return -xS.compareToIgnoreCase(yS);
+				return -xS.compareTo(yS);
 			}
 		};
 
-		Array<Object> alphabetR = $array(null, 2, 1, "X", -1, "a", true, obj, NaN, Double.POSITIVE_INFINITY);
-		Array<Object> alphabet = $array(-1, obj, 1, 2, Double.POSITIVE_INFINITY, NaN, "X", "a", true, null);
+		Array<Object> alphabetR = $array(null, 2, 1, "X", -1, "a", true, obj, NaN, POSITIVE_INFINITY);
+		Array<Object> alphabet = $array(true, null, "a", "X", NaN, POSITIVE_INFINITY, 2, 1, obj, -1);
 
-		alphabet.sort(myComparefn);
+		alphabetR.sort(myComparefn);
 
 		boolean result = true;
 		for (int i = 0; i < 10; i++) {
@@ -330,7 +335,7 @@ public class ArraySortTest {
 			Object b = alphabet.$get(i);
 
 			if (!(a instanceof Double && b instanceof Double && Double.isNaN((Double) a) && Double.isNaN((Double) b))) {
-				if (!a.equals(b)) {
+				if (!Objects.equals(a, b)) {
 					result = false;
 					break;
 				}
@@ -338,5 +343,31 @@ public class ArraySortTest {
 		}
 
 		assertTrue("Check toString operator", result);
+	}
+
+	@Test
+	public void testSort15(){
+		// test sort in a sparse store
+		Array<Object> a = Array(10001);
+		a.$set(0, "e");
+		a.$set(10, "d");
+		a.$set(100, "c");
+		a.$set(1000, "b");
+		a.$set(10000, "a");
+
+		a.sort();
+
+		// unset/undefined values sort last
+		assertEquals("a", a.$get(0));
+		assertEquals("b", a.$get(1));
+		assertEquals("c", a.$get(2));
+		assertEquals("d", a.$get(3));
+		assertEquals("e", a.$get(4));
+		assertNull(a.$get(5));
+		assertNull(a.$get(10));
+		assertNull(a.$get(100));
+		assertNull(a.$get(1000));
+		assertNull(a.$get(10000));
+		assertEquals(10001, a.$length());
 	}
 }

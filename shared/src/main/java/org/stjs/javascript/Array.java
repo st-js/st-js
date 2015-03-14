@@ -24,6 +24,8 @@ import org.stjs.javascript.functions.Callback3;
 import org.stjs.javascript.functions.Function3;
 import org.stjs.javascript.functions.Function4;
 
+import static org.stjs.javascript.JSGlobal.String;
+
 /**
  * This interface represents an array from Javascript.The value may be typed. The iteration is done on the indexes to have the javascript
  * equivalent of <br>
@@ -760,12 +762,11 @@ public class Array<V> implements Iterable<String> {
 	 * <strong>Note1:</strong> Because non-existent property values always compare greater than undefined property
 	 * values, and undefined always compares greater than any other value, undefined property values always sort to the
 	 * end of the result, followed by non-existent property values.
-	 * 
+	 *
 	 * @return this array
 	 */
 	public Array<V> sort() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.sort(null);
 	}
 
 	/**
@@ -784,20 +785,34 @@ public class Array<V> implements Iterable<String> {
 	 * <p>
 	 * If <tt>comparefn</tt> is not a consistent comparison function for the elements of this <tt>Array</tt>, the
 	 * behaviour of sort is implementation-defined.
+	 *
+	 * <p>
+	 * <strong>Note1:</strong> Because non-existent property values always compare greater than undefined property
+	 * values, and undefined always compares greater than any other value, undefined property values always sort to the
+	 * end of the result, followed by non-existent property values.
 	 * 
 	 * @param comparefn
 	 *            a sort function that can compare elements of this <tt>Array</tt>.
 	 * @return this <tt>Array</tt>
 	 */
-	public Array<V> sort(final SortFunction<V> comparefn) {
-		// Collections.sort(array, new Comparator<V>() {
-		// @Override
-		// public int compare(V a, V b) {
-		// return comparefn.$invoke(a, b);
-		// }
-		// });
-		// return this;
-		return null;
+	public Array<V> sort(SortFunction<V> comparefn) {
+		if(comparefn == null) {
+			this.array.sort(defaultSortComparator());
+		} else {
+			this.array.sort(comparefn);
+		}
+		return this;
+	}
+
+	private SortFunction<V> defaultSortComparator(){
+		return new SortFunction<V>() {
+			@Override
+			public int $invoke(V a, V b) {
+				String aString = String(a);
+				String bString = String(b);
+				return aString.compareTo(bString);
+			}
+		};
 	}
 
 	/**
@@ -1315,6 +1330,8 @@ public class Array<V> implements Iterable<String> {
 		abstract Array<E> slice(long fromIncluded, long toExcluded);
 
 		abstract void reverse();
+
+		public abstract void sort(SortFunction<E> comparefn);
 	}
 
 	private final class PackedArrayStore<E> extends ArrayStore<E> {
@@ -1389,6 +1406,32 @@ public class Array<V> implements Iterable<String> {
 		@Override
 		void reverse() {
 			Collections.reverse(this.elements);
+		}
+
+		@Override
+		public void sort(final SortFunction<E> comparefn) {
+			// This comparator implements the SortCompare algorithm in section 15.4.4.11 of the ECMA-262 Specification
+			Comparator<Object> comparator = new Comparator<Object>(){
+				@Override
+				@SuppressWarnings("unchecked")
+				public int compare(Object x, Object y) {
+					if(x == UNSET && y == UNSET){
+						return 0;
+					}
+					if(x == UNSET){
+						return 1;
+					}
+					if(y == UNSET){
+						return -1;
+					}
+
+					// In Java we don't have undefined values, so we skip steps 10 through 12
+
+					return comparefn.$invoke((E)x, (E)y);
+				}
+			};
+
+			this.elements.sort(comparator);
 		}
 
 		@Override
@@ -1612,6 +1655,25 @@ public class Array<V> implements Iterable<String> {
 					this.elements.remove(index);
 					this.elements.put(newIndex, value);
 				}
+			}
+		}
+
+		@Override
+		public void sort(final SortFunction<E> comparefn) {
+			ArrayList<E> values = new ArrayList<>(this.elements.values());
+			Comparator<E> comparator = new Comparator<E>(){
+				@Override
+				public int compare(E x, E y) {
+					// We do not have to worry about unset/undefined values, because they are not
+					// present in the TreeMap anyway.
+					return comparefn.$invoke(x, y);
+				}
+			};
+			values.sort(comparator);
+
+			this.elements.clear(); // don't create a new instance, so we don't disrupt any iterators or submaps.
+			for(int i = 0; i < values.size(); i ++){
+				this.elements.put((long)i, values.get(i));
 			}
 		}
 
