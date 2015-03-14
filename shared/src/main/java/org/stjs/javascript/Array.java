@@ -97,35 +97,6 @@ public class Array<V> implements Iterable<String> {
 		}
 	}
 
-	/**
-	 * constructors used on the server side only. It only wraps the given list, no copy is done
-	 * @param list
-	 * @return
-	 */
-	@ServerSide
-	public static <T> Array<T> wrap(List<T> list) {
-		return new Array<T>(list);
-	}
-
-	/**
-	 * constructors used on the server side only. It copies the given parameter
-	 * @param list
-	 * @return
-	 */
-	@ServerSide
-	public static <T> Array<T> copyOf(List<T> list) {
-		return new Array<T>(new ArrayList<T>(list));
-	}
-
-	/**
-	 * this gives access to the java implementation. used on the server side only
-	 * @return
-	 */
-	@ServerSide
-	public List<V> java() {
-		return array;
-	}
-
 	/**	
 	 * Returns an <tt>Iterator</tt> that allow this <tt>Array</tt> to be used in foreach statements. The returned
 	 * iterator is designed to make Java for-each statements on <tt>Arrays</tt> match the corresponding JavaScript
@@ -514,6 +485,7 @@ public class Array<V> implements Iterable<String> {
 	 * @return the index at which the element was found, -1 if not found
 	 */
 	@BrowserCompatibility("IE:9+")
+	public int indexOf(V element, int start) {
 		long actualStart;
 		if (start < 0) {
 			actualStart = (long) Math.max(0, this.$length() + start);
