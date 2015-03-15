@@ -89,4 +89,17 @@ public class ArrayDeleteTest {
 			assertFalse(i.equals("100") || i.equals("10000") || i.equals("1000000"));
 		}
 	}
+
+	/**
+	 * Deleting the last element of the array doesn't change the length.
+	 */
+	@Test
+	public void testDelete05(){
+		Array<Integer> x = $array(0, 1, 2, 3);
+
+		x.$delete(3);
+
+		assertNull(x.$get(3));
+		assertEquals(4, x.$length());
+	}
 }

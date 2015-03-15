@@ -344,12 +344,14 @@ public class Array<V> implements Iterable<String> {
 
 		boolean isSet = array.isSet(index);
 		long newSetElements = this.setElements;
-		if (isSet) {
-			newSetElements--;
-		}
 
-		this.switchStoreIfNeeded(this.length, newSetElements);
-		this.array.delete(index);
+		if (isSet) {
+			// there is only something to do if the element is set. If it is already unset, nothing to do.
+			newSetElements--;
+			this.switchStoreIfNeeded(this.length, newSetElements);
+			this.array.delete(index);
+			this.setElements = newSetElements;
+		}
 	}
 
 	private void doSet(long index, V value) {
