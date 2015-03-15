@@ -243,8 +243,5 @@ public class ArrayEveryTest {
 		};
 	}
 
-	private static interface EveryCB<V> extends Function3<V, Long, Array<V>, Boolean> {
-		@Override
-		public Boolean $invoke(V val, Long idx, Array<V> array);
-	}
+	private static interface EveryCB<V> extends Function3<V, Long, Array<V>, Boolean> {}
 }

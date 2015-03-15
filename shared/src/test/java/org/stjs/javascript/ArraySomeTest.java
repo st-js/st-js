@@ -1,9 +1,5 @@
 package org.stjs.javascript;
 
-//============================================
-//Tests section 15.4.4.17 of the ECMA-262 Spec
-//============================================
-
 import org.junit.Test;
 import org.stjs.javascript.functions.Function3;
 
@@ -12,6 +8,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 import static org.stjs.javascript.JSCollections.$array;
+
+//============================================
+//Tests section 15.4.4.17 of the ECMA-262 Spec
+//============================================
 
 public class ArraySomeTest {
 
@@ -358,8 +358,5 @@ public class ArraySomeTest {
 		assertEquals(10, callCnt.get());
 	}
 
-	private static interface SomeCB<V> extends Function3<V, Long, Array<V>, Boolean> {
-		@Override
-		public Boolean $invoke(V val, Long idx, Array<V> array);
-	}
+	private static interface SomeCB<V> extends Function3<V, Long, Array<V>, Boolean> {}
 }
