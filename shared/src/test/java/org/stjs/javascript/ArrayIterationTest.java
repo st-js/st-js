@@ -104,6 +104,65 @@ public class ArrayIterationTest {
 		assertFalse(keyIter.hasNext());
 	}
 
+	@Test
+	public void testIterator09() {
+		// Delete some key in a sparse store during the iteration
+		Array<Integer> x = $array();
+		x.$set(10000, 10000);
+		x.$set(0, 0);
+		x.$set(1, 1);
+
+		Iterator<String> keyIter = x.iterator();
+		assertEquals("0", keyIter.next());
+		x.$delete(1);
+		assertEquals("10000", keyIter.next());
+		assertFalse(keyIter.hasNext());
+	}
+
+	@Test
+	public void testIterator10() {
+		// Add some key in a sparse store during the iteration
+		Array<Integer> x = $array();
+		x.$set(10000, 10000);
+		x.$set(0, 0);
+		x.$set(1, 1);
+
+		Iterator<String> keyIter = x.iterator();
+		assertEquals("0", keyIter.next());
+		assertEquals("1", keyIter.next());
+		x.$set(2, 2);
+		assertEquals("2", keyIter.next());
+		assertEquals("10000", keyIter.next());
+		assertFalse(keyIter.hasNext());
+	}
+
+	@Test
+	public void testIterator11() {
+		// Delete some key in a packed store during the iteration
+		Array<Integer> x = $array(0, 1, 2);
+
+		Iterator<String> keyIter = x.iterator();
+		assertEquals("0", keyIter.next());
+		x.$delete(1);
+		assertEquals("2", keyIter.next());
+		assertFalse(keyIter.hasNext());
+	}
+
+	@Test
+	public void testIterator12() {
+		// Add some key in a packed store during the iteration
+		Array<Integer> x = $array();
+		x.$set(0, 0);
+		x.$set(2, 2);
+
+		Iterator<String> keyIter = x.iterator();
+		assertEquals("0", keyIter.next());
+		x.$set(1, 1);
+		assertEquals("1", keyIter.next());
+		assertEquals("2", keyIter.next());
+		assertFalse(keyIter.hasNext());
+	}
+
 	private void assertIteratedKeys(Array<Integer> x, String... expectedKeys) {
 		List<String> keys = new ArrayList<String>();
 		for (String key : x) {
