@@ -372,7 +372,7 @@ public class ArrayForEachTest {
 
 		arr.forEach(callbackfn);
 
-		assertEquals(5, callCnt);
+		assertEquals(5, callCnt.get());
 	}
 
 	public interface ForEachCB<V> extends Callback3<V, Long, Array<V>> {}

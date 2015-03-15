@@ -931,7 +931,14 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+")
 	public void forEach(Callback3<V, Long, Array<V>> callbackfn) {
-		// TODO Auto-generated method stub
+		if(callbackfn == null){
+			throw new Error("TypeError", "callbackfn is null");
+		}
+		Iterator<Entry<V>> iter = this.array.entryIterator(0, $length(), true);
+		while(iter.hasNext()){
+			Entry<V> val = iter.next();
+			callbackfn.$invoke(val.value, val.key, this);
+		}
 	}
 
 	/**
