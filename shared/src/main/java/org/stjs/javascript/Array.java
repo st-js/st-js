@@ -1097,7 +1097,18 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+")
 	public boolean some(Function3<V, Long, Array<V>, Boolean> callbackfn) {
-		// TODO Auto-generated method stub
+		if(callbackfn == null){
+			throw new Error("TypeError", "callbackfn is null");
+		}
+		Iterator<Entry<V>> iter = this.array.entryIterator(0, this.$length(), true);
+		while (iter.hasNext()) {
+			Entry<V> entry = iter.next();
+			Boolean result = callbackfn.$invoke(entry.value, entry.key, this);
+			if (Boolean.TRUE.equals(result)) {
+				// false or null was returned
+				return true;
+			}
+		}
 		return false;
 	}
 
