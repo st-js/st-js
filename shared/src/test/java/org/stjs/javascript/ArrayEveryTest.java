@@ -17,6 +17,12 @@ import org.stjs.javascript.functions.Function3;
 
 public class ArrayEveryTest {
 
+	@Test(expected = Error.class)
+	public void testEvery00(){
+		Array<Object> arr = $array();
+		arr.every(null);
+	}
+
 	@Test
 	public void testEvery01() {
 		// every doesn't visit non-array indices
