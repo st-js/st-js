@@ -234,6 +234,65 @@ public class ArrayEveryTest {
 		assertTrue(calledForThree.get());
 	}
 
+	/**
+	 * Change the Array store type from sparse to packed during iteration
+	 */
+	@Test
+	public void testEvery12(){
+		final Array<Integer> arr = new Array<>(1000);
+		arr.$set(0, 0);
+		arr.$set(999, 999);
+
+		final AtomicInteger callCnt = new AtomicInteger(0);
+		EveryCB<Integer> callbackfn = new EveryCB<Integer>() {
+			@Override
+			public Boolean $invoke(Integer val, Long idx, Array<Integer> obj) {
+				callCnt.incrementAndGet();
+				if(idx == 0){
+					// add lots of elements to force the change of array store
+					for(int i = 1; i < 999; i ++){
+						arr.$set(i, i);
+					}
+				}
+				return true;
+			}
+		};
+
+		arr.every(callbackfn);
+
+		assertEquals(1000, callCnt.get());
+	}
+
+	/**
+	 * Change the Array store type from packed to sparse during iteration
+	 */
+	@Test
+	public void testEvery13(){
+		final Array<Integer> arr = $array();
+		for(int i = 0; i < 1000; i ++){
+			arr.$set(i, i);
+		}
+
+		final AtomicInteger callCnt = new AtomicInteger(0);
+		EveryCB<Integer> callbackfn = new EveryCB<Integer>() {
+			@Override
+			public Boolean $invoke(Integer val, Long idx, Array<Integer> obj) {
+				callCnt.incrementAndGet();
+				if(idx == 0){
+					// remove lots of elements to force the change of array store
+					for(int i = 1; i < 999; i ++){
+						arr.$delete(i);
+					}
+				}
+				return true;
+			}
+		};
+
+		arr.every(callbackfn);
+
+		assertEquals(2, callCnt.get()); // only 0 and 999 remain
+	}
+
 	private static <V> Function3<V, Long, Array<V>, Boolean> callback(Array<V> arr, final Boolean retVal) {
 		return new Function3<V, Long, Array<V>, Boolean>() {
 			@Override

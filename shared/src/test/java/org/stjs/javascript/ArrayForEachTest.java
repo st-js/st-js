@@ -375,6 +375,64 @@ public class ArrayForEachTest {
 		assertEquals(5, callCnt.get());
 	}
 
+	/**
+	 * Change the Array store type from sparse to packed during iteration
+	 */
+	@Test
+	public void testForEach15(){
+		final Array<Integer> arr = new Array<>(1000);
+		arr.$set(0, 0);
+		arr.$set(999, 999);
+
+		final AtomicInteger callCnt = new AtomicInteger(0);
+		ForEachCB<Integer> callbackfn = new ForEachCB<Integer>() {
+			@Override
+			public void $invoke(Integer val, Long idx, Array<Integer> obj) {
+				callCnt.incrementAndGet();
+				if(idx == 0){
+					// add lots of elements to force the change of array store
+					for(int i = 1; i < 999; i ++){
+						arr.$set(i, i);
+					}
+				}
+			}
+		};
+
+		arr.forEach(callbackfn);
+
+		assertEquals(1000, callCnt.get());
+	}
+
+	/**
+	 * Change the Array store type from packed to sparse during iteration
+	 */
+	@Test
+	public void testForEach16(){
+		final Array<Integer> arr = $array();
+		for(int i = 0; i < 1000; i ++){
+			arr.$set(i, i);
+		}
+
+		final AtomicInteger callCnt = new AtomicInteger(0);
+		ForEachCB<Integer> callbackfn = new ForEachCB<Integer>() {
+			@Override
+			public void $invoke(Integer val, Long idx, Array<Integer> obj) {
+				callCnt.incrementAndGet();
+				if(idx == 0){
+					// remove lots of elements to force the change of array store
+					for(int i = 1; i < 999; i ++){
+						arr.$delete(i);
+					}
+				}
+			}
+		};
+
+		arr.forEach(callbackfn);
+
+		assertEquals(2, callCnt.get()); // only 0 and 999 remain
+	}
+
+
 	public interface ForEachCB<V> extends Callback3<V, Long, Array<V>> {}
 
 }
