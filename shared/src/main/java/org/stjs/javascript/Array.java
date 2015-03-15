@@ -160,9 +160,22 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@Template("get")
 	public V $get(int index) {
+		return this.$get((long)index);
+	}
+
+	/**
+	 * Translated to <tt>array[index]</tt> in JavaScript, returns the element at the specified index in this
+	 * <tt>Array</tt>.
+	 *
+	 * @param index
+	 *            the index
+	 * @return the element a the specified index
+	 */
+	@Template("get")
+	public V $get(long index){
 		if (index < 0) {
 			// index is not an array index, so we'll look into the non-array element values
-			return this.nonArrayElements.get(Integer.toString(index));
+			return this.nonArrayElements.get(Long.toString(index));
 		}
 
 		// index is an array element, so let's ask the array store
@@ -207,7 +220,7 @@ public class Array<V> implements Iterable<String> {
 	/**
 	 * Translated to <tt>array[index] = value</tt> in JavaScript, sets the element at the specified index in this
 	 * <tt>Array</tt> to the specified value.
-	 * 
+	 *
 	 * @param index
 	 *            the index
 	 * @param value
@@ -215,12 +228,26 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@Template("set")
 	public void $set(int index, V value) {
+		this.$set((long)index, value);
+	}
+
+	/**
+	 * Translated to <tt>array[index] = value</tt> in JavaScript, sets the element at the specified index in this
+	 * <tt>Array</tt> to the specified value.
+	 *
+	 * @param index
+	 *            the index
+	 * @param value
+	 *            the value
+	 */
+	@Template("set")
+	public void $set(long index, V value) {
 		if (index < 0) {
 			// not an array index. Set the value in the non-array properties
 			this.nonArrayElements.put(JSAbstractOperations.ToString(index), value);
 
 		} else {
-			this.$set((long) index, value);
+			this.doSet(index, value);
 		}
 	}
 
@@ -307,7 +334,7 @@ public class Array<V> implements Iterable<String> {
 		this.array.delete(index);
 	}
 
-	private void $set(long index, V value) {
+	private void doSet(long index, V value) {
 		// check if store type is correct for setting this value
 		boolean isSet = array.isSet(index);
 		long newLength = (long) Math.max(this.length, index + 1);
@@ -1022,6 +1049,9 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+")
 	public boolean every(Function3<V, Long, Array<V>, Boolean> callbackfn) {
+		if(callbackfn == null){
+			throw new Error("TypeError", "callbackfn is null");
+		}
 		Iterator<Entry<V>> iter = this.array.entryIterator(0, this.$length(), true);
 		while (iter.hasNext()) {
 			Entry<V> entry = iter.next();
@@ -1066,7 +1096,7 @@ public class Array<V> implements Iterable<String> {
 	 *         <tt>Array</tt>, <tt>false</tt> otherwise
 	 */
 	@BrowserCompatibility("IE:9+")
-	public boolean some(Function3<V, Integer, Array<V>, Boolean> callbackfn) {
+	public boolean some(Function3<V, Long, Array<V>, Boolean> callbackfn) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -1100,7 +1130,7 @@ public class Array<V> implements Iterable<String> {
 	 * @return a new <tt>Array</tt> containing new elements as returned by the specified callback function
 	 */
 	@BrowserCompatibility("IE:9+")
-	public <T> Array<T> map(Function3<V, Integer, Array<V>, T> callbackfn) {
+	public <T> Array<T> map(Function3<V, Long, Array<V>, T> callbackfn) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -1136,7 +1166,7 @@ public class Array<V> implements Iterable<String> {
 	 *         function returns <tt>true</tt>.
 	 */
 	@BrowserCompatibility("IE:9+")
-	public Array<V> filter(Function3<V, Integer, Array<V>, Boolean> callbackfn) {
+	public Array<V> filter(Function3<V, Long, Array<V>, Boolean> callbackfn) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -1173,7 +1203,7 @@ public class Array<V> implements Iterable<String> {
 	 * @return a single value derived from calling the callback function on all the elements of this <tt>Array</tt>
 	 */
 	@BrowserCompatibility("IE:9+, Safari:4+, Opera:10.50+")
-	public V reduce(Function4<V, V, Integer, Array<V>, V> callbackfn) {
+	public V reduce(Function4<V, V, Long, Array<V>, V> callbackfn) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -1209,7 +1239,7 @@ public class Array<V> implements Iterable<String> {
 	 * @return a single value derived from calling the callback function on all the elements of this <tt>Array</tt>
 	 */
 	@BrowserCompatibility("IE:9+, Safari:4+, Opera:10.50+")
-	public <T> T reduce(Function4<T, V, Integer, Array<V>, T> callbackfn, T initialValue) {
+	public <T> T reduce(Function4<T, V, Long, Array<V>, T> callbackfn, T initialValue) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -1246,7 +1276,7 @@ public class Array<V> implements Iterable<String> {
 	 * @return a single value derived from calling the callback function on all the elements of this <tt>Array</tt>
 	 */
 	@BrowserCompatibility("IE:9+, Safari:4+, Opera:10.50+")
-	public V reduceRight(Function4<V, V, Integer, Array<V>, V> callbackfn) {
+	public V reduceRight(Function4<V, V, Long, Array<V>, V> callbackfn) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -1282,7 +1312,7 @@ public class Array<V> implements Iterable<String> {
 	 * @return a single value derived from calling the callback function on all the elements of this <tt>Array</tt>
 	 */
 	@BrowserCompatibility("IE:9+, Safari:4+, Opera:10.50+")
-	public <T> T reduceRight(Function4<T, V, Integer, Array<V>, T> callbackfn, T initialValue) {
+	public <T> T reduceRight(Function4<T, V, Long, Array<V>, T> callbackfn, T initialValue) {
 		// TODO Auto-generated method stub
 		return null;
 	}
