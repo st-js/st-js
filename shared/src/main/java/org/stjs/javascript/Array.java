@@ -289,7 +289,7 @@ public class Array<V> implements Iterable<String> {
 		if (i == null) {
 			this.nonArrayElements.remove(index);
 		} else {
-			this.$delete(i);
+			this.doDelete(i);
 		}
 		return true;
 	}
@@ -302,23 +302,41 @@ public class Array<V> implements Iterable<String> {
 	 * <tt>Array</tt> (e.g. <tt>myArray.$delete("foobar")</tt>)
 	 * <p>
 	 * <tt>myArray.$delete(index)</tt> is translated to <tt>delete myArray[index]</tt> in JavaScript.
-	 * 
+	 *
 	 * @param index
 	 *            the index
 	 * @return true
 	 */
 	@Template("delete")
 	public boolean $delete(int index) {
+		return this.$delete((long)index);
+	}
+
+	/**
+	 * Deletes the element at the specified index from this <tt>Array</tt>, leaving an empty hole. Unlike
+	 * <tt>splice()</tt> This method does not affect the length of this <tt>Array</tt>, it only unsets the value at the
+	 * specified index. After <tt>$delete()</tt> is called on an index, that index will not be iterated over any more in
+	 * for-each loops on this <tt>Array</tt>. <tt>$delete()</tt> can also be used to remove non-array elements from this
+	 * <tt>Array</tt> (e.g. <tt>myArray.$delete("foobar")</tt>)
+	 * <p>
+	 * <tt>myArray.$delete(index)</tt> is translated to <tt>delete myArray[index]</tt> in JavaScript.
+	 *
+	 * @param index
+	 *            the index
+	 * @return true
+	 */
+	@Template("delete")
+	public boolean $delete(long index) {
 		if (index < 0) {
 			// not an array index. Remove the property from the non-array properties
 			this.nonArrayElements.remove(JSAbstractOperations.ToString(index));
 		} else {
-			this.$delete((long) index);
+			this.doDelete(index);
 		}
 		return true;
 	}
 
-	private void $delete(long index) {
+	private void doDelete(long index) {
 		if (index >= this.$length()) {
 			// nothing to do
 			return;
@@ -879,10 +897,13 @@ public class Array<V> implements Iterable<String> {
 	 *            the callback function to be called for each element
 	 */
 	@BrowserCompatibility("IE:9+")
-	public void forEach(Callback1<V> callbackfn) {
-		// for (V value : array) {
-		// callbackfn.$invoke(value);
-		// }
+	public void forEach(final Callback1<V> callbackfn) {
+		forEach(new Callback3<V, Long, Array<V>>(){
+			@Override
+			public void $invoke(V v, Long aLong, Array<V> strings) {
+				callbackfn.$invoke(v);
+			}
+		});
 	}
 
 	/**
@@ -909,21 +930,32 @@ public class Array<V> implements Iterable<String> {
 	 *            the callback function to be called for each element
 	 */
 	@BrowserCompatibility("IE:9+")
-	public void forEach(Callback3<V, Integer, Array<V>> callbackfn) {
+	public void forEach(Callback3<V, Long, Array<V>> callbackfn) {
 		// TODO Auto-generated method stub
-
 	}
 
 	/**
 	 * this method does exactly as {@link #forEach(Callback1)}, but allows in java 8 the usage of lambda easily as the forEach method overloads
 	 * the method from the new Iterable interface. The generated code is, as expected, forEach
-	 * @param callback
+	 * @param callbackfn
 	 */
 	@Template("prefix")
-	public void $forEach(Callback1<V> callback) {
-		forEach(callback);
+	@BrowserCompatibility("IE:9+")
+	public void $forEach(Callback1<V> callbackfn) {
+		forEach(callbackfn);
 	}
-	
+
+	/**
+	 * this method does exactly as {@link #forEach(Callback1)}, but allows in java 8 the usage of lambda easily as the forEach method overloads
+	 * the method from the new Iterable interface. The generated code is, as expected, forEach
+	 * @param callbackfn
+	 */
+	@Template("prefix")
+	@BrowserCompatibility("IE:9+")
+	public void $forEach(Callback3<V, Long, Array<V>> callbackfn) {
+		forEach(callbackfn);
+	}
+
 	/**
 	 * Converts all the elements of this <tt>Array</tt> to their String representation, concatenates them using a comma
 	 * as a separator. Calling this method is equivalent to calling <tt>join()</tt>.
