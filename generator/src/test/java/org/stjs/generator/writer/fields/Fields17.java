@@ -4,7 +4,7 @@ import org.stjs.javascript.annotation.Template;
 
 public class Fields17 {
 
-	@Template("gsetter")
+	@Template("gproperty")
 	public String field;
 
 	public void method(String n) {
