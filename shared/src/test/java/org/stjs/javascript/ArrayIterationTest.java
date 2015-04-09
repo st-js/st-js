@@ -79,13 +79,18 @@ public class ArrayIterationTest {
 	@Test
 	public void testIterator07() {
 		// now a tricky one: we'll change the array store type from packed to sparse during the iteration
-		Array<Integer> x = $array(0, 1);
+		Array<Integer> x = $array();
+		for(int i = 0; i < 1000; i++){
+			x.push(i);
+		}
 
 		Iterator<String> keyIter = x.iterator();
 		assertEquals("0", keyIter.next());
-		x.$set(100000, 100000);
-		assertEquals("1", keyIter.next());
-		assertEquals("100000", keyIter.next());
+		for(int i = 1; i < 998; i ++){
+			x.$delete(i);
+		}
+		assertEquals("998", keyIter.next());
+		assertEquals("999", keyIter.next());
 	}
 
 	@Test

@@ -112,28 +112,58 @@ public class Array<V> implements Iterable<String> {
 	@Deprecated
 	@BrowserCompatibility("none")
 	public Iterator<String> iterator() {
-		return new Iterator<String>() {
-			private ArrayStore<V> prevStore = array;
-			private Long prevKey = 0L;
+		// Extract from the ECMA-262 specification: chapter 12.6.4 The for-in Statement
+		//
+		// The mechanics and order of enumerating the properties is not specified. Properties of the object being
+		// enumerated may be deleted during enumeration. If a property that has not yet been visited during
+		// enumeration is deleted, then it will not be visited. If new properties are added to the object being
+		// enumerated during enumeration, the newly added properties are not guaranteed to be visited in the active
+		// enumeration. A property name must not be visited more than once in any enumeration.
 
-			private Iterator<Entry<V>> arrayIter = array.entryIterator(0, $length(), true);
+		return new Iterator<String>() {
+			private Iterator<Entry<V>> arrayIter = entryIterator(0, $length(), true);
 			private Iterator<String> nonArrayIter = nonArrayElements.keySet().iterator();
 
 			@Override
 			public boolean hasNext() {
-				updateEntryIterator();
 				return arrayIter.hasNext() || nonArrayIter.hasNext();
 			}
 
 			@Override
 			public String next() {
-				updateEntryIterator();
 				if (arrayIter.hasNext()) {
 					Entry<V> nextEntry = arrayIter.next();
-					prevKey = nextEntry.key;
-					return Long.toString(prevKey);
+					return Long.toString(nextEntry.key);
 				}
 				return nonArrayIter.next();
+			}
+
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+		};
+	}
+
+	private Iterator<Entry<V>> entryIterator(final long actualStart, final long actualEndExcluded, final boolean isForward){
+		return new Iterator<Entry<V>>() {
+			private ArrayStore<V> prevStore = array;
+			private Long prevKey = 0L;
+
+			private Iterator<Entry<V>> iter = array.entryIterator(actualStart, actualEndExcluded, isForward);
+
+			@Override
+			public boolean hasNext() {
+				updateEntryIterator();
+				return iter.hasNext();
+			}
+
+			@Override
+			public Entry<V> next() {
+				updateEntryIterator();
+				Entry<V> entry = iter.next();
+				prevKey = entry.key;
+				return entry;
 			}
 
 			@Override
@@ -144,7 +174,7 @@ public class Array<V> implements Iterable<String> {
 			private void updateEntryIterator(){
 				if(prevStore != array){
 					prevStore = array;
-					arrayIter = array.entryIterator(prevKey + 1, $length(), true);
+					iter = array.entryIterator(prevKey + (isForward ? 1 : -1), actualEndExcluded, isForward);
 				}
 			}
 		};
@@ -441,7 +471,7 @@ public class Array<V> implements Iterable<String> {
 
 		// Add the elements of this array
 		long i = 0;
-		Iterator<Entry<V>> iter = this.array.entryIterator(0, this.$length(), true);
+		Iterator<Entry<V>> iter = this.entryIterator(0, this.$length(), true);
 		while (iter.hasNext()) {
 			Entry<V> entry = iter.next();
 			result.$set(i + entry.key, entry.value);
@@ -478,7 +508,7 @@ public class Array<V> implements Iterable<String> {
 
 		// add the elements of this array
 		long i = 0;
-		Iterator<Entry<V>> iter = this.array.entryIterator(0, this.$length(), true);
+		Iterator<Entry<V>> iter = this.entryIterator(0, this.$length(), true);
 		while (iter.hasNext()) {
 			Entry<V> entry = iter.next();
 			result.$set(i + entry.key, entry.value);
@@ -551,7 +581,7 @@ public class Array<V> implements Iterable<String> {
 			actualStart = (long) Math.min(this.$length(), start);
 		}
 
-		Iterator<Entry<V>> iter = this.array.entryIterator(actualStart, this.$length(), true);
+		Iterator<Entry<V>> iter = this.entryIterator(actualStart, this.$length(), true);
 		return indexOf(element, iter);
 	}
 
@@ -900,7 +930,7 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+")
 	public void forEach(final Callback1<V> callbackfn) {
-		forEach(new Callback3<V, Long, Array<V>>(){
+		forEach(new Callback3<V, Long, Array<V>>() {
 			@Override
 			public void $invoke(V v, Long aLong, Array<V> strings) {
 				callbackfn.$invoke(v);
@@ -936,7 +966,7 @@ public class Array<V> implements Iterable<String> {
 		if(callbackfn == null){
 			throw new Error("TypeError", "callbackfn is null");
 		}
-		Iterator<Entry<V>> iter = this.array.entryIterator(0, $length(), true);
+		Iterator<Entry<V>> iter = this.entryIterator(0, $length(), true);
 		while(iter.hasNext()){
 			Entry<V> val = iter.next();
 			callbackfn.$invoke(val.value, val.key, this);
@@ -1051,7 +1081,7 @@ public class Array<V> implements Iterable<String> {
 			actualStart = (long) Math.min(this.$length() - 1, fromIndex);
 		}
 
-		Iterator<Entry<V>> iter = this.array.entryIterator(actualStart, -1, false);
+		Iterator<Entry<V>> iter = this.entryIterator(actualStart, -1, false);
 		return indexOf(searchElement, iter);
 	}
 
@@ -1093,7 +1123,7 @@ public class Array<V> implements Iterable<String> {
 		if(callbackfn == null){
 			throw new Error("TypeError", "callbackfn is null");
 		}
-		Iterator<Entry<V>> iter = this.array.entryIterator(0, this.$length(), true);
+		Iterator<Entry<V>> iter = this.entryIterator(0, this.$length(), true);
 		while (iter.hasNext()) {
 			Entry<V> entry = iter.next();
 			Boolean result = callbackfn.$invoke(entry.value, entry.key, this);
@@ -1141,7 +1171,7 @@ public class Array<V> implements Iterable<String> {
 		if(callbackfn == null){
 			throw new Error("TypeError", "callbackfn is null");
 		}
-		Iterator<Entry<V>> iter = this.array.entryIterator(0, this.$length(), true);
+		Iterator<Entry<V>> iter = this.entryIterator(0, this.$length(), true);
 		while (iter.hasNext()) {
 			Entry<V> entry = iter.next();
 			Boolean result = callbackfn.$invoke(entry.value, entry.key, this);
