@@ -1213,8 +1213,17 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+")
 	public <T> Array<T> map(Function3<V, Long, Array<V>, T> callbackfn) {
-		// TODO Auto-generated method stub
-		return null;
+		if(callbackfn == null){
+			throw new Error("TypeError", "callbackfn is null");
+		}
+		Iterator<Entry<V>> iter = this.entryIterator(0, this.$length(), true);
+		Array<T> result = new Array<>();
+		while (iter.hasNext()) {
+			Entry<V> entry = iter.next();
+			T mapped = callbackfn.$invoke(entry.value, entry.key, this);
+			result.$set(entry.key, mapped);
+		}
+		return result;
 	}
 
 	/**
@@ -1249,13 +1258,24 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+")
 	public Array<V> filter(Function3<V, Long, Array<V>, Boolean> callbackfn) {
-		// TODO Auto-generated method stub
-		return null;
+		if(callbackfn == null){
+			throw new Error("TypeError", "callbackfn is null");
+		}
+		Iterator<Entry<V>> iter = this.entryIterator(0, this.$length(), true);
+		Array<V> result = new Array<>();
+		while (iter.hasNext()) {
+			Entry<V> entry = iter.next();
+			boolean selected = callbackfn.$invoke(entry.value, entry.key, this);
+			if(selected){
+				result.push(entry.value);
+			}
+		}
+		return result;
 	}
 
 	/**
-	 * Applies the specified function against an accumulator and each value of this <tt>Array</tt> omitting the first
-	 * element (from left-to-right), as to reduce it to a single value.
+	 * Applies the specified function against an accumulator and each value of this <tt>Array</tt> (from left-to-right)
+	 * as to reduce it to a single value, omitting the first element and using it as initial accumulator value.
 	 * 
 	 * <p>
 	 * <tt>reduce</tt> calls the callback, as a function, once for each element present in this <tt>Array</tt> except
@@ -1286,8 +1306,7 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+, Safari:4+, Opera:10.50+")
 	public V reduce(Function4<V, V, Long, Array<V>, V> callbackfn) {
-		// TODO Auto-generated method stub
-		return null;
+		return doReduce(callbackfn, UNSET, true);
 	}
 
 	/**
@@ -1322,13 +1341,12 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+, Safari:4+, Opera:10.50+")
 	public <T> T reduce(Function4<T, V, Long, Array<V>, T> callbackfn, T initialValue) {
-		// TODO Auto-generated method stub
-		return null;
+		return doReduce(callbackfn, initialValue, true);
 	}
 
 	/**
-	 * Applies the specified function against an accumulator and each value of this <tt>Array</tt> omitting the first
-	 * element (from right-to-left), as to reduce it to a single value.
+	 * Applies the specified function against an accumulator and each value of this <tt>Array</tt> (from right-to-left)
+	 * as to reduce it to a single value, omitting the first element and using it as initial accumulator value.
 	 * 
 	 * <p>
 	 * <tt>reduceRight</tt> calls the callback, as a function, once for each element present in this <tt>Array</tt>
@@ -1359,8 +1377,7 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+, Safari:4+, Opera:10.50+")
 	public V reduceRight(Function4<V, V, Long, Array<V>, V> callbackfn) {
-		// TODO Auto-generated method stub
-		return null;
+		return doReduce(callbackfn, UNSET, false);
 	}
 
 	/**
@@ -1395,8 +1412,43 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@BrowserCompatibility("IE:9+, Safari:4+, Opera:10.50+")
 	public <T> T reduceRight(Function4<T, V, Long, Array<V>, T> callbackfn, T initialValue) {
-		// TODO Auto-generated method stub
-		return null;
+		return doReduce(callbackfn, initialValue, false);
+	}
+
+	private <T> T doReduce(Function4<T, V, Long, Array<V>, T> callbackfn, Object initialValue, boolean isForward){
+		if(callbackfn == null){
+			throw new Error("TypeError", "callbackfn is null");
+		}
+
+		Iterator<Entry<V>> iter;
+		if(isForward) {
+			iter = this.entryIterator(0, this.$length(), true);
+		} else {
+			iter = this.entryIterator(this.$length(), -1, false);
+		}
+
+		T accumulator;
+		if(initialValue == UNSET){
+			// when initialValue is UNSET (the parameter was not specified)
+			// then the types T and V are the same.
+			@SuppressWarnings("unchecked")
+			T temp = (T)iter.next().value;
+			accumulator = temp;
+
+		} else {
+			// when initialValue is set (ie: not UNSET, the parameter was specified, but may be null)
+			// then the type of initialValue is T
+			@SuppressWarnings("unchecked")
+			T temp = (T)initialValue;
+			accumulator = temp;
+		}
+
+		while (iter.hasNext()) {
+			Entry<V> entry = iter.next();
+			accumulator = callbackfn.$invoke(accumulator, entry.value, entry.key, this);
+		}
+
+		return accumulator;
 	}
 
 	private abstract class ArrayStore<E> {
