@@ -1765,26 +1765,43 @@ public class Array<V> implements Iterable<String> {
 		}
 
 		@Override
-		Iterator<Entry<E>> entryIterator(long actualStart, long actualEndExcluded, boolean isForward) {
-			java.util.Map<Long, E> range;
-			if (isForward) {
-				range = elements.subMap(actualStart, true, actualEndExcluded - 1, true);
-			} else {
-				range = elements.subMap(actualEndExcluded + 1, true, actualStart, true).descendingMap();
-			}
-			final Iterator<java.util.Map.Entry<Long, E>> it = range.entrySet().iterator();
+		Iterator<Entry<E>> entryIterator(final long actualStart, final long actualEndExcluded, final boolean isForward) {
+
 			return new Iterator<Entry<E>>() {
+
+				private long lastProduced;
+				{
+					if(isForward){
+						lastProduced = actualStart - 1;
+					} else {
+						lastProduced = actualStart + 1;
+					}
+				}
+
 				@Override
 				public boolean hasNext() {
-					return it.hasNext();
+					if(isForward){
+						Long nextKey = elements.higherKey(lastProduced);
+						return nextKey != null && nextKey < actualEndExcluded;
+					}
+					Long nextKey = elements.lowerKey(lastProduced);
+					return nextKey != null && nextKey > actualEndExcluded;
 				}
 
 				@Override
 				public Entry<E> next() {
-					java.util.Map.Entry<Long, E> utilEntry = it.next();
-					Entry<E> entry = new Entry<E>();
-					entry.key = utilEntry.getKey();
-					entry.value = utilEntry.getValue();
+					Long nextKey;
+					if(isForward){
+						nextKey = elements.higherKey(lastProduced);
+					} else {
+						nextKey = elements.lowerKey(lastProduced);
+					}
+
+					E value = elements.get(nextKey);
+					Entry<E> entry = new Entry<>();
+					entry.key = nextKey;
+					entry.value = value;
+					lastProduced = nextKey;
 					return entry;
 				}
 
