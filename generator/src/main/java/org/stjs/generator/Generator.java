@@ -162,6 +162,9 @@ public class Generator {
 		if (ClassUtils.isBridge(builtProjectClassLoader, clazz)) {
 			return new BridgeClass(dependencyResolver, clazz);
 		}
+		if (ClassUtils.isSynthetic(builtProjectClassLoader, clazz)) {
+			return new SyntheticClass(dependencyResolver, clazz);
+		}
 
 		File inputFile = getInputFile(sourceFolder, className);
 		File outputFile = getOutputFile(generationFolder.getAbsolutePath(), className);
@@ -338,6 +341,17 @@ public class Generator {
 			}
 		}
 
+		private ClassWithJavascript getSTJSClass(String parentClassName) {
+			// check if it has already generated
+			STJSClass stjsClass = new STJSClass(this, builtProjectClassLoader, parentClassName);
+			if (stjsClass.getJavascriptFiles().isEmpty()) {
+				checkFolders(parentClassName);
+				stjsClass = (STJSClass) generateJavascript(builtProjectClassLoader, parentClassName, sourceFolder, generationFolder,
+						targetFolder, configuration);
+			}
+			return stjsClass;
+		}
+
 		@Override
 		public ClassWithJavascript resolve(String className) {
 			String parentClassName = className;
@@ -354,18 +368,16 @@ public class Generator {
 			catch (ClassNotFoundException e) {
 				throw new STJSRuntimeException(e);
 			}
+
 			if (ClassUtils.isBridge(builtProjectClassLoader, clazz)) {
 				return new BridgeClass(this, clazz);
 			}
 
-			// check if it has already generated
-			STJSClass stjsClass = new STJSClass(this, builtProjectClassLoader, parentClassName);
-			if (stjsClass.getJavascriptFiles().isEmpty()) {
-				checkFolders(parentClassName);
-				stjsClass = (STJSClass) generateJavascript(builtProjectClassLoader, parentClassName, sourceFolder, generationFolder,
-						targetFolder, configuration);
+			if (ClassUtils.isSynthetic(builtProjectClassLoader, clazz)) {
+				return new SyntheticClass(this, clazz);
 			}
-			return stjsClass;
+
+			return getSTJSClass(parentClassName);
 		}
 
 	}
