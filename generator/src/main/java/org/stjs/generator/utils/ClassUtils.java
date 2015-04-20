@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 import org.stjs.generator.JavascriptClassGenerationException;
 import org.stjs.javascript.annotation.STJSBridge;
+import org.stjs.javascript.annotation.SyntheticType;
 
 public final class ClassUtils {
 	/**
@@ -52,6 +53,11 @@ public final class ClassUtils {
 			return true;
 		}
 		return false;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static boolean isSynthetic(ClassLoader builtProjectClassLoader, Class<?> clazz) {
+		return hasAnnotation(clazz, (Class<? extends Annotation>) getClazz(builtProjectClassLoader, SyntheticType.class.getName()));
 	}
 
 	public static boolean hasAnnotation(Class<?> clazz, Class<? extends Annotation> annotationClass) {

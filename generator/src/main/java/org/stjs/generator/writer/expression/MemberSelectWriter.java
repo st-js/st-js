@@ -27,6 +27,7 @@ public class MemberSelectWriter<JS> implements WriterContributor<MemberSelectTre
 		return visitor.forward(DiscriminatorKey.of(MemberSelectWriter.class.getSimpleName(), templateName), tree, context);
 	}
 
+	@SuppressWarnings("PMD.UnusedFormalParameter")
 	private String buildTemplateName(MemberSelectTree tree, GenerationContext<JS> context) {
 		TreeWrapper<IdentifierTree, JS> tw = context.getCurrentWrapper();
 

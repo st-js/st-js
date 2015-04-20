@@ -21,4 +21,10 @@ public class SyntheticTypeGeneratorTest {
 	public void testAllowCallSuperMethod() {
 		assertCodeContains(Synthetic3.class, "method2=function(){this.method();}");
 	}
+
+	@Test(expected = IndexOutOfBoundsException.class)
+	public void testWillNotGenerate() {
+		// the class is a bridge so no code is actually generated
+		generate(Synthetic4.class);
+	}
 }

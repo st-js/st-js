@@ -48,7 +48,7 @@ public class LambdaGeneratorTest {
 
 	@Test
 	public void testLambaAccessMethodOuterScopeExecute() {
-		assertEquals(Integer.valueOf(4), execute(Lambda6b.class));
+		assertEquals(Double.valueOf(4.0), execute(Lambda6b.class));
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)

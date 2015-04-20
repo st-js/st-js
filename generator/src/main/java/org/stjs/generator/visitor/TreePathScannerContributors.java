@@ -168,14 +168,14 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "PMD.UnusedFormalParameter" })
 	public <T extends Tree> R forward(DiscriminatorKey discriminator, T node, P param) {
 		VisitorContributor<? extends Tree, R, P, V> contributor = contributorsWithDiscriminator.get(discriminator);
 		if (contributor != null) {
 			// here i should be sure i have the right type
 			return ((VisitorContributor<T, R, P, V>) contributor).visit((V) this, node, param);
 		}
-		System.err.println("No contributor found with key:" + discriminator);
+		//System.err.println("No contributor found with key:" + discriminator);
 		return null;
 	}
 
