@@ -710,7 +710,7 @@ stjs.isArray=function( obj ) {
 stjs.typefy=function(obj, cls){
 	if (stjs.isArray(obj)){
 		var result = [];
-		for(var idx in obj){
+		for(var idx = 0; idx < obj.length; idx++){
 			result.push(stjs.typefy(obj[idx], elementType(cls)));
 		}
 		return result;
