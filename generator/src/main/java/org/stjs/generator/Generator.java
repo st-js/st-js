@@ -164,7 +164,7 @@ public class Generator {
 		}
 
 		File inputFile = getInputFile(sourceFolder, className);
-		File outputFile = getOutputFile(generationFolder.getAbsolutePath(), className);
+		File outputFile = getOutputFile(generationFolder.getGeneratedSourcesAbsolutePath(), className);
 		JavaScriptNameProvider names = new DefaultJavaScriptNameProvider();
 		GenerationPlugins<Object> currentClassPlugins = plugins.forClass(clazz);
 
@@ -208,7 +208,7 @@ public class Generator {
 		// String path = generationFolder.getPath();
 		// int pos = path.lastIndexOf("target");
 		try {
-			File file = getOutputFile(generationFolder.getRelativeToClasspath(), className, false);
+			File file = getOutputFile(generationFolder.getGeneratedSourcesPathInClasspath(), className, false);
 			String path = file.getPath().replace('\\', '/');
 			// make it "absolute"
 			if (!path.startsWith("/")) {
@@ -441,7 +441,7 @@ public class Generator {
 
 				try {
 					// write the source map
-					sourceMapWriter = Files.newWriter(getSourceMapFile(generationFolder.getAbsolutePath(), stjsClass.getClassName()),
+					sourceMapWriter = Files.newWriter(getSourceMapFile(generationFolder.getGeneratedSourcesAbsolutePath(), stjsClass.getClassName()),
 							Charset.forName(sourceEncoding));
 					context.writeSourceMap(sourceMapWriter);
 					sourceMapWriter.flush();
@@ -454,7 +454,7 @@ public class Generator {
 					// to be
 					// able to do backward analysis: i.e fine the class name corresponding to a JS)
 					File stjsPropFile = stjsClass.getStjsPropertiesFile();
-					File copyStjsPropFile = new File(generationFolder.getAbsolutePath(), ClassUtils.getPropertiesFileName(stjsClass
+					File copyStjsPropFile = new File(generationFolder.getGeneratedSourcesAbsolutePath(), ClassUtils.getPropertiesFileName(stjsClass
 							.getClassName()));
 					if (!stjsPropFile.equals(copyStjsPropFile)) {
 						Files.copy(stjsPropFile, copyStjsPropFile);

@@ -8,6 +8,12 @@
 	<packaging>jar</packaging>
 	<version>1.0.0-SNAPSHOT</version>
 
+	<properties>
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
+		<webjar.path>${project.build.outputDirectory}/META-INF/resources/webjar/${project.artifactId}</webjar.path>
+	</properties>
+
 	<dependencies>
 		<!-- for the java libraries -->
 		<dependency>
@@ -35,6 +41,7 @@
 		<resources>
 			<resource>
 				<directory>src/main/js</directory>
+				<targetPath>${webjar.path}</targetPath>
 			</resource>
 		</resources>
 		<plugins>
@@ -45,14 +52,23 @@
 				<version>${stjs.version}</version>
 				<executions>
 					<execution>
+						<id>main</id>
+						<phase>process-classes</phase>
 						<goals>
 							<goal>generate</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>test</id>
+						<phase>process-test-classes</phase>
+						<goals>
+							<goal>generate-test</goal>
 						</goals>
 					</execution>
 				</executions>
 				<configuration>
 					<generateSourceMap>true</generateSourceMap>
-					<generatedSourcesDirectory>${project.build.outputDirectory}/META-INF/resources/webjar/${project.artifactId}</generatedSourcesDirectory>
+					<generatedSourcesDirectory>${webjar.path}</generatedSourcesDirectory>
 				</configuration>
 			</plugin>
 		</plugins>

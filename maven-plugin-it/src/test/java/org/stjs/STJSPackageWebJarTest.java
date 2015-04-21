@@ -28,6 +28,10 @@ public class STJSPackageWebJarTest {
 
 		// coming from the configuration of surefire plugin outside
 		verifier.getCliOptions().add("-Dstjs.version=" + System.getProperty("stjs.version"));
+//
+//		File testClassesDir = new File(testDir, "target/test-classes");
+//		verifier.getCliOptions().add("-DtestClassesDirectory=" + testClassesDir.getAbsolutePath());
+
 
 		verifier.executeGoal("install");
 

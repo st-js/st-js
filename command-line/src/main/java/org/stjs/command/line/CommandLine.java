@@ -50,7 +50,7 @@ public class CommandLine {
 					.currentThread().getContextClassLoader());
 			File sourceFolder = new File(path);
 			GenerationDirectory targetFolder = new GenerationDirectory(new File(outputDir), null, null);
-			File generationFolder = targetFolder.getAbsolutePath();
+			File generationFolder = targetFolder.getGeneratedSourcesAbsolutePath();
 
 			GeneratorConfigurationBuilder configBuilder = new GeneratorConfigurationBuilder();
 			configBuilder.allowedPackage(builtProjectClassLoader.loadClass(className).getPackage().getName());
