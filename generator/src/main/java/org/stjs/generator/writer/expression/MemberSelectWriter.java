@@ -22,12 +22,12 @@ public class MemberSelectWriter<JS> implements WriterContributor<MemberSelectTre
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, MemberSelectTree tree, GenerationContext<JS> context) {
-		String templateName = buildTemplateName(tree, context);
+		String templateName = buildTemplateName(context);
 
 		return visitor.forward(DiscriminatorKey.of(MemberSelectWriter.class.getSimpleName(), templateName), tree, context);
 	}
 
-	private String buildTemplateName(MemberSelectTree tree, GenerationContext<JS> context) {
+	private String buildTemplateName(GenerationContext<JS> context) {
 		TreeWrapper<IdentifierTree, JS> tw = context.getCurrentWrapper();
 
 		Element def = tw.getElement();

@@ -4,6 +4,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 
@@ -17,6 +18,9 @@ import com.sun.source.util.TreeScanner;
 
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class TreePathScannerContributors<R, P extends TreePathHolder, V extends TreePathScannerContributors<R, P, V>> extends TreeScanner<R, P> {
+
+	private static final Logger LOG = Logger.getLogger(TreePathScannerContributors.class.getName());
+
 	private final Map<Class<?>, ContributorHolder<? extends Tree>> contributors = Maps.newHashMap();
 
 	private final Map<DiscriminatorKey, ContributorHolder<? extends Tree>> contributorsWithDiscriminator = Maps.newHashMap();
@@ -175,7 +179,7 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 			// here i should be sure i have the right type
 			return ((VisitorContributor<T, R, P, V>) contributor).visit((V) this, node, param);
 		}
-		System.err.println("No contributor found with key:" + discriminator);
+		LOG.warning("No contributor found with key:" + discriminator);
 		return null;
 	}
 
