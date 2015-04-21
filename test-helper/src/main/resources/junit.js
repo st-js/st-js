@@ -282,7 +282,7 @@ function assertNull(msg, actual) {
   var args = argsWithOptionalMsg_(arguments, 2);
   junit.assertCount++;
 
-  if (args[1] !== null) {
+  if (args[1] != null) {
     fail(args[0] + 'expected null but was ' + prettyPrintEntity_(args[1]));
   }
   return true;
@@ -293,7 +293,7 @@ function assertNotNull(msg, actual) {
   var args = argsWithOptionalMsg_(arguments, 2);
   junit.assertCount++;
 
-  if (args[1] === null) {
+  if (args[1] == null) {
     fail(args[0] + 'expected not null but was null');
   }
 
