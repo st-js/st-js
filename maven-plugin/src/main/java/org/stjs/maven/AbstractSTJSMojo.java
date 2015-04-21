@@ -154,6 +154,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 	abstract protected List<String> getClasspathElements() throws DependencyResolutionRequiredException;
 
+	abstract protected boolean getCopyStjsSupportFile();
+
 	private ClassLoader getBuiltProjectClassLoader() throws MojoExecutionException {
 		try {
 			List<String> runtimeClasspathElements = getClasspathElements();
@@ -415,7 +417,9 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	protected void filesGenerated(Generator generator, GenerationDirectory gendir) throws MojoFailureException, MojoExecutionException {
 		// copy the javascript support
 		try {
-			generator.copyJavascriptSupport(getGeneratedSourcesDirectory().getGeneratedSourcesAbsolutePath());
+			if(getCopyStjsSupportFile()) {
+				generator.copyJavascriptSupport(getGeneratedSourcesDirectory().getGeneratedSourcesAbsolutePath());
+			}
 		}
 		catch (Exception ex) {
 			throw new MojoFailureException("Error when copying support files:" + ex.getMessage(), ex);

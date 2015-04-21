@@ -41,19 +41,10 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 	private File buildOutputDirectory;
 
 	/**
-	 * Specifies if the ST-JS runtime support file (stjs.js) must be included in your build output.
-	 *
-	 * @parameter
+	 * Specifies if the ST-JS runtime support file (stjs.js) must be included in your build output. Default value is true.
+	 * @parameter default-value="true"
 	 */
-	private Boolean includeStjsSupportFile;
-
-	/**
-	 * Specifies if the output of your ST-JS jar project must be a webjar. Only compatible with .jar packaging. You can
-	 * obtain the same effect by setting appropriate values for <tt>generatedSourcesDirectory</tt> and <tt>includeStjsSupportFile</tt>.
-	 *
-	 * @parameter
-	 */
-	private Boolean webjar;
+	private boolean includeStjsSupportFile;
 
 	@Override
 	public List<String> getCompileSourceRoots() {
@@ -103,6 +94,11 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 	@Override
 	protected List<String> getClasspathElements() throws DependencyResolutionRequiredException {
 		return project.getCompileClasspathElements();
+	}
+
+	@Override
+	protected boolean getCopyStjsSupportFile() {
+		return this.includeStjsSupportFile;
 	}
 
 	@Override

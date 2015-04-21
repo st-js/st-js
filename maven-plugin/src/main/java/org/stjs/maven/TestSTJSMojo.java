@@ -70,6 +70,11 @@ public class TestSTJSMojo extends AbstractSTJSMojo {
 	}
 
 	@Override
+	protected boolean getCopyStjsSupportFile() {
+		return true;
+	}
+
+	@Override
 	protected File getBuildOutputDirectory() {
 		return buildOutputDirectory;
 	}

@@ -69,6 +69,8 @@
 				<configuration>
 					<generateSourceMap>true</generateSourceMap>
 					<generatedSourcesDirectory>${webjar.path}</generatedSourcesDirectory>
+					<includeStjsSupportFile>false</includeStjsSupportFile>
+					<pack>true</pack>
 				</configuration>
 			</plugin>
 		</plugins>
