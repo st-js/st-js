@@ -23,7 +23,7 @@ public class NamespaceGeneratorTest {
 
 	@Test
 	public void testExtends() {
-		assertCodeContains(Namespace2.class, "stjs.extend(a.b.Namespace2.Child, a.b.Namespace2, [],");
+		assertCodeContains(Namespace2.class, "constructor.Child = stjs.extend(constructor.Child, a.b.Namespace2, [],");
 		// call super
 		assertCodeContains(Namespace2.class, "a.b.Namespace2.call(this)");
 	}
