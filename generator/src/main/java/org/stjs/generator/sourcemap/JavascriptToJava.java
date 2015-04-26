@@ -20,6 +20,8 @@ import com.google.debugging.sourcemap.SourceMapConsumerFactory;
 import com.google.debugging.sourcemap.SourceMapParseException;
 import com.google.debugging.sourcemap.SourceMapping;
 
+import static java.lang.Integer.parseInt;
+
 public class JavascriptToJava {
 	private final static Pattern STACKTRACE_UNIVERSAL_JS_PATTERN = Pattern
 			.compile("\\s*(?:at)?\\s*(?:([\\w$]+)\\.)*(\\w*\\s?\\w+)[\\s\\@]?\\(?([^\\)]+)\\)?");
@@ -103,7 +105,7 @@ public class JavascriptToJava {
 
 			// java line
 			String cleanJsPath = url.getPath().split(":")[0];
-			int jsLineNumber = Integer.valueOf(fileParts[1]);
+			int jsLineNumber = parseInt(fileParts[1]);
 			int line = getJavaLine(cleanJsPath, jsLineNumber);
 			String stjsPropertyFile = cleanJsPath.replaceAll("\\.js$", ".stjs");
 
