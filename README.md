@@ -1,5 +1,6 @@
 Strongly-Typed Javascript (STJS)
 ================================
+[![Build Status](https://travis-ci.org/st-js/st-js.svg?branch=master)](https://travis-ci.org/st-js/st-js)
 
 STJS is an open source (Apache 2.0 licensed) Javascript code generator from a Java source. It is built as a Maven plugin that can be executed after the compilation of your Java code.
 
