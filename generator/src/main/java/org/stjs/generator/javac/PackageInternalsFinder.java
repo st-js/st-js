@@ -22,9 +22,9 @@ import com.google.common.collect.Maps;
 
 /**
  * this class looks for packages in the classpath
- * 
+ *
  * @author acraciun
- * 
+ *
  */
 public class PackageInternalsFinder {
 	private final ClassLoader classLoader;
@@ -108,6 +108,8 @@ public class PackageInternalsFinder {
 		List<JavaFileObject> result = new ArrayList<JavaFileObject>();
 
 		File[] childFiles = directory.listFiles();
+		assert childFiles != null;
+
 		for (File childFile : childFiles) {
 			if (childFile.isFile() && childFile.getName().endsWith(CLASS_FILE_EXTENSION)) {
 				// We only want the .class files.

@@ -59,7 +59,7 @@
 		<maven-scm-provider-svnexe.version>1.1</maven-scm-provider-svnexe.version>
 
 		<!-- code analysis plugins -->
-		<findbugs-maven-plugin.version>2.5.3</findbugs-maven-plugin.version>
+		<findbugs-maven-plugin.version>3.0.1</findbugs-maven-plugin.version>
 
 		<maven-pmd-plugin.version>3.0.1</maven-pmd-plugin.version>
 		<maven-checkstyle-plugin.version>2.10</maven-checkstyle-plugin.version>
