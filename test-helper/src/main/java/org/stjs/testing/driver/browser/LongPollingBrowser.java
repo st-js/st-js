@@ -252,13 +252,14 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		}
 
 		Set<URI> jsFiles = new LinkedHashSet<URI>();
-		for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies(getConfig().getClassLoader())) {
+		for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies()) {
 
 			if (addedScripts != null && dep instanceof BridgeClass) {
 				// bridge dependencies are not added when using @Scripts
 				System.out
-						.println("WARNING: You're using @Scripts deprecated annotation that disables the automatic inclusion of the Javascript files of the bridges you're using! "
-								+ "Please consider using @ScriptsBefore and/or @ScriptsAfter instead.");
+						.println(
+								"WARNING: You're using @Scripts deprecated annotation that disables the automatic inclusion of the Javascript files of the bridges you're using! "
+										+ "Please consider using @ScriptsBefore and/or @ScriptsAfter instead.");
 				continue;
 			}
 			for (URI file : dep.getJavascriptFiles()) {

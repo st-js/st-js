@@ -356,7 +356,7 @@ public class Generator {
 
 				try {
 					// write the source map
-					sourceMapWriter = Files.newWriter(getSourceMapFile(stjsClass.getClassName()), Charset.forName(config.getSourceEncoding()));
+					sourceMapWriter = Files.newWriter(getSourceMapFile(stjsClass.getJavaClassName()), Charset.forName(config.getSourceEncoding()));
 					context.writeSourceMap(sourceMapWriter);
 					sourceMapWriter.flush();
 
@@ -369,7 +369,7 @@ public class Generator {
 					// able to do backward analysis: i.e fine the class name corresponding to a JS)
 					File stjsPropFile = stjsClass.getStjsPropertiesFile();
 					File copyStjsPropFile = new File(config.getGenerationFolder().getGeneratedSourcesAbsolutePath(),
-							ClassUtils.getPropertiesFileName(stjsClass.getClassName()));
+							ClassUtils.getPropertiesFileName(stjsClass.getJavaClassName()));
 					if (!stjsPropFile.equals(copyStjsPropFile)) {
 						Files.copy(stjsPropFile, copyStjsPropFile);
 					}

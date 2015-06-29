@@ -39,6 +39,7 @@ public class DependencyCollection {
 	public static final Comparator<Class<?>> DEPENDENCY_COMPARATOR = new Comparator<Class<?>>() {
 
 		/**
+		/**
 		 * -1: if "b" or any child type of "b" (at any level) extends from "a" or any of "a"'s child type <br>
 		 * 1: the other way around<br>
 		 * 0: if none of the cases
@@ -107,6 +108,15 @@ public class DependencyCollection {
 		}
 	};
 
+	@SuppressWarnings(
+			value = "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", justification = "This comparator will not be used with Serializable lists")
+	private static final Comparator<ClassWithJavascript> CLASS_WITH_JS_COMPARATOR = new Comparator<ClassWithJavascript>() {
+		@Override
+		public int compare(ClassWithJavascript o1, ClassWithJavascript o2) {
+			return DEPENDENCY_COMPARATOR.compare(o1.getJavaClass(), o2.getJavaClass());
+		}
+	};
+
 	public DependencyCollection(List<ClassWithJavascript> roots) {
 		this.roots = ImmutableList.copyOf(roots);
 	}
@@ -127,21 +137,20 @@ public class DependencyCollection {
 		return -1;
 	}
 
-	public List<ClassWithJavascript> orderAllDependencies(ClassLoader classLoader) {
-		List<ClassWithJavascript> deps = new ArrayList<ClassWithJavascript>();
-		Set<ClassWithJavascript> visited = new HashSet<ClassWithJavascript>();
+	public List<ClassWithJavascript> orderAllDependencies() {
+		List<ClassWithJavascript> deps = new ArrayList<>();
+		Set<ClassWithJavascript> visited = new HashSet<>();
 		for (ClassWithJavascript root : roots) {
 			visit(visited, new LinkedHashSet<ClassWithJavascript>(), deps, root);
 		}
 
-		Comparator<ClassWithJavascript> comparator = new ClassWithJavascriptComparator(classLoader);
-		List<ClassWithJavascript> orderedDeps = new ArrayList<ClassWithJavascript>();
+		List<ClassWithJavascript> orderedDeps = new ArrayList<>();
 		while (!deps.isEmpty()) {
 			// add to orderedDeps only the classes that have no "extends" dependency to any of the other from the
 			// remaining list.
 			// i.e. the result of the comparison is <= 0
 			for (int i = 0; i < deps.size(); ++i) {
-				if (compareDeps(i, deps, comparator) <= 0) {
+				if (compareDeps(i, deps, CLASS_WITH_JS_COMPARATOR) <= 0) {
 					orderedDeps.add(deps.remove(i));
 					i--;
 				}
@@ -171,30 +180,5 @@ public class DependencyCollection {
 			deps.add(cj);
 
 		}
-	}
-
-	@SuppressWarnings(
-			value = "SE_COMPARATOR_SHOULD_BE_SERIALIZABLE", justification = "This comparator will not be used with Serializable lists")
-	private static class ClassWithJavascriptComparator implements Comparator<ClassWithJavascript> {
-
-		private final ClassLoader classLoader;
-
-		public ClassWithJavascriptComparator(ClassLoader classLoader) {
-			this.classLoader = classLoader;
-		}
-
-		@Override
-		public int compare(ClassWithJavascript o1, ClassWithJavascript o2) {
-
-			try {
-				Class<?> c1 = classLoader.loadClass(o1.getClassName());
-				Class<?> c2 = classLoader.loadClass(o2.getClassName());
-				return DEPENDENCY_COMPARATOR.compare(c1, c2);
-			}
-			catch (ClassNotFoundException e) {
-				throw new STJSRuntimeException(e);
-			}
-		}
-
 	}
 }

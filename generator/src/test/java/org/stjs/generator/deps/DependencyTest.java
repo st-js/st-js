@@ -123,7 +123,7 @@ public class DependencyTest extends AbstractStjsTest {
 
 	private void assertDependency(List<ClassWithJavascript> directDependencies, Class<?> clz) {
 		for (ClassWithJavascript c : directDependencies) {
-			if (clz.getName().equals(c.getClassName())) {
+			if (clz.getName().equals(c.getJavaClassName())) {
 				return;
 			}
 		}
@@ -133,7 +133,7 @@ public class DependencyTest extends AbstractStjsTest {
 
 	private void assertDependency(Map<ClassWithJavascript, DependencyType> directDependencies, Class<?> clz, DependencyType depType) {
 		for (Map.Entry<ClassWithJavascript, DependencyType> entry : directDependencies.entrySet()) {
-			if (clz.getName().equals(entry.getKey().getClassName())) {
+			if (clz.getName().equals(entry.getKey().getJavaClassName())) {
 				if (depType != entry.getValue()) {
 					assertEquals("Dependency for type :" + clz, depType, entry.getValue());
 				}

@@ -346,9 +346,9 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 					dependencyGraph.addVertex(className);
 					for (Map.Entry<ClassWithJavascript, DependencyType> dep : cjs.getDirectDependencyMap().entrySet()) {
 						if (dep.getKey() instanceof STJSClass) {
-							dependencyGraph.addVertex(dep.getKey().getClassName());
+							dependencyGraph.addVertex(dep.getKey().getJavaClassName());
 							if (dep.getValue() != DependencyType.OTHER) {
-								dependencyGraph.addEdge(dep.getKey().getClassName(), className);
+								dependencyGraph.addEdge(dep.getKey().getJavaClassName(), className);
 							}
 						}
 					}

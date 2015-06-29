@@ -53,6 +53,6 @@ public class DefaultClassResolver implements ClassWithJavascriptResolver {
 			return new BridgeClass(this, clazz);
 		}
 
-		return new STJSClass(this, classLoader, parentClassName);
+		return new STJSClass(this, classLoader, clazz);
 	}
 }

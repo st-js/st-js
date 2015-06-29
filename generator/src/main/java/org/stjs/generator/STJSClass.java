@@ -64,37 +64,38 @@ public class STJSClass implements ClassWithJavascript {
 
 	private URI generatedJavascriptFile;
 
-	private final String className;
+	private final String javaClassName;
+	private final Class<?> javaClass;
 	private final File targetFolder;
 
 	/**
-	 * constructor for storage
+	 * constructor for storage, instances created with this constructor are very short lived and should only be used to
+	 * output the small .stjs properties file that resides next to .class files
 	 */
-	public STJSClass(ClassWithJavascriptResolver classResolver, File targetFolder, String className) {
+	public STJSClass(ClassWithJavascriptResolver classResolver, File targetFolder, String javaClassName) {
 		PreConditions.checkNotNull(classResolver);
 		PreConditions.checkNotNull(targetFolder);
-		PreConditions.checkNotNull(className);
+		PreConditions.checkNotNull(javaClassName);
 		this.targetFolder = targetFolder;
-		this.className = className;
+		this.javaClassName = javaClassName;
 		this.properties = new Properties();
 		this.classWithJavascriptResolver = classResolver;
 		this.javascriptNamespace = null;
+		this.javaClass = null;
 	}
 
 	/**
 	 * constructor for loading
-	 *
-	 * @param builtProjectClassLoader
-	 * @param className
 	 */
-	public STJSClass(ClassWithJavascriptResolver classesolver, ClassLoader classLoader, String className) {
-		PreConditions.checkNotNull(classesolver);
+	public STJSClass(ClassWithJavascriptResolver classResolver, ClassLoader classLoader, Class<?> javaClass) {
+		PreConditions.checkNotNull(classResolver);
 		PreConditions.checkNotNull(classLoader);
-		PreConditions.checkNotNull(className);
+		PreConditions.checkNotNull(javaClass);
 
-		this.className = className;
+		this.javaClass = javaClass;
+		this.javaClassName = javaClass.getName();
 		this.targetFolder = null;
-		this.classWithJavascriptResolver = classesolver;
+		this.classWithJavascriptResolver = classResolver;
 		properties = loadProperties(classLoader);
 
 		// deps
@@ -116,16 +117,16 @@ public class STJSClass implements ClassWithJavascript {
 
 		InputStream inputStream = null;
 		try {
-			inputStream = classLoader.getResourceAsStream(ClassUtils.getPropertiesFileName(className));
+			inputStream = classLoader.getResourceAsStream(ClassUtils.getPropertiesFileName(javaClassName));
 			if (inputStream == null) {
-				LOG.severe("CANNOT find:" + ClassUtils.getPropertiesFileName(className) + " clazz:"
-						+ classLoader.getResource(ClassUtils.getPropertiesFileName(className)));
+				LOG.severe("CANNOT find:" + ClassUtils.getPropertiesFileName(javaClassName) + " clazz:"
+						+ classLoader.getResource(ClassUtils.getPropertiesFileName(javaClassName)));
 			} else {
 				props.load(inputStream);
 			}
 		}
 		catch (IOException e) {
-			throw new JavascriptClassGenerationException(className, e);
+			throw new JavascriptClassGenerationException(javaClassName, e);
 		}
 		finally {
 			Closeables.closeQuietly(inputStream);
@@ -168,7 +169,7 @@ public class STJSClass implements ClassWithJavascript {
 				return new URI(jsFile);
 			}
 			catch (URISyntaxException e) {
-				throw new JavascriptClassGenerationException(className, "Could not load URI from " + jsFile, e);
+				throw new JavascriptClassGenerationException(javaClassName, "Could not load URI from " + jsFile, e);
 			}
 		}
 		return null;
@@ -183,7 +184,7 @@ public class STJSClass implements ClassWithJavascript {
 		// generated with a version of ST-JS earlier than 3.1.2 that did not write that property down. Fortunately for us
 		// it also means that any namespace can be read by inspecting the @Namespace annotation directly on that
 		// class.
-		String ns = NamespaceUtil.resolveNamespaceSimple(this.className, loader);
+		String ns = NamespaceUtil.resolveNamespaceSimple(this.javaClassName, loader);
 		if (ns == null) {
 			// With earlier versions of ST-JS (pre 3.1.2) if no namespace is found on the class, then there is
 			// no namespace at all
@@ -193,9 +194,9 @@ public class STJSClass implements ClassWithJavascript {
 	}
 
 	public File getStjsPropertiesFile() {
-		File propFile = new File(targetFolder, ClassUtils.getPropertiesFileName(className));
+		File propFile = new File(targetFolder, ClassUtils.getPropertiesFileName(javaClassName));
 		if (!propFile.getParentFile().exists() && !propFile.getParentFile().mkdirs()) {
-			throw new JavascriptClassGenerationException(className, "Unable to create parent folder for the properties file:" + propFile);
+			throw new JavascriptClassGenerationException(javaClassName, "Unable to create parent folder for the properties file:" + propFile);
 		}
 		return propFile;
 	}
@@ -207,11 +208,11 @@ public class STJSClass implements ClassWithJavascript {
 		Writer propertiesWriter = null;
 		try {
 			propertiesWriter = Files.newWriter(getStjsPropertiesFile(), Charsets.UTF_8);
-			properties.setProperty(CLASS_PROP, className);
+			properties.setProperty(CLASS_PROP, javaClassName);
 			properties.store(propertiesWriter, "Generated by STJS ");
 		}
 		catch (IOException e1) {
-			throw new JavascriptClassGenerationException(className, "Could not open properties file " + getStjsPropertiesFile() + ":" + e1, e1);
+			throw new JavascriptClassGenerationException(javaClassName, "Could not open properties file " + getStjsPropertiesFile() + ":" + e1, e1);
 		}
 		finally {
 			try {
@@ -221,7 +222,7 @@ public class STJSClass implements ClassWithJavascript {
 				}
 			}
 			catch (IOException e) {
-				throw new JavascriptClassGenerationException(className, e);
+				throw new JavascriptClassGenerationException(javaClassName, e);
 			}
 		}
 	}
@@ -255,8 +256,13 @@ public class STJSClass implements ClassWithJavascript {
 	}
 
 	@Override
-	public String getClassName() {
-		return className;
+	public String getJavaClassName() {
+		return javaClassName;
+	}
+
+	@Override
+	public Class<?> getJavaClass() {
+		return this.javaClass;
 	}
 
 	@Override
@@ -296,14 +302,14 @@ public class STJSClass implements ClassWithJavascript {
 
 	@Override
 	public String toString() {
-		return "STJSClass [className=" + className + "]";
+		return "STJSClass [javaClassName=" + javaClassName + "]";
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + className.hashCode();
+		result = prime * result + javaClassName.hashCode();
 		return result;
 	}
 
@@ -320,7 +326,7 @@ public class STJSClass implements ClassWithJavascript {
 		}
 		STJSClass other = (STJSClass) obj;
 
-		return className.equals(other.className);
+		return javaClassName.equals(other.javaClassName);
 	}
 
 }

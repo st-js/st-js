@@ -53,8 +53,13 @@ public class BridgeClass implements ClassWithJavascript {
 	}
 
 	@Override
-	public String getClassName() {
+	public String getJavaClassName() {
 		return clazz.getName();
+	}
+
+	@Override
+	public Class<?> getJavaClass() {
+		return this.clazz;
 	}
 
 	@Override
@@ -81,7 +86,7 @@ public class BridgeClass implements ClassWithJavascript {
 				}
 			}
 			catch (URISyntaxException e) {
-				throw new JavascriptClassGenerationException(getClassName(), e);
+				throw new JavascriptClassGenerationException(getJavaClassName(), e);
 			}
 		}
 		return files;

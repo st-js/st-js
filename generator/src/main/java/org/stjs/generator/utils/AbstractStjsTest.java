@@ -232,7 +232,7 @@ public abstract class AbstractStjsTest {
 			File jsFile = new File(generationPath, stjsClass.getJavascriptFiles().get(0).getPath());
 			String content = Files.toString(jsFile, Charset.defaultCharset());
 			List<ClassWithJavascript> allDeps =
-					new DependencyCollection(stjsClass).orderAllDependencies(Thread.currentThread().getContextClassLoader());
+					new DependencyCollection(stjsClass).orderAllDependencies();
 			for (ClassWithJavascript dep : allDeps) {
 				for (URI js : dep.getJavascriptFiles()) {
 					if (dep instanceof BridgeClass) {

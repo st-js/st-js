@@ -29,7 +29,9 @@ import org.stjs.generator.name.DependencyType;
  * @author acraciun
  */
 public interface ClassWithJavascript {
-	String getClassName();
+	String getJavaClassName();
+
+	Class<?> getJavaClass();
 
 	String getJavascriptNamespace();
 
@@ -38,5 +40,4 @@ public interface ClassWithJavascript {
 	List<ClassWithJavascript> getDirectDependencies();
 
 	Map<ClassWithJavascript, DependencyType> getDirectDependencyMap();
-
 }
