@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,6 +68,7 @@ public class DriverConfiguration {
 
 	private final ClassLoader classLoader;
 	private ClassWithJavascriptResolver stjsClassResolver;
+	private TestResourceResolver resourceResolver;
 
 	private Properties props;
 
@@ -111,6 +113,7 @@ public class DriverConfiguration {
 		}
 		classLoader = new WebAppClassLoader(new URL[] {}, klass.getClassLoader(), debugEnabled);
 		stjsClassResolver = new DefaultClassResolver(classLoader);
+		resourceResolver = new TestResourceResolver(classLoader);
 
 		// load browsers last
 		browsers = instantiateBrowsers();
@@ -209,6 +212,10 @@ public class DriverConfiguration {
 
 	public String getProperty(String name, String defaultValue) {
 		return this.props.getProperty(name, defaultValue);
+	}
+
+	public TestResource getResource(String httpUrl) throws URISyntaxException {
+		return resourceResolver.resolveResource(httpUrl);
 	}
 
 	public URL getServerURL() {

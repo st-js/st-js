@@ -18,13 +18,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.stjs.generator.BridgeClass;
 import org.stjs.generator.ClassWithJavascript;
-import org.stjs.generator.DefaultClassResolver;
 import org.stjs.generator.DependencyCollection;
-import org.stjs.generator.ClassWithJavascriptResolver;
-import org.stjs.generator.Generator;
-import org.stjs.generator.STJSClass;
-import org.stjs.generator.STJSRuntimeException;
-import org.stjs.generator.utils.ClassUtils;
 import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.Scripts;
 import org.stjs.testing.annotation.ScriptsAfter;
@@ -34,7 +28,6 @@ import org.stjs.testing.driver.DriverConfiguration;
 import org.stjs.testing.driver.HttpLongPollingServer;
 import org.stjs.testing.driver.JUnitSession;
 import org.stjs.testing.driver.MultiTestMethod;
-import org.stjs.testing.driver.StreamUtils;
 import org.stjs.testing.driver.TestResult;
 
 import com.google.common.base.Strings;
@@ -337,7 +330,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 			} else if (!Strings.isNullOrEmpty(htmlFixture.url())) {
 				StringWriter writer = new StringWriter();
-				StreamUtils.copy(getConfig().getClassLoader(), htmlFixture.url(), writer);
+				getConfig().getResource(htmlFixture.url()).copyTo(writer);
 				resp.append(writer.toString());
 			}
 		}
