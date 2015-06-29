@@ -55,7 +55,7 @@ public class STJSClass implements ClassWithJavascript {
 
 	private final Properties properties;
 
-	private final DependencyResolver dependencyResolver;
+	private final ClassWithJavascriptResolver classWithJavascriptResolver;
 	private Map<String, DependencyType> dependencies = Collections.emptyMap();
 	private List<ClassWithJavascript> directDependencies;
 	private Map<ClassWithJavascript, DependencyType> directDependenciesMap;
@@ -70,14 +70,14 @@ public class STJSClass implements ClassWithJavascript {
 	/**
 	 * constructor for storage
 	 */
-	public STJSClass(DependencyResolver dependencyResolver, File targetFolder, String className) {
-		PreConditions.checkNotNull(dependencyResolver);
+	public STJSClass(ClassWithJavascriptResolver classResolver, File targetFolder, String className) {
+		PreConditions.checkNotNull(classResolver);
 		PreConditions.checkNotNull(targetFolder);
 		PreConditions.checkNotNull(className);
 		this.targetFolder = targetFolder;
 		this.className = className;
 		this.properties = new Properties();
-		this.dependencyResolver = dependencyResolver;
+		this.classWithJavascriptResolver = classResolver;
 		this.javascriptNamespace = null;
 	}
 
@@ -87,14 +87,14 @@ public class STJSClass implements ClassWithJavascript {
 	 * @param builtProjectClassLoader
 	 * @param className
 	 */
-	public STJSClass(DependencyResolver dependencyResolver, ClassLoader classLoader, String className) {
-		PreConditions.checkNotNull(dependencyResolver);
+	public STJSClass(ClassWithJavascriptResolver classesolver, ClassLoader classLoader, String className) {
+		PreConditions.checkNotNull(classesolver);
 		PreConditions.checkNotNull(classLoader);
 		PreConditions.checkNotNull(className);
 
 		this.className = className;
 		this.targetFolder = null;
-		this.dependencyResolver = dependencyResolver;
+		this.classWithJavascriptResolver = classesolver;
 		properties = loadProperties(classLoader);
 
 		// deps
@@ -277,7 +277,7 @@ public class STJSClass implements ClassWithJavascript {
 		if (directDependencies == null) {
 			directDependencies = new ArrayList<ClassWithJavascript>(dependencies.size());
 			for (String depClassName : dependencies.keySet()) {
-				directDependencies.add(dependencyResolver.resolve(depClassName.trim()));
+				directDependencies.add(classWithJavascriptResolver.resolve(depClassName.trim()));
 			}
 		}
 		return directDependencies;
@@ -288,7 +288,7 @@ public class STJSClass implements ClassWithJavascript {
 		if (directDependenciesMap == null) {
 			directDependenciesMap = new HashMap<ClassWithJavascript, DependencyType>(dependencies.size());
 			for (Map.Entry<String, DependencyType> entry : dependencies.entrySet()) {
-				directDependenciesMap.put(dependencyResolver.resolve(entry.getKey().trim()), entry.getValue());
+				directDependenciesMap.put(classWithJavascriptResolver.resolve(entry.getKey().trim()), entry.getValue());
 			}
 		}
 		return directDependenciesMap;

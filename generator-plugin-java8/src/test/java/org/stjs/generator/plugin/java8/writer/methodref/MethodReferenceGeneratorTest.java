@@ -1,12 +1,12 @@
 package org.stjs.generator.plugin.java8.writer.methodref;
 
+import org.stjs.generator.utils.AbstractStjsTest;
+
 import static org.junit.Assert.assertEquals;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.execute;
 
 import org.junit.Test;
 
-public class MethodReferenceGeneratorTest {
+public class MethodReferenceGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testStaticMethodRef() {
 		assertCodeContains(MethodRef1.class, "calculate(MethodRef1.inc)");

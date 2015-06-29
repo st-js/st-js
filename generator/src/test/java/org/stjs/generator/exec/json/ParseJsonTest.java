@@ -5,12 +5,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
-import org.stjs.generator.utils.GeneratorTestHelper;
+import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;
 import org.stjs.javascript.Map;
 
-public class ParseJsonTest {
+public class ParseJsonTest extends AbstractStjsTest {
 	@SuppressWarnings("unchecked")
 	private Object getProperty(Object obj, String... props) {
 		Object bean = obj;
@@ -38,7 +38,7 @@ public class ParseJsonTest {
 
 	@Test
 	public void testSimple() {
-		Object result = GeneratorTestHelper.execute(Json1.class);
+		Object result = execute(Json1.class);
 		assertProperty(1.0, result, "a");
 		assertProperty(2.0, result, "children", "0", "i");
 		assertProperty("Inner", result, "children", "0", "type");
@@ -47,7 +47,7 @@ public class ParseJsonTest {
 
 	@Test
 	public void testMap() {
-		Object result = GeneratorTestHelper.execute(Json2.class);
+		Object result = execute(Json2.class);
 		assertProperty("Class2", result, "type");
 		assertProperty(1.0, result, "map", "key", "a");
 		assertProperty("Class1", result, "map", "key", "type");
@@ -55,7 +55,7 @@ public class ParseJsonTest {
 
 	@Test
 	public void testMapOfMap() {
-		Object result = GeneratorTestHelper.execute(Json3.class);
+		Object result = execute(Json3.class);
 		assertProperty("Class3", result, "type");
 		assertProperty(1.0, result, "map", "key1", "key2", "a");
 		assertProperty("Class1", result, "map", "key1", "key2", "type");
@@ -63,7 +63,7 @@ public class ParseJsonTest {
 
 	@Test
 	public void testDate() {
-		Object result = GeneratorTestHelper.execute(Json4.class);
+		Object result = execute(Json4.class);
 		assertProperty("Class4", result, "type");
 		Date d = (Date) getProperty(result, "date");
 		assertEquals(11, d.getMonth(), 0.1);
@@ -72,7 +72,7 @@ public class ParseJsonTest {
 
 	@Test
 	public void testDateWithTypefy() {
-		Object result = GeneratorTestHelper.execute(Json4b.class);
+		Object result = execute(Json4b.class);
 		assertProperty("Class4", result, "type");
 		Date d = (Date) getProperty(result, "date");
 		assertEquals(11, d.getMonth(), 0.1);
@@ -81,7 +81,7 @@ public class ParseJsonTest {
 
 	@Test
 	public void testEnum() {
-		Object result = GeneratorTestHelper.execute(Json5.class);
+		Object result = execute(Json5.class);
 		assertProperty("Class5", result, "type");
 		assertProperty(1.0, result, "e", "_ordinal");
 		assertProperty("b", result, "e", "_name");
@@ -89,7 +89,7 @@ public class ParseJsonTest {
 
 	@Test
 	public void testEnumWithTypefy() {
-		Object result = GeneratorTestHelper.execute(Json5b.class);
+		Object result = execute(Json5b.class);
 		assertProperty("Class5", result, "type");
 		assertProperty(1.0, result, "e", "_ordinal");
 		assertProperty("b", result, "e", "_name");
@@ -97,7 +97,7 @@ public class ParseJsonTest {
 
 	@Test
 	public void testEnumWithStringify() {
-		Object result = GeneratorTestHelper.execute(Json5c.class);
+		Object result = execute(Json5c.class);
 		assertProperty("Class5", result, "type");
 		assertProperty(2.0, result, "number");
 		assertProperty("b", result, "e");
@@ -107,7 +107,7 @@ public class ParseJsonTest {
 
 	@Test
 	public void testSuperClass() {
-		Object result = GeneratorTestHelper.execute(Json6.class);
+		Object result = execute(Json6.class);
 		assertProperty(1.0, result, "a");
 		assertProperty(2.0, result, "children", "0", "i");
 		assertProperty("Inner", result, "children", "0", "type");

@@ -1,12 +1,10 @@
 package org.stjs.generator.writer.annotations;
 
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
-
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 
-public class AnnotationGeneratorTest {
+public class AnnotationGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testSimpleClassAnnotation() {
 		assertCodeContains(Annotation1.class, "_:{\"Immutable\":{}}", new GeneratorConfigurationBuilder().annotations("Immutable").build());

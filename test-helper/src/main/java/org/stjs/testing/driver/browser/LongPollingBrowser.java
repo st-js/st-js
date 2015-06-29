@@ -1,6 +1,5 @@
 package org.stjs.testing.driver.browser;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
@@ -19,11 +18,10 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.stjs.generator.BridgeClass;
 import org.stjs.generator.ClassWithJavascript;
+import org.stjs.generator.DefaultClassResolver;
 import org.stjs.generator.DependencyCollection;
-import org.stjs.generator.DependencyResolver;
-import org.stjs.generator.GenerationDirectory;
+import org.stjs.generator.ClassWithJavascriptResolver;
 import org.stjs.generator.Generator;
-import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.STJSClass;
 import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.utils.ClassUtils;
@@ -216,7 +214,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	}
 
 	private String getTypeName(Class<?> clazz){
-		return getTypeName(clazz, new NullDependencyResolver().resolve(clazz.getName()));
+		return getTypeName(clazz, getConfig().getStjsClassResolver().resolve(clazz.getName()));
 	}
 
 	/**
@@ -227,7 +225,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	public void sendTestFixture(MultiTestMethod meth, HttpExchange exchange) throws Exception {
 		Class<?> testClass = meth.getTestClass().getJavaClass();
 		Method method = meth.getMethod().getMethod();
-		ClassWithJavascript stjsClass = new Generator().getExistingStjsClass(getConfig().getClassLoader(), testClass);
+		ClassWithJavascript stjsClass = getConfig().getStjsClassResolver().resolve(testClass.getName());
 
 		List<FrameworkMethod> beforeMethods = meth.getTestClass().getAnnotatedMethods(Before.class);
 		List<FrameworkMethod> afterMethods = meth.getTestClass().getAnnotatedMethods(After.class);
@@ -375,34 +373,5 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	public long getId() {
 		return this.id;
-	}
-
-	private class NullDependencyResolver implements DependencyResolver {
-
-		public NullDependencyResolver() {
-		}
-
-		@Override
-		public ClassWithJavascript resolve(String className) {
-			String parentClassName = className;
-			int pos = parentClassName.indexOf('$');
-			if (pos > 0 && parentClassName.charAt(pos - 1) != '.') {
-				// avoid classes like angularjs.$Timeout
-				parentClassName = parentClassName.substring(0, pos);
-			}
-			// try first if to see if it's a bridge class
-			Class<?> clazz;
-			try {
-				clazz = getConfig().getClassLoader().loadClass(parentClassName);
-			}
-			catch (ClassNotFoundException e) {
-				throw new STJSRuntimeException(e);
-			}
-			if (ClassUtils.isBridge(getConfig().getClassLoader(), clazz)) {
-				return new BridgeClass(this, clazz);
-			}
-
-			return new STJSClass(this, getConfig().getClassLoader(), parentClassName);
-		}
 	}
 }

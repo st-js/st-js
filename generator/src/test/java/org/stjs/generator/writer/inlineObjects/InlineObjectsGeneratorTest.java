@@ -1,13 +1,10 @@
 package org.stjs.generator.writer.inlineObjects;
 
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
-import static org.stjs.generator.utils.GeneratorTestHelper.generate;
-
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 
-public class InlineObjectsGeneratorTest {
+public class InlineObjectsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testInlineObject() {
 		assertCodeContains(InlineObjects1.class, "o = {a:1, b:\"x\"}");

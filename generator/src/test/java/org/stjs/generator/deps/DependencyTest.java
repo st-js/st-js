@@ -4,19 +4,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.stjs.generator.utils.GeneratorTestHelper.generate;
-import static org.stjs.generator.utils.GeneratorTestHelper.stjsClass;
 
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.ClassWithJavascript;
 import org.stjs.generator.DependencyCollection;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.javascript.JSGlobal;
 
-public class DependencyTest {
+public class DependencyTest extends AbstractStjsTest {
 	@Test
 	public void test1() {
 		assertEquals(-1, DependencyCollection.DEPENDENCY_COMPARATOR.compare(Dep1.class, Dep2.class));

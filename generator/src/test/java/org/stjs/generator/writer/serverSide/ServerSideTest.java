@@ -1,12 +1,10 @@
 package org.stjs.generator.writer.serverSide;
 
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
-import static org.stjs.generator.utils.GeneratorTestHelper.generate;
-
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 
-public class ServerSideTest {
+public class ServerSideTest extends AbstractStjsTest {
 	@Test
 	public void testFieldNotGenerated() {
 		assertCodeDoesNotContain(ServerSide1.class, "serverSideField");

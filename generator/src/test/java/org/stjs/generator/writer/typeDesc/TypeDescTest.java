@@ -1,10 +1,9 @@
 package org.stjs.generator.writer.typeDesc;
 
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 
-public class TypeDescTest {
+public class TypeDescTest extends AbstractStjsTest {
 	@Test
 	public void testBasicField() {
 		assertCodeContains(TypeDesc1.class, "{});");

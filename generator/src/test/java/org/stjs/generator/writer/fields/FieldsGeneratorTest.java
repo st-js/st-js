@@ -2,14 +2,12 @@ package org.stjs.generator.writer.fields;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.execute;
-import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 
-public class FieldsGeneratorTest {
+public class FieldsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testPrimitiveIntInstanceField() {
 		assertCodeContains(Fields1.class, "prototype.x = 0;");

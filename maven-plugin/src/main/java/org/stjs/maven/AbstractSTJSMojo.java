@@ -1,17 +1,14 @@
 /**
- *  Copyright 2011 Alexandru Craciun, Eyal Kaspi
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Copyright 2011 Alexandru Craciun, Eyal Kaspi
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.stjs.maven;
 
@@ -205,21 +202,22 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			Collection<String> packages = accumulatePackages(sourceDir);
 			configBuilder.allowedPackages(packages);
 		}
+		configBuilder.stjsClassLoader(builtProjectClassLoader);
+		configBuilder.targetFolder(getBuildOutputDirectory());
+		configBuilder.generationFolder(gendir);
 
 		GeneratorConfiguration configuration = configBuilder.build();
-		Generator generator = new Generator();
-		generator.init(builtProjectClassLoader, sourceEncoding);
+		Generator generator = new Generator(configuration);
 
 		int generatedFiles = 0;
 		boolean hasFailures = false;
 		// scan the modified sources
 		for (String sourceRoot : getCompileSourceRoots()) {
 			File sourceDir = new File(sourceRoot);
-			List<File> sources = new ArrayList<File>();
 			SourceMapping mapping = new SuffixMapping(".java", ".js");
 			SourceMapping stjsMapping = new SuffixMapping(".java", ".stjs");
 
-			sources = accumulateSources(gendir, sourceDir, mapping, stjsMapping, staleMillis);
+			List<File> sources = accumulateSources(gendir, sourceDir, mapping, stjsMapping, staleMillis);
 			for (File source : sources) {
 				if (source.getName().equals(PACKAGE_INFO_JAVA)) {
 					getLog().debug("Skipping " + source);
@@ -227,7 +225,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				}
 				File absoluteSource = new File(sourceDir, source.getPath());
 				try {
-					File absoluteTarget = (File) mapping.getTargetFiles(gendir.getGeneratedSourcesAbsolutePath(), source.getPath()).iterator().next();
+					File absoluteTarget =
+							(File) mapping.getTargetFiles(gendir.getGeneratedSourcesAbsolutePath(), source.getPath()).iterator().next();
 					if (getLog().isDebugEnabled()) {
 						getLog().debug("Generating " + absoluteTarget);
 					}
@@ -238,9 +237,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 						continue;
 					}
 					String className = getClassNameForSource(source.getPath());
-					ClassWithJavascript stjsClass =
-							generator.generateJavascript(builtProjectClassLoader, className, sourceDir, gendir, getBuildOutputDirectory(),
-									configuration);
+					ClassWithJavascript stjsClass = generator.generateJavascript(className, sourceDir);
 					if (!(stjsClass instanceof BridgeClass)) {
 						++generatedFiles;
 					}
@@ -251,8 +248,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				}
 				catch (MultipleFileGenerationException e) {
 					for (JavascriptFileGenerationException jse : e.getExceptions()) {
-						buildContext.addMessage(jse.getSourcePosition().getFile(), jse.getSourcePosition().getLine(), jse.getSourcePosition()
-								.getColumn(), jse.getMessage(), BuildContext.SEVERITY_ERROR, null);
+						buildContext.addMessage(jse.getSourcePosition().getFile(), jse.getSourcePosition().getLine(),
+								jse.getSourcePosition().getColumn(), jse.getMessage(), BuildContext.SEVERITY_ERROR, null);
 					}
 					hasFailures = true;
 					// continue with the next file
@@ -287,7 +284,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		StrongConnectivityInspector<String, DefaultEdge> inspector = new StrongConnectivityInspector<String, DefaultEdge>(dependencyGraph);
 		List<Set<String>> components = inspector.stronglyConnectedSets();
 
-		for (Iterator<Set<String>> it = components.iterator(); it.hasNext();) {
+		for (Iterator<Set<String>> it = components.iterator(); it.hasNext(); ) {
 			Set<String> component = it.next();
 			if (component.size() == 1) {
 				it.remove();
@@ -331,7 +328,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				sources = accumulateSources(gendir, sourceDir, mapping, stjsMapping, Integer.MIN_VALUE);
 				for (File source : sources) {
 
-					File absoluteTarget = (File) mapping.getTargetFiles(gendir.getGeneratedSourcesAbsolutePath(), source.getPath()).iterator().next();
+					File absoluteTarget =
+							(File) mapping.getTargetFiles(gendir.getGeneratedSourcesAbsolutePath(), source.getPath()).iterator().next();
 
 					String className = getClassNameForSource(source.getPath());
 					if (!absoluteTarget.exists()) {
@@ -372,8 +370,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				if (targetFile != null) {
 					// for this project's files
 					if (generateSourceMap) {
-						currentLine =
-								SourceMapUtils.appendFileSkipSourceMap(gendir.getGeneratedSourcesAbsolutePath(), allSourcesFile, targetFile, currentLine,
+						currentLine = SourceMapUtils
+								.appendFileSkipSourceMap(gendir.getGeneratedSourcesAbsolutePath(), allSourcesFile, targetFile, currentLine,
 										packSourceMap, sourceEncoding);
 					} else {
 						Files.copy(targetFile, allSourcesFile);
@@ -417,7 +415,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	protected void filesGenerated(Generator generator, GenerationDirectory gendir) throws MojoFailureException, MojoExecutionException {
 		// copy the javascript support
 		try {
-			if(getCopyStjsSupportFile()) {
+			if (getCopyStjsSupportFile()) {
 				generator.copyJavascriptSupport(getGeneratedSourcesDirectory().getGeneratedSourcesAbsolutePath());
 			}
 		}
@@ -493,8 +491,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				staleFiles.addAll(stjsScanner.getIncludedSources(f.getParentFile(), getBuildOutputDirectory()));
 			}
 			catch (InclusionScanException e) {
-				throw new MojoExecutionException("Error scanning source root: \'" + sourceDir.getPath() + "\' "
-						+ "for stale files to recompile.", e);
+				throw new MojoExecutionException(
+						"Error scanning source root: \'" + sourceDir.getPath() + "\' " + "for stale files to recompile.", e);
 			}
 		}
 

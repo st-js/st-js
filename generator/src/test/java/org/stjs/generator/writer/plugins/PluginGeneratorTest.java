@@ -1,10 +1,9 @@
 package org.stjs.generator.writer.plugins;
 
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 
-public class PluginGeneratorTest {
+public class PluginGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testReplaceContributor() {
 		assertCodeContains(Plugins1.class, "return a + 2");

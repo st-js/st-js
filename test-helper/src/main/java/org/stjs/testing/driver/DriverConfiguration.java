@@ -25,6 +25,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import org.stjs.generator.ClassWithJavascriptResolver;
+import org.stjs.generator.DefaultClassResolver;
 import org.stjs.testing.driver.browser.Browser;
 import org.stjs.testing.driver.browser.ChromeBrowser;
 import org.stjs.testing.driver.browser.DesktopDefaultBrowser;
@@ -64,6 +66,7 @@ public class DriverConfiguration {
 	private List<Browser> browsers;
 
 	private final ClassLoader classLoader;
+	private ClassWithJavascriptResolver stjsClassResolver;
 
 	private Properties props;
 
@@ -107,6 +110,7 @@ public class DriverConfiguration {
 			debugEnabled = Boolean.parseBoolean(props.getProperty(PROP_DEBUG));
 		}
 		classLoader = new WebAppClassLoader(new URL[] {}, klass.getClassLoader(), debugEnabled);
+		stjsClassResolver = new DefaultClassResolver(classLoader);
 
 		// load browsers last
 		browsers = instantiateBrowsers();
@@ -193,6 +197,10 @@ public class DriverConfiguration {
 
 	public ClassLoader getClassLoader() {
 		return classLoader;
+	}
+
+	public ClassWithJavascriptResolver getStjsClassResolver(){
+		return this.stjsClassResolver;
 	}
 
 	public String getProperty(String name) {

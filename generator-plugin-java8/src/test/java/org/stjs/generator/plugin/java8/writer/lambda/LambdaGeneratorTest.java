@@ -1,16 +1,12 @@
 package org.stjs.generator.plugin.java8.writer.lambda;
 
 import static org.junit.Assert.assertEquals;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
-import static org.stjs.generator.utils.GeneratorTestHelper.execute;
-import static org.stjs.generator.utils.GeneratorTestHelper.executeAndReturnNumber;
-import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
 import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.utils.AbstractStjsTest;
 
-public class LambdaGeneratorTest {
+public class LambdaGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testLambdaParamExpression() {
 		assertCodeContains(Lambda1.class, "method(function(x){return x+1;})");

@@ -1,16 +1,13 @@
 package org.stjs.generator.writer.statements;
 
 import static org.junit.Assert.assertEquals;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
-import static org.stjs.generator.utils.GeneratorTestHelper.execute;
-import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 
-public class StatementsGeneratorTest {
+public class StatementsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testFor() {
 		assertCodeContains(Statements1.class, "for (var i = 0; i < 10; i++) {");

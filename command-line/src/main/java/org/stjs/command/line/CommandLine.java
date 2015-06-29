@@ -38,7 +38,7 @@ public class CommandLine {
 	}
 
 	static void generate(final String path, final String className, List<File> dependencies, String outputDir) {
-		Generator gen = new Generator();
+		Generator gen = null;
 		try {
 			List<URL> classpathElements = new ArrayList<URL>();
 			classpathElements.add(new File(path).toURI().toURL());
@@ -49,21 +49,26 @@ public class CommandLine {
 			ClassLoader builtProjectClassLoader = new URLClassLoader(classpathElements.toArray(new URL[classpathElements.size()]), Thread
 					.currentThread().getContextClassLoader());
 			File sourceFolder = new File(path);
-			GenerationDirectory targetFolder = new GenerationDirectory(new File(outputDir), null, null);
-			File generationFolder = targetFolder.getGeneratedSourcesAbsolutePath();
+
+			GenerationDirectory generationFolder = new GenerationDirectory(new File(outputDir), null, null);
 
 			GeneratorConfigurationBuilder configBuilder = new GeneratorConfigurationBuilder();
 			configBuilder.allowedPackage(builtProjectClassLoader.loadClass(className).getPackage().getName());
-			GeneratorConfiguration configuration = configBuilder.build();
+			configBuilder.generationFolder(generationFolder);
+			configBuilder.targetFolder(generationFolder.getGeneratedSourcesAbsolutePath());
+			configBuilder.stjsClassLoader(builtProjectClassLoader);
 
-			gen.init(builtProjectClassLoader, configuration.getSourceEncoding());
-			gen.generateJavascript(builtProjectClassLoader, className, sourceFolder, targetFolder, generationFolder, configuration);
+			GeneratorConfiguration configuration = configBuilder.build();
+			gen = new Generator(configuration);
+			gen.generateJavascript(className, sourceFolder);
 		}
 		catch (Exception e) {
 			throw Throwables.propagate(e);
 		}
 		finally {
-			gen.close();
+			if(gen != null) {
+				gen.close();
+			}
 		}
 	}
 

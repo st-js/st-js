@@ -1,13 +1,12 @@
 package org.stjs.generator.writer.switches;
 
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.writer.enums.Enums3;
 import org.stjs.generator.writer.enums.Enums4Switch;
 import org.stjs.generator.writer.enums.Enums7;
 
-public class SwitchGeneratorTest {
+public class SwitchGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testSwitchEnumsInnerClass() {

@@ -2,15 +2,12 @@ package org.stjs.generator.writer.innerTypes;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
-import static org.stjs.generator.utils.GeneratorTestHelper.execute;
-import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 
-public class InnerTypesGeneratorTest {
+public class InnerTypesGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testCreateInstanceInnerType() {
 		assertCodeContains(InnerTypes1.class, "new InnerTypes1.InnerType()");
