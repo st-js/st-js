@@ -10,7 +10,7 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * array.$set(index, value) -> array[index] = value, or $set(obj, prop, value) -> obj[prop]=value
- * 
+ *
  * @author acraciun
  */
 public class PutTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
@@ -19,7 +19,7 @@ public class PutTemplate<JS> implements WriterContributor<MethodInvocationTree, 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		int argCount = tree.getArguments().size();
-		if (argCount < MIN_ARGS_COUNT && argCount > MIN_ARGS_COUNT + 1) {
+		if (argCount < MIN_ARGS_COUNT || argCount > MIN_ARGS_COUNT + 1) {
 			throw context.addError(tree, "A 'put' template can only be applied for methods with 2 or 3 parameters");
 		}
 

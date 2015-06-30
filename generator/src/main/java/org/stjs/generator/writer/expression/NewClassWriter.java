@@ -113,9 +113,6 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 			JavaScriptBuilder<JS> js = tw.getContext().js();
 			JS target = js.keyword(Keyword.THIS);
 			JS stjsBind = js.property(js.name("stjs"), "bind");
-			if (specialThisParamPos < 0) {
-				return js.functionCall(stjsBind, Arrays.asList(target, func));
-			}
 			return js.functionCall(stjsBind, Arrays.asList(target, func, js.number(specialThisParamPos)));
 		}
 
