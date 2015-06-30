@@ -8,7 +8,7 @@ import org.stjs.generator.utils.ClassUtils;
 /**
  * this class lazily generates the dependencies
  */
-public class DefaultClassResolver implements ClassWithJavascriptResolver {
+public class DefaultClassResolver implements ClassResolver {
 
 	private final ClassLoader classLoader;
 	private final Map<String, ClassWithJavascript> cache = new HashMap<>();
@@ -29,6 +29,15 @@ public class DefaultClassResolver implements ClassWithJavascriptResolver {
 		return clazz;
 	}
 
+	public Class<?> resolveJavaClass(String className) {
+		try {
+			return classLoader.loadClass(className);
+		}
+		catch (ClassNotFoundException e) {
+			throw new STJSRuntimeException(e);
+		}
+	}
+
 	protected String getParentClassName(String className) {
 		String parentClassName = className;
 		int pos = parentClassName.indexOf('$');
@@ -42,13 +51,8 @@ public class DefaultClassResolver implements ClassWithJavascriptResolver {
 	protected ClassWithJavascript doResolve(String className) {
 		String parentClassName = getParentClassName(className);
 		// try first if to see if it's a bridge class
-		Class<?> clazz;
-		try {
-			clazz = classLoader.loadClass(parentClassName);
-		}
-		catch (ClassNotFoundException e) {
-			throw new STJSRuntimeException(e);
-		}
+		Class<?> clazz = resolveJavaClass(parentClassName);
+
 		if (ClassUtils.isBridge(classLoader, clazz)) {
 			return new BridgeClass(this, clazz);
 		}

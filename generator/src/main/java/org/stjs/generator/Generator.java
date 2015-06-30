@@ -169,7 +169,8 @@ public class Generator {
 		context.getChecks().check();
 		Timers.end("write-js-ast");
 
-		STJSClass stjsClass = new STJSClass(config.getClassResolver(), config.getTargetFolder(), className);
+		Class<?> javaClass = config.getClassResolver().resolveJavaClass(className);
+		STJSClass stjsClass = new STJSClass(config.getClassResolver(), config.getTargetFolder(), javaClass);
 		Map<String, DependencyType> resolvedClasses = new LinkedHashMap<String, DependencyType>(names.getResolvedTypes());
 		resolvedClasses.remove(className);
 		stjsClass.setDependencies(resolvedClasses);

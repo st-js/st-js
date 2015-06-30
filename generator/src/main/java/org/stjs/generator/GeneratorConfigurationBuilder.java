@@ -34,7 +34,7 @@ public class GeneratorConfigurationBuilder {
 	private ClassLoader stjsClassLoader;
 	private File targetFolder;
 	private GenerationDirectory generationFolder;
-	private ClassWithJavascriptResolver classResolver;
+	private ClassResolver classResolver;
 
 	public GeneratorConfigurationBuilder() {
 		// Set a default value for the source encoding.
@@ -117,7 +117,7 @@ public class GeneratorConfigurationBuilder {
 		return this;
 	}
 
-	public GeneratorConfigurationBuilder classResolver(ClassWithJavascriptResolver classResolver) {
+	public GeneratorConfigurationBuilder classResolver(ClassResolver classResolver) {
 		this.classResolver = classResolver;
 		return this;
 	}

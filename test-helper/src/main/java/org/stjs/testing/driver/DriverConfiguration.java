@@ -26,8 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import org.stjs.generator.ClassWithJavascriptResolver;
+import org.stjs.generator.ClassResolver;
 import org.stjs.generator.DefaultClassResolver;
+import org.stjs.generator.DependencyCollector;
 import org.stjs.testing.driver.browser.Browser;
 import org.stjs.testing.driver.browser.ChromeBrowser;
 import org.stjs.testing.driver.browser.DesktopDefaultBrowser;
@@ -67,8 +68,9 @@ public class DriverConfiguration {
 	private List<Browser> browsers;
 
 	private final ClassLoader classLoader;
-	private ClassWithJavascriptResolver stjsClassResolver;
-	private TestResourceResolver resourceResolver;
+	private final ClassResolver stjsClassResolver;
+	private final TestResourceResolver resourceResolver;
+	private final DependencyCollector dependencyCollector;
 
 	private Properties props;
 
@@ -114,6 +116,7 @@ public class DriverConfiguration {
 		classLoader = new WebAppClassLoader(new URL[] {}, klass.getClassLoader(), debugEnabled);
 		stjsClassResolver = new DefaultClassResolver(classLoader);
 		resourceResolver = new TestResourceResolver(classLoader);
+		dependencyCollector = new DependencyCollector();
 
 		// load browsers last
 		browsers = instantiateBrowsers();
@@ -202,7 +205,7 @@ public class DriverConfiguration {
 		return classLoader;
 	}
 
-	public ClassWithJavascriptResolver getStjsClassResolver(){
+	public ClassResolver getStjsClassResolver(){
 		return this.stjsClassResolver;
 	}
 
@@ -212,6 +215,10 @@ public class DriverConfiguration {
 
 	public String getProperty(String name, String defaultValue) {
 		return this.props.getProperty(name, defaultValue);
+	}
+
+	public DependencyCollector getDependencyCollector() {
+		return dependencyCollector;
 	}
 
 	public TestResource getResource(String httpUrl) throws URISyntaxException {

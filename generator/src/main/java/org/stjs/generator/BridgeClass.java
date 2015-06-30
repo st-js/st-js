@@ -39,7 +39,7 @@ public class BridgeClass implements ClassWithJavascript {
 	private final Class<?> clazz;
 	private final String jsNamespace;
 
-	public BridgeClass(ClassWithJavascriptResolver classResolver, Class<?> clazz) {
+	public BridgeClass(ClassResolver classResolver, Class<?> clazz) {
 		PreConditions.checkNotNull(classResolver);
 		PreConditions.checkNotNull(clazz);
 		this.clazz = clazz;

@@ -63,7 +63,7 @@ public final class NamespaceUtil {
 		}
 	}
 
-	private static String resolveNamespaceSimple(Class<?> clazz) {
+	public static String resolveNamespaceSimple(Class<?> clazz) {
 		String ns = getNamespaceAnnotationValue(clazz, clazz.getClassLoader());
 		if (ns != null) {
 			return ns;

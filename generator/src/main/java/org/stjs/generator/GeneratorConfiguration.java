@@ -26,13 +26,13 @@ public class GeneratorConfiguration {
 	private final ClassLoader stjsClassLoader;
 	private final File targetFolder;
 	private final GenerationDirectory generationFolder;
-	private final ClassWithJavascriptResolver classResolver;
+	private final ClassResolver classResolver;
 
 	// We actually have a builder for that, so the number of parameters warning doesn't apply
 	@SuppressWarnings("PMD.ExcessiveParameterList")
 	GeneratorConfiguration(Collection<String> allowedPackages, Set<String> allowedJavaLangClasses, boolean generateArrayHasOwnProperty,
 			boolean generateSourceMap, String sourceEncoding, Set<String> annotations, ClassLoader stjsClassLoader, File targetFolder,
-			GenerationDirectory generationFolder, ClassWithJavascriptResolver classResolver) {
+			GenerationDirectory generationFolder, ClassResolver classResolver) {
 		this.allowedPackages = allowedPackages;
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
 		this.generateArrayHasOwnProperty = generateArrayHasOwnProperty;
@@ -89,7 +89,7 @@ public class GeneratorConfiguration {
 		return targetFolder;
 	}
 
-	public ClassWithJavascriptResolver getClassResolver() {
+	public ClassResolver getClassResolver() {
 		return classResolver;
 	}
 }

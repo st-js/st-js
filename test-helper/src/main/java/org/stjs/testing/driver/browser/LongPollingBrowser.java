@@ -18,7 +18,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.stjs.generator.BridgeClass;
 import org.stjs.generator.ClassWithJavascript;
-import org.stjs.generator.DependencyCollection;
+import org.stjs.generator.DependencyCollector;
 import org.stjs.testing.annotation.HTMLFixture;
 import org.stjs.testing.annotation.Scripts;
 import org.stjs.testing.annotation.ScriptsAfter;
@@ -251,8 +251,8 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 			}
 		}
 
-		Set<URI> jsFiles = new LinkedHashSet<URI>();
-		for (ClassWithJavascript dep : new DependencyCollection(stjsClass).orderAllDependencies()) {
+		Set<URI> jsFiles = new LinkedHashSet<>();
+		for (ClassWithJavascript dep : getConfig().getDependencyCollector().orderAllDependencies(stjsClass)) {
 
 			if (addedScripts != null && dep instanceof BridgeClass) {
 				// bridge dependencies are not added when using @Scripts

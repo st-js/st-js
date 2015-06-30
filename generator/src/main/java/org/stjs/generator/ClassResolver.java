@@ -21,6 +21,7 @@ package org.stjs.generator;
  * 
  * @author acraciun
  */
-public interface ClassWithJavascriptResolver {
+public interface ClassResolver {
 	ClassWithJavascript resolve(String className);
+	Class<?> resolveJavaClass(String className);
 }

@@ -23,7 +23,7 @@ import javax.script.ScriptException;
 
 import org.stjs.generator.BridgeClass;
 import org.stjs.generator.ClassWithJavascript;
-import org.stjs.generator.DependencyCollection;
+import org.stjs.generator.DependencyCollector;
 import org.stjs.generator.GenerationDirectory;
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConfiguration;
@@ -232,7 +232,7 @@ public abstract class AbstractStjsTest {
 			File jsFile = new File(generationPath, stjsClass.getJavascriptFiles().get(0).getPath());
 			String content = Files.toString(jsFile, Charset.defaultCharset());
 			List<ClassWithJavascript> allDeps =
-					new DependencyCollection(stjsClass).orderAllDependencies();
+					new DependencyCollector().orderAllDependencies(stjsClass);
 			for (ClassWithJavascript dep : allDeps) {
 				for (URI js : dep.getJavascriptFiles()) {
 					if (dep instanceof BridgeClass) {

@@ -13,7 +13,6 @@ import java.util.Set;
 
 import org.junit.runners.model.InitializationError;
 import org.openqa.selenium.browserlaunchers.locators.BrowserLocator;
-import org.stjs.generator.ClassWithJavascriptResolver;
 import org.stjs.testing.driver.AsyncProcess;
 import org.stjs.testing.driver.DriverConfiguration;
 import org.stjs.testing.driver.TestResult;

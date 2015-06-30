@@ -1,6 +1,5 @@
 package org.stjs.testing.driver;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,7 +34,6 @@ public class TestResource {
 			throw new IllegalArgumentException("Wrong path in uri:" + httpUrl);
 		}
 		this.resourceUrl = classLoader.getResource(uri.getPath().substring(1));
-		System.out.println(resourceUrl);
 	}
 
 	public Date getModifiedDate() throws IOException {
