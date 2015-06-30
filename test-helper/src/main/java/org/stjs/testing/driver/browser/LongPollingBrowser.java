@@ -1,9 +1,11 @@
 package org.stjs.testing.driver.browser;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +33,7 @@ import org.stjs.testing.driver.MultiTestMethod;
 import org.stjs.testing.driver.TestResult;
 
 import com.google.common.base.Strings;
+import com.google.common.io.Files;
 import com.sun.net.httpserver.HttpExchange;
 
 /**
@@ -287,7 +290,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		resp.append("    try{\n");
 
 		String testedClassName = getTypeName(testClass, stjsClass);
-		resp.append("        parent.startingTest('" + testedClassName + "', '" + method.getName() + "');");
+		resp.append("        parent.startingTest('" + testedClassName + "', '" + method.getName() + "');\n");
 		resp.append("        var stjsTest = new " + testedClassName + "();\n");
 		resp.append("        var stjsResult = 'OK';\n");
 

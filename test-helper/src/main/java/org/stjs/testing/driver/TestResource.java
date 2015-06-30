@@ -19,6 +19,8 @@ import com.google.common.io.CharStreams;
 import com.google.common.io.Closeables;
 import com.sun.net.httpserver.HttpExchange;
 
+import sun.net.www.protocol.file.FileURLConnection;
+
 public class TestResource {
 
 	private final ClassLoader classLoader;
@@ -41,50 +43,75 @@ public class TestResource {
 			return new Date();
 		}
 
-		return new Date(connect().getLastModified());
+		return withConnection(new ConnectionOperation<Date>() {
+			@Override
+			public Date doWithConnection(URLConnection connection) throws IOException {
+				return new Date(connection.getLastModified());
+			}
+		});
 	}
 
-	public boolean copyTo(Writer out) throws IOException {
+	public boolean copyTo(final Writer out) throws IOException {
 		if(resourceUrl == null){
 			return false;
 		}
-		InputStream is = connect().getInputStream();
-		Reader reader = new InputStreamReader(is, Charset.forName("UTF-8"));
-		try {
-			CharStreams.copy(reader, out);
-			out.flush();
-		}
-		finally {
-			Closeables.closeQuietly(reader);
-		}
-		return true;
+
+		return withConnection(new ConnectionOperation<Boolean>() {
+			@Override
+			public Boolean doWithConnection(URLConnection connection) throws IOException {
+				InputStream is = connection.getInputStream();
+				Reader reader = new InputStreamReader(is, Charset.forName("UTF-8"));
+				try {
+					CharStreams.copy(reader, out);
+					out.flush();
+				}
+				finally {
+					Closeables.closeQuietly(reader);
+					Closeables.closeQuietly(is);
+				}
+				return true;
+			}
+		});
 	}
 
-	public boolean copyTo(HttpExchange exchange) throws IOException {
+	public boolean copyTo(final HttpExchange exchange) throws IOException {
 		if(resourceUrl == null){
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, -1);
 			return false;
 		}
 
-		URLConnection conn = connect();
-		InputStream is = connect().getInputStream();
-		try {
-			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, conn.getContentLengthLong());
-			OutputStream out = exchange.getResponseBody();
-			ByteStreams.copy(is, out);
-			out.flush();
-		}
-		finally {
-			Closeables.closeQuietly(is);
-		}
-
-		return true;
+		return withConnection(new ConnectionOperation<Boolean>() {
+			@Override
+			public Boolean doWithConnection(URLConnection connection) throws IOException {
+				InputStream is = connection.getInputStream();
+				try {
+					exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, connection.getContentLengthLong());
+					OutputStream out = exchange.getResponseBody();
+					ByteStreams.copy(is, out);
+					out.flush();
+				}
+				finally {
+					Closeables.closeQuietly(is);
+				}
+				return true;
+			}
+		});
 	}
 
-	private URLConnection connect() throws IOException {
+
+	private <T> T withConnection(ConnectionOperation<T> operation) throws IOException {
 		URLConnection conn = this.resourceUrl.openConnection();
 		conn.connect();
-		return conn;
+
+		try {
+			T result = operation.doWithConnection(conn);
+			return result;
+		} finally {
+			Closeables.closeQuietly(conn.getInputStream());
+		}
 	}
 
+	private interface ConnectionOperation<T> {
+		T doWithConnection(URLConnection connection) throws IOException ;
+	}
 }
