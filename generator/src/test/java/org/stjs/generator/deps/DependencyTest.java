@@ -124,6 +124,50 @@ public class DependencyTest extends AbstractStjsTest {
 		assertDependency(jsClass.getDirectDependencyMap(), Dep10p.class, DependencyType.OTHER);
 	}
 
+	@Test
+	public void testStaticInitializerBlockDep() {
+		generate(Dep11b.class);
+		generate(Dep11.class);
+
+		ClassWithJavascript jsClass = stjsClass(Dep11.class);
+
+		assertNotNull(jsClass);
+		assertDependency(jsClass.getDirectDependencyMap(), Dep11b.class, DependencyType.STATIC);
+	}
+
+	@Test
+	public void testStaticInitializerBlockWithInnerClassStaticMethodDep() {
+		generate(Dep12b.class);
+		generate(Dep12.class);
+
+		ClassWithJavascript jsClass = stjsClass(Dep12.class);
+
+		assertNotNull(jsClass);
+		assertDependency(jsClass.getDirectDependencyMap(), Dep12b.class, DependencyType.STATIC);
+	}
+
+	@Test
+	public void testStaticInitializerBlockWithInnerClassConstructorDep() {
+		generate(Dep13b.class);
+		generate(Dep13.class);
+
+		ClassWithJavascript jsClass = stjsClass(Dep13.class);
+
+		assertNotNull(jsClass);
+		assertDependency(jsClass.getDirectDependencyMap(), Dep13b.class, DependencyType.STATIC);
+	}
+
+	@Test
+	public void testStaticInitializerBlockWithStaticMethodDep() {
+		generate(Dep14b.class);
+		generate(Dep14.class);
+
+		ClassWithJavascript jsClass = stjsClass(Dep14.class);
+
+		assertNotNull(jsClass);
+		assertDependency(jsClass.getDirectDependencyMap(), Dep14b.class, DependencyType.STATIC);
+	}
+
 	private void assertDependency(List<ClassWithJavascript> directDependencies, Class<?> clz) {
 		for (ClassWithJavascript c : directDependencies) {
 			if (clz.getName().equals(c.getJavaClassName())) {
