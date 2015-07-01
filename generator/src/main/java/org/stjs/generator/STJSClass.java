@@ -263,6 +263,16 @@ public class STJSClass implements ClassWithJavascript {
 	}
 
 	@Override
+	public String getJavascriptClassName() {
+		String simpleName = getJavaClass().getSimpleName();
+		String ns = getJavascriptNamespace();
+		if (ns != null && !ns.isEmpty()) {
+			return ns + "." + simpleName;
+		}
+		return simpleName;
+	}
+
+	@Override
 	public String getJavascriptNamespace() {
 		return this.javascriptNamespace;
 	}

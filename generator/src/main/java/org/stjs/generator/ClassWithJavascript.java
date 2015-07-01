@@ -33,6 +33,8 @@ public interface ClassWithJavascript {
 
 	Class<?> getJavaClass();
 
+	String getJavascriptClassName();
+
 	String getJavascriptNamespace();
 
 	List<URI> getJavascriptFiles();

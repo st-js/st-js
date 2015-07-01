@@ -1,39 +1,29 @@
 package org.stjs.testing.driver.browser;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.lang.reflect.Method;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Exchanger;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.stjs.generator.BridgeClass;
 import org.stjs.generator.ClassWithJavascript;
-import org.stjs.generator.DependencyCollector;
-import org.stjs.testing.annotation.HTMLFixture;
-import org.stjs.testing.annotation.Scripts;
-import org.stjs.testing.annotation.ScriptsAfter;
-import org.stjs.testing.annotation.ScriptsBefore;
 import org.stjs.testing.driver.AsyncProcess;
 import org.stjs.testing.driver.DriverConfiguration;
 import org.stjs.testing.driver.HttpLongPollingServer;
 import org.stjs.testing.driver.JUnitSession;
 import org.stjs.testing.driver.MultiTestMethod;
+import org.stjs.testing.driver.TestClassAttributes;
+import org.stjs.testing.driver.TestClassAttributesRepository;
 import org.stjs.testing.driver.TestResult;
 
 import com.google.common.base.Strings;
-import com.google.common.io.Files;
 import com.sun.net.httpserver.HttpExchange;
 
 /**
@@ -43,18 +33,21 @@ import com.sun.net.httpserver.HttpExchange;
  * by calling notifyNoMoreTests(). The HTTP server waits for a new test to send to the browser by calling awaitNewTestReady(). <br>
  * <br>
  * On top of that, LongPollinBrowser delegates the details of starting and stopping the browser itself to its concrete subclasses.
+ *
  * @author lordofthepigs
  */
 @SuppressWarnings({"restriction", "deprecation"})
 public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	private final Exchanger<MultiTestMethod> exchanger = new Exchanger<MultiTestMethod>();
+	private final TestClassAttributesRepository testClasses;
 	private volatile MultiTestMethod methodUnderExecution = null;
 	private long id;
 	private volatile boolean isDead = false;
 
 	public LongPollingBrowser(DriverConfiguration config) {
 		super(config);
+		testClasses = new TestClassAttributesRepository(config.getStjsClassResolver(), config.getDependencyCollector());
 	}
 
 	protected String getStartPageUri(long browserId, boolean persistent) {
@@ -101,6 +94,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	 * tests, this method returns null.<br>
 	 * <br>
 	 * This method is typically called right after the results of the previous test were reported.
+	 *
 	 * @return The next test to execute, or null if there isn't any
 	 */
 	public MultiTestMethod awaitNextTest() {
@@ -133,6 +127,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	 * Notifies this browser that the specified test must be executed. This method blocks until this browser picks up the test by calling
 	 * awaitNextTest(). If the browser does not pick up the test within the timeout specified in DriverConfiguration.getTestTimeout(), then the
 	 * browser is assumed to be dead. The test is failed, and the browser does not receive any more tests at all.
+	 *
 	 * @param method The test to execute.
 	 */
 	@Override
@@ -164,8 +159,8 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	 * Reports this browser as dead to the specified test method. The test will be failed.
 	 */
 	private void reportAsDead(MultiTestMethod method) {
-		method.notifyExecutionResult(TestResult.deadBrowser(this.getClass().getSimpleName(), getConfig().getTestTimeout()
-				+ " seconds passed and the browser didn't contact back the ST-JS JUnit runner"));
+		method.notifyExecutionResult(TestResult.deadBrowser(this.getClass().getSimpleName(),
+				getConfig().getTestTimeout() + " seconds passed and the browser didn't contact back the ST-JS JUnit runner"));
 	}
 
 	/**
@@ -200,37 +195,14 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		return methodUnderExecution;
 	}
 
-	private String getTypeName(Class<?> clazz, ClassWithJavascript stjsClass) {
-		String simpleName = clazz.getSimpleName();
-		String ns = stjsClass.getJavascriptNamespace();
-		if(ns != null && !ns.isEmpty()){
-			return ns + "." + simpleName;
-		}
-		return simpleName;
-	}
-
-	private String getTypeName(Class<?> clazz){
-		return getTypeName(clazz, getConfig().getStjsClassResolver().resolve(clazz.getName()));
-	}
-
 	/**
 	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser to execute the specified test.
-	 * @param meth The test to send to the browser
+	 *
+	 * @param meth     The test to send to the browser
 	 * @param exchange contains the HTTP response that must be written to
 	 */
 	public void sendTestFixture(MultiTestMethod meth, HttpExchange exchange) throws Exception {
-		Class<?> testClass = meth.getTestClass().getJavaClass();
-		Method method = meth.getMethod().getMethod();
-		ClassWithJavascript stjsClass = getConfig().getStjsClassResolver().resolve(testClass.getName());
-
-		List<FrameworkMethod> beforeMethods = meth.getTestClass().getAnnotatedMethods(Before.class);
-		List<FrameworkMethod> afterMethods = meth.getTestClass().getAnnotatedMethods(After.class);
-
-		final HTMLFixture htmlFixture = testClass.getAnnotation(HTMLFixture.class);
-
-		final Scripts addedScripts = testClass.getAnnotation(Scripts.class);
-		final ScriptsBefore addedScriptsBefore = testClass.getAnnotation(ScriptsBefore.class);
-		final ScriptsAfter addedScriptsAfter = testClass.getAnnotation(ScriptsAfter.class);
+		TestClassAttributes attr = testClasses.getAttributes(meth.getTestClass());
 		final Test test = meth.getMethod().getAnnotation(Test.class);
 
 		StringBuilder resp = new StringBuilder(8192);
@@ -242,27 +214,26 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		resp.append("<script language='javascript'>stjs.mainCallDisabled=true;</script>\n");
 
 		// scripts added explicitly
-		if (addedScripts != null) {
-			for (String script : addedScripts.value()) {
+		if (attr.getScripts() != null) {
+			for (String script : attr.getScripts().value()) {
 				appendScriptTag(resp, script);
 			}
 		}
 		// scripts before - new style
-		if (addedScriptsBefore != null) {
-			for (String script : addedScriptsBefore.value()) {
+		if (attr.getScriptsBefore() != null) {
+			for (String script : attr.getScriptsBefore().value()) {
 				appendScriptTag(resp, script);
 			}
 		}
 
 		Set<URI> jsFiles = new LinkedHashSet<>();
-		for (ClassWithJavascript dep : getConfig().getDependencyCollector().orderAllDependencies(stjsClass)) {
+		for (ClassWithJavascript dep : attr.getDependencies()) {
 
-			if (addedScripts != null && dep instanceof BridgeClass) {
+			if (attr.getScripts() != null && dep instanceof BridgeClass) {
 				// bridge dependencies are not added when using @Scripts
-				System.out
-						.println(
-								"WARNING: You're using @Scripts deprecated annotation that disables the automatic inclusion of the Javascript files of the bridges you're using! "
-										+ "Please consider using @ScriptsBefore and/or @ScriptsAfter instead.");
+				System.out.println(
+						"WARNING: You're using @Scripts deprecated annotation that disables the automatic inclusion of the Javascript files of the bridges you're using! "
+								+ "Please consider using @ScriptsBefore and/or @ScriptsAfter instead.");
 				continue;
 			}
 			for (URI file : dep.getJavascriptFiles()) {
@@ -275,8 +246,8 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		}
 
 		// scripts after - new style
-		if (addedScriptsAfter != null) {
-			for (String script : addedScriptsAfter.value()) {
+		if (attr.getScriptsAfter() != null) {
+			for (String script : attr.getScriptsAfter().value()) {
 				appendScriptTag(resp, script);
 			}
 		}
@@ -289,23 +260,24 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		resp.append("    Assert=window;\n");
 		resp.append("    try{\n");
 
-		String testedClassName = getTypeName(testClass, stjsClass);
-		resp.append("        parent.startingTest('" + testedClassName + "', '" + method.getName() + "');\n");
+		String testedClassName = attr.getStjsClass().getJavascriptClassName();
+		resp.append("        parent.startingTest('" + testedClassName + "', '" + meth.getName() + "');\n");
 		resp.append("        var stjsTest = new " + testedClassName + "();\n");
 		resp.append("        var stjsResult = 'OK';\n");
 
 		String expectedExceptionConstructor = "null";
-		if(test.expected() != Test.None.class){
-			expectedExceptionConstructor = getTypeName(test.expected());
+		if (test.expected() != Test.None.class) {
+			ClassWithJavascript exceptionClass = getConfig().getStjsClassResolver().resolve(test.expected().getName());
+			expectedExceptionConstructor = exceptionClass.getJavascriptClassName();
 		}
 		resp.append("        var expectedException = " + expectedExceptionConstructor + ";\n");
 
 		// call before methods
-		for (FrameworkMethod beforeMethod : beforeMethods) {
+		for (FrameworkMethod beforeMethod : attr.getBeforeMethods()) {
 			resp.append("      stjsTest." + beforeMethod.getName() + "();\n");
 		}
 		// call the test's method
-		resp.append("      stjsTest." + method.getName() + "();\n");
+		resp.append("      stjsTest." + meth.getName() + "();\n");
 		resp.append("      if(expectedException){\n");
 		resp.append("        stjsResult = 'Expected an exception, but none was thrown';\n");
 		resp.append("      }\n");
@@ -319,7 +291,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		resp.append("      }\n");
 		resp.append("    }finally{\n");
 		// call after methods
-		for (FrameworkMethod afterMethod : afterMethods) {
+		for (FrameworkMethod afterMethod : attr.getAfterMethods()) {
 			resp.append("     stjsTest." + afterMethod.getName() + "();\n");
 		}
 		resp.append("      parent.reportResultAndRunNextTest(stjsResult, stjsResult.location);\n");
@@ -328,13 +300,13 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		resp.append("</script>\n");
 		resp.append("</head>\n");
 		resp.append("<body>\n");
-		if (htmlFixture != null) {
-			if (!Strings.isNullOrEmpty(htmlFixture.value())) {
-				resp.append(htmlFixture.value());
+		if (attr.getHtmlFixture() != null) {
+			if (!Strings.isNullOrEmpty(attr.getHtmlFixture().value())) {
+				resp.append(attr.getHtmlFixture().value());
 
-			} else if (!Strings.isNullOrEmpty(htmlFixture.url())) {
+			} else if (!Strings.isNullOrEmpty(attr.getHtmlFixture().url())) {
 				StringWriter writer = new StringWriter();
-				getConfig().getResource(htmlFixture.url()).copyTo(writer);
+				getConfig().getResource(attr.getHtmlFixture().url()).copyTo(writer);
 				resp.append(writer.toString());
 			}
 		}
@@ -346,8 +318,8 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	/**
 	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser understand that there will be no more tests.
+	 *
 	 * @param exchange contains the HTTP response that must be written to
-	 * @throws IOException
 	 */
 	public void sendNoMoreTestFixture(HttpExchange exchange) throws IOException {
 		sendResponse("<html><body><h1>Tests completed!</h1></body></html>", exchange);
@@ -370,5 +342,9 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	public long getId() {
 		return this.id;
+	}
+
+	private static class TestClassCache {
+
 	}
 }

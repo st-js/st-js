@@ -105,6 +105,16 @@ public class BridgeClass implements ClassWithJavascript {
 	}
 
 	@Override
+	public String getJavascriptClassName() {
+		String simpleName = getJavaClass().getSimpleName();
+		String ns = getJavascriptNamespace();
+		if (ns != null && !ns.isEmpty()) {
+			return ns + "." + simpleName;
+		}
+		return simpleName;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
