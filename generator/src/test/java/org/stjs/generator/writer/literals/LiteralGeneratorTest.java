@@ -1,10 +1,9 @@
 package org.stjs.generator.writer.literals;
 
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 
-public class LiteralGeneratorTest {
+public class LiteralGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testHexaNumbers() {
 		assertCodeContains(Literal1.class, "65535");

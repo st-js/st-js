@@ -1,10 +1,9 @@
 package org.stjs.generator.writer.inheritance;
 
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 
-public class InheritanceGeneratorTest {
+public class InheritanceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testImplements() {

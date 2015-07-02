@@ -4,7 +4,7 @@ import org.stjs.javascript.annotation.Template;
 
 public class Fields15a {
 
-	@Template("setter")
+	@Template("property")
 	public static String field;
 
 	public void method(String n) {

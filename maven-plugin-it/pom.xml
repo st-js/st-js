@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>stjs</artifactId>
 		<groupId>org.st-js</groupId>
-		<version>3.1.4-SNAPSHOT</version>
+		<version>3.1.5-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>maven-plugin-it</artifactId>
@@ -35,6 +35,11 @@
 					<systemPropertyVariables>
 						<stjs.version>${project.version}</stjs.version>
 					</systemPropertyVariables>
+
+					<!-- Don't try to run the test-classes of the sub-projects from the Integration Test parent project -->
+					<excludes>
+						<exclude>/pack*/**</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 		</plugins>

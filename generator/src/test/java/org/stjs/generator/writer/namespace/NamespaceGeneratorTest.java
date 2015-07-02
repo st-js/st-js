@@ -1,15 +1,12 @@
 package org.stjs.generator.writer.namespace;
 
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
-import static org.stjs.generator.utils.GeneratorTestHelper.generate;
-
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.writer.namespace.packageLevel.PackageNamespace1;
 import org.stjs.generator.writer.namespace.packageLevel.empty.deep.PackageNamespace2;
 
-public class NamespaceGeneratorTest {
+public class NamespaceGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testDecl() {
 		assertCodeContains(Namespace1.class, "stjs.ns(\"a.b\");");
@@ -23,7 +20,7 @@ public class NamespaceGeneratorTest {
 
 	@Test
 	public void testExtends() {
-		assertCodeContains(Namespace2.class, "stjs.extend(a.b.Namespace2.Child, a.b.Namespace2, [],");
+		assertCodeContains(Namespace2.class, "constructor.Child = stjs.extend(constructor.Child, a.b.Namespace2, [],");
 		// call super
 		assertCodeContains(Namespace2.class, "a.b.Namespace2.call(this)");
 	}

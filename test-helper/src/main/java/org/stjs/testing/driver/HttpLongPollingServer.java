@@ -265,14 +265,15 @@ public class HttpLongPollingServer implements AsyncProcess {
 			// XXX: legacy fix
 			String cleanPath = path.replaceFirst("file:/+target", "target");
 
-			Date lastModified = StreamUtils.getResourceModifiedDate(config.getClassLoader(), cleanPath);
+			TestResource resource = config.getResource(cleanPath);
+			Date lastModified = resource.getModifiedDate();
 			exchange.getResponseHeaders().add("Last-Modified", formatDateHeader(lastModified));
 
 			if (ifModifiedSince != null && !lastModified.after(ifModifiedSince)) {
 				exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_MODIFIED, -1);
 				return;
 			}
-			if (!StreamUtils.copy(config.getClassLoader(), cleanPath, exchange)) {
+			if (!resource.copyTo(exchange)) {
 				notFound.add(path);
 				System.err.println(cleanPath + " was not found in classpath");
 			}

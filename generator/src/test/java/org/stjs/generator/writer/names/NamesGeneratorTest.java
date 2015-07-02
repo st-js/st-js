@@ -1,10 +1,9 @@
 package org.stjs.generator.writer.names;
 
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 
-public class NamesGeneratorTest {
+public class NamesGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testQualifyStaticField() {
 		assertCodeContains(Names1.class, "Names1.MY_CONSTANT");

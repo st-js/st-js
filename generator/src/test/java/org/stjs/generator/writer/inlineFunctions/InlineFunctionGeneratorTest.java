@@ -1,14 +1,12 @@
 package org.stjs.generator.writer.inlineFunctions;
 
 import static org.junit.Assert.assertEquals;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.executeAndReturnNumber;
-import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 
-public class InlineFunctionGeneratorTest {
+public class InlineFunctionGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testInlineFunction() {
 		assertCodeContains(InlineFunctions1.class, "method(function(arg){arg=arg+1;})");

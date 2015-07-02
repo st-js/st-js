@@ -1,10 +1,9 @@
 package org.stjs.generator.writer.callSuper;
 
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 
-public class CallSuperGeneratorTest {
+public class CallSuperGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testCallSuperConstructorObject() {
 		// in fact the call to super should not be generated

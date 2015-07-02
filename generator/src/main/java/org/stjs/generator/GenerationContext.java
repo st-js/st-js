@@ -70,21 +70,18 @@ public class GenerationContext<JS> implements TreePathHolder {
 
 	private SourceMapGenerator sourceMapGenerator;
 
-	private final ClassLoader builtProjectClassLoader;
-
 	private final Map<AnnotationCacheKey, Object> cacheAnnotations;
 	private final Map<Tree, TreeWrapper<?, JS>> cacheWrappers = Maps.newIdentityHashMap();
 	private final Map<Element, TreeWrapper<?, JS>> cacheWrappersByElement = Maps.newIdentityHashMap();
 
 	public GenerationContext(File inputFile, GeneratorConfiguration configuration, JavaScriptNameProvider names, Trees trees,
-			ClassLoader builtProjectClassLoader, Map<AnnotationCacheKey, Object> cacheAnnotations, JavaScriptBuilder<JS> javaScriptBuilder) {
+			Map<AnnotationCacheKey, Object> cacheAnnotations, JavaScriptBuilder<JS> javaScriptBuilder) {
 		this.inputFile = inputFile;
 		this.configuration = configuration;
 		this.names = names;
 		this.trees = trees;
 		this.checks = new Checks();
 		this.javaScriptBuilder = javaScriptBuilder;
-		this.builtProjectClassLoader = builtProjectClassLoader;
 		this.cacheAnnotations = cacheAnnotations;
 	}
 
@@ -247,7 +244,7 @@ public class GenerationContext<JS> implements TreePathHolder {
 	}
 
 	public ClassLoader getBuiltProjectClassLoader() {
-		return builtProjectClassLoader;
+		return configuration.getStjsClassLoader();
 	}
 
 	@SuppressWarnings("unchecked")

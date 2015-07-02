@@ -4,46 +4,48 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.stjs.generator.utils.GeneratorTestHelper.generate;
-import static org.stjs.generator.utils.GeneratorTestHelper.stjsClass;
 
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.ClassWithJavascript;
-import org.stjs.generator.DependencyCollection;
+import org.stjs.generator.DependencyCollector;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.javascript.JSGlobal;
 
-public class DependencyTest {
+public class DependencyTest extends AbstractStjsTest {
+
+	private DependencyCollector.DependencyComparator comparator = new DependencyCollector.DependencyComparator();
+
 	@Test
 	public void test1() {
-		assertEquals(-1, DependencyCollection.DEPENDENCY_COMPARATOR.compare(Dep1.class, Dep2.class));
-		assertEquals(1, DependencyCollection.DEPENDENCY_COMPARATOR.compare(Dep2.class, Dep1.class));
+		assertEquals(-1, comparator.compare(Dep1.class, Dep2.class));
+		assertEquals(1, comparator.compare(Dep2.class, Dep1.class));
 	}
 
 	@Test
 	public void test2() {
-		assertEquals(-1, DependencyCollection.DEPENDENCY_COMPARATOR.compare(Dep1.class, Dep3.class));
-		assertEquals(1, DependencyCollection.DEPENDENCY_COMPARATOR.compare(Dep3.class, Dep1.class));
+		assertEquals(-1, comparator.compare(Dep1.class, Dep3.class));
+		assertEquals(1, comparator.compare(Dep3.class, Dep1.class));
 	}
 
 	@Test
 	public void test3() {
-		assertEquals(-1, DependencyCollection.DEPENDENCY_COMPARATOR.compare(Dep1.class, Dep4.class));
-		assertEquals(1, DependencyCollection.DEPENDENCY_COMPARATOR.compare(Dep4.class, Dep1.class));
+		assertEquals(-1, comparator.compare(Dep1.class, Dep4.class));
+		assertEquals(1, comparator.compare(Dep4.class, Dep1.class));
 	}
 
 	@Test
 	public void test4() {
-		assertEquals(0, DependencyCollection.DEPENDENCY_COMPARATOR.compare(Dep3.class, Dep4.class));
-		assertEquals(0, DependencyCollection.DEPENDENCY_COMPARATOR.compare(Dep4.class, Dep3.class));
+		assertEquals(0, comparator.compare(Dep3.class, Dep4.class));
+		assertEquals(0, comparator.compare(Dep4.class, Dep3.class));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void test5() {
-		DependencyCollection.DEPENDENCY_COMPARATOR.compare(Err1.class, Err2.class);
+		comparator.compare(Err1.class, Err2.class);
 	}
 
 	@Test
@@ -122,9 +124,53 @@ public class DependencyTest {
 		assertDependency(jsClass.getDirectDependencyMap(), Dep10p.class, DependencyType.OTHER);
 	}
 
+	@Test
+	public void testStaticInitializerBlockDep() {
+		generate(Dep11b.class);
+		generate(Dep11.class);
+
+		ClassWithJavascript jsClass = stjsClass(Dep11.class);
+
+		assertNotNull(jsClass);
+		assertDependency(jsClass.getDirectDependencyMap(), Dep11b.class, DependencyType.STATIC);
+	}
+
+	@Test
+	public void testStaticInitializerBlockWithInnerClassStaticMethodDep() {
+		generate(Dep12b.class);
+		generate(Dep12.class);
+
+		ClassWithJavascript jsClass = stjsClass(Dep12.class);
+
+		assertNotNull(jsClass);
+		assertDependency(jsClass.getDirectDependencyMap(), Dep12b.class, DependencyType.STATIC);
+	}
+
+	@Test
+	public void testStaticInitializerBlockWithInnerClassConstructorDep() {
+		generate(Dep13b.class);
+		generate(Dep13.class);
+
+		ClassWithJavascript jsClass = stjsClass(Dep13.class);
+
+		assertNotNull(jsClass);
+		assertDependency(jsClass.getDirectDependencyMap(), Dep13b.class, DependencyType.STATIC);
+	}
+
+	@Test
+	public void testStaticInitializerBlockWithStaticMethodDep() {
+		generate(Dep14b.class);
+		generate(Dep14.class);
+
+		ClassWithJavascript jsClass = stjsClass(Dep14.class);
+
+		assertNotNull(jsClass);
+		assertDependency(jsClass.getDirectDependencyMap(), Dep14b.class, DependencyType.STATIC);
+	}
+
 	private void assertDependency(List<ClassWithJavascript> directDependencies, Class<?> clz) {
 		for (ClassWithJavascript c : directDependencies) {
-			if (clz.getName().equals(c.getClassName())) {
+			if (clz.getName().equals(c.getJavaClassName())) {
 				return;
 			}
 		}
@@ -134,7 +180,7 @@ public class DependencyTest {
 
 	private void assertDependency(Map<ClassWithJavascript, DependencyType> directDependencies, Class<?> clz, DependencyType depType) {
 		for (Map.Entry<ClassWithJavascript, DependencyType> entry : directDependencies.entrySet()) {
-			if (clz.getName().equals(entry.getKey().getClassName())) {
+			if (clz.getName().equals(entry.getKey().getJavaClassName())) {
 				if (depType != entry.getValue()) {
 					assertEquals("Dependency for type :" + clz, depType, entry.getValue());
 				}

@@ -64,6 +64,10 @@ public class MultiTestMethod {
 		return this.testClass;
 	}
 
+	public String getName(){
+		return getMethod().getName();
+	}
+
 	@Override
 	public String toString() {
 		return "MultiTestMethod [method=" + meth.getMethod() + "]";

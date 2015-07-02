@@ -164,9 +164,11 @@
 		<module name="ParameterName">
 			<property name="format" value="^[a-z0-9]+[a-zA-Z0-9]*$" />
 		</module>
+		<!-- Already checked by PMD
 		<module name="ParameterNumber">
 			<property name="id" value="paramNum" />
 		</module>
+		-->
 		<module name="ParenPad" />
 		<module name="TypecastParenPad" />
 		<module name="RedundantImport" />

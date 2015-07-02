@@ -1,12 +1,10 @@
 package org.stjs.generator.writer.methods;
 
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.generate;
-
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 
-public class MethodsGeneratorTest {
+public class MethodsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testPublicInstanceMethod() {
 		assertCodeContains(Methods1.class, //

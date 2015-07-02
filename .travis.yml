@@ -1,0 +1,20 @@
+language: java
+
+# Cache maven downloads
+sudo: false
+cache:
+  directories:
+    - $HOME/.m2
+
+jdk:
+  - oraclejdk8
+  - oraclejdk7
+
+# Do this in install, as the normal way to do it, would
+# do a `mvn install` here. we want to do it all at once.
+install:
+  - export JAVA8_HOME=`jdk_switcher home oraclejdk8`
+  - echo $JAVA8_HOME
+
+script:
+  - mvn clean install -B -V

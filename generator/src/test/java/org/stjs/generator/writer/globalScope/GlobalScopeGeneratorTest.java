@@ -1,15 +1,12 @@
 package org.stjs.generator.writer.globalScope;
 
 import static org.junit.Assert.assertEquals;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
-import static org.stjs.generator.utils.GeneratorTestHelper.execute;
-import static org.stjs.generator.utils.GeneratorTestHelper.generate;
 
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 
-public class GlobalScopeGeneratorTest {
+public class GlobalScopeGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testGlobalScopeGeneration() {
 		assertCodeDoesNotContain(Globals.class, "stjs.extends");

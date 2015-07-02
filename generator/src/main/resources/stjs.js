@@ -19,7 +19,7 @@
 
 var NOT_IMPLEMENTED = function(){
 	throw "This method is not implemented in Javascript.";
-}
+};
 
 JavalikeEquals = function(value){
 	if (value == null)
@@ -27,7 +27,7 @@ JavalikeEquals = function(value){
 	if (value.valueOf)
 		return this.valueOf() === value.valueOf();
 	return this === value;
-}
+};
 
 /* String */
 if (!String.prototype.equals) {
@@ -142,7 +142,7 @@ if (!String.prototype.regionMatches){
 //force valueof to match the Java's behavior
 String.valueOf=function(value){
 	return new String(value);
-}
+};
 
 /* Number */
 var Byte=Number;
@@ -389,7 +389,8 @@ stjs.isInstanceOf=function(child, parent){
 		}
 	}
 	return false;
-}
+};
+
 stjs.enumEntry=function(idx, name){
 	this._name = name;
 	this._ordinal = idx;
@@ -430,11 +431,11 @@ stjs.mainCallDisabled = false;
 
 stjs.exception=function(err){
 	return err;
-}
+};
 
 stjs.isEnum=function(obj){
 	return obj != null && obj.constructor == stjs.enumEntry;
-}
+};
 
 if (typeof Math.trunc === "function") {
 	stjs.trunc = Math.trunc;
@@ -492,7 +493,7 @@ stjs.bind=function(obj, method, thisParamPos) {
 			return method.apply(obj, args);
 	};	
 	return f;
-}
+};
 
 
 /** *********** global ************** */
@@ -709,7 +710,7 @@ stjs.isArray=function( obj ) {
 stjs.typefy=function(obj, cls){
 	if (stjs.isArray(obj)){
 		var result = [];
-		for(var idx in obj){
+		for(var idx = 0; idx < obj.length; idx++){
 			result.push(stjs.typefy(obj[idx], elementType(cls)));
 		}
 		return result;
@@ -808,7 +809,7 @@ stjs.stringify=function(obj, cls){
 /************* STJS asserts ***************/
 var stjsAssertHandler = function(position, code, msg) {
 	throw msg + " at " + position;
-}
+};
 function setAssertHandler(a) {
 	stjsAssertHandler = a;
 }
@@ -913,10 +914,10 @@ stjs.setField=function(obj, field, value, returnOldValue){
 	var toReturn = returnOldValue ? obj[field] : value;
 	obj[field] = value;
 	return toReturn;
-}
+};
 
 stjs.getField=function(obj, field){
 	if (stjs.getFieldHandler)
 		return stjs.getFieldHandler(obj, field);
 	return obj[field];
-}
+};

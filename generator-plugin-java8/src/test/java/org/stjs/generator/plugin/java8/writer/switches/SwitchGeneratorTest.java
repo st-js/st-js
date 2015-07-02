@@ -1,10 +1,9 @@
 package org.stjs.generator.plugin.java8.writer.switches;
 
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 
-public class SwitchGeneratorTest {
+public class SwitchGeneratorTest extends AbstractStjsTest {
 
 	// this one if for Java 7 actually
 	@Test

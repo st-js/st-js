@@ -55,7 +55,7 @@ public class STJSClass implements ClassWithJavascript {
 
 	private final Properties properties;
 
-	private final DependencyResolver dependencyResolver;
+	private final ClassResolver classResolver;
 	private Map<String, DependencyType> dependencies = Collections.emptyMap();
 	private List<ClassWithJavascript> directDependencies;
 	private Map<ClassWithJavascript, DependencyType> directDependenciesMap;
@@ -64,37 +64,35 @@ public class STJSClass implements ClassWithJavascript {
 
 	private URI generatedJavascriptFile;
 
-	private final String className;
+	private final Class<?> javaClass;
 	private final File targetFolder;
 
 	/**
-	 * constructor for storage
+	 * constructor for storage, instances created with this constructor are very short lived and should only be used to
+	 * output the small .stjs properties file that resides next to .class files
 	 */
-	public STJSClass(DependencyResolver dependencyResolver, File targetFolder, String className) {
-		PreConditions.checkNotNull(dependencyResolver);
+	public STJSClass(ClassResolver classResolver, File targetFolder, Class<?> javaClass) {
+		PreConditions.checkNotNull(classResolver);
 		PreConditions.checkNotNull(targetFolder);
-		PreConditions.checkNotNull(className);
+		PreConditions.checkNotNull(javaClass);
 		this.targetFolder = targetFolder;
-		this.className = className;
+		this.javaClass = javaClass;
 		this.properties = new Properties();
-		this.dependencyResolver = dependencyResolver;
+		this.classResolver = classResolver;
 		this.javascriptNamespace = null;
 	}
 
 	/**
 	 * constructor for loading
-	 *
-	 * @param builtProjectClassLoader
-	 * @param className
 	 */
-	public STJSClass(DependencyResolver dependencyResolver, ClassLoader classLoader, String className) {
-		PreConditions.checkNotNull(dependencyResolver);
+	public STJSClass(ClassResolver classResolver, ClassLoader classLoader, Class<?> javaClass) {
+		PreConditions.checkNotNull(classResolver);
 		PreConditions.checkNotNull(classLoader);
-		PreConditions.checkNotNull(className);
+		PreConditions.checkNotNull(javaClass);
 
-		this.className = className;
+		this.javaClass = javaClass;
 		this.targetFolder = null;
-		this.dependencyResolver = dependencyResolver;
+		this.classResolver = classResolver;
 		properties = loadProperties(classLoader);
 
 		// deps
@@ -107,7 +105,7 @@ public class STJSClass implements ClassWithJavascript {
 		if (javascriptNamespace == null) {
 			// Old versions of ST-JS did not set the jsNamespace property, so we must look into the compiled
 			// class to figure out the namespace
-			javascriptNamespace = readJavascriptNamespaceAnnotation(classLoader);
+			javascriptNamespace = readJavascriptNamespaceAnnotation();
 		}
 	}
 
@@ -116,16 +114,16 @@ public class STJSClass implements ClassWithJavascript {
 
 		InputStream inputStream = null;
 		try {
-			inputStream = classLoader.getResourceAsStream(ClassUtils.getPropertiesFileName(className));
+			inputStream = classLoader.getResourceAsStream(ClassUtils.getPropertiesFileName(getJavaClassName()));
 			if (inputStream == null) {
-				LOG.severe("CANNOT find:" + ClassUtils.getPropertiesFileName(className) + " clazz:"
-						+ classLoader.getResource(ClassUtils.getPropertiesFileName(className)));
+				LOG.severe("CANNOT find:" + ClassUtils.getPropertiesFileName(getJavaClassName()) + " clazz:"
+						+ classLoader.getResource(ClassUtils.getPropertiesFileName(getJavaClassName())));
 			} else {
 				props.load(inputStream);
 			}
 		}
 		catch (IOException e) {
-			throw new JavascriptClassGenerationException(className, e);
+			throw new JavascriptClassGenerationException(getJavaClassName(), e);
 		}
 		finally {
 			Closeables.closeQuietly(inputStream);
@@ -168,7 +166,7 @@ public class STJSClass implements ClassWithJavascript {
 				return new URI(jsFile);
 			}
 			catch (URISyntaxException e) {
-				throw new JavascriptClassGenerationException(className, "Could not load URI from " + jsFile, e);
+				throw new JavascriptClassGenerationException(getJavaClassName(), "Could not load URI from " + jsFile, e);
 			}
 		}
 		return null;
@@ -178,12 +176,12 @@ public class STJSClass implements ClassWithJavascript {
 		return properties.getProperty(JS_NAMESPACE);
 	}
 
-	private String readJavascriptNamespaceAnnotation(ClassLoader loader) {
+	private String readJavascriptNamespaceAnnotation() {
 		// If the jsNamespace property is not defined, it means that class was
 		// generated with a version of ST-JS earlier than 3.1.2 that did not write that property down. Fortunately for us
 		// it also means that any namespace can be read by inspecting the @Namespace annotation directly on that
 		// class.
-		String ns = NamespaceUtil.resolveNamespaceSimple(this.className, loader);
+		String ns = NamespaceUtil.resolveNamespaceSimple(javaClass);
 		if (ns == null) {
 			// With earlier versions of ST-JS (pre 3.1.2) if no namespace is found on the class, then there is
 			// no namespace at all
@@ -193,9 +191,9 @@ public class STJSClass implements ClassWithJavascript {
 	}
 
 	public File getStjsPropertiesFile() {
-		File propFile = new File(targetFolder, ClassUtils.getPropertiesFileName(className));
+		File propFile = new File(targetFolder, ClassUtils.getPropertiesFileName(getJavaClassName()));
 		if (!propFile.getParentFile().exists() && !propFile.getParentFile().mkdirs()) {
-			throw new JavascriptClassGenerationException(className, "Unable to create parent folder for the properties file:" + propFile);
+			throw new JavascriptClassGenerationException(getJavaClassName(), "Unable to create parent folder for the properties file:" + propFile);
 		}
 		return propFile;
 	}
@@ -207,11 +205,11 @@ public class STJSClass implements ClassWithJavascript {
 		Writer propertiesWriter = null;
 		try {
 			propertiesWriter = Files.newWriter(getStjsPropertiesFile(), Charsets.UTF_8);
-			properties.setProperty(CLASS_PROP, className);
+			properties.setProperty(CLASS_PROP, getJavaClassName());
 			properties.store(propertiesWriter, "Generated by STJS ");
 		}
 		catch (IOException e1) {
-			throw new JavascriptClassGenerationException(className, "Could not open properties file " + getStjsPropertiesFile() + ":" + e1, e1);
+			throw new JavascriptClassGenerationException(getJavaClassName(), "Could not open properties file " + getStjsPropertiesFile() + ":" + e1, e1);
 		}
 		finally {
 			try {
@@ -221,7 +219,7 @@ public class STJSClass implements ClassWithJavascript {
 				}
 			}
 			catch (IOException e) {
-				throw new JavascriptClassGenerationException(className, e);
+				throw new JavascriptClassGenerationException(getJavaClassName(), e);
 			}
 		}
 	}
@@ -235,9 +233,9 @@ public class STJSClass implements ClassWithJavascript {
 
 		if (deps == null) {
 			properties.remove(DEPENDENCIES_PROP);
-			this.dependencies = new HashMap<String, DependencyType>();
+			this.dependencies = new HashMap<>();
 		} else {
-			this.dependencies = new HashMap<String, DependencyType>(deps);
+			this.dependencies = new HashMap<>(deps);
 			// filter out anonymous classes
 			this.dependencies.remove("");
 			properties.put(DEPENDENCIES_PROP, writeDependeciesProperty(dependencies));
@@ -255,8 +253,23 @@ public class STJSClass implements ClassWithJavascript {
 	}
 
 	@Override
-	public String getClassName() {
-		return className;
+	public final String getJavaClassName() {
+		return javaClass.getName();
+	}
+
+	@Override
+	public Class<?> getJavaClass() {
+		return this.javaClass;
+	}
+
+	@Override
+	public String getJavascriptClassName() {
+		String simpleName = getJavaClass().getSimpleName();
+		String ns = getJavascriptNamespace();
+		if (ns != null && !ns.isEmpty()) {
+			return ns + "." + simpleName;
+		}
+		return simpleName;
 	}
 
 	@Override
@@ -277,7 +290,7 @@ public class STJSClass implements ClassWithJavascript {
 		if (directDependencies == null) {
 			directDependencies = new ArrayList<ClassWithJavascript>(dependencies.size());
 			for (String depClassName : dependencies.keySet()) {
-				directDependencies.add(dependencyResolver.resolve(depClassName.trim()));
+				directDependencies.add(classResolver.resolve(depClassName.trim()));
 			}
 		}
 		return directDependencies;
@@ -288,7 +301,7 @@ public class STJSClass implements ClassWithJavascript {
 		if (directDependenciesMap == null) {
 			directDependenciesMap = new HashMap<ClassWithJavascript, DependencyType>(dependencies.size());
 			for (Map.Entry<String, DependencyType> entry : dependencies.entrySet()) {
-				directDependenciesMap.put(dependencyResolver.resolve(entry.getKey().trim()), entry.getValue());
+				directDependenciesMap.put(classResolver.resolve(entry.getKey().trim()), entry.getValue());
 			}
 		}
 		return directDependenciesMap;
@@ -296,14 +309,14 @@ public class STJSClass implements ClassWithJavascript {
 
 	@Override
 	public String toString() {
-		return "STJSClass [className=" + className + "]";
+		return "STJSClass [javaClassName=" + getJavaClassName() + "]";
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + className.hashCode();
+		result = prime * result + getJavaClassName().hashCode();
 		return result;
 	}
 
@@ -320,7 +333,7 @@ public class STJSClass implements ClassWithJavascript {
 		}
 		STJSClass other = (STJSClass) obj;
 
-		return className.equals(other.className);
+		return getJavaClassName().equals(other.getJavaClassName());
 	}
 
 }

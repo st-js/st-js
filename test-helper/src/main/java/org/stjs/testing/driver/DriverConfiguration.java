@@ -19,12 +19,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import org.stjs.generator.ClassResolver;
+import org.stjs.generator.DefaultClassResolver;
+import org.stjs.generator.DependencyCollector;
 import org.stjs.testing.driver.browser.Browser;
 import org.stjs.testing.driver.browser.ChromeBrowser;
 import org.stjs.testing.driver.browser.DesktopDefaultBrowser;
@@ -64,6 +68,9 @@ public class DriverConfiguration {
 	private List<Browser> browsers;
 
 	private final ClassLoader classLoader;
+	private final ClassResolver stjsClassResolver;
+	private final TestResourceResolver resourceResolver;
+	private final DependencyCollector dependencyCollector;
 
 	private Properties props;
 
@@ -107,6 +114,9 @@ public class DriverConfiguration {
 			debugEnabled = Boolean.parseBoolean(props.getProperty(PROP_DEBUG));
 		}
 		classLoader = new WebAppClassLoader(new URL[] {}, klass.getClassLoader(), debugEnabled);
+		stjsClassResolver = new DefaultClassResolver(classLoader);
+		resourceResolver = new TestResourceResolver(classLoader);
+		dependencyCollector = new DependencyCollector();
 
 		// load browsers last
 		browsers = instantiateBrowsers();
@@ -195,12 +205,24 @@ public class DriverConfiguration {
 		return classLoader;
 	}
 
+	public ClassResolver getStjsClassResolver(){
+		return this.stjsClassResolver;
+	}
+
 	public String getProperty(String name) {
 		return this.props.getProperty(name);
 	}
 
 	public String getProperty(String name, String defaultValue) {
 		return this.props.getProperty(name, defaultValue);
+	}
+
+	public DependencyCollector getDependencyCollector() {
+		return dependencyCollector;
+	}
+
+	public TestResource getResource(String httpUrl) throws URISyntaxException {
+		return resourceResolver.resolveResource(httpUrl);
 	}
 
 	public URL getServerURL() {

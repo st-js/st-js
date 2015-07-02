@@ -39,8 +39,8 @@ public class BridgeClass implements ClassWithJavascript {
 	private final Class<?> clazz;
 	private final String jsNamespace;
 
-	public BridgeClass(DependencyResolver dependencyResolver, Class<?> clazz) {
-		PreConditions.checkNotNull(dependencyResolver);
+	public BridgeClass(ClassResolver classResolver, Class<?> clazz) {
+		PreConditions.checkNotNull(classResolver);
 		PreConditions.checkNotNull(clazz);
 		this.clazz = clazz;
 		String ns = NamespaceUtil.resolveNamespace(clazz);
@@ -53,8 +53,13 @@ public class BridgeClass implements ClassWithJavascript {
 	}
 
 	@Override
-	public String getClassName() {
+	public String getJavaClassName() {
 		return clazz.getName();
+	}
+
+	@Override
+	public Class<?> getJavaClass() {
+		return this.clazz;
 	}
 
 	@Override
@@ -81,7 +86,7 @@ public class BridgeClass implements ClassWithJavascript {
 				}
 			}
 			catch (URISyntaxException e) {
-				throw new JavascriptClassGenerationException(getClassName(), e);
+				throw new JavascriptClassGenerationException(getJavaClassName(), e);
 			}
 		}
 		return files;
@@ -97,6 +102,16 @@ public class BridgeClass implements ClassWithJavascript {
 	public Map<ClassWithJavascript, DependencyType> getDirectDependencyMap() {
 		// TODO use annotations
 		return Collections.emptyMap();
+	}
+
+	@Override
+	public String getJavascriptClassName() {
+		String simpleName = getJavaClass().getSimpleName();
+		String ns = getJavascriptNamespace();
+		if (ns != null && !ns.isEmpty()) {
+			return ns + "." + simpleName;
+		}
+		return simpleName;
 	}
 
 	@Override

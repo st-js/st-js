@@ -1,11 +1,11 @@
 package org.stjs.generator.plugin.java8.writer.statements;
 
 import org.junit.Test;
-import org.stjs.generator.utils.GeneratorTestHelper;
+import org.stjs.generator.utils.AbstractStjsTest;
 
-public class StatementGeneratorTest {
+public class StatementGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testMultipleCatch(){
-		GeneratorTestHelper.assertCodeContains(Statement1.class, "catch(e){throw new RuntimeException(e);}");
+		assertCodeContains(Statement1.class, "catch(e){throw new RuntimeException(e);}");
 	}
 }

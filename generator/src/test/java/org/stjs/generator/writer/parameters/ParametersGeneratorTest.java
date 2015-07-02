@@ -1,12 +1,10 @@
 package org.stjs.generator.writer.parameters;
 
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.generate;
-
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 
-public class ParametersGeneratorTest {
+public class ParametersGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testSimpleParam() {
 		assertCodeContains(Parameters1.class, "function(arg)");

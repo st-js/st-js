@@ -1,24 +1,24 @@
 package org.stjs.maven;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.stjs.generator.GenerationDirectory;
 
 /**
- * 
+ * @author acraciun
  * @goal generate
  * @phase process-classes
  * @requiresDependencyResolution compile
- * @author acraciun
- * 
  */
 public class MainSTJSMojo extends AbstractSTJSMojo {
 
 	/**
 	 * The source directories containing the sources to be compiled.
-	 * 
+	 *
 	 * @parameter default-value="${project.compileSourceRoots}"
 	 * @required
 	 */
@@ -30,7 +30,7 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 	 * Default value for war: "${project.build.directory}/${project.build.finalName}/generated-js" <br>
 	 * Default value for jar: "${project.build.outputDirectory}"
 	 * </p>
-	 * 
+	 *
 	 * @parameter
 	 */
 	private File generatedSourcesDirectory;
@@ -40,6 +40,12 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 	 */
 	private File buildOutputDirectory;
 
+	/**
+	 * Specifies if the ST-JS runtime support file (stjs.js) must be included in your build output. Default value is true.
+	 * @parameter default-value="true"
+	 */
+	private boolean includeStjsSupportFile;
+
 	@Override
 	public List<String> getCompileSourceRoots() {
 		return compileSourceRoots;
@@ -47,25 +53,40 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 
 	@Override
 	public GenerationDirectory getGeneratedSourcesDirectory() {
-		File artifactPath = new File(project.getBuild().getDirectory(), project.getBuild().getFinalName());
-		File generatedSourcesDirectoryVar = generatedSourcesDirectory;
-		if (generatedSourcesDirectoryVar == null) {
-			if (project.getPackaging().equals("jar")) {
-				generatedSourcesDirectoryVar = new File(project.getBuild().getOutputDirectory());
-			} else {
-				generatedSourcesDirectoryVar = new File(artifactPath, "generated-js");
-			}
-		}
-		File baseDir = project.getBasedir();
-		File classpath = new File(artifactPath.getAbsolutePath().substring(baseDir.getAbsolutePath().length() + 1));
 
-		File relativeToClasspath = new File("/");
-		if (generatedSourcesDirectoryVar.getAbsolutePath().length() > artifactPath.getAbsolutePath().length()) {
-			relativeToClasspath = new File(generatedSourcesDirectoryVar.getAbsolutePath().substring(
-					artifactPath.getAbsolutePath().length() + 1));
+		Path generatedSourcesPath;
+		if (generatedSourcesDirectory == null) {
+			if (project.getPackaging().equals("jar")) {
+				// default path for .jar packaging
+				generatedSourcesPath = Paths.get(project.getBuild().getOutputDirectory());
+			} else {
+				// default path for .war packaging
+				generatedSourcesPath = Paths.get(project.getBuild().getDirectory(), project.getBuild().getFinalName(), "generated-js");
+			}
+
+		} else {
+			// user specified path
+			generatedSourcesPath = generatedSourcesDirectory.toPath();
 		}
-		GenerationDirectory gendir = new GenerationDirectory(generatedSourcesDirectoryVar, classpath,
-				relativeToClasspath);
+		generatedSourcesPath = generatedSourcesPath.toAbsolutePath();
+
+		Path generatedSourcesPathInClasspath;
+		if (project.getPackaging().equals("jar")) {
+			// .jar packaging
+			Path outputDir = Paths.get(project.getBuild().getOutputDirectory()).toAbsolutePath();
+			generatedSourcesPathInClasspath = outputDir.relativize(generatedSourcesPath);
+
+		} else {
+			// .war packaging
+			Path artifactPath = Paths.get(project.getBuild().getDirectory(), project.getBuild().getFinalName());
+			generatedSourcesPathInClasspath = artifactPath.relativize(generatedSourcesPath);
+		}
+
+		GenerationDirectory gendir = new GenerationDirectory( //
+				generatedSourcesPath.toFile(), //
+				null, //
+				generatedSourcesPathInClasspath.toFile() //
+		);
 		return gendir;
 	}
 
@@ -73,6 +94,11 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 	@Override
 	protected List<String> getClasspathElements() throws DependencyResolutionRequiredException {
 		return project.getCompileClasspathElements();
+	}
+
+	@Override
+	protected boolean getCopyStjsSupportFile() {
+		return this.includeStjsSupportFile;
 	}
 
 	@Override

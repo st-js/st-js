@@ -1,16 +1,16 @@
 package org.stjs.generator.plugin.java8.writer.literals;
 
 import org.junit.Test;
-import org.stjs.generator.utils.GeneratorTestHelper;
+import org.stjs.generator.utils.AbstractStjsTest;
 
-public class LiteralGeneratorTest {
+public class LiteralGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testUnderscore(){
-		GeneratorTestHelper.assertCodeContains(Literal1.class, "n=100100");
+		assertCodeContains(Literal1.class, "n=100100");
 	}
 	
 	@Test
 	public void testBinary(){
-		GeneratorTestHelper.assertCodeContains(Literal2.class, "n=37");
+		assertCodeContains(Literal2.class, "n=37");
 	}
 }

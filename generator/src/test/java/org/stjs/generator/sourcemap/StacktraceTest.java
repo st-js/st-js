@@ -2,12 +2,11 @@ package org.stjs.generator.sourcemap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.stjs.generator.utils.GeneratorTestHelper.buildClassLoader;
-import static org.stjs.generator.utils.GeneratorTestHelper.generateWithSourcemap;
 
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 
-public class StacktraceTest {
+public class StacktraceTest extends AbstractStjsTest {
 
 	@Test
 	public void testStacktraceUniversalBuild() {

@@ -1,35 +1,35 @@
 package org.stjs.generator.plugin.java8.writer.methodref;
 
+import org.stjs.generator.utils.AbstractStjsTest;
+
 import static org.junit.Assert.assertEquals;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.execute;
 
 import org.junit.Test;
 
-public class MethodReferenceGeneratorTest {
+public class MethodReferenceGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testStaticMethodRef() {
 		assertCodeContains(MethodRef1.class, "calculate(MethodRef1.inc)");
-		assertEquals(Integer.valueOf(1), execute(MethodRef1.class));
+		assertEquals(1, ((Number)execute(MethodRef1.class)).intValue());
 	}
 
 	@Test
 	public void testInstanceMethodRef() {
 		assertCodeContains(MethodRef2.class,
 				"calculate(function(){return MethodRef2.prototype.inc2.call(arguments[0], arguments[1]);}, new MethodRef2(), 1)");
-		assertEquals(Integer.valueOf(3), execute(MethodRef2.class));
+		assertEquals(3, ((Number)execute(MethodRef2.class)).intValue());
 	}
 
 	@Test
 	public void testInstanceWithTargetMethodRef() {
 		assertCodeContains(MethodRef3.class, "calculate(stjs.bind(ref, \"inc2\"), 1)");
-		assertEquals(Integer.valueOf(4), execute(MethodRef3.class));
+		assertEquals(4, ((Number)execute(MethodRef3.class)).intValue());
 	}
 
 	@Test
 	public void testNewMethodRef() {
 		assertCodeContains(MethodRef4.class, "calculate(function(){return new MethodRef4(arguments[0]);}, 1)");
-		assertEquals(Integer.valueOf(1), execute(MethodRef4.class));
+		assertEquals(1, ((Number)execute(MethodRef4.class)).intValue());
 	}
 
 	@Test

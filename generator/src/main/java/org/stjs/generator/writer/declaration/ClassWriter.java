@@ -469,15 +469,22 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		if (typeName.contains(".")) {
 			// inner class or namespace
 			// generate [ns.]typeName = function() {...}
-			boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
-			String leftSide = innerClass ? replaceFullNameWithConstructor(typeName) : typeName;
-
-			stmts.add(js.expressionStatement(js.assignment(AssignOperator.ASSIGN, js.name(leftSide), getConstructor(visitor, tree, context))));
+			stmts.add(js.expressionStatement(js.assignment(AssignOperator.ASSIGN, getClassName(tree, context), getConstructor(visitor, tree, context))));
 		} else {
 			// regular class
 			// generate var typeName = function() {...}
 			stmts.add(js.variableDeclaration(true, typeName, getConstructor(visitor, tree, context)));
 		}
+	}
+	public JS getClassName(ClassTree tree, GenerationContext<JS> context) {
+		Element type = TreeUtils.elementFromDeclaration(tree);
+		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
+
+		if (typeName.contains(".") && type.getEnclosingElement().getKind() != ElementKind.PACKAGE) {
+			return context.js().name(replaceFullNameWithConstructor(typeName));
+		}
+
+		return context.js().name(typeName);
 	}
 
 	@Override
@@ -496,10 +503,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			return js.statements(stmts);
 		}
 
-		Element type = TreeUtils.elementFromDeclaration(tree);
-		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
-		JS name = js.name(typeName);
-
+		JS name = getClassName(tree, context);
 		JS superClazz = getSuperClass(tree, context);
 		JS interfaces = getInterfaces(tree, context);
 		JS members = getMembers(visitor, tree, context);
@@ -519,7 +523,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		if (anonymousClass) {
 			stmts.add(extendsCall);
 		} else {
-			stmts.add(context.withPosition(tree, js.expressionStatement(extendsCall)));
+			stmts.add(context.withPosition(tree, js.expressionStatement(js.assignment(AssignOperator.ASSIGN, name, extendsCall))));
 		}
 		addStaticInitializers(visitor, tree, context, stmts);
 		addMainMethodCall(tree, stmts, context);

@@ -1,13 +1,10 @@
 package org.stjs.generator.writer.overload;
 
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeContains;
-import static org.stjs.generator.utils.GeneratorTestHelper.assertCodeDoesNotContain;
-import static org.stjs.generator.utils.GeneratorTestHelper.generate;
-
 import org.junit.Test;
+import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 
-public class OverloadTest {
+public class OverloadTest extends AbstractStjsTest {
 	@Test
 	public void testSkipNativeGeneration() {
 		assertCodeDoesNotContain(Overload1.class, "method");

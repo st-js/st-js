@@ -51,8 +51,8 @@ public class DefaultMemberSelectTemplate<JS> implements WriterContributor<Member
 			// package names are ignored
 			return null;
 		}
-		if (element.getKind() == ElementKind.CLASS){
-			if(tw.isGlobal()) {
+		if (element.getKind() == ElementKind.CLASS) {
+			if (tw.isGlobal()) {
 				// global classes are ignored
 				return null;
 
