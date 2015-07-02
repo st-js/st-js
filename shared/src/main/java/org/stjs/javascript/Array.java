@@ -1595,7 +1595,7 @@ public class Array<V> implements Iterable<String> {
 				}
 			};
 
-			this.elements.sort(comparator);
+			Collections.sort(this.elements, comparator);
 		}
 
 		@Override
@@ -1833,7 +1833,7 @@ public class Array<V> implements Iterable<String> {
 					return comparefn.$invoke(x, y);
 				}
 			};
-			values.sort(comparator);
+			Collections.sort(values, comparator);
 
 			this.elements.clear(); // don't create a new instance, so we don't disrupt any iterators or submaps.
 			for(int i = 0; i < values.size(); i ++){
