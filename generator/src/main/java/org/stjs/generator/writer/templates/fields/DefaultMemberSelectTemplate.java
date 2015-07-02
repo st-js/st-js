@@ -58,7 +58,7 @@ public class DefaultMemberSelectTemplate<JS> implements WriterContributor<Member
 
 			} else {
 				// Non global classes however, are not ignored and a translated taking the namespace into account
-				return context.js().name(context.getNames().getTypeName(context, element, DependencyType.OTHER));
+				return context.js().name(context.getNames().getTypeName(context, element, DependencyType.STATIC));
 			}
 		}
 
