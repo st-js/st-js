@@ -379,17 +379,19 @@ stjs.getParameterAnnotation = function(clz, methodName, idx, annType) {
  * checks if the child is an instanceof parent. it checks recursively if "parent" is the child itself or it's found somewhere in the $inherit array
  */
 stjs.isInstanceOf=function(child, parent){
+	if (child == null)
+		return false;
 	if (child === parent)
 		return true;
 	if (!child.$inherit)
 		return false;
-	for(var i in child.$inherit){
+	for(var i = 0; i < child.$inherit.length; ++i){
 		if (stjs.isInstanceOf(child.$inherit[i], parent)) {
 			return true;
 		}
 	}
 	return false;
-};
+}
 
 stjs.enumEntry=function(idx, name){
 	this._name = name;
@@ -491,7 +493,7 @@ stjs.bind=function(obj, method, thisParamPos) {
 			return obj[method].apply(obj, args);
 		else
 			return method.apply(obj, args);
-	};	
+	};
 	return f;
 };
 
@@ -703,7 +705,7 @@ stjs.isArray=function( obj ) {
 };
 
 /**
- * cls can by the type of the return. 
+ * cls can by the type of the return.
  * If it's an array it can be either the type of an element or the type definition of the field.
  * TODO - for other collections and classes is not done yet
  */
@@ -734,7 +736,7 @@ stjs.typefy=function(obj, cls){
 		 return Object;
 	  }
 
-	 
+
 	function convert(type, json){
 		  if (!type)
 			  return json;
@@ -759,10 +761,10 @@ stjs.typefy=function(obj, cls){
 			}
 			return constr(type);
 	  }
-	 
+
 	  if (obj == null)
 		  return null;
-	  
+
 	  var ret = new cls();
 	  for(var key in obj){
 		  var prop = obj[key];
@@ -784,21 +786,21 @@ stjs.typefy=function(obj, cls){
 stjs.stringify=function(obj, cls){
 	 if (obj == null)
 		  return null;
-	  
+
 	 var ret = {};
 	  for(var key in obj){
 		  var td = cls.$typeDescription[key];
 		  var prop = obj[key];
 		  var ser = td != null ? stjs.serializers[td.name || td] : null;
-		  
+
 		  if (typeof prop == "function")
 			  continue;
-		  
+
 		  if (!td || !ser) {
 			  ret[key] = prop;
 			  continue;
 		  }
-		  if (typeof prop != "string") 
+		  if (typeof prop != "string")
 			  if (ser)
 				  ret[key] = ser(prop, td);
 			  else
