@@ -104,9 +104,9 @@ public class TestClassAttributesTest {
 		TestClass testClass = new TestClass(Child.class);
 		TestClassAttributes testClassAttributes  = new TestClassAttributes(testClass, classResolver, dependencyCollector);
 
-		List<String> expectedScripts = Arrays.asList(CHILD_SCRIPT_1, CHILD_SCRIPT_2, PARENT_SCRIPT_1, PARENT_SCRIPT_2);
-		List<String> expectedBefore = Arrays.asList(CHILD_SCRIPT_BEFORE_1, CHILD_SCRIPT_BEFORE_2, PARENT_SCRIPT_BEFORE_1, PARENT_SCRIPT_BEFORE_2);
-		List<String> expectedAfter = Arrays.asList(CHILD_SCRIPT_AFTER_1, CHILD_SCRIPT_AFTER_2, PARENT_SCRIPT_AFTER_1, PARENT_SCRIPT_AFTER_2);
+		List<String> expectedScripts = Arrays.asList(PARENT_SCRIPT_1, PARENT_SCRIPT_2, CHILD_SCRIPT_1, CHILD_SCRIPT_2);
+		List<String> expectedBefore = Arrays.asList( PARENT_SCRIPT_BEFORE_1, PARENT_SCRIPT_BEFORE_2, CHILD_SCRIPT_BEFORE_1, CHILD_SCRIPT_BEFORE_2);
+		List<String> expectedAfter = Arrays.asList(PARENT_SCRIPT_AFTER_1, PARENT_SCRIPT_AFTER_2, CHILD_SCRIPT_AFTER_1, CHILD_SCRIPT_AFTER_2);
 
 		Assert.assertEquals(expectedScripts.size(), testClassAttributes.getScripts().size());
 		Assert.assertEquals(expectedBefore.size(), testClassAttributes.getScriptsBefore().size());
@@ -125,9 +125,9 @@ public class TestClassAttributesTest {
 		TestClass testClass = new TestClass(ChildWithSameScripts.class);
 		TestClassAttributes testClassAttributes  = new TestClassAttributes(testClass, classResolver, dependencyCollector);
 
-		List<String> expectedScripts = Arrays.asList(CHILD_SCRIPT_1, PARENT_SCRIPT_2, PARENT_SCRIPT_1);
-		List<String> expectedBefore = Arrays.asList(CHILD_SCRIPT_BEFORE_1, PARENT_SCRIPT_BEFORE_2, PARENT_SCRIPT_BEFORE_1);
-		List<String> expectedAfter = Arrays.asList(CHILD_SCRIPT_AFTER_1, PARENT_SCRIPT_AFTER_2, PARENT_SCRIPT_AFTER_1);
+		List<String> expectedScripts = Arrays.asList(PARENT_SCRIPT_2, PARENT_SCRIPT_1, CHILD_SCRIPT_1);
+		List<String> expectedBefore = Arrays.asList(PARENT_SCRIPT_BEFORE_2, PARENT_SCRIPT_BEFORE_1, CHILD_SCRIPT_BEFORE_1);
+		List<String> expectedAfter = Arrays.asList(PARENT_SCRIPT_AFTER_2, PARENT_SCRIPT_AFTER_1, CHILD_SCRIPT_AFTER_1);
 
 		Assert.assertEquals(expectedScripts.size(), testClassAttributes.getScripts().size());
 		Assert.assertEquals(expectedBefore.size(), testClassAttributes.getScriptsBefore().size());
@@ -145,9 +145,9 @@ public class TestClassAttributesTest {
 		TestClass testClass = new TestClass(Son.class);
 		TestClassAttributes testClassAttributes  = new TestClassAttributes(testClass, classResolver, dependencyCollector);
 
-		List<String> expectedScripts = Arrays.asList(PARENT_SCRIPT_2, CHILD_SCRIPT_1, PARENT_SCRIPT_1);
-		List<String> expectedBefore = Arrays.asList(CHILD_SCRIPT_BEFORE_1, CHILD_SCRIPT_BEFORE_2, PARENT_SCRIPT_BEFORE_2, PARENT_SCRIPT_BEFORE_1);
-		List<String> expectedAfter = Arrays.asList(CHILD_SCRIPT_AFTER_1, CHILD_SCRIPT_AFTER_2, PARENT_SCRIPT_AFTER_2, PARENT_SCRIPT_AFTER_1);
+		List<String> expectedScripts = Arrays.asList(PARENT_SCRIPT_1, PARENT_SCRIPT_2, CHILD_SCRIPT_1);
+		List<String> expectedBefore = Arrays.asList(PARENT_SCRIPT_BEFORE_1, PARENT_SCRIPT_BEFORE_2, CHILD_SCRIPT_BEFORE_1, CHILD_SCRIPT_BEFORE_2);
+		List<String> expectedAfter = Arrays.asList(PARENT_SCRIPT_AFTER_1, PARENT_SCRIPT_AFTER_2, CHILD_SCRIPT_AFTER_1, CHILD_SCRIPT_AFTER_2);
 
 		Assert.assertEquals(expectedScripts.size(), testClassAttributes.getScripts().size());
 		Assert.assertEquals(expectedBefore.size(), testClassAttributes.getScriptsBefore().size());

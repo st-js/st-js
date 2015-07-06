@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -108,16 +109,17 @@ public class TestClassAttributes {
 	}
 
 	private List<String> getScriptsPathes(Class clazz, Class<? extends Annotation> anotClazz, Function1<Annotation, Collection<String>> caster) {
-		List<Annotation> scriptsAnnots = accumulateAnnots(clazz, anotClazz, new ArrayList<Annotation>());
+		LinkedList<Annotation> scriptsAnnots = accumulateAnnots(clazz, anotClazz, new LinkedList<Annotation>());
 		Set<String> scripts = new LinkedHashSet<>();
-		for (Annotation annotation : scriptsAnnots) {
-			scripts.addAll(caster.$invoke(annotation));
+		int scriptsAnnotsSize = scriptsAnnots.size();
+		for (int i = 0; i < scriptsAnnotsSize; i++) {
+			scripts.addAll(caster.$invoke(scriptsAnnots.removeLast()));
 		}
 
 		return new ArrayList<>(scripts);
 	}
 
-	private List<Annotation> accumulateAnnots(Class clazz, Class<? extends Annotation> annotation, List<Annotation> accum) {
+	private LinkedList<Annotation> accumulateAnnots(Class clazz, Class<? extends Annotation> annotation, LinkedList<Annotation> accum) {
 		if (Object.class.equals(clazz)) {
 			return accum;
 		} else {
