@@ -119,8 +119,14 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 			} else {
 				// .war packaging
 				Path artifactPath = Paths.get(project.getBuild().getDirectory(), project.getBuild().getFinalName());
-				Path jsPath = artifactPath.relativize(generatedSourcesPath);
-				generatedSourcesRuntimePath = new URI(artifactPath.toString());
+				String jsPath = artifactPath.relativize(generatedSourcesPath).toString();
+				if(!jsPath.startsWith("/")){
+					jsPath = "/" + jsPath;
+				}
+				if(!jsPath.endsWith("/")){
+					jsPath = jsPath + "/";
+				}
+				generatedSourcesRuntimePath = new URI(jsPath);
 			}
 		}
 		catch (URISyntaxException use) {
