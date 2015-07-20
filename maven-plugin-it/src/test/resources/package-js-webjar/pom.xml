@@ -11,7 +11,7 @@
 	<properties>
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
-		<webjar.path>${project.build.outputDirectory}/META-INF/resources/webjar/${project.artifactId}</webjar.path>
+		<webjar.path>${project.build.outputDirectory}/META-INF/resources/webjars/${project.artifactId}/${project.version}</webjar.path>
 	</properties>
 
 	<dependencies>
@@ -68,9 +68,9 @@
 				</executions>
 				<configuration>
 					<generateSourceMap>true</generateSourceMap>
-					<generatedSourcesDirectory>${webjar.path}</generatedSourcesDirectory>
 					<includeStjsSupportFile>false</includeStjsSupportFile>
 					<pack>true</pack>
+					<webjar>true</webjar>
 				</configuration>
 			</plugin>
 		</plugins>

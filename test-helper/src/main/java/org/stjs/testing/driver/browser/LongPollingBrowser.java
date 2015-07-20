@@ -222,7 +222,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 			appendScriptTag(resp, script);
 		}
 
-		Set<URI> jsFiles = new LinkedHashSet<>();
+		Set<URI> jsUris = new LinkedHashSet<>();
 		for (ClassWithJavascript dep : attr.getDependencies()) {
 
 			if (!attr.getScripts().isEmpty() && dep instanceof BridgeClass) {
@@ -233,12 +233,12 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 				continue;
 			}
 			for (URI file : dep.getJavascriptFiles()) {
-				jsFiles.add(file);
+				jsUris.add(file);
 			}
 		}
 
-		for (URI file : jsFiles) {
-			appendScriptTag(resp, file.toString());
+		for (URI uri : jsUris) {
+			appendScriptTag(resp, httpPath(uri));
 		}
 
 		// scripts after - new style
@@ -309,6 +309,18 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		resp.append("</html>\n");
 
 		sendResponse(resp.toString(), exchange);
+	}
+
+	protected String httpPath(URI uri){
+		if(uri.getScheme().equals("webjar")){
+			return "webjars" + uri.getPath();
+
+		} else if(uri.getScheme().equals("classpath")) {
+			return uri.getPath();
+		}
+
+		// all the other cases (.war packaging, old .jar packaging)
+		return uri.toString();
 	}
 
 	/**

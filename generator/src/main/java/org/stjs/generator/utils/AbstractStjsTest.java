@@ -201,7 +201,12 @@ public abstract class AbstractStjsTest {
 	private Object executeOrGenerate(Class<?> clazz, boolean execute, boolean withSourceMap, GeneratorConfiguration extraConfig) {
 
 		File generationPath = new File("target", TEMP_GENERATION_PATH);
-		GenerationDirectory generationFolder = new GenerationDirectory(generationPath, new File(TEMP_GENERATION_PATH), new File(""));
+		// We must create the output directory before building paths, or file.toURI will not include a trailing slash,
+		// which fucks up URI.resolve
+		if (!generationPath.exists() && !generationPath.mkdirs()) {
+			throw new STJSRuntimeException("Unable to create generation directory");
+		}
+		GenerationDirectory generationFolder = new GenerationDirectory(generationPath, new File(TEMP_GENERATION_PATH), generationPath.toURI());
 		final File sourcePath = new File("src/test/java");
 		File resourcePath = new File("src/test/resources");
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -229,7 +234,7 @@ public abstract class AbstractStjsTest {
 		Timers.start("js-exec");
 		List<File> javascriptFiles = new ArrayList<File>();
 		try {
-			File jsFile = new File(generationPath, stjsClass.getJavascriptFiles().get(0).getPath());
+			File jsFile = new File(stjsClass.getJavascriptFiles().get(0).getPath());
 			String content = Files.toString(jsFile, Charset.defaultCharset());
 			List<ClassWithJavascript> allDeps =
 					new DependencyCollector().orderAllDependencies(stjsClass);
@@ -238,7 +243,7 @@ public abstract class AbstractStjsTest {
 					if (dep instanceof BridgeClass) {
 						javascriptFiles.add(new File(resourcePath, js.getPath()));
 					} else {
-						javascriptFiles.add(new File(generationPath, js.getPath()));
+						javascriptFiles.add(new File(js.getPath()));
 					}
 				}
 			}

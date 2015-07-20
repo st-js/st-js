@@ -145,7 +145,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 	abstract protected List<String> getCompileSourceRoots();
 
-	abstract protected GenerationDirectory getGeneratedSourcesDirectory();
+	abstract protected GenerationDirectory getGeneratedSourcesDirectory() throws MojoExecutionException;
 
 	abstract protected File getBuildOutputDirectory();
 

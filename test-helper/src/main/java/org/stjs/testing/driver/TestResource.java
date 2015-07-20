@@ -19,23 +19,16 @@ import com.google.common.io.CharStreams;
 import com.google.common.io.Closeables;
 import com.sun.net.httpserver.HttpExchange;
 
-import sun.net.www.protocol.file.FileURLConnection;
-
 public class TestResource {
 
 	private final ClassLoader classLoader;
-	private final String httpUrl;
+	private final String httpPath;
 	private final URL resourceUrl;
 
-	public TestResource(ClassLoader classLoader, String httpUrl) throws URISyntaxException {
+	public TestResource(ClassLoader classLoader, String httpPath, URL resourceUrl) throws URISyntaxException {
 		this.classLoader = classLoader;
-		this.httpUrl = httpUrl;
-
-		URI uri = new URI(httpUrl);
-		if (uri.getPath() == null) {
-			throw new IllegalArgumentException("Wrong path in uri:" + httpUrl);
-		}
-		this.resourceUrl = classLoader.getResource(uri.getPath().substring(1));
+		this.httpPath = httpPath;
+		this.resourceUrl = resourceUrl;
 	}
 
 	public Date getModifiedDate() throws IOException {
@@ -52,7 +45,7 @@ public class TestResource {
 	}
 
 	public boolean copyTo(final Writer out) throws IOException {
-		if(resourceUrl == null){
+		if (resourceUrl == null) {
 			return false;
 		}
 
@@ -75,7 +68,7 @@ public class TestResource {
 	}
 
 	public boolean copyTo(final HttpExchange exchange) throws IOException {
-		if(resourceUrl == null){
+		if (resourceUrl == null) {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, -1);
 			return false;
 		}
@@ -98,20 +91,28 @@ public class TestResource {
 		});
 	}
 
-
 	private <T> T withConnection(ConnectionOperation<T> operation) throws IOException {
 		URLConnection conn = this.resourceUrl.openConnection();
 		conn.connect();
 
 		try {
-			T result = operation.doWithConnection(conn);
-			return result;
-		} finally {
+			return operation.doWithConnection(conn);
+		}
+		finally {
 			Closeables.closeQuietly(conn.getInputStream());
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "TestResource{" +
+				"classLoader=" + classLoader +
+				", httpPath='" + httpPath + '\'' +
+				", resourceUrl=" + resourceUrl +
+				'}';
+	}
+
 	private interface ConnectionOperation<T> {
-		T doWithConnection(URLConnection connection) throws IOException ;
+		T doWithConnection(URLConnection connection) throws IOException;
 	}
 }

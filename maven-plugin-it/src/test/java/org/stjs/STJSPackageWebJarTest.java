@@ -38,13 +38,13 @@ public class STJSPackageWebJarTest {
 
 		// all resources that must be loaded by a browser must be packaged in the folder
 		// specified in <generatedSourcesDirectory>
-		assertContainsEntry(entryNames, "META-INF/resources/webjar/package-js-webjar/org/stjs/example/lib/stjs/STJSLibExample.js");
-		assertContainsEntry(entryNames, "META-INF/resources/webjar/package-js-webjar/org/stjs/example/lib/stjs/STJSLibExample.map");
-		assertContainsEntry(entryNames, "META-INF/resources/webjar/package-js-webjar/org/stjs/example/lib/stjs/STJSLibExample.java");
-		assertContainsEntry(entryNames, "META-INF/resources/webjar/package-js-webjar/stjs/example/stjs-lib-example.js");
-		assertContainsEntry(entryNames, "META-INF/resources/webjar/package-js-webjar/DefaultPackageExample.js");
-		assertContainsEntry(entryNames, "META-INF/resources/webjar/package-js-webjar/DefaultPackageExample.map");
-		assertContainsEntry(entryNames, "META-INF/resources/webjar/package-js-webjar/DefaultPackageExample.java");
+		assertContainsEntry(entryNames, "META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/org/stjs/example/lib/stjs/STJSLibExample.js");
+		assertContainsEntry(entryNames, "META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/org/stjs/example/lib/stjs/STJSLibExample.map");
+		assertContainsEntry(entryNames, "META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/org/stjs/example/lib/stjs/STJSLibExample.java");
+		assertContainsEntry(entryNames, "META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/stjs/example/stjs-lib-example.js");
+		assertContainsEntry(entryNames, "META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/DefaultPackageExample.js");
+		assertContainsEntry(entryNames, "META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/DefaultPackageExample.map");
+		assertContainsEntry(entryNames, "META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/DefaultPackageExample.java");
 		assertNotContainsEntry(entryNames, "org/stjs/example/lib/stjs/STJSLibExample.js");
 		assertNotContainsEntry(entryNames, "org/stjs/example/lib/stjs/STJSLibExample.map");
 		assertNotContainsEntry(entryNames, "org/stjs/example/lib/stjs/STJSLibExample.java");
@@ -56,19 +56,19 @@ public class STJSPackageWebJarTest {
 		// Class files must be packaged at the root of the web jar
 		assertContainsEntry(entryNames, "org/stjs/example/lib/stjs/STJSLibExample.class");
 		assertContainsEntry(entryNames, "DefaultPackageExample.class");
-		assertNotContainsEntry(entryNames, "META-INF/resources/webjar/package-js-webjar/org/stjs/example/lib/stjs/STJSLibExample.class");
-		assertNotContainsEntry(entryNames, "META-INF/resources/webjar/package-js-webjar/DefaultPackageExample.class");
+		assertNotContainsEntry(entryNames, "META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/org/stjs/example/lib/stjs/STJSLibExample.class");
+		assertNotContainsEntry(entryNames, "META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/DefaultPackageExample.class");
 
 		// the .stjs properties files must be in both places (classpath and webjar path), so that we can easily do bidirectional mapping between
 		// .js and .class file locations
 		assertContainsEntry(entryNames, "org/stjs/example/lib/stjs/STJSLibExample.stjs");
 		assertContainsEntry(entryNames, "DefaultPackageExample.stjs");
-		assertContainsEntry(entryNames, "META-INF/resources/webjar/package-js-webjar/org/stjs/example/lib/stjs/STJSLibExample.stjs");
-		assertContainsEntry(entryNames, "META-INF/resources/webjar/package-js-webjar/DefaultPackageExample.stjs");
+		assertContainsEntry(entryNames, "META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/org/stjs/example/lib/stjs/STJSLibExample.stjs");
+		assertContainsEntry(entryNames, "META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/DefaultPackageExample.stjs");
 
 		// stjs.js should not be included in a webjar (it is declared as a dependency instead)
 		assertNotContainsEntry(entryNames, "stjs.js");
-		assertNotContainsEntry(entryNames, "META-INF/resources/webjar/package-js-webjar/stjs.js");
+		assertNotContainsEntry(entryNames, "META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/stjs.js");
 
 		verifier.resetStreams();
 	}

@@ -1,11 +1,14 @@
 package org.stjs.maven;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.stjs.generator.GenerationDirectory;
 
 /**
@@ -26,9 +29,10 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 
 	/**
 	 * <p>
-	 * Specify where to place generated source files <br>
+	 * Specify where to place generated source files. Cannot be set with &lt;webjar&gt;true&lt;/webjar&gt; <br>
 	 * Default value for war: "${project.build.directory}/${project.build.finalName}/generated-js" <br>
 	 * Default value for jar: "${project.build.outputDirectory}"
+	 * Default value for webjar: "${project.build.outputDirectory}/META-INF/resources/webjar/${project.artifactId}/${project.version}"
 	 * </p>
 	 *
 	 * @parameter
@@ -42,9 +46,18 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 
 	/**
 	 * Specifies if the ST-JS runtime support file (stjs.js) must be included in your build output. Default value is true.
+	 *
 	 * @parameter default-value="true"
 	 */
 	private boolean includeStjsSupportFile;
+
+	/**
+	 * Sets up ST-JS to generate webjar compliant jars. This option is only compatible with jar packaging and will not
+	 * work if you have explicitly set the value of generatedSourcesDirectory.
+	 *
+	 * @parameter default-value="false"
+	 */
+	private boolean webjar;
 
 	@Override
 	public List<String> getCompileSourceRoots() {
@@ -52,13 +65,34 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 	}
 
 	@Override
-	public GenerationDirectory getGeneratedSourcesDirectory() {
+	public GenerationDirectory getGeneratedSourcesDirectory() throws MojoExecutionException {
+
+		if (webjar) {
+			if (!project.getPackaging().equals("jar")) {
+				throw new MojoExecutionException("<webjar>true</webjar> is only compatible with <packaging>jar</packaging>");
+
+			} else if (generatedSourcesDirectory != null) {
+				throw new MojoExecutionException("Cannot set <generatedSourcesDirectory> when <webjar>true</webjar> is set");
+			}
+		}
 
 		Path generatedSourcesPath;
 		if (generatedSourcesDirectory == null) {
-			if (project.getPackaging().equals("jar")) {
+			if (webjar) {
+				// default path for webjar packaging
+				generatedSourcesPath = Paths.get( //
+						project.getBuild().getOutputDirectory(), //
+						"META-INF", //
+						"resources", //
+						"webjars", //
+						project.getArtifactId(), //
+						project.getVersion() //
+				);
+
+			} else if (project.getPackaging().equals("jar")) {
 				// default path for .jar packaging
 				generatedSourcesPath = Paths.get(project.getBuild().getOutputDirectory());
+
 			} else {
 				// default path for .war packaging
 				generatedSourcesPath = Paths.get(project.getBuild().getDirectory(), project.getBuild().getFinalName(), "generated-js");
@@ -70,22 +104,33 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 		}
 		generatedSourcesPath = generatedSourcesPath.toAbsolutePath();
 
-		Path generatedSourcesPathInClasspath;
-		if (project.getPackaging().equals("jar")) {
-			// .jar packaging
-			Path outputDir = Paths.get(project.getBuild().getOutputDirectory()).toAbsolutePath();
-			generatedSourcesPathInClasspath = outputDir.relativize(generatedSourcesPath);
+		URI generatedSourcesRuntimePath;
+		try {
+			if (webjar) {
+				// webjar packaging
+				generatedSourcesRuntimePath = new URI("webjar:/");
 
-		} else {
-			// .war packaging
-			Path artifactPath = Paths.get(project.getBuild().getDirectory(), project.getBuild().getFinalName());
-			generatedSourcesPathInClasspath = artifactPath.relativize(generatedSourcesPath);
+			} else if (project.getPackaging().equals("jar")) {
+				// .jar packaging
+				Path outputDir = Paths.get(project.getBuild().getOutputDirectory()).toAbsolutePath();
+				Path classpathOuputDir = outputDir.relativize(generatedSourcesPath);
+				generatedSourcesRuntimePath = new URI("classpath:/").resolve(classpathOuputDir.toString());
+
+			} else {
+				// .war packaging
+				Path artifactPath = Paths.get(project.getBuild().getDirectory(), project.getBuild().getFinalName());
+				Path jsPath = artifactPath.relativize(generatedSourcesPath);
+				generatedSourcesRuntimePath = new URI(artifactPath.toString());
+			}
+		}
+		catch (URISyntaxException use) {
+			throw new MojoExecutionException("Unable to generate runtime path", use);
 		}
 
 		GenerationDirectory gendir = new GenerationDirectory( //
 				generatedSourcesPath.toFile(), //
 				null, //
-				generatedSourcesPathInClasspath.toFile() //
+				generatedSourcesRuntimePath //
 		);
 		return gendir;
 	}
