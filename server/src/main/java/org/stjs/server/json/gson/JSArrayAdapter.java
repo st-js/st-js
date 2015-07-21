@@ -60,10 +60,7 @@ public class JSArrayAdapter implements JsonSerializer<Array<?>>, JsonDeserialize
 		// have any non-array indices. JSON supports none of these features, and toList()
 		// detects them and rejects them too.
 		List<?> list = array.toList();
-		for (Object o : list) {
-			js.add(ctx.serialize(o));
-		}
-		return js;
+		return ctx.serialize(list);
 	}
 
 }

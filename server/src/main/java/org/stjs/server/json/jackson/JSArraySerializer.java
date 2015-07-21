@@ -51,11 +51,7 @@ public class JSArraySerializer extends JsonSerializer<Array<?>> {
 			throw new JsonGenerationException("Could not serialize Array", ise);
 		}
 
-		gen.writeStartArray();
-		for (Object o : list) {
-			provider.defaultSerializeValue(o, gen);
-		}
-		gen.writeEndArray();
+		provider.defaultSerializeValue(list, gen);
 	}
 
 }
