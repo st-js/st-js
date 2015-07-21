@@ -54,6 +54,7 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	@SuppressWarnings("unchecked")
+	@SafeVarargs
 	public Array(V first, V second, V... others) {
 		this();
 		this.push(first);
@@ -161,7 +162,8 @@ public class Array<V> implements Iterable<String> {
 
 	}
 
-	public Array<V> concat(Array<V>... arrays) {
+	@SafeVarargs
+	public final Array<V> concat(Array<V>... arrays) {
 		Array<V> ret = new Array<V>();
 		ret.array.addAll(this.array);
 		for (Array<V> a : arrays) {
@@ -210,7 +212,8 @@ public class Array<V> implements Iterable<String> {
 		return array.remove(array.size() - 1);
 	}
 
-	public int push(V... values) {
+	@SafeVarargs
+	public final int push(V... values) {
 		for (V value : values) {
 			array.add(value);
 		}
@@ -272,7 +275,8 @@ public class Array<V> implements Iterable<String> {
 		return ret;
 	}
 
-	public Array<V> splice(int start, int howMany, V... values) {
+	@SafeVarargs
+	public final Array<V> splice(int start, int howMany, V... values) {
 		int s = fixIndex(start);
 		Array<V> removed = splice(start, howMany);
 		array.addAll(s, Arrays.asList(values));
@@ -309,7 +313,8 @@ public class Array<V> implements Iterable<String> {
 		});
 	}
 
-	public int unshift(V... values) {
+	@SafeVarargs
+	public final int unshift(V... values) {
 		array.addAll(0, Arrays.asList(values));
 		return array.size();
 	}
