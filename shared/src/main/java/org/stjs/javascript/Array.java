@@ -466,6 +466,7 @@ public class Array<V> implements Iterable<String> {
 	 *            the <tt>Arrays</tt> to be concatenated to this <tt>Array</tt>
 	 * @return a new <tt>Array</tt>, containing all the elements of the joined <tt>Arrays</tt>.
 	 */
+	@SafeVarargs
 	public Array<V> concat(Array<V>... arrays) {
 		Array<V> result = new Array<V>();
 
@@ -665,6 +666,7 @@ public class Array<V> implements Iterable<String> {
 	 *            the values to be appended
 	 * @return the new length of this <tt>Array</tt>
 	 */
+	@SafeVarargs
 	public int push(V... values) {
 		this.splice(this.$length(), 0, values);
 		return (int) this.length;

@@ -29,6 +29,7 @@ import org.stjs.javascript.annotation.Template;
 public class JSCollections {
 
 	@Template("array")
+	@SafeVarargs
 	public static <V> Array<V> $array(V... values) {
 		Array<V> a = new Array<V>();
 		a.splice(0, 0, values);

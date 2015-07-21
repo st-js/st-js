@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
@@ -54,13 +56,19 @@ public class TestSTJSMojo extends AbstractSTJSMojo {
 	}
 
 	@Override
-	protected GenerationDirectory getGeneratedSourcesDirectory() {
-		File baseDir = project.getBasedir();
-		File classpath = new File(generatedTestSourcesDirectory.getAbsolutePath().substring(
-				baseDir.getAbsolutePath().length() + 1));
+	protected GenerationDirectory getGeneratedSourcesDirectory() throws MojoExecutionException {
+		try {
+			File baseDir = project.getBasedir();
+			File classpath = new File(generatedTestSourcesDirectory.getAbsolutePath().substring(
+					baseDir.getAbsolutePath().length() + 1));
+			URI runtimePath = new URI("classpath:/");
 
-		GenerationDirectory gendir = new GenerationDirectory(generatedTestSourcesDirectory, classpath, new File(""));
-		return gendir;
+			GenerationDirectory gendir = new GenerationDirectory(generatedTestSourcesDirectory, classpath, runtimePath);
+			return gendir;
+
+		}catch(URISyntaxException use){
+			throw new MojoExecutionException("Could not generate runtime path");
+		}
 	}
 
 	@SuppressWarnings("unchecked")

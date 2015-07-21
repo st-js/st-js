@@ -13,6 +13,7 @@
 package org.stjs.generator;
 
 import java.io.File;
+import java.net.URI;
 
 /**
  * This class is used to provide the different parts of the target directory:
@@ -34,12 +35,12 @@ import java.io.File;
  */
 public class GenerationDirectory {
 	private final File generatedSourcesAbsolutePath;
-	private final File generatedSourcesPathInClasspath;
+	private final URI generatedSourcesRuntimePath;
 	private final File classpath;
 
-	public GenerationDirectory(File generatedSourcesAbsolutePath, File classpath, File generatedSourcesPathInClasspath) {
+	public GenerationDirectory(File generatedSourcesAbsolutePath, File classpath, URI generatedSourcesRuntimePath) {
 		this.generatedSourcesAbsolutePath = generatedSourcesAbsolutePath;
-		this.generatedSourcesPathInClasspath = generatedSourcesPathInClasspath;
+		this.generatedSourcesRuntimePath = generatedSourcesRuntimePath;
 		this.classpath = classpath;
 	}
 
@@ -47,8 +48,8 @@ public class GenerationDirectory {
 		return generatedSourcesAbsolutePath;
 	}
 
-	public File getGeneratedSourcesPathInClasspath() {
-		return generatedSourcesPathInClasspath;
+	public URI getGeneratedSourcesRuntimePath() {
+		return generatedSourcesRuntimePath;
 	}
 
 	public File getClasspath() {
@@ -58,8 +59,7 @@ public class GenerationDirectory {
 	@Override
 	public String toString() {
 		return "GenerationDirectory [generatedSourcesAbsolutePath=" + generatedSourcesAbsolutePath + ", classpath=" + classpath
-				+ ", generatedSourcesPathInClasspath=" + generatedSourcesPathInClasspath
+				+ ", generatedSourcesRuntimePath=" + generatedSourcesRuntimePath
 				+ "]";
 	}
-
 }

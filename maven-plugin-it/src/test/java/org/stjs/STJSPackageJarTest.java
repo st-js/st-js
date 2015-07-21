@@ -14,7 +14,7 @@ import org.junit.Test;
  * 
  * @author acraciun
  */
-public class STJSPackageJarTest {
+public class STJSPackageJarTest extends AbstractPackagingTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
@@ -40,11 +40,15 @@ public class STJSPackageJarTest {
 		assertContainsEntry(entryNames, "org/stjs/example/lib/stjs/STJSLibExample.stjs");
 		assertContainsEntry(entryNames, "stjs/example/stjs-lib-example.js");
 		assertContainsEntry(entryNames, "DefaultPackageExample.js");
+
+
+		assertEntryContainsText( //
+				artifactFile, //
+				"org/stjs/example/lib/stjs/STJSLibExample.stjs", //
+				"js=classpath\\:/org/stjs/example/lib/stjs/STJSLibExample.js" //
+		);
+
 		verifier.resetStreams();
 
-	}
-
-	private static void assertContainsEntry(Set<String> entries, String entry) {
-		assertTrue("The set " + entries + " should contain entry: " + entry, entries.contains(entry));
 	}
 }

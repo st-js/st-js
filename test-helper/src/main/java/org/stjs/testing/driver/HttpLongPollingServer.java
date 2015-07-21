@@ -31,6 +31,7 @@ import com.sun.net.httpserver.HttpServer;
 
 /**
  * Manages the HTTP server that is used to send tests to the browsers.
+ *
  * @author lordofthepigs
  */
 @SuppressWarnings("restriction")
@@ -118,7 +119,7 @@ public class HttpLongPollingServer implements AsyncProcess {
 				exchange.getResponseHeaders().add("Server", "STJS");
 				boolean dryRun = false;
 
-				if(exchange.getRequestMethod().equals("HEAD") || exchange.getRequestMethod().equals("OPTIONS")){
+				if (exchange.getRequestMethod().equals("HEAD") || exchange.getRequestMethod().equals("OPTIONS")) {
 					exchange = new NoBodyHttpExchange(exchange);
 					dryRun = true;
 				}
@@ -180,7 +181,7 @@ public class HttpLongPollingServer implements AsyncProcess {
 				// notify JUnit of the result of this test. When the last browser notifies
 				// the MultiTestMethod, the JUnit thread will become unblocked and the test result
 				// will be reported
-				if(!dryRun) {
+				if (!dryRun) {
 					TestResult result = browser.buildResult(params, exchange);
 					completedMethod.notifyExecutionResult(result);
 				}
@@ -195,7 +196,7 @@ public class HttpLongPollingServer implements AsyncProcess {
 			// whichever comes first. Basically, we are not sending the HTTP response to the
 			// browser until we have received a new test
 			MultiTestMethod nextMethod = null;
-			if(!dryRun){
+			if (!dryRun) {
 				nextMethod = browser.awaitNextTest();
 			}
 			if (nextMethod != null) {
@@ -230,8 +231,6 @@ public class HttpLongPollingServer implements AsyncProcess {
 		/**
 		 * this method returns an id of a registered browser when the id received from the client does not correspond to an existing one - i.e.
 		 * it's randomly generated on the client.
-		 * @param browserId
-		 * @return
 		 */
 		private synchronized LongPollingBrowser selfAssignedBrowser(long browserId) {
 			Long correspondingId = selfAssignedBrowserIds.get(browserId);
@@ -250,8 +249,8 @@ public class HttpLongPollingServer implements AsyncProcess {
 
 		private synchronized void handleResource(String path, HttpExchange exchange) throws IOException, URISyntaxException {
 			if (notFound.contains(path)) {
-			exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, -1);
-			return;
+				exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, -1);
+				return;
 			}
 			if (path.endsWith(".js")) {
 				exchange.getResponseHeaders().add("Content-Type", "text/javascript");
@@ -275,7 +274,7 @@ public class HttpLongPollingServer implements AsyncProcess {
 			}
 			if (!resource.copyTo(exchange)) {
 				notFound.add(path);
-				System.err.println(cleanPath + " was not found in classpath");
+				System.err.println(resource + " was not found in classpath");
 			}
 		}
 

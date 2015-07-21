@@ -1,7 +1,5 @@
 package org.stjs;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.util.Set;
 
@@ -11,10 +9,10 @@ import org.junit.Test;
 
 /**
  * This integration test checks if a war is correctly packaged
- * 
+ *
  * @author acraciun
  */
-public class STJSPackageWarTest {
+public class STJSPackageWarTest extends AbstractPackagingTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
@@ -42,11 +40,14 @@ public class STJSPackageWarTest {
 		assertContainsEntry(entryNames, "js/stjs/example/stjs-lib-example.js");
 		// check that jquery is copied as well
 		assertContainsEntry(entryNames, "generated-js/jquery/jquery.js");
+
+		// Check that the paths to the .js files are correctly generated in the .stjs files
+		assertEntryContainsText( //
+				artifactFile, //
+				"WEB-INF/classes/org/stjs/example/lib/stjs/STJSLibExample.stjs", //
+				"js=/generated-js/org/stjs/example/lib/stjs/STJSLibExample.js" //
+		);
 		verifier.resetStreams();
 
-	}
-
-	private static void assertContainsEntry(Set<String> entries, String entry) {
-		assertTrue("The set " + entries + " should contain entry: " + entry, entries.contains(entry));
 	}
 }

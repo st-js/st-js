@@ -214,22 +214,18 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		resp.append("<script language='javascript'>stjs.mainCallDisabled=true;</script>\n");
 
 		// scripts added explicitly
-		if (attr.getScripts() != null) {
-			for (String script : attr.getScripts().value()) {
-				appendScriptTag(resp, script);
-			}
+		for (String script : attr.getScripts()) {
+			appendScriptTag(resp, script);
 		}
 		// scripts before - new style
-		if (attr.getScriptsBefore() != null) {
-			for (String script : attr.getScriptsBefore().value()) {
-				appendScriptTag(resp, script);
-			}
+		for (String script : attr.getScriptsBefore()) {
+			appendScriptTag(resp, script);
 		}
 
-		Set<URI> jsFiles = new LinkedHashSet<>();
+		Set<URI> jsUris = new LinkedHashSet<>();
 		for (ClassWithJavascript dep : attr.getDependencies()) {
 
-			if (attr.getScripts() != null && dep instanceof BridgeClass) {
+			if (!attr.getScripts().isEmpty() && dep instanceof BridgeClass) {
 				// bridge dependencies are not added when using @Scripts
 				System.out.println(
 						"WARNING: You're using @Scripts deprecated annotation that disables the automatic inclusion of the Javascript files of the bridges you're using! "
@@ -237,20 +233,19 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 				continue;
 			}
 			for (URI file : dep.getJavascriptFiles()) {
-				jsFiles.add(file);
+				jsUris.add(file);
 			}
 		}
 
-		for (URI file : jsFiles) {
-			appendScriptTag(resp, file.toString());
+		for (URI uri : jsUris) {
+			appendScriptTag(resp, httpPath(uri));
 		}
 
 		// scripts after - new style
-		if (attr.getScriptsAfter() != null) {
-			for (String script : attr.getScriptsAfter().value()) {
-				appendScriptTag(resp, script);
-			}
+		for (String script : attr.getScriptsAfter()) {
+			appendScriptTag(resp, script);
 		}
+
 		resp.append("<script language='javascript'>\n");
 		resp.append("  window.onload=function(){\n");
 		// resp.append("    console.error(document.getElementsByTagName('html')[0].innerHTML);\n");
@@ -314,6 +309,18 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		resp.append("</html>\n");
 
 		sendResponse(resp.toString(), exchange);
+	}
+
+	protected String httpPath(URI uri){
+		if(uri.getScheme().equals("webjar")){
+			return "webjars" + uri.getPath();
+
+		} else if(uri.getScheme().equals("classpath")) {
+			return uri.getPath();
+		}
+
+		// all the other cases (.war packaging, old .jar packaging)
+		return uri.toString();
 	}
 
 	/**

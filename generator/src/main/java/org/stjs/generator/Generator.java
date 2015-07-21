@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
@@ -174,40 +173,20 @@ public class Generator {
 		Map<String, DependencyType> resolvedClasses = new LinkedHashMap<String, DependencyType>(names.getResolvedTypes());
 		resolvedClasses.remove(className);
 		stjsClass.setDependencies(resolvedClasses);
-		stjsClass.setGeneratedJavascriptFile(relative(className));
+		stjsClass.setGeneratedJavascriptFile(getRuntimeUri(className));
 
 		TypeElement classElement = context.getElements().getTypeElement(clazz.getCanonicalName());
 		stjsClass.setJavascriptNamespace(context.wrap(classElement).getNamespace());
 
 		// dump the ast to a file
-		taskExecutor.execute(new DumpFilesTask<Object>(outputFile, context, javascriptRoot, stjsClass));
+		taskExecutor.execute(new DumpFilesTask<>(outputFile, context, javascriptRoot, stjsClass));
 
 		return stjsClass;
 	}
 
-	private URI relative(String className) {
-		// FIXME temporary have to remove the full path from the file name.
-		// it should be different depending on whether the final artifact is a war or a jar.
-		// String path = generationFolder.getPath();
-		// int pos = path.lastIndexOf("target");
-		try {
-			File file = getOutputFile(config.getGenerationFolder().getGeneratedSourcesPathInClasspath(), className, false);
-			String path = file.getPath().replace('\\', '/');
-			// make it "absolute"
-			if (!path.startsWith("/")) {
-				path = "/" + path;
-			}
-			return new URI(path);
-
-			// if (pos >= 0) {
-			// File file = getOutputFile(new File(path.substring(pos)), className);
-			// return new URI(file.getPath().replace('\\', '/'));
-			// }
-			// return getOutputFile(generationFolder, className).toURI();
-		}
-		catch (URISyntaxException e) {
-			throw new JavascriptClassGenerationException(className, e);
-		}
+	private URI getRuntimeUri(String className) {
+		String jsFilePath = className.replace('.', File.separatorChar) + ".js";
+		return config.getGenerationFolder().getGeneratedSourcesRuntimePath().resolve(jsFilePath);
 	}
 
 	private JavaCompiler getCompiler(ClassLoader builtProjectClassLoader, String sourceEncoding) {
@@ -357,7 +336,8 @@ public class Generator {
 
 				try {
 					// write the source map
-					sourceMapWriter = Files.newWriter(getSourceMapFile(stjsClass.getJavaClassName()), Charset.forName(config.getSourceEncoding()));
+					sourceMapWriter =
+							Files.newWriter(getSourceMapFile(stjsClass.getJavaClassName()), Charset.forName(config.getSourceEncoding()));
 					context.writeSourceMap(sourceMapWriter);
 					sourceMapWriter.flush();
 

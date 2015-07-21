@@ -2,6 +2,7 @@ package org.stjs.command.line;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -50,7 +51,7 @@ public class CommandLine {
 					.currentThread().getContextClassLoader());
 			File sourceFolder = new File(path);
 
-			GenerationDirectory generationFolder = new GenerationDirectory(new File(outputDir), null, null);
+			GenerationDirectory generationFolder = new GenerationDirectory(new File(outputDir), null, new URI("/"));
 
 			GeneratorConfigurationBuilder configBuilder = new GeneratorConfigurationBuilder();
 			configBuilder.allowedPackage(builtProjectClassLoader.loadClass(className).getPackage().getName());
