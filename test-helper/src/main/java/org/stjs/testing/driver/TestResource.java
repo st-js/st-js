@@ -76,15 +76,12 @@ public class TestResource {
 		return withConnection(new ConnectionOperation<Boolean>() {
 			@Override
 			public Boolean doWithConnection(URLConnection connection) throws IOException {
-				InputStream is = connection.getInputStream();
-				try {
+
+				try (InputStream is = connection.getInputStream()){
 					exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, connection.getContentLengthLong());
 					OutputStream out = exchange.getResponseBody();
 					ByteStreams.copy(is, out);
 					out.flush();
-				}
-				finally {
-					Closeables.closeQuietly(is);
 				}
 				return true;
 			}

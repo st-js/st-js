@@ -65,22 +65,8 @@ public class TestResourceResolver {
 		// all the classes of the current project are not yet packed into a .jar, but are exploded outside of the jar.
 		// We must try to find the files in the exploded compiled classes directly before handing control over to
 		// WebJarAssetLocator if we can't find anything.
-
-
-		try {
-			final Enumeration<URL> enumeration = classLoader.getResources("META-INF/resources/webjars");
-			while (enumeration.hasMoreElements()) {
-				System.out.println(enumeration.nextElement());
-			}
-		} catch(Exception e){
-			throw new RuntimeException(e);
-		}
-
-		System.out.println("httpPath: " + httpPath);
 		String partialPath = httpPath.substring(WEBJARS_ROOT.length());
-		System.out.println("partialPath: " + partialPath);
 		String fullPath = webjarLocator.getFullPath(partialPath);
-		System.out.println("fullPath: " + fullPath);
 
 		return classLoader.getResource(fullPath);
 	}
