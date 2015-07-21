@@ -20,60 +20,57 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 public class GsonTest {
-	@Test
-	public void testSerializeArray() {
+
+	private Gson gson;
+
+	public GsonTest(){
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		GsonAdapters.addAll(gsonBuilder);
-		Gson gson = gsonBuilder.create();
+		gson = gsonBuilder.create();
+	}
+
+	@Test
+	public void testSerializeArray() {
 		String s = gson.toJson(JSCollections.$array(1, 2, 3));
 		assertEquals("[1,2,3]", s);
 	}
 
 	@Test
-	public void testSerializeArrayPojo() throws JsonGenerationException, JsonMappingException, IOException {
-		GsonBuilder gsonBuilder = new GsonBuilder();
-		GsonAdapters.addAll(gsonBuilder);
-		Gson gson = gsonBuilder.create();
-
+	public void testSerializeArrayPojo() throws IOException {
 		String s = gson.toJson(JSCollections.$array(new Pojo(1), new Pojo(2)));
 		assertEquals("[{\"n\":1},{\"n\":2}]", s);
 	}
 
-	@Test
-	public void testSerializeMap() throws JsonGenerationException, JsonMappingException, IOException {
-		GsonBuilder gsonBuilder = new GsonBuilder();
-		GsonAdapters.addAll(gsonBuilder);
-		Gson gson = gsonBuilder.create();
+	@Test(expected = IllegalStateException.class)
+	public void testSerializeArraySparse() throws IOException {
+		Array<Integer> holes = new Array<>();
+		holes.$set(0, 0);
+		holes.$set(1, null);
+		holes.$set(4, 1); // array is now sparse
 
+		gson.toJson(holes);
+	}
+
+	@Test
+	public void testSerializeMap() throws IOException {
 		String s = gson.toJson(JSCollections.$map("a", 1));
 		assertEquals("{\"a\":1}", s);
 	}
 
 	@Test
-	public void testSerializeMapPojo() throws JsonGenerationException, JsonMappingException, IOException {
-		GsonBuilder gsonBuilder = new GsonBuilder();
-		GsonAdapters.addAll(gsonBuilder);
-		Gson gson = gsonBuilder.create();
-
+	public void testSerializeMapPojo() throws IOException {
 		String s = gson.toJson(JSCollections.$map("A", new Pojo(1)));
 		assertEquals("{\"A\":{\"n\":1}}", s);
 	}
 
 	@Test
-	public void testSerializeDate() throws JsonGenerationException, JsonMappingException, IOException {
-		GsonBuilder gsonBuilder = new GsonBuilder();
-		GsonAdapters.addAll(gsonBuilder);
-		Gson gson = gsonBuilder.create();
-
+	public void testSerializeDate() throws IOException {
 		String s = gson.toJson(new Date(2011, 10, 9, 17, 10, 0, 0));
 		assertEquals("\"2011-11-09 17:10:00\"", s);
 	}
 
 	@Test
 	public void testDeserializeArray() {
-		GsonBuilder gsonBuilder = new GsonBuilder();
-		GsonAdapters.addAll(gsonBuilder);
-		Gson gson = gsonBuilder.create();
 		Type collectionType = new TypeToken<Array<Integer>>() {
 		}.getType();
 		Array<Integer> a = gson.fromJson("[1,2,3]", collectionType);
@@ -84,9 +81,6 @@ public class GsonTest {
 
 	@Test
 	public void testDeserializeMap() {
-		GsonBuilder gsonBuilder = new GsonBuilder();
-		GsonAdapters.addAll(gsonBuilder);
-		Gson gson = gsonBuilder.create();
 		Type collectionType = new TypeToken<Map<String, Integer>>() {
 		}.getType();
 		Map<String, Integer> m = gson.fromJson("{\"a\":1}", collectionType);
@@ -96,12 +90,8 @@ public class GsonTest {
 
 	@Test
 	public void testDeserializeDate() {
-		GsonBuilder gsonBuilder = new GsonBuilder();
-		GsonAdapters.addAll(gsonBuilder);
-		Gson gson = gsonBuilder.create();
 		Date d = gson.fromJson("\"2011-11-09 17:10:00\"", Date.class);
 		assertNotNull(d);
 		assertEquals(10, (int) d.getMonth());
 	}
-
 }

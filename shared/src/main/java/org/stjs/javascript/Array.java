@@ -114,26 +114,28 @@ public class Array<V> implements Iterable<String> {
 
 	/**
 	 * Returns a java.lang.List that corresponds to this Array. This method can only be called from server side code
-	 * and cannot be used in code that is translated to JavaScript. If this Array contains any unset indices (holes)
-	 * then the corresponding elements in the returned List are set to null.
+	 * and cannot be used in code that is translated to JavaScript.
 	 *
 	 * @return a List that corresponds this Array
-	 * @throws IllegalStateException if the Array contains more than Integer.MAX_VALUE elements or contains non-Array elements
+	 * @throws IllegalStateException if the Array contains more than Integer.MAX_VALUE elements,
+	 *                               if it contains non-Array elements or
+	 *                               if it has some unset indices (holes)
 	 */
 	@ServerSide
 	public List<V> toList() {
 		if (this.length > Integer.MAX_VALUE) {
-			throw new IllegalStateException("Cannot convert this Array to List, contains too many element. " + //
-					this.length + " > " + Integer.MAX_VALUE);
+			throw new IllegalStateException("Array is too long: " + this.length + " > " + Integer.MAX_VALUE);
 
 		} else if (this.nonArrayElements.size() > 0) {
-			throw new IllegalStateException("Cannot convert this Array to List, contains non array elements: " + //
-					this.nonArrayElements.keySet());
+			throw new IllegalStateException("Array contains non-array elements: " + this.nonArrayElements.keySet());
+
+		} else if(this.length != this.setElements){
+			throw new IllegalStateException("Array is sparse");
 		}
 
 		ArrayList<V> result = new ArrayList<>((int) length);
 		for (int i = 0; i < this.$length(); i++) {
-			result.set(i, this.$get(i));
+			result.add(this.$get(i));
 		}
 		return result;
 	}

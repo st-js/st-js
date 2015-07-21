@@ -17,7 +17,9 @@ package org.stjs.server.json.gson;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.List;
 
+import org.codehaus.jackson.JsonGenerationException;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.JSCollections;
 
@@ -53,8 +55,13 @@ public class JSArrayAdapter implements JsonSerializer<Array<?>>, JsonDeserialize
 			return new JsonNull();
 		}
 		JsonArray js = new JsonArray();
-		for (String i : array) {
-			js.add(ctx.serialize(array.$get(i)));
+
+		// validate that we have a packed array (no unset elements) and that we do not
+		// have any non-array indices. JSON supports none of these features, and toList()
+		// detects them and rejects them too.
+		List<?> list = array.toList();
+		for (Object o : list) {
+			js.add(ctx.serialize(o));
 		}
 		return js;
 	}
