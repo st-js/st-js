@@ -11,8 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.stjs.javascript.functions.Function4;
 
-import com.sun.jndi.toolkit.ctx.AtomicContext;
-
 public class ArrayReduceTest {
 
 	/**

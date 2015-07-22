@@ -236,7 +236,7 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@Template("get")
 	public V $get(int index) {
-		return this.$get((long)index);
+		return this.$get((long) index);
 	}
 
 	/**
@@ -1486,6 +1486,9 @@ public class Array<V> implements Iterable<String> {
 		if(initialValue == UNSET){
 			// when initialValue is UNSET (the parameter was not specified)
 			// then the types T and V are the same.
+			if(!iter.hasNext()){
+				throw new Error("TypeError", "Array is empty and initialValue was not provided");
+			}
 			@SuppressWarnings("unchecked")
 			T temp = (T)iter.next().value;
 			accumulator = temp;
