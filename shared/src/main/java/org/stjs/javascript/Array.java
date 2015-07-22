@@ -951,7 +951,8 @@ public class Array<V> implements Iterable<String> {
 	 *            the values to the prepended to the start of this <tt>Array</tt>
 	 * @return the new length of this <tt>Array</tt>
 	 */
-	public int unshift(V... values) {
+	@SafeVarargs
+	public final int unshift(V... values) {
 		this.splice(0, 0, values);
 		return this.$length();
 	}
