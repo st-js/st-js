@@ -1502,6 +1502,15 @@ public class Array<V> implements Iterable<String> {
 		return accumulator;
 	}
 
+	/**
+	 * Returns true if the specified object is an Array.
+	 * @param o the object to check
+	 * @return true if the object is an Array, false if not
+	 */
+	public static boolean isArray(Object o){
+		return o instanceof Array;
+	}
+
 	private abstract class ArrayStore<E> {
 
 		ArrayStore<E> switchStoreType(long newLength) {
