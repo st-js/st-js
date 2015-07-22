@@ -1267,6 +1267,8 @@ public class Array<V> implements Iterable<String> {
 		if(callbackfn == null){
 			throw new Error("TypeError", "callbackfn is null");
 		}
+		int lengthBefore = this.$length();
+
 		Iterator<Entry<V>> iter = this.entryIterator(0, this.$length(), true);
 		Array<T> result = new Array<>();
 		while (iter.hasNext()) {
@@ -1274,6 +1276,8 @@ public class Array<V> implements Iterable<String> {
 			T mapped = callbackfn.$invoke(entry.value, entry.key, this);
 			result.$set(entry.key, mapped);
 		}
+
+		result.$length(lengthBefore);
 		return result;
 	}
 

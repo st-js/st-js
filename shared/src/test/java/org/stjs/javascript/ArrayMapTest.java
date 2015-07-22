@@ -82,7 +82,7 @@ public class ArrayMapTest {
 		};
 
 		Array<Integer> resArr = srcArr.map(callbackfn);
-		assertEquals(4, resArr.$length());
+		assertEquals(5, resArr.$length());
 		assertEquals(0, resArr.$get(4).intValue());
 	}
 
