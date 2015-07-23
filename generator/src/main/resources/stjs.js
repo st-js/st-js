@@ -137,6 +137,11 @@ if (!String.prototype.regionMatches){
 	}
 }
 
+if(!String.prototype.contains){
+	String.prototype.contains=function(it){
+		return this.indexOf(it)>=0;
+	};
+}
 
 
 //force valueof to match the Java's behavior
