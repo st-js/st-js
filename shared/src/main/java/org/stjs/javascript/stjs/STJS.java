@@ -35,34 +35,66 @@ public final class STJS {
 
 	/**
 	 * using the type description, it converts a POJO (i.e arrived as JSON in your client) to an object of the given type, transforming
-	 * recursively the fields. You need to include stjs-ext.js
+	 * recursively the fields.
+	 * @deprecated use STJS.hydrate instead
 	 * @param obj
 	 * @param cls
 	 * @return
 	 */
+	@Deprecated
 	public native <T> T typefy(T obj, Class<T> cls);
 
 	/**
 	 * using the type description, it converts a POJO (i.e arrived as JSON in your client) to an object of the given type, transforming
-	 * recursively the fields. You need to include stjs-ext.js
+	 * recursively the fields.
 	 * @param obj
 	 * @param cls
 	 * @return
 	 */
+	public native <T> T hydrate(T obj, Class<T> cls);
+
+	/**
+	 * using the type description, it converts a POJO (i.e arrived as JSON in your client) to an object of the given type, transforming
+	 * recursively the fields.
+	 * @deprecated use STJS.hydrate instead
+	 * @param obj
+	 * @param cls
+	 * @return
+	 */
+	@Deprecated
 	public native <T> T typefy(Map<String, ? extends Object> obj, Class<T> cls);
 
 	/**
-	 * using the type description, it converts an array of POJOs (i.e arrived as JSON in your client) to an object of the given type,
-	 * transforming recursively the fields.You need to include stjs-ext.js
+	 * using the type description, it converts a POJO (i.e arrived as JSON in your client) to an object of the given type, transforming
+	 * recursively the fields.
 	 * @param obj
 	 * @param cls
 	 * @return
 	 */
+	public native <T> T hydrate(Map<String, ? extends Object> obj, Class<T> cls);
+
+	/**
+	 * using the type description, it converts an array of POJOs (i.e arrived as JSON in your client) to an object of the given type,
+	 * transforming recursively the fields.
+	 * @deprecated use STJS.hydrate instead
+	 * @param obj
+	 * @param cls
+	 * @return
+	 */
+	@Deprecated
 	public native <T> Array<T> typefy(Array<Object> obj, Class<T> cls);
 
 	/**
+	 * using the type description, it converts an array of POJOs (i.e arrived as JSON in your client) to an object of the given type,
+	 * transforming recursively the fields.
+	 * @param obj
+	 * @param cls
+	 */
+	public native <T> Array<T> hydrate(Array<Object> obj, Class<T> cls);
+
+	/**
 	 * using the type description it converts the fields of the object in strings or other primitve types to be able to send the object via AJAX
-	 * for example.You need to include stjs-ext.js
+	 * for example.
 	 * @param obj
 	 * @param cls
 	 * @return

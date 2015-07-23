@@ -787,6 +787,7 @@ stjs.typefy=function(obj, cls){
 	  }
 	  return ret;
 };
+stjs.hydrate=stjs.typefy
 
 stjs.stringify=function(obj, cls){
 	 if (obj == null)
