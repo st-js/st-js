@@ -1189,8 +1189,7 @@ public class Date {
 	 */
 	@BrowserCompatibility("IE:9+")
 	public static double now(){
-		// TODO: code it
-		return 0.0;
+		return new Date().getTime();
 	}
 
 	/**
