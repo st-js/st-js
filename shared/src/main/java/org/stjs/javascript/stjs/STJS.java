@@ -89,6 +89,7 @@ public final class STJS {
 	 * transforming recursively the fields.
 	 * @param obj
 	 * @param cls
+	 * @return
 	 */
 	public native <T> Array<T> hydrate(Array<Object> obj, Class<T> cls);
 
