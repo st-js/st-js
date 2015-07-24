@@ -35,4 +35,9 @@ public class BridgeGeneratorTest extends AbstractStjsTest {
 	public void testTemplateOutsideBridge() {
 		generate(Bridge5.class);
 	}
+
+	@Test
+	public void testBridgeAsInnerClass(){
+		assertCodeDoesNotContain(Bridge6.class, "constructor.ActualBridge = function()");
+	}
 }
