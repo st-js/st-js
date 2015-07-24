@@ -667,7 +667,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	public void addSourceMapURL() {
 		if (generateSourceMap) {
 			addMapping();
-			print("//@ sourceMappingURL=").print(inputFile.getName().replaceAll("\\.java$", ".map"));
+			print("//# sourceMappingURL=").print(inputFile.getName().replaceAll("\\.java$", ".map"));
 		}
 	}
 

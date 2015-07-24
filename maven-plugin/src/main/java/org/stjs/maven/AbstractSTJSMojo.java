@@ -385,7 +385,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				packMapStream = new BufferedWriter(new FileWriter(packMapFile));
 				packSourceMap.appendTo(packMapStream, project.getArtifactId() + ".js");
 
-				allSourcesFile.write(("//@ sourceMappingURL=" + project.getArtifactId() + ".map\n").getBytes());
+				allSourcesFile.write(("//# sourceMappingURL=" + project.getArtifactId() + ".map\n").getBytes());
 				allSourcesFile.flush();
 			}
 
