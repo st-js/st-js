@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
@@ -33,6 +34,7 @@ import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
+import org.stjs.javascript.annotation.STJSBridge;
 import org.stjs.javascript.annotation.ServerSide;
 
 import com.sun.source.tree.AnnotationTree;
@@ -92,8 +94,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	}
 
 	/**
-	 *
-	 @return the list of implemented interfaces. for intefaces, the super class goes also in the interfaces list
+	 * @return the list of implemented interfaces. for intefaces, the super class goes also in the interfaces list
 	 */
 	private JS getInterfaces(ClassTree clazz, GenerationContext<JS> context) {
 		Element type = TreeUtils.elementFromDeclaration(clazz);
@@ -476,6 +477,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			stmts.add(js.variableDeclaration(true, typeName, getConstructor(visitor, tree, context)));
 		}
 	}
+
 	public JS getClassName(ClassTree tree, GenerationContext<JS> context) {
 		Element type = TreeUtils.elementFromDeclaration(tree);
 		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
@@ -489,6 +491,12 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context) {
+		if (isBridge(tree)) {
+			// class is actually a bridge. This path is usually not reached for top-level classes (because the
+			// generator skips top-level classes with @STJSBridge altogether), but can happen for inner classes
+			return null;
+		}
+
 		JavaScriptBuilder<JS> js = context.js();
 		List<JS> stmts = new ArrayList<JS>();
 		if (generateGlobal(visitor, tree, context, stmts)) {
@@ -529,5 +537,16 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		addMainMethodCall(tree, stmts, context);
 
 		return js.statements(stmts);
+	}
+
+	private boolean isBridge(ClassTree tree) {
+		TypeElement type = TreeUtils.elementFromDeclaration(tree);
+		List<? extends AnnotationMirror> annotations = type.getAnnotationMirrors();
+		for (AnnotationMirror a : annotations) {
+			if (a.getAnnotationType().toString().equals(STJSBridge.class.getName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
