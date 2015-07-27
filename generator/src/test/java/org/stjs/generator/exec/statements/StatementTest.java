@@ -12,4 +12,9 @@ public class StatementTest extends AbstractStjsTest {
 		assertEquals(0.0, executeAndReturnNumber(Statements1.class), 0);
 	}
 
+	@Test
+	public void testGetClass() {
+		assertEquals(0.0, executeAndReturnNumber(Statements2.class), 0);
+	}
+
 }

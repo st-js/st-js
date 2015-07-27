@@ -29,6 +29,10 @@ JavalikeEquals = function(value){
 	return this === value;
 };
 
+JavalikeGetClass = function(){
+	return this.constructor;
+};
+
 /* String */
 if (!String.prototype.equals) {
 	String.prototype.equals=JavalikeEquals;
@@ -321,8 +325,13 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 	_constructor.$annotations = _annotations;
 
 	// add the default equals method if it is not present yet, and we don't have a superclass
-	if(_super == null && !_constructor.prototype.equals){
-		_constructor.prototype.equals = JavalikeEquals;
+	if(_super == null){
+		if(!_constructor.prototype.equals) {
+			_constructor.prototype.equals = JavalikeEquals;
+		}
+		if(!_constructor.prototype.getClass) {
+			_constructor.prototype.getClass = JavalikeGetClass;
+		}
 	}
 
 	// build package and assign
@@ -352,6 +361,7 @@ stjs.extend12=function( _constructor,  _super, _implements){
 	// with 1.3 requires it
 	if(_super == null){
 		_constructor.prototype.equals = JavalikeEquals;
+		_constructor.prototype.getClass = JavalikeGetClass;
 	}
 
 	// build package and assign
