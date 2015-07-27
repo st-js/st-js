@@ -16,7 +16,7 @@ import com.sun.source.tree.MethodInvocationTree;
  * $method() => $method and <br>
  * $method(x) => $method = x and $staticMethod(x) => x.$method and <br>
  * $staticMethod(x, y) => x.$method = y
- * 
+ *
  * @author acraciun
  */
 public class MethodToPropertyTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
@@ -38,13 +38,11 @@ public class MethodToPropertyTemplate<JS> implements WriterContributor<MethodInv
 			target = context.js().paren(visitor.scan(tree.getArguments().get(arg++), context));
 		} else {
 			// $method() or $method(x)
-			target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree>getCurrentWrapper());
+			target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree> getCurrentWrapper());
 		}
 
 		// NAME
-		String name = MethodInvocationWriter.buildMethodName(tree);
-		int start = name.startsWith("$") ? 1 : 0;
-		JS property = context.js().property(target, name.substring(start));
+		JS property = context.js().property(target, getPropertyName(tree));
 
 		// VALUE
 		if (argCount == arg) {
@@ -54,5 +52,11 @@ public class MethodToPropertyTemplate<JS> implements WriterContributor<MethodInv
 
 		// $staticMethod(x,y) or $method(x)
 		return context.js().assignment(AssignOperator.ASSIGN, property, visitor.scan(tree.getArguments().get(arg), context));
+	}
+
+	public static String getPropertyName(MethodInvocationTree tree) {
+		String name = MethodInvocationWriter.buildMethodName(tree);
+		int start = name.startsWith("$") ? 1 : 0;
+		return name.substring(start);
 	}
 }

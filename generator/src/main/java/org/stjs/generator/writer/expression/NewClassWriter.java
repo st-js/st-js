@@ -16,6 +16,7 @@ import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.declaration.MethodWriter;
+import org.stjs.generator.writer.templates.MethodToPropertyTemplate;
 
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BlockTree;
@@ -23,6 +24,7 @@ import com.sun.source.tree.ExpressionStatementTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MemberSelectTree;
+import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.StatementTree;
@@ -70,8 +72,18 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 		if (initBlock != null) {
 			for (StatementTree stmt : initBlock.getStatements()) {
 				// check the right type of statements x=y is done in NewClassObjectInitCheck
-				AssignmentTree assign = (AssignmentTree) ((ExpressionStatementTree) stmt).getExpression();
-				props.add(NameValue.of(getPropertyName(assign.getVariable()), visitor.scan(assign.getExpression(), tw.getContext())));
+				ExpressionTree expr = ((ExpressionStatementTree) stmt).getExpression();
+
+				if (expr instanceof AssignmentTree) {
+					AssignmentTree assign = (AssignmentTree) expr;
+					props.add(NameValue.of(getPropertyName(assign.getVariable()), visitor.scan(assign.getExpression(), tw.getContext())));
+
+				} else {
+					MethodInvocationTree meth = (MethodInvocationTree) expr;
+					String propertyName = MethodToPropertyTemplate.getPropertyName(meth);
+					JS value = visitor.scan(meth.getArguments().get(0), tw.getContext());
+					props.add(NameValue.of(propertyName, value));
+				}
 			}
 		}
 		return tw.getContext().js().object(props);

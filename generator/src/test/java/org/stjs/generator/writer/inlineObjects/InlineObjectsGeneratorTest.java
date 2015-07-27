@@ -40,4 +40,30 @@ public class InlineObjectsGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(InlineObjects5.class, "o={}");
 		assertCodeDoesNotContain(InlineObjects5.class, "Pojo");
 	}
+
+	@Test
+	public void testAssignmentWithToPropertyTemplate(){
+		assertCodeContains(InlineObjects6.class, "o={x:\"hello\",x:12}");
+	}
+
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testAssignmentWithToPropertyTemplateGetter(){
+		generate(InlineObjects7.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testAssignmentWithToPropertyTemplateOnAnotherType(){
+		generate(InlineObjects8.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testAssignmentThatLooksLikeToPropertyTemplateButIsnt(){
+		generate(InlineObjects9.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testAssignmentThatLooksLikeToPropertyTemplateButIsnt2(){
+		generate(InlineObjects10.class);
+	}
 }
