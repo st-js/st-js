@@ -147,6 +147,10 @@ if(!String.prototype.contains){
 	};
 }
 
+if(!String.prototype.getClass){
+	String.prototype.getClass=JavalikeGetClass;
+}
+
 
 //force valueof to match the Java's behavior
 String.valueOf=function(value){
@@ -226,6 +230,9 @@ if (!Number.prototype.isNaN) {
 if (!Number.prototype.equals) {
 	Number.prototype.equals=JavalikeEquals;
 }
+if(!Number.prototype.getClass){
+	Number.prototype.getClass=JavalikeGetClass;
+}
 
 //force valueof to match approximately the Java's behavior (for Integer.valueOf it returns in fact a double)
 Number.valueOf=function(value){
@@ -235,6 +242,9 @@ Number.valueOf=function(value){
 /* Boolean */
 if (!Boolean.prototype.equals) {
 	Boolean.prototype.equals=JavalikeEquals;
+}
+if(!Boolean.prototype.getClass){
+	Boolean.prototype.getClass=JavalikeGetClass;
 }
 
 //force valueof to match the Java's behavior
