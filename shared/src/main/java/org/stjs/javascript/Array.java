@@ -513,24 +513,24 @@ public class Array<V> implements Iterable<String> {
 	 * @return a new <tt>Array</tt>, containing all the elements of the joined <tt>Arrays</tt>.
 	 */
 	@SafeVarargs
-	public final Array<V> concat(Array<V>... arrays) {
-		Array<V> result = new Array<V>();
+	public final Array<V> concat(Array<? extends V>... arrays) {
+		Array<V> result = new Array<>();
 
 		// Add the elements of this array
 		long i = 0;
-		Iterator<Entry<V>> iter = this.entryIterator(0, this.$length(), true);
-		while (iter.hasNext()) {
-			Entry<V> entry = iter.next();
+		Iterator<Entry<V>> thisIter = this.entryIterator(0, this.$length(), true);
+		while (thisIter.hasNext()) {
+			Entry<V> entry = thisIter.next();
 			result.$set(i + entry.key, entry.value);
 		}
 		i = this.$length();
 
 		if (arrays != null) {
 			// add the elements of all the other specified arrays
-			for (Array<V> arr : arrays) {
-				iter = arr.array.entryIterator(0, arr.$length(), true);
-				while (iter.hasNext()) {
-					Entry<V> entry = iter.next();
+			for (Array<? extends V> arr : arrays) {
+				Iterator<? extends Entry<? extends V>> arrIter = arr.array.entryIterator(0, arr.$length(), true);
+				while (arrIter.hasNext()) {
+					Entry<? extends V> entry = arrIter.next();
 					result.$set(i + entry.key, entry.value);
 				}
 				i += arr.$length();
