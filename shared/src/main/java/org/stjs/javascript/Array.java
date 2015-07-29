@@ -922,7 +922,7 @@ public class Array<V> implements Iterable<String> {
 	 *            a sort function that can compare elements of this <tt>Array</tt>.
 	 * @return this <tt>Array</tt>
 	 */
-	public Array<V> sort(SortFunction<V> comparefn) {
+	public Array<V> sort(SortFunction<? super V> comparefn) {
 		if(comparefn == null) {
 			this.array.sort(defaultSortComparator());
 		} else {
@@ -980,7 +980,7 @@ public class Array<V> implements Iterable<String> {
 	 *            the callback function to be called for each element
 	 */
 	@BrowserCompatibility("IE:9+")
-	public void forEach(final Callback1<V> callbackfn) {
+	public void forEach(final Callback1<? super V> callbackfn) {
 		forEach(new Callback3<V, Long, Array<V>>() {
 			@Override
 			public void $invoke(V v, Long aLong, Array<V> strings) {
@@ -1013,7 +1013,7 @@ public class Array<V> implements Iterable<String> {
 	 *            the callback function to be called for each element
 	 */
 	@BrowserCompatibility("IE:9+")
-	public void forEach(Callback3<V, Long, Array<V>> callbackfn) {
+	public void forEach(Callback3<? super V, Long, ? super Array<V>> callbackfn) {
 		if(callbackfn == null){
 			throw new Error("TypeError", "callbackfn is null");
 		}
@@ -1031,7 +1031,7 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@Template("prefix")
 	@BrowserCompatibility("IE:9+")
-	public void $forEach(Callback1<V> callbackfn) {
+	public void $forEach(Callback1<? super V> callbackfn) {
 		forEach(callbackfn);
 	}
 
@@ -1042,7 +1042,7 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@Template("prefix")
 	@BrowserCompatibility("IE:9+")
-	public void $forEach(Callback3<V, Long, Array<V>> callbackfn) {
+	public void $forEach(Callback3<? super V, Long, ? super Array<V>> callbackfn) {
 		forEach(callbackfn);
 	}
 
@@ -1170,7 +1170,7 @@ public class Array<V> implements Iterable<String> {
 	 *         <tt>false</tt> if not
 	 */
 	@BrowserCompatibility("IE:9+")
-	public boolean every(Function3<V, Long, Array<V>, Boolean> callbackfn) {
+	public boolean every(Function3<? super V, Long, ? super Array<V>, Boolean> callbackfn) {
 		if(callbackfn == null){
 			throw new Error("TypeError", "callbackfn is null");
 		}
@@ -1218,7 +1218,7 @@ public class Array<V> implements Iterable<String> {
 	 *         <tt>Array</tt>, <tt>false</tt> otherwise
 	 */
 	@BrowserCompatibility("IE:9+")
-	public boolean some(Function3<V, Long, Array<V>, Boolean> callbackfn) {
+	public boolean some(Function3<? super V, Long, ? super Array<V>, Boolean> callbackfn) {
 		if(callbackfn == null){
 			throw new Error("TypeError", "callbackfn is null");
 		}
@@ -1263,7 +1263,7 @@ public class Array<V> implements Iterable<String> {
 	 * @return a new <tt>Array</tt> containing new elements as returned by the specified callback function
 	 */
 	@BrowserCompatibility("IE:9+")
-	public <T> Array<T> map(Function3<V, Long, Array<V>, T> callbackfn) {
+	public <T> Array<T> map(Function3<? super V, Long, ? super Array<V>, T> callbackfn) {
 		if(callbackfn == null){
 			throw new Error("TypeError", "callbackfn is null");
 		}
@@ -1312,7 +1312,7 @@ public class Array<V> implements Iterable<String> {
 	 *         function returns <tt>true</tt>.
 	 */
 	@BrowserCompatibility("IE:9+")
-	public Array<V> filter(Function3<V, Long, Array<V>, Boolean> callbackfn) {
+	public Array<V> filter(Function3<? super V, Long, ? super Array<V>, Boolean> callbackfn) {
 		if(callbackfn == null){
 			throw new Error("TypeError", "callbackfn is null");
 		}
@@ -1395,7 +1395,7 @@ public class Array<V> implements Iterable<String> {
 	 * @return a single value derived from calling the callback function on all the elements of this <tt>Array</tt>
 	 */
 	@BrowserCompatibility("IE:9+, Safari:4+, Opera:10.50+")
-	public <T> T reduce(Function4<T, V, Long, Array<V>, T> callbackfn, T initialValue) {
+	public <T> T reduce(Function4<T, ? super V, Long, ? super Array<V>, T> callbackfn, T initialValue) {
 		return doReduce(callbackfn, initialValue, true);
 	}
 
@@ -1466,11 +1466,11 @@ public class Array<V> implements Iterable<String> {
 	 * @return a single value derived from calling the callback function on all the elements of this <tt>Array</tt>
 	 */
 	@BrowserCompatibility("IE:9+, Safari:4+, Opera:10.50+")
-	public <T> T reduceRight(Function4<T, V, Long, Array<V>, T> callbackfn, T initialValue) {
+	public <T> T reduceRight(Function4<T, ? super V, Long, ? super Array<V>, T> callbackfn, T initialValue) {
 		return doReduce(callbackfn, initialValue, false);
 	}
 
-	private <T> T doReduce(Function4<T, V, Long, Array<V>, T> callbackfn, Object initialValue, boolean isForward){
+	private <T> T doReduce(Function4<T, ? super V, Long, ? super Array<V>, T> callbackfn, Object initialValue, boolean isForward){
 		if(callbackfn == null){
 			throw new Error("TypeError", "callbackfn is null");
 		}
@@ -1562,7 +1562,7 @@ public class Array<V> implements Iterable<String> {
 
 		abstract void reverse();
 
-		public abstract void sort(SortFunction<E> comparefn);
+		public abstract void sort(SortFunction<? super E> comparefn);
 	}
 
 	private final class PackedArrayStore<E> extends ArrayStore<E> {
@@ -1648,7 +1648,7 @@ public class Array<V> implements Iterable<String> {
 		}
 
 		@Override
-		public void sort(final SortFunction<E> comparefn) {
+		public void sort(final SortFunction<? super E> comparefn) {
 			// This comparator implements the SortCompare algorithm in section 15.4.4.11 of the ECMA-262 Specification
 			Comparator<Object> comparator = new Comparator<Object>(){
 				@Override
@@ -1898,7 +1898,7 @@ public class Array<V> implements Iterable<String> {
 		}
 
 		@Override
-		public void sort(final SortFunction<E> comparefn) {
+		public void sort(final SortFunction<? super E> comparefn) {
 			ArrayList<E> values = new ArrayList<>(this.elements.values());
 			Comparator<E> comparator = new Comparator<E>(){
 				@Override
