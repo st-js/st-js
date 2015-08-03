@@ -312,10 +312,10 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	}
 
 	protected String httpPath(URI uri){
-		if(uri.getScheme().equals("webjar")){
+		if("webjar".equals(uri.getScheme())){
 			return "webjars" + uri.getPath();
 
-		} else if(uri.getScheme().equals("classpath")) {
+		} else if("classpath".equals(uri.getScheme())) {
 			return uri.getPath();
 		}
 
