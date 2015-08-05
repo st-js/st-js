@@ -77,6 +77,8 @@
 				logAppend(result + "<br>");
 			else
 				logAppendError(result + "<br>", errorStack.join("<br>"));
+		} else {
+			logDiv.innerHTML = "";
 		}
 		if(persistent){
 			setTimeout(checkLoad, 500);
@@ -90,7 +92,12 @@
 	}
 
 	function runFirstTest(){
-		reportResultAndRunNextTest("OK", null, true);
+		if (waitUserAction) {
+			logDiv.innerHTML += "<button onclick='reportResultAndRunNextTest(\"OK\", null, true)'>Start</button>"
+			return;
+		} else {
+			reportResultAndRunNextTest("OK", null, true);
+		}
 	}
 
 	// Shamelessly lifted from
@@ -117,6 +124,7 @@
 		queryStringParameters = decodeParameters();
 		browserId = queryStringParameters['browserId'];
 		persistent = queryStringParameters['persistent'] !== 'false';
+		waitUserAction = queryStringParameters['waitUserAction'] === 'true';
 		if (browserId == null){
 			//self assign a browser id
 			browserId = Math.floor((Math.random()*10000000)+1);

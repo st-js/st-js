@@ -28,7 +28,8 @@ import com.sun.net.httpserver.HttpExchange;
 
 /**
  * Represents a testing session opened with one instance of a browser that uses long-polling to fetch new tests to execute from the HTTP server.
- * LongPollingBrowser handles multithreading synchronization between the browser, the HTTP server and the JUnit runner. The JUnit runner notifies
+ * LongPollingBrowser handles multithreading synchronization between the browser, the HTTP server and the JUnit runner. The JUnit runner
+ * notifies
  * this browser that a new test method must be executed by calling executeTest(MultiTestMethod), or that it has finished executing all the tests
  * by calling notifyNoMoreTests(). The HTTP server waits for a new test to send to the browser by calling awaitNewTestReady(). <br>
  * <br>
@@ -51,7 +52,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	}
 
 	protected String getStartPageUri(long browserId, boolean persistent) {
-		return "start.html?browserId=" + browserId + "&persistent=" + persistent;
+		return "start.html?browserId=" + browserId + "&persistent=" + persistent + "&waitUserAction=" + isWaitUserAction();
 	}
 
 	protected String getStartPageUrl(long browserId, boolean persistent) {
@@ -68,19 +69,18 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	/**
 	 * Starts the browser session. This will open a browser and navigate it to some page where the unit testing procedure can be started. The
 	 * decision about exactly which browser binary is started, how it is started and which page is opened is delegated to the Browser
-	 * implementation that this AsynBrowserSession was constructed with. This method performs some error handling, and the real implementation of
+	 * implementation that this AsynBrowserSession was constructed with. This method performs some error handling, and the real implementation
+	 * of
 	 * the browser starting procedure is delegated to doStart().
 	 */
 	@Override
 	public void start() throws InitializationError {
 		try {
 			this.doStart();
-		}
-		catch (InitializationError ie) {
+		} catch (InitializationError ie) {
 			this.markAsDead();
 			throw ie;
-		}
-		catch (Throwable t) {
+		} catch (Throwable t) {
 			this.markAsDead();
 			throw new InitializationError(t);
 		}
@@ -117,8 +117,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 				}
 			}
 			return methodUnderExecution;
-		}
-		catch (InterruptedException e) {
+		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -144,11 +143,9 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 			if (getConfig().isDebugEnabled()) {
 				System.out.println("Browser " + this.id + " has picked up the new test");
 			}
-		}
-		catch (InterruptedException e) {
+		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
-		}
-		catch (TimeoutException e) {
+		} catch (TimeoutException e) {
 			// the browser failed to pick up the test in time.
 			this.markAsDead();
 			this.reportAsDead(method);
@@ -178,11 +175,9 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 				System.out.println("Browser " + this.id + " has been notified that no more tests are coming");
 			}
 			exchanger.exchange(null, getConfig().getTestTimeout(), TimeUnit.SECONDS);
-		}
-		catch (InterruptedException e) {
+		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
-		}
-		catch (TimeoutException e) {
+		} catch (TimeoutException e) {
 			// the browser failed to pick up the test in time.
 			this.markAsDead();
 		}
@@ -228,7 +223,8 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 			if (!attr.getScripts().isEmpty() && dep instanceof BridgeClass) {
 				// bridge dependencies are not added when using @Scripts
 				System.out.println(
-						"WARNING: You're using @Scripts deprecated annotation that disables the automatic inclusion of the Javascript files of the bridges you're using! "
+						"WARNING: You're using @Scripts deprecated annotation that disables the automatic inclusion of the Javascript files of "
+								+ "the bridges you're using! "
 								+ "Please consider using @ScriptsBefore and/or @ScriptsAfter instead.");
 				continue;
 			}
@@ -311,11 +307,11 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		sendResponse(resp.toString(), exchange);
 	}
 
-	protected String httpPath(URI uri){
-		if("webjar".equals(uri.getScheme())){
+	protected String httpPath(URI uri) {
+		if ("webjar".equals(uri.getScheme())) {
 			return "/webjars" + uri.getPath();
 
-		} else if("classpath".equals(uri.getScheme())) {
+		} else if ("classpath".equals(uri.getScheme())) {
 			return uri.getPath();
 		}
 
@@ -324,7 +320,8 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	}
 
 	/**
-	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser understand that there will be no more tests.
+	 * Writes to the HTTP response the HTML and/or javascript code that is necessary for the browser understand that there will be no more
+	 * tests.
 	 *
 	 * @param exchange contains the HTTP response that must be written to
 	 */
@@ -349,6 +346,10 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	public long getId() {
 		return this.id;
+	}
+
+	public boolean isWaitUserAction() {
+		return getConfig().isWaitUserAction();
 	}
 
 	private static class TestClassCache {

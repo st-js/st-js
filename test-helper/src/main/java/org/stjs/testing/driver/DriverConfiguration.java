@@ -58,6 +58,7 @@ public class DriverConfiguration {
 	private static final String PROP_BROWSERS = "stjs.test.browsers";
 	private static final String PROP_TEST_TIMEOUT = "stjs.test.testTimeout";
 	private static final String PROP_DEBUG = "stjs.test.debug";
+	private static final String PROP_WAIT_USER_ACTION = "stjs.test.waitUserAction";
 
 	private int port = 8055;
 	private int waitForBrowser = 10;
@@ -65,6 +66,7 @@ public class DriverConfiguration {
 	private boolean startBrowser = true;
 	private int testTimeout = 2;
 	private boolean debugEnabled = false;
+	private boolean waitUserAction = false;
 	private List<Browser> browsers;
 
 	private final ClassLoader classLoader;
@@ -112,6 +114,9 @@ public class DriverConfiguration {
 		}
 		if (props.get(PROP_DEBUG) != null) {
 			debugEnabled = Boolean.parseBoolean(props.getProperty(PROP_DEBUG));
+		}
+		if (props.get(PROP_WAIT_USER_ACTION) != null) {
+			waitUserAction = Boolean.parseBoolean(props.getProperty(PROP_WAIT_USER_ACTION));
 		}
 		classLoader = new WebAppClassLoader(new URL[] {}, klass.getClassLoader(), debugEnabled);
 		stjsClassResolver = new DefaultClassResolver(classLoader);
@@ -199,6 +204,14 @@ public class DriverConfiguration {
 
 	public void setDebugEnabled(boolean debugEnabled) {
 		this.debugEnabled = debugEnabled;
+	}
+
+	public boolean isWaitUserAction() {
+		return waitUserAction;
+	}
+
+	public void setWaitUserAction(boolean waitUserAction) {
+		this.waitUserAction = waitUserAction;
 	}
 
 	public ClassLoader getClassLoader() {
