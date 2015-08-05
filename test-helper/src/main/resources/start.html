@@ -94,7 +94,6 @@
 	function runFirstTest(){
 		if (waitUserAction) {
 			logDiv.innerHTML += "<button onclick='reportResultAndRunNextTest(\"OK\", null, true)'>Start</button>"
-			return;
 		} else {
 			reportResultAndRunNextTest("OK", null, true);
 		}
