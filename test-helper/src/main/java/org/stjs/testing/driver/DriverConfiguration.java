@@ -17,6 +17,7 @@ package org.stjs.testing.driver;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -43,7 +44,7 @@ import com.google.common.io.Closeables;
 
 /**
  * this is a wrapper around the configuration files stjs-test.properties.
- * 
+ *
  * @author acraciun
  */
 public class DriverConfiguration {
@@ -115,9 +116,13 @@ public class DriverConfiguration {
 		if (props.get(PROP_DEBUG) != null) {
 			debugEnabled = Boolean.parseBoolean(props.getProperty(PROP_DEBUG));
 		}
+
 		if (props.get(PROP_DEBUG_JAVA_SCRIPT) != null) {
 			debugJavaScript = Boolean.parseBoolean(props.getProperty(PROP_DEBUG_JAVA_SCRIPT));
+		} else {
+			debugJavaScript = isJavaDebuggerAttached();
 		}
+
 		classLoader = new WebAppClassLoader(new URL[] {}, klass.getClassLoader(), debugEnabled);
 		stjsClassResolver = new DefaultClassResolver(classLoader);
 		resourceResolver = new TestResourceResolver(classLoader);
@@ -125,6 +130,12 @@ public class DriverConfiguration {
 
 		// load browsers last
 		browsers = instantiateBrowsers();
+	}
+
+	private boolean isJavaDebuggerAttached() {
+		String vmargs = ManagementFactory.getRuntimeMXBean().getInputArguments().toString();
+		System.out.println(vmargs);
+		return vmargs.contains("-agentlib:jdwp") || vmargs.contains("-Xrunjdwp");
 	}
 
 	private String getConfigFileLocation() {
