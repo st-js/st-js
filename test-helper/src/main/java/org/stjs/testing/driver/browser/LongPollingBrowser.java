@@ -77,10 +77,12 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	public void start() throws InitializationError {
 		try {
 			this.doStart();
-		} catch (InitializationError ie) {
+		}
+		catch (InitializationError ie) {
 			this.markAsDead();
 			throw ie;
-		} catch (Throwable t) {
+		}
+		catch (Throwable t) {
 			this.markAsDead();
 			throw new InitializationError(t);
 		}
@@ -117,7 +119,8 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 				}
 			}
 			return methodUnderExecution;
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -143,9 +146,11 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 			if (getConfig().isDebugEnabled()) {
 				System.out.println("Browser " + this.id + " has picked up the new test");
 			}
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			throw new RuntimeException(e);
-		} catch (TimeoutException e) {
+		}
+		catch (TimeoutException e) {
 			// the browser failed to pick up the test in time.
 			this.markAsDead();
 			this.reportAsDead(method);
@@ -175,9 +180,11 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 				System.out.println("Browser " + this.id + " has been notified that no more tests are coming");
 			}
 			exchanger.exchange(null, getConfig().getTestTimeout(), TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			throw new RuntimeException(e);
-		} catch (TimeoutException e) {
+		}
+		catch (TimeoutException e) {
 			// the browser failed to pick up the test in time.
 			this.markAsDead();
 		}
@@ -296,9 +303,17 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		resp.append("</head>\n");
 		resp.append("<body>\n");
 		if (getConfig().isDebugJavaScript()) {
-			resp.append(
-					"<div id='startSection'>JavaScript debugging mode.<br>Setup your breakpoints and debugging options, and then <button "
-							+ "onclick='runTest()'>Start</button> " + meth.getName() + " execution.</div>\n");
+			resp.append("<div id='startSection'>\n");
+			resp.append("  <h2>JavaScript debugging mode</h2>\n");
+			resp.append("  <ul>\n");
+			resp.append("    <li>Open your developer tools</li>\n");
+			resp.append("    <li>Setup your breakpoints and debugging options</li>\n");
+			resp.append("    <li>Start the test</li>\n");
+			resp.append("  </ul>\n");
+			resp.append("  <button onclick='runTest()'>\n");
+			resp.append("    Start " + attr.getStjsClass().getJavaClass().getSimpleName() + "." + meth.getName() + "\n");
+			resp.append("  </button>\n");
+			resp.append("</div>\n");
 		}
 		if (attr.getHtmlFixture() != null) {
 			if (!Strings.isNullOrEmpty(attr.getHtmlFixture().value())) {
