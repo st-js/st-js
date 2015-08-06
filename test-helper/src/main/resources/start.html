@@ -29,11 +29,11 @@
 		log(s);
 		logAppend("<br>");
 	}
-	
+
 	function showStack(idx){
 		stackDiv.innerHTML = stacktraces[idx];
 	}
-	
+
 
 	function startingTest(testedClassName, methodName){
 		log('<b>' + testedClassName + '</b>.' + methodName + ": ");
@@ -64,7 +64,7 @@
 			//errorStack.splice(0,1);
 			errorStack.splice(errorStack.length - 1,1);
             location = encodeURIComponent(errorStack.join(";"));
-			
+
 			for(var i = 0; i < errorStack.length; ++i){
 				if (errorStack[i].indexOf("junit.js") < 0) {
 					isAssert = (i > 1);
@@ -77,8 +77,6 @@
 				logAppend(result + "<br>");
 			else
 				logAppendError(result + "<br>", errorStack.join("<br>"));
-		} else {
-			logDiv.innerHTML = "";
 		}
 		if(persistent){
 			setTimeout(checkLoad, 500);
@@ -92,11 +90,7 @@
 	}
 
 	function runFirstTest(){
-		if (waitUserAction) {
-			logDiv.innerHTML += "<button onclick='reportResultAndRunNextTest(\"OK\", null, true)'>Start</button>"
-		} else {
-			reportResultAndRunNextTest("OK", null, true);
-		}
+        reportResultAndRunNextTest("OK", null, true);
 	}
 
 	// Shamelessly lifted from
@@ -123,7 +117,6 @@
 		queryStringParameters = decodeParameters();
 		browserId = queryStringParameters['browserId'];
 		persistent = queryStringParameters['persistent'] !== 'false';
-		waitUserAction = queryStringParameters['waitUserAction'] === 'true';
 		if (browserId == null){
 			//self assign a browser id
 			browserId = Math.floor((Math.random()*10000000)+1);
@@ -155,7 +148,7 @@
 		overflow-x: auto;
 		padding-bottom: 20px;
 	}
-	
+
 	.time {
 		color:lightgray;
 	}

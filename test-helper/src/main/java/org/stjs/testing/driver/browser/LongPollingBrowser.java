@@ -52,7 +52,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 	}
 
 	protected String getStartPageUri(long browserId, boolean persistent) {
-		return "start.html?browserId=" + browserId + "&persistent=" + persistent + "&waitUserAction=" + isWaitUserAction();
+		return "start.html?browserId=" + browserId + "&persistent=" + persistent;
 	}
 
 	protected String getStartPageUrl(long browserId, boolean persistent) {
@@ -224,8 +224,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 				// bridge dependencies are not added when using @Scripts
 				System.out.println(
 						"WARNING: You're using @Scripts deprecated annotation that disables the automatic inclusion of the Javascript files of "
-								+ "the bridges you're using! "
-								+ "Please consider using @ScriptsBefore and/or @ScriptsAfter instead.");
+								+ "the bridges you're using! " + "Please consider using @ScriptsBefore and/or @ScriptsAfter instead.");
 				continue;
 			}
 			for (URI file : dep.getJavascriptFiles()) {
@@ -243,7 +242,12 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		}
 
 		resp.append("<script language='javascript'>\n");
-		resp.append("  window.onload=function(){\n");
+		if (getConfig().isDebugJavaScript()) {
+			resp.append(" function runTest() {\n");
+			resp.append("(elem=document.getElementById('startButton')).parentNode.removeChild(elem);\n");
+		} else {
+			resp.append("  window.onload=function(){\n");
+		}
 		// resp.append("    console.error(document.getElementsByTagName('html')[0].innerHTML);\n");
 
 		// Adapter between generated assert (not global) and JS-test-driver assert (which is a
@@ -291,6 +295,9 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		resp.append("</script>\n");
 		resp.append("</head>\n");
 		resp.append("<body>\n");
+		if (getConfig().isDebugJavaScript()) {
+			resp.append("<button id='startButton' onclick='runTest()'>Start</button><br> \n");
+		}
 		if (attr.getHtmlFixture() != null) {
 			if (!Strings.isNullOrEmpty(attr.getHtmlFixture().value())) {
 				resp.append(attr.getHtmlFixture().value());
@@ -346,10 +353,6 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 
 	public long getId() {
 		return this.id;
-	}
-
-	public boolean isWaitUserAction() {
-		return getConfig().isWaitUserAction();
 	}
 
 	private static class TestClassCache {
