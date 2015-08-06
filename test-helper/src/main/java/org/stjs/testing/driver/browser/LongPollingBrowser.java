@@ -242,8 +242,9 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		}
 
 		resp.append("<script language='javascript'>\n");
-		 if (getConfig().isWaitUserAction()) {
+		if (getConfig().isDebugJavaScript()) {
 			resp.append(" function runTest() {\n");
+			resp.append("(elem=document.getElementById('startButton')).parentNode.removeChild(elem);\n");
 		} else {
 			resp.append("  window.onload=function(){\n");
 		}
@@ -294,8 +295,8 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		resp.append("</script>\n");
 		resp.append("</head>\n");
 		resp.append("<body>\n");
-		if (getConfig().isWaitUserAction()) {
-			resp.append("<button onclick='runTest()'>Start</button><br> \n");
+		if (getConfig().isDebugJavaScript()) {
+			resp.append("<button id='startButton' onclick='runTest()'>Start</button><br> \n");
 		}
 		if (attr.getHtmlFixture() != null) {
 			if (!Strings.isNullOrEmpty(attr.getHtmlFixture().value())) {
