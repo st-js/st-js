@@ -83,10 +83,9 @@ public class Array<V> implements Iterable<String> {
 	 */
 	@ServerSide
 	public Array(List<V> values) {
-		Array<V> result = new Array<V>();
-		result.length = values.size();
-		result.setElements = values.size();
-		result.array = new PackedArrayStore<>(values);
+		this.length = values.size();
+		this.setElements = values.size();
+		this.array = new PackedArrayStore<>(values);
 	}
 
 	/**
