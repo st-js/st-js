@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.stjs.javascript.JSGlobal.Array;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Test;
 
 /**
@@ -56,6 +59,17 @@ public class ArrayConstructorTest {
 		);
 		for (int i = 0; i < 100; i++) {
 			assertEquals(i, (int) x.$get(i));
+		}
+	}
+
+	@Test
+	public void testConstructor04() {
+		List<Integer> ints = Arrays.asList(0, 1, 2, 3);
+		Array<Integer> arr = new Array<>(ints);
+
+		assertEquals(ints.size(), arr.$length());
+		for(int i = 0; i < ints.size(); i ++){
+			assertEquals(ints.get(i), arr.$get(i));
 		}
 	}
 }
