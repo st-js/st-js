@@ -185,7 +185,7 @@ public class Generator {
 	}
 
 	private URI getRuntimeUri(String className) {
-		String jsFilePath = className.replace('.', File.separatorChar) + ".js";
+		String jsFilePath = className.replace('.', '/') + ".js";
 		return config.getGenerationFolder().getGeneratedSourcesRuntimePath().resolve(jsFilePath);
 	}
 
@@ -232,7 +232,7 @@ public class Generator {
 			return cu;
 		}
 		catch (Throwable e) {
-			throw new JavascriptFileGenerationException(new SourcePosition(context.getInputFile(), 0, 0), "Cannot parse the Java file:" + e);
+			throw new JavascriptFileGenerationException(new SourcePosition(context.getInputFile(), 0, 0), "Cannot parse the Java file", e);
 		}
 
 	}
