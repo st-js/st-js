@@ -130,6 +130,9 @@ public class DriverConfiguration {
 
 		// load browsers last
 		browsers = instantiateBrowsers();
+		if(browsers.isEmpty()){
+			throw new IllegalStateException("No browser was successfully configured. Unit tests cannot run without a valid environment.");
+		}
 	}
 
 	private boolean isJavaDebuggerAttached() {
