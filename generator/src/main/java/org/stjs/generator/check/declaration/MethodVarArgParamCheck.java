@@ -30,6 +30,12 @@ public class MethodVarArgParamCheck implements CheckContributor<MethodTree> {
 		if (MemberWriters.shouldSkip(tw)) {
 			return null;
 		}
+
+		// Native methods can be safely ignored
+		if (tw.isNative()) {
+			return null;
+		}
+
 		for (VariableTree param : tree.getParameters()) {
 			if (InternalUtils.isVarArg(param)) {
 				checkVarArg(tree, param, context);
