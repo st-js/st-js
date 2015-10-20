@@ -80,6 +80,13 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	}
 
 	@Test
+	public void testVarArgsMethod4Native() {
+		assertCodeContains(Methods11_b.class, "prototype.test=function(props){}");
+
+		assertCodeDoesNotContain(Methods11_b.class, "prototype.method=function");
+	}
+
+	@Test
 	public void testInterfaceImplResolution() {
 		assertCodeContains(Methods12.class, "method(c);");
 	}
