@@ -47,6 +47,8 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 	/**
 	 * Specifies if the ST-JS runtime support file (stjs.js) must be included in your build output. Default value is true.
 	 *
+	 * The runtime will not be copied if the "webjar" setting is set to "true"
+	 *
 	 * @parameter default-value="true"
 	 */
 	private boolean includeStjsSupportFile;
@@ -149,7 +151,7 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 
 	@Override
 	protected boolean getCopyStjsSupportFile() {
-		return this.includeStjsSupportFile;
+		return !webjar && includeStjsSupportFile;
 	}
 
 	@Override

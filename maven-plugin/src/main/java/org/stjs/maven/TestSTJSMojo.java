@@ -18,19 +18,19 @@ import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConstants;
 
 /**
- * 
+ *
  * @goal generate-test
  * @phase process-test-classes
  * @requiresDependencyResolution test
  * @author acraciun
- * 
+ *
  */
 public class TestSTJSMojo extends AbstractSTJSMojo {
 	private static final String MAVEN_TEST_SKIP = "maven.test.skip";
 
 	/**
 	 * The source directories containing the sources to be compiled.
-	 * 
+	 *
 	 * @parameter default-value="${project.testCompileSourceRoots}"
 	 * @required
 	 */
@@ -40,7 +40,7 @@ public class TestSTJSMojo extends AbstractSTJSMojo {
 	 * <p>
 	 * Specify where to place generated source files
 	 * </p>
-	 * 
+	 *
 	 * @parameter default-value="${project.build.directory}/generated-test-js"
 	 */
 	private File generatedTestSourcesDirectory;
@@ -79,7 +79,7 @@ public class TestSTJSMojo extends AbstractSTJSMojo {
 
 	@Override
 	protected boolean getCopyStjsSupportFile() {
-		return true;
+		return false;
 	}
 
 	@Override
