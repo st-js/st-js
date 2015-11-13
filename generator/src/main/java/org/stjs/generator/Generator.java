@@ -64,6 +64,7 @@ public class Generator {
 	private static final Logger LOG = Logger.getLogger(Generator.class.getName());
 	private static final int EXECUTOR_TERMINAL_TIMEOUT = 10;
 	private static final String STJS_FILE = "stjs.js";
+	public static final String STJS_PATH = "META-INF/resources/webjars/stjs-client-runtime/" + STJS_FILE;
 	private final GenerationPlugins<Object> plugins;
 	private StandardJavaFileManager fileManager;
 	private JavaFileManager classLoaderFileManager;
@@ -242,16 +243,16 @@ public class Generator {
 	 * called after the processing of all the files.
 	 */
 	public void copyJavascriptSupport(File folder) {
-		final InputStream stjs = Thread.currentThread().getContextClassLoader().getResourceAsStream(STJS_FILE);
+		final InputStream stjs = Thread.currentThread().getContextClassLoader().getResourceAsStream(STJS_PATH);
 		if (stjs == null) {
-			throw new STJSRuntimeException(STJS_FILE + " is missing from the Generator's classpath");
+			throw new STJSRuntimeException(STJS_PATH + " is missing from the Generator's classpath");
 		}
 		File outputFile = new File(folder, STJS_FILE);
 		try {
 			Files.copy(new InputStreamSupplier(stjs), outputFile);
 		}
 		catch (IOException e) {
-			throw new STJSRuntimeException("Could not copy the " + STJS_FILE + " file to the folder " + folder + ":" + e.getMessage(), e);
+			throw new STJSRuntimeException("Could not copy the " + STJS_PATH + " file to the folder " + folder + ":" + e.getMessage(), e);
 		}
 		finally {
 			Closeables.closeQuietly(stjs);

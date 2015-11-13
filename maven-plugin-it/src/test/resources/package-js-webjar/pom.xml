@@ -17,9 +17,9 @@
 	<dependencies>
 		<!-- for the java libraries -->
 		<dependency>
-			<groupId>org.st-js.bridge</groupId>
-			<artifactId>html</artifactId>
-			<version>4.01.0</version>
+			<groupId>org.st-js</groupId>
+			<artifactId>shared</artifactId>
+			<version>${stjs.version}</version>
 		</dependency>
 
 		<!-- test deps -->

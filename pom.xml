@@ -39,6 +39,7 @@
 
 	<modules>
 		<module>code-analysis</module>
+		<module>client-runtime</module>
 		<module>generator</module>
 		<module>generator-plugin-java8</module>
 		<module>shared</module>

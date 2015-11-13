@@ -26,6 +26,8 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import org.stjs.generator.Generator;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
@@ -51,7 +53,7 @@ public class RhinoExecutor {
 		ScriptEngine engine = factory.getEngineByName("JavaScript");
 		Reader reader = null;
 		try {
-			reader = new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream("stjs.js"), "UTF-8");
+			reader = new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream(Generator.STJS_PATH), "UTF-8");
 			engine.eval(reader);
 			if (mainClassDisabled) {
 				engine.eval("stjs.mainCallDisabled=true;");

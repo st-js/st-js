@@ -17,6 +17,12 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.st-js</groupId>
+			<artifactId>client-runtime</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.1</version>

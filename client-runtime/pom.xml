@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>stjs</artifactId>
+		<groupId>org.st-js</groupId>
+		<version>3.2.3-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>client-runtime</artifactId>
+
+	<name>Strongly-typed Javascript:Client Runtime webjar</name>
+
+	<properties>
+		  <maven-closure-compiler-plugin.version>1.0.0</maven-closure-compiler-plugin.version>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.dasberg.maven.plugins</groupId>
+				<artifactId>maven-closure-compiler-plugin</artifactId>
+				<version>${maven-closure-compiler-plugin.version}</version>
+				<executions>
+					<execution>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<js_dir>src/main/resources/META-INF/resources/webjars/stjs-client-runtime</js_dir>
+							<js_output_dir>${project.build.outputDirectory}/META-INF/resources/webjars/stjs-client-runtime</js_output_dir>
+							<version>min</version>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

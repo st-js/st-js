@@ -210,7 +210,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		StringBuilder resp = new StringBuilder(8192);
 		resp.append("<html>\n");
 		resp.append("<head>\n");
-		appendScriptTag(resp, "/stjs.js");
+		appendScriptTag(resp, httpPath(new URI("webjar:/stjs.js")));
 		appendScriptTag(resp, "/junit.js");
 
 		resp.append("<script language='javascript'>stjs.mainCallDisabled=true;</script>\n");
