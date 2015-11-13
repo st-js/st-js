@@ -15,8 +15,8 @@ package org.stjs.generator;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,6 +35,9 @@ import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 
+import com.google.common.io.CharSink;
+import com.google.common.io.CharSource;
+import com.google.common.io.Resources;
 import org.stjs.generator.GenerationContext.AnnotationCacheKey;
 import org.stjs.generator.javac.CustomClassloaderJavaFileManager;
 import org.stjs.generator.javascript.JavaScriptBuilder;
@@ -49,7 +52,6 @@ import org.stjs.generator.utils.Timers;
 import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
-import com.google.common.io.InputSupplier;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.util.JavacTask;
 import com.sun.source.util.Trees;
@@ -243,34 +245,20 @@ public class Generator {
 	 * called after the processing of all the files.
 	 */
 	public void copyJavascriptSupport(File folder) {
-		final InputStream stjs = Thread.currentThread().getContextClassLoader().getResourceAsStream(STJS_PATH);
-		if (stjs == null) {
+		URL resourceUrl = Resources.getResource(STJS_PATH);
+		if (resourceUrl == null) {
 			throw new STJSRuntimeException(STJS_PATH + " is missing from the Generator's classpath");
 		}
-		File outputFile = new File(folder, STJS_FILE);
+
 		try {
-			Files.copy(new InputStreamSupplier(stjs), outputFile);
+			CharSource inputFileSource = Resources.asCharSource(resourceUrl, Charset.forName(config.getSourceEncoding()));
+			CharSink outputFileSink = Files.asCharSink(new File(folder, STJS_FILE), Charset.forName(config.getSourceEncoding()));
+
+			inputFileSource.copyTo(outputFileSink);
 		}
 		catch (IOException e) {
 			throw new STJSRuntimeException("Could not copy the " + STJS_PATH + " file to the folder " + folder + ":" + e.getMessage(), e);
 		}
-		finally {
-			Closeables.closeQuietly(stjs);
-		}
-	}
-
-	private static final class InputStreamSupplier implements InputSupplier<InputStream> {
-		private final InputStream input;
-
-		public InputStreamSupplier(InputStream input) {
-			this.input = input;
-		}
-
-		@Override
-		public InputStream getInput() throws IOException {
-			return input;
-		}
-
 	}
 
 	/**
