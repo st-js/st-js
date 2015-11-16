@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -56,8 +57,18 @@ public class PackageInternalsFinder {
 		return result;
 	}
 
-	private Collection<JavaFileObject> listUnder(String packageName, URL packageFolderURL, boolean recursive) {
-		File directory = new File(packageFolderURL.getFile());
+	private Collection<JavaFileObject> listUnder(String packageName, URL packageFolderURL, boolean recursive) throws IOException {
+		File directory;
+		try {
+			if ("file".equals(packageFolderURL.getProtocol())) {
+				directory = new File(packageFolderURL.toURI());
+			} else {
+				directory = new File(packageFolderURL.getFile());
+			}
+		}
+		catch (URISyntaxException e) {
+			directory = new File(packageFolderURL.getFile());
+		}
 		if (directory.isDirectory()) { // browse local .class files - useful for local execution
 			return processDir(packageName, directory, recursive);
 		} else { // browse a jar file
@@ -124,4 +135,5 @@ public class PackageInternalsFinder {
 
 		return result;
 	}
+
 }
