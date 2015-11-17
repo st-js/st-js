@@ -3,7 +3,6 @@ package org.stjs.testing.driver;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 

@@ -18,6 +18,7 @@ package org.stjs.testing.driver;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
@@ -60,12 +61,12 @@ public class WebAppClassLoader extends URLClassLoader {
 			while (cpFiles.hasMoreElements()) {
 				URL cpFile = cpFiles.nextElement();
 				if ("file".equals(cpFile.getProtocol())) {
-					for (String cp : Files.readLines(new File(cpFile.getPath()), Charset.defaultCharset())) {
+					for (String cp : Files.readLines(new File(cpFile.toURI()), Charset.defaultCharset())) {
 						addURL(new File(cp).toURI().toURL());
 					}
 				}
 			}
-		} catch (IOException e) {
+		} catch (IOException | URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
 
