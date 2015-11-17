@@ -1,6 +1,7 @@
 package org.stjs;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Set;
 
 import org.apache.maven.it.Verifier;
@@ -27,7 +28,7 @@ public class STJSPackageWarTest extends AbstractPackagingTest {
 		// coming from the configuration of surefire plugin outside
 		verifier.getCliOptions().add("-Dstjs.version=" + System.getProperty("stjs.version"));
 
-		verifier.executeGoal("install");
+		verifier.executeGoals(Arrays.asList("clean", "install"));
 
 		verifier.verifyErrorFreeLog();
 

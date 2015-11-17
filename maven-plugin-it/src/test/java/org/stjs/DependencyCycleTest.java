@@ -1,6 +1,7 @@
 package org.stjs;
 
 import java.io.File;
+import java.util.Arrays;
 
 import org.apache.maven.it.Verifier;
 import org.apache.maven.it.util.ResourceExtractor;
@@ -17,7 +18,7 @@ public class DependencyCycleTest {
 
 		try {
 			verifier.getCliOptions().add("-Dstjs.version=" + System.getProperty("stjs.version"));
-			verifier.executeGoal("install");
+			verifier.executeGoals(Arrays.asList("clean", "install"));
 		}
 		catch (Exception e) {
 			// it should break here
