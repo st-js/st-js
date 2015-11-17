@@ -45,6 +45,10 @@ public class ProjectCommandLine {
 	}
 
 	private static void listFiles0(File srcDir, List<File> output, String suffix) {
+		File[] files = srcDir.listFiles();
+		if(files == null){
+			throw new IllegalArgumentException("Not a directory: " + srcDir);
+		}
 		for (File file : srcDir.listFiles()) {
 			if (file.isDirectory()) {
 				listFiles0(file, output, suffix);

@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.junit.BeforeClass;
@@ -26,15 +27,29 @@ public class CommandLineIntegrationTest {
 	}
 
 	@Test
-	public void testSimpleExecute() throws IOException {
+	public void testSimpleExecute() throws IOException, URISyntaxException {
 		URL projectUrl = Thread.currentThread().getContextClassLoader().getResource("test-project");
+		File projectRoot = new File(projectUrl.toURI());
 		assertNotNull(projectUrl);
 
-		ProcessBuilder pb = windows ? new ProcessBuilder(WINDOWS_PATH , new File(projectUrl.getPath(), "src").getAbsolutePath(),
-				new File(projectUrl.getPath(), "lib").getAbsolutePath(), OUTPUT_DIR):
-					//unix - need to call /bin/sh because the script does not have the execution flags set
-					new ProcessBuilder("/bin/sh", UNIX_PATH , new File(projectUrl.getPath(), "src").getAbsolutePath(),
-							new File(projectUrl.getPath(), "lib").getAbsolutePath(), OUTPUT_DIR);
+		ProcessBuilder pb;
+		if(windows ){
+			pb = new ProcessBuilder(
+					WINDOWS_PATH,
+					new File(projectRoot, "src").getAbsolutePath(),
+					new File(projectRoot, "lib").getAbsolutePath(),
+					OUTPUT_DIR
+			);
+		} else {
+			//unix - need to call /bin/sh because the script does not have the execution flags set
+			pb = new ProcessBuilder(
+					"/bin/sh",
+					UNIX_PATH,
+					new File(projectRoot, "src").getAbsolutePath(),
+					new File(projectRoot, "lib").getAbsolutePath(),
+					OUTPUT_DIR
+			);
+		}
 					
 		
 
