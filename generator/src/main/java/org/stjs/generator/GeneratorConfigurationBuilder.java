@@ -142,6 +142,8 @@ public class GeneratorConfigurationBuilder {
 		allowedJavaLangClasses.add("Exception");
 		allowedJavaLangClasses.add("RuntimeException");
 
+		allowedJavaLangClasses.add("Iterable");
+
 		allowedPackages.add("java.lang");
 
 		return new GeneratorConfiguration(//
