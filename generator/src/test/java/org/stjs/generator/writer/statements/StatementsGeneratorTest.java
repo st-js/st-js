@@ -86,6 +86,11 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 	}
 
 	@Test
+	public void testForEachInWithIterable() {
+		assertCodeContains(Statements22_ForEachIterable.class, "for (var iterator$oneOfTheString = myStringList.iterator(); iterator$oneOfTheString.hasNext(); ) { var oneOfTheString = iterator$oneOfTheString.next(); }");
+	}
+
+	@Test
 	public void testForEachArrayBlock() {
 		assertCodeContains(Statements12.class, "if (!(a).hasOwnProperty(i)) continue;var x");
 	}
