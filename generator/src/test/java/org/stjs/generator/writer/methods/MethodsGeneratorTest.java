@@ -17,9 +17,13 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testPrivateInstanceMethod() {
 		// same as public
-		assertCodeContains(Methods2.class, //
-				"stjs.extend(Methods2, null, [], function(constructor, prototype){" + //
-						"prototype.method = function(arg1,arg2){");
+		assertCodeContains(Methods2.class, "" +
+				"prototype._privateMethod = function(arg1, arg2) {\n" +
+				"        return 0;\n" +
+				"    };\n" +
+				"    prototype.method = function() {\n" +
+				"        return this._privateMethod(\"\", \"\");\n" +
+				"    };");
 	}
 
 	@Test
@@ -33,7 +37,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	public void testPrivateStaticMethod() {
 		assertCodeContains(Methods4.class, //
 				"stjs.extend(Methods4, null, [], function(constructor, prototype){" + //
-						"constructor.method = function(arg1,arg2){");
+						"constructor._method = function(arg1,arg2){");
 	}
 
 	@Test

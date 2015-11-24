@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.ElementUtils;
+import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.visitor.DiscriminatorKey;
@@ -18,6 +19,9 @@ import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.Tree;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 
 public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvocationTree, JS> {
 
@@ -44,11 +48,15 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 		return targetJS;
 	}
 
-	public static String buildMethodName(MethodInvocationTree tree) {
+	public static <JS> String buildMethodName(MethodInvocationTree tree) {
 		ExpressionTree select = tree.getMethodSelect();
 		if (select instanceof IdentifierTree) {
 			// simple call: method(args)
-			return ((IdentifierTree) select).getName().toString();
+			String methodName = ((IdentifierTree) select).getName().toString();
+			Element element = InternalUtils.symbol(tree);
+			if (element != null) {
+				return !element.getModifiers().contains(Modifier.PUBLIC) ? "_" + methodName : methodName;
+			}
 		}
 		// calls with target: target.method(args)
 		MemberSelectTree memberSelect = (MemberSelectTree) select;

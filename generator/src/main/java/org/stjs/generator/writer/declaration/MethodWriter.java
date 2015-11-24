@@ -55,6 +55,14 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		return null;
 	}
 
+	private String decorateMethodName(MethodTree tree, String methodName) {
+		if (!JavaNodes.isPublic(tree)) {
+			return "_" + methodName;
+		}
+
+		return methodName;
+	}
+
 	public static <JS> List<JS> getParams(List<? extends VariableTree> treeParams, GenerationContext<JS> context) {
 		List<JS> params = new ArrayList<JS>();
 		for (VariableTree param : treeParams) {
@@ -104,7 +112,7 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 
 		// add the constructor.<name> or prototype.<name> if needed
 		if (!JavaNodes.isConstructor(tree) && !isMethodOfJavascriptFunction(context.getCurrentWrapper())) {
-			String methodName = context.getNames().getMethodName(context, tree, context.getCurrentPath());
+			String methodName = decorateMethodName(tree, context.getNames().getMethodName(context, tree, context.getCurrentPath()));
 			if (tw.getEnclosingType().isGlobal()) {
 				// var method=function() ...; //for global types
 				return context.js().variableDeclaration(true, methodName, decl);
@@ -115,5 +123,4 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 
 		return decl;
 	}
-
 }

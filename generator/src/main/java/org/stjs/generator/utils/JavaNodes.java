@@ -49,6 +49,11 @@ public final class JavaNodes {
 		return modifiers.contains(Modifier.STATIC);
 	}
 
+	public static boolean isPublic(MethodTree method) {
+		Set<Modifier> modifiers = method.getModifiers().getFlags();
+		return modifiers.contains(Modifier.PUBLIC);
+	}
+
 	public static boolean isFinal(VariableTree tree) {
 		return tree.getModifiers().getFlags().contains(Modifier.FINAL);
 	}
