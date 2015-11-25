@@ -27,7 +27,7 @@ public class NamesGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testSpecialThis() {
 		// the special parameter THIS is no longer changed
-		assertCodeContains(Names5.class, "return THIS.field");
+		assertCodeContains(Names5.class, "return THIS._field");
 	}
 
 	@Test

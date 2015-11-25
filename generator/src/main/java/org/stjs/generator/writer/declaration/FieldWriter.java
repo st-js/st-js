@@ -4,9 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.AssignOperator;
@@ -77,6 +79,9 @@ public class FieldWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		}
 
 		String fieldName = tree.getName().toString();
+		if (!tree.getModifiers().getFlags().contains(Modifier.PUBLIC)) {
+			fieldName = GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX + fieldName;
+		}
 		if (tw.getEnclosingType().isGlobal()) {
 			// var field = init; //for global types
 			return context.js().variableDeclaration(true, fieldName, initializer);

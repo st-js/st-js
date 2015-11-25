@@ -2,6 +2,7 @@ package org.stjs.generator.writer.templates.fields;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Modifier;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
@@ -68,6 +69,17 @@ public class DefaultMemberSelectTemplate<JS> implements WriterContributor<Member
 			// When ClassName.class -> ClassName
 			return target;
 		}
-		return context.js().property(target, tree.getIdentifier().toString());
+
+		String fieldName = decorateMember(tree, element);
+
+		return context.js().property(target, fieldName);
+	}
+
+	private String decorateMember(MemberSelectTree tree, Element element) {
+		String fieldName = tree.getIdentifier().toString();
+		if (!element.getModifiers().contains(Modifier.PUBLIC)) {
+			fieldName = GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX + fieldName;
+		}
+		return fieldName;
 	}
 }

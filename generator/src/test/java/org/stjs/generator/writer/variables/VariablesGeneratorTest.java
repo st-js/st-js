@@ -29,7 +29,7 @@ public class VariablesGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testKeepDeclarationLocation() {
-		assertCodeContains(Variables5.class, "y = this.x;");
+		assertCodeContains(Variables5.class, "y = this._x;");
 		assertCodeContains(Variables5.class, "k = x;");
 	}
 

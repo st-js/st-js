@@ -18,7 +18,7 @@ public class InheritanceGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testAccessProtectedField() {
 		// the this. prefix should be added for fields from the super class too
-		assertCodeContains(Inheritance3.class, "return this.field;");
+		assertCodeContains(Inheritance3.class, "return this._field;");
 	}
 
 	@Test

@@ -26,7 +26,7 @@ public class InlineFunctionGeneratorTest extends AbstractStjsTest {
 	public void testInterfaceAndParam() {
 		assertCodeContains(InlineFunctions2b.class,
 				"stjs.extend(function InlineFunctions2b$1(){},  null, [FunctionInterface2], function(constructor, prototype){"
-						+ "prototype.test=2; prototype.$invoke=function(arg){arg=arg+1;}");
+						+ "prototype._test=2; prototype.$invoke=function(arg){arg=arg+1;}");
 	}
 
 	@Test

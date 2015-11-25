@@ -123,7 +123,7 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 	public void testEnumInsideInner() {
 		String code = generate(InnerTypes17.class);
 		assertCodeContains(code, "var InnerTypes17 = function(){};" + "InnerTypes17 = stjs.extend(InnerTypes17, null, [], function(constructor, prototype){");
-		assertCodeContains(code, "var deep = InnerTypes17.Inner.Enum.a;");
+		assertCodeContains(code, "var deep = InnerTypes17.Inner._Enum.a;");
 		assertCodeContains(code, "stjs.extend(constructor.Inner, null, [], function(constructor, prototype){");
 		assertCodeContains(code, "constructor.Enum=stjs.enumeration(");
 	}
@@ -150,7 +150,7 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 		assertEquals(2, ((Number) result).intValue());
 
 		assertCodeContains(InnerTypes20.class, "constructor.Holder = function(){};"
-				+ "constructor.Holder = stjs.extend(constructor.Holder, null, [], function(constructor, prototype){" + "       constructor.VALUE = 2;"
+				+ "constructor.Holder = stjs.extend(constructor.Holder, null, [], function(constructor, prototype){" + "       constructor._VALUE = 2;"
 				+ "}, {}, {});");
 	}
 
@@ -163,7 +163,7 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testCallPrivateMethodFromAnonymous() {
-		assertCodeContains(InnerTypes22.class, "return this.privateMethod()");
+		assertCodeContains(InnerTypes22.class, "return this._privateMethod()");
 	}
 
 	@Test

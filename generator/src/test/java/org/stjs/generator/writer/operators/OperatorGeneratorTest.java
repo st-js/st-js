@@ -11,6 +11,6 @@ public class OperatorGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testBugNot() {
-		assertCodeContains(Operator2.class, "if (!this.func())");
+		assertCodeContains(Operator2.class, "if (!this._func())");
 	}
 }

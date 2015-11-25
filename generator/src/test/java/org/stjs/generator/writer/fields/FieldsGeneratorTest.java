@@ -80,7 +80,63 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testPrivateFinalBooleanBug() {
-		assertCodeContains(Fields13.class, "prototype.value = false;");
+		assertCodeContains(Fields13.class, "prototype._value = false;");
+	}
+
+	@Test
+	public void testNoModifiersFieldExpectedToNotBePublic() {
+		assertCodeContains(Fields25_non_public_prefix.class, "" +
+				"    prototype._packageField = null;\n" +
+				"    prototype._privateField = null;\n" +
+				"    prototype.publicField = null;\n" +
+				"    prototype.getThisPackageField = function() {\n" +
+				"        var myFields25nonpublicprefix = new Fields25_non_public_prefix();\n" +
+				"        myFields25nonpublicprefix._packageField = \"test\";\n" +
+				"        return this._packageField;\n" +
+				"    };\n" +
+				"    prototype.getThisPrivateField = function() {\n" +
+				"        return this._privateField;\n" +
+				"    };\n" +
+				"    prototype.getThisPublicField = function() {\n" +
+				"        return this.publicField;\n" +
+				"    };\n" +
+				"    prototype.getPackageField = function() {\n" +
+				"        return this._packageField;\n" +
+				"    };\n" +
+				"    prototype.getPrivateField = function() {\n" +
+				"        return this._privateField;\n" +
+				"    };\n" +
+				"    prototype.getPublicField = function() {\n" +
+				"        return this.publicField;\n" +
+				"    };\n" +
+				"    constructor.InnerClass = function(parent) {\n" +
+				"        this._parent = parent;\n" +
+				"    };\n" +
+				"    constructor.InnerClass = stjs.extend(constructor.InnerClass, null, [], function(constructor, prototype) {\n" +
+				"        prototype._innerPackageField = null;\n" +
+				"        prototype._innerPrivateField = null;\n" +
+				"        prototype.innerPublicField = null;\n" +
+				"        prototype._parent = null;\n" +
+				"        prototype.getThisPackageField = function() {\n" +
+				"            var myFields25nonpublicprefix = new Fields25_non_public_prefix();\n" +
+				"            myFields25nonpublicprefix._packageField = \"test\";\n" +
+				"            return this._innerPackageField;\n" +
+				"        };\n" +
+				"        prototype.getThisPrivateField = function() {\n" +
+				"            return this._innerPrivateField;\n" +
+				"        };\n" +
+				"        prototype.getThisPublicField = function() {\n" +
+				"            return this.innerPublicField;\n" +
+				"        };\n" +
+				"        prototype.getPackageField = function() {\n" +
+				"            return this._parent._packageField;\n" +
+				"        };\n" +
+				"        prototype.getPrivateField = function() {\n" +
+				"            return this._parent._privateField;\n" +
+				"        };\n" +
+				"        prototype.getPublicField = function() {\n" +
+				"            return this._parent.publicField;\n" +
+				"        };");
 	}
 
 	@Test

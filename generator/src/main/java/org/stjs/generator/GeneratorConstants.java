@@ -49,6 +49,8 @@ public final class GeneratorConstants {
 	 */
 	public static final String STJS_TEST_TEMP_FOLDER = "stjs-test";
 
+	public static final String NON_PUBLIC_METHODS_AND_FIELDS_PREFIX = "_";
+
 	private GeneratorConstants() {
 		//
 	}

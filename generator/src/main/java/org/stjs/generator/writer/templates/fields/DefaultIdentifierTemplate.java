@@ -2,10 +2,12 @@ package org.stjs.generator.writer.templates.fields;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Modifier;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.ElementUtils;
+import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.name.DependencyType;
@@ -23,7 +25,12 @@ import com.sun.source.tree.IdentifierTree;
 public class DefaultIdentifierTemplate<JS> implements WriterContributor<IdentifierTree, JS> {
 
 	private JS visitField(IdentifierTree tree, GenerationContext<JS> context) {
-		return context.js().property(MemberWriters.buildTarget(context.getCurrentWrapper()), tree.getName());
+		String fieldName = tree.getName().toString();
+		Element element = InternalUtils.symbol(tree);
+		if (element != null && !element.getModifiers().contains(Modifier.PUBLIC)) {
+			fieldName = GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX + fieldName;
+		}
+		return context.js().property(MemberWriters.buildTarget(context.getCurrentWrapper()), fieldName);
 	}
 
 	private JS visitEnumConstant(Element def, IdentifierTree tree, GenerationContext<JS> context) {

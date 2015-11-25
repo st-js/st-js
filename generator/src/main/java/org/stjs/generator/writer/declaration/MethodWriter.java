@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
@@ -55,9 +56,12 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		return null;
 	}
 
-	private String decorateMethodName(MethodTree tree, String methodName) {
-		if (!JavaNodes.isPublic(tree)) {
-			return "_" + methodName;
+	private String decorateMethodName(MethodTree tree, GenerationContext<JS> context) {
+		String methodName = context.getNames().getMethodName(context, tree, context.getCurrentPath());
+		boolean isFromInterface = context.getCurrentWrapper().getEnclosingType().getElement().getKind().equals(ElementKind.INTERFACE);
+
+		if (!JavaNodes.isPublic(tree) && !isFromInterface) {
+			return GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX + methodName;
 		}
 
 		return methodName;
@@ -112,7 +116,7 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 
 		// add the constructor.<name> or prototype.<name> if needed
 		if (!JavaNodes.isConstructor(tree) && !isMethodOfJavascriptFunction(context.getCurrentWrapper())) {
-			String methodName = decorateMethodName(tree, context.getNames().getMethodName(context, tree, context.getCurrentPath()));
+			String methodName = decorateMethodName(tree, context);
 			if (tw.getEnclosingType().isGlobal()) {
 				// var method=function() ...; //for global types
 				return context.js().variableDeclaration(true, methodName, decl);

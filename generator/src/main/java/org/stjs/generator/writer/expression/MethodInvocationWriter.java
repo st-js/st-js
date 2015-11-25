@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
@@ -55,7 +56,7 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 			String methodName = ((IdentifierTree) select).getName().toString();
 			Element element = InternalUtils.symbol(tree);
 			if (element != null) {
-				return !element.getModifiers().contains(Modifier.PUBLIC) ? "_" + methodName : methodName;
+				return element.getModifiers().contains(Modifier.PUBLIC) ? methodName : GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX + methodName;
 			}
 		}
 		// calls with target: target.method(args)

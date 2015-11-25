@@ -106,8 +106,8 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	public void testAbstractMethod() {
 		// the class only contains abstract methods, therefore nothing must be generated
 		assertCodeContains(Methods15.class, "stjs.extend(Methods15, null, [], function(constructor, prototype){" //
-				+ "prototype.doSomething=function(){};" //
-				+ "prototype.doSomethingElse=function(){};" //
+				+ "prototype._doSomething=function(){};" //
+				+ "prototype._doSomethingElse=function(){};" //
 				+ "}, {}, {});");
 	}
 
