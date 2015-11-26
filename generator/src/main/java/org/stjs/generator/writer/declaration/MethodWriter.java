@@ -6,6 +6,8 @@ import java.util.List;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 
+import com.sun.tools.javac.code.Symbol;
+import org.stjs.generator.AnnotationUtils;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.InternalUtils;
@@ -57,8 +59,13 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 	}
 
 	private String decorateMethodName(MethodTree tree, GenerationContext<JS> context) {
-		String methodName = context.getNames().getMethodName(context, tree, context.getCurrentPath());
+		Symbol.MethodSymbol element = (Symbol.MethodSymbol) context.getCurrentWrapper().getElement();
+		String methodName = element.getSimpleName().toString();
 		boolean isFromInterface = context.getCurrentWrapper().getEnclosingType().getElement().getKind().equals(ElementKind.INTERFACE);
+
+		if (AnnotationUtils.JSOverloadName.isPresent(element)) {
+			methodName = AnnotationUtils.JSOverloadName.decorate(element);
+		}
 
 		if (!JavaNodes.isPublic(tree) && !isFromInterface) {
 			return GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX + methodName;

@@ -5,6 +5,7 @@ package org.stjs.generator.javac;
  */
 
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -678,6 +679,22 @@ public final class TreeUtils {
 		}
 		ErrorReporter.errorAbort("TreeUtils.getMethod: shouldn't be here!");
 		return null; // dead code
+	}
+
+	/**
+	 * Obtain the associated method as ExecutableElement from the given MethodSymbol.
+	 *
+	 * @param methodSymbolElement
+	 * @return the associated ExecutableElement if found, null otherwise.
+     */
+	public static ExecutableElement getMethod(MethodSymbol methodSymbolElement) {
+		List<ExecutableElement> allMethods = ElementUtils.getAllMethodsIn(ElementUtils.enclosingClass(methodSymbolElement), false);
+		for (ExecutableElement exec : ElementFilter.methodsIn(allMethods)) {
+			if (exec.toString().contentEquals(methodSymbolElement.toString())) {
+				return exec;
+			}
+		}
+		return null;
 	}
 
 	/**

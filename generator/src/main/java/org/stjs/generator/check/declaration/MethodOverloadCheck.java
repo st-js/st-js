@@ -17,6 +17,7 @@ import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.MemberWriters;
+import org.stjs.javascript.annotation.JSOverloadName;
 import org.stjs.javascript.annotation.ServerSide;
 
 import com.sun.source.tree.MethodTree;
@@ -85,10 +86,11 @@ public class MethodOverloadCheck implements CheckContributor<MethodTree> {
 			return;
 		}
 		// here I have all the methods with the same name, other than the ckecked method
-		if (!isMoreGeneric(context, methodElement, (ExecutableElement) memberElement, hasVarArgs)) {
+		if (!isMoreGeneric(context, methodElement, (ExecutableElement) memberElement, hasVarArgs)
+				&& methodElement.getAnnotation(JSOverloadName.class) == null) {
 			context.addError(tree,
 					"There is a method in the class (or one of its parents) having the same name with the method named [" + tree.getName()
-							+ "] but is less generic");
+							+ "] but is less generic. Use the annotation '@JSOverloadName(\"newMethodNameHere\")' to provide another method name at generation.");
 		}
 	}
 

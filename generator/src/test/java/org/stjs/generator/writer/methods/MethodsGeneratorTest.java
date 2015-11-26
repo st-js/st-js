@@ -135,4 +135,19 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 		// keywords are forbidden
 		generate(Methods17.class);
 	}
+
+	@Test
+	public void testOverloadMethod() {
+		assertCodeContains(Methods18_overload.class, "" +
+				"    prototype._overloadMethod = function() {};\n" +
+				"    prototype.overloadMethodWithString = function(firstParam) {\n" +
+				"        this._overloadMethod();\n" +
+				"    };\n" +
+				"    prototype.overloadMethod$String_int = function(firstParam, secondParam) {\n" +
+				"        this.overloadMethodWithString(firstParam);\n" +
+				"    };\n" +
+				"    prototype.overloadMethod$String_int_CustomClass = function(firstParam, secondParam, thirdParam) {\n" +
+				"        this.overloadMethod$String_int(firstParam, secondParam);\n" +
+				"    };");
+	}
 }

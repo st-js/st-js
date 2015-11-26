@@ -25,6 +25,7 @@ import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
+import org.stjs.javascript.annotation.JSOverloadName;
 
 /**
  * checks the a field name or method exists only once in the class and its hierchy
@@ -43,9 +44,10 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 			// it's a field or inner type -> this is illegal
 			context.addError(member, "There is already a field with the same name as this method in the type or one of its parents: "
 					+ ((TypeElement) overrideCandidate.getEnclosingElement()).getQualifiedName() + "." + overrideCandidate.getSimpleName());
-		} else if (!context.getElements().overrides(methodElement, (ExecutableElement) overrideCandidate, classElement)) {
+		} else if (!context.getElements().overrides(methodElement, (ExecutableElement) overrideCandidate, classElement)
+				&& methodElement.getAnnotation(JSOverloadName.class) == null) {
 			context.addError(member, "Only maximum one method with the name [" + name
-					+ "] is allowed to have a body. The other methods must be marked as native."
+					+ "] is allowed to have a body. The other methods must be marked with annotation '@native' or '@JSOverloadName(\"newMethodNameHere\")'."
 					+ " The type (or one of its parents) may contain already the method: " + overrideCandidate
 					+ " that has a different signature");
 		}
