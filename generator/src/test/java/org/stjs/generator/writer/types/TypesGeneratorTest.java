@@ -10,11 +10,6 @@ public class TypesGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(Types1.class, "var Types1 = function(){};");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
-	public void testForbidArrays() {
-		generate(Types2.class);
-	}
-
 	@Test
 	public void testAllowedrrays() {
 		// should not break in the annotation's array

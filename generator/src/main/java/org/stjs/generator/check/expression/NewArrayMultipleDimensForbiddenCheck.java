@@ -9,22 +9,18 @@ import com.sun.source.tree.NewArrayTree;
 import com.sun.source.util.TreePath;
 
 /**
- * this checks that no java array is used. You should use {@link org.stjs.javascript.Array} instead.
- * 
- * @author acraciun
+ * this checks that no java array with 3 dimens or more are used.
  */
-public class NewArrayForbiddenCheck implements CheckContributor<NewArrayTree> {
+public class NewArrayMultipleDimensForbiddenCheck implements CheckContributor<NewArrayTree> {
 
 	@Override
 	public Void visit(CheckVisitor visitor, NewArrayTree tree, GenerationContext<Void> context) {
 		if (isAnnotationParam(context.getCurrentPath())) {
 			return null;
 		}
-		context.addError(tree, "You cannot use Java arrays because they are incompatible with Javascript arrays. "
-				+ "Use org.stjs.javascript.Array<T> instead. "
-				+ "You can use also the method org.stjs.javascript.Global.$castArray to convert an "
-				+ "existent Java array to the corresponding Array type." + "The only exception is void main(String[] args).");
-
+		if (tree.getInitializers() == null && tree.getDimensions().size() > 2) {
+			context.addError(tree, "You cannot use Java arrays without initializers that are more than 2 dimensions.");
+		}
 		return null;
 	}
 

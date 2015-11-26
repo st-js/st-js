@@ -31,7 +31,10 @@ public class EnumGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testEnumValues() {
-		assertCodeContains(Enums6.class, "for(var v in Enums6.Value.values())");
+		assertCodeContains(Enums6.class, "" +
+				"        for (var index$v in Enums6.Value.values()) {\n" +
+				"            var v = Enums6.Value.values()[index$v];\n" +
+				"        }\n");
 		assertCodeContains(Enums6.class, "constructor.Value = stjs.enumeration(\"a\", \"b\", \"c\");");
 	}
 

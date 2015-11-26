@@ -1,7 +1,6 @@
 package org.stjs.generator.writer.statement;
 
-import javax.lang.model.type.TypeMirror;
-
+import com.sun.source.tree.EnhancedForLoopTree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TypesUtils;
@@ -11,8 +10,8 @@ import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.javascript.Array;
 
-import com.sun.source.tree.EnhancedForLoopTree;
-
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import java.util.Collections;
 
 /**
@@ -73,9 +72,43 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 			return generateForEachInArray(tree, context, iterator, iterated, body);
 		} else if (isErasuredClassAssignableFromType(Iterable.class, iteratedType, context)) {
 			return generateForEachWithIterable(tree, context, iterated, body);
+		} else if (isNativeArray(iteratedType)) {
+			return generateForEachForNativeArray(tree, context, iterated, body);
 		} else {
 			return context.withPosition(tree, context.js().forInLoop(iterator, iterated, body));
 		}
+	}
+
+	private JS generateForEachForNativeArray(EnhancedForLoopTree tree, GenerationContext<JS> context, JS iterated, JS body) {
+		JavaScriptBuilder<JS> js = context.js();
+
+		// Java source code:
+		// ---------------------------------------------
+		//  private int[] anIntArray;
+		//	int sum = 0;
+		//	for (int element : anIntArray) {
+		//		sum += element;
+		//	}
+		//
+		// Translated Javascript:
+		// ---------------------------------------------
+		//   for (var index$element in this._anIntArray) {
+		//     var element = this._anIntArray[index$element];
+		//     sum += element;
+		//   }
+		String initialIteratorName = tree.getVariable().getName().toString();
+		String newIteratorName = "index$" + initialIteratorName;
+
+		JS arrayAccessByIndex = context.js().elementGet(iterated, js.name(newIteratorName));
+		JS newIterator = js.variableDeclaration(false, newIteratorName, null);
+		JS arrayAccessedObject = js.variableDeclaration(true, initialIteratorName, arrayAccessByIndex);
+		JS newBody = js.addStatementBeginning(body, arrayAccessedObject);
+
+		return context.withPosition(tree, context.js().forInLoop(newIterator, iterated, newBody));
+	}
+
+	private boolean isNativeArray(TypeMirror iteratedType) {
+		return iteratedType.getKind() == TypeKind.ARRAY;
 	}
 
 	private boolean isErasuredClassAssignableFromType(Class clazz, TypeMirror iteratedType, GenerationContext<JS> context) {

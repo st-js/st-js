@@ -1,11 +1,11 @@
 package org.stjs.generator.writer.fields;
 
+import org.junit.Test;
+import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.utils.AbstractStjsTest;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-
-import org.junit.Test;
-import org.stjs.generator.utils.AbstractStjsTest;
-import org.stjs.generator.JavascriptFileGenerationException;
 
 public class FieldsGeneratorTest extends AbstractStjsTest {
 	@Test
@@ -213,5 +213,49 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testTemplateMemberSelect() {
 		assertCodeContains(Fields25.class, "obj.get(\"field\")");
+	}
+
+	@Test
+	public void testArray() {
+		assertCodeContains(Fields28_array.class, "" +
+				"    this._aBooleanArray = [true, false];\n" +
+				"    this._aStringArray = [\"a\", \"b\", \"c\", \"d\", \"e\"];\n" +
+				"    this._anIntTwoDimensArray = [[0, 1], [2, 3]];\n" +
+				"    this._aCharArray = ['n', 'o', 't', ' ', 'a', ' ', 'S', 't', 'r', 'i', 'n', 'g'];\n" +
+				"    this._anObjectArray = [new Fields28_array.SimpleObject(this._anIntTwoDimensArray), new Fields28_array.SimpleObject([[0]])];\n" +
+				"    this._aFloatArray = [2.0, 3.6969];\n" +
+				"    this._aCollectionArray = [];\n" +
+				"    this._anInterfaceArray = [new (stjs.extend(function Fields28_array$1() {}, null, [Fields28_array.SimpleInterface], function(constructor, prototype) {\n" +
+				"        prototype.doNothing = function() {};\n" +
+				"    }, {}, {}))()];\n" +
+				"    this._anIntThreeDimensArrayInitialized = [[[0]]];");
+	}
+
+	@Test
+	public void testArrayLoop() {
+	assertCodeContains(Fields29_array_loop.class, "" +
+			"        this._anIntArray = [0, 2, 4, 6, 8, 10];\n" +
+			"        for (var i = 0; i < this._anIntArray.length; i++) {\n" +
+			"            this._anIntArray[i] = i;\n" +
+			"        }\n" +
+			"        var sum = 0;\n" +
+			"        for (var index$element in this._anIntArray) {\n" +
+			"            var element = this._anIntArray[index$element];\n" +
+			"            sum += element;\n" +
+			"        }");
+	}
+
+	@Test
+	public void testTwoDimensArrayLoop() {
+		assertCodeContains(Fields30_two_dimens_array_loop.class, "" +
+				"        this._anIntTwoDimensArray = [[0, 2], [4, 6], [8, 10]];\n" +
+				"        for (var i = 0; i < this._anIntTwoDimensArray.length; i++) {\n" +
+				"            this._anIntTwoDimensArray[i][0] = i;\n" +
+				"        }\n" +
+				"        var sum = 0;\n" +
+				"        for (var index$element in this._anIntTwoDimensArray) {\n" +
+				"            var element = this._anIntTwoDimensArray[index$element];\n" +
+				"            sum += element[0];\n" +
+				"        }");
 	}
 }

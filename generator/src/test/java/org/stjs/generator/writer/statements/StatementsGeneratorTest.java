@@ -1,13 +1,14 @@
 package org.stjs.generator.writer.statements;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.utils.AbstractStjsTest;
+
+import static org.junit.Assert.assertEquals;
 
 public class StatementsGeneratorTest extends AbstractStjsTest {
 	@Test
@@ -17,8 +18,10 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testForEach() {
-		// XXX this is not exactly correct as arg here is the index not the value
-		assertCodeContains(Statements2.class, "for (var arg in args) {");
+		assertCodeContains(Statements2.class, "" +
+				"        for (var index$arg in args) {\n" +
+				"            var arg = args[index$arg];\n" +
+				"        }");
 	}
 
 	@Test
@@ -31,17 +34,6 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(Statements4.class, "switch(i)");
 		assertCodeContains(Statements4.class, "case 1: break;");
 		assertCodeContains(Statements4.class, "default: break");
-	}
-
-	@Test(expected = JavascriptFileGenerationException.class)
-	public void testArray1() {
-		generate(Statements5.class);
-	}
-
-	@Test(expected = JavascriptFileGenerationException.class)
-	public void testArray2() {
-		// java array creation is forbidden
-		generate(Statements6.class);
 	}
 
 	@Ignore

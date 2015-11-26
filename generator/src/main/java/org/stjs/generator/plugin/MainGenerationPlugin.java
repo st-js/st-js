@@ -2,7 +2,6 @@ package org.stjs.generator.plugin;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.check.CheckVisitor;
-import org.stjs.generator.check.declaration.ArrayTypeForbiddenCheck;
 import org.stjs.generator.check.declaration.ClassDuplicateMemberNameCheck;
 import org.stjs.generator.check.declaration.ClassEnumWithoutMembersCheck;
 import org.stjs.generator.check.declaration.ClassGlobalForbidInnerCheck;
@@ -25,7 +24,7 @@ import org.stjs.generator.check.expression.MethodInvocationMapConstructorCheck;
 import org.stjs.generator.check.expression.MethodInvocationOuterScopeCheck;
 import org.stjs.generator.check.expression.MethodInvocationServerSideCheck;
 import org.stjs.generator.check.expression.MethodInvocationSuperSynthCheck;
-import org.stjs.generator.check.expression.NewArrayForbiddenCheck;
+import org.stjs.generator.check.expression.NewArrayMultipleDimensForbiddenCheck;
 import org.stjs.generator.check.expression.NewClassInlineFunctionCheck;
 import org.stjs.generator.check.expression.NewClassObjectInitCheck;
 import org.stjs.generator.check.statement.AssertCheck;
@@ -136,9 +135,8 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(new MethodOverloadCheck());
 
 		visitor.contribute(new NewClassObjectInitCheck());
-		visitor.contribute(new ArrayTypeForbiddenCheck());
 		visitor.contribute(new ClassEnumWithoutMembersCheck());
-		visitor.contribute(new NewArrayForbiddenCheck());
+		visitor.contribute(new NewArrayMultipleDimensForbiddenCheck());
 
 		visitor.contribute(new BlockInstanceCheck());
 		visitor.contribute(new MethodInvocationMapConstructorCheck());
