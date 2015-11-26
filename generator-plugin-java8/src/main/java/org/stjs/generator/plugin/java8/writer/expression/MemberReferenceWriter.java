@@ -8,8 +8,10 @@ import java.util.List;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.JavaNodes;
@@ -47,7 +49,15 @@ public class MemberReferenceWriter<JS> implements WriterContributor<MemberRefere
 		JavaScriptBuilder<JS> js = context.js();
 		Element type = methodElement.getEnclosingElement();
 		JS typeName = js.name(context.getNames().getTypeName(context, type, DependencyType.STATIC));
-		return js.property(typeName, tree.getName());
+		return js.property(typeName, decorateMemberAccessor(tree, methodElement));
+	}
+
+	private String decorateMemberAccessor(MemberReferenceTree tree, ExecutableElement methodElement) {
+		String fieldName = tree.getName().toString();
+		if (!methodElement.getModifiers().contains(Modifier.PUBLIC)) {
+			fieldName = GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX + fieldName;
+		}
+		return fieldName;
 	}
 
 	/**
@@ -56,10 +66,13 @@ public class MemberReferenceWriter<JS> implements WriterContributor<MemberRefere
 	private JS generateInstanceRef(MemberReferenceTree tree, GenerationContext<JS> context, ExecutableElement methodElement) {
 		JavaScriptBuilder<JS> js = context.js();
 		Element type = methodElement.getEnclosingElement();
-		context.getNames().getTypeName(context, type, DependencyType.STATIC); // Make sure that we record the dependency on the type
-		JS stjsBind = context.js().property(context.js().name("stjs"), "bind");
-		JS methodName = js.string(tree.getName().toString());
-		return js.functionCall(stjsBind, Collections.singletonList(methodName));
+		JS typeName = js.name(context.getNames().getTypeName(context, type, DependencyType.STATIC));
+		JS proto = js.property(typeName, JavascriptKeywords.PROTOTYPE);
+		JS method = js.property(proto, decorateMemberAccessor(tree, methodElement));
+		JS methodCall = js.property(method, "call");
+		// + 1 because first is the object to which the method is applied
+		JS call = js.functionCall(methodCall, generateArguments(context, methodElement.getParameters().size() + 1));
+		return js.function(null, Collections.emptyList(), js.returnStatement(call));
 	}
 
 	/**
@@ -69,7 +82,7 @@ public class MemberReferenceWriter<JS> implements WriterContributor<MemberRefere
 			ExecutableElement methodElement) {
 		JavaScriptBuilder<JS> js = context.js();
 		JS target = visitor.scan(tree.getQualifierExpression(), context);
-		JS methodName = js.string(tree.getName().toString());
+		JS methodName = js.string(decorateMemberAccessor(tree, methodElement));
 		JS stjsBind = context.js().property(context.js().name("stjs"), "bind");
 		return js.functionCall(stjsBind, Arrays.asList(target, methodName));
 	}

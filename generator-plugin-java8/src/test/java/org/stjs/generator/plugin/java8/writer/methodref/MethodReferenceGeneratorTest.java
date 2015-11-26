@@ -9,7 +9,7 @@ import org.junit.Test;
 public class MethodReferenceGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testStaticMethodRef() {
-		assertCodeContains(MethodRef1.class, "calculate(MethodRef1.inc)");
+		assertCodeContains(MethodRef1.class, "_calculate(MethodRef1._inc)");
 		assertEquals(1, ((Number)execute(MethodRef1.class)).intValue());
 	}
 
@@ -46,7 +46,7 @@ public class MethodReferenceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testUsageOFieldMethodRef() {
-		assertCodeContains(MethodRef6.class, "calculate(stjs.bind(this.field, \"method\"))");
+		assertCodeContains(MethodRef6.class, "calculate(stjs.bind(this._field, \"method\"))");
 	}
 
 	@Test

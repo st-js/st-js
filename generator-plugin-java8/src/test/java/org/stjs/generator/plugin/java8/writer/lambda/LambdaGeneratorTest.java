@@ -29,17 +29,17 @@ public class LambdaGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testLambaAccessFieldOuterScope() {
-		assertCodeContains(Lambda5.class, "var c = stjs.bind(this, function() {return this.field + 1;});");
+		assertCodeContains(Lambda5.class, "var c = stjs.bind(this, function() {return this._field + 1;});");
 	}
 
 	@Test
 	public void testLambaAccessQualifiedFieldOuterScope() {
-		assertCodeContains(Lambda5b.class, "var c = stjs.bind(this, function() {return this.field + 1;});");
+		assertCodeContains(Lambda5b.class, "var c = stjs.bind(this, function() {return this._field + 1;});");
 	}
 
 	@Test
 	public void testLambaAccessMethodOuterScope() {
-		assertCodeContains(Lambda6.class, "var c = stjs.bind(this, function() {return this.outerMethod() + 1;});");
+		assertCodeContains(Lambda6.class, "var c = stjs.bind(this, function() {return this._outerMethod() + 1;});");
 	}
 
 	@Test
