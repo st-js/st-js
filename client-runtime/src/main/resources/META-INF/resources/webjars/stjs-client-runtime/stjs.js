@@ -935,6 +935,12 @@ var RuntimeException = function(message, cause){
 stjs.extend(RuntimeException, Exception, [], function(constructor, prototype){
 }, {});
 
+var Iterable = function(){
+}
+
+var Iterator = function(){
+}
+
 /** stjs field manipulation */
 stjs.setField=function(obj, field, value, returnOldValue){
 	if (stjs.setFieldHandler)
@@ -949,3 +955,4 @@ stjs.getField=function(obj, field){
 		return stjs.getFieldHandler(obj, field);
 	return obj[field];
 };
+
