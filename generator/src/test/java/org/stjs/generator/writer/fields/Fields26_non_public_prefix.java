@@ -1,12 +1,12 @@
 package org.stjs.generator.writer.fields;
 
-public class Fields25_non_public_prefix {
+public class Fields26_non_public_prefix {
     String packageField;
     private String privateField;
     public String publicField;
 
     public String getThisPackageField() {
-        Fields25_non_public_prefix myFields25nonpublicprefix = new Fields25_non_public_prefix();
+        Fields26_non_public_prefix myFields25nonpublicprefix = new Fields26_non_public_prefix();
         myFields25nonpublicprefix.packageField = "test";
 
         return this.packageField;
@@ -36,14 +36,14 @@ public class Fields25_non_public_prefix {
         String innerPackageField;
         private String innerPrivateField;
         public String innerPublicField;
-        private Fields25_non_public_prefix parent;
+        private Fields26_non_public_prefix parent;
 
-        public InnerClass(Fields25_non_public_prefix parent) {
+        public InnerClass(Fields26_non_public_prefix parent) {
             this.parent = parent;
         }
 
         public String getThisPackageField() {
-            Fields25_non_public_prefix myFields25nonpublicprefix = new Fields25_non_public_prefix();
+            Fields26_non_public_prefix myFields25nonpublicprefix = new Fields26_non_public_prefix();
             myFields25nonpublicprefix.packageField = "test";
 
             return this.innerPackageField;

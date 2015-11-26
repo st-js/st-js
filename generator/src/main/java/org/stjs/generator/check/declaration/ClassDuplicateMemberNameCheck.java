@@ -2,16 +2,13 @@ package org.stjs.generator.check.declaration;
 
 import java.util.Collection;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.javac.TreeUtils;
@@ -107,15 +104,20 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 				return;
 			}
 
-			String name = ((VariableTree) member).getName().toString();
+			VariableTree memberVariableTree = (VariableTree) member;
+			String name = memberVariableTree.getName().toString();
+			if (!memberVariableTree.getModifiers().getFlags().contains(Modifier.PUBLIC)) {
+				name = GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX + name;
+			}
+
 			Collection<Element> sameName = existingNames.get(name);
 			if (sameName.isEmpty()) {
-				Element variableElement = TreeUtils.elementFromDeclaration((VariableTree) member);
+				Element variableElement = TreeUtils.elementFromDeclaration(memberVariableTree);
 				existingNames.put(name, variableElement);
 			} else {
 				if (!hasOnlyFields(sameName)) {
 					// accept fields with the same name, but not methods and fields
-					context.addError(member, "The type (or one of its parents) contains already a method called [" + name
+					context.addError(memberVariableTree, "The type (or one of its parents) contains already a method called [" + name
 							+ "]. Javascript cannot distinguish methods/fields with the same name");
 				}
 			}

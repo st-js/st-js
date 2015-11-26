@@ -84,13 +84,22 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 	}
 
 	@Test
+	public void testNonPublicFieldWithPublicMethodOfSameName() {
+		assertCodeContains(Fields27_non_public_field_with_public_method.class, "" +
+				"    prototype._isCool = 0;\n" +
+				"    prototype.isCool = function() {\n" +
+				"        return this._isCool;\n" +
+				"    };");
+	}
+
+	@Test
 	public void testNoModifiersFieldExpectedToNotBePublic() {
-		assertCodeContains(Fields25_non_public_prefix.class, "" +
+		assertCodeContains(Fields26_non_public_prefix.class, "" +
 				"    prototype._packageField = null;\n" +
 				"    prototype._privateField = null;\n" +
 				"    prototype.publicField = null;\n" +
 				"    prototype.getThisPackageField = function() {\n" +
-				"        var myFields25nonpublicprefix = new Fields25_non_public_prefix();\n" +
+				"        var myFields25nonpublicprefix = new Fields26_non_public_prefix();\n" +
 				"        myFields25nonpublicprefix._packageField = \"test\";\n" +
 				"        return this._packageField;\n" +
 				"    };\n" +
@@ -118,7 +127,7 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 				"        prototype.innerPublicField = null;\n" +
 				"        prototype._parent = null;\n" +
 				"        prototype.getThisPackageField = function() {\n" +
-				"            var myFields25nonpublicprefix = new Fields25_non_public_prefix();\n" +
+				"            var myFields25nonpublicprefix = new Fields26_non_public_prefix();\n" +
 				"            myFields25nonpublicprefix._packageField = \"test\";\n" +
 				"            return this._innerPackageField;\n" +
 				"        };\n" +
