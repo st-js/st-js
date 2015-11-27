@@ -935,6 +935,18 @@ var RuntimeException = function(message, cause){
 stjs.extend(RuntimeException, Exception, [], function(constructor, prototype){
 }, {});
 
+var Iterator = function() {};
+Iterator = stjs.extend(Iterator, null, [], function(constructor, prototype) {
+    prototype.hasNext = function() {};
+    prototype.next = function() {};
+    prototype.remove = function() {};
+}, {}, {});
+
+var Iterable = function() {};
+Iterable = stjs.extend(Iterable, null, [], function(constructor, prototype) {
+    prototype.iterator = function() {};
+}, {}, {});
+
 /** stjs field manipulation */
 stjs.setField=function(obj, field, value, returnOldValue){
 	if (stjs.setFieldHandler)
@@ -949,3 +961,4 @@ stjs.getField=function(obj, field){
 		return stjs.getFieldHandler(obj, field);
 	return obj[field];
 };
+

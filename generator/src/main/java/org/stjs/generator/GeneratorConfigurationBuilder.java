@@ -17,6 +17,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -145,6 +146,8 @@ public class GeneratorConfigurationBuilder {
 		allowedJavaLangClasses.add("Iterable");
 
 		allowedPackages.add("java.lang");
+
+		allowedPackage(Iterator.class.getName());
 
 		return new GeneratorConfiguration(//
 				allowedPackages,  //
