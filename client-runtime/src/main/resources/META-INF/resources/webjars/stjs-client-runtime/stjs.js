@@ -509,17 +509,46 @@ stjs.serializers = {
 };
 
 /**
- * this functions is used to be able to send method references as callbacks
+ * Used to be able to send method references and lambdas that capture 'this' as callbacks.
+ * This method has a bunch of different usage patterns:
+ *
+ * bind(instance, "methodName"):
+ *     Used when translating a capturing method reference (eg: instance::methodName), or when translating
+ *
+ * bind(this, function):
+ *     Used when translating a lambda that uses 'this' explicitly or implicitly (eg: () -> this.doSomething(3))
+ *
+ * bind(this, function, specialTHISparamPosition)
+ *     Used when translating a lambda that uses the special all-caps 'THIS' parameter
+ *
+ * bind("methodName")
+ *     Used when translating a non-static method reference (eg: TypeName::methodName, where methodName is non-static)
  */
 stjs.bind=function(obj, method, thisParamPos) {
+	var useFirstParamAsContext = false;
+	if(method == null) {
+		// the bind("methodName") is the only usage where the method argument can be null
+		method = obj;
+		obj = null;
+		useFirstParamAsContext = true;
+	}
+	var addThisToParameters = thisParamPos != null;
+
 	var f = function(){
 		var args = arguments;
-		if (thisParamPos != null)
+		if (addThisToParameters) {
 			Array.prototype.splice.call(args, thisParamPos, 0, this);
-		if (typeof method === "string")
+		}
+		if(useFirstParamAsContext){
+			obj = Array.prototype.shift.call(args);
+		}
+
+		if (typeof method === "string") {
 			return obj[method].apply(obj, args);
-		else
+
+		} else {
 			return method.apply(obj, args);
+		}
 	};
 	return f;
 };
