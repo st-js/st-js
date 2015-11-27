@@ -225,7 +225,9 @@ if (!Number.isNaN) {
 }
 
 if (!Number.prototype.isNaN) {
-	Number.prototype.isNaN = isNaN;
+	Number.prototype.isNaN = function() {
+		return isNaN(this);
+	}
 }
 if (!Number.prototype.equals) {
 	Number.prototype.equals=JavalikeEquals;
