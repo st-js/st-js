@@ -97,7 +97,7 @@ public class MemberReferenceWriter<JS> implements WriterContributor<MemberRefere
 		// System.out.println(tree + ":left:" + tree.getQualifierExpression().getClass() + ", kind:" +
 		// qualifierElemenet.getKind());
 		if (tree.getMode() == ReferenceMode.INVOKE) {
-			if (qualifierElement.getKind() == ElementKind.CLASS) {
+			if (qualifierElement.getKind() == ElementKind.CLASS || qualifierElement.getKind() == ElementKind.INTERFACE) {
 				if (JavaNodes.isStatic(methodElement)) {
 					return generateStaticRef(tree, context, methodElement);
 				}
