@@ -119,7 +119,11 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testSynchronizedMethod() {
 		GeneratorConfiguration configuration = new GeneratorConfigurationBuilder().setSynchronizedAllowed(true).build();
-		assertCodeContains(Methods16.class, "stjs.extend(Methods16, null, [], function(constructor, prototype){ prototype.method = function() {for (var i = 0; i < 10; i++) {}};}", configuration);
+		assertCodeContains(Methods16.class, "stjs.extend(Methods16, null, [], function(constructor, prototype)" +
+				"{ prototype.method = function() {" +
+				"for (var i = 0; i < 10; i++) {}" +
+				"}" +
+				";}", configuration);
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
