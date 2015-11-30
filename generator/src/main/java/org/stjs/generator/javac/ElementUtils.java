@@ -4,6 +4,23 @@ package org.stjs.generator.javac;
  import checkers.nullness.quals.Nullable;
  */
 
+import com.sun.tools.javac.code.Symbol;
+import org.stjs.generator.utils.JavaNodes;
+import org.stjs.javascript.annotation.JSOverloadName;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.Name;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
+import javax.lang.model.util.Elements;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,22 +29,6 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.Name;
-import javax.lang.model.element.PackageElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementFilter;
-import javax.lang.model.util.Elements;
-
-import com.sun.tools.javac.code.Symbol;
 
 /**
  * A Utility class for analyzing {@code Element}s.
@@ -234,7 +235,7 @@ public final class ElementUtils {
 	}
 
 	public static Set<VariableElement> findFieldsInType(TypeElement type, Collection<String> names) {
-		Set<VariableElement> results = new HashSet<VariableElement>();
+		Set<VariableElement> results = new HashSet<>();
 		for (VariableElement field : ElementFilter.fieldsIn(type.getEnclosedElements())) {
 			if (names.contains(field.getSimpleName().toString())) {
 				results.add(field);
@@ -267,13 +268,13 @@ public final class ElementUtils {
 
 	public static List<TypeElement> getSuperTypes(TypeElement type, boolean addInterfaces) {
 
-		List<TypeElement> superelems = new ArrayList<TypeElement>();
+		List<TypeElement> superelems = new ArrayList<>();
 		if (type == null) {
 			return superelems;
 		}
 
 		// Set up a stack containing type, which is our starting point.
-		Deque<TypeElement> stack = new ArrayDeque<TypeElement>();
+		Deque<TypeElement> stack = new ArrayDeque<>();
 		stack.push(type);
 
 		while (!stack.isEmpty()) {
@@ -369,5 +370,39 @@ public final class ElementUtils {
 
 	public static boolean isTypeKind(Element elem) {
 		return elem.getKind().isClass() || elem.getKind().isInterface();
+	}
+
+	public static boolean hasAnOverloadedEquivalentMethod(ExecutableElement methodElement, Elements contextElements) {
+		if (JavaNodes.isNative(methodElement)) {
+			// no need to check the native ones - only the one with the body
+			return false;
+		}
+
+		if (methodElement.getKind() == ElementKind.METHOD) {
+			TypeElement typeElement = (TypeElement) methodElement.getEnclosingElement();
+			// For regular methods, checks against all the methods in the class' hierarchy
+			List<? extends Element> allMembers = contextElements.getAllMembers(typeElement);
+
+			for (Element memberElement : allMembers) {
+				if (isMemberMethodUnique(memberElement, methodElement)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return false;
+	}
+
+	private static boolean isMemberMethodUnique(Element memberElement, ExecutableElement methodElement) {
+		if (JavaNodes.isNative(memberElement)) {
+			return false;
+		}
+		if (methodElement.equals(memberElement)) {
+			return false;
+		}
+		if (!memberElement.getSimpleName().equals(methodElement.getSimpleName()) || memberElement.getKind() != methodElement.getKind()) {
+			return false;
+		}
+		return methodElement.getAnnotation(JSOverloadName.class) == null;
 	}
 }

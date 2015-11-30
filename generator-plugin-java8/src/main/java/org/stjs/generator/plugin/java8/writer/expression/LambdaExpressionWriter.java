@@ -46,7 +46,7 @@ import com.sun.source.util.TreeScanner;
  */
 public class LambdaExpressionWriter<JS> implements WriterContributor<LambdaExpressionTree, JS> {
 
-	private boolean accessOuterScope(LambdaExpressionTree lambda) {
+	private boolean accessOuterScope(LambdaExpressionTree lambda, GenerationContext<JS> context) {
 		AtomicBoolean outerScopeAccess = new AtomicBoolean(false);
 
 		lambda.accept(new TreeScanner<Void, Void>() {
@@ -82,7 +82,7 @@ public class LambdaExpressionWriter<JS> implements WriterContributor<LambdaExpre
 					// only instance methods
 					return super.visitMethodInvocation(tree, arg1);
 				}
-				String name = MethodInvocationWriter.buildMethodName(tree);
+				String name = MethodInvocationWriter.buildMethodName(tree, context);
 
 				if (GeneratorConstants.THIS.equals(name) || GeneratorConstants.SUPER.equals(name)) {
 					// this and super call are ok
@@ -117,7 +117,7 @@ public class LambdaExpressionWriter<JS> implements WriterContributor<LambdaExpre
 		JS lambdaFunc = js.function(null, params, body);
 		int specialThisParamPos = MethodWriter.getTHISParamPos(tree.getParameters());
 
-		if (accessOuterScope(tree) || specialThisParamPos >= 0) {
+		if (accessOuterScope(tree, context) || specialThisParamPos >= 0) {
 			// bind for lamdas accessing the outher scope
 			JS target = js.keyword(Keyword.THIS);
 			JS stjsBind = js.property(context.js().name("stjs"), "bind");

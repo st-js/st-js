@@ -24,7 +24,7 @@ public class AssertTemplate<JS> implements WriterContributor<MethodInvocationTre
 		if (argCount < 1) {
 			throw context.addError(tree, "An 'adapter' template can only be applied for methods with at least 1 parameter");
 		}
-		String name = MethodInvocationWriter.buildMethodName(tree);
+		String name = MethodInvocationWriter.buildMethodName(tree, context);
 		JS target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree>getCurrentWrapper());
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
 		arguments.add(0, context.js().string(context.getInputFile().getName() + ":" + context.getStartLine(tree)));

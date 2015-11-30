@@ -1,5 +1,8 @@
 package org.stjs.generator.plugin;
 
+import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.VariableTree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.check.declaration.ClassDuplicateMemberNameCheck;
@@ -10,7 +13,6 @@ import org.stjs.generator.check.declaration.ClassImplementJavascriptFunctionChec
 import org.stjs.generator.check.declaration.ClassNamespaceCheck;
 import org.stjs.generator.check.declaration.FieldInitializerCheck;
 import org.stjs.generator.check.declaration.MethodDeclarationTemplateCheck;
-import org.stjs.generator.check.declaration.MethodOverloadCheck;
 import org.stjs.generator.check.declaration.MethodSynchronizedCheck;
 import org.stjs.generator.check.declaration.MethodVarArgParamCheck;
 import org.stjs.generator.check.declaration.MethodWrongNameCheck;
@@ -106,10 +108,6 @@ import org.stjs.generator.writer.templates.fields.SetterAssignmentTemplate;
 import org.stjs.generator.writer.templates.fields.SetterCompoundAssignmentTemplate;
 import org.stjs.generator.writer.templates.fields.SetterUnaryTemplate;
 
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.VariableTree;
-
 /**
  * this is the main generation plugin that adds all the needed checks and writers.
  *
@@ -132,7 +130,6 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(new ClassImplementJavascriptFunctionCheck());
 		visitor.contribute(new ClassGlobalInstanceMembersCheck());
 		visitor.contribute(new ClassNamespaceCheck());
-		visitor.contribute(new MethodOverloadCheck());
 
 		visitor.contribute(new NewClassObjectInitCheck());
 		visitor.contribute(new ClassEnumWithoutMembersCheck());

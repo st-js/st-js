@@ -1,17 +1,11 @@
 package org.stjs.generator.check.declaration;
 
-import java.util.Collection;
-
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
+import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.Tree;
+import com.sun.source.tree.VariableTree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.check.CheckContributor;
@@ -21,13 +15,16 @@ import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.MemberWriters;
 
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.Tree;
-import com.sun.source.tree.VariableTree;
-import org.stjs.javascript.annotation.JSOverloadName;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import java.util.Collection;
 
 /**
  * checks the a field name or method exists only once in the class and its hierchy
@@ -35,28 +32,19 @@ import org.stjs.javascript.annotation.JSOverloadName;
  */
 public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree> {
 
-	private void checkCandidate(Element overrideCandidate, ExecutableElement methodElement, TypeElement classElement, Tree member,
-			GenerationContext<Void> context) {
+	private void checkCandidate(Element overrideCandidate, Tree member, GenerationContext<Void> context) {
 
 		boolean isMethod = overrideCandidate instanceof ExecutableElement;
 		boolean isFieldOrInnerType = !isMethod;
 
-		String name = methodElement.getSimpleName().toString();
 		if (isFieldOrInnerType) {
 			// it's a field or inner type -> this is illegal
 			context.addError(member, "There is already a field with the same name as this method in the type or one of its parents: "
 					+ ((TypeElement) overrideCandidate.getEnclosingElement()).getQualifiedName() + "." + overrideCandidate.getSimpleName());
-		} else if (!context.getElements().overrides(methodElement, (ExecutableElement) overrideCandidate, classElement)
-				&& methodElement.getAnnotation(JSOverloadName.class) == null) {
-			context.addError(member, "Only maximum one method with the name [" + name
-					+ "] is allowed to have a body. The other methods must be marked with annotation '@native' or '@JSOverloadName(\"newMethodNameHere\")'."
-					+ " The type (or one of its parents) may contain already the method: " + overrideCandidate
-					+ " that has a different signature");
 		}
-
 	}
 
-	private void checkMethodName(TypeElement classElement, MethodTree method, ExecutableElement methodElement, GenerationContext<Void> context,
+	private void checkMethodName(MethodTree method, ExecutableElement methodElement, GenerationContext<Void> context,
 			Multimap<String, Element> existingNames) {
 		String name = method.getName().toString();
 
@@ -66,12 +54,12 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 		} else {
 			// try to see if it's not in fact a method override
 			for (Element overrideCandidate : sameName) {
-				checkCandidate(overrideCandidate, methodElement, classElement, method, context);
+				checkCandidate(overrideCandidate, method, context);
 			}
 		}
 	}
 
-	private void checkMethod(TypeElement classElement, Tree member, GenerationContext<Void> context, Multimap<String, Element> existingNames) {
+	private void checkMethod(Tree member, GenerationContext<Void> context, Multimap<String, Element> existingNames) {
 		if (member instanceof MethodTree) {
 			MethodTree method = (MethodTree) member;
 			ExecutableElement methodElement = TreeUtils.elementFromDeclaration(method);
@@ -89,7 +77,7 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 				// skip the constructors
 				return;
 			}
-			checkMethodName(classElement, method, methodElement, context, existingNames);
+			checkMethodName(method, methodElement, context, existingNames);
 		}
 	}
 
@@ -147,7 +135,7 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 		}
 		// check first the methods
 		for (Tree member : tree.getMembers()) {
-			checkMethod(classElement, member, context, names);
+			checkMethod(member, context, names);
 		}
 		// check the fields
 		for (Tree member : tree.getMembers()) {

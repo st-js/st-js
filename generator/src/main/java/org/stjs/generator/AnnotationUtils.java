@@ -20,7 +20,11 @@ public class AnnotationUtils {
 		public static String decorate(Symbol.MethodSymbol methodSymbolElement) {
 			String value = getAnnotationValue(methodSymbolElement);
 
-			return AnnotationConstants.JS_OVERLOAD_NAME_DEFAULT_VALUE.equals(value) ? generateMethodName(methodSymbolElement) : value;
+			if (value == null || AnnotationConstants.JS_OVERLOAD_NAME_DEFAULT_VALUE.equals(value)) {
+				return generateMethodName(methodSymbolElement);
+			} else {
+				return value;
+			}
 		}
 
 		private static String generateMethodName(Symbol.MethodSymbol methodSymbolElement) {

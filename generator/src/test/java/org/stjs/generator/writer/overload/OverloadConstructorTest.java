@@ -2,7 +2,6 @@ package org.stjs.generator.writer.overload;
 
 import org.junit.Test;
 import org.stjs.generator.utils.AbstractStjsTest;
-import org.stjs.generator.JavascriptFileGenerationException;
 
 public class OverloadConstructorTest extends AbstractStjsTest {
 	@Test
@@ -20,18 +19,6 @@ public class OverloadConstructorTest extends AbstractStjsTest {
 	public void testMoreGenericType() {
 		// check that no other method is generated
 		assertCodeContains(Overload3c.class, "Overload3c=function(param1){}");
-	}
-
-	@Test(
-			expected = JavascriptFileGenerationException.class)
-	public void testLessGenericType() {
-		generate(Overload4c.class);
-	}
-
-	@Test(
-			expected = JavascriptFileGenerationException.class)
-	public void testTwoWithBody() {
-		generate(Overload5c.class);
 	}
 
 	@Test

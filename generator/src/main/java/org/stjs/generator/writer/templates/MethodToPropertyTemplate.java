@@ -1,7 +1,6 @@
 package org.stjs.generator.writer.templates;
 
-import javax.lang.model.element.ExecutableElement;
-
+import com.sun.source.tree.MethodInvocationTree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javascript.AssignOperator;
@@ -10,7 +9,7 @@ import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
 
-import com.sun.source.tree.MethodInvocationTree;
+import javax.lang.model.element.ExecutableElement;
 
 /**
  * $method() => $method and <br>
@@ -55,7 +54,7 @@ public class MethodToPropertyTemplate<JS> implements WriterContributor<MethodInv
 	}
 
 	public static String getPropertyName(MethodInvocationTree tree) {
-		String name = MethodInvocationWriter.buildMethodName(tree);
+		String name = MethodInvocationWriter.buildMethodName(tree, null);
 		int start = name.startsWith("$") ? 1 : 0;
 		return name.substring(start);
 	}

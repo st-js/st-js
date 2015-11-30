@@ -1,15 +1,15 @@
 package org.stjs.generator.writer.declaration;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-
+import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.NewClassTree;
+import com.sun.source.tree.Tree;
+import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Symbol;
 import org.stjs.generator.AnnotationUtils;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TreeWrapper;
@@ -19,11 +19,10 @@ import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.NewClassTree;
-import com.sun.source.tree.Tree;
-import com.sun.source.tree.VariableTree;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements WriterContributor<MethodTree, JS> {
 
@@ -63,7 +62,8 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		String methodName = element.getSimpleName().toString();
 		boolean isFromInterface = context.getCurrentWrapper().getEnclosingType().getElement().getKind().equals(ElementKind.INTERFACE);
 
-		if (AnnotationUtils.JSOverloadName.isPresent(element)) {
+		if (AnnotationUtils.JSOverloadName.isPresent(element)
+				|| ElementUtils.hasAnOverloadedEquivalentMethod(TreeUtils.elementFromDeclaration(tree), context.getElements())) {
 			methodName = AnnotationUtils.JSOverloadName.decorate(element);
 		}
 

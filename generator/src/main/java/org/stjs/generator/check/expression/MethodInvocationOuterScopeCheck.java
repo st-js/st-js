@@ -1,8 +1,8 @@
 package org.stjs.generator.check.expression;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
-
+import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.IdentifierTree;
+import com.sun.source.tree.MethodInvocationTree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.check.CheckContributor;
@@ -11,9 +11,8 @@ import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
 
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.IdentifierTree;
-import com.sun.source.tree.MethodInvocationTree;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 
 /**
  * this check verifies that you don't call a method from the outer type as in javaScript this scope is not accessible.
@@ -40,7 +39,7 @@ public class MethodInvocationOuterScopeCheck implements CheckContributor<MethodI
 			return null;
 		}
 
-		String name = MethodInvocationWriter.buildMethodName(tree);
+		String name = MethodInvocationWriter.buildMethodName(tree, context);
 
 		if (GeneratorConstants.THIS.equals(name) || GeneratorConstants.SUPER.equals(name)) {
 			// this and super call are ok

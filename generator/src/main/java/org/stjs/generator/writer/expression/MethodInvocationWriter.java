@@ -1,8 +1,10 @@
 package org.stjs.generator.writer.expression;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.IdentifierTree;
+import com.sun.source.tree.MemberSelectTree;
+import com.sun.source.tree.MethodInvocationTree;
+import com.sun.source.tree.Tree;
 import com.sun.tools.javac.code.Symbol;
 import org.stjs.generator.AnnotationUtils;
 import org.stjs.generator.GenerationContext;
@@ -17,14 +19,10 @@ import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 
-import com.sun.source.tree.ExpressionTree;
-import com.sun.source.tree.IdentifierTree;
-import com.sun.source.tree.MemberSelectTree;
-import com.sun.source.tree.MethodInvocationTree;
-import com.sun.source.tree.Tree;
-
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvocationTree, JS> {
 
@@ -51,7 +49,7 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 		return targetJS;
 	}
 
-	public static <JS> String buildMethodName(MethodInvocationTree tree) {
+	public static <JS> String buildMethodName(MethodInvocationTree tree, GenerationContext<JS> context) {
 		ExpressionTree select = tree.getMethodSelect();
 		if (select instanceof IdentifierTree) {
 			// simple call: method(args)
@@ -59,7 +57,10 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 			String methodName = ((IdentifierTree) select).getName().toString();
 			Symbol.MethodSymbol element = (Symbol.MethodSymbol) InternalUtils.symbol(tree);
 			ExecutableElement methodElement = TreeUtils.getMethod(element);
-			if (methodElement != null && AnnotationUtils.JSOverloadName.isPresent((Symbol.MethodSymbol) methodElement)) {
+
+			if (methodElement != null
+					&& (AnnotationUtils.JSOverloadName.isPresent((Symbol.MethodSymbol) methodElement)
+					|| hasAnOverloadedMethod(context, methodElement))) {
 				methodName = AnnotationUtils.JSOverloadName.decorate((Symbol.MethodSymbol) methodElement);
 			}
 			return prefixNonPublicMethods(methodName, element);
@@ -67,6 +68,13 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 		// calls with target: target.method(args)
 		MemberSelectTree memberSelect = (MemberSelectTree) select;
 		return memberSelect.getIdentifier().toString();
+	}
+
+	private static <JS> boolean hasAnOverloadedMethod(GenerationContext<JS> context, ExecutableElement methodElement) {
+		if (context == null) {
+			return false;
+        }
+		return ElementUtils.hasAnOverloadedEquivalentMethod(methodElement, context.getElements());
 	}
 
 	private static String prefixNonPublicMethods(String methodName, Symbol.MethodSymbol element) {

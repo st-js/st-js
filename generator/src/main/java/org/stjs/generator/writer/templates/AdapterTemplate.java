@@ -22,7 +22,7 @@ public class AdapterTemplate<JS> implements WriterContributor<MethodInvocationTr
 		if (argCount < 1) {
 			throw context.addError(tree, "An 'adapter' template can only be applied for methods with at least 1 parameter");
 		}
-		String name = MethodInvocationWriter.buildMethodName(tree);
+		String name = MethodInvocationWriter.buildMethodName(tree, context);
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
 
 		JS target = context.js().paren(arguments.get(0));

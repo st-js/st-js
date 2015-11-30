@@ -45,7 +45,7 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		Element methodElement = TreeUtils.elementFromUse(tree);
 		TypeElement typeElement = (TypeElement) methodElement.getEnclosingElement();
 
-		String methodName = MethodInvocationWriter.buildMethodName(tree);
+		String methodName = MethodInvocationWriter.buildMethodName(tree, context);
 
 		// avoid useless call to super() when the super class is Object
 		if (GeneratorConstants.SUPER.equals(methodName) && JavaNodes.sameRawType(typeElement.asType(), Object.class)) {
@@ -73,7 +73,7 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		}
 
 		JS target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree> getCurrentWrapper());
-		String name = MethodInvocationWriter.buildMethodName(tree);
+		String name = MethodInvocationWriter.buildMethodName(tree, context);
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
 		return context.js().functionCall(context.js().property(target, name), arguments);
 	}
