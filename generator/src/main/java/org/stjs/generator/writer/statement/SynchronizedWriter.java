@@ -15,8 +15,13 @@ public class SynchronizedWriter<JS> implements WriterContributor<SynchronizedTre
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, SynchronizedTree tree, GenerationContext<JS> context) {
-		// synchronized is not allowed
-		context.addError(tree, "Synchronized blocks are not allowed");
-		return null;
+		if (context.getConfiguration().isSynchronizedAllowed()) {
+			JS js = visitor.visitBlock(tree.getBlock(), context);
+			return context.withPosition(tree, js);
+		} else {
+			context.addError(tree, "Synchronized blocks are not allowed");
+			return null;
+		}
+
 	}
 }

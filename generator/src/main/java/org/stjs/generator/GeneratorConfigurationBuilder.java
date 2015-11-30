@@ -32,6 +32,7 @@ public class GeneratorConfigurationBuilder {
 	private boolean generateArrayHasOwnProperty = true;
 	private boolean generateSourceMap;
 	private String sourceEncoding = Charset.defaultCharset().name();
+	private boolean isSynchronizedAllowed= false;
 	private ClassLoader stjsClassLoader;
 	private File targetFolder;
 	private GenerationDirectory generationFolder;
@@ -55,6 +56,7 @@ public class GeneratorConfigurationBuilder {
 			targetFolder(baseConfig.getTargetFolder());
 			generationFolder(baseConfig.getGenerationFolder());
 			classResolver(baseConfig.getClassResolver());
+			setSynchronizedAllowed(baseConfig.isSynchronizedAllowed());
 		}
 	}
 
@@ -123,6 +125,12 @@ public class GeneratorConfigurationBuilder {
 		return this;
 	}
 
+	public GeneratorConfigurationBuilder setSynchronizedAllowed(boolean synchronizedAllowed) {
+		this.isSynchronizedAllowed = synchronizedAllowed;
+		return this;
+	}
+
+
 	public GeneratorConfiguration build() {
 		allowedJavaLangClasses.add("Object");
 		allowedJavaLangClasses.add("Class");
@@ -159,7 +167,8 @@ public class GeneratorConfigurationBuilder {
 				stjsClassLoader,  //
 				targetFolder,  //
 				generationFolder, //
-				classResolver == null ? new DefaultClassResolver(stjsClassLoader) : classResolver //
+				classResolver == null ? new DefaultClassResolver(stjsClassLoader) : classResolver, //
+				isSynchronizedAllowed //
 		);
 	}
 

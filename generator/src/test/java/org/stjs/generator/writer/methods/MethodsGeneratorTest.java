@@ -1,6 +1,8 @@
 package org.stjs.generator.writer.methods;
 
 import org.junit.Test;
+import org.stjs.generator.GeneratorConfiguration;
+import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 
@@ -114,10 +116,10 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 				+ "}, {}, {});");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test
 	public void testSynchronizedMethod() {
-		// synchronized is forbidden
-		generate(Methods16.class);
+		GeneratorConfiguration configuration = new GeneratorConfigurationBuilder().setSynchronizedAllowed(true).build();
+		assertCodeContains(Methods16.class, "stjs.extend(Methods16, null, [], function(constructor, prototype){ prototype.method = function() {for (var i = 0; i < 10; i++) {}};}", configuration);
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)

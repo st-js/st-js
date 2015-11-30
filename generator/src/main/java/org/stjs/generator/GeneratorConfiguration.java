@@ -27,12 +27,13 @@ public class GeneratorConfiguration {
 	private final File targetFolder;
 	private final GenerationDirectory generationFolder;
 	private final ClassResolver classResolver;
+	private final boolean isSynchronizedAllowed;
 
 	// We actually have a builder for that, so the number of parameters warning doesn't apply
 	@SuppressWarnings("PMD.ExcessiveParameterList")
 	GeneratorConfiguration(Collection<String> allowedPackages, Set<String> allowedJavaLangClasses, boolean generateArrayHasOwnProperty,
 			boolean generateSourceMap, String sourceEncoding, Set<String> annotations, ClassLoader stjsClassLoader, File targetFolder,
-			GenerationDirectory generationFolder, ClassResolver classResolver) {
+			GenerationDirectory generationFolder, ClassResolver classResolver, boolean isSynchronizedAllowed) {
 		this.allowedPackages = allowedPackages;
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
 		this.generateArrayHasOwnProperty = generateArrayHasOwnProperty;
@@ -43,6 +44,7 @@ public class GeneratorConfiguration {
 		this.targetFolder = targetFolder;
 		this.generationFolder = generationFolder;
 		this.classResolver = classResolver;
+		this.isSynchronizedAllowed = isSynchronizedAllowed;
 	}
 
 	/**
@@ -91,5 +93,9 @@ public class GeneratorConfiguration {
 
 	public ClassResolver getClassResolver() {
 		return classResolver;
+	}
+
+	public boolean isSynchronizedAllowed() {
+		return isSynchronizedAllowed;
 	}
 }

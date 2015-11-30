@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.stjs.generator.GeneratorConfiguration;
+import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 
@@ -125,10 +127,10 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 		assertEquals(2, ((Number) execute(Statements16.class)).intValue());
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test
 	public void testSynchronizedBlock() {
-		// synchronized not supported
-		generate(Statements17.class);
+		GeneratorConfiguration configuration = new GeneratorConfigurationBuilder().setSynchronizedAllowed(true).build();
+		assertCodeContains(Statements17.class, "for (var i = 0; i < 10; ++i) {}", configuration);
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)

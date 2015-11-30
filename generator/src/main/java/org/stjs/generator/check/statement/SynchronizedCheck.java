@@ -15,7 +15,9 @@ public class SynchronizedCheck implements CheckContributor<SynchronizedTree> {
 
 	@Override
 	public Void visit(CheckVisitor visitor, SynchronizedTree tree, GenerationContext<Void> context) {
-		context.addError(tree, "Synchronized blocks are not supported by Javascript");
+		if (!context.getConfiguration().isSynchronizedAllowed()) {
+			context.addError(tree, "Synchronized blocks are not supported by Javascript");
+		}
 		return null;
 	}
 
