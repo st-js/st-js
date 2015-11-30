@@ -258,4 +258,9 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 				"            sum += element[0];\n" +
 				"        }");
 	}
+
+	@Test
+	public void testProtectedMethodInParent() {
+		assertCodeContains(Fields31_protected_parent.class, "return this._parent._getProtectedField();");
+	}
 }

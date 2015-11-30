@@ -19,6 +19,7 @@ import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import java.util.ArrayList;
@@ -51,23 +52,44 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 
 	public static <JS> String buildMethodName(MethodInvocationTree tree, GenerationContext<JS> context) {
 		ExpressionTree select = tree.getMethodSelect();
+
 		if (select instanceof IdentifierTree) {
 			// simple call: method(args)
-
-			String methodName = ((IdentifierTree) select).getName().toString();
-			Symbol.MethodSymbol element = (Symbol.MethodSymbol) InternalUtils.symbol(tree);
-			ExecutableElement methodElement = TreeUtils.getMethod(element);
-
-			if (methodElement != null
-					&& (AnnotationUtils.JSOverloadName.isPresent((Symbol.MethodSymbol) methodElement)
-					|| hasAnOverloadedMethod(context, methodElement))) {
-				methodName = AnnotationUtils.JSOverloadName.decorate((Symbol.MethodSymbol) methodElement);
-			}
-			return prefixNonPublicMethods(methodName, element);
+			return buildMethodNameForIdentifierTree(tree, context, (IdentifierTree) select);
+		} else if (select instanceof MemberSelectTree) {
+			// calls with target: target.method(args)
+			return buildMethodNameForMemberSelectTree(select);
 		}
-		// calls with target: target.method(args)
+		throw context.addError(tree, "Unsupported tree type during buildMethodName.");
+	}
+
+	private static String buildMethodNameForMemberSelectTree(ExpressionTree select) {
 		MemberSelectTree memberSelect = (MemberSelectTree) select;
-		return memberSelect.getIdentifier().toString();
+		String methodName = memberSelect.getIdentifier().toString();
+		Symbol symbol = null;
+
+		if (TreeUtils.isFieldAccess(memberSelect.getExpression())) {
+            symbol = (Symbol) InternalUtils.symbol(select);
+        }
+
+		if (symbol != null && (symbol.getKind() == ElementKind.FIELD || symbol.getKind() == ElementKind.METHOD)) {
+            return prefixNonPublicMethods(methodName, symbol);
+        } else {
+            return methodName;
+        }
+	}
+
+	private static <JS> String buildMethodNameForIdentifierTree(MethodInvocationTree tree, GenerationContext<JS> context, IdentifierTree select) {
+		String methodName = select.getName().toString();
+		Symbol symbol = (Symbol.MethodSymbol) InternalUtils.symbol(tree);
+		ExecutableElement methodElement = TreeUtils.getMethod((Symbol.MethodSymbol) symbol);
+
+		if (methodElement != null
+                && (AnnotationUtils.JSOverloadName.isPresent((Symbol.MethodSymbol) methodElement)
+                || hasAnOverloadedMethod(context, methodElement))) {
+            methodName = AnnotationUtils.JSOverloadName.decorate((Symbol.MethodSymbol) methodElement);
+        }
+		return prefixNonPublicMethods(methodName, symbol);
 	}
 
 	private static <JS> boolean hasAnOverloadedMethod(GenerationContext<JS> context, ExecutableElement methodElement) {
@@ -77,7 +99,7 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 		return ElementUtils.hasAnOverloadedEquivalentMethod(methodElement, context.getElements());
 	}
 
-	private static String prefixNonPublicMethods(String methodName, Symbol.MethodSymbol element) {
+	private static String prefixNonPublicMethods(String methodName, Symbol element) {
 		if (element != null && element.getModifiers().contains(Modifier.PUBLIC)) {
             return methodName;
         } else {
