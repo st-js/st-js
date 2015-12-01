@@ -1,10 +1,6 @@
 package org.stjs.generator.writer.templates;
 
-import java.util.List;
-
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
-
+import com.sun.source.tree.MethodInvocationTree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.TreeUtils;
@@ -15,7 +11,9 @@ import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
 
-import com.sun.source.tree.MethodInvocationTree;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+import java.util.List;
 
 /**
  * this is the standard generation template
@@ -58,12 +56,19 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		}
 
 		// transform it into superType.[prototype.method].call(this, args..);
-		String typeName = context.getNames().getTypeName(context, typeElement, DependencyType.STATIC);
-		JS superType = context.js().name(GeneratorConstants.SUPER.equals(methodName) ? typeName : typeName + ".prototype." + methodName);
+		JS superType = constructSuperType(context, typeElement, methodName);
 
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
 		arguments.add(0, context.js().keyword(Keyword.THIS));
 		return context.js().functionCall(context.js().property(superType, "call"), arguments);
+	}
+
+	private JS constructSuperType(GenerationContext<JS> context, TypeElement typeElement, String methodName) {
+		String typeName = context.getNames().getTypeName(context, typeElement, DependencyType.STATIC);
+		if (typeName.equals(GeneratorConstants.ENUM_CLASS)) {
+			typeName = GeneratorConstants.TRANSPILED_ENUM_CLASS;
+		}
+		return context.js().name(GeneratorConstants.SUPER.equals(methodName) ? typeName : typeName + ".prototype." + methodName);
 	}
 
 	@Override

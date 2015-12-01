@@ -152,10 +152,12 @@ public class GeneratorConfigurationBuilder {
 		allowedJavaLangClasses.add("RuntimeException");
 
 		allowedJavaLangClasses.add("Iterable");
+		allowedJavaLangClasses.add("Enum");
 
 		allowedPackages.add("java.lang");
 
 		allowedPackage(Iterator.class.getName());
+		allowedPackage(Enum.class.getName());
 
 		return new GeneratorConfiguration(//
 				allowedPackages,  //

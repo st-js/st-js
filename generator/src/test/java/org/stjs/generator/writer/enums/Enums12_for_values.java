@@ -1,13 +1,9 @@
 package org.stjs.generator.writer.enums;
 
-public class Enums6 {
-	public enum Value {
-		a, b, c;
-	}
-
+public class Enums12_for_values {
 	@SuppressWarnings("unused")
 	public void main() {
-		for (Value v : Value.values()) {
+		for (SimpleEnum v : SimpleEnum.values()) {
 			//
 		}
 	}
