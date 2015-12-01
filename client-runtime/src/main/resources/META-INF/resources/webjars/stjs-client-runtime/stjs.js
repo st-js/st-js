@@ -17,11 +17,13 @@
  * methods added to JS prototypes
  */
 
-var NOT_IMPLEMENTED = function(){
+var stjs={};
+
+stjs.NOT_IMPLEMENTED = function(){
 	throw "This method is not implemented in Javascript.";
 };
 
-JavalikeEquals = function(value){
+stjs.JavalikeEquals = function(value){
 	if (value == null)
 		return false;
 	if (value.valueOf)
@@ -29,22 +31,22 @@ JavalikeEquals = function(value){
 	return this === value;
 };
 
-JavalikeGetClass = function(){
+stjs.JavalikeGetClass = function(){
 	return this.constructor;
 };
 
 /* String */
 if (!String.prototype.equals) {
-	String.prototype.equals=JavalikeEquals;
+	String.prototype.equals=stjs.JavalikeEquals;
 }
 if (!String.prototype.getBytes) {
-	String.prototype.getBytes=NOT_IMPLEMENTED;
+	String.prototype.getBytes=stjs.NOT_IMPLEMENTED;
 }
 if (!String.prototype.getChars) {
-	String.prototype.getChars=NOT_IMPLEMENTED;
+	String.prototype.getChars=stjs.NOT_IMPLEMENTED;
 }
 if (!String.prototype.contentEquals){
-	String.prototype.contentEquals=NOT_IMPLEMENTED;
+	String.prototype.contentEquals=stjs.NOT_IMPLEMENTED;
 }
 if (!String.prototype.startsWith) {
 	String.prototype.startsWith=function(start, from){
@@ -62,10 +64,10 @@ if (!String.prototype.endsWith) {
 	}
 }
 if (!String.prototype.trim) {
-	var trimLeft = /^\s+/;
-	var trimRight = /\s+$/;
-	String.prototype.trim = function(  ) {
-		return this.replace( trimLeft, "" ).replace( trimRight, "" );
+	stjs.trimLeftRegExp = /^\s+/;
+	stjs.trimRightRegExp = /\s+$/;
+	String.prototype.trim = function() {
+		return this.replace(stjs.trimLeftRegExp, "").replace(stjs.trimRightRegExp, "");
 	}
 }
 if (!String.prototype.matches){
@@ -106,10 +108,10 @@ if (!String.prototype.codePointAt){
 }
 
 if (!String.prototype.codePointBefore){
-	String.prototype.codePointBefore=NOT_IMPLEMENTED;
+	String.prototype.codePointBefore=stjs.NOT_IMPLEMENTED;
 }
 if (!String.prototype.codePointCount){
-	String.prototype.codePointCount=NOT_IMPLEMENTED;
+	String.prototype.codePointCount=stjs.NOT_IMPLEMENTED;
 }
 
 if (!String.prototype.replaceAll){
@@ -148,7 +150,7 @@ if(!String.prototype.contains){
 }
 
 if(!String.prototype.getClass){
-	String.prototype.getClass=JavalikeGetClass;
+	String.prototype.getClass=stjs.JavalikeGetClass;
 }
 
 
@@ -230,10 +232,10 @@ if (!Number.prototype.isNaN) {
 	}
 }
 if (!Number.prototype.equals) {
-	Number.prototype.equals=JavalikeEquals;
+	Number.prototype.equals=stjs.JavalikeEquals;
 }
 if(!Number.prototype.getClass){
-	Number.prototype.getClass=JavalikeGetClass;
+	Number.prototype.getClass=stjs.JavalikeGetClass;
 }
 
 //force valueof to match approximately the Java's behavior (for Integer.valueOf it returns in fact a double)
@@ -243,10 +245,10 @@ Number.valueOf=function(value){
 
 /* Boolean */
 if (!Boolean.prototype.equals) {
-	Boolean.prototype.equals=JavalikeEquals;
+	Boolean.prototype.equals=stjs.JavalikeEquals;
 }
 if(!Boolean.prototype.getClass){
-	Boolean.prototype.getClass=JavalikeGetClass;
+	Boolean.prototype.getClass=stjs.JavalikeGetClass;
 }
 
 //force valueof to match the Java's behavior
@@ -257,8 +259,6 @@ Boolean.valueOf=function(value){
 
 
 /************* STJS helper functions ***************/
-var stjs={};
-
 stjs.global=this;
 stjs.skipCopy = {"prototype":true, "constructor": true, "$typeDescription":true, "$inherit" : true};
 
@@ -273,7 +273,7 @@ stjs.ns=function(path){
 };
 
 stjs.copyProps=function(from, to){
-	for(key in from){
+	for(var key in from){
 		if (!stjs.skipCopy[key])
 			to[key]	= from[key];
 	}
@@ -281,7 +281,7 @@ stjs.copyProps=function(from, to){
 };
 
 stjs.copyInexistentProps=function(from, to){
-	for(key in from){
+	for(var key in from){
 		if (!stjs.skipCopy[key] && !to[key])
 			to[key]	= from[key];
 	}
@@ -296,7 +296,7 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 	}
 
 	_constructor.$inherit=[];
-	var key, a;
+
 	if(_super != null){
 		// I is used as a no-op constructor that has the same prototype as _super
 		// we do this because we cannot predict the result of calling new _super()
@@ -318,7 +318,7 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 	}
 
 	// copy static properties and default methods from interfaces
-	for(a = 0; a < _implements.length; ++a){
+	for(var a = 0; a < _implements.length; ++a){
 		if (!_implements[a]) continue;
 		stjs.copyProps(_implements[a], _constructor);
 		stjs.copyInexistentProps(_implements[a].prototype, _constructor.prototype);
@@ -339,10 +339,10 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 	// add the default equals method if it is not present yet, and we don't have a superclass
 	if(_super == null){
 		if(!_constructor.prototype.equals) {
-			_constructor.prototype.equals = JavalikeEquals;
+			_constructor.prototype.equals = stjs.JavalikeEquals;
 		}
 		if(!_constructor.prototype.getClass) {
-			_constructor.prototype.getClass = JavalikeGetClass;
+			_constructor.prototype.getClass = stjs.JavalikeGetClass;
 		}
 	}
 
@@ -354,14 +354,13 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
  * 1.2 and earlier version of stjs.extend. Included for backwards compatibility
  */
 stjs.extend12=function( _constructor,  _super, _implements){
-	var key, a;
 	var I = function(){};
 	I.prototype	= _super.prototype;
 	_constructor.prototype	= new I();
 
 	//copy static properties for super and interfaces
 	// assign every method from proto instance
-	for(a = 1; a < arguments.length; ++a){
+	for(var a = 1; a < arguments.length; ++a){
 		stjs.copyProps(arguments[a], _constructor);
 	}
 	// remember the correct constructor
@@ -372,8 +371,8 @@ stjs.extend12=function( _constructor,  _super, _implements){
 	// this was not part of the original 1.2 version of extends, however forward compatibility
 	// with 1.3 requires it
 	if(_super == null){
-		_constructor.prototype.equals = JavalikeEquals;
-		_constructor.prototype.getClass = JavalikeGetClass;
+		_constructor.prototype.equals = stjs.JavalikeEquals;
+		_constructor.prototype.getClass = stjs.JavalikeGetClass;
 	}
 
 	// build package and assign
@@ -434,7 +433,7 @@ stjs.enumEntry.prototype.ordinal=function(){
 stjs.enumEntry.prototype.toString=function(){
 	return this._name;
 };
-stjs.enumEntry.prototype.equals=JavalikeEquals;
+stjs.enumEntry.prototype.equals=stjs.JavalikeEquals;
 
 stjs.enumeration=function(){
 	var i;
@@ -866,41 +865,44 @@ stjs.stringify=function(obj, cls){
 	  return ret;
 };
 /************* STJS asserts ***************/
-var stjsAssertHandler = function(position, code, msg) {
+stjs.assertHandler = function(position, code, msg) {
 	throw msg + " at " + position;
 };
-function setAssertHandler(a) {
-	stjsAssertHandler = a;
+
+stjs.STJSAssert = {};
+
+stjs.STJSAssert.setAssertHandler = function(a) {
+	stjs.assertHandler = a;
 }
 
-function assertArgEquals(position, code, expectedValue, testValue) {
-	if (expectedValue != testValue && stjsAssertHandler)
-		stjsAssertHandler(position, code, "Wrong argument. Expected: " + expectedValue + ", got:" + testValue);
+stjs.STJSAssert.assertArgEquals = function(position, code, expectedValue, testValue) {
+	if (expectedValue != testValue && stjs.assertHandler)
+		stjs.assertHandler(position, code, "Wrong argument. Expected: " + expectedValue + ", got:" + testValue);
 }
 
-function assertArgNotNull(position, code, testValue) {
-	if (testValue == null && stjsAssertHandler)
-		stjsAssertHandler(position, code, "Wrong argument. Null value");
+stjs.STJSAssert.assertArgNotNull = function(position, code, testValue) {
+	if (testValue == null && stjs.assertHandler)
+		stjs.assertHandler(position, code, "Wrong argument. Null value");
 }
 
-function assertArgTrue(position, code, condition) {
-	if (!condition && stjsAssertHandler)
-		stjsAssertHandler(position, code, "Wrong argument. Condition is false");
+stjs.STJSAssert.assertArgTrue = function(position, code, condition) {
+	if (!condition && stjs.assertHandler)
+		stjs.assertHandler(position, code, "Wrong argument. Condition is false");
 }
 
-function assertStateEquals(position, code, expectedValue, testValue) {
-	if (expectedValue != testValue && stjsAssertHandler)
-		stjsAssertHandler(position, code, "Wrong state. Expected: " + expectedValue + ", got:" + testValue);
+stjs.STJSAssert.assertStateEquals = function(position, code, expectedValue, testValue) {
+	if (expectedValue != testValue && stjs.assertHandler)
+		stjs.assertHandler(position, code, "Wrong state. Expected: " + expectedValue + ", got:" + testValue);
 }
 
-function assertStateNotNull(position, code, testValue) {
-	if (testValue == null && stjsAssertHandler)
-		stjsAssertHandler(position, code, "Wrong state. Null value");
+stjs.STJSAssert.assertStateNotNull = function(position, code, testValue) {
+	if (testValue == null && stjs.assertHandler)
+		stjs.assertHandler(position, code, "Wrong state. Null value");
 }
 
-function assertStateTrue(position, code, condition) {
-	if (!condition && stjsAssertHandler)
-		stjsAssertHandler(position, code, "Wrong state. Condition is false");
+stjs.STJSAssert.assertStateTrue = function(position, code, condition) {
+	if (!condition && stjs.assertHandler)
+		stjs.assertHandler(position, code, "Wrong state. Condition is false");
 }
 /** exception **/
 var Throwable = function(message, cause){

@@ -1,6 +1,7 @@
 package org.stjs.javascript.stjs;
 
 import org.stjs.javascript.annotation.GlobalScope;
+import org.stjs.javascript.annotation.Namespace;
 import org.stjs.javascript.annotation.Template;
 import org.stjs.javascript.functions.Callback3;
 
@@ -8,7 +9,9 @@ import org.stjs.javascript.functions.Callback3;
  * This is a collection of assert methods that are implemented in the stjs.js javascript file.
  * @author acraciun
  */
-@GlobalScope
+
+@Namespace("stjs")
+
 @SuppressWarnings("unused")
 public class STJSAssert {
 	@Template("assert")
