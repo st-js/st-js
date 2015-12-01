@@ -81,6 +81,12 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 
 	private static <JS> String buildMethodNameForIdentifierTree(MethodInvocationTree tree, GenerationContext<JS> context, IdentifierTree select) {
 		String methodName = select.getName().toString();
+
+		// Ignore super() calls, these are never going to be prefixed
+		if (GeneratorConstants.SUPER.equals(methodName)) {
+			return methodName;
+		}
+
 		Symbol symbol = (Symbol.MethodSymbol) InternalUtils.symbol(tree);
 		ExecutableElement methodElement = TreeUtils.getMethod((Symbol.MethodSymbol) symbol);
 
