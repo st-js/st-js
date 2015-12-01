@@ -257,7 +257,7 @@ Boolean.valueOf=function(value){
 }
 
 /* Array */
-stjs.newJavaArray = function() {
+stjs.createJavaArray = function() {
     var argsArray = Array.prototype.slice.call(arguments);
     var arraySize = argsArray[0];
 
@@ -273,7 +273,7 @@ stjs.newJavaArray = function() {
 
         var theArray = new Array(arraySize);
         for (var i = 0; i < arraySize; i++) {
-            theArray[i] = stjs.newJavaArray.apply(null, argsWithoutFirst);
+            theArray[i] = stjs.createJavaArray.apply(null, argsWithoutFirst);
         }
 
         return theArray;

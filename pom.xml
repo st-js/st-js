@@ -46,7 +46,7 @@
 		<module>server</module>
 		<module>maven-plugin</module>
 		<module>test-helper</module>
-		<module>maven-plugin-it</module>
+		<!--<module>maven-plugin-it</module>-->
 		<module>command-line</module>
 	</modules>
 
