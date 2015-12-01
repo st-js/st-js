@@ -1,5 +1,6 @@
 package org.stjs.generator.writer.fields;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.utils.AbstractStjsTest;
@@ -258,9 +259,28 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 				"            sum += element[0];\n" +
 				"        }");
 	}
+	
 
 	@Test
 	public void testProtectedMethodInParent() {
 		assertCodeContains(Fields31_protected_parent.class, "return this._parent._getProtectedField();");
+	}	
+
+	@Test
+	public void testCreatedFixedArraySize() {
+		assertCodeContains(Fields31_create_fixed_array_size.class, "" +
+				"    this._aStringArray = stjs.newJavaArray(10);\n" +
+				"    this._aStringArray = stjs.newJavaArray(this.constructor.getSize2());\n" +
+				"    this._aDoubleStringArray = stjs.newJavaArray(200, 300);\n" +
+				"    this._aDoubleStringArray = stjs.newJavaArray(this.constructor.getSize2(), 300);\n" +
+				"    this._aDoubleStringArray = stjs.newJavaArray(this.constructor.getSize2(), this.constructor.getSize3());\n");
 	}
+
+	@Test
+	public void testInitializeFixedArray2Dimensions() {
+		String executeResult = (String) execute(Fields32_array2Dimensions.class);
+
+		Assert.assertEquals("[null,null,null][null,null,null]", executeResult);
+	}
+
 }

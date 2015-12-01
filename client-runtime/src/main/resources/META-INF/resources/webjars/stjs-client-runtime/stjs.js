@@ -256,7 +256,29 @@ Boolean.valueOf=function(value){
 	return new Boolean(value).valueOf();
 }
 
+/* Array */
+stjs.newJavaArray = function() {
+    var argsArray = Array.prototype.slice.call(arguments);
+    var arraySize = argsArray[0];
 
+    if (argsArray.length == 1) {
+        var theArray = new Array(arraySize);
+        for (var i = 0; i < arraySize; i++) {
+            theArray[i] = null;
+        }
+        return theArray;
+    }
+    else {
+        var argsWithoutFirst = argsArray.slice(1);
+
+        var theArray = new Array(arraySize);
+        for (var i = 0; i < arraySize; i++) {
+            theArray[i] = stjs.newJavaArray.apply(null, argsWithoutFirst);
+        }
+
+        return theArray;
+    }
+}
 
 /************* STJS helper functions ***************/
 stjs.global=this;
