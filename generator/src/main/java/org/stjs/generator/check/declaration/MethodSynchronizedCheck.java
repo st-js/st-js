@@ -25,10 +25,8 @@ public class MethodSynchronizedCheck implements CheckContributor<MethodTree> {
             return null;
         }
 
-        if (!context.getConfiguration().isSynchronizedAllowed()) {
-            if (tree.getModifiers().getFlags().contains(Modifier.SYNCHRONIZED)) {
-                context.addError(tree, "Synchronized methods are not supported by Javascript");
-            }
+        if ((!context.getConfiguration().isSynchronizedAllowed()) && tree.getModifiers().getFlags().contains(Modifier.SYNCHRONIZED)) {
+            context.addError(tree, "Synchronized methods are not supported by Javascript");
         }
 
         return null;
