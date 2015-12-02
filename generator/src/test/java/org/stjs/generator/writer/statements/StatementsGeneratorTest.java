@@ -102,7 +102,9 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testForEachMapBlock() {
-		assertCodeDoesNotContain(Statements13.class, "hasOwnProperty");
+		String code = generate(Statements13.class);
+		assertCodeDoesNotContain(code, "hasOwnProperty");
+		assertCodeContains(code, "for (var i in a) {");
 	}
 
 	@Test
