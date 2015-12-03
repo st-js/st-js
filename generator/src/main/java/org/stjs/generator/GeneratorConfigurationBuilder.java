@@ -32,7 +32,7 @@ public class GeneratorConfigurationBuilder {
 	private boolean generateArrayHasOwnProperty = true;
 	private boolean generateSourceMap;
 	private String sourceEncoding = Charset.defaultCharset().name();
-	private boolean isSynchronizedAllowed;
+	private boolean isSynchronizedAllowed = true;
 	private ClassLoader stjsClassLoader;
 	private File targetFolder;
 	private GenerationDirectory generationFolder;
