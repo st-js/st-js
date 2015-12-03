@@ -1,21 +1,15 @@
 package org.stjs.generator.writer.declaration;
 
-import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVariable;
-
+import com.sun.source.tree.AnnotationTree;
+import com.sun.source.tree.AssignmentTree;
+import com.sun.source.tree.BlockTree;
+import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.NewArrayTree;
+import com.sun.source.tree.Tree;
+import com.sun.source.tree.VariableTree;
+import com.sun.tools.javac.tree.JCTree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.AnnotationHelper;
@@ -37,15 +31,20 @@ import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.javascript.annotation.STJSBridge;
 import org.stjs.javascript.annotation.ServerSide;
 
-import com.sun.source.tree.AnnotationTree;
-import com.sun.source.tree.AssignmentTree;
-import com.sun.source.tree.BlockTree;
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.ExpressionTree;
-import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.NewArrayTree;
-import com.sun.source.tree.Tree;
-import com.sun.source.tree.VariableTree;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 
@@ -67,10 +66,15 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	}
 
 	/**
-	 * @return the node to put in the super class. for intefaces, the super class goes also in the interfaces list
+	 * @return the node to put in the super class. for interfaces, the super class goes also in the interfaces list
 	 */
 	private JS getSuperClass(ClassTree clazz, GenerationContext<JS> context) {
+		if (clazz.getKind() == Tree.Kind.ENUM) {
+			return context.js().name(GeneratorConstants.TRANSPILED_ENUM_CLASS);
+		}
+
 		Element type = TreeUtils.elementFromDeclaration(clazz);
+
 		if (clazz.getExtendsClause() == null || type.getKind() == ElementKind.INTERFACE) {
 			// no super class found
 			return context.js().keyword(Keyword.NULL);
@@ -147,7 +151,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	/**
 	 * @return the JavaScript node for the class' members
 	 */
-	private JS getMembers(WriterVisitor<JS> visitor, ClassTree clazz, GenerationContext<JS> context) {
+	private JS getMembers(WriterVisitor<JS> visitor, ClassTree clazz, GenerationContext<JS> context, List<String> enumEntries) {
 		// the following members must not appear in the initializer function:
 		// - constructors (they are printed elsewhere)
 		// - abstract methods (they should be omitted)
@@ -160,12 +164,55 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		@SuppressWarnings("unchecked")
 		List<JS> params = Arrays.asList(context.js().name(JavascriptKeywords.CONSTRUCTOR), context.js().name(JavascriptKeywords.PROTOTYPE));
 
-		List<JS> stmts = new ArrayList<JS>();
-		for (Tree member : nonConstructors) {
+		List<JS> stmts = new ArrayList<>();
+		List<JS> enumValues = new ArrayList<>();
+		for (int i = 0; i < nonConstructors.size(); i++) {
+			Tree member = nonConstructors.get(i);
 			stmts.add(visitor.scan(member, context));
+			if (isMemberAnEnumEntry(member, enumEntries)) {
+				generateEnumSignatureForMember(context, stmts, enumValues, i, member);
+			}
+		}
+		// _values must be set at the end of the statements to make sure all object are available to the javascript
+		if (!enumValues.isEmpty()) {
+			JS enumValuesProperty = context.js().property(context.js().name(JavascriptKeywords.CONSTRUCTOR), GeneratorConstants.ENUM_VALUES_PROPERTY);
+			stmts.add(context.js().expressionStatement(
+					context.js().assignment(AssignOperator.ASSIGN, enumValuesProperty, context.js().array(enumValues))));
 		}
 
 		return context.js().function(null, params, context.js().block(stmts));
+	}
+
+	private boolean isMemberAnEnumEntry(Tree member, List<String> enumEntries) {
+		if (enumEntries != null && member instanceof JCTree.JCVariableDecl) {
+			String enumEntryName = ((JCTree.JCVariableDecl) member).getName().toString();
+			return enumEntries.contains(enumEntryName);
+		}
+		return false;
+	}
+
+	/**
+	 *  Add JS corresponding to the contract of a Java Enum (name() and ordinal()):
+	 *
+	 *  constructor.FIRST._name = "FIRST";
+	 *  constructor.FIRST._ordinal = 1;
+	 *  constructor._values = [constructor.FIRST];
+	 */
+	private void generateEnumSignatureForMember(GenerationContext<JS> context, List<JS> stmts, List<JS> enumValues, int index, Tree member) {
+		if (member instanceof JCTree.JCVariableDecl) {
+            String enumEntryName = ((JCTree.JCVariableDecl) member).getName().toString();
+
+            JS enumConstructorProperty = context.js().property(context.js().name(JavascriptKeywords.CONSTRUCTOR), enumEntryName);
+            JS enumNameProperty = context.js().property(enumConstructorProperty, GeneratorConstants.ENUM_NAME_PROPERTY);
+            JS enumOrdinalProperty = context.js().property(enumConstructorProperty, GeneratorConstants.ENUM_ORDINAL_PROPERTY);
+
+			stmts.add(context.js().expressionStatement(
+					context.js().assignment(AssignOperator.ASSIGN, enumNameProperty, context.js().string(enumEntryName))));
+            stmts.add(context.js().expressionStatement(
+					context.js().assignment(AssignOperator.ASSIGN, enumOrdinalProperty, context.js().number(index))));
+
+			enumValues.add(enumConstructorProperty);
+        }
 	}
 
 	private void addStaticInitializers(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
@@ -401,38 +448,21 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		return context.js().object(props);
 	}
 
-	@SuppressWarnings("unused")
-	private boolean generareEnum(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
+	private List<String> generateEnumEntries(ClassTree tree) {
 		Element type = TreeUtils.elementFromDeclaration(tree);
+
 		if (type.getKind() != ElementKind.ENUM) {
-			return false;
+			return null;
 		}
 
-		JavaScriptBuilder<JS> js = context.js();
-
-		// add all anum entries
-		List<JS> enumEntries = new ArrayList<JS>();
+		List<String> enumEntries = new ArrayList<>();
 		for (Element member : ElementUtils.getAllFieldsIn((TypeElement) type)) {
 			if (member.getKind() == ElementKind.ENUM_CONSTANT) {
-				enumEntries.add(js.string(member.getSimpleName().toString()));
+				enumEntries.add(member.getSimpleName().toString());
 			}
 		}
 
-		JS enumConstructor = js.functionCall(js.property(js.name(GeneratorConstants.STJS), "enumeration"), enumEntries);
-
-		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
-		if (typeName.contains(".")) {
-			// inner class or namespace
-			boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
-			String leftSide = innerClass ? replaceFullNameWithConstructor(typeName) : typeName;
-
-			stmts.add(js.expressionStatement(js.assignment(AssignOperator.ASSIGN, js.name(leftSide), enumConstructor)));
-		} else {
-			// regular class
-			stmts.add(js.variableDeclaration(true, Collections.singleton(NameValue.of(typeName, enumConstructor))));
-		}
-
-		return true;
+		return enumEntries.isEmpty() ? null : enumEntries;
 	}
 
 	/**
@@ -506,15 +536,12 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 
 		addNamespace(tree, context, stmts);
 
-		if (generareEnum(visitor, tree, context, stmts)) {
-			// special construction for enums
-			return js.statements(stmts);
-		}
+		List<String> enumEntries = generateEnumEntries(tree);
 
 		JS name = getClassName(tree, context);
 		JS superClazz = getSuperClass(tree, context);
 		JS interfaces = getInterfaces(tree, context);
-		JS members = getMembers(visitor, tree, context);
+		JS members = getMembers(visitor, tree, context, enumEntries);
 		JS typeDesc = getTypeDescription(visitor, tree, context);
 		JS annotationDesc = getAnnotationDescription(visitor, tree, context);
 		boolean anonymousClass = tree.getSimpleName().length() == 0;

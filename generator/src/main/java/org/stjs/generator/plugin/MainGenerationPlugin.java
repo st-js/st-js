@@ -6,7 +6,6 @@ import com.sun.source.tree.VariableTree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.check.declaration.ClassDuplicateMemberNameCheck;
-import org.stjs.generator.check.declaration.ClassEnumWithoutMembersCheck;
 import org.stjs.generator.check.declaration.ClassGlobalForbidInnerCheck;
 import org.stjs.generator.check.declaration.ClassGlobalInstanceMembersCheck;
 import org.stjs.generator.check.declaration.ClassImplementJavascriptFunctionCheck;
@@ -132,7 +131,6 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(new ClassNamespaceCheck());
 
 		visitor.contribute(new NewClassObjectInitCheck());
-		visitor.contribute(new ClassEnumWithoutMembersCheck());
 		visitor.contribute(new NewArrayMultipleDimensForbiddenCheck());
 
 		visitor.contribute(new BlockInstanceCheck());

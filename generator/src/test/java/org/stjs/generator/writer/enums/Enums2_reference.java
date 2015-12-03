@@ -1,12 +1,12 @@
 package org.stjs.generator.writer.enums;
 
-public class Enums2 {
+public class Enums2_reference {
 	public enum Value {
-		a, b, c;
+		FIRST, SECOND, THIRD
 	}
 
 	public void main() {
 		@SuppressWarnings("unused")
-		Value x = Value.a;
+		Value x = Value.FIRST;
 	}
 }

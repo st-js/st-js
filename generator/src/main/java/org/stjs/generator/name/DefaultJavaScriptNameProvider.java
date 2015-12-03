@@ -1,12 +1,9 @@
 package org.stjs.generator.name;
 
-import java.util.HashMap;
-import java.util.Map;
-import javax.lang.model.element.Element;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.WildcardType;
-
+import com.sun.source.tree.IdentifierTree;
+import com.sun.source.tree.MethodInvocationTree;
+import com.sun.source.tree.MethodTree;
+import com.sun.source.util.TreePath;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.javac.ElementUtils;
@@ -14,10 +11,12 @@ import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.JavaNodes;
 
-import com.sun.source.tree.IdentifierTree;
-import com.sun.source.tree.MethodInvocationTree;
-import com.sun.source.tree.MethodTree;
-import com.sun.source.util.TreePath;
+import javax.lang.model.element.Element;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.WildcardType;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class implements the naming strategy transforming Java element names in JavaScript names.

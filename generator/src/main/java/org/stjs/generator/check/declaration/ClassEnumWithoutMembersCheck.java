@@ -1,18 +1,17 @@
 package org.stjs.generator.check.declaration;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
-
+import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.Tree;
+import com.sun.source.tree.VariableTree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
 
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.Tree;
-import com.sun.source.tree.VariableTree;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.TypeElement;
 
 /**
  * this class checks that no member is added to an enum declaration (other than of course the enum constants)
