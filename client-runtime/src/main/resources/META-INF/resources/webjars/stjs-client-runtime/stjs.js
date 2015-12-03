@@ -50,6 +50,10 @@ window["stjs"] = (function (global) {
     return to;
   };
 
+  var _INHERIT = "$inherit";
+  var _TYPEDESCRIPTION = "$typeDescription";
+  var _ANNOTATIONS = "$annotations";
+
   /* String */
   var _augmentedStringPrototype = {
     "equals": _JavalikeEquals,
@@ -256,7 +260,7 @@ window["stjs"] = (function (global) {
       return _extend12.apply(this, arguments);
     }
 
-    _constructor.$inherit = [];
+    _constructor[_INHERIT] = [];
 
     if (_super != null) {
       // I is used as a no-op constructor that has the same prototype as _super
@@ -272,11 +276,11 @@ window["stjs"] = (function (global) {
       // copy static properties for super
       // assign every method from proto instance
       _copyProps(_super, _constructor);
-      _copyProps(_super.$typeDescription, _typeDescription);
-      _copyProps(_super.$annotations, _annotations);
+      _copyProps(_super[_TYPEDESCRIPTION], _typeDescription);
+      _copyProps(_super[_ANNOTATIONS], _annotations);
 
       //add the super class to inherit array
-      _constructor.$inherit.push(_super);
+      _constructor[_INHERIT].push(_super);
     }
 
     // copy static properties and default methods from interfaces
@@ -284,7 +288,7 @@ window["stjs"] = (function (global) {
       if (!_implements[a]) continue;
       _copyProps(_implements[a], _constructor);
       _copyInexistentProps(_implements[a].prototype, _constructor.prototype);
-      _constructor.$inherit.push(_implements[a]);
+      _constructor[_INHERIT].push(_implements[a]);
     }
 
     // remember the correct constructor
@@ -295,8 +299,8 @@ window["stjs"] = (function (global) {
       _initializer(_constructor, _constructor.prototype);
     }
 
-    _constructor.$typeDescription = _typeDescription;
-    _constructor.$annotations = _annotations;
+    _constructor[_TYPEDESCRIPTION] = _typeDescription;
+    _constructor[_ANNOTATIONS] = _annotations;
 
     // add the default equals method if it is not present yet, and we don't have a superclass
     if (_super == null) {
@@ -316,22 +320,22 @@ window["stjs"] = (function (global) {
    * return type's annotations
    */
   var getAnnotations = function (clz) {
-    return clz.$annotations;
+    return clz[_ANNOTATIONS];
   };
 
   var getTypeAnnotation = function (clz, annType) {
     //noinspection JSUnresolvedVariable
-    var ann = clz.$annotations._;
+    var ann = clz[_ANNOTATIONS]["_"];
     return ann ? ann[annType] : null;
   };
 
   var getMemberAnnotation = function (clz, memberName, annType) {
-    var ann = clz.$annotations[memberName];
+    var ann = clz[_ANNOTATIONS][memberName];
     return ann ? ann[annType] : null;
   };
 
   var getParameterAnnotation = function (clz, methodName, idx, annType) {
-    var ann = clz.$annotations[methodName + "$" + idx];
+    var ann = clz[_ANNOTATIONS][methodName + "$" + idx];
     return ann ? ann[annType] : null;
   };
 
@@ -343,10 +347,10 @@ window["stjs"] = (function (global) {
       return false;
     if (child === parent)
       return true;
-    if (!child.$inherit)
+    if (!child[_INHERIT])
       return false;
-    for (var i = 0; i < child.$inherit.length; ++i) {
-      if (isInstanceOf(child.$inherit[i], parent)) {
+    for (var i = 0; i < child[_INHERIT].length; ++i) {
+      if (isInstanceOf(child[_INHERIT][i], parent)) {
         return true;
       }
     }
@@ -628,7 +632,7 @@ window["stjs"] = (function (global) {
                 key = cont.length;
               } else {
                 key = tok || EMPTY_STRING;  // Use as key for next value seen.
-                stack2[0] = cont.constructor.$typeDescription ? cont.constructor.$typeDescription[key] : stack2[1].arguments[1];
+                stack2[0] = cont.constructor[_TYPEDESCRIPTION] ? cont.constructor[_TYPEDESCRIPTION][key] : stack2[1].arguments[1];
                 break;
               }
             }
@@ -748,7 +752,7 @@ window["stjs"] = (function (global) {
       if (prop == null)
         continue;
       //noinspection JSUnfilteredForInLoop
-      var td = cls.$typeDescription[key];
+      var td = cls[_TYPEDESCRIPTION][key];
       if (!td) {
         //noinspection JSUnfilteredForInLoop
         ret[key] = prop;
@@ -769,7 +773,7 @@ window["stjs"] = (function (global) {
     var ret = {};
     for (var key in obj) {
       //noinspection JSUnfilteredForInLoop
-      var td = cls.$typeDescription[key];
+      var td = cls[_TYPEDESCRIPTION][key];
       //noinspection JSUnfilteredForInLoop
       var prop = obj[key];
       var ser = td != null ? serializers[td.name || td] : null;
