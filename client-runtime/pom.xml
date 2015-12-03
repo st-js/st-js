@@ -28,6 +28,7 @@
 							<goal>compile</goal>
 						</goals>
 						<configuration>
+							<compilation_level>ADVANCED_OPTIMIZATIONS</compilation_level>
 							<js_dir>src/main/resources/META-INF/resources/webjars/stjs-client-runtime</js_dir>
 							<js_output_dir>${project.build.outputDirectory}/META-INF/resources/webjars/stjs-client-runtime</js_output_dir>
 							<version>min</version>
