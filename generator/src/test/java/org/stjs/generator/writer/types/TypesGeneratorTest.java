@@ -27,12 +27,6 @@ public class TypesGeneratorTest extends AbstractStjsTest {
 		generate(Types5.class);
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
-	public void testUseForbiddenTypes2() {
-		// ArrayList is not allowed
-		generate(Types6.class);
-	}
-
 	@Test
 	public void testUseForbiddenTypes3() {
 		// LinkedList is allowed - presence of LinkedList.stjs

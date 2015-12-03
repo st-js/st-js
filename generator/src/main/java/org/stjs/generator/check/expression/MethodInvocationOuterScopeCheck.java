@@ -9,49 +9,57 @@ import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.utils.Scopes;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
 
 /**
  * this check verifies that you don't call a method from the outer type as in javaScript this scope is not accessible.
  * @author acraciun
  */
 public class MethodInvocationOuterScopeCheck implements CheckContributor<MethodInvocationTree> {
-	private void checkScope(Element methodElement, MethodInvocationTree tree, GenerationContext<Void> context) {
-		ClassTree enclosingClassTree = IdentifierAccessOuterScopeCheck.enclosingClassSkipAnonymousInitializer(context.getCurrentPath());
+    @Override
+    public Void visit(CheckVisitor visitor, MethodInvocationTree tree, GenerationContext<Void> context) {
+        Element methodElement = TreeUtils.elementFromUse(tree);
 
-		TypeElement currentScopeClassElement = TreeUtils.elementFromDeclaration(enclosingClassTree);
-		TypeElement methodOwnerElement = (TypeElement) methodElement.getEnclosingElement();
-		if (IdentifierAccessOuterScopeCheck.isOuterType(context, methodOwnerElement, currentScopeClassElement)) {
-			context.addError(tree, "In Javascript you cannot call methods or fields from the outer type. "
-					+ "You should define a variable var that=this outside your function definition and call the methods on this object");
-		}
-	}
+        if (JavaNodes.isStatic(methodElement)) {
+            // only instance methods
+            return null;
+        }
 
-	@Override
-	public Void visit(CheckVisitor visitor, MethodInvocationTree tree, GenerationContext<Void> context) {
-		Element methodElement = TreeUtils.elementFromUse(tree);
+        String name = MethodInvocationWriter.buildMethodName(tree, context);
+        if (GeneratorConstants.THIS.equals(name) || GeneratorConstants.SUPER.equals(name)) {
+            // this and super call are ok
+            return null;
+        }
 
-		if (JavaNodes.isStatic(methodElement)) {
-			// only instance methods
-			return null;
-		}
+        if (!(tree.getMethodSelect() instanceof IdentifierTree)) {
+            // check for Outer.this check
+            return null;
+        }
 
-		String name = MethodInvocationWriter.buildMethodName(tree, context);
+        if (isInvokedFromAnonymousClass(context)) {
+            return null;
+        }
 
-		if (GeneratorConstants.THIS.equals(name) || GeneratorConstants.SUPER.equals(name)) {
-			// this and super call are ok
-			return null;
-		}
+        checkScope(tree, context, methodElement);
 
-		if (!(tree.getMethodSelect() instanceof IdentifierTree)) {
-			// check for Outer.this check
-			return null;
-		}
+        return null;
+    }
 
-		checkScope(methodElement, tree, context);
-		return null;
-	}
+    private void checkScope(MethodInvocationTree tree, GenerationContext<Void> context, Element methodElement) {
+        if (Scopes.isInvokedMethodFromOuterType(methodElement, context)) {
+            context.addError(tree, "In Javascript you cannot call methods or fields from the outer type. "
+                    + "You should define a variable var that=this outside your function definition and call the methods on this object");
+        }
+    }
+
+    private boolean isInvokedFromAnonymousClass(GenerationContext<Void> context) {
+        ClassTree enclosingClass = Scopes.findEnclosingClassSkipAnonymousInitializer(context.getCurrentPath());
+        if (enclosingClass != null && enclosingClass.getSimpleName().toString().isEmpty()) {
+            return true;
+        }
+        return false;
+    }
 }
