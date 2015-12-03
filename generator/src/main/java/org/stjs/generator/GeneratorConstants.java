@@ -51,6 +51,16 @@ public final class GeneratorConstants {
 
 	public static final String NON_PUBLIC_METHODS_AND_FIELDS_PREFIX = "_";
 
+	public static final String ENUM_NAME_PROPERTY = "_name";
+
+	public static final String ENUM_ORDINAL_PROPERTY = "_ordinal";
+
+	public static final String ENUM_VALUES_PROPERTY = "_values";
+
+	public static final String ENUM_CLASS = "Enum";
+
+	public static final String TRANSPILED_ENUM_CLASS = "JavaEnum";
+
 	private GeneratorConstants() {
 		//
 	}

@@ -472,6 +472,42 @@ stjs.enumeration=function(){
 	return e;
 };
 
+var JavaEnum = function() {};
+
+stjs.extend(JavaEnum, null, [], function(constructor, prototype) {
+  prototype._name = null;
+  prototype._ordinal = null;
+  constructor._values = [];
+
+  constructor.values = function() {
+    return this._values;
+  };
+  constructor.valueOf = function() {
+    var value = arguments[0];
+    // No values to compare with, assume the caller want the value of ourself
+    if (!value) {
+      return this;
+    }
+    var matchedValue = null;
+    for(var key in this._values){
+      var obj = this._values[key];
+      if (value === obj.name()) {
+        return obj;
+      }
+    }
+    throw new Error("Specified JavaEnum value not found in the enumaration.");
+  };
+  prototype.name = function() {
+    return this._name;
+  };
+  prototype.ordinal = function() {
+    return this._ordinal;
+  };
+  prototype.toString = function() {
+    return this._name;
+  };
+  prototype.equals = stjs.JavalikeEquals;
+}, {});
 
 /**
  * if true the execution of generated main methods is disabled.

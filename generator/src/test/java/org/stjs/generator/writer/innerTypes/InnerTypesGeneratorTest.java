@@ -1,11 +1,11 @@
 package org.stjs.generator.writer.innerTypes;
 
+import org.junit.Test;
+import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.utils.AbstractStjsTest;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
-
-import org.junit.Test;
-import org.stjs.generator.utils.AbstractStjsTest;
-import org.stjs.generator.JavascriptFileGenerationException;
 
 public class InnerTypesGeneratorTest extends AbstractStjsTest {
 	@Test
@@ -125,7 +125,7 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(code, "var InnerTypes17 = function(){};" + "InnerTypes17 = stjs.extend(InnerTypes17, null, [], function(constructor, prototype){");
 		assertCodeContains(code, "var deep = InnerTypes17.Inner._Enum.a;");
 		assertCodeContains(code, "stjs.extend(constructor.Inner, null, [], function(constructor, prototype){");
-		assertCodeContains(code, "constructor.Enum=stjs.enumeration(");
+		assertCodeContains(code, "constructor.Enum = stjs.extend(constructor.Enum, JavaEnum");
 	}
 
 	@Test
