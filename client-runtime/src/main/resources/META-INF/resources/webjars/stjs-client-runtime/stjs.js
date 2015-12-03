@@ -22,12 +22,12 @@
 /* Number */
 window["stjs"] = (function (global) {
 
-  var NOT_IMPLEMENTED = function () {
+  var _NOT_IMPLEMENTED = function () {
     throw "This method is not implemented in Javascript.";
   };
 
   /** @return boolean */
-  var JavalikeEquals = function (value) {
+  var _JavalikeEquals = function (value) {
     if (value == null)
       return false;
     if (value.valueOf)
@@ -35,50 +35,54 @@ window["stjs"] = (function (global) {
     return this === value;
   };
 
-  var JavalikeGetClass = function () {
+  var _JavalikeGetClass = function () {
     return this.constructor;
   };
 
+  var _copyInexistentProps = function (from, to) {
+    for (var key in from) {
+      //noinspection JSUnfilteredForInLoop
+      if (!_skipCopy[key] && !to[key]) {
+        //noinspection JSUnfilteredForInLoop
+        to[key] = from[key];
+      }
+    }
+    return to;
+  };
+
   /* String */
-  if (!String.prototype.equals) {
-    String.prototype.equals = JavalikeEquals;
-  }
-  if (!String.prototype.getBytes) {
-    String.prototype.getBytes = NOT_IMPLEMENTED;
-  }
-  if (!String.prototype.getChars) {
-    String.prototype.getChars = NOT_IMPLEMENTED;
-  }
-  if (!String.prototype.contentEquals) {
-    String.prototype.contentEquals = NOT_IMPLEMENTED;
-  }
-  if (!String.prototype.startsWith) {
-    String.prototype.startsWith = function (start, from) {
+  var _augmentedStringPrototype = {
+    "equals": _JavalikeEquals,
+    "getClass": _JavalikeGetClass,
+    "getBytes": _NOT_IMPLEMENTED,
+    "getChars": _NOT_IMPLEMENTED,
+    "contentEquals": _NOT_IMPLEMENTED,
+    "codePointBefore": _NOT_IMPLEMENTED,
+    "codePointCount": _NOT_IMPLEMENTED,
+    "codePointAt": String.prototype.charCodeAt,
+
+    "startsWith": function (start, from) {
       var f = from != null ? from : 0;
       return this.substring(f, f + start.length) == start;
-    }
-  }
-  if (!String.prototype.endsWith) {
-    String.prototype.endsWith = function (end) {
+    },
+
+    "endsWith": function (end) {
       if (end == null)
         return false;
       if (this.length < end.length)
         return false;
       return this.substring(this.length - end.length, this.length) == end;
-    }
-  }
-  if (!String.prototype.trim) {
-    String.prototype.trim = function () {
+    },
+
+    "trim": function () {
       return this.replace(/^\s+/, "").replace(/\s+$/, "");
-    }
-  }
-  if (!String.prototype.matches) {
-    String.prototype.matches = function (regexp) {
+    },
+
+    "matches": function (regexp) {
       return this.match(new RegExp("^" + regexp + "$")) != null;
-    }
-  }
-  if (!String.prototype.compareTo) {
-    String.prototype.compareTo = function (other) {
+    },
+
+    "compareTo": function (other) {
       if (other == null)
         return 1;
       if (this < other)
@@ -86,50 +90,29 @@ window["stjs"] = (function (global) {
       if (this == other)
         return 0;
       return 1;
-    }
-  }
+    },
 
-  if (!String.prototype.compareToIgnoreCase) {
-    String.prototype.compareToIgnoreCase = function (other) {
+    "compareToIgnoreCase": function (other) {
       if (other == null)
         return 1;
       return this.toLowerCase().compareTo(other.toLowerCase());
-    }
-  }
+    },
 
-  if (!String.prototype.equalsIgnoreCase) {
-    String.prototype.equalsIgnoreCase = function (other) {
+    "equalsIgnoreCase": function (other) {
       if (other == null)
         return false;
       return this.toLowerCase() === other.toLowerCase();
-    }
-  }
+    },
 
-  if (!String.prototype.codePointAt) {
-    String.prototype.codePointAt = String.prototype.charCodeAt;
-  }
-
-  if (!String.prototype.codePointBefore) {
-    String.prototype.codePointBefore = NOT_IMPLEMENTED;
-  }
-  if (!String.prototype.codePointCount) {
-    String.prototype.codePointCount = NOT_IMPLEMENTED;
-  }
-
-  if (!String.prototype.replaceAll) {
-    String.prototype.replaceAll = function (regexp, replace) {
+    "replaceAll": function (regexp, replace) {
       return this.replace(new RegExp(regexp, "g"), replace);
-    }
-  }
+    },
 
-  if (!String.prototype.replaceFirst) {
-    String.prototype.replaceFirst = function (regexp, replace) {
+    "replaceFirst": function (regexp, replace) {
       return this.replace(new RegExp(regexp), replace);
-    }
-  }
+    },
 
-  if (!String.prototype.regionMatches) {
-    String.prototype.regionMatches = function (ignoreCase, toffset, other, ooffset, len) {
+    "regionMatches": function (ignoreCase, toffset, other, ooffset, len) {
       if (arguments.length == 4) {
         len = arguments[3];
         ooffset = arguments[2];
@@ -142,18 +125,14 @@ window["stjs"] = (function (global) {
       var s1 = this.substring(toffset, toffset + len);
       var s2 = other.substring(ooffset, ooffset + len);
       return ignoreCase ? s1.equalsIgnoreCase(s2) : s1 === s2;
-    }
-  }
+    },
 
-  if (!String.prototype.contains) {
-    String.prototype.contains = function (it) {
+    "contains": function (it) {
       return this.indexOf(it) >= 0;
-    };
-  }
+    }
 
-  if (!String.prototype.getClass) {
-    String.prototype.getClass = JavalikeGetClass;
-  }
+  };
+  _copyInexistentProps(_augmentedStringPrototype, String.prototype);
 
   /**
    * force valueof to match the Java's behavior
@@ -162,77 +141,40 @@ window["stjs"] = (function (global) {
     return String(value);
   };
 
+  var _parseInt = function () {
+    return parseInt(this);
+  };
 
-  /* type conversion - approximative as Javascript only has integers and doubles */
-  if (!Number.prototype.intValue) {
-    Number.prototype.intValue = function () {
-      return parseInt(this);
-    }
-  }
-  if (!Number.prototype.shortValue) {
-    Number.prototype.shortValue = function () {
-      return parseInt(this);
-    }
-  }
-  if (!Number.prototype.longValue) {
-    Number.prototype.longValue = function () {
-      return parseInt(this);
-    }
-  }
-  if (!Number.prototype.byteValue) {
-    Number.prototype.byteValue = function () {
-      return parseInt(this);
-    }
-  }
+  var _parseFloat = function () {
+    return parseFloat(this);
+  };
 
-  if (!Number.prototype.floatValue) {
-    Number.prototype.floatValue = function () {
-      return parseFloat(this);
-    }
-  }
-
-  if (!Number.prototype.doubleValue) {
-    Number.prototype.doubleValue = function () {
-      return parseFloat(this);
-    }
-  }
-
-  if (!Number.parseInt) {
-    Number["parseInt"] = parseInt;
-  }
-  if (!Number.parseShort) {
-    Number["parseShort"] = parseInt;
-  }
-  if (!Number.parseLong) {
-    Number["parseLong"] = parseInt;
-  }
-  if (!Number.parseByte) {
-    Number["parseByte"] = parseInt;
-  }
-
-  if (!Number.parseDouble) {
-    Number["parseDouble"] = parseFloat;
-  }
-
-  if (!Number.parseFloat) {
-    Number["parseFloat"] = parseFloat;
-  }
-
-  if (!Number.isNaN) {
-    Number["isNaN"] = isNaN;
-  }
-
-  if (!Number.prototype.isNaN) {
-    Number.prototype.isNaN = function () {
+  var _augmentedNumberPrototype = {
+    /* type conversion - approximative as Javascript only has integers and doubles */
+    "equals": _JavalikeEquals,
+    "getClass": _JavalikeGetClass,
+    "intValue": _parseInt,
+    "shortValue": _parseInt,
+    "longValue": _parseInt,
+    "byteValue": _parseInt,
+    "floatValue": _parseFloat,
+    "doubleValue": _parseFloat,
+    "isNaN": function () {
       return isNaN(this);
     }
-  }
-  if (!Number.prototype.equals) {
-    Number.prototype.equals = JavalikeEquals;
-  }
-  if (!Number.prototype.getClass) {
-    Number.prototype.getClass = JavalikeGetClass;
-  }
+  };
+  _copyInexistentProps(_augmentedNumberPrototype, Number.prototype);
+
+  var _augmentedNumberConstructor = {
+    "parseInt": parseInt,
+    "parseShort": parseInt,
+    "parseLong": parseInt,
+    "parseByte": parseInt,
+    "parseDouble": parseFloat,
+    "parseFloat": parseFloat,
+    "isNaN": isNaN
+  };
+  _copyInexistentProps(_augmentedNumberConstructor, Number);
 
   /** force valueof to match approximately the Java's behavior (for Integer.valueOf it returns in fact a double) */
   Number["valueOf"] = function (value) {
@@ -241,12 +183,11 @@ window["stjs"] = (function (global) {
 
 
   /* Boolean */
-  if (!Boolean.prototype.equals) {
-    Boolean.prototype.equals = JavalikeEquals;
-  }
-  if (!Boolean.prototype.getClass) {
-    Boolean.prototype.getClass = JavalikeGetClass;
-  }
+  var _augmentedBooleanPrototype = {
+    "equals": _JavalikeEquals,
+    "getClass": _JavalikeGetClass
+  };
+  _copyInexistentProps(_augmentedBooleanPrototype, Boolean.prototype);
 
   /** force valueof to match the Java's behavior */
   Boolean["valueOf"] = function (value) {
@@ -255,7 +196,7 @@ window["stjs"] = (function (global) {
 
 
   /************* STJS helper functions ***************/
-  var skipCopy = {"prototype": true, "constructor": true, "$typeDescription": true, "$inherit": true};
+  var _skipCopy = {"prototype": true, "constructor": true, "$typeDescription": true, "$inherit": true};
 
   var ns = function (path) {
     var p = path.split(".");
@@ -267,21 +208,10 @@ window["stjs"] = (function (global) {
     return obj;
   };
 
-  var copyProps = function (from, to) {
+  var _copyProps = function (from, to) {
     for (var key in from) {
       //noinspection JSUnfilteredForInLoop
-      if (!skipCopy[key]) {
-        //noinspection JSUnfilteredForInLoop
-        to[key] = from[key];
-      }
-    }
-    return to;
-  };
-
-  var copyInexistentProps = function (from, to) {
-    for (var key in from) {
-      //noinspection JSUnfilteredForInLoop
-      if (!skipCopy[key] && !to[key]) {
+      if (!_skipCopy[key]) {
         //noinspection JSUnfilteredForInLoop
         to[key] = from[key];
       }
@@ -292,7 +222,7 @@ window["stjs"] = (function (global) {
   /**
    * 1.2 and earlier version of stjs.extend. Included for backwards compatibility
    */
-  var extend12 = function (_constructor, _super, _implements) {
+  var _extend12 = function (_constructor, _super, _implements) {
     var I = function () {
     };
     I.prototype = _super.prototype;
@@ -301,7 +231,7 @@ window["stjs"] = (function (global) {
     //copy static properties for super and interfaces
     // assign every method from proto instance
     for (var a = 1; a < arguments.length; ++a) {
-      copyProps(arguments[a], _constructor);
+      _copyProps(arguments[a], _constructor);
     }
     // remember the correct constructor
     _constructor.prototype.constructor = _constructor;
@@ -311,8 +241,8 @@ window["stjs"] = (function (global) {
     // this was not part of the original 1.2 version of extends, however forward compatibility
     // with 1.3 requires it
     if (_super == null) {
-      _constructor.prototype.equals = JavalikeEquals;
-      _constructor.prototype.getClass = JavalikeGetClass;
+      _constructor.prototype.equals = _JavalikeEquals;
+      _constructor.prototype.getClass = _JavalikeGetClass;
     }
 
     // build package and assign
@@ -323,7 +253,7 @@ window["stjs"] = (function (global) {
     if (typeof(_typeDescription) !== "object") {
       // stjs 1.3+ always passes an non-null object to _typeDescription => The code calling stjs.extend
       // was generated with version 1.2 or earlier, so let's call the 1.2 version of stjs.extend
-      return extend12.apply(this, arguments);
+      return _extend12.apply(this, arguments);
     }
 
     _constructor.$inherit = [];
@@ -341,9 +271,9 @@ window["stjs"] = (function (global) {
 
       // copy static properties for super
       // assign every method from proto instance
-      copyProps(_super, _constructor);
-      copyProps(_super.$typeDescription, _typeDescription);
-      copyProps(_super.$annotations, _annotations);
+      _copyProps(_super, _constructor);
+      _copyProps(_super.$typeDescription, _typeDescription);
+      _copyProps(_super.$annotations, _annotations);
 
       //add the super class to inherit array
       _constructor.$inherit.push(_super);
@@ -352,8 +282,8 @@ window["stjs"] = (function (global) {
     // copy static properties and default methods from interfaces
     for (var a = 0; a < _implements.length; ++a) {
       if (!_implements[a]) continue;
-      copyProps(_implements[a], _constructor);
-      copyInexistentProps(_implements[a].prototype, _constructor.prototype);
+      _copyProps(_implements[a], _constructor);
+      _copyInexistentProps(_implements[a].prototype, _constructor.prototype);
       _constructor.$inherit.push(_implements[a]);
     }
 
@@ -371,10 +301,10 @@ window["stjs"] = (function (global) {
     // add the default equals method if it is not present yet, and we don't have a superclass
     if (_super == null) {
       if (!_constructor.prototype.equals) {
-        _constructor.prototype.equals = JavalikeEquals;
+        _constructor.prototype.equals = _JavalikeEquals;
       }
       if (!_constructor.prototype.getClass) {
-        _constructor.prototype.getClass = JavalikeGetClass;
+        _constructor.prototype.getClass = _JavalikeGetClass;
       }
     }
 
@@ -423,31 +353,29 @@ window["stjs"] = (function (global) {
     return false;
   };
 
-  var enumEntry = (function () {
-    var enumEntry = function (idx, name) {
-      this._name = name;
-      this._ordinal = idx;
-    };
-
-    enumEntry.prototype["name"] = function () {
+  var _enumEntry = function (idx, name) {
+    this._name = name;
+    this._ordinal = idx;
+  };
+  var _enumEntryPrototype = {
+    "equals": _JavalikeEquals,
+    "name": function () {
       return this._name;
-    };
-    enumEntry.prototype["ordinal"] = function () {
+    },
+    "ordinal": function () {
       return this._ordinal;
-    };
-    enumEntry.prototype["toString"] = function () {
+    },
+    "toString": function () {
       return this._name;
-    };
-    enumEntry.prototype["equals"] = JavalikeEquals;
-
-    return enumEntry;
-  })();
+    }
+  };
+  _copyInexistentProps(_enumEntryPrototype, _enumEntry.prototype);
 
   var enumeration = function () {
     var enumClass = {}; // the Enum class has no constructors
     enumClass._values = [];
     for (var i = 0; i < arguments.length; ++i) {
-      enumClass[arguments[i]] = new enumEntry(i, arguments[i]);
+      enumClass[arguments[i]] = new _enumEntry(i, arguments[i]);
       enumClass._values[i] = enumClass[arguments[i]];
     }
 
@@ -565,7 +493,7 @@ window["stjs"] = (function (global) {
   };
 
   var isEnum = function (obj) {
-    return obj != null && obj.constructor == enumEntry;
+    return obj != null && obj.constructor == _enumEntry;
   };
 
   /******* parsing *************/
@@ -869,36 +797,36 @@ window["stjs"] = (function (global) {
   };
 
   var STJSAssert = {
-    "setAssertHandler" : function (a) {
+    "setAssertHandler": function (a) {
       assertHandler = a;
     },
 
-    "assertArgEquals" : function (position, code, expectedValue, testValue) {
+    "assertArgEquals": function (position, code, expectedValue, testValue) {
       if (expectedValue != testValue && assertHandler)
         assertHandler(position, code, "Wrong argument. Expected: " + expectedValue + ", got:" + testValue);
     },
 
-    "assertArgNotNull" : function (position, code, testValue) {
+    "assertArgNotNull": function (position, code, testValue) {
       if (testValue == null && assertHandler)
         assertHandler(position, code, "Wrong argument. Null value");
     },
 
-    "assertArgTrue" : function (position, code, condition) {
+    "assertArgTrue": function (position, code, condition) {
       if (!condition && assertHandler)
         assertHandler(position, code, "Wrong argument. Condition is false");
     },
 
-    "assertStateEquals" : function (position, code, expectedValue, testValue) {
+    "assertStateEquals": function (position, code, expectedValue, testValue) {
       if (expectedValue != testValue && assertHandler)
         assertHandler(position, code, "Wrong state. Expected: " + expectedValue + ", got:" + testValue);
     },
 
-    "assertStateNotNull" : function (position, code, testValue) {
+    "assertStateNotNull": function (position, code, testValue) {
       if (testValue == null && assertHandler)
         assertHandler(position, code, "Wrong state. Null value");
     },
 
-    "assertStateTrue" : function (position, code, condition) {
+    "assertStateTrue": function (position, code, condition) {
       if (!condition && assertHandler)
         assertHandler(position, code, "Wrong state. Condition is false");
     }
@@ -1021,28 +949,28 @@ window["stjs"] = (function (global) {
   // Export all the stjs namespace
   return {
     // Functions and methods
-    "ns" : ns,
-    "extend" : extend,
-    "getAnnotations" : getAnnotations,
-    "getTypeAnnotation" : getTypeAnnotation,
-    "getMemberAnnotation" : getMemberAnnotation,
-    "getParameterAnnotation" : getParameterAnnotation,
-    "isInstanceOf" : isInstanceOf,
-    "enumeration" : enumeration,
-    "exception" : exception,
+    "ns": ns,
+    "extend": extend,
+    "getAnnotations": getAnnotations,
+    "getTypeAnnotation": getTypeAnnotation,
+    "getMemberAnnotation": getMemberAnnotation,
+    "getParameterAnnotation": getParameterAnnotation,
+    "isInstanceOf": isInstanceOf,
+    "enumeration": enumeration,
+    "exception": exception,
     "isEnum": isEnum,
-    "trunc" : trunc,
-    "bind" : bind,
-    "typefy" : typefy,
-    "hydrate" : typefy,
-    "stringify" : stringify,
-    "setField" : setField,
-    "getField" : getField,
-    "parseJSON" : parseJSON,
+    "trunc": trunc,
+    "bind": bind,
+    "typefy": typefy,
+    "hydrate": typefy,
+    "stringify": stringify,
+    "setField": setField,
+    "getField": getField,
+    "parseJSON": parseJSON,
 
     // Static classes and variables
-    "STJSAssert" : STJSAssert,
-    "mainCallDisabled" : mainCallDisabled
+    "STJSAssert": STJSAssert,
+    "mainCallDisabled": mainCallDisabled
   };
 })(window);
 
