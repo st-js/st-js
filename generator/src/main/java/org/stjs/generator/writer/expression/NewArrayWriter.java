@@ -38,7 +38,7 @@ public class NewArrayWriter<JS> implements WriterContributor<NewArrayTree, JS> {
         }
 
         return context.js().functionCall(
-                context.js().name("stjs.newJavaArray"),
+                context.js().name("stjs.createJavaArray"),
                 dimensionExpressionList
         );
     }
