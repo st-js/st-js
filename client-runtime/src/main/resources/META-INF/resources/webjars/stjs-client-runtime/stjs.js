@@ -296,7 +296,7 @@ stjs.ns=function(path){
 
 stjs.copyProps=function(from, to){
 	for(var key in from){
-		if (!stjs.skipCopy.hasOwnProperty(key)))
+		if (!stjs.skipCopy.hasOwnProperty(key))
 			to[key]	= from[key];
 	}
 	return to;
@@ -304,7 +304,7 @@ stjs.copyProps=function(from, to){
 
 stjs.copyInexistentProps=function(from, to){
 	for(var key in from){
-		if (!stjs.skipCopy.hasOwnProperty(key)) && !to[key])
+		if (!stjs.skipCopy.hasOwnProperty(key) && !to[key])
 			to[key]	= from[key];
 	}
 	return to;
