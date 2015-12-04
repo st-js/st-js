@@ -2,7 +2,6 @@ package org.stjs.generator.writer.fields;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.utils.AbstractStjsTest;
 
 import static org.junit.Assert.assertEquals;
@@ -44,19 +43,21 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(Fields4.class, "constructor.x = 2;");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
-	public void testForbidInstanceFieldInit() {
-		generate(Fields6.class);
-	}
-
 	@Test
 	public void testAllowStaticFieldInit() {
 		assertCodeContains(Fields7.class, "constructor.x = {};");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
-	public void testForbidInstanceFieldInitWithNonLiterals() {
-		generate(Fields8.class);
+	@Test
+	public void testInstanceFieldInitWithNonLiterals() {
+		assertCodeContains(Fields8.class, "{\n" +
+		"    this.y = this.x;\n" +
+		"}");
+
+		assertCodeContains(Fields8.class, "{\n" +
+		"    prototype.x = 2;\n" +
+		"    prototype.y = 0;\n" +
+		"}");
 	}
 
 	@Test
@@ -281,6 +282,23 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 		String executeResult = (String) execute(Fields32_array2Dimensions.class);
 
 		Assert.assertEquals("[null,null,null][null,null,null]", executeResult);
+	}
+
+
+	@Test
+	public void testInitializeObjectField() {
+		assertCodeContains(Fields33_object_field_initializer.class, "{\n" +
+		"    this._privateObject = new Object();\n" +
+		"    this.publicObject = new Object();\n" +
+		"    this._defaultedValue = Fields33_object_field_initializer._DEFAULT_VALUE;\n" +
+		"};");
+		assertCodeContains(Fields33_object_field_initializer.class, "{\n" +
+		"    constructor._DEFAULT_VALUE = 3;\n" +
+		"    prototype._privateObject = null;\n" +
+		"    prototype.publicObject = null;\n" +
+		"    prototype._defaultedValue = 0;\n" +
+		"    prototype.method = function() {};\n" +
+		"}");
 	}
 
 }

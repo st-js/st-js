@@ -1,16 +1,15 @@
 package org.stjs.generator.writer.statement;
 
-import org.stjs.generator.GenerationContext;
-import org.stjs.generator.name.DependencyType;
-import org.stjs.generator.writer.WriterContributor;
-import org.stjs.generator.writer.WriterVisitor;
-import org.stjs.generator.writer.declaration.FieldWriter;
-
-import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.EnhancedForLoopTree;
 import com.sun.source.tree.ForLoopTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
+import org.stjs.generator.GenerationContext;
+import org.stjs.generator.name.DependencyType;
+import org.stjs.generator.utils.FieldUtils;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
+import org.stjs.generator.writer.declaration.FieldWriter;
 
 /**
  * variable declaration. Covers also the fields.
@@ -25,16 +24,9 @@ public class VariableWriter<JS> implements WriterContributor<VariableTree, JS> {
 		return parent instanceof ForLoopTree || parent instanceof EnhancedForLoopTree;
 	}
 
-	private boolean isFieldDeclaration(GenerationContext<JS> context) {
-		if (context.getCurrentPath().getParentPath().getLeaf() instanceof ClassTree) {
-			return true;
-		}
-		return false;
-	}
-
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, VariableTree tree, GenerationContext<JS> context) {
-		if (isFieldDeclaration(context)) {
+		if (FieldUtils.isFieldDeclaration(context)) {
 			return fieldWriter.visit(visitor, tree, context);
 		}
 		// load the type of the variable

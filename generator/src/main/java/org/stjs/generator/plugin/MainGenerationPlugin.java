@@ -10,7 +10,6 @@ import org.stjs.generator.check.declaration.ClassGlobalForbidInnerCheck;
 import org.stjs.generator.check.declaration.ClassGlobalInstanceMembersCheck;
 import org.stjs.generator.check.declaration.ClassImplementJavascriptFunctionCheck;
 import org.stjs.generator.check.declaration.ClassNamespaceCheck;
-import org.stjs.generator.check.declaration.FieldInitializerCheck;
 import org.stjs.generator.check.declaration.MethodDeclarationTemplateCheck;
 import org.stjs.generator.check.declaration.MethodSynchronizedCheck;
 import org.stjs.generator.check.declaration.MethodVarArgParamCheck;
@@ -123,7 +122,6 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(new VariableFinalInLoopCheck());
 		visitor.contribute(new VariableWrongNameCheck());
 		visitor.contribute(new MethodVarArgParamCheck());
-		visitor.contribute(new FieldInitializerCheck());
 		visitor.contribute(new ClassDuplicateMemberNameCheck());
 		visitor.contribute(new NewClassInlineFunctionCheck());
 		visitor.contribute(new ClassImplementJavascriptFunctionCheck());
