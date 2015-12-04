@@ -14,7 +14,9 @@ import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.AssignOperator;
+import org.stjs.generator.utils.FieldUtils;
 import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
@@ -22,6 +24,7 @@ import org.stjs.generator.writer.WriterVisitor;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements WriterContributor<MethodTree, JS> {
@@ -105,6 +108,59 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		return true;
 	}
 
+	private void addFieldInitializersToConstructor(WriterVisitor<JS> visitor, JS constructorBody, GenerationContext<JS> context) {
+		List<JS> expressions = new ArrayList<>();
+
+		for (Tree tree : context.getCurrentWrapper().getEnclosingType().getTree().getMembers()) {
+			if (tree.getKind() == Tree.Kind.VARIABLE) {
+				TreeWrapper<VariableTree, JS> variableTreeWrapper = context.wrap(TreeUtils.elementFromDeclaration((VariableTree) tree));
+				if (isFieldInitializerRequired(variableTreeWrapper)) {
+					expressions.add(context.js().expressionStatement(
+							context.js().assignment(AssignOperator.ASSIGN,
+									context.js().property(
+											context.js().name(JavascriptKeywords.THIS),
+											FieldUtils.getFieldName(variableTreeWrapper.getTree())
+									),
+									visitor.scan(
+											variableTreeWrapper.getTree().getInitializer(),
+											context)
+							)
+					));
+				}
+			}
+		}
+
+		Collections.reverse(expressions);
+
+		for (JS expression : expressions) {
+			context.js().addStatementBeginning(constructorBody, expression);
+		}
+	}
+
+	private boolean isFieldInitializerRequired(TreeWrapper<VariableTree, JS> variableTreeWrapper) {
+		if (!FieldUtils.isFieldDeclaration(variableTreeWrapper.getContext())) {
+			return false;
+		}
+
+		if (MemberWriters.shouldSkip(variableTreeWrapper)) {
+			return false;
+		}
+
+		if (variableTreeWrapper.isStatic()) {
+			return false;
+		}
+
+		if (variableTreeWrapper.getTree().getInitializer() == null) {
+			return false;
+		}
+
+		if (FieldUtils.isInitializerLiteral(variableTreeWrapper.getTree().getInitializer())) {
+			return false;
+		}
+
+		return true;
+	}
+
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, MethodTree tree, GenerationContext<JS> context) {
 		TreeWrapper<MethodTree, JS> tw = context.getCurrentWrapper();
@@ -120,6 +176,10 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		String name = getAnonymousTypeConstructorName(tree, context);
 
 		JS decl = context.js().function(name, params, body);
+
+		if (JavaNodes.isConstructor(tree)) {
+			addFieldInitializersToConstructor(visitor, body, context);
+		}
 
 		// add the constructor.<name> or prototype.<name> if needed
 		if (!JavaNodes.isConstructor(tree) && !isMethodOfJavascriptFunction(context.getCurrentWrapper())) {
