@@ -267,6 +267,6 @@
 		<connection>scm:git:ssh://git@github.com/mirego/st-js.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/mirego/st-js.git</developerConnection>
 		<url>scm:git:https://github.com/mirego/st-js.git</url>
-    <tag>stjs-3.3.1.13-mirego-SNAPSHOT</tag>
+    <tag>HEAD</tag>
   </scm>
 </project>
