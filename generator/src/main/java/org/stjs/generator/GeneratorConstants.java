@@ -61,6 +61,8 @@ public final class GeneratorConstants {
 
 	public static final String TRANSPILED_ENUM_CLASS = "JavaEnum";
 
+	public static final String AUTO_GENERATED_ELEMENT_SEPARATOR = "$";
+
 	private GeneratorConstants() {
 		//
 	}

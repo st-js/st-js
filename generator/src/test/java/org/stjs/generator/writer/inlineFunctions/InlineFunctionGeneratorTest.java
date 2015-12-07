@@ -1,10 +1,10 @@
 package org.stjs.generator.writer.inlineFunctions;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
-import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.utils.AbstractStjsTest;
+
+import static org.junit.Assert.assertEquals;
 
 public class InlineFunctionGeneratorTest extends AbstractStjsTest {
 	@Test
@@ -50,11 +50,6 @@ public class InlineFunctionGeneratorTest extends AbstractStjsTest {
 	public void testImplementInlinefunction() {
 		// implement is forbidden
 		generate(InlineFunctions6.class);
-	}
-
-	@Test(expected = JavascriptFileGenerationException.class)
-	public void testAccessOuterScope() {
-		generate(InlineFunctions7.class);
 	}
 
 	@Test
