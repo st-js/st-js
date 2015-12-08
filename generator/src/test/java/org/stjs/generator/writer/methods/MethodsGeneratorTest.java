@@ -1,5 +1,6 @@
 package org.stjs.generator.writer.methods;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConfigurationBuilder;
@@ -67,16 +68,15 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(Methods14.class, "var x = (String).fromCharCode(65,66,67)");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test
 	public void testVarArgsMethod1() {
-		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
-		generate(Methods9.class);
+		assertCodeContains(Methods9.class, "prototype.method = function(params) {};");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test
 	public void testVarArgsMethod2() {
-		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
-		generate(Methods10.class);
+		Object result = execute(Methods10_basic_varargs.class);
+		Assert.assertEquals("123", result);
 	}
 
 	@Test
@@ -163,5 +163,14 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 				"    prototype.overloadMethod$String_int_CustomClass = function(firstParam, secondParam, thirdParam) {\n" +
 				"        this.overloadMethod$String_int(firstParam, secondParam);\n" +
 				"    };");
+	}
+
+	@Test
+	public void testOverloadMethodWithVarargs() {
+		assertCodeContains(Methods20_overload_with_varargs.class, "" +
+				"    prototype.overloadMethod$String_Array$int = function(firstParam, secondParams) {};\n" +
+				"    prototype.overloadMethod$String_Array$String = function(firstParam, secondParams) {};\n" +
+				"    prototype.overloadMethod$String_Array$boolean = function(firstParam, secondParams) {};\n" +
+				"    prototype.overloadMethod$String_ArrayString = function(firstParam, secondParams) {};\n");
 	}
 }

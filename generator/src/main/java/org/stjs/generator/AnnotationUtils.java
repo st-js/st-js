@@ -1,9 +1,11 @@
 package org.stjs.generator;
 
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.code.Type;
 import org.stjs.javascript.annotation.AnnotationConstants;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.type.TypeKind;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -38,6 +40,10 @@ public class AnnotationUtils {
 			for (int i = 0; i < params.size(); i++) {
 				Symbol.VarSymbol param = params.get(i);
 				methodNameBuilder.append(param.type.tsym.getSimpleName());
+				if (TypeKind.ARRAY.equals(param.type.getKind())) {
+					methodNameBuilder.append(AnnotationConstants.JS_OVERLOAD_NAME_DEFAULT_VALUE);
+					methodNameBuilder.append(((Type.ArrayType) param.type).elemtype.tsym.getSimpleName());
+				}
 				if (i < params.size() - 1) {
 					methodNameBuilder.append(AnnotationConstants.JS_OVERLOAD_NAME_METHOD_PARAMS_SEPARATOR);
 				}
