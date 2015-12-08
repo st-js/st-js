@@ -75,9 +75,7 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 
 	@Test()
 	public void testAnnotationAtPackageLevelRecursive(){
-		// TODO Investigate how to adjust MethodWriter.java->getTypeNameForElement() so that the recursive package namespace
-		// is available on the enclosed package element. That way, we do not generate the outerClass$0 accessor.
-		assertCodeContains(PackageNamespace2.class, "a.b.PackageNamespace2 = function(outerClass$0)");
+		assertCodeContains(PackageNamespace2.class, "a.b.PackageNamespace2 = function()");
 	}
 
 	@Test()

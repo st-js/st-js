@@ -12,6 +12,7 @@ import org.mozilla.javascript.ast.Block;
 import org.stjs.generator.AnnotationUtils;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.NamespaceUtil;
 import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
@@ -236,11 +237,10 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 			return typeName.replaceAll(annotationNamespace.value() + ".", "");
 		}
 		// Check the package namespace
-		annotationNamespace = ElementUtils.enclosingPackage(element).getAnnotation(Namespace.class);
-		if (annotationNamespace != null) {
-			return typeName.replaceAll(annotationNamespace.value() + ".", "");
+		String packageNamespace = NamespaceUtil.resolvePackageNamespace(ElementUtils.enclosingPackage(element).toString(), context.getBuiltProjectClassLoader());
+		if (packageNamespace != null && !packageNamespace.isEmpty()) {
+			return typeName.replaceAll(packageNamespace + ".", "");
 		}
-
 		return typeName;
 	}
 
