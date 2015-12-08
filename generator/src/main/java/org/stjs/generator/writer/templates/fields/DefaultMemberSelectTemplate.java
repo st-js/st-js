@@ -78,17 +78,21 @@ public class DefaultMemberSelectTemplate<JS> implements WriterContributor<Member
 		if (tree.getIdentifier().toString().equals(GeneratorConstants.THIS)) {
 			return buildTargetForThisAccessor(tree, context);
 		} else {
-			JS target = getTarget(visitor, tree, context);
-
-			if (GeneratorConstants.CLASS.equals(tree.getIdentifier().toString())) {
-				// When ClassName.class -> ClassName
-				return target;
-			}
-
-			String fieldName = decorateMember(tree, element);
-
-			return context.js().property(target, fieldName);
+			return buildDefaultProperty(visitor, tree, context, element);
 		}
+	}
+
+	private JS buildDefaultProperty(WriterVisitor<JS> visitor, MemberSelectTree tree, GenerationContext<JS> context, Element element) {
+		JS target = getTarget(visitor, tree, context);
+
+		if (GeneratorConstants.CLASS.equals(tree.getIdentifier().toString())) {
+            // When ClassName.class -> ClassName
+            return target;
+        }
+
+		String fieldName = decorateMember(tree, element);
+
+		return context.js().property(target, fieldName);
 	}
 
 	private String decorateMember(MemberSelectTree tree, Element element) {

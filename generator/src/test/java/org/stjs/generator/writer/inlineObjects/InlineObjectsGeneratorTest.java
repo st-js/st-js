@@ -1,5 +1,6 @@
 package org.stjs.generator.writer.inlineObjects;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
@@ -96,4 +97,11 @@ public class InlineObjectsGeneratorTest extends AbstractStjsTest {
 				"        }, {}, {}))().doIt();\n" +
 				"    };");
 	}
+
+	@Test
+	public void testCallInnerClassCallingOuter() {
+		Object result = execute(InlineObjects11b_InnerClass_calling_outer.class);
+		Assert.assertEquals(true, result);
+	}
+
 }
