@@ -237,7 +237,8 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 			return typeName.replaceAll(annotationNamespace.value() + ".", "");
 		}
 		// Check the package namespace
-		String packageNamespace = NamespaceUtil.resolvePackageNamespace(ElementUtils.enclosingPackage(element).toString(), context.getBuiltProjectClassLoader());
+		String packageNamespace = NamespaceUtil.resolvePackageNamespace(ElementUtils.enclosingPackage(element).toString(),
+				context.getBuiltProjectClassLoader());
 		if (packageNamespace != null && !packageNamespace.isEmpty()) {
 			return typeName.replaceAll(packageNamespace + ".", "");
 		}
