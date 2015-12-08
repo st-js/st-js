@@ -55,9 +55,9 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(InnerTypes6a.class, "var m = this._outerClass$0._n;");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test
 	public void testCallMethodOuterType() {
-		generate(InnerTypes6b.class);
+		assertCodeContains(InnerTypes6b.class, "var m = this._outerClass$0.method();");
 	}
 
 	@Test

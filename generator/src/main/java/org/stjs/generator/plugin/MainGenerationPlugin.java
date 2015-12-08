@@ -19,7 +19,6 @@ import org.stjs.generator.check.expression.IdentifierGlobalScopeNameClashCheck;
 import org.stjs.generator.check.expression.MemberSelectGlobalScopeNameClashCheck;
 import org.stjs.generator.check.expression.MemberSelectServerSideCheck;
 import org.stjs.generator.check.expression.MethodInvocationMapConstructorCheck;
-import org.stjs.generator.check.expression.MethodInvocationOuterScopeCheck;
 import org.stjs.generator.check.expression.MethodInvocationServerSideCheck;
 import org.stjs.generator.check.expression.MethodInvocationSuperSynthCheck;
 import org.stjs.generator.check.expression.NewArrayMultipleDimensForbiddenCheck;
@@ -139,8 +138,6 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(new MemberSelectGlobalScopeNameClashCheck());
 
 		visitor.contribute(new MethodDeclarationTemplateCheck());
-
-		visitor.contribute(new MethodInvocationOuterScopeCheck());
 
 		visitor.contribute(new ClassGlobalForbidInnerCheck());
 		visitor.contribute(new MethodInvocationSuperSynthCheck());
