@@ -98,7 +98,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	}
 
 	/**
-	 * @return the list of implemented interfaces. for intefaces, the super class goes also in the interfaces list
+	 * @return the list of implemented interfaces. for interfaces, the super class goes also in the interfaces list
 	 */
 	private JS getInterfaces(ClassTree clazz, GenerationContext<JS> context) {
 		Element type = TreeUtils.elementFromDeclaration(clazz);

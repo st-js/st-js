@@ -1,23 +1,5 @@
 package org.stjs.generator.writer.expression;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.lang.model.element.Element;
-
-import org.stjs.generator.GenerationContext;
-import org.stjs.generator.javac.TreeUtils;
-import org.stjs.generator.javac.TreeWrapper;
-import org.stjs.generator.javascript.JavaScriptBuilder;
-import org.stjs.generator.javascript.Keyword;
-import org.stjs.generator.javascript.NameValue;
-import org.stjs.generator.name.DependencyType;
-import org.stjs.generator.writer.WriterContributor;
-import org.stjs.generator.writer.WriterVisitor;
-import org.stjs.generator.writer.declaration.MethodWriter;
-import org.stjs.generator.writer.templates.MethodToPropertyTemplate;
-
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.ExpressionStatementTree;
@@ -29,6 +11,25 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.Tree;
+import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.TreeWrapper;
+import org.stjs.generator.javascript.JavaScriptBuilder;
+import org.stjs.generator.javascript.Keyword;
+import org.stjs.generator.javascript.NameValue;
+import org.stjs.generator.name.DependencyType;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
+import org.stjs.generator.writer.declaration.MethodWriter;
+import org.stjs.generator.writer.templates.MethodToPropertyTemplate;
+import org.stjs.javascript.annotation.Namespace;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 	public static BlockTree getDoubleBracesBlock(NewClassTree tree) {
@@ -151,8 +152,22 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 
 	private JS getRegularNewExpression(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {
 		Element type = TreeUtils.elementFromUse(tree.getIdentifier());
-		JS typeName = context.js().name(context.getNames().getTypeName(context, type, DependencyType.STATIC));
-		return context.js().newExpression(typeName, arguments(visitor, tree, context));
+		String typeName = context.getNames().getTypeName(context, type, DependencyType.STATIC);
+		List<JS> params = arguments(visitor, tree, context);
+
+		if (ElementKind.CLASS.equals(type.getKind())) {
+			String innerClassCheckTypeName = typeName;
+			Namespace annotationNamespace = type.getAnnotation(Namespace.class);
+			if (annotationNamespace != null) {
+				innerClassCheckTypeName = innerClassCheckTypeName.replaceAll(annotationNamespace.value() + ".", "");
+			}
+			if (innerClassCheckTypeName.contains(".")) {
+				// This is an inner class, let's add they keyword this as first param
+				params.add(0, context.js().name(GeneratorConstants.THIS));
+			}
+		}
+
+		return context.js().newExpression(context.js().name(typeName), params);
 	}
 
 	@Override
