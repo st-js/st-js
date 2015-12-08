@@ -63,6 +63,8 @@ public final class GeneratorConstants {
 
 	public static final String AUTO_GENERATED_ELEMENT_SEPARATOR = "$";
 
+	public static final String INNER_CLASS_CONSTRUCTOR_PARAM_PREFIX = "outerClass";
+
 	private GeneratorConstants() {
 		//
 	}

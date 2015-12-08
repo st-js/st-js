@@ -43,5 +43,4 @@ public class InlineObjects11_AnonymousClass_calling_outer {
         String doIt();
         String superDoIt();
     }
-
 }

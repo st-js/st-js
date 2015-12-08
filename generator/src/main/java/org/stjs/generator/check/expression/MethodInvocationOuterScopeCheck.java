@@ -49,7 +49,7 @@ public class MethodInvocationOuterScopeCheck implements CheckContributor<MethodI
     }
 
     private void checkScope(MethodInvocationTree tree, GenerationContext<Void> context, Element methodElement) {
-        if (Scopes.isInvokedMethodFromOuterType(methodElement, context)) {
+        if (Scopes.isInvokedElementFromOuterType(methodElement, context)) {
             context.addError(tree, "In Javascript you cannot call methods or fields from the outer type. "
                     + "You should define a variable var that=this outside your function definition and call the methods on this object");
         }

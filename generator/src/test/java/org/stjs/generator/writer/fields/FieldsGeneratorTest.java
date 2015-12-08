@@ -120,7 +120,8 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 				"    prototype.getPublicField = function() {\n" +
 				"        return this.publicField;\n" +
 				"    };\n" +
-				"    constructor.InnerClass = function(parent) {\n" +
+				"    constructor.InnerClass = function(outerClass$0, parent) {\n" +
+				"        this._outerClass$0 = outerClass$0;\n" +
 				"        this._parent = parent;\n" +
 				"    };\n" +
 				"    constructor.InnerClass = stjs.extend(constructor.InnerClass, null, [], function(constructor, prototype) {\n" +
@@ -224,7 +225,7 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 				"    this._aStringArray = [\"a\", \"b\", \"c\", \"d\", \"e\"];\n" +
 				"    this._anIntTwoDimensArray = [[0, 1], [2, 3]];\n" +
 				"    this._aCharArray = ['n', 'o', 't', ' ', 'a', ' ', 'S', 't', 'r', 'i', 'n', 'g'];\n" +
-				"    this._anObjectArray = [new Fields28_array.SimpleObject(this._anIntTwoDimensArray), new Fields28_array.SimpleObject([[0]])];\n" +
+				"    this._anObjectArray = [new Fields28_array.SimpleObject(this, this._anIntTwoDimensArray), new Fields28_array.SimpleObject(this, [[0]])];\n" +
 				"    this._aFloatArray = [2.0, 3.6969];\n" +
 				"    this._aCollectionArray = [];\n" +
 				"    this._anInterfaceArray = [new (stjs.extend(function Fields28_array$1() {}, null, [Fields28_array.SimpleInterface], function(constructor, prototype) {\n" +

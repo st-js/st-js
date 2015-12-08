@@ -2,9 +2,11 @@ package org.stjs.generator.utils;
 
 import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.util.TreePath;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.TreeUtils;
 
 import javax.lang.model.element.Element;
@@ -25,7 +27,7 @@ public final class Scopes {
 	 * @param context
      * @return
      */
-	public static boolean isInvokedMethodFromOuterType(Element methodElement, GenerationContext<Void> context) {
+	public static boolean isInvokedElementFromOuterType(Element methodElement, GenerationContext<Void> context) {
 		ClassTree enclosingClassTree = findEnclosingClassSkipAnonymousInitializer(context.getCurrentPath());
 
 		TypeElement currentScopeClassElement = TreeUtils.elementFromDeclaration(enclosingClassTree);
@@ -103,5 +105,26 @@ public final class Scopes {
 		}
 
 		return deepnessLevel;
+	}
+
+	public static String buildOuterClassAccessTargetPrefix() {
+		return GeneratorConstants.THIS + "." + GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX
+				+ GeneratorConstants.INNER_CLASS_CONSTRUCTOR_PARAM_PREFIX;
+	}
+
+	public static boolean isRegularInstanceField(Element fieldElement, IdentifierTree tree) {
+		if (fieldElement == null || fieldElement.getKind() != ElementKind.FIELD) {
+			// only meant for fields
+			return false;
+		}
+		if (JavaNodes.isStatic(fieldElement)) {
+			// only instance fieds
+			return false;
+		}
+
+		if (GeneratorConstants.THIS.equals(tree.getName().toString()) || GeneratorConstants.SUPER.equals(tree.getName().toString())) {
+			return false;
+		}
+		return true;
 	}
 }

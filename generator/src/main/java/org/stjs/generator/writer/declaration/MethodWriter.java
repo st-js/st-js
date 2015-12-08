@@ -17,6 +17,7 @@ import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.AssignOperator;
+import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.FieldUtils;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.utils.Scopes;
@@ -24,6 +25,7 @@ import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
+import org.stjs.javascript.annotation.Namespace;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -182,20 +184,18 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 
 		// set if needed Type$1 name, if this is an anonymous type constructor
 		String anonymousTypeConstructorName = getAnonymousTypeConstructorName(tree, context);
-
-		if (anonymousTypeConstructorName == null) {
-			JS thisScopeAccessor = addThisScopeAccessorIfNeeded(tree, context, body);
-			if (thisScopeAccessor != null) {
-				// Insert our accessor at the beginning of the current method block { }
-				((Block) body).addChildToFront((Node) thisScopeAccessor);
-			}
-		}
-
-		JS decl = context.js().function(anonymousTypeConstructorName, params, body);
+		boolean isAnonymousConstructor = (anonymousTypeConstructorName != null);
 
 		if (JavaNodes.isConstructor(tree)) {
 			addFieldInitializersToConstructor(visitor, body, context);
+			decorateBodyWithOuterClassAccessor(tree, context, params, body, isAnonymousConstructor);
 		}
+
+		if (!isAnonymousConstructor) {
+			decorateBodyWithScopeAccessor(tree, context, body);
+		}
+
+		JS decl = context.js().function(anonymousTypeConstructorName, params, body);
 
 		JS constructorOrPrototypePrefix = addConstructorOrPrototypePrefixIfNeeded(tree, context, tw, decl);
 		if (constructorOrPrototypePrefix == null) {
@@ -205,26 +205,80 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		}
 	}
 
+	private void decorateBodyWithOuterClassAccessor(MethodTree tree, GenerationContext<JS> context, List<JS> params, JS body,
+													boolean isAnonymousConstructor) {
+		if (!isAnonymousConstructor && isInnerClass(tree, context)) {
+            context.js().addStatementBeginning(body, addConstructorOuterClassAccessor(tree, context));
+            params.add(0, context.js().name(getOuterClassAccessorParamName(tree)));
+        }
+	}
+
+	private void decorateBodyWithScopeAccessor(MethodTree tree, GenerationContext<JS> context, JS body) {
+		JS scopeAccessor = addScopeAccessorIfNeeded(tree, context, body);
+		if (scopeAccessor != null) {
+            context.js().addStatementBeginning(body, scopeAccessor);
+        }
+	}
+
+	private boolean isInnerClass(MethodTree tree, GenerationContext<JS> context) {
+		Element element = TreeUtils.elementFromDeclaration(tree).getEnclosingElement();
+		if (ElementKind.CLASS.equals(element.getKind())) {
+			String typeName = getTypeNameForElement(context, element);
+			return typeName.contains(".");
+		}
+		return false;
+	}
+
+	private String getTypeNameForElement(GenerationContext<JS> context, Element element) {
+		String typeName = context.getNames().getTypeName(context, element.asType(), DependencyType.EXTENDS);
+		Namespace annotationNamespace = element.getAnnotation(Namespace.class);
+		if (annotationNamespace != null) {
+			return typeName.replaceAll(annotationNamespace.value() + ".", "");
+		}
+		// Check the package namespace
+		annotationNamespace = ElementUtils.enclosingPackage(element).getAnnotation(Namespace.class);
+		if (annotationNamespace != null) {
+			return typeName.replaceAll(annotationNamespace.value() + ".", "");
+		}
+
+		return typeName;
+	}
+
+	private String getOuterClassAccessorParamName(MethodTree tree) {
+		Element element = TreeUtils.elementFromDeclaration(tree);
+		int deepnessLevel = Scopes.getElementDeepnessLevel(element);
+		return GeneratorConstants.INNER_CLASS_CONSTRUCTOR_PARAM_PREFIX + GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR + deepnessLevel;
+	}
+
 	/**
 	 * Evaluate if any accessor may require our current scope.
-	 * In this case, we return a "var this$X = this;" where x is the deepness level ourself.
+	 *
+	 * For anonymous methods:
+	 * 	Return a "var this$X = this;"
+	 *
+	 * For normal inner classes:
+	 *  Return "this._outerClass$x = outerClass$x;"
 	 *
 	 * @param tree
 	 * @param context
 	 * @param body
-     * @return
+	 * @return
      */
-	private JS addThisScopeAccessorIfNeeded(MethodTree tree, GenerationContext<JS> context, JS body) {
-		if (isFromInterface(context) || JavaNodes.isConstructor(tree) || isMethodOfJavascriptFunction(context.getCurrentWrapper())) {
+	private JS addScopeAccessorIfNeeded(MethodTree tree, GenerationContext<JS> context, JS body) {
+		if (isFromInterface(context) || isMethodOfJavascriptFunction(context.getCurrentWrapper())) {
 			return null;
 		}
 
 		Element element = TreeUtils.elementFromDeclaration(tree);
 		int deepnessLevel = Scopes.getElementDeepnessLevel(element);
-		String thisScopeAccessorVariable = GeneratorConstants.THIS + GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR + deepnessLevel;
 
-		if (findAccessor(body, thisScopeAccessorVariable)) {
-			return context.js().variableDeclaration(true, thisScopeAccessorVariable, context.js().name(GeneratorConstants.THIS));
+		String scopeAccessorPrefix = GeneratorConstants.THIS;
+		JS scopeAccessorValue = context.js().name(GeneratorConstants.THIS);
+
+		String scopeAccessorVariable = scopeAccessorPrefix + GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR + deepnessLevel;
+
+		if (findAccessor(body, scopeAccessorVariable)) {
+			return context.js().variableDeclaration(true, scopeAccessorVariable, scopeAccessorValue);
 		}
 
 		return null;
@@ -242,6 +296,21 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 			}
 		}
 		return false;
+	}
+
+	private JS addConstructorOuterClassAccessor(MethodTree tree, GenerationContext<JS> context) {
+		Element element = TreeUtils.elementFromDeclaration(tree);
+		int deepnessLevel = Scopes.getElementDeepnessLevel(element);
+
+		// Create a target such as 'this._outerClass$x'
+		String scopeAccessorPrefix = Scopes.buildOuterClassAccessTargetPrefix();
+		JS innerClassConstructorParam = context.js().name(GeneratorConstants.INNER_CLASS_CONSTRUCTOR_PARAM_PREFIX
+				+ GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR + deepnessLevel);
+
+		String scopeAccessorVariable = scopeAccessorPrefix + GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR + deepnessLevel;
+
+		return context.js().expressionStatement(
+				context.js().assignment(AssignOperator.ASSIGN, context.js().name(scopeAccessorVariable), innerClassConstructorParam));
 	}
 
 	private JS addConstructorOrPrototypePrefixIfNeeded(MethodTree tree, GenerationContext<JS> context,

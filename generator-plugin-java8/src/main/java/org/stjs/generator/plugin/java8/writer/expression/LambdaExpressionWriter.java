@@ -1,24 +1,5 @@
 package org.stjs.generator.plugin.java8.writer.expression;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.lang.model.element.Element;
-
-import org.stjs.generator.GenerationContext;
-import org.stjs.generator.GeneratorConstants;
-import org.stjs.generator.check.expression.IdentifierAccessOuterScopeCheck;
-import org.stjs.generator.javac.TreeUtils;
-import org.stjs.generator.javascript.JavaScriptBuilder;
-import org.stjs.generator.javascript.Keyword;
-import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.writer.WriterContributor;
-import org.stjs.generator.writer.WriterVisitor;
-import org.stjs.generator.writer.declaration.MethodWriter;
-import org.stjs.generator.writer.expression.MethodInvocationWriter;
-
 import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.IdentifierTree;
@@ -26,6 +7,23 @@ import com.sun.source.tree.LambdaExpressionTree;
 import com.sun.source.tree.LambdaExpressionTree.BodyKind;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.util.TreeScanner;
+import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javascript.JavaScriptBuilder;
+import org.stjs.generator.javascript.Keyword;
+import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.utils.Scopes;
+import org.stjs.generator.writer.WriterContributor;
+import org.stjs.generator.writer.WriterVisitor;
+import org.stjs.generator.writer.declaration.MethodWriter;
+import org.stjs.generator.writer.expression.MethodInvocationWriter;
+
+import javax.lang.model.element.Element;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * generates the code for Lambda expressions.
@@ -58,7 +56,7 @@ public class LambdaExpressionWriter<JS> implements WriterContributor<LambdaExpre
 					return super.visitIdentifier(tree, arg1);
 				}
 				Element fieldElement = TreeUtils.elementFromUse(tree);
-				if (IdentifierAccessOuterScopeCheck.isRegularInstanceField(fieldElement, tree)
+				if (Scopes.isRegularInstanceField(fieldElement, tree)
 						|| GeneratorConstants.THIS.equals(tree.getName().toString())) {
 					outerScopeAccess.set(true);
 				}

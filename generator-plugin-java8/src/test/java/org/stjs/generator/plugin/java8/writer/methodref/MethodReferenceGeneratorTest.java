@@ -1,10 +1,9 @@
 package org.stjs.generator.plugin.java8.writer.methodref;
 
+import org.junit.Test;
 import org.stjs.generator.utils.AbstractStjsTest;
 
 import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
 
 public class MethodReferenceGeneratorTest extends AbstractStjsTest {
 	@Test
@@ -23,7 +22,7 @@ public class MethodReferenceGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testInstanceMethodRefWithInterface() {
 		assertCodeContains(MethodRef9.class,
-				"calculate(stjs.bind(\"inc2\"), new MethodRef9.IncImpl(), 1)");
+				"calculate(stjs.bind(\"inc2\"), new MethodRef9.IncImpl(this), 1)");
 		assertEquals(3, ((Number)execute(MethodRef9.class)).intValue());
 	}
 
