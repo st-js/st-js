@@ -1,5 +1,6 @@
 package org.stjs.generator.writer.innerTypes;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.utils.AbstractStjsTest;
@@ -49,9 +50,9 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 				"    };");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test
 	public void testCallFieldToQualifiedOuterType() {
-		generate(InnerTypes6a.class);
+		assertCodeContains(InnerTypes6a.class, "var m = this._outerClass$0._n;");
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
@@ -59,9 +60,15 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 		generate(InnerTypes6b.class);
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test
 	public void testCallMethodToQualifiedOuterType() {
-		generate(InnerTypes6c.class);
+		assertCodeContains(InnerTypes6c.class, "var m = this._outerClass$0.method();");
+	}
+
+	@Test
+	public void testCallMethodToQualifiedOuterTypeExecution() {
+		Object result = execute(InnerTypes6d_execution.class);
+		Assert.assertEquals("MyClass$InnerClass,MyClass$InnerClass,MyClass", result);
 	}
 
 	@Test
