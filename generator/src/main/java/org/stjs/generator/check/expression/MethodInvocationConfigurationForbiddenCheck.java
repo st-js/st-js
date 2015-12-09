@@ -6,6 +6,7 @@ import org.stjs.generator.GenerationContext;
 import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.writer.expression.MethodInvocationWriter;
 
 import javax.lang.model.element.Element;
 import java.util.Collection;
@@ -28,7 +29,9 @@ public class MethodInvocationConfigurationForbiddenCheck implements CheckContrib
 			return null;
 		}
 
-		String methodFullPath = ((Symbol.ClassSymbol) methodOwner).className() + "." + methodElement.getSimpleName();
+		String transpiledMethodName = MethodInvocationWriter.buildMethodName(tree, context);
+
+		String methodFullPath = ((Symbol.ClassSymbol) methodOwner).className() + "." + transpiledMethodName;
 
 		Collection<String> forbiddenMethodInvocations = context.getConfiguration().getForbiddenMethodInvocations();
 		if (forbiddenMethodInvocations.contains(methodFullPath)) {

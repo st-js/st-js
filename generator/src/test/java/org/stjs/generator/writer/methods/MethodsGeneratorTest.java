@@ -182,7 +182,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testForbiddenConfigurationPrivateMethod() {
-		String expectedForbiddenMethod = "org.stjs.generator.writer.methods.Methods21_forbidden_configuration_private_method.forbiddenPrivateMethod";
+		String expectedForbiddenMethod = "org.stjs.generator.writer.methods.Methods21_forbidden_configuration_private_method._forbiddenPrivateMethod";
 		testForbiddenConfiguration(expectedForbiddenMethod, Methods21_forbidden_configuration_private_method.class);
 	}
 
@@ -198,12 +198,19 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 		testForbiddenConfiguration(expectedForbiddenMethod, Methods23_forbidden_configuration_inner_class_method.class);
 	}
 
+	@Test
+	public void testForbiddenConfigurationOverloadedMethod() {
+		String expectedForbiddenMethod = "org.stjs.generator.writer.methods.Methods24_forbidden_configuration_overloaded_method.forbiddenMethod$String";
+		testForbiddenConfiguration(expectedForbiddenMethod, Methods24_forbidden_configuration_overloaded_method.class);
+	}
+
 	private void testForbiddenConfiguration(String expectedForbiddenMethod, Class<?> clazz) {
 		Set<String> forbiddenMethodInvocations = new HashSet<>();
 		forbiddenMethodInvocations.add(expectedForbiddenMethod);
 
 		try {
 			generate(clazz,	new GeneratorConfigurationBuilder().forbiddenMethodInvocations(forbiddenMethodInvocations).build());
+			throw new RuntimeException("Invalid forbidden method invocations configuration, the test should've failed and get trapped by the catch.");
 		} catch (JavascriptFileGenerationException e) {
 			Assert.assertTrue("The expected error message wasn't present.", e.getMessage().contains("You cannot access methods that are listed as forbidden."));
 			Assert.assertTrue("The expected forbidden method wasn't found: " + expectedForbiddenMethod, e.getMessage().contains(expectedForbiddenMethod));
