@@ -17,6 +17,7 @@ import org.stjs.generator.check.expression.IdentifierAccessServerSideCheck;
 import org.stjs.generator.check.expression.IdentifierGlobalScopeNameClashCheck;
 import org.stjs.generator.check.expression.MemberSelectGlobalScopeNameClashCheck;
 import org.stjs.generator.check.expression.MemberSelectServerSideCheck;
+import org.stjs.generator.check.expression.MethodInvocationConfigurationForbiddenCheck;
 import org.stjs.generator.check.expression.MethodInvocationMapConstructorCheck;
 import org.stjs.generator.check.expression.MethodInvocationServerSideCheck;
 import org.stjs.generator.check.expression.MethodInvocationSuperSynthCheck;
@@ -145,6 +146,7 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(new MethodInvocationServerSideCheck());
 		visitor.contribute(new MethodWrongNameCheck());
 
+		visitor.contribute(new MethodInvocationConfigurationForbiddenCheck());
 	}
 
 	@Override

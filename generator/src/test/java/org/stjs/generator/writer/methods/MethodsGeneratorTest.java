@@ -7,6 +7,9 @@ import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class MethodsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testPublicInstanceMethod() {
@@ -175,5 +178,23 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 				"    prototype.overloadMethod$String_Array$String = function(firstParam, secondParams) {};\n" +
 				"    prototype.overloadMethod$String_Array$boolean = function(firstParam, secondParams) {};\n" +
 				"    prototype.overloadMethod$String_ArrayString = function(firstParam, secondParams) {};\n");
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testForbiddenConfigurationPrivateMethod() {
+		Set<String> forbiddenMethodInvocations = new HashSet<>();
+		forbiddenMethodInvocations.add("org.stjs.generator.writer.methods.Methods21_forbidden_configuration_private_method.forbiddenPrivateMethod");
+
+		generate(Methods21_forbidden_configuration_private_method.class,
+				new GeneratorConfigurationBuilder().forbiddenMethodInvocations(forbiddenMethodInvocations).build());
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testForbiddenConfigurationPublicMethod() {
+		Set<String> forbiddenMethodInvocations = new HashSet<>();
+		forbiddenMethodInvocations.add("org.stjs.generator.writer.methods.Methods22_forbidden_configuration_public_method.forbiddenPublicMethod");
+
+		generate(Methods22_forbidden_configuration_public_method.class,
+				new GeneratorConfigurationBuilder().forbiddenMethodInvocations(forbiddenMethodInvocations).build());
 	}
 }
