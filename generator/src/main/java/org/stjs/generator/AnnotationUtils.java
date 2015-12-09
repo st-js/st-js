@@ -42,6 +42,8 @@ public class AnnotationUtils {
 				methodNameBuilder.append(param.type.tsym.getSimpleName());
 				if (TypeKind.ARRAY.equals(param.type.getKind())) {
 					methodNameBuilder.append(AnnotationConstants.JS_OVERLOAD_NAME_DEFAULT_VALUE);
+
+					assert param.type instanceof Type.ArrayType;
 					methodNameBuilder.append(((Type.ArrayType) param.type).elemtype.tsym.getSimpleName());
 				}
 				if (i < params.size() - 1) {
