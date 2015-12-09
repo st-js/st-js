@@ -51,18 +51,15 @@ public class MemberReferenceWriter<JS> implements WriterContributor<MemberRefere
 	}
 
 	/**
-	 * Type::method -> function() {return Type.prototype.method.call(arguments[0], arguments[1], ...);}
+	 * Type::method -> stjs.bind("method")
 	 */
 	private JS generateInstanceRef(MemberReferenceTree tree, GenerationContext<JS> context, ExecutableElement methodElement) {
 		JavaScriptBuilder<JS> js = context.js();
 		Element type = methodElement.getEnclosingElement();
-		JS typeName = js.name(context.getNames().getTypeName(context, type, DependencyType.STATIC));
-		JS proto = js.property(typeName, JavascriptKeywords.PROTOTYPE);
-		JS method = js.property(proto, tree.getName());
-		JS methoCall = js.property(method, "call");
-		// + 1 because first is the object to which the method is applied
-		JS call = js.functionCall(methoCall, generateArguments(context, methodElement.getParameters().size() + 1));
-		return js.function(null, Collections.emptyList(), js.returnStatement(call));
+		context.getNames().getTypeName(context, type, DependencyType.STATIC); // Make sure that we record the dependency on the type
+		JS stjsBind = context.js().property(context.js().name("stjs"), "bind");
+		JS methodName = js.string(tree.getName().toString());
+		return js.functionCall(stjsBind, Collections.singletonList(methodName));
 	}
 
 	/**
@@ -97,7 +94,7 @@ public class MemberReferenceWriter<JS> implements WriterContributor<MemberRefere
 		// System.out.println(tree + ":left:" + tree.getQualifierExpression().getClass() + ", kind:" +
 		// qualifierElemenet.getKind());
 		if (tree.getMode() == ReferenceMode.INVOKE) {
-			if (qualifierElement.getKind() == ElementKind.CLASS) {
+			if (qualifierElement.getKind() == ElementKind.CLASS || qualifierElement.getKind() == ElementKind.INTERFACE) {
 				if (JavaNodes.isStatic(methodElement)) {
 					return generateStaticRef(tree, context, methodElement);
 				}

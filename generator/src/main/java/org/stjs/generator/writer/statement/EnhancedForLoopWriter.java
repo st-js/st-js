@@ -10,6 +10,7 @@ import org.stjs.generator.javascript.UnaryOperator;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.javascript.Array;
+import org.stjs.javascript.Map;
 
 import com.sun.source.tree.EnhancedForLoopTree;
 
@@ -40,6 +41,7 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 
 		TypeMirror iteratedType = InternalUtils.typeOf(tree.getExpression());
 		if (!TypesUtils.isDeclaredOfName(iteratedType, Array.class.getName())) {
+			// only Arrays need hasOwnProperty. Maps are just plain JS objects and don't have any other enumerable properties.
 			return body;
 		}
 		JavaScriptBuilder<JS> js = context.js();
@@ -69,10 +71,13 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 
 		TypeMirror iteratedType = InternalUtils.typeOf(tree.getExpression());
 
-		if (TypesUtils.isDeclaredOfName(iteratedType, Array.class.getName())) {
-			return generateForEachInArray(tree, context, iterator, iterated, body);
+		if (TypesUtils.isDeclaredOfName(iteratedType, Array.class.getName())
+				|| TypesUtils.isDeclaredOfName(iteratedType, Map.class.getName())) {
+			return generateForEachInObject(tree, context, iterator, iterated, body);
+
 		} else if (isErasuredClassAssignableFromType(Iterable.class, iteratedType, context)) {
 			return generateForEachWithIterable(tree, context, iterated, body);
+
 		} else {
 			return context.withPosition(tree, context.js().forInLoop(iterator, iterated, body));
 		}
@@ -85,7 +90,7 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 		return context.getTypes().isAssignable(erasedIteratedType, erasedClassToCheck);
 	}
 
-	private JS generateForEachInArray(EnhancedForLoopTree tree, GenerationContext<JS> context, JS iterator, JS iterated, JS body) {
+	private JS generateForEachInObject(EnhancedForLoopTree tree, GenerationContext<JS> context, JS iterator, JS iterated, JS body) {
 		JS newBody = generateArrayHasOwnProperty(tree, context, iterated, body);
 		return context.withPosition(tree, context.js().forInLoop(iterator, iterated, newBody));
 	}
