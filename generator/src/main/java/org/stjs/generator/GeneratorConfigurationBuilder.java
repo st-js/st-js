@@ -26,9 +26,10 @@ import java.util.Set;
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class GeneratorConfigurationBuilder {
-	private final Collection<String> allowedPackages = new HashSet<String>();
-	private final Set<String> allowedJavaLangClasses = new HashSet<String>();
-	private final Set<String> annotations = new HashSet<String>();
+	private final Set<String> allowedPackages = new HashSet<>();
+	private final Set<String> allowedJavaLangClasses = new HashSet<>();
+	private final Set<String> annotations = new HashSet<>();
+	private final Set<String> forbiddenMethodInvocations = new HashSet<>();
 	private boolean generateArrayHasOwnProperty = true;
 	private boolean generateSourceMap;
 	private String sourceEncoding = Charset.defaultCharset().name();
@@ -48,6 +49,7 @@ public class GeneratorConfigurationBuilder {
 		if (baseConfig != null) {
 			allowedPackages(baseConfig.getAllowedPackages());
 			allowedJavaLangClasses(baseConfig.getAllowedJavaLangClasses());
+			forbiddenMethodInvocations(baseConfig.getForbiddenMethodInvocations());
 			annotations(baseConfig.getAnnotations());
 			generateArrayHasOwnProperty(baseConfig.isGenerateArrayHasOwnProperty());
 			generateSourceMap(baseConfig.isGenerateSourceMap());
@@ -70,13 +72,18 @@ public class GeneratorConfigurationBuilder {
 		return this;
 	}
 
-	public GeneratorConfigurationBuilder allowedPackages(Collection<String> packageNames) {
+	public GeneratorConfigurationBuilder allowedPackages(Set<String> packageNames) {
 		allowedPackages.addAll(packageNames);
 		return this;
 	}
 
-	public GeneratorConfigurationBuilder allowedJavaLangClasses(Collection<String> classNames) {
+	public GeneratorConfigurationBuilder allowedJavaLangClasses(Set<String> classNames) {
 		allowedJavaLangClasses.addAll(classNames);
+		return this;
+	}
+
+	public GeneratorConfigurationBuilder forbiddenMethodInvocations(Set<String> methodInvocations) {
+		forbiddenMethodInvocations.addAll(methodInvocations);
 		return this;
 	}
 
@@ -162,6 +169,7 @@ public class GeneratorConfigurationBuilder {
 		return new GeneratorConfiguration(//
 				allowedPackages,  //
 				allowedJavaLangClasses, //
+				forbiddenMethodInvocations, //
 				generateArrayHasOwnProperty, //
 				generateSourceMap, //
 				sourceEncoding,  //

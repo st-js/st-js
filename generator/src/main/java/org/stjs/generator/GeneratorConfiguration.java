@@ -13,11 +13,10 @@
 package org.stjs.generator;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.Set;
 
 public class GeneratorConfiguration {
-	private final Collection<String> allowedPackages;
+	private final Set<String> allowedPackages;
 	private final Set<String> allowedJavaLangClasses;
 	private final boolean generateArrayHasOwnProperty;
 	private final boolean generateSourceMap;
@@ -28,14 +27,16 @@ public class GeneratorConfiguration {
 	private final GenerationDirectory generationFolder;
 	private final ClassResolver classResolver;
 	private final boolean isSynchronizedAllowed;
+	private final Set<String> forbiddenMethodInvocations;
 
 	// We actually have a builder for that, so the number of parameters warning doesn't apply
 	@SuppressWarnings("PMD.ExcessiveParameterList")
-	GeneratorConfiguration(Collection<String> allowedPackages, Set<String> allowedJavaLangClasses, boolean generateArrayHasOwnProperty,
-			boolean generateSourceMap, String sourceEncoding, Set<String> annotations, ClassLoader stjsClassLoader, File targetFolder,
-			GenerationDirectory generationFolder, ClassResolver classResolver, boolean isSynchronizedAllowed) {
+	GeneratorConfiguration(Set<String> allowedPackages, Set<String> allowedJavaLangClasses, Set<String> forbiddenMethodInvocations,
+			boolean generateArrayHasOwnProperty, boolean generateSourceMap, String sourceEncoding, Set<String> annotations, ClassLoader stjsClassLoader,
+			File targetFolder, GenerationDirectory generationFolder, ClassResolver classResolver, boolean isSynchronizedAllowed) {
 		this.allowedPackages = allowedPackages;
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
+		this.forbiddenMethodInvocations = forbiddenMethodInvocations;
 		this.generateArrayHasOwnProperty = generateArrayHasOwnProperty;
 		this.generateSourceMap = generateSourceMap;
 		this.sourceEncoding = sourceEncoding;
@@ -51,12 +52,16 @@ public class GeneratorConfiguration {
 	 * @return the parent packages that contain the classes that can be called from the processed source file. Note that sub-packages of a
 	 *         package from this collection are also allowed. java.lang is implicit
 	 */
-	public Collection<String> getAllowedPackages() {
+	public Set<String> getAllowedPackages() {
 		return allowedPackages;
 	}
 
 	public Set<String> getAllowedJavaLangClasses() {
 		return allowedJavaLangClasses;
+	}
+
+	public Set<String> getForbiddenMethodInvocations() {
+		return forbiddenMethodInvocations;
 	}
 
 	public boolean isGenerateArrayHasOwnProperty() {
