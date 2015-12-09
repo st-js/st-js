@@ -91,6 +91,7 @@ import org.stjs.generator.writer.templates.PutTemplate;
 import org.stjs.generator.writer.templates.SetTemplate;
 import org.stjs.generator.writer.templates.SuffixTemplate;
 import org.stjs.generator.writer.templates.TypeOfTemplate;
+import org.stjs.generator.writer.templates.fields.PathGetterMemberSelectTemplate;
 import org.stjs.generator.writer.templates.fields.DefaultAssignmentTemplate;
 import org.stjs.generator.writer.templates.fields.DefaultCompoundAssignmentTemplate;
 import org.stjs.generator.writer.templates.fields.DefaultIdentifierTemplate;
@@ -269,6 +270,7 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		String none = "none";
 		String property = "property";
 		String gproperty = "gproperty";
+		String path = "path";
 
 		visitor.contribute(assignTemplate(none), new DefaultAssignmentTemplate<JS>());
 		visitor.contribute(assignTemplate(property), new SetterAssignmentTemplate<JS>());
@@ -289,6 +291,7 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(memberSelectTemplate(none), new DefaultMemberSelectTemplate<JS>());
 		visitor.contribute(memberSelectTemplate(property), new GetterMemberSelectTemplate<JS>());
 		visitor.contribute(memberSelectTemplate(gproperty), new GlobalGetterMemberSelectTemplate<JS>());
+		visitor.contribute(memberSelectTemplate(path), new PathGetterMemberSelectTemplate<JS>());
 	}
 
 	@Override
