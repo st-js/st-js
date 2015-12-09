@@ -8,7 +8,7 @@ import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.javac.TreeUtils;
 
 import javax.lang.model.element.Element;
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * this check verifies that you don't call a method that is listed as forbidden in the configuration.
@@ -30,7 +30,7 @@ public class MethodInvocationConfigurationForbiddenCheck implements CheckContrib
 
 		String methodFullPath = ((Symbol.ClassSymbol) methodOwner).className() + "." + methodElement.getSimpleName();
 
-		Set<String> forbiddenMethodInvocations = context.getConfiguration().getForbiddenMethodInvocations();
+		Collection<String> forbiddenMethodInvocations = context.getConfiguration().getForbiddenMethodInvocations();
 		for (String forbiddenMethodInvocation : forbiddenMethodInvocations) {
 			if (forbiddenMethodInvocation.equals(methodFullPath)) {
 				context.addError(tree, "You cannot access methods that are listed as forbidden. See `forbiddenMethodInvocations` "

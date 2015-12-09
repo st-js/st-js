@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 /**
  * Use this class to build a configuration needed by the {@link Generator}
@@ -26,10 +25,10 @@ import java.util.Set;
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class GeneratorConfigurationBuilder {
-	private final Set<String> allowedPackages = new HashSet<>();
-	private final Set<String> allowedJavaLangClasses = new HashSet<>();
-	private final Set<String> annotations = new HashSet<>();
-	private final Set<String> forbiddenMethodInvocations = new HashSet<>();
+	private final Collection<String> allowedPackages = new HashSet<>();
+	private final Collection<String> allowedJavaLangClasses = new HashSet<>();
+	private final Collection<String> annotations = new HashSet<>();
+	private final Collection<String> forbiddenMethodInvocations = new HashSet<>();
 	private boolean generateArrayHasOwnProperty = true;
 	private boolean generateSourceMap;
 	private String sourceEncoding = Charset.defaultCharset().name();
@@ -67,23 +66,33 @@ public class GeneratorConfigurationBuilder {
 		return this;
 	}
 
-	public GeneratorConfigurationBuilder allowedJavaLangClasses(String className) {
+	public GeneratorConfigurationBuilder allowedJavaLangClass(String className) {
 		allowedJavaLangClasses.add(className);
 		return this;
 	}
 
-	public GeneratorConfigurationBuilder allowedPackages(Set<String> packageNames) {
+	public GeneratorConfigurationBuilder forbiddenMethodInvocation(String methodInvocation) {
+		forbiddenMethodInvocations.add(methodInvocation);
+		return this;
+	}
+
+	public GeneratorConfigurationBuilder allowedPackages(Collection<String> packageNames) {
 		allowedPackages.addAll(packageNames);
 		return this;
 	}
 
-	public GeneratorConfigurationBuilder allowedJavaLangClasses(Set<String> classNames) {
+	public GeneratorConfigurationBuilder allowedJavaLangClasses(Collection<String> classNames) {
 		allowedJavaLangClasses.addAll(classNames);
 		return this;
 	}
 
-	public GeneratorConfigurationBuilder forbiddenMethodInvocations(Set<String> methodInvocations) {
+	public GeneratorConfigurationBuilder forbiddenMethodInvocations(Collection<String> methodInvocations) {
 		forbiddenMethodInvocations.addAll(methodInvocations);
+		return this;
+	}
+
+	public GeneratorConfigurationBuilder annotations(Collection<String> annotationNames) {
+		annotations.addAll(annotationNames);
 		return this;
 	}
 
@@ -104,11 +113,6 @@ public class GeneratorConfigurationBuilder {
 
 	public GeneratorConfigurationBuilder annotations(String... annotationNames) {
 		annotations.addAll(Arrays.asList(annotationNames));
-		return this;
-	}
-
-	public GeneratorConfigurationBuilder annotations(Collection<String> annotationNames) {
-		annotations.addAll(annotationNames);
 		return this;
 	}
 
