@@ -12,7 +12,6 @@ import org.stjs.generator.check.declaration.ClassImplementJavascriptFunctionChec
 import org.stjs.generator.check.declaration.ClassNamespaceCheck;
 import org.stjs.generator.check.declaration.MethodDeclarationTemplateCheck;
 import org.stjs.generator.check.declaration.MethodSynchronizedCheck;
-import org.stjs.generator.check.declaration.MethodVarArgParamCheck;
 import org.stjs.generator.check.declaration.MethodWrongNameCheck;
 import org.stjs.generator.check.expression.IdentifierAccessServerSideCheck;
 import org.stjs.generator.check.expression.IdentifierGlobalScopeNameClashCheck;
@@ -118,7 +117,6 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 	public void contributeCheckVisitor(CheckVisitor visitor) {
 		visitor.contribute(new VariableFinalInLoopCheck());
 		visitor.contribute(new VariableWrongNameCheck());
-		visitor.contribute(new MethodVarArgParamCheck());
 		visitor.contribute(new ClassDuplicateMemberNameCheck());
 		visitor.contribute(new NewClassInlineFunctionCheck());
 		visitor.contribute(new ClassImplementJavascriptFunctionCheck());

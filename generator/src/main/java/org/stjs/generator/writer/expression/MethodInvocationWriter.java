@@ -5,6 +5,7 @@ import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.Tree;
+import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
 import org.stjs.generator.AnnotationUtils;
 import org.stjs.generator.GenerationContext;
@@ -18,6 +19,7 @@ import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
+import org.stjs.javascript.annotation.Template;
 
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -114,11 +116,39 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 	}
 
 	public static <JS> List<JS> buildArguments(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
-		List<JS> arguments = new ArrayList<JS>();
-		for (Tree arg : tree.getArguments()) {
-			arguments.add(visitor.scan(arg, context));
+		List<JS> arguments = new ArrayList<>();
+		Symbol.MethodSymbol symbol = (Symbol.MethodSymbol) InternalUtils.symbol(tree);
+
+		// We must convert the var arg params to a an Array
+		if (symbol != null && symbol.isVarArgs() && symbol.getAnnotation(Template.class) == null) {
+			buildArgumentsWithVarArgs(visitor, tree, context, symbol, arguments);
+		} else {
+			for (Tree arg : tree.getArguments()) {
+				arguments.add(visitor.scan(arg, context));
+			}
 		}
+
 		return arguments;
+	}
+
+	private static <JS> void buildArgumentsWithVarArgs(WriterVisitor<JS> visitor, MethodInvocationTree tree,
+													   GenerationContext<JS> context, Symbol.MethodSymbol symbol, List<JS> arguments) {
+		List<JS> varArgs = new ArrayList<>();
+		List<? extends ExpressionTree> treeArguments = tree.getArguments();
+		List<Symbol.VarSymbol> symbolParameters = symbol.getParameters();
+		for (int i = 0; i < treeArguments.size(); i++) {
+            ExpressionTree arg = treeArguments.get(i);
+            Symbol.VarSymbol param = null;
+            if (symbolParameters.size() > i) {
+                param = symbolParameters.get(i);
+            }
+            if (param != null && (param.flags() & Flags.VARARGS) == 0) {
+                arguments.add(visitor.scan(arg, context));
+            } else {
+                varArgs.add(visitor.scan(arg, context));
+            }
+        }
+		arguments.add(context.js().array(varArgs));
 	}
 
 	public static <JS> String buildTemplateName(MethodInvocationTree tree, GenerationContext<JS> context) {
