@@ -180,21 +180,33 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 				"    prototype.overloadMethod$String_ArrayString = function(firstParam, secondParams) {};\n");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test
 	public void testForbiddenConfigurationPrivateMethod() {
-		Set<String> forbiddenMethodInvocations = new HashSet<>();
-		forbiddenMethodInvocations.add("org.stjs.generator.writer.methods.Methods21_forbidden_configuration_private_method.forbiddenPrivateMethod");
-
-		generate(Methods21_forbidden_configuration_private_method.class,
-				new GeneratorConfigurationBuilder().forbiddenMethodInvocations(forbiddenMethodInvocations).build());
+		String expectedForbiddenMethod = "org.stjs.generator.writer.methods.Methods21_forbidden_configuration_private_method.forbiddenPrivateMethod";
+		testForbiddenConfiguration(expectedForbiddenMethod, Methods21_forbidden_configuration_private_method.class);
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
+	@Test
 	public void testForbiddenConfigurationPublicMethod() {
-		Set<String> forbiddenMethodInvocations = new HashSet<>();
-		forbiddenMethodInvocations.add("org.stjs.generator.writer.methods.Methods22_forbidden_configuration_public_method.forbiddenPublicMethod");
+		String expectedForbiddenMethod = "org.stjs.generator.writer.methods.Methods22_forbidden_configuration_public_method.forbiddenPublicMethod";
+		testForbiddenConfiguration(expectedForbiddenMethod, Methods22_forbidden_configuration_public_method.class);
+	}
 
-		generate(Methods22_forbidden_configuration_public_method.class,
-				new GeneratorConfigurationBuilder().forbiddenMethodInvocations(forbiddenMethodInvocations).build());
+	@Test
+	public void testForbiddenConfigurationInnerClassMethod() {
+		String expectedForbiddenMethod = "org.stjs.generator.writer.methods.Methods23_forbidden_configuration_inner_class_method.InnerClass.forbiddenMethod";
+		testForbiddenConfiguration(expectedForbiddenMethod, Methods23_forbidden_configuration_inner_class_method.class);
+	}
+
+	private void testForbiddenConfiguration(String expectedForbiddenMethod, Class<?> clazz) {
+		Set<String> forbiddenMethodInvocations = new HashSet<>();
+		forbiddenMethodInvocations.add(expectedForbiddenMethod);
+
+		try {
+			generate(clazz,	new GeneratorConfigurationBuilder().forbiddenMethodInvocations(forbiddenMethodInvocations).build());
+		} catch (JavascriptFileGenerationException e) {
+			Assert.assertTrue("The expected error message wasn't present.", e.getMessage().contains("You cannot access methods that are listed as forbidden."));
+			Assert.assertTrue("The expected forbidden method wasn't found: " + expectedForbiddenMethod, e.getMessage().contains(expectedForbiddenMethod));
+		}
 	}
 }
