@@ -36,8 +36,8 @@ public class MethodInvocationConfigurationForbiddenCheck implements CheckContrib
 		Collection<String> forbiddenMethodInvocations = context.getConfiguration().getForbiddenMethodInvocations();
 		if (forbiddenMethodInvocations.contains(methodFullPath)) {
 			context.addError(tree, "You cannot access methods that are listed as forbidden. See `forbiddenMethodInvocations` "
-					+ "setting list in your Generator Configuration." +
-					"Forbidden method: " + methodFullPath);
+					+ "setting list in your Generator Configuration."
+					+ "Forbidden method: " + methodFullPath);
 			return null;
 		}
 
