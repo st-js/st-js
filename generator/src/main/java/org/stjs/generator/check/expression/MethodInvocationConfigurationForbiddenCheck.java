@@ -31,12 +31,11 @@ public class MethodInvocationConfigurationForbiddenCheck implements CheckContrib
 		String methodFullPath = ((Symbol.ClassSymbol) methodOwner).className() + "." + methodElement.getSimpleName();
 
 		Collection<String> forbiddenMethodInvocations = context.getConfiguration().getForbiddenMethodInvocations();
-		for (String forbiddenMethodInvocation : forbiddenMethodInvocations) {
-			if (forbiddenMethodInvocation.equals(methodFullPath)) {
-				context.addError(tree, "You cannot access methods that are listed as forbidden. See `forbiddenMethodInvocations` "
-						+ "setting list in your Generator Configuration.");
-				return null;
-			}
+		if (forbiddenMethodInvocations.contains(methodFullPath)) {
+			context.addError(tree, "You cannot access methods that are listed as forbidden. See `forbiddenMethodInvocations` "
+					+ "setting list in your Generator Configuration." +
+					"Forbidden method: " + methodFullPath);
+			return null;
 		}
 
 		return null;
