@@ -13,27 +13,29 @@
 package org.stjs.generator;
 
 import java.io.File;
-import java.util.Set;
+import java.util.Collection;
 
 public class GeneratorConfiguration {
-	private final Set<String> allowedPackages;
-	private final Set<String> allowedJavaLangClasses;
+	private final Collection<String> allowedPackages;
+	private final Collection<String> allowedJavaLangClasses;
+	private final Collection<String> forbiddenMethodInvocations;
+	private final Collection<String> annotations;
 	private final boolean generateArrayHasOwnProperty;
 	private final boolean generateSourceMap;
 	private final String sourceEncoding;
-	private final Set<String> annotations;
 	private final ClassLoader stjsClassLoader;
 	private final File targetFolder;
 	private final GenerationDirectory generationFolder;
 	private final ClassResolver classResolver;
 	private final boolean isSynchronizedAllowed;
-	private final Set<String> forbiddenMethodInvocations;
 
 	// We actually have a builder for that, so the number of parameters warning doesn't apply
 	@SuppressWarnings("PMD.ExcessiveParameterList")
-	GeneratorConfiguration(Set<String> allowedPackages, Set<String> allowedJavaLangClasses, Set<String> forbiddenMethodInvocations,
-			boolean generateArrayHasOwnProperty, boolean generateSourceMap, String sourceEncoding, Set<String> annotations, ClassLoader stjsClassLoader,
-			File targetFolder, GenerationDirectory generationFolder, ClassResolver classResolver, boolean isSynchronizedAllowed) {
+	GeneratorConfiguration(Collection<String> allowedPackages, Collection<String> allowedJavaLangClasses,
+						   Collection<String> forbiddenMethodInvocations, boolean generateArrayHasOwnProperty,
+						   boolean generateSourceMap, String sourceEncoding, Collection<String> annotations,
+						   ClassLoader stjsClassLoader,	File targetFolder, GenerationDirectory generationFolder,
+						   ClassResolver classResolver, boolean isSynchronizedAllowed) {
 		this.allowedPackages = allowedPackages;
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
 		this.forbiddenMethodInvocations = forbiddenMethodInvocations;
@@ -52,15 +54,15 @@ public class GeneratorConfiguration {
 	 * @return the parent packages that contain the classes that can be called from the processed source file. Note that sub-packages of a
 	 *         package from this collection are also allowed. java.lang is implicit
 	 */
-	public Set<String> getAllowedPackages() {
+	public Collection<String> getAllowedPackages() {
 		return allowedPackages;
 	}
 
-	public Set<String> getAllowedJavaLangClasses() {
+	public Collection<String> getAllowedJavaLangClasses() {
 		return allowedJavaLangClasses;
 	}
 
-	public Set<String> getForbiddenMethodInvocations() {
+	public Collection<String> getForbiddenMethodInvocations() {
 		return forbiddenMethodInvocations;
 	}
 
@@ -80,7 +82,7 @@ public class GeneratorConfiguration {
 	 * these are annotations to be generated
 	 * @return
 	 */
-	public Set<String> getAnnotations() {
+	public Collection<String> getAnnotations() {
 		return annotations;
 	}
 
