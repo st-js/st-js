@@ -152,7 +152,7 @@ public class SpecialMethodGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testCastArray() {
 		// Array<V> x = $castArray(obj[]) -> var x = obj;
-		assertCodeContains(SpecialMethod19.class, "var a = (\"abc\".split(\",\"));");
+		assertCodeContains(SpecialMethod19.class, "var a = (\"abc\".split$String(\",\"));");
 	}
 
 	@Test

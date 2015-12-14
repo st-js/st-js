@@ -60,25 +60,25 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 			return buildMethodNameForIdentifierTree(tree, context, (IdentifierTree) select);
 		} else if (select instanceof MemberSelectTree) {
 			// calls with target: target.method(args)
-			return buildMethodNameForMemberSelectTree(select);
+			return buildMethodNameForMemberSelectTree(context, (MemberSelectTree) select);
 		}
 		throw context.addError(tree, "Unsupported tree type during buildMethodName.");
 	}
 
-	private static String buildMethodNameForMemberSelectTree(ExpressionTree select) {
-		MemberSelectTree memberSelect = (MemberSelectTree) select;
+	private static <JS> String buildMethodNameForMemberSelectTree(GenerationContext<JS> context, MemberSelectTree memberSelect) {
 		String methodName = memberSelect.getIdentifier().toString();
-		Symbol symbol = null;
+		Symbol symbol = (Symbol) InternalUtils.symbol(memberSelect);
 
-		if (TreeUtils.isFieldAccess(memberSelect.getExpression())) {
-            symbol = (Symbol) InternalUtils.symbol(select);
-        }
-
-		if (symbol != null && (symbol.getKind() == ElementKind.FIELD || symbol.getKind() == ElementKind.METHOD)) {
+		if (symbol != null && TreeUtils.isFieldAccess(memberSelect.getExpression())
+				&& (symbol.getKind() == ElementKind.FIELD || symbol.getKind() == ElementKind.METHOD)) {
             return prefixNonPublicMethods(methodName, symbol);
-        } else {
-            return methodName;
         }
+
+		ExecutableElement methodElement = TreeUtils.getMethod(symbol);
+		if (hasAnOverloadedMethod(context, methodElement)) {
+			return AnnotationUtils.JSOverloadName.decorate((Symbol.MethodSymbol) methodElement);
+		}
+		return methodName;
 	}
 
 	private static <JS> String buildMethodNameForIdentifierTree(MethodInvocationTree tree, GenerationContext<JS> context, IdentifierTree select) {
@@ -90,7 +90,7 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 		}
 
 		Symbol symbol = (Symbol.MethodSymbol) InternalUtils.symbol(tree);
-		ExecutableElement methodElement = TreeUtils.getMethod((Symbol.MethodSymbol) symbol);
+		ExecutableElement methodElement = TreeUtils.getMethod(symbol);
 
 		if (methodElement != null
                 && (AnnotationUtils.JSOverloadName.isPresent((Symbol.MethodSymbol) methodElement)

@@ -687,7 +687,7 @@ public final class TreeUtils {
 	 * @param methodSymbolElement
 	 * @return the associated ExecutableElement if found, null otherwise.
      */
-	public static ExecutableElement getMethod(MethodSymbol methodSymbolElement) {
+	public static ExecutableElement getMethod(Element methodSymbolElement) {
 		List<ExecutableElement> allMethods = ElementUtils.getAllMethodsIn(ElementUtils.enclosingClass(methodSymbolElement), false);
 		for (ExecutableElement exec : ElementFilter.methodsIn(allMethods)) {
 			if (exec.toString().contentEquals(methodSymbolElement.toString())) {

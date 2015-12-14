@@ -204,6 +204,12 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 		testForbiddenConfiguration(expectedForbiddenMethod, Methods24_forbidden_configuration_overloaded_method.class);
 	}
 
+	@Test
+	public void testOverloadMethodWithBytes() {
+		assertCodeContains(Methods25_overload_string_getBytes.class, "" +
+				"        var bytes = \"test\".getBytes$String(\"UTF-8\");\n");
+	}
+
 	private void testForbiddenConfiguration(String expectedForbiddenMethod, Class<?> clazz) {
 		Set<String> forbiddenMethodInvocations = new HashSet<>();
 		forbiddenMethodInvocations.add(expectedForbiddenMethod);
