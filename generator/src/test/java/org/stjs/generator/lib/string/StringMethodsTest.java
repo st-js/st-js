@@ -1,9 +1,9 @@
 package org.stjs.generator.lib.string;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
 import org.stjs.generator.utils.AbstractStjsTest;
+
+import static org.junit.Assert.assertEquals;
 
 public class StringMethodsTest extends AbstractStjsTest {
 
@@ -70,5 +70,16 @@ public class StringMethodsTest extends AbstractStjsTest {
 	@Test
 	public void testRegionMatchesIgnoreCase() {
 		assertEquals(true, execute(String13.class));
+	}
+
+	@Test
+	public void testStringOverloadMethodNames() {
+		assertCodeContains(String14_overloaded_methods.class, "" +
+				"        test.regionMatches$boolean_int_String_int_int(false, 1, \"bc\", 0, 2);\n" +
+				"        test.regionMatches$int_String_int_int(1, \"bc\", 0, 2);\n" +
+				"        test.indexOf$String(\"ab\");\n" +
+				"        test.indexOf$String_int(\"ab\", 0);\n" +
+				"        test.indexOf$int(1);\n" +
+				"        test.indexOf$int_int(1, 0);");
 	}
 }

@@ -48,12 +48,15 @@ if (!String.prototype.getChars) {
 if (!String.prototype.contentEquals){
 	String.prototype.contentEquals=stjs.NOT_IMPLEMENTED;
 }
-if (!String.prototype.startsWith) {
-	String.prototype.startsWith=function(start, from){
-		var f = from != null ? from : 0;
-		return this.substring(f, f + start.length) == start;
-	}
+
+String.prototype.startsWith$String_int=function(start, from){
+    return this.substring(from, from + start.length) == start;
 }
+
+String.prototype.startsWith$String=function(start) {
+    return this.startsWith$String_int(start, 0);
+}
+
 if (!String.prototype.endsWith) {
 	String.prototype.endsWith=function(end){
 		if (end == null)
@@ -126,21 +129,24 @@ if (!String.prototype.replaceFirst){
 	}
 }
 
-if (!String.prototype.regionMatches){
-	String.prototype.regionMatches=function(ignoreCase, toffset, other, ooffset, len){
-		if (arguments.length == 4){
-			len=arguments[3];
-			ooffset=arguments[2];
-			other=arguments[1];
-			toffset=arguments[0];
-			ignoreCase=false;
-		}
-		if (toffset < 0 || ooffset < 0 || other == null || toffset + len > this.length || ooffset + len > other.length)
-			return false;
-		var s1 = this.substring(toffset, toffset + len);
-		var s2 = other.substring(ooffset, ooffset + len);
-		return ignoreCase ? s1.equalsIgnoreCase(s2) : s1 === s2;
-	}
+String.prototype.indexOf$String=function(str) {
+    return this.indexOf(str) >= 0;
+}
+
+String.prototype.indexOf$String_int=stjs.NOT_IMPLEMENTED;
+String.prototype.indexOf$int=stjs.NOT_IMPLEMENTED;
+String.prototype.indexOf$int_int=stjs.NOT_IMPLEMENTED;
+
+String.prototype.regionMatches$boolean_int_String_int_int=function(ignoreCase, toffset, other, ooffset, len) {
+    if (toffset < 0 || ooffset < 0 || other == null || toffset + len > this.length || ooffset + len > other.length)
+        return false;
+    var s1 = this.substring(toffset, toffset + len);
+    var s2 = other.substring(ooffset, ooffset + len);
+    return ignoreCase ? s1.equalsIgnoreCase(s2) : s1 === s2;
+}
+
+String.prototype.regionMatches$int_String_int_int=function(toffset, other, ooffset, len) {
+    return this.regionMatches$boolean_int_String_int_int(true, toffset, other, ooffset, len);
 }
 
 if(!String.prototype.contains){
@@ -152,7 +158,6 @@ if(!String.prototype.contains){
 if(!String.prototype.getClass){
 	String.prototype.getClass=stjs.JavalikeGetClass;
 }
-
 
 //force valueof to match the Java's behavior
 String.valueOf=function(value){
@@ -166,6 +171,26 @@ var Float=Number;
 var Integer=Number;
 var Long=Number;
 var Short=Number;
+
+Number.parseInt$String=function(str) {
+    return parseInt(str);
+}
+
+Number.parseInt$String_int=function(str, radix) {
+    return parseInt(str, radix);
+}
+
+Number.valueOf$String=function(str) {
+    return Number.valueOf(Number.parseInt$String(str));
+}
+
+Number.valueOf$int=function(value) {
+    return Number.valueOf(value);
+}
+
+Number.valueOf$String_int=function(str, radix) {
+    return Number.valueOf(Number.parseInt$String_int(str, radix));
+}
 
 /* type conversion - approximative as Javascript only has integers and doubles */
 if (!Number.prototype.intValue) {
