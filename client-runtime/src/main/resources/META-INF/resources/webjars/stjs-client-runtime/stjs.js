@@ -17,11 +17,17 @@
  * methods added to JS prototypes
  */
 
-if (typeof window !== 'undefined') {
-  window.stjs = {};
+var __stjsGlobal__;
+if (typeof Packages === "object" && String(Packages) === "[JavaPackage ]") {
+  //Rhino
+  __stjsGlobal__ = this;
+} else if (typeof global !== 'undefined') {
+  //node.js
+  __stjsGlobal__ = global;
 } else {
-  global.stjs = {};
+  __stjsGlobal__ = window;
 }
+__stjsGlobal__.stjs = {};
 
 stjs.NOT_IMPLEMENTED = function(){
 	throw "This method is not implemented in Javascript.";
@@ -310,12 +316,11 @@ stjs.createJavaArray = function() {
 }
 
 /************* STJS helper functions ***************/
-stjs.global = (typeof window !== 'undefined' ? window : global);
 stjs.skipCopy = {"prototype":true, "constructor": true, "$typeDescription":true, "$inherit" : true};
 
 stjs.ns=function(path){
 	var p = path.split(".");
-	var obj = stjs.global;
+	var obj = __stjsGlobal__;
 	for(var i = 0; i < p.length; ++i){
 		var part = p[i];
 		obj = obj[part] = obj[part] || {};
