@@ -167,7 +167,7 @@ public class TreeWrapper<T extends Tree, JS> {
 		Map<String, String> namespacesFromConfig = configuration.getNamespaces();
 		for (Map.Entry<String, String> entry : namespacesFromConfig.entrySet()) {
 			String key = entry.getKey();
-			if (key != null && key.equals(element.asType().toString())) {
+			if (key != null && element.asType().toString().startsWith(key)) {
 				return entry.getValue();
 			}
 		}
