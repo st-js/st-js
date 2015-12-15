@@ -17,7 +17,11 @@
  * methods added to JS prototypes
  */
 
-var stjs={};
+if (typeof window !== 'undefined') {
+  window.stjs = {};
+} else {
+  global.stjs = {};
+}
 
 stjs.NOT_IMPLEMENTED = function(){
 	throw "This method is not implemented in Javascript.";
@@ -306,7 +310,7 @@ stjs.createJavaArray = function() {
 }
 
 /************* STJS helper functions ***************/
-stjs.global=this;
+stjs.global = (typeof window !== 'undefined' ? window : global);
 stjs.skipCopy = {"prototype":true, "constructor": true, "$typeDescription":true, "$inherit" : true};
 
 stjs.ns=function(path){
