@@ -1,16 +1,11 @@
 package org.stjs.generator.javac;
 
-import java.lang.annotation.Annotation;
-import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.PackageElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
-
+import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.IdentifierTree;
+import com.sun.source.tree.Tree;
+import com.sun.source.util.TreePath;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.NamespaceUtil;
 import org.stjs.generator.name.DependencyType;
@@ -23,10 +18,16 @@ import org.stjs.javascript.annotation.ServerSide;
 import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.annotation.Template;
 
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.IdentifierTree;
-import com.sun.source.tree.Tree;
-import com.sun.source.util.TreePath;
+import javax.annotation.Nonnull;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
+import java.lang.annotation.Annotation;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * this class is a wrapper around a {@link Tree} node to give you easier access to the most important methods of the
@@ -162,6 +163,15 @@ public class TreeWrapper<T extends Tree, JS> {
 		if (nsAnnotation != null) {
 			return nsAnnotation.value();
 		}
+		GeneratorConfiguration configuration = context.getConfiguration();
+		Map<String, String> namespacesFromConfig = configuration.getNamespaces();
+		for (Map.Entry<String, String> entry : namespacesFromConfig.entrySet()) {
+			String key = entry.getKey();
+			if (key != null && key.equals(element.asType().toString())) {
+				return entry.getValue();
+			}
+		}
+
 		return null;
 	}
 
