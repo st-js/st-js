@@ -55,7 +55,11 @@ import com.sun.source.tree.Tree;
  */
 public class PathGetterMemberSelectTemplate<JS> implements WriterContributor<MemberSelectTree, JS> {
 
-	private JS getTarget(WriterVisitor<JS> visitor, ExpressionTree tree, GenerationContext<JS> context) {
+	private JS getTarget(WriterVisitor<JS> visitor, TreeWrapper<ExpressionTree, JS> currentWrapper, ExpressionTree tree,
+			GenerationContext<JS> context, boolean targetIsPartOfPath) {
+		if (!targetIsPartOfPath) {
+			return visitor.scan(currentWrapper.getTree(), context);
+		}
 		if (tree instanceof MemberSelectTree) {
 			MemberSelectTree ms = (MemberSelectTree) tree;
 			if (JavaNodes.isSuper(ms.getExpression())) {
@@ -87,6 +91,15 @@ public class PathGetterMemberSelectTemplate<JS> implements WriterContributor<Mem
 		throw new STJSRuntimeException("Unexpected node type while building path:" + tree);
 	}
 
+	private boolean checkTemplateParams(String[] params, GenerationContext<JS> context, TreeWrapper<ExpressionTree, JS> currentWrapper) {
+		if (params == null || params.length == 0) {
+			context.addError(currentWrapper.getTree(),
+					"The 'path' template needs a parameter designating the method to be called, like this @Template(\"path(methodName)\")");
+			return false;
+		}
+		return true;
+	}
+
 	private JS getPath(WriterVisitor<JS> visitor, TreeWrapper<ExpressionTree, JS> tree, GenerationContext<JS> context) {
 		String path = "";
 		TreeWrapper<ExpressionTree, JS> currentWrapper = tree;
@@ -99,6 +112,7 @@ public class PathGetterMemberSelectTemplate<JS> implements WriterContributor<Mem
 		while (true) {
 			Tree currentTree = currentWrapper.getTree();
 			String template = currentWrapper.getFieldTemplate();
+
 			if (!"path".equals(template)) {
 				targetIsPartOfPath = false;
 				break;
@@ -113,13 +127,11 @@ public class PathGetterMemberSelectTemplate<JS> implements WriterContributor<Mem
 			currentWrapper = currentWrapper.child(((MemberSelectTree) currentTree).getExpression());
 		}
 
-		JS target = targetIsPartOfPath ? getTarget(visitor, currentWrapper.getTree(), context) : visitor.scan(currentWrapper.getTree(), context);
-
-		if (params == null || params.length == 0) {
-			context.addError(currentWrapper.getTree(),
-					"The 'path' template needs a parameter designating the method to be called, like this @Template(\"path(methodName)\")");
+		if (!checkTemplateParams(params, context, currentWrapper)) {
 			return null;
 		}
+
+		JS target = getTarget(visitor, currentWrapper, currentWrapper.getTree(), context, targetIsPartOfPath);
 
 		String methodName = params[0];
 
