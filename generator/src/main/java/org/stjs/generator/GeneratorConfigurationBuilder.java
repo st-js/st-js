@@ -16,8 +16,10 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Use this class to build a configuration needed by the {@link Generator}
@@ -29,6 +31,7 @@ public class GeneratorConfigurationBuilder {
 	private final Collection<String> allowedJavaLangClasses = new HashSet<>();
 	private final Collection<String> annotations = new HashSet<>();
 	private final Collection<String> forbiddenMethodInvocations = new HashSet<>();
+	private final Map<String, String> namespaces = new HashMap<>();
 	private boolean generateArrayHasOwnProperty = true;
 	private boolean generateSourceMap;
 	private String sourceEncoding = Charset.defaultCharset().name();
@@ -49,6 +52,7 @@ public class GeneratorConfigurationBuilder {
 			allowedPackages(baseConfig.getAllowedPackages());
 			allowedJavaLangClasses(baseConfig.getAllowedJavaLangClasses());
 			forbiddenMethodInvocations(baseConfig.getForbiddenMethodInvocations());
+			namespaces(baseConfig.getNamespaces());
 			annotations(baseConfig.getAnnotations());
 			generateArrayHasOwnProperty(baseConfig.isGenerateArrayHasOwnProperty());
 			generateSourceMap(baseConfig.isGenerateSourceMap());
@@ -88,6 +92,11 @@ public class GeneratorConfigurationBuilder {
 
 	public GeneratorConfigurationBuilder forbiddenMethodInvocations(Collection<String> methodInvocations) {
 		forbiddenMethodInvocations.addAll(methodInvocations);
+		return this;
+	}
+
+	public GeneratorConfigurationBuilder namespaces(Map<String, String> namespacesMap) {
+		namespaces.putAll(namespacesMap);
 		return this;
 	}
 
@@ -174,6 +183,7 @@ public class GeneratorConfigurationBuilder {
 				allowedPackages,  //
 				allowedJavaLangClasses, //
 				forbiddenMethodInvocations, //
+				namespaces, //
 				generateArrayHasOwnProperty, //
 				generateSourceMap, //
 				sourceEncoding,  //

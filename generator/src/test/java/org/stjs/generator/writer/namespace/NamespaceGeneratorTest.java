@@ -1,10 +1,15 @@
 package org.stjs.generator.writer.namespace;
 
 import org.junit.Test;
-import org.stjs.generator.utils.AbstractStjsTest;
+import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.writer.namespace.packageLevel.PackageNamespace1;
 import org.stjs.generator.writer.namespace.packageLevel.empty.deep.PackageNamespace2;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class NamespaceGeneratorTest extends AbstractStjsTest {
 	@Test
@@ -62,8 +67,7 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(Namespace8.class, "stjs.extend(function Namespace8$1(){a.b.Namespace8.call(this);}, a.b.Namespace8, [], ");
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testReservedWordsInNamespace() {
 		generate(Namespace9.class);
 	}
@@ -73,23 +77,47 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(PackageNamespace1.class, "a.b.PackageNamespace1 = function()");
 	}
 
-	@Test()
+	@Test
 	public void testAnnotationAtPackageLevelRecursive(){
 		assertCodeContains(PackageNamespace2.class, "a.b.PackageNamespace2 = function()");
 	}
 
-	@Test()
+	@Test
 	public void testNamespaceWithFullyQualifiedStaticMethodName(){
 		assertCodeContains(Namespace10.class, "a.b.Namespace1.staticMethod()");
 	}
 
-	@Test()
+	@Test
 	public void testNamespaceWithStaticMethodInAnotherClass(){
 		assertCodeContains(Namespace11.class, "a.b.Namespace1.staticMethod()");
 	}
 
-	@Test()
+	@Test
 	public void testNamespaceWithStaticMethodInAnotherClassAndStaticImport(){
 		assertCodeContains(Namespace12.class, "a.b.Namespace1.staticMethod()");
+	}
+
+	@Test
+	public void testNamespaceDefinedInConfiguration() {
+		String datePackage = Date.class.getCanonicalName();
+		Map<String, String> namespaces = new HashMap<>();
+		namespaces.put(datePackage, "java_util_custom_namespace");
+		// Test starts with package name
+		namespaces.put("org.stjs.generator.writer", "my.own.namespace");
+
+		GeneratorConfigurationBuilder generatorConfigurationBuilder = new GeneratorConfigurationBuilder();
+		generatorConfigurationBuilder.namespaces(namespaces);
+		generatorConfigurationBuilder.allowedPackage(datePackage);
+
+		assertCodeContains(Namespace13_generator_configuration.class, "" +
+						"stjs.ns(\"my.own.namespace\");\n" +
+						"my.own.namespace.Namespace13_generator_configuration = function(outerClass$0) {\n" +
+						"    this._outerClass$0 = outerClass$0;\n" +
+						"};\n" +
+						"my.own.namespace.Namespace13_generator_configuration = stjs.extend(my.own.namespace.Namespace13_generator_configuration, null, [], function(constructor, prototype) {",
+				generatorConfigurationBuilder.build());
+		assertCodeContains(Namespace13_generator_configuration.class, "" +
+						"var date = new java_util_custom_namespace.Date(this);",
+				generatorConfigurationBuilder.build());
 	}
 }
