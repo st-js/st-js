@@ -65,6 +65,8 @@ public final class GeneratorConstants {
 
 	public static final String INNER_CLASS_CONSTRUCTOR_PARAM_PREFIX = "outerClass";
 
+	public static final String MULTIPLE_CONSTRUCTORS_PREFIX = "_constructor";
+
 	private GeneratorConstants() {
 		//
 	}

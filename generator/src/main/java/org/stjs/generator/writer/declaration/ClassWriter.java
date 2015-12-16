@@ -9,11 +9,13 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewArrayTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
+import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.tree.JCTree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.AnnotationHelper;
 import org.stjs.generator.javac.ElementUtils;
+import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javac.TypesUtils;
@@ -46,7 +48,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
+public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterContributor<ClassTree, JS> {
 
 	/**
 	 * generate the namespace declaration stjs.ns("namespace") if needed
@@ -138,6 +140,16 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		return context.js().function(null, Collections.<JS> emptyList(), null);
 	}
 
+	private List<MethodTree> getConstructors(ClassTree clazz) {
+		List<MethodTree> constructors = new ArrayList<>();
+		for (Tree member : clazz.getMembers()) {
+			if (JavaNodes.isConstructor(member)) {
+				constructors.add((MethodTree) member);
+			}
+		}
+		return constructors;
+	}
+
 	private List<Tree> getAllMembersExceptConstructors(ClassTree clazz) {
 		List<Tree> nonConstructors = new ArrayList<Tree>();
 		for (Tree member : clazz.getMembers()) {
@@ -153,7 +165,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	 */
 	private JS getMembers(WriterVisitor<JS> visitor, ClassTree clazz, GenerationContext<JS> context, List<String> enumEntries) {
 		// the following members must not appear in the initializer function:
-		// - constructors (they are printed elsewhere)
+		// - Single constructor (it is the default behavior, its printed elsewhere)
 		// - abstract methods (they should be omitted)
 
 		List<Tree> nonConstructors = getAllMembersExceptConstructors(clazz);
@@ -161,10 +173,15 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		if (nonConstructors.isEmpty()) {
 			return context.js().keyword(Keyword.NULL);
 		}
+
+		List<JS> stmts = new ArrayList<>();
+
+		// Generate multiple constructors methods to support them as static initializers.
+		generateMultipleConstructorsAsStaticInitializers(visitor, context, stmts, clazz);
+
 		@SuppressWarnings("unchecked")
 		List<JS> params = Arrays.asList(context.js().name(JavascriptKeywords.CONSTRUCTOR), context.js().name(JavascriptKeywords.PROTOTYPE));
 
-		List<JS> stmts = new ArrayList<>();
 		List<JS> enumValues = new ArrayList<>();
 		for (int i = 0; i < nonConstructors.size(); i++) {
 			Tree member = nonConstructors.get(i);
@@ -181,6 +198,42 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		}
 
 		return context.js().function(null, params, context.js().block(stmts));
+	}
+
+	private void generateMultipleConstructorsAsStaticInitializers(WriterVisitor<JS> visitor, GenerationContext<JS> context,
+																  List<JS> stmts, ClassTree clazz) {
+		if (!JavaNodes.hasMultipleConstructors(context.getCurrentPath())) {
+			return;
+		}
+
+		Element type = TreeUtils.elementFromDeclaration(clazz);
+		String constructorName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
+
+		List<MethodTree> constructors = getConstructors(clazz);
+		for (MethodTree constructor : constructors) {
+			Element element = InternalUtils.symbol(constructor);
+			if (element instanceof Symbol.MethodSymbol) {
+				constructorName = InternalUtils.generateOverloadeConstructorName(((Symbol.MethodSymbol) element).params());
+			}
+			JS block = visitor.scan(constructor.getBody(), context);
+			List<JS> params = MethodWriter.getParams(constructor.getParameters(), context);
+			JS member = context.js().property(getMemberTarget(context.getCurrentWrapper()), constructorName);
+			JS declaration = context.js().function(null, params, block);
+
+			addReturnThisStatementForChaining(context, block);
+
+			stmts.add(context.js().expressionStatement(context.js().assignment(AssignOperator.ASSIGN, member, declaration)));
+		}
+	}
+
+	/**
+	 * Add a "return this;" statement to allow method chaining during new block construction.
+	 *
+	 * 		var object = new Object()._constructor$String("test");
+ 	 */
+	private void addReturnThisStatementForChaining(GenerationContext<JS> context, JS block) {
+		JS returnThis = context.js().returnStatement(context.js().keyword(Keyword.THIS));
+		context.js().addStatement(block, returnThis);
 	}
 
 	private boolean isMemberAnEnumEntry(Tree member, List<String> enumEntries) {

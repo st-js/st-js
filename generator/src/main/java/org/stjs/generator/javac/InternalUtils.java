@@ -1,15 +1,5 @@
 package org.stjs.generator.javac;
 
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.PackageElement;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.WildcardType;
-import javax.lang.model.util.Elements;
-
 import com.sun.source.tree.ArrayAccessTree;
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.ExpressionTree;
@@ -31,8 +21,19 @@ import com.sun.tools.javac.tree.JCTree.JCMethodInvocation;
 import com.sun.tools.javac.tree.JCTree.JCNewClass;
 import com.sun.tools.javac.tree.TreeInfo;
 import com.sun.tools.javac.util.Context;
+import org.stjs.generator.GeneratorConstants;
+import org.stjs.javascript.annotation.AnnotationConstants;
 
-//import com.sun.source.tree.AnnotatedTypeTree;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.WildcardType;
+import javax.lang.model.util.Elements;
+import java.util.List;
 
 /*>>>
  import checkers.nullness.quals.*;
@@ -433,6 +434,38 @@ public final class InternalUtils {
 			return false;
 		}
 		return isSynthetic(tree);
+	}
+
+	public static String generateOverloadedMethodName(String methodName, List<Symbol.VarSymbol> params) {
+		StringBuilder methodNameBuilder = new StringBuilder(methodName);
+
+		return buildOverloadedName(methodNameBuilder, params);
+	}
+
+	public static String generateOverloadeConstructorName(List<Symbol.VarSymbol> params) {
+		StringBuilder methodNameBuilder = new StringBuilder(GeneratorConstants.MULTIPLE_CONSTRUCTORS_PREFIX);
+
+		return buildOverloadedName(methodNameBuilder, params);
+	}
+
+	private static String buildOverloadedName(StringBuilder builder, List<Symbol.VarSymbol> params) {
+		if (!params.isEmpty()) {
+			builder.append(AnnotationConstants.JS_OVERLOAD_NAME_DEFAULT_VALUE);
+		}
+		for (int i = 0; i < params.size(); i++) {
+			Symbol.VarSymbol param = params.get(i);
+			builder.append(param.type.tsym.getSimpleName());
+			if (TypeKind.ARRAY.equals(param.type.getKind())) {
+				builder.append(AnnotationConstants.JS_OVERLOAD_NAME_DEFAULT_VALUE);
+
+				assert param.type instanceof Type.ArrayType;
+				builder.append(((Type.ArrayType) param.type).elemtype.tsym.getSimpleName());
+			}
+			if (i < params.size() - 1) {
+				builder.append(AnnotationConstants.JS_OVERLOAD_NAME_METHOD_PARAMS_SEPARATOR);
+			}
+		}
+		return builder.toString();
 	}
 }
 // CHECKSTYLE:ON

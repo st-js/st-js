@@ -1,8 +1,10 @@
 package org.stjs.generator.writer.templates;
 
 import com.sun.source.tree.MethodInvocationTree;
+import com.sun.tools.javac.code.Symbol;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.name.DependencyType;
@@ -12,6 +14,8 @@ import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
 
@@ -78,8 +82,26 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		}
 
 		JS target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree> getCurrentWrapper());
-		String name = MethodInvocationWriter.buildMethodName(tree, context);
+
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
+
+		JS constructorName = buildConstructorInvocationForMultipleConstructors(tree, context, target, arguments);
+		if (constructorName != null) {
+			return constructorName;
+		}
+
+		String name = MethodInvocationWriter.buildMethodName(tree, context);
 		return context.js().functionCall(context.js().property(target, name), arguments);
+	}
+
+	private JS buildConstructorInvocationForMultipleConstructors(MethodInvocationTree tree, GenerationContext<JS> context,
+																 JS target, List<JS> arguments) {
+		ExecutableElement element = TreeUtils.elementFromUse(tree);
+		if (JavaNodes.hasMultipleConstructors(context.getCurrentPath()) && ElementKind.CONSTRUCTOR.equals(element.getKind())) {
+			// Invocation of a another constructor, let's get the overloaded constructor name and chain the real static constructor
+			String constructorName = InternalUtils.generateOverloadeConstructorName(((Symbol.MethodSymbol) element).getParameters());
+			return context.js().functionCall(context.js().property(target, constructorName), arguments);
+		}
+		return null;
 	}
 }

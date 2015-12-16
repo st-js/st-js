@@ -4,7 +4,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConfigurationBuilder;
-import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.utils.AbstractStjsTest;
 
@@ -133,7 +132,7 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testCatch() {
-		assertCodeContains(Statements19.class, "catch(e){throw new RuntimeException(e);}");
+		assertCodeContains(Statements19.class, "catch(e){throw new RuntimeException()._constructor$Throwable(e);}");
 	}
 
 	@Test

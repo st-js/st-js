@@ -393,6 +393,25 @@ public final class ElementUtils {
 		return false;
 	}
 
+	public static boolean isConstructor(Element element) {
+		if (!(element instanceof Symbol.MethodSymbol)) {
+			return false;
+		}
+		Symbol.MethodSymbol methodElement = (Symbol.MethodSymbol) element;
+		return "<init>".equals(methodElement.name.toString()) && !methodElement.getModifiers().contains(Modifier.STATIC);
+	}
+
+	public static boolean hasMultipleConstructors(Element element) {
+		int constructorCount = 0;
+		List<? extends Element> enclosedElements = element.getEnclosedElements();
+		for (Element enclosedElement : enclosedElements) {
+			if (isConstructor(enclosedElement) && !JavaNodes.isNative(enclosedElement)) {
+				constructorCount++;
+			}
+		}
+		return constructorCount > 1;
+	}
+
 	private static boolean isMemberMethodUnique(Element memberElement, ExecutableElement methodElement) {
 		if (JavaNodes.isNative(memberElement)) {
 			return false;

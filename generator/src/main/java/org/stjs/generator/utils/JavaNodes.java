@@ -1,6 +1,19 @@
 package org.stjs.generator.utils;
 
-import java.util.Set;
+import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.IdentifierTree;
+import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.Tree;
+import com.sun.source.tree.VariableTree;
+import com.sun.source.util.TreePath;
+import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.JavascriptClassGenerationException;
+import org.stjs.generator.javac.InternalUtils;
+import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.TypesUtils;
+import org.stjs.javascript.annotation.Native;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
@@ -8,19 +21,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
-
-import org.stjs.generator.GeneratorConstants;
-import org.stjs.generator.JavascriptClassGenerationException;
-import org.stjs.generator.javac.TreeUtils;
-import org.stjs.generator.javac.TypesUtils;
-import org.stjs.javascript.annotation.Native;
-
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.ExpressionTree;
-import com.sun.source.tree.IdentifierTree;
-import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.Tree;
-import com.sun.source.tree.VariableTree;
+import java.util.List;
+import java.util.Set;
 
 public final class JavaNodes {
 
@@ -34,6 +36,22 @@ public final class JavaNodes {
 		}
 		MethodTree method = (MethodTree) tree;
 		return "<init>".equals(method.getName().toString()) && !method.getModifiers().getFlags().contains(Modifier.STATIC);
+	}
+
+	public static boolean hasMultipleConstructors(TreePath treePath) {
+		return hasMultipleConstructors(TreeUtils.enclosingClass(treePath));
+	}
+
+	public static boolean hasMultipleConstructors(ClassTree classTree) {
+		int constructorCount = 0;
+		List<? extends Tree> treeMembers = classTree.getMembers();
+		for (Tree member : treeMembers) {
+			Element symbolElement = InternalUtils.symbol(member);
+			if (JavaNodes.isConstructor(member) && !JavaNodes.isNative(symbolElement)) {
+				constructorCount++;
+			}
+		}
+		return constructorCount > 1;
 	}
 
 	public static boolean sameRawType(TypeMirror type1, Class<?> clazz) {
