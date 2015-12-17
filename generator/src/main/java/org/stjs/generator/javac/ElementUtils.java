@@ -372,7 +372,7 @@ public final class ElementUtils {
 		return elem.getKind().isClass() || elem.getKind().isInterface();
 	}
 
-	public static boolean hasAnOverloadedEquivalentMethod(ExecutableElement methodElement, Elements contextElements) {
+	public static boolean hasAnOverloadedEquivalentMethod(Element methodElement, Elements contextElements) {
 		if (JavaNodes.isNative(methodElement)) {
 			// no need to check the native ones - only the one with the body
 			return false;
@@ -382,13 +382,21 @@ public final class ElementUtils {
 			TypeElement typeElement = (TypeElement) methodElement.getEnclosingElement();
 			// For regular methods, checks against all the methods in the class' hierarchy
 			List<? extends Element> allMembers = contextElements.getAllMembers(typeElement);
+			return hasAnOverloadedEquivalentMethod(methodElement, allMembers);
+		}
+		return false;
+	}
 
-			for (Element memberElement : allMembers) {
-				if (isMemberMethodUnique(memberElement, methodElement)) {
-					return true;
-				}
-			}
+	public static boolean hasAnOverloadedEquivalentMethod(Element methodElement, List<? extends Element> allElements) {
+		if (JavaNodes.isNative(methodElement)) {
+			// no need to check the native ones - only the one with the body
 			return false;
+		}
+
+		for (Element element : allElements) {
+			if (isMemberMethodUnique(element, methodElement)) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -412,7 +420,7 @@ public final class ElementUtils {
 		return constructorCount > 1;
 	}
 
-	private static boolean isMemberMethodUnique(Element memberElement, ExecutableElement methodElement) {
+	private static boolean isMemberMethodUnique(Element memberElement, Element methodElement) {
 		if (JavaNodes.isNative(memberElement)) {
 			return false;
 		}
