@@ -32,6 +32,7 @@ public class GeneratorConfigurationBuilder {
 	private final Collection<String> annotations = new HashSet<>();
 	private final Collection<String> forbiddenMethodInvocations = new HashSet<>();
 	private final Map<String, String> namespaces = new HashMap<>();
+	private final Map<String, String> renamedMethodSignatures = new HashMap<>();
 	private boolean generateArrayHasOwnProperty = true;
 	private boolean generateSourceMap;
 	private String sourceEncoding = Charset.defaultCharset().name();
@@ -54,6 +55,7 @@ public class GeneratorConfigurationBuilder {
 			forbiddenMethodInvocations(baseConfig.getForbiddenMethodInvocations());
 			namespaces(baseConfig.getNamespaces());
 			annotations(baseConfig.getAnnotations());
+			renamedMethodSignatures(baseConfig.getRenamedMethodSignatures());
 			generateArrayHasOwnProperty(baseConfig.isGenerateArrayHasOwnProperty());
 			generateSourceMap(baseConfig.isGenerateSourceMap());
 			sourceEncoding(baseConfig.getSourceEncoding());
@@ -97,6 +99,11 @@ public class GeneratorConfigurationBuilder {
 
 	public GeneratorConfigurationBuilder namespaces(Map<String, String> namespacesMap) {
 		namespaces.putAll(namespacesMap);
+		return this;
+	}
+
+	public GeneratorConfigurationBuilder renamedMethodSignatures(Map<String, String> renamedMethodSignaturesMap) {
+		renamedMethodSignatures.putAll(renamedMethodSignaturesMap);
 		return this;
 	}
 
@@ -179,11 +186,14 @@ public class GeneratorConfigurationBuilder {
 		allowedPackage(Iterator.class.getName());
 		allowedPackage(Enum.class.getName());
 
+		renamedMethodSignatures.put("java.util.List.add$Object", "add");
+
 		return new GeneratorConfiguration(//
 				allowedPackages,  //
 				allowedJavaLangClasses, //
 				forbiddenMethodInvocations, //
 				namespaces, //
+				renamedMethodSignatures, //
 				generateArrayHasOwnProperty, //
 				generateSourceMap, //
 				sourceEncoding,  //

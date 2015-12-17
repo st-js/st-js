@@ -22,6 +22,7 @@ public class GeneratorConfiguration {
 	private final Collection<String> forbiddenMethodInvocations;
 	private final Collection<String> annotations;
 	private final Map<String, String> namespaces;
+	private final Map<String, String> renamedMethodSignatures;
 	private final boolean generateArrayHasOwnProperty;
 	private final boolean generateSourceMap;
 	private final String sourceEncoding;
@@ -35,6 +36,7 @@ public class GeneratorConfiguration {
 	@SuppressWarnings("PMD.ExcessiveParameterList")
 	GeneratorConfiguration(Collection<String> allowedPackages, Collection<String> allowedJavaLangClasses,
 						   Collection<String> forbiddenMethodInvocations, Map<String, String> namespaces,
+						   Map<String, String> renamedMethodSignatures,
 						   boolean generateArrayHasOwnProperty, boolean generateSourceMap, String sourceEncoding,
 						   Collection<String> annotations, ClassLoader stjsClassLoader, File targetFolder,
 						   GenerationDirectory generationFolder, ClassResolver classResolver, boolean isSynchronizedAllowed) {
@@ -42,6 +44,7 @@ public class GeneratorConfiguration {
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
 		this.forbiddenMethodInvocations = forbiddenMethodInvocations;
 		this.namespaces = namespaces;
+		this.renamedMethodSignatures = renamedMethodSignatures;
 		this.generateArrayHasOwnProperty = generateArrayHasOwnProperty;
 		this.generateSourceMap = generateSourceMap;
 		this.sourceEncoding = sourceEncoding;
@@ -71,6 +74,10 @@ public class GeneratorConfiguration {
 
 	public Map<String, String> getNamespaces() {
 		return namespaces;
+	}
+
+	public Map<String, String> getRenamedMethodSignatures() {
+		return renamedMethodSignatures;
 	}
 
 	public boolean isGenerateArrayHasOwnProperty() {
