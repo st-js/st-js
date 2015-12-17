@@ -19,6 +19,7 @@ import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
+import org.stjs.javascript.Array;
 import org.stjs.javascript.annotation.Template;
 
 import javax.lang.model.element.ElementKind;
@@ -136,13 +137,16 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 		List<JS> varArgs = new ArrayList<>();
 		List<? extends ExpressionTree> treeArguments = tree.getArguments();
 		List<Symbol.VarSymbol> symbolParameters = symbol.getParameters();
+
+		boolean methodOwnerIsStJsArray = symbol.owner.getQualifiedName().toString().equals(Array.class.getCanonicalName());
+
 		for (int i = 0; i < treeArguments.size(); i++) {
             ExpressionTree arg = treeArguments.get(i);
             Symbol.VarSymbol param = null;
             if (symbolParameters.size() > i) {
                 param = symbolParameters.get(i);
             }
-            if (param != null && (param.flags() & Flags.VARARGS) == 0) {
+            if (!methodOwnerIsStJsArray && param != null && (param.flags() & Flags.VARARGS) == 0) {
                 arguments.add(visitor.scan(arg, context));
             } else {
                 varArgs.add(visitor.scan(arg, context));

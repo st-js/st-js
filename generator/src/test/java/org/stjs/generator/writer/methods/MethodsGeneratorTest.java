@@ -81,8 +81,8 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 		Object result = execute(Methods10_basic_varargs.class);
 		Assert.assertEquals("123", result);
 		assertCodeContains(Methods10_basic_varargs.class, "" +
-				"        var test = Methods10_basic_varargs.method(0, []);\n" +
-				"        return Methods10_basic_varargs.method(0, [\"1\", \"2\", \"3\"]);\n");
+				"        var test = new Methods10_basic_varargs().method(0, []);\n" +
+				"        return new Methods10_basic_varargs().method(0, [\"1\", \"2\", \"3\"]);");
 	}
 
 	@Test
