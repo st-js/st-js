@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.st-js</groupId>
 	<artifactId>stjs</artifactId>
-	<version>3.3.1.36-mirego-SNAPSHOT</version>
+	<version>3.3.1.36-mirego</version>
 	<packaging>pom</packaging>
 	<name>Strongly-typed Javascript</name>
 	<description>Javascript code generator from Java source code</description>
@@ -267,6 +267,6 @@
 		<connection>scm:git:ssh://git@github.com/mirego/st-js.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/mirego/st-js.git</developerConnection>
 		<url>scm:git:https://github.com/mirego/st-js.git</url>
-    <tag>HEAD</tag>
+    <tag>stjs-3.3.1.36-mirego</tag>
   </scm>
 </project>
