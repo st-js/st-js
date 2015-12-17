@@ -11,8 +11,11 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.Tree;
+import com.sun.tools.javac.code.Symbol;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javac.ElementUtils;
+import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.JavaScriptBuilder;
@@ -27,6 +30,7 @@ import org.stjs.javascript.annotation.Namespace;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -167,6 +171,11 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 			}
 		}
 
+		if (identifierHasMultipleConstructors(tree.getIdentifier())) {
+			// For the concept of multiple constructors, a static init method is called with these params,
+			// we call the default no params constructor in those cases
+			params.clear();
+		}
 		return context.js().newExpression(context.js().name(typeName), params);
 	}
 
@@ -188,14 +197,20 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 			return js;
 		}
 
-		return getRegularNewExpression(visitor, tree, context);
+		js = getRegularNewExpression(visitor, tree, context);
 
-		// if (clazz instanceof ClassWrapper && ClassUtils.isSyntheticType(clazz)) {
-		// // this is a call to an mock type
-		// printer.print("{}");
-		// return;
-		// }
+		if (identifierHasMultipleConstructors(tree.getIdentifier())) {
+			List<JS> params = arguments(visitor, tree, context);
+			ExecutableElement element = TreeUtils.elementFromUse(tree);
+			String constructorName = InternalUtils.generateOverloadeConstructorName(((Symbol.MethodSymbol) element).getParameters());
+			js = context.js().functionCall(context.js().property(js, constructorName), params);
+		}
 
+		return js;
 	}
 
+	private boolean identifierHasMultipleConstructors(ExpressionTree tree) {
+		Element identifierElement = TreeUtils.elementFromUse(tree);
+		return ElementUtils.hasMultipleConstructors(identifierElement);
+	}
 }

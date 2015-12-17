@@ -26,4 +26,42 @@ public class OverloadConstructorTest extends AbstractStjsTest {
 		// check that no other method is generated
 		assertCodeContains(Overload6c.class, "Overload6c=function(_arguments){}");
 	}
+
+	@Test
+	public void testOverloadMultipleConstructors() {
+		assertCodeContains(Overload7_multiple_constructors.class, "" +
+				"var Overload7_multiple_constructors = function() {\n" +
+				"    this._param2 = new Array()._constructor();\n" +
+				"};");
+		assertCodeContains(Overload7_multiple_constructors.class, "" +
+				"    prototype._constructor = function() {\n" +
+				"        this._constructor$String(\"ok\");\n" +
+				"        this._param2.push(\"1\", []);\n" +
+				"        return this;\n" +
+				"    };\n" +
+				"    prototype._constructor$String = function(param1) {\n" +
+				"        this._constructor$String_Array(param1, new Array()._constructor());\n" +
+				"        this._param2.push(\"2\", []);\n" +
+				"        return this;\n" +
+				"    };\n" +
+				"    prototype._constructor$String_Array = function(param1, param2) {\n" +
+				"        this._param1 = param1;\n" +
+				"        this._param2 = param2;\n" +
+				"        param2.push(\"3\", []);\n" +
+				"        return this;\n" +
+				"    };");
+		assertCodeContains(Overload7_multiple_constructors.class, "" +
+				"        var clazz = new Overload7_multiple_constructors()._constructor$String(\"2\");");
+	}
+
+	@Test
+	public void testOverloadMultipleConstructorsCall() {
+		assertCodeContains(Overload8_multiple_constructors_call.class, "" +
+				"        var multipleConstructors = new Overload7_multiple_constructors()._constructor();\n" +
+				"        return multipleConstructors.getArray().toString();\n");
+
+		// TODO Investigate with the team how to generate array and execute it
+//		Object result = execute(Overload8_multiple_constructors_call.class);
+//		Assert.assertEquals("321", result);
+	}
 }

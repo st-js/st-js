@@ -173,6 +173,7 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 	}
 
 	@Override
+	@SuppressWarnings("PMD.CyclomaticComplexity")
 	public JS visit(WriterVisitor<JS> visitor, MethodTree tree, GenerationContext<JS> context) {
 		TreeWrapper<MethodTree, JS> tw = context.getCurrentWrapper();
 		if (!accept(tw)) {
@@ -182,6 +183,12 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		List<JS> params = getParams(tree.getParameters(), context);
 
 		JS body = visitor.scan(tree.getBody(), context);
+
+		if (JavaNodes.isConstructor(tree) && JavaNodes.hasMultipleConstructors(context.getCurrentPath())) {
+			// Multiple constructors are generated as static methods within the class
+			//    prototype._constructor$String = function(string) {
+			body = context.withPosition(tree, context.js().block(new ArrayList<JS>()));
+		}
 
 		// set if needed Type$1 name, if this is an anonymous type constructor
 		String anonymousTypeConstructorName = getAnonymousTypeConstructorName(tree, context);
@@ -194,6 +201,10 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 
 		if (!isAnonymousConstructor) {
 			decorateBodyWithScopeAccessor(tree, context, body);
+		}
+
+		if (JavaNodes.isConstructor(tree) && JavaNodes.hasMultipleConstructors(context.getCurrentPath())) {
+			params.clear();
 		}
 
 		JS decl = context.js().function(anonymousTypeConstructorName, params, body);
