@@ -11,6 +11,7 @@ import org.stjs.generator.check.declaration.ClassGlobalInstanceMembersCheck;
 import org.stjs.generator.check.declaration.ClassImplementJavascriptFunctionCheck;
 import org.stjs.generator.check.declaration.ClassNamespaceCheck;
 import org.stjs.generator.check.declaration.MethodDeclarationTemplateCheck;
+import org.stjs.generator.check.declaration.MethodOverloadManyToSingleCheck;
 import org.stjs.generator.check.declaration.MethodSynchronizedCheck;
 import org.stjs.generator.check.declaration.MethodWrongNameCheck;
 import org.stjs.generator.check.expression.IdentifierAccessServerSideCheck;
@@ -147,6 +148,8 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(new MethodWrongNameCheck());
 
 		visitor.contribute(new MethodInvocationConfigurationForbiddenCheck());
+
+		visitor.contribute(new MethodOverloadManyToSingleCheck());
 	}
 
 	@Override
