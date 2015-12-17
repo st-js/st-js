@@ -2,6 +2,7 @@ package org.stjs.generator.check.declaration;
 
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.Tree;
+import org.stjs.generator.AnnotationUtils;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
@@ -61,7 +62,7 @@ public class MethodOverloadManyToSingleCheck implements CheckContributor<MethodT
         List<? extends Element> allMembers = context.getElements().getAllMembers(superClassElement);
 
         if (ElementUtils.hasAnOverloadedEquivalentMethod(methodElement, allMembers)
-                && (superClassElement.getAnnotation(JSOverloadName.class) == null)) {
+                && (!AnnotationUtils.JSOverloadName.isPresent(methodElement))) {
             context.addError(tree, "There is a method in a parent having the same name [" + tree.getName() + "]"
                     + " than your overloaded method but your class only implement one, which leads to not being overloaded."
                     + " This will lead to a clash in the invocation of the method. "

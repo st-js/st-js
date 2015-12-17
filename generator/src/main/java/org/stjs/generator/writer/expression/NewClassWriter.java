@@ -85,7 +85,7 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 
 				} else {
 					MethodInvocationTree meth = (MethodInvocationTree) expr;
-					String propertyName = MethodToPropertyTemplate.getPropertyName(meth);
+					String propertyName = tw.getContext().getNames().getFieldName(tw.getContext(), meth);
 					JS value = visitor.scan(meth.getArguments().get(0), tw.getContext());
 					props.add(NameValue.of(propertyName, value));
 				}

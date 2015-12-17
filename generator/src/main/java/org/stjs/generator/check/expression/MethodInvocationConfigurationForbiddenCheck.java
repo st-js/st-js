@@ -29,7 +29,7 @@ public class MethodInvocationConfigurationForbiddenCheck implements CheckContrib
 			return null;
 		}
 
-		String transpiledMethodName = MethodInvocationWriter.buildMethodName(tree, context);
+		String transpiledMethodName = context.getNames().getMethodName(context, tree);
 
 		String methodFullPath = ((Symbol.ClassSymbol) methodOwner).className() + "." + transpiledMethodName;
 

@@ -41,7 +41,7 @@ public class MethodToPropertyTemplate<JS> implements WriterContributor<MethodInv
 		}
 
 		// NAME
-		JS property = context.js().property(target, getPropertyName(tree));
+		JS property = context.js().property(target, context.getNames().getFieldName(context, tree));
 
 		// VALUE
 		if (argCount == arg) {
@@ -53,9 +53,4 @@ public class MethodToPropertyTemplate<JS> implements WriterContributor<MethodInv
 		return context.js().assignment(AssignOperator.ASSIGN, property, visitor.scan(tree.getArguments().get(arg), context));
 	}
 
-	public static String getPropertyName(MethodInvocationTree tree) {
-		String name = MethodInvocationWriter.buildMethodName(tree, null);
-		int start = name.startsWith("$") ? 1 : 0;
-		return name.substring(start);
-	}
 }

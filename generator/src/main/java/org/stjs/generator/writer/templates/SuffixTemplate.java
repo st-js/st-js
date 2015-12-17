@@ -25,7 +25,7 @@ public class SuffixTemplate<JS> implements WriterContributor<MethodInvocationTre
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		JS target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree>getCurrentWrapper());
-		String name = MethodInvocationWriter.buildMethodName(tree, context);
+		String name = context.getNames().getMethodName(context, tree);
 		name = transformMethodName(name, context.getCurrentWrapper().getMethodTemplateParameters());
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
 		return context.js().functionCall(context.js().property(target, name), arguments);

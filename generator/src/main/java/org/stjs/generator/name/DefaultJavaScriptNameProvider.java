@@ -1,17 +1,26 @@
 package org.stjs.generator.name;
 
+import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
+import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.util.TreePath;
+import com.sun.tools.javac.code.Symbol;
+import org.stjs.generator.AnnotationUtils;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConfiguration;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.InternalUtils;
+import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.JavaNodes;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
@@ -167,21 +176,46 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 		}
 	}
 
-	@Override
-	public String getVariableName(GenerationContext<?> context, IdentifierTree treeNode, TreePath path) {
-		// TODO Auto-generated method stub
-		return null;
+	public String getFieldName(GenerationContext<?> context, MethodInvocationTree tree) {
+		String name = context.getNames().getMethodName(context, tree);
+		int start = name.startsWith("$") ? 1 : 0;
+		return name.substring(start);
 	}
 
 	@Override
-	public String getMethodName(GenerationContext<?> context, MethodTree tree, TreePath path) {
-		return tree.getName().toString();
+	public String getMethodName(GenerationContext<?> context, MethodTree tree) {
+		Symbol.MethodSymbol element = (Symbol.MethodSymbol) context.getCurrentWrapper().getElement();
+		String methodName = element.getSimpleName().toString();
+
+		if (AnnotationUtils.JSOverloadName.isPresent(element)
+				|| ElementUtils.hasAnOverloadedEquivalentMethod(TreeUtils.elementFromDeclaration(tree), context.getElements())) {
+			methodName = AnnotationUtils.JSOverloadName.decorate(element);
+		}
+
+		if (!JavaNodes.isPublic(tree) && !isFromInterface(context)) {
+			return GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX + methodName;
+		}
+
+		return methodName;
+	}
+
+
+	private boolean isFromInterface(GenerationContext<?> context) {
+		return ElementKind.INTERFACE.equals(context.getCurrentWrapper().getEnclosingType().getElement().getKind());
 	}
 
 	@Override
-	public String getMethodName(GenerationContext<?> context, MethodInvocationTree tree, TreePath path) {
-		// TODO Auto-generated method stub
-		return null;
+	public String getMethodName(GenerationContext<?> context, MethodInvocationTree tree) {
+		ExpressionTree select = tree.getMethodSelect();
+
+		if (select instanceof IdentifierTree) {
+			// simple call: method(args)
+			return buildMethodNameForIdentifierTree(tree, context, (IdentifierTree) select);
+		} else if (select instanceof MemberSelectTree) {
+			// calls with target: target.method(args)
+			return buildMethodNameForMemberSelectTree(context, (MemberSelectTree) select);
+		}
+		throw context.addError(tree, "Unsupported tree type during buildMethodName.");
 	}
 
 	@Override
@@ -195,6 +229,56 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 	@Override
 	public Map<String, DependencyType> getResolvedTypes() {
 		return resolvedRootTypes;
+	}
+
+	private <JS> String buildMethodNameForIdentifierTree(MethodInvocationTree tree, GenerationContext<JS> context, IdentifierTree select) {
+		String methodName = select.getName().toString();
+
+		// Ignore super() calls, these are never going to be prefixed
+		if (GeneratorConstants.SUPER.equals(methodName)) {
+			return methodName;
+		}
+
+		Symbol symbol = (Symbol.MethodSymbol) InternalUtils.symbol(tree);
+		ExecutableElement methodElement = TreeUtils.getMethod(symbol);
+
+		if (methodElement != null
+				&& (AnnotationUtils.JSOverloadName.isPresent(methodElement)
+				|| hasAnOverloadedMethod(context, methodElement))) {
+			methodName = AnnotationUtils.JSOverloadName.decorate((Symbol.MethodSymbol) methodElement);
+		}
+		return prefixNonPublicMethods(methodName, symbol);
+	}
+
+	private <JS> String buildMethodNameForMemberSelectTree(GenerationContext<JS> context, MemberSelectTree memberSelect) {
+		String methodName = memberSelect.getIdentifier().toString();
+		Symbol symbol = (Symbol) InternalUtils.symbol(memberSelect);
+
+		if (symbol != null && TreeUtils.isFieldAccess(memberSelect.getExpression())
+				&& (symbol.getKind() == ElementKind.FIELD || symbol.getKind() == ElementKind.METHOD)) {
+			return prefixNonPublicMethods(methodName, symbol);
+		}
+
+		ExecutableElement methodElement = TreeUtils.getMethod(symbol);
+		if (hasAnOverloadedMethod(context, methodElement)) {
+			return AnnotationUtils.JSOverloadName.decorate((Symbol.MethodSymbol) methodElement);
+		}
+		return methodName;
+	}
+
+	private <JS> boolean hasAnOverloadedMethod(GenerationContext<JS> context, ExecutableElement methodElement) {
+		if (context == null) {
+			return false;
+		}
+		return ElementUtils.hasAnOverloadedEquivalentMethod(methodElement, context.getElements());
+	}
+
+	private String prefixNonPublicMethods(String methodName, Symbol element) {
+		if (element != null && element.getModifiers().contains(Modifier.PUBLIC)) {
+			return methodName;
+		} else {
+			return GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX + methodName;
+		}
 	}
 
 }
