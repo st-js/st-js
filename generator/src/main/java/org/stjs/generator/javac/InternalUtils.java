@@ -454,7 +454,11 @@ public final class InternalUtils {
 		}
 		for (int i = 0; i < params.size(); i++) {
 			Symbol.VarSymbol param = params.get(i);
-			builder.append(param.type.tsym.getSimpleName());
+			String paramName = param.type.tsym.getSimpleName().toString();
+			if (TypeKind.TYPEVAR.equals(param.type.getKind())) {
+				paramName = AnnotationConstants.JS_OVERLOAD_NAME_TYPEVAR_PARAM_NAME;
+			}
+			builder.append(paramName);
 			if (TypeKind.ARRAY.equals(param.type.getKind())) {
 				builder.append(AnnotationConstants.JS_OVERLOAD_NAME_DEFAULT_VALUE);
 

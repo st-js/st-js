@@ -210,6 +210,15 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 				"        var bytes = \"test\".getBytes$String(\"UTF-8\");\n");
 	}
 
+	@Test
+	public void testOverloadWithGenerics() {
+		assertCodeContains(Methods26_overload_with_generics.class, "" +
+				"    prototype.overloadMethod$Object = function(firstParam) {};\n" +
+				"    prototype.overloadMethod$Object_int = function(firstParam, secondParam) {\n" +
+				"        this.overloadMethod$Object(firstParam);\n" +
+				"    };");
+	}
+
 	private void testForbiddenConfiguration(String expectedForbiddenMethod, Class<?> clazz) {
 		Set<String> forbiddenMethodInvocations = new HashSet<>();
 		forbiddenMethodInvocations.add(expectedForbiddenMethod);
