@@ -1,5 +1,8 @@
 package org.stjs.generator.check.expression;
 
+import com.sun.source.tree.MemberSelectTree;
+import com.sun.source.tree.MethodInvocationTree;
+import com.sun.source.tree.Tree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.check.CheckContributor;
@@ -7,11 +10,6 @@ import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TreeWrapper;
-import org.stjs.generator.writer.expression.MethodInvocationWriter;
-
-import com.sun.source.tree.MemberSelectTree;
-import com.sun.source.tree.MethodInvocationTree;
-import com.sun.source.tree.Tree;
 
 /**
  * this check verifies that you don't call a method from the super type if that is a synthetic type, as the actual

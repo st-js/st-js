@@ -80,7 +80,7 @@ public class LambdaExpressionWriter<JS> implements WriterContributor<LambdaExpre
 					// only instance methods
 					return super.visitMethodInvocation(tree, arg1);
 				}
-				String name = MethodInvocationWriter.buildMethodName(tree, context);
+				String name = context.getNames().getMethodName(context, tree);
 
 				if (GeneratorConstants.THIS.equals(name) || GeneratorConstants.SUPER.equals(name)) {
 					// this and super call are ok

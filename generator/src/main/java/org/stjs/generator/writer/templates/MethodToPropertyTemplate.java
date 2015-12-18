@@ -2,7 +2,6 @@ package org.stjs.generator.writer.templates;
 
 import com.sun.source.tree.MethodInvocationTree;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.utils.JavaNodes;

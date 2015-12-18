@@ -1,17 +1,13 @@
 package org.stjs.generator;
 
-import com.sun.tools.javac.code.Symbol;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.javascript.annotation.AnnotationConstants;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class AnnotationUtils {
 

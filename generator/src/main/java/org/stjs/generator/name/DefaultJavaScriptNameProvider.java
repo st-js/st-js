@@ -240,9 +240,8 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
             if (allMethodNamesFromSuperTypes.size() >= 2) {
                 context.addError(context.getCurrentPath().getCompilationUnit(),
                         String.format(
-                                "" +
-                                        "Method name conflict for method with signature: [%s.%s]. " +
-                                        "Parent class hierarchy uses different method names fro the same method type erasure: %s",
+                                "Method name conflict for method with signature: [%s.%s]. "
+                                        + "Parent class hierarchy uses different method names fro the same method type erasure: %s",
                                 methodElement.getEnclosingElement().getSimpleName(),
                                 methodElement.toString(),
                                 buildOverridenMethodErrorMessage(allMethodNamesFromSuperTypes)));
@@ -260,13 +259,13 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
             if (sb.length() > 0) {
                 sb.append(", ");
             }
-            sb.append("'");
+            sb.append('\'');
             sb.append(mapEntry.getKey());
             sb.append("' --> ");
 
             List<ExecutableElement> value = mapEntry.getValue();
 
-            sb.append("[");
+            sb.append('[');
             int sbLengthBeforeLoop = sb.length();
             for (ExecutableElement executableElement : value) {
                 if (sb.length() != sbLengthBeforeLoop) {
@@ -274,10 +273,10 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
                 }
 
                 sb.append(executableElement.getEnclosingElement().getSimpleName());
-                sb.append(".");
+                sb.append('.');
                 sb.append(executableElement.toString());
             }
-            sb.append("]");
+            sb.append(']');
 
             sb.append(mapEntry.getValue().toString());
         }
@@ -286,12 +285,12 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
     }
 
     private String getMethodNameFromClass(GenerationContext context, ExecutableElement methodElement) {
-        String methodName = methodElement.getSimpleName().toString();
-
         List<ExecutableElement> methodsInClassWithSameName = findAllMethodsInClassWithSameName(methodElement);
         if (methodsInClassWithSameName.isEmpty() && !ElementUtils.isConstructor(methodElement)) {
             throw new AssertionError("Should have matched at least the current method.");
         }
+        String methodName = methodElement.getSimpleName().toString();
+
         methodsInClassWithSameName = filterOutNativeMethods(methodsInClassWithSameName);
 
         boolean isAnOverloadedMethod = (methodsInClassWithSameName.size() >= 2);
@@ -344,10 +343,6 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
         }
 
         return methodsInClassWithSameName;
-    }
-
-    private boolean isFromInterface(GenerationContext<?> context) {
-        return ElementKind.INTERFACE.equals(context.getCurrentWrapper().getEnclosingType().getElement().getKind());
     }
 
     @Override

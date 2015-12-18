@@ -7,9 +7,7 @@ import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.Tree;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
-import org.stjs.generator.AnnotationUtils;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
@@ -22,9 +20,6 @@ import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.annotation.Template;
 
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
