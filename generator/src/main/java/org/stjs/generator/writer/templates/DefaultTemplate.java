@@ -99,7 +99,7 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		ExecutableElement element = TreeUtils.elementFromUse(tree);
 		if (JavaNodes.hasMultipleConstructors(context.getCurrentPath()) && ElementKind.CONSTRUCTOR.equals(element.getKind())) {
 			// Invocation of a another constructor, let's get the overloaded constructor name and chain the real static constructor
-			String constructorName = InternalUtils.generateOverloadeConstructorName(((Symbol.MethodSymbol) element).getParameters());
+			String constructorName = InternalUtils.generateOverloadeConstructorName(context, ((Symbol.MethodSymbol) element).getParameters());
 			return context.js().functionCall(context.js().property(target, constructorName), arguments);
 		}
 		return null;

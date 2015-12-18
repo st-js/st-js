@@ -272,10 +272,10 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 	public void testCreatedFixedArraySize() {
 		assertCodeContains(Fields31_create_fixed_array_size.class, "" +
 				"    this._aStringArray = stjs.createJavaArray(10);\n" +
-				"    this._aStringArray = stjs.createJavaArray(this.constructor.getSize2());\n" +
+				"    this._aStringArray = stjs.createJavaArray(this.constructor._getSize2());\n" +
 				"    this._aDoubleStringArray = stjs.createJavaArray(200, 300);\n" +
-				"    this._aDoubleStringArray = stjs.createJavaArray(this.constructor.getSize2(), 300);\n" +
-				"    this._aDoubleStringArray = stjs.createJavaArray(this.constructor.getSize2(), this.constructor.getSize3());\n");
+				"    this._aDoubleStringArray = stjs.createJavaArray(this.constructor._getSize2(), 300);\n" +
+				"    this._aDoubleStringArray = stjs.createJavaArray(this.constructor._getSize2(), this.constructor._getSize3());\n");
 	}
 
 	@Test

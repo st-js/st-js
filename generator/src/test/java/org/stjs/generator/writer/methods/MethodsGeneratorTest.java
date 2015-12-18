@@ -219,6 +219,29 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 				"    };");
 	}
 
+	@Test
+	public void testOverrideAndOverloadInSubClass_execute() throws Exception {
+		String result = (String) execute(Methods27_overrride_and_overload_in_subclass_no_conflict.class);
+		Assert.assertEquals("Hello a! - Hello world from Mars! - Hello world from Mars! - Hello world! - Hello world from Mars!", result);
+	}
+
+	@Test
+	public void testOverrideAndOverloadInSubClass_generation() throws Exception {
+		assertCodeContains(Methods27_overrride_and_overload_in_subclass_no_conflict.class, "" +
+				"    constructor.SubClassClass = function(outerClass$0) {\n" +
+				"        this._outerClass$0 = outerClass$0;\n" +
+				"        Methods27_overrride_and_overload_in_subclass_no_conflict.BaseClass.call(this);\n" +
+				"    };\n" +
+				"    constructor.SubClassClass = stjs.extend(constructor.SubClassClass, Methods27_overrride_and_overload_in_subclass_no_conflict.BaseClass, [Methods27_overrride_and_overload_in_subclass_no_conflict.Interface1], function(constructor, prototype) {\n" +
+				"        prototype.getMessage = function() {\n" +
+				"            return \"Hello world from Mars!\";\n" +
+				"        };\n" +
+				"        prototype.getMessage$String = function(userName) {\n" +
+				"            return \"Hello \" + userName + \"!\";\n" +
+				"        };\n" +
+				"    }, {}, {});\n");
+	}
+
 	private void testForbiddenConfiguration(String expectedForbiddenMethod, Class<?> clazz) {
 		Set<String> forbiddenMethodInvocations = new HashSet<>();
 		forbiddenMethodInvocations.add(expectedForbiddenMethod);

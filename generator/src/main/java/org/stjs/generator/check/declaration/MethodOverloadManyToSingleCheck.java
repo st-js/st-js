@@ -20,7 +20,13 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This check make sure that there is no single implementation of a method in a base class where a child of the base class
@@ -57,16 +63,45 @@ public class MethodOverloadManyToSingleCheck implements CheckContributor<MethodT
             return;
         }
 
-        TypeMirror superClass = typeElement.getSuperclass();
-        TypeElement superClassElement = (TypeElement) ((DeclaredType) superClass).asElement();
-        List<? extends Element> allMembers = context.getElements().getAllMembers(superClassElement);
+        List<ExecutableElement> sameMethodFromParents = ElementUtils.getSameMethodFromParents(methodElement);
 
-        if (ElementUtils.hasAnOverloadedEquivalentMethod(methodElement, allMembers)
-                && (!AnnotationUtils.JSOverloadName.isPresent(methodElement))) {
-            context.addError(tree, "There is a method in a parent having the same name [" + tree.getName() + "]"
-                    + " than your overloaded method but your class only implement one, which leads to not being overloaded."
-                    + " This will lead to a clash in the invocation of the method. "
-                    + "Use the annotation '@JSOverloadName(\"newMethodNameHere\")' to provide another method name at generation.");
+        Map<String, List<ExecutableElement>> allMethodNamesFromSuperTypes = new HashMap<>();
+        for (ExecutableElement sameMethodFromParent : sameMethodFromParents) {
+            String methodName = context.getNames().getMethodName(context, sameMethodFromParent);
+
+            List<ExecutableElement> matchingExecutableElements = allMethodNamesFromSuperTypes.get(methodName);
+            if (matchingExecutableElements == null) {
+                matchingExecutableElements = new ArrayList<>();
+                allMethodNamesFromSuperTypes.put(methodName, matchingExecutableElements);
+            }
+            matchingExecutableElements.add(sameMethodFromParent);
         }
+
+        if (allMethodNamesFromSuperTypes.size() >= 2) {
+            context.addError(tree,
+                    String.format(
+                            "" +
+                                    "Method name conflict for method with signature: '%s.%s']. " +
+                                    "Class hierarchy contains different names for this method signature: %s",
+                            methodElement.getEnclosingElement().getSimpleName(),
+                            methodElement.toString(),
+                            buildOverridenMethodErrorMessage(allMethodNamesFromSuperTypes)));
+        }
+    }
+
+    private String buildOverridenMethodErrorMessage(Map<String, List<ExecutableElement>> allMethodNamesFromSuperTypes) {
+        StringBuilder sb = new StringBuilder();
+
+        for (Map.Entry<String, List<ExecutableElement>> mapEntry : allMethodNamesFromSuperTypes.entrySet()) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append("'");
+            sb.append(mapEntry.getKey());
+            sb.append("' --> ");
+            sb.append(mapEntry.getValue().toString());
+        }
+
+        return sb.toString();
     }
 }

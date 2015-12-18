@@ -1,12 +1,7 @@
 package org.stjs.generator.name;
 
-import com.sun.source.tree.ExpressionTree;
-import com.sun.source.tree.IdentifierTree;
-import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
-import com.sun.source.util.TreePath;
-import com.sun.tools.javac.code.Symbol;
 import org.stjs.generator.AnnotationUtils;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConfiguration;
@@ -21,10 +16,14 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
+import javax.lang.model.util.ElementFilter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,252 +32,335 @@ import java.util.Map;
  * @author acraciun
  */
 public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
-	private static final String JAVA_LANG_PACKAGE = "java.lang.";
-	private static final int JAVA_LANG_LENGTH = JAVA_LANG_PACKAGE.length();
+    private static final String JAVA_LANG_PACKAGE = "java.lang.";
+    private static final int JAVA_LANG_LENGTH = JAVA_LANG_PACKAGE.length();
 
-	private final Map<String, DependencyType> resolvedRootTypes = new HashMap<String, DependencyType>();
-	private final Map<TypeMirror, TypeInfo> resolvedTypes = new HashMap<TypeMirror, TypeInfo>();
+    private final Map<String, DependencyType> resolvedRootTypes = new HashMap<String, DependencyType>();
+    private final Map<TypeMirror, TypeInfo> resolvedTypes = new HashMap<TypeMirror, TypeInfo>();
 
-	private class TypeInfo {
-		private final String fullName;
-		private final Element rootTypeElement;
+    private class TypeInfo {
+        private final String fullName;
+        private final Element rootTypeElement;
 
-		public TypeInfo(String fullName, Element rootTypeElement) {
-			this.fullName = fullName;
-			this.rootTypeElement = rootTypeElement;
-		}
+        public TypeInfo(String fullName, Element rootTypeElement) {
+            this.fullName = fullName;
+            this.rootTypeElement = rootTypeElement;
+        }
 
-		public String getFullName() {
-			return fullName;
-		}
+        public String getFullName() {
+            return fullName;
+        }
 
-		public Element getRootTypeElement() {
-			return rootTypeElement;
-		}
+        public Element getRootTypeElement() {
+            return rootTypeElement;
+        }
 
-	}
+    }
 
-	private String addNameSpace(Element rootTypeElement, GenerationContext<?> context, String name) {
-		String namespace = context.wrap(rootTypeElement).getNamespace();
-		if (namespace.isEmpty()) {
-			return name;
-		}
-		return namespace + "." + name;
-	}
+    private String addNameSpace(Element rootTypeElement, GenerationContext<?> context, String name) {
+        String namespace = context.wrap(rootTypeElement).getNamespace();
+        if (namespace.isEmpty()) {
+            return name;
+        }
+        return namespace + "." + name;
+    }
 
-	@Override
-	public String getTypeName(GenerationContext<?> context, TypeMirror type, DependencyType dependencyType) {
-		TypeInfo typeInfo = resolvedTypes.get(type);
-		if (typeInfo != null) {
-			// make sure we have the strictest dep type
-			addResolvedType(typeInfo.getRootTypeElement(), dependencyType);
-			return typeInfo.getFullName();
-		}
+    @Override
+    public String getTypeName(GenerationContext<?> context, TypeMirror type, DependencyType dependencyType) {
+        TypeInfo typeInfo = resolvedTypes.get(type);
+        if (typeInfo != null) {
+            // make sure we have the strictest dep type
+            addResolvedType(typeInfo.getRootTypeElement(), dependencyType);
+            return typeInfo.getFullName();
+        }
 
-		if (type instanceof DeclaredType) {
-			DeclaredType declaredType = (DeclaredType) type;
-			String name = InternalUtils.getSimpleName(declaredType.asElement());
-			Element rootTypeElement = declaredType.asElement();
-			for (DeclaredType enclosingType = JavaNodes.getEnclosingType(declaredType); enclosingType != null; enclosingType = JavaNodes
-					.getEnclosingType(enclosingType)) {
-				rootTypeElement = enclosingType.asElement();
-				name = InternalUtils.getSimpleName(rootTypeElement) + "." + name;
-			}
+        if (type instanceof DeclaredType) {
+            DeclaredType declaredType = (DeclaredType) type;
+            String name = InternalUtils.getSimpleName(declaredType.asElement());
+            Element rootTypeElement = declaredType.asElement();
+            for (DeclaredType enclosingType = JavaNodes.getEnclosingType(declaredType); enclosingType != null; enclosingType = JavaNodes
+                    .getEnclosingType(enclosingType)) {
+                rootTypeElement = enclosingType.asElement();
+                name = InternalUtils.getSimpleName(rootTypeElement) + "." + name;
+            }
 
-			checkAllowedType(rootTypeElement, context);
-			addResolvedType(rootTypeElement, dependencyType);
+            checkAllowedType(rootTypeElement, context);
+            addResolvedType(rootTypeElement, dependencyType);
 
-			String fullName = addNameSpace(rootTypeElement, context, name);
-			resolvedTypes.put(type, new TypeInfo(fullName, rootTypeElement));
-			return fullName;
-		}
-		if (type instanceof WildcardType) {
-			// ? extends Type1 super Type2
-			// XXX what to return here !?
-			return "Object";
-		}
-		return type.toString();
-	}
+            String fullName = addNameSpace(rootTypeElement, context, name);
+            resolvedTypes.put(type, new TypeInfo(fullName, rootTypeElement));
+            return fullName;
+        }
+        if (type instanceof WildcardType) {
+            // ? extends Type1 super Type2
+            // XXX what to return here !?
+            return "Object";
+        }
+        return type.toString();
+    }
 
-	private void typeNotAllowedException(GenerationContext<?> context, String name) {
-		context.addError(context.getCurrentPath().getLeaf(), "The usage of the class " + name
-				+ " is not allowed. If it's one of your own bridge types, "
-				+ "please add the annotation @STJSBridge to the class or to its package.");
-	}
+    private void typeNotAllowedException(GenerationContext<?> context, String name) {
+        context.addError(context.getCurrentPath().getLeaf(), "The usage of the class " + name
+                + " is not allowed. If it's one of your own bridge types, "
+                + "please add the annotation @STJSBridge to the class or to its package.");
+    }
 
-	private boolean isJavaLangClassAllowed(GenerationContext<?> context, String name) {
-		GeneratorConfiguration configuration = context.getConfiguration();
-		if (name.startsWith(JAVA_LANG_PACKAGE) && configuration.getAllowedJavaLangClasses().contains(name.substring(JAVA_LANG_LENGTH))) {
-			return true;
-		}
+    private boolean isJavaLangClassAllowed(GenerationContext<?> context, String name) {
+        GeneratorConfiguration configuration = context.getConfiguration();
+        if (name.startsWith(JAVA_LANG_PACKAGE) && configuration.getAllowedJavaLangClasses().contains(name.substring(JAVA_LANG_LENGTH))) {
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	private boolean isPackageAllowed(GenerationContext<?> context, String name) {
-		if (name.startsWith(JAVA_LANG_PACKAGE)) {
-			return false;
-		}
-		GeneratorConfiguration configuration = context.getConfiguration();
-		for (String packageName : configuration.getAllowedPackages()) {
-			if (name.startsWith(packageName)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    private boolean isPackageAllowed(GenerationContext<?> context, String name) {
+        if (name.startsWith(JAVA_LANG_PACKAGE)) {
+            return false;
+        }
+        GeneratorConfiguration configuration = context.getConfiguration();
+        for (String packageName : configuration.getAllowedPackages()) {
+            if (name.startsWith(packageName)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	private boolean isBridge(GenerationContext<?> context, String name) {
-		if (name.startsWith(JAVA_LANG_PACKAGE)) {
-			return false;
-		}
+    private boolean isBridge(GenerationContext<?> context, String name) {
+        if (name.startsWith(JAVA_LANG_PACKAGE)) {
+            return false;
+        }
 
-		return ClassUtils.isBridge(context.getBuiltProjectClassLoader(), ClassUtils.getClazz(context.getBuiltProjectClassLoader(), name));
-	}
+        return ClassUtils.isBridge(context.getBuiltProjectClassLoader(), ClassUtils.getClazz(context.getBuiltProjectClassLoader(), name));
+    }
 
-	private void checkAllowedType(Element rootTypeElement, GenerationContext<?> context) {
-		String name = ElementUtils.getQualifiedClassName(rootTypeElement).toString();
-		if (name.isEmpty()) {
-			return;
-		}
-		if (isJavaLangClassAllowed(context, name)) {
-			return;
-		}
+    private void checkAllowedType(Element rootTypeElement, GenerationContext<?> context) {
+        String name = ElementUtils.getQualifiedClassName(rootTypeElement).toString();
+        if (name.isEmpty()) {
+            return;
+        }
+        if (isJavaLangClassAllowed(context, name)) {
+            return;
+        }
 
-		if (isImportedStjsClass(context, name)) {
-			return;
-		}
+        if (isImportedStjsClass(context, name)) {
+            return;
+        }
 
-		if (isPackageAllowed(context, name)) {
-			return;
-		}
+        if (isPackageAllowed(context, name)) {
+            return;
+        }
 
-		// ClassUtils.isBridge accepts all java.lang classes, that are actually not allowed
-		if (isBridge(context, name)) {
-			return;
-		}
+        // ClassUtils.isBridge accepts all java.lang classes, that are actually not allowed
+        if (isBridge(context, name)) {
+            return;
+        }
 
-		typeNotAllowedException(context, name);
-	}
+        typeNotAllowedException(context, name);
+    }
 
-	private boolean isImportedStjsClass(GenerationContext<?> context, String className) {
-		String stjsPropertiesName = ClassUtils.getPropertiesFileName(className);
-		return context.getBuiltProjectClassLoader().getResource(stjsPropertiesName) != null;
-	}
+    private boolean isImportedStjsClass(GenerationContext<?> context, String className) {
+        String stjsPropertiesName = ClassUtils.getPropertiesFileName(className);
+        return context.getBuiltProjectClassLoader().getResource(stjsPropertiesName) != null;
+    }
 
-	private void addResolvedType(Element rootTypeElement, DependencyType depType) {
-		String name = ElementUtils.getQualifiedClassName(rootTypeElement).toString();
-		if (!name.startsWith("java.lang.")) {
-			DependencyType prevDepType = resolvedRootTypes.get(name);
-			if (prevDepType == null || depType.isStricter(prevDepType)) {
-				resolvedRootTypes.put(name, depType);
-			}
-		}
-	}
+    private void addResolvedType(Element rootTypeElement, DependencyType depType) {
+        String name = ElementUtils.getQualifiedClassName(rootTypeElement).toString();
+        if (!name.startsWith("java.lang.")) {
+            DependencyType prevDepType = resolvedRootTypes.get(name);
+            if (prevDepType == null || depType.isStricter(prevDepType)) {
+                resolvedRootTypes.put(name, depType);
+            }
+        }
+    }
 
-	public String getFieldName(GenerationContext<?> context, MethodInvocationTree tree) {
-		String name = context.getNames().getMethodName(context, tree);
-		int start = name.startsWith("$") ? 1 : 0;
-		return name.substring(start);
-	}
+    @Override
+    public String transformMethodCallToFieldName(GenerationContext<?> context, MethodInvocationTree tree) {
+        String methodName = getMethodName(context, tree);
 
-	@Override
-	public String getMethodName(GenerationContext<?> context, MethodTree tree) {
-		Symbol.MethodSymbol element = (Symbol.MethodSymbol) context.getCurrentWrapper().getElement();
-		String methodName = element.getSimpleName().toString();
+        if (methodName.startsWith(GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR)) {
+            methodName = methodName.substring(1, methodName.length());
+        }
 
-		if (AnnotationUtils.JSOverloadName.isPresent(element)
-				|| ElementUtils.hasAnOverloadedEquivalentMethod(TreeUtils.elementFromDeclaration(tree), context.getElements())) {
-			methodName = AnnotationUtils.JSOverloadName.decorate(element);
-		}
+        int idx = methodName.indexOf(GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR);
+        if (idx > 0) {
+            methodName = methodName.substring(0, idx);
+        }
 
-		if (!JavaNodes.isPublic(tree) && !isFromInterface(context)) {
-			return GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX + methodName;
-		}
+        return methodName;
+    }
 
-		return methodName;
-	}
+    @Override
+    public String getMethodName(GenerationContext<?> context, MethodTree methodTree) {
+        return getMethodName(context,
+                TreeUtils.elementFromDeclaration(methodTree));
+    }
 
+    @Override
+    public String getMethodName(GenerationContext<?> context, MethodInvocationTree tree) {
+        ExecutableElement executableElement = TreeUtils.elementFromUse(tree);
 
-	private boolean isFromInterface(GenerationContext<?> context) {
-		return ElementKind.INTERFACE.equals(context.getCurrentWrapper().getEnclosingType().getElement().getKind());
-	}
+        // Ignore super() calls, these are never going to be prefixed
+        if (ElementUtils.isConstructor(executableElement)) {
+            return GeneratorConstants.SUPER;
+        }
 
-	@Override
-	public String getMethodName(GenerationContext<?> context, MethodInvocationTree tree) {
-		ExpressionTree select = tree.getMethodSelect();
+        return getMethodName(context, executableElement);
+    }
 
-		if (select instanceof IdentifierTree) {
-			// simple call: method(args)
-			return buildMethodNameForIdentifierTree(tree, context, (IdentifierTree) select);
-		} else if (select instanceof MemberSelectTree) {
-			// calls with target: target.method(args)
-			return buildMethodNameForMemberSelectTree(context, (MemberSelectTree) select);
-		}
-		throw context.addError(tree, "Unsupported tree type during buildMethodName.");
-	}
+    @Override
+    public String getMethodName(GenerationContext<?> context, ExecutableElement methodElement) {
 
-	@Override
-	public String getTypeName(GenerationContext<?> context, Element type, DependencyType dependencyType) {
-		if (type == null) {
-			return null;
-		}
-		return getTypeName(context, type.asType(), dependencyType);
-	}
+        String annotationValue = AnnotationUtils.JSOverloadName.getAnnotationValue(context, methodElement);
+        if (annotationValue != null) {
+            return decorateNonPublicMembers(methodElement, annotationValue);
+        }
 
-	@Override
-	public Map<String, DependencyType> getResolvedTypes() {
-		return resolvedRootTypes;
-	}
+        List<ExecutableElement> sameMethodsFromParents =
+                ElementUtils.getSameMethodsFromSupertypes(ElementUtils.enclosingClass(methodElement), methodElement);
 
-	private <JS> String buildMethodNameForIdentifierTree(MethodInvocationTree tree, GenerationContext<JS> context, IdentifierTree select) {
-		String methodName = select.getName().toString();
+        if (sameMethodsFromParents.isEmpty()) {
+            return getMethodNameFromClass(context, methodElement);
+        } else {
+            // found same method in some of parent class.
+            // Ensure all parent classes returns the same name for the method
+            Map<String, List<ExecutableElement>> allMethodNamesFromSuperTypes = new HashMap<>();
+            for (ExecutableElement sameMethodFromParent : sameMethodsFromParents) {
+                String methodName = getMethodName(context, sameMethodFromParent);
 
-		// Ignore super() calls, these are never going to be prefixed
-		if (GeneratorConstants.SUPER.equals(methodName)) {
-			return methodName;
-		}
+                List<ExecutableElement> matchingExecutableElements = allMethodNamesFromSuperTypes.get(methodName);
+                if (matchingExecutableElements == null) {
+                    matchingExecutableElements = new ArrayList<>();
+                    allMethodNamesFromSuperTypes.put(methodName, matchingExecutableElements);
+                }
+                matchingExecutableElements.add(sameMethodFromParent);
+            }
 
-		Symbol symbol = (Symbol.MethodSymbol) InternalUtils.symbol(tree);
-		ExecutableElement methodElement = TreeUtils.getMethod(symbol);
+            if (allMethodNamesFromSuperTypes.size() >= 2) {
+                context.addError(context.getCurrentPath().getCompilationUnit(),
+                        String.format(
+                                "" +
+                                        "Method name conflict for method with signature: [%s.%s]. " +
+                                        "Parent class hierarchy uses different method names fro the same method type erasure: %s",
+                                methodElement.getEnclosingElement().getSimpleName(),
+                                methodElement.toString(),
+                                buildOverridenMethodErrorMessage(allMethodNamesFromSuperTypes)));
+            }
 
-		if (methodElement != null
-				&& (AnnotationUtils.JSOverloadName.isPresent(methodElement)
-				|| hasAnOverloadedMethod(context, methodElement))) {
-			methodName = AnnotationUtils.JSOverloadName.decorate((Symbol.MethodSymbol) methodElement);
-		}
-		return prefixNonPublicMethods(methodName, symbol);
-	}
+            // return first
+            return allMethodNamesFromSuperTypes.keySet().iterator().next();
+        }
+    }
 
-	private <JS> String buildMethodNameForMemberSelectTree(GenerationContext<JS> context, MemberSelectTree memberSelect) {
-		String methodName = memberSelect.getIdentifier().toString();
-		Symbol symbol = (Symbol) InternalUtils.symbol(memberSelect);
+    private String buildOverridenMethodErrorMessage(Map<String, List<ExecutableElement>> allMethodNamesFromSuperTypes) {
+        StringBuilder sb = new StringBuilder();
 
-		if (symbol != null && TreeUtils.isFieldAccess(memberSelect.getExpression())
-				&& (symbol.getKind() == ElementKind.FIELD || symbol.getKind() == ElementKind.METHOD)) {
-			return prefixNonPublicMethods(methodName, symbol);
-		}
+        for (Map.Entry<String, List<ExecutableElement>> mapEntry : allMethodNamesFromSuperTypes.entrySet()) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append("'");
+            sb.append(mapEntry.getKey());
+            sb.append("' --> ");
 
-		ExecutableElement methodElement = TreeUtils.getMethod(symbol);
-		if (hasAnOverloadedMethod(context, methodElement)) {
-			return AnnotationUtils.JSOverloadName.decorate((Symbol.MethodSymbol) methodElement);
-		}
-		return methodName;
-	}
+            List<ExecutableElement> value = mapEntry.getValue();
 
-	private <JS> boolean hasAnOverloadedMethod(GenerationContext<JS> context, ExecutableElement methodElement) {
-		if (context == null) {
-			return false;
-		}
-		return ElementUtils.hasAnOverloadedEquivalentMethod(methodElement, context.getElements());
-	}
+            sb.append("[");
+            int sbLengthBeforeLoop = sb.length();
+            for (ExecutableElement executableElement : value) {
+                if (sb.length() != sbLengthBeforeLoop) {
+                    sb.append(", ");
+                }
 
-	private String prefixNonPublicMethods(String methodName, Symbol element) {
-		if (element != null && element.getModifiers().contains(Modifier.PUBLIC)) {
-			return methodName;
-		} else {
-			return GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX + methodName;
-		}
-	}
+                sb.append(executableElement.getEnclosingElement().getSimpleName());
+                sb.append(".");
+                sb.append(executableElement.toString());
+            }
+            sb.append("]");
+
+            sb.append(mapEntry.getValue().toString());
+        }
+
+        return sb.toString();
+    }
+
+    private String getMethodNameFromClass(GenerationContext context, ExecutableElement methodElement) {
+        String methodName = methodElement.getSimpleName().toString();
+
+        List<ExecutableElement> methodsInClassWithSameName = findAllMethodsInClassWithSameName(methodElement);
+        if (methodsInClassWithSameName.isEmpty() && !ElementUtils.isConstructor(methodElement)) {
+            throw new AssertionError("Should have matched at least the current method.");
+        }
+        methodsInClassWithSameName = filterOutNativeMethods(methodsInClassWithSameName);
+
+        boolean isAnOverloadedMethod = (methodsInClassWithSameName.size() >= 2);
+
+        if (isAnOverloadedMethod) {
+            // generate method name with argument types
+            List<? extends VariableElement> params = methodElement.getParameters();
+            methodName = InternalUtils.generateOverloadedMethodName(context, methodName, params);
+        }
+
+        methodName = decorateNonPublicMembers(methodElement, methodName);
+
+        return methodName;
+    }
+
+    private List<ExecutableElement> filterOutNativeMethods(List<ExecutableElement> methodsInClassWithSameName) {
+        List<ExecutableElement> filteredList = new ArrayList<>();
+
+        for (ExecutableElement executableElement : methodsInClassWithSameName) {
+            if (!executableElement.getModifiers().contains(Modifier.NATIVE)) {
+                filteredList.add(executableElement);
+            }
+        }
+
+        return filteredList;
+    }
+
+    private String decorateNonPublicMembers(Element element, String memberName) {
+        String decoratedMemberName = memberName;
+
+        boolean isPublic = element.getModifiers().contains(Modifier.PUBLIC)
+                || element.getEnclosingElement().getKind() == ElementKind.INTERFACE;
+
+        if (!isPublic) {
+            decoratedMemberName = GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX + memberName;
+        }
+
+        return decoratedMemberName;
+    }
+
+    private List<ExecutableElement> findAllMethodsInClassWithSameName(ExecutableElement methodElement) {
+        String methodSimpleName = methodElement.getSimpleName().toString();
+
+        List<ExecutableElement> methodsInClassWithSameName = new ArrayList<>();
+        List<ExecutableElement> allMethodsInClass = ElementFilter.methodsIn(methodElement.getEnclosingElement().getEnclosedElements());
+        for (ExecutableElement method : allMethodsInClass) {
+            if (method.getSimpleName().toString().equals(methodSimpleName)) {
+                methodsInClassWithSameName.add(method);
+            }
+        }
+
+        return methodsInClassWithSameName;
+    }
+
+    private boolean isFromInterface(GenerationContext<?> context) {
+        return ElementKind.INTERFACE.equals(context.getCurrentWrapper().getEnclosingType().getElement().getKind());
+    }
+
+    @Override
+    public String getTypeName(GenerationContext<?> context, Element type, DependencyType dependencyType) {
+        if (type == null) {
+            return null;
+        }
+        return getTypeName(context, type.asType(), dependencyType);
+    }
+
+    @Override
+    public Map<String, DependencyType> getResolvedTypes() {
+        return resolvedRootTypes;
+    }
 
 }

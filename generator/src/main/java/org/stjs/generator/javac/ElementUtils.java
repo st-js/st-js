@@ -368,6 +368,26 @@ public final class ElementUtils {
 		return similar;
 	}
 
+	public static List<ExecutableElement> getSameMethodsFromSupertypes(TypeElement clazz, ExecutableElement model) {
+		List<ExecutableElement> similar = new ArrayList<ExecutableElement>();
+
+		List<TypeElement> superTypes = ElementUtils.getSuperTypes(clazz);
+		for (TypeElement superType : superTypes) {
+
+			List<ExecutableElement> allMethods = ElementFilter.methodsIn(superType.getEnclosedElements());
+			for (ExecutableElement method : allMethods) {
+				if (sameSignature(model, method)) {
+					similar.add(method);
+				}
+			}
+
+			similar.addAll(getSameMethodsFromSupertypes(superType, model));
+		}
+
+
+		return similar;
+	}
+
 	public static boolean isTypeKind(Element elem) {
 		return elem.getKind().isClass() || elem.getKind().isInterface();
 	}
@@ -401,6 +421,7 @@ public final class ElementUtils {
 		return false;
 	}
 
+
 	public static boolean isConstructor(Element element) {
 		if (!(element instanceof Symbol.MethodSymbol)) {
 			return false;
@@ -432,4 +453,5 @@ public final class ElementUtils {
 		}
 		return methodElement.getAnnotation(JSOverloadName.class) == null;
 	}
+
 }

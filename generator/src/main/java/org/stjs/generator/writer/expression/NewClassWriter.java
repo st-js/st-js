@@ -25,7 +25,6 @@ import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.declaration.MethodWriter;
-import org.stjs.generator.writer.templates.MethodToPropertyTemplate;
 import org.stjs.javascript.annotation.Namespace;
 
 import javax.lang.model.element.Element;
@@ -85,7 +84,7 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 
 				} else {
 					MethodInvocationTree meth = (MethodInvocationTree) expr;
-					String propertyName = tw.getContext().getNames().getFieldName(tw.getContext(), meth);
+					String propertyName = tw.getContext().getNames().transformMethodCallToFieldName(tw.getContext(), meth);
 					JS value = visitor.scan(meth.getArguments().get(0), tw.getContext());
 					props.add(NameValue.of(propertyName, value));
 				}
@@ -202,7 +201,7 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 		if (identifierHasMultipleConstructors(tree.getIdentifier())) {
 			List<JS> params = arguments(visitor, tree, context);
 			ExecutableElement element = TreeUtils.elementFromUse(tree);
-			String constructorName = InternalUtils.generateOverloadeConstructorName(((Symbol.MethodSymbol) element).getParameters());
+			String constructorName = InternalUtils.generateOverloadeConstructorName(context, ((Symbol.MethodSymbol) element).getParameters());
 			js = context.js().functionCall(context.js().property(js, constructorName), params);
 		}
 

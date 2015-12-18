@@ -22,8 +22,13 @@ public class OverloadTest extends AbstractStjsTest {
 		assertCodeContains(Overload6.class, "{prototype.method=function(_arguments){};}");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
-	public void testOverloadNoOverloadInBaseClass() {
-		generate(Overload9_no_overload_base_class.class);
+	@Test
+	public void testOverloadNoOverloadInBaseClass_generation() {
+		assertCodeContains(Overload9_no_overload_base_class.class, "" +
+				"    constructor.ExtendedClass = stjs.extend(constructor.ExtendedClass, Overload9_no_overload_base_class.BaseClass, [], function(constructor, prototype) {\n" +
+				"        prototype.overloadMethod = function() {};\n" +
+				"        prototype.overloadMethod$String = function(param) {};\n" +
+				"    }");
 	}
+
 }
