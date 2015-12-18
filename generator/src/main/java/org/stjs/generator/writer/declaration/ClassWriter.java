@@ -213,7 +213,7 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		for (MethodTree constructor : constructors) {
 			Element element = InternalUtils.symbol(constructor);
 			if (element instanceof Symbol.MethodSymbol) {
-				constructorName = InternalUtils.generateOverloadeConstructorName(((Symbol.MethodSymbol) element).params());
+				constructorName = InternalUtils.generateOverloadeConstructorName(context, ((Symbol.MethodSymbol) element).params());
 			}
 			JS block = visitor.scan(constructor.getBody(), context);
 			List<JS> params = MethodWriter.getParams(constructor.getParameters(), context);

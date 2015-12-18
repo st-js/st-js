@@ -23,7 +23,7 @@ import com.sun.source.tree.Tree;
 public class MethodInvocationSuperSynthCheck implements CheckContributor<MethodInvocationTree> {
 
 	private boolean checkSuperConstructor(MethodInvocationTree tree, GenerationContext<Void> context) {
-		String name = MethodInvocationWriter.buildMethodName(tree, context);
+		String name = context.getNames().getMethodName(context, tree);
 		if (GeneratorConstants.SUPER.equals(name)) {
 			if (!InternalUtils.isSyntheticConstructor(TreeUtils.enclosingOfKind(context.getCurrentPath(), Tree.Kind.METHOD))) {
 				context.addError(tree, "You cannot call the super constructor if that belongs to a @SyntheticType");

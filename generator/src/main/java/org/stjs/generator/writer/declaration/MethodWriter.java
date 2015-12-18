@@ -69,19 +69,7 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 	}
 
 	private String decorateMethodName(MethodTree tree, GenerationContext<JS> context) {
-		Symbol.MethodSymbol element = (Symbol.MethodSymbol) context.getCurrentWrapper().getElement();
-		String methodName = element.getSimpleName().toString();
-
-		if (AnnotationUtils.JSOverloadName.isPresent(element)
-				|| ElementUtils.hasAnOverloadedEquivalentMethod(TreeUtils.elementFromDeclaration(tree), context.getElements())) {
-			methodName = AnnotationUtils.JSOverloadName.decorate(element);
-		}
-
-		if (!JavaNodes.isPublic(tree) && !isFromInterface(context)) {
-			return GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX + methodName;
-		}
-
-		return methodName;
+		return context.getNames().getMethodName(context, tree);
 	}
 
 	private boolean isFromInterface(GenerationContext<JS> context) {

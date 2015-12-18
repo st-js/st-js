@@ -53,69 +53,6 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 		return targetJS;
 	}
 
-	public static <JS> String buildMethodName(MethodInvocationTree tree, GenerationContext<JS> context) {
-		ExpressionTree select = tree.getMethodSelect();
-
-		if (select instanceof IdentifierTree) {
-			// simple call: method(args)
-			return buildMethodNameForIdentifierTree(tree, context, (IdentifierTree) select);
-		} else if (select instanceof MemberSelectTree) {
-			// calls with target: target.method(args)
-			return buildMethodNameForMemberSelectTree(context, (MemberSelectTree) select);
-		}
-		throw context.addError(tree, "Unsupported tree type during buildMethodName.");
-	}
-
-	private static <JS> String buildMethodNameForMemberSelectTree(GenerationContext<JS> context, MemberSelectTree memberSelect) {
-		String methodName = memberSelect.getIdentifier().toString();
-		Symbol symbol = (Symbol) InternalUtils.symbol(memberSelect);
-
-		if (symbol != null && TreeUtils.isFieldAccess(memberSelect.getExpression())
-				&& (symbol.getKind() == ElementKind.FIELD || symbol.getKind() == ElementKind.METHOD)) {
-            return prefixNonPublicMethods(methodName, symbol);
-        }
-
-		ExecutableElement methodElement = TreeUtils.getMethod(symbol);
-		if (hasAnOverloadedMethod(context, methodElement)) {
-			return AnnotationUtils.JSOverloadName.decorate((Symbol.MethodSymbol) methodElement);
-		}
-		return methodName;
-	}
-
-	private static <JS> String buildMethodNameForIdentifierTree(MethodInvocationTree tree, GenerationContext<JS> context, IdentifierTree select) {
-		String methodName = select.getName().toString();
-
-		// Ignore super() calls, these are never going to be prefixed
-		if (GeneratorConstants.SUPER.equals(methodName)) {
-			return methodName;
-		}
-
-		Symbol symbol = (Symbol.MethodSymbol) InternalUtils.symbol(tree);
-		ExecutableElement methodElement = TreeUtils.getMethod(symbol);
-
-		if (methodElement != null
-                && (AnnotationUtils.JSOverloadName.isPresent((Symbol.MethodSymbol) methodElement)
-                || hasAnOverloadedMethod(context, methodElement))) {
-            methodName = AnnotationUtils.JSOverloadName.decorate((Symbol.MethodSymbol) methodElement);
-        }
-		return prefixNonPublicMethods(methodName, symbol);
-	}
-
-	private static <JS> boolean hasAnOverloadedMethod(GenerationContext<JS> context, ExecutableElement methodElement) {
-		if (context == null) {
-			return false;
-        }
-		return ElementUtils.hasAnOverloadedEquivalentMethod(methodElement, context.getElements());
-	}
-
-	private static String prefixNonPublicMethods(String methodName, Symbol element) {
-		if (element != null && element.getModifiers().contains(Modifier.PUBLIC)) {
-            return methodName;
-        } else {
-            return GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX + methodName;
-        }
-	}
-
 	public static <JS> List<JS> buildArguments(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		List<JS> arguments = new ArrayList<>();
 		Symbol.MethodSymbol symbol = (Symbol.MethodSymbol) InternalUtils.symbol(tree);

@@ -47,7 +47,7 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		Element methodElement = TreeUtils.elementFromUse(tree);
 		TypeElement typeElement = (TypeElement) methodElement.getEnclosingElement();
 
-		String methodName = MethodInvocationWriter.buildMethodName(tree, context);
+		String methodName = context.getNames().getMethodName(context, tree);
 
 		// avoid useless call to super() when the super class is Object
 		if (GeneratorConstants.SUPER.equals(methodName) && JavaNodes.sameRawType(typeElement.asType(), Object.class)) {
@@ -90,7 +90,7 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 			return constructorName;
 		}
 
-		String name = MethodInvocationWriter.buildMethodName(tree, context);
+		String name = context.getNames().getMethodName(context, tree);
 		return context.js().functionCall(context.js().property(target, name), arguments);
 	}
 
@@ -99,7 +99,7 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		ExecutableElement element = TreeUtils.elementFromUse(tree);
 		if (JavaNodes.hasMultipleConstructors(context.getCurrentPath()) && ElementKind.CONSTRUCTOR.equals(element.getKind())) {
 			// Invocation of a another constructor, let's get the overloaded constructor name and chain the real static constructor
-			String constructorName = InternalUtils.generateOverloadeConstructorName(((Symbol.MethodSymbol) element).getParameters());
+			String constructorName = InternalUtils.generateOverloadeConstructorName(context, ((Symbol.MethodSymbol) element).getParameters());
 			return context.js().functionCall(context.js().property(target, constructorName), arguments);
 		}
 		return null;

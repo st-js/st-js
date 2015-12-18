@@ -15,7 +15,7 @@ import com.sun.tools.javac.model.JavacTypes;
 
 /**
  * A utility class that helps with {@link TypeMirror}s.
- * 
+ *
  */
 // TODO: This class needs significant restructuring
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
@@ -31,7 +31,7 @@ public final class TypesUtils {
 
 	/**
 	 * Gets the fully qualified name for a provided type. It returns an empty name if type is an anonymous type.
-	 * 
+	 *
 	 * @param type
 	 *            the declared type
 	 * @return the name corresponding to that type
@@ -43,7 +43,7 @@ public final class TypesUtils {
 
 	/**
 	 * Checks if the type represents a java.lang.Object declared type.
-	 * 
+	 *
 	 * @param type
 	 *            the type
 	 * @return true iff type represents java.lang.Object
@@ -54,7 +54,7 @@ public final class TypesUtils {
 
 	/**
 	 * Checks if the type represents a java.lang.Class declared type.
-	 * 
+	 *
 	 * @param type
 	 *            the type
 	 * @return true iff type represents java.lang.Class
@@ -67,7 +67,7 @@ public final class TypesUtils {
 	 * Checks if the type represents a java.lang.String declared type. TODO: it would be cleaner to use
 	 * String.class.getCanonicalName(), but the two existing methods above don't do that, I guess for performance
 	 * reasons.
-	 * 
+	 *
 	 * @param type
 	 *            the type
 	 * @return true iff type represents java.lang.String
@@ -78,7 +78,7 @@ public final class TypesUtils {
 
 	/**
 	 * Checks if the type represents a boolean type, that is either boolean (primitive type) or java.lang.Boolean.
-	 * 
+	 *
 	 * @param type
 	 *            the type to test
 	 * @return true iff type represents a boolean type
@@ -89,7 +89,7 @@ public final class TypesUtils {
 
 	/**
 	 * Check if the type represent a declared type of the given qualified name
-	 * 
+	 *
 	 * @param type
 	 *            the type
 	 * @return type iff type represents a declared type of the qualified name
@@ -130,7 +130,7 @@ public final class TypesUtils {
 
 	/**
 	 * Returns true iff the argument is a primitive type.
-	 * 
+	 *
 	 * @return whether the argument is a primitive type
 	 */
 	public static boolean isPrimitive(TypeMirror type) {
@@ -152,7 +152,7 @@ public final class TypesUtils {
 
 	/**
 	 * Returns true iff the arguments are both the same primitive types.
-	 * 
+	 *
 	 * @return whether the arguments are the same primitive types
 	 */
 	public static boolean areSamePrimitiveTypes(TypeMirror left, TypeMirror right) {
@@ -165,7 +165,7 @@ public final class TypesUtils {
 
 	/**
 	 * Returns true iff the argument is a primitive numeric type.
-	 * 
+	 *
 	 * @return whether the argument is a primitive numeric type
 	 */
 	public static boolean isNumeric(TypeMirror type) {
@@ -186,7 +186,7 @@ public final class TypesUtils {
 
 	/**
 	 * Returns true iff the argument is an integral type.
-	 * 
+	 *
 	 * @return whether the argument is an integral type
 	 */
 	public static boolean isIntegral(TypeMirror type) {
@@ -205,7 +205,7 @@ public final class TypesUtils {
 
 	/**
 	 * Returns true iff the argument is a floating point type.
-	 * 
+	 *
 	 * @return whether the argument is a floating point type
 	 */
 	public static boolean isFloating(TypeMirror type) {
@@ -223,7 +223,7 @@ public final class TypesUtils {
 	 * Returns the widened numeric type for an arithmetic operation performed on a value of the left type and the right
 	 * type. Defined in JLS 5.6.2. We return a {@link TypeKind} because creating a {@link TypeMirror} requires a
 	 * {@link Types} object from the {@link javax.annotation.processing.ProcessingEnvironment}.
-	 * 
+	 *
 	 * @return the result of widening numeric conversion, or NONE when the conversion cannot be performed
 	 */
 	public static TypeKind widenedNumericType(TypeMirror left, TypeMirror right) {
@@ -252,7 +252,7 @@ public final class TypesUtils {
 	/**
 	 * If the argument is a bounded TypeVariable or WildcardType, return its non-variable, non-wildcard upper bound.
 	 * Otherwise, return the type itself.
-	 * 
+	 *
 	 * @param type
 	 *            a type
 	 * @return the non-variable, non-wildcard upper bound of a type, if it has one, or itself if it has no bounds
@@ -310,5 +310,6 @@ public final class TypesUtils {
 		JavacTypes t = (JavacTypes) types;
 		return t.getArrayType(componentType);
 	}
+
 }
 // CHECKSTYLE:ON
