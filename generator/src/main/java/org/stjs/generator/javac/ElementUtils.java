@@ -5,6 +5,7 @@ package org.stjs.generator.javac;
  */
 
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.code.Type;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.javascript.annotation.JSOverloadName;
@@ -347,11 +348,17 @@ public final class ElementUtils {
 			return false;
 		}
 
-		for (int i = 0; i < m1.getParameters().size(); ++i) {
-			TypeMirror type1 = context.getTypes().erasure(m1.getParameters().get(i).asType());
-			TypeMirror type2 = context.getTypes().erasure(m2.getParameters().get(i).asType());
+		TypeMirror typeMirror1 = m1.asType();
 
-			if (!type1.equals(type2)) {
+		DeclaredType declaredType = context.getTypes().getDeclaredType(enclosingClass(m1));
+		TypeMirror typeMirror2 = context.getTypes().asMemberOf(declaredType, m2);
+
+		Type.MethodType mt1 = TypesUtils.asMethodType(typeMirror1);
+		Type.MethodType mt2 = TypesUtils.asMethodType(typeMirror2);
+
+		for (int i = 0; i < mt1.getParameterTypes().size(); ++i) {
+
+			if (!mt1.getParameterTypes().get(i).equals(mt2.getParameterTypes().get(i))) {
 				return false;
 			}
 		}

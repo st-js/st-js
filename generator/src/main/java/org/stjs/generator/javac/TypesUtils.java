@@ -11,6 +11,7 @@ import javax.lang.model.type.WildcardType;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.model.JavacTypes;
 
 /**
@@ -311,5 +312,12 @@ public final class TypesUtils {
 		return t.getArrayType(componentType);
 	}
 
+	public static Type.MethodType asMethodType(TypeMirror typeMirror) {
+
+		if (typeMirror instanceof Type) {
+			return ((Type) typeMirror).asMethodType();
+		}
+		return null;
+	}
 }
 // CHECKSTYLE:ON
