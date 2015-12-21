@@ -5,6 +5,7 @@ package org.stjs.generator.javac;
  */
 
 import com.sun.tools.javac.code.Symbol;
+import org.stjs.generator.GenerationContext;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.javascript.annotation.JSOverloadName;
 
@@ -338,15 +339,19 @@ public final class ElementUtils {
 		return Collections.<ExecutableElement> unmodifiableList(meths);
 	}
 
-	public static boolean sameSignature(ExecutableElement m1, ExecutableElement m2) {
+	public static boolean sameSignature(GenerationContext context, ExecutableElement m1, ExecutableElement m2) {
 		if (!m1.getSimpleName().equals(m2.getSimpleName())) {
 			return false;
 		}
 		if (m1.getParameters().size() != m2.getParameters().size()) {
 			return false;
 		}
+
 		for (int i = 0; i < m1.getParameters().size(); ++i) {
-			if (!m1.getParameters().get(i).asType().equals(m2.getParameters().get(i).asType())) {
+			TypeMirror type1 = context.getTypes().erasure(m1.getParameters().get(i).asType());
+			TypeMirror type2 = context.getTypes().erasure(m2.getParameters().get(i).asType());
+
+			if (!type1.equals(type2)) {
 				return false;
 			}
 		}
@@ -354,73 +359,54 @@ public final class ElementUtils {
 	}
 
 	/**
+	 *
+	 * @param context
 	 * @param model
 	 * @return the methods from the parent classes having the same signature as the given method. it's useful when llong for annotations.
 	 */
-	public static List<ExecutableElement> getSameMethodFromParents(ExecutableElement model) {
+	public static List<ExecutableElement> getSameMethodFromParents(GenerationContext context, ExecutableElement model) {
 		List<ExecutableElement> allMethods = ElementUtils.getAllMethodsIn(ElementUtils.enclosingClass(model), false);
 		List<ExecutableElement> similar = new ArrayList<ExecutableElement>();
 		for (ExecutableElement method : allMethods) {
-			if (sameSignature(model, method)) {
+			if (sameSignature(context, model, method)) {
 				similar.add(method);
 			}
 		}
 		return similar;
 	}
 
-	public static List<ExecutableElement> getSameMethodsFromSupertypes(TypeElement clazz, ExecutableElement model) {
+	public static List<ExecutableElement> getSameMethodsFromSupertypes(GenerationContext context, TypeElement clazz, ExecutableElement model) {
 		List<ExecutableElement> similar = new ArrayList<ExecutableElement>();
+
+		List<ExecutableElement> allMethodsFromSupetypes = getAllMethodsFromSupertypes(clazz);
+
+		for (ExecutableElement methodFromSupetype : allMethodsFromSupetypes) {
+			if (sameSignature(context, model, methodFromSupetype)) {
+				similar.add(methodFromSupetype);
+			}
+		}
+
+		return similar;
+	}
+
+	public static List<ExecutableElement> getAllMethodsFromSupertypes(TypeElement clazz) {
+		List<ExecutableElement> allMethods = new ArrayList<ExecutableElement>();
 
 		List<TypeElement> superTypes = ElementUtils.getSuperTypes(clazz);
 		for (TypeElement superType : superTypes) {
+			allMethods.addAll(ElementFilter.methodsIn(superType.getEnclosedElements()));
 
-			List<ExecutableElement> allMethods = ElementFilter.methodsIn(superType.getEnclosedElements());
-			for (ExecutableElement method : allMethods) {
-				if (sameSignature(model, method)) {
-					similar.add(method);
-				}
-			}
-
-			similar.addAll(getSameMethodsFromSupertypes(superType, model));
+			// recursive
+			allMethods.addAll(getAllMethodsFromSupertypes(superType));
 		}
 
+		return allMethods;
 
-		return similar;
 	}
 
 	public static boolean isTypeKind(Element elem) {
 		return elem.getKind().isClass() || elem.getKind().isInterface();
 	}
-
-	public static boolean hasAnOverloadedEquivalentMethod(Element methodElement, Elements contextElements) {
-		if (JavaNodes.isNative(methodElement)) {
-			// no need to check the native ones - only the one with the body
-			return false;
-		}
-
-		if (methodElement.getKind() == ElementKind.METHOD) {
-			TypeElement typeElement = (TypeElement) methodElement.getEnclosingElement();
-			// For regular methods, checks against all the methods in the class' hierarchy
-			List<? extends Element> allMembers = contextElements.getAllMembers(typeElement);
-			return hasAnOverloadedEquivalentMethod(methodElement, allMembers);
-		}
-		return false;
-	}
-
-	public static boolean hasAnOverloadedEquivalentMethod(Element methodElement, List<? extends Element> allElements) {
-		if (JavaNodes.isNative(methodElement)) {
-			// no need to check the native ones - only the one with the body
-			return false;
-		}
-
-		for (Element element : allElements) {
-			if (isMemberMethodUnique(element, methodElement)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 
 	public static boolean isConstructor(Element element) {
 		if (!(element instanceof Symbol.MethodSymbol)) {

@@ -248,13 +248,13 @@ public class GenerationContext<JS> implements TreePathHolder {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends Annotation> T getAnnotation(Element element, Class<T> annotationType) {
+	public <T extends Annotation> T getAnnotation(GenerationContext context, Element element, Class<T> annotationType) {
 		AnnotationCacheKey key = new AnnotationCacheKey(annotationType, element);
 		Object ret = cacheAnnotations.get(key);
 		if (ret != null) {
 			return NULL.equals(ret) ? null : (T) ret;
 		}
-		ret = AnnotationHelper.getAnnotation(elements, element, annotationType);
+		ret = AnnotationHelper.getAnnotation(context, elements, element, annotationType);
 		if (ret == null) {
 			cacheAnnotations.put(key, NULL);
 		} else {

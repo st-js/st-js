@@ -13,6 +13,7 @@ import javax.lang.model.util.Elements;
 
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.Tree;
+import org.stjs.generator.GenerationContext;
 
 public final class AnnotationHelper {
 	private static final String ANNOTATED_PACKAGE = "annotation.";
@@ -21,7 +22,7 @@ public final class AnnotationHelper {
 		// private
 	}
 
-	public static <T extends Annotation> T getAnnotation(Elements elements, Element element, Class<T> annotationType) {
+	public static <T extends Annotation> T getAnnotation(GenerationContext context, Elements elements, Element element, Class<T> annotationType) {
 		if (!(element instanceof ExecutableElement)) {
 			return element == null ? null : element.getAnnotation(annotationType);
 		}
@@ -31,7 +32,7 @@ public final class AnnotationHelper {
 			return t;
 		}
 		// look into the definition in the super class
-		List<ExecutableElement> similar = ElementUtils.getSameMethodFromParents((ExecutableElement) element);
+		List<ExecutableElement> similar = ElementUtils.getSameMethodFromParents(context, (ExecutableElement) element);
 		for (ExecutableElement method : similar) {
 			t = method.getAnnotation(annotationType);
 			if (t != null) {
