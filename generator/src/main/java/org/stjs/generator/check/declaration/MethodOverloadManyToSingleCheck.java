@@ -71,7 +71,6 @@ public class MethodOverloadManyToSingleCheck implements CheckContributor<MethodT
         }
 
         List<ExecutableElement> methodNameConflict = new ArrayList<>();
-//        String methodSignature = model.toString();
         for (ExecutableElement executableElement : executableElements) {
             if (!ElementUtils.sameSignature(context, model, executableElement)) {
                 methodNameConflict.add(executableElement);

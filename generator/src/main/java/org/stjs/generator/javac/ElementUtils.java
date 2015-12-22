@@ -340,25 +340,28 @@ public final class ElementUtils {
 		return Collections.<ExecutableElement> unmodifiableList(meths);
 	}
 
-	public static boolean sameSignature(GenerationContext context, ExecutableElement m1, ExecutableElement m2) {
-		if (!m1.getSimpleName().equals(m2.getSimpleName())) {
+	public static boolean sameSignature(GenerationContext context, ExecutableElement executableElement1, ExecutableElement executableElement2) {
+		if (!executableElement1.getSimpleName().equals(executableElement2.getSimpleName())) {
 			return false;
 		}
-		if (m1.getParameters().size() != m2.getParameters().size()) {
+		if (executableElement1.getParameters().size() != executableElement2.getParameters().size()) {
 			return false;
 		}
 
-		TypeMirror typeMirror1 = m1.asType();
+		TypeMirror typeMirror1 = executableElement1.asType();
 
-		DeclaredType declaredType = context.getTypes().getDeclaredType(enclosingClass(m1));
-		TypeMirror typeMirror2 = context.getTypes().asMemberOf(declaredType, m2);
+		DeclaredType declaredType = context.getTypes().getDeclaredType(enclosingClass(executableElement1));
+		TypeMirror typeMirror2 = context.getTypes().asMemberOf(declaredType, executableElement2);
 
-		Type.MethodType mt1 = TypesUtils.asMethodType(typeMirror1);
-		Type.MethodType mt2 = TypesUtils.asMethodType(typeMirror2);
+		Type.MethodType methodType1 = TypesUtils.asMethodType(typeMirror1);
+		Type.MethodType methodType2 = TypesUtils.asMethodType(typeMirror2);
 
-		for (int i = 0; i < mt1.getParameterTypes().size(); ++i) {
+		for (int i = 0; i < methodType1.getParameterTypes().size(); ++i) {
 
-			if (!mt1.getParameterTypes().get(i).equals(mt2.getParameterTypes().get(i))) {
+			Type type1 = methodType1.getParameterTypes().get(i);
+			Type type2 = methodType2.getParameterTypes().get(i);
+
+			if (!type1.tsym.equals(type2.tsym)) {
 				return false;
 			}
 		}
@@ -432,19 +435,6 @@ public final class ElementUtils {
 			}
 		}
 		return constructorCount > 1;
-	}
-
-	private static boolean isMemberMethodUnique(Element memberElement, Element methodElement) {
-		if (JavaNodes.isNative(memberElement)) {
-			return false;
-		}
-		if (methodElement.equals(memberElement)) {
-			return false;
-		}
-		if (!memberElement.getSimpleName().equals(methodElement.getSimpleName()) || memberElement.getKind() != methodElement.getKind()) {
-			return false;
-		}
-		return methodElement.getAnnotation(JSOverloadName.class) == null;
 	}
 
 }
