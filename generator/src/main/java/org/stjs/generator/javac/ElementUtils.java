@@ -347,9 +347,8 @@ public final class ElementUtils {
 			return false;
 		}
 
-		TypeMirror typeMirror1 = executableElement1.asType();
-
 		DeclaredType declaredType = context.getTypes().getDeclaredType(enclosingClass(executableElement1));
+		TypeMirror typeMirror1 = context.getTypes().asMemberOf(declaredType, executableElement1);
 		TypeMirror typeMirror2 = context.getTypes().asMemberOf(declaredType, executableElement2);
 
 		Type.MethodType methodType1 = TypesUtils.asMethodType(typeMirror1);
