@@ -13,13 +13,18 @@
 package org.stjs.generator;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Use this class to build a configuration needed by the {@link Generator}
@@ -27,6 +32,15 @@ import java.util.Map;
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class GeneratorConfigurationBuilder {
+	private static final Logger LOG = Logger.getLogger(Generator.class.getName());
+	private static final String CONFIG_PROPERTIES_RESOURCES_FILENAME = "config.properties";
+	private static final String CONFIG_PROPERTIES_SPLIT_REGEX = "\\s*,\\s*";
+	private static final String CONFIG_PROPERTIES_MAP_SPLIT_REGEX = "\\s*:\\s*";
+	private static final String ALLOWED_JAVA_LANG_CLASSES_CONFIG_KEY = "allowedJavaLangClasses";
+	private static final String ALLOWED_PACKAGES_CONFIG_KEY = "allowedPackages";
+	private static final String RENAMED_METHOD_SIGNATURES_CONFIG_KEY = "renamedMethodSignatures";
+	private static final String NAMESPACES_CONFIG_KEY = "namespaces";
+	private static final String FORBIDDEN_METHOD_INVOCATIONS_CONFIG_KEY = "forbiddenMethodInvocations";
 	private final Collection<String> allowedPackages = new HashSet<>();
 	private final Collection<String> allowedJavaLangClasses = new HashSet<>();
 	private final Collection<String> annotations = new HashSet<>();
@@ -157,36 +171,13 @@ public class GeneratorConfigurationBuilder {
 		return this;
 	}
 
-
 	public GeneratorConfiguration build() {
-		allowedJavaLangClasses.add("Object");
-		allowedJavaLangClasses.add("Class");
-		allowedJavaLangClasses.add("String");
-		allowedJavaLangClasses.add("Number");
-		allowedJavaLangClasses.add("Double");
-		allowedJavaLangClasses.add("Float");
-		allowedJavaLangClasses.add("Long");
-		allowedJavaLangClasses.add("Integer");
-		allowedJavaLangClasses.add("Short");
-		allowedJavaLangClasses.add("Boolean");
-		allowedJavaLangClasses.add("Character");
-		allowedJavaLangClasses.add("Byte");
-		allowedJavaLangClasses.add("Void");
-		allowedJavaLangClasses.add("Math");
-
-		allowedJavaLangClasses.add("Throwable");
-		allowedJavaLangClasses.add("Exception");
-		allowedJavaLangClasses.add("RuntimeException");
-
-		allowedJavaLangClasses.add("Iterable");
-		allowedJavaLangClasses.add("Enum");
-
-		allowedPackages.add("java.lang");
-
-		allowedPackage(Iterator.class.getName());
-		allowedPackage(Enum.class.getName());
-
-		renamedMethodSignatures.put("java.util.List.add$Object", "add");
+		try {
+			buildFromConfigFile();
+		}
+		catch (IOException e) {
+			LOG.log(Level.SEVERE, "IOException should not have been thrown.", e);
+		}
 
 		return new GeneratorConfiguration(//
 				allowedPackages,  //
@@ -206,4 +197,57 @@ public class GeneratorConfigurationBuilder {
 		);
 	}
 
+	private void buildFromConfigFile() throws IOException {
+		Properties prop = new Properties();
+		InputStream inputStream = null;
+		try {
+			inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(CONFIG_PROPERTIES_RESOURCES_FILENAME);
+
+			if (inputStream == null) {
+				throw new FileNotFoundException("property file '" + CONFIG_PROPERTIES_RESOURCES_FILENAME + "' not found in the resources.");
+			}
+			prop.load(inputStream);
+
+			String allowedJavaLangClassesConfig = prop.getProperty(ALLOWED_JAVA_LANG_CLASSES_CONFIG_KEY);
+			String allowedPackagesConfig = prop.getProperty(ALLOWED_PACKAGES_CONFIG_KEY);
+			String forbiddenMethodInvocationsConfig = prop.getProperty(FORBIDDEN_METHOD_INVOCATIONS_CONFIG_KEY);
+			String namespacesConfig = prop.getProperty(NAMESPACES_CONFIG_KEY);
+			String renamedMethodSignaturesConfig = prop.getProperty(RENAMED_METHOD_SIGNATURES_CONFIG_KEY);
+
+			readConfigKey(allowedJavaLangClassesConfig, allowedJavaLangClasses);
+			readConfigKey(allowedPackagesConfig, allowedPackages);
+			readConfigKey(forbiddenMethodInvocationsConfig, forbiddenMethodInvocations);
+			readConfigKeyAsMap(namespacesConfig, namespaces);
+			readConfigKeyAsMap(renamedMethodSignaturesConfig, renamedMethodSignatures);
+		}
+		finally {
+			if (inputStream != null) {
+				inputStream.close();
+			}
+		}
+	}
+
+	private void readConfigKeyAsMap(String config, Map<String, String> map) {
+		if (config != null && !config.isEmpty()) {
+			Map<String, String> namespacesMap = processConfigKeyAsMap(config);
+			map.putAll(namespacesMap);
+		}
+	}
+
+	private void readConfigKey(String config, Collection<String> collection) {
+		if (config != null && !config.isEmpty()) {
+			collection.addAll(Arrays.asList(config.split(CONFIG_PROPERTIES_SPLIT_REGEX)));
+        }
+	}
+
+	private Map<String, String> processConfigKeyAsMap(String config) {
+		Map<String, String> map = new HashMap<>();
+		String[] pairs = config.split(CONFIG_PROPERTIES_SPLIT_REGEX);
+		for (int i = 0; i < pairs.length; i++) {
+            String pair = pairs[i];
+            String[] keyValue = pair.split(CONFIG_PROPERTIES_MAP_SPLIT_REGEX);
+			map.put(keyValue[0], keyValue[1]);
+        }
+		return map;
+	}
 }
