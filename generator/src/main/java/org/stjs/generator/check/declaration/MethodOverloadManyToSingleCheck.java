@@ -40,9 +40,7 @@ public class MethodOverloadManyToSingleCheck implements CheckContributor<MethodT
             return null;
         }
 
-        if (ElementUtils.hasAnOverloadedEquivalentMethod(methodElement, context.getElements())) {
-            checkSuperClassOverloadedMethods(methodElement, context, tree);
-        }
+        checkSuperClassOverloadedMethods(methodElement, context, tree);
 
         return null;
     }
@@ -53,44 +51,143 @@ public class MethodOverloadManyToSingleCheck implements CheckContributor<MethodT
             return;
         }
 
-        List<ExecutableElement> sameMethodFromParents = ElementUtils.getSameMethodFromParents(methodElement);
+        Map<String, List<ExecutableElement>> allMethodNamesFromSuperTypes =
+                mapExecutableElementsToResolvedName(context, ElementUtils.getAllMethodsFromSupertypes(ElementUtils.enclosingClass(methodElement)));
 
-        Map<String, List<ExecutableElement>> allMethodNamesFromSuperTypes = new HashMap<>();
-        for (ExecutableElement sameMethodFromParent : sameMethodFromParents) {
-            String methodName = context.getNames().getMethodName(context, sameMethodFromParent);
+        checkAllMethodsWithTheSameNameHaveTheSameSignature(context, tree, methodElement, allMethodNamesFromSuperTypes);
+        checkAllMethodsWithTheSameSignatureHaveTheSameName(context, tree, methodElement, allMethodNamesFromSuperTypes);
 
-            List<ExecutableElement> matchingExecutableElements = allMethodNamesFromSuperTypes.get(methodName);
-            if (matchingExecutableElements == null) {
-                matchingExecutableElements = new ArrayList<>();
-                allMethodNamesFromSuperTypes.put(methodName, matchingExecutableElements);
-            }
-            matchingExecutableElements.add(sameMethodFromParent);
+    }
+
+    private void checkAllMethodsWithTheSameNameHaveTheSameSignature(GenerationContext<Void> context,
+                                                                    MethodTree tree,
+                                                                    ExecutableElement model,
+                                                                    Map<String, List<ExecutableElement>> allMethodNamesFromSuperTypes) {
+        String methodName = context.getNames().getMethodName(context, model);
+        List<ExecutableElement> executableElements = allMethodNamesFromSuperTypes.get(methodName);
+
+        if (executableElements == null) {
+            return;
         }
 
-        if (allMethodNamesFromSuperTypes.size() >= 2) {
+        List<ExecutableElement> methodNameConflict = new ArrayList<>();
+        for (ExecutableElement executableElement : executableElements) {
+            if (!ElementUtils.sameSignature(context, model, executableElement)) {
+                methodNameConflict.add(executableElement);
+            }
+        }
+
+        if (!methodNameConflict.isEmpty()) {
             context.addError(tree,
                     String.format(
-                            "Method name conflict for method with signature: '%s.%s']. "
-                                    + "Class hierarchy contains different names for this method signature: %s",
-                            methodElement.getEnclosingElement().getSimpleName(),
-                            methodElement.toString(),
-                            buildOverridenMethodErrorMessage(allMethodNamesFromSuperTypes)));
+                            "Method name conflict for: [%s.%s]. "
+                                    + "Class hierarchy contains methods with the same name [%s] but with different signatures: %s",
+                            model.getEnclosingElement().getSimpleName(),
+                            model.toString(),
+                            methodName,
+                            buildOverridenMethodErrorMessage_sameNameButDifferentSignature(methodNameConflict)));
         }
     }
 
-    private String buildOverridenMethodErrorMessage(Map<String, List<ExecutableElement>> allMethodNamesFromSuperTypes) {
+    private String buildOverridenMethodErrorMessage_sameNameButDifferentSignature(List<ExecutableElement> methodList) {
         StringBuilder sb = new StringBuilder();
 
-        for (Map.Entry<String, List<ExecutableElement>> mapEntry : allMethodNamesFromSuperTypes.entrySet()) {
+        for (ExecutableElement executableElement : methodList) {
             if (sb.length() > 0) {
                 sb.append(", ");
             }
+
             sb.append('\'');
-            sb.append(mapEntry.getKey());
-            sb.append("' --> ");
-            sb.append(mapEntry.getValue().toString());
+            sb.append(executableElement.getEnclosingElement().getSimpleName());
+            sb.append('.');
+            sb.append(executableElement.toString());
+            sb.append('\'');
         }
 
         return sb.toString();
     }
+
+    private void checkAllMethodsWithTheSameSignatureHaveTheSameName(GenerationContext<Void> context,
+                                                                    MethodTree tree,
+                                                                    ExecutableElement model,
+                                                                    Map<String, List<ExecutableElement>> allMethodNamesFromSuperTypes) {
+        String methodName = context.getNames().getMethodName(context, model);
+
+        List<ExecutableElement> methodNameConflict = new ArrayList<>();
+
+        for (Map.Entry<String, List<ExecutableElement>> mapEntry : allMethodNamesFromSuperTypes.entrySet()) {
+            String mappedMethodName = mapEntry.getKey();
+
+            if (!methodName.equals(mappedMethodName)) {
+                // Not the same name: search for a method with the same signature
+                List<ExecutableElement> executableElements = mapEntry.getValue();
+
+                for (ExecutableElement executableElement : executableElements) {
+                    if (ElementUtils.sameSignature(context, model, executableElement)) {
+                        methodNameConflict.add(executableElement);
+                    }
+                }
+            }
+        }
+
+        if (!methodNameConflict.isEmpty()) {
+            context.addError(tree,
+                    String.format(
+                            "Method name conflict for: [%s.%s --> %s]. "
+                                    + "Class hierarchy contains methods with the same signature [%s] but with different resolved name: %s",
+                            model.getEnclosingElement().getSimpleName(),
+                            model.toString(),
+                            methodName,
+                            model.toString(),
+                            buildOverridenMethodErrorMessage_sameSignatureButDifferentName(context, methodNameConflict)));
+        }
+    }
+
+    private String buildOverridenMethodErrorMessage_sameSignatureButDifferentName(GenerationContext context, List<ExecutableElement> methodList) {
+        StringBuilder sb = new StringBuilder();
+
+        for (ExecutableElement executableElement : methodList) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+
+            sb.append('[');
+
+            sb.append('\'');
+            sb.append(executableElement.getEnclosingElement().getSimpleName());
+            sb.append('.');
+            sb.append(executableElement.toString());
+            sb.append('\'');
+
+            sb.append(" --> ");
+
+            sb.append(context.getNames().getMethodName(context, executableElement));
+
+            sb.append(']');
+
+        }
+
+        return sb.toString();
+    }
+
+    private Map<String, List<ExecutableElement>> mapExecutableElementsToResolvedName(GenerationContext context, List<ExecutableElement> allMethodsFromSupertypes) {
+        Map<String, List<ExecutableElement>> executableElementByResolvedName = new HashMap<>();
+
+        for (ExecutableElement sameMethodFromParent : allMethodsFromSupertypes) {
+            String methodName = context.getNames().getMethodName(context, sameMethodFromParent);
+
+            // create entry in 'executableElementByResolvedName' if there is none
+            List<ExecutableElement> matchingExecutableElementList = executableElementByResolvedName.get(methodName);
+            if (matchingExecutableElementList == null) {
+                matchingExecutableElementList = new ArrayList<>();
+                executableElementByResolvedName.put(methodName, matchingExecutableElementList);
+            }
+
+            // add entry
+            matchingExecutableElementList.add(sameMethodFromParent);
+        }
+
+        return executableElementByResolvedName;
+    }
+
 }

@@ -242,6 +242,70 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 				"    }, {}, {});\n");
 	}
 
+	@Test
+	public void testOverloadNameConflict_Subclass_with_same_name_method_but_different_signature() {
+		assertCodeContains(Methods28_overloadNameConflict_Subclass_with_same_name_method_but_different_signatures.class, "" +
+				"    constructor.BaseClass = stjs.extend(constructor.BaseClass, null, [], function(constructor, prototype) {\n" +
+				"        prototype.aMethod1 = function(i) {};\n" +
+				"        prototype.aMethod2 = function(i) {};\n" +
+				"    }, {}, {});");
+		assertCodeContains(Methods28_overloadNameConflict_Subclass_with_same_name_method_but_different_signatures.class, "" +
+				"    constructor.SubClass = stjs.extend(constructor.SubClass, Methods28_overloadNameConflict_Subclass_with_same_name_method_but_different_signatures.BaseClass, [], function(constructor, prototype) {\n" +
+				"        prototype.aMethod1$String = function(s) {};\n" +
+				"        prototype.aMethod2 = function(i) {};\n" +
+				"        prototype.aMethod2$String = function(s) {};\n" +
+				"    }, {}, {});\n");
+	}
+
+	@Test
+	public void testOverloadNameConflict_2Supertypes_with_same_method_name_but_different_signatures() {
+		try {
+			generate(Methods29_overloadNameConflict_2Supertypes_with_same_method_name_but_different_signatures.class);
+			Assert.fail("Should not get here. An exception was expected.");
+		} catch (JavascriptFileGenerationException e) {
+			Assert.assertEquals(
+					"Method name conflict for: [SubClass.aMethod(int)]. Class hierarchy contains methods with the same name [aMethod] but with different signatures: 'Interface2.aMethod(java.lang.String)'",
+					e.getMessage());
+		}
+	}
+
+	@Test
+	public void testOverloadNameConflict_Subclass_with_same_name_method_but_different_signatures() {
+		assertCodeContains(Methods30_overloadNameConflict_Resolved_by_JSOverloadName_annotation.class, "" +
+				"    constructor.Interface1 = stjs.extend(constructor.Interface1, null, [], function(constructor, prototype) {\n" +
+				"        prototype.aMethod = function(i) {};\n" +
+				"    }, {}, {});");
+		assertCodeContains(Methods30_overloadNameConflict_Resolved_by_JSOverloadName_annotation.class, "" +
+				"    constructor.Interface2 = stjs.extend(constructor.Interface2, null, [], function(constructor, prototype) {\n" +
+				"        prototype.aMethodWithString = function(s) {};\n" +
+				"    }, {}, {});");
+		assertCodeContains(Methods30_overloadNameConflict_Resolved_by_JSOverloadName_annotation.class, "" +
+				"    constructor.SubClass = stjs.extend(constructor.SubClass, null, [Methods30_overloadNameConflict_Resolved_by_JSOverloadName_annotation.Interface1, Methods30_overloadNameConflict_Resolved_by_JSOverloadName_annotation.Interface2], function(constructor, prototype) {\n" +
+				"        prototype.aMethod = function(i) {};\n" +
+				"        prototype.aMethodWithString = function(s) {};\n" +
+				"    }, {}, {});");
+	}
+
+	@Test
+	public void testMethodsOverloadNameError_subclass_trying_to_change_methodName_for_signature() {
+		try {
+			generate(Methods31_overloadNameError_subclass_trying_to_change_methodName_for_signature.class);
+			Assert.fail("Should not get here. An exception was expected.");
+		} catch (JavascriptFileGenerationException e) {
+			Assert.assertEquals(
+					"Method name conflict for: [SubClass.aMethod(int) --> aMethodWithInt]. Class hierarchy contains methods with the same signature [aMethod(int)] but with different resolved name: ['Interface1.aMethod(int)' --> aMethod]",
+					e.getMessage());
+		}
+	}
+
+	@Test
+	public void testMethodsOverloadName_with_typed_class() {
+		assertCodeContains(Methods32_overloadName_with_typed_class.class, "" +
+				"    constructor.SubClass = stjs.extend(constructor.SubClass, Methods32_overloadName_with_typed_class.GenericInterface, [], function(constructor, prototype) {\n" +
+				"        prototype.aMethod = function(s) {};\n" +
+				"    }, {}, {});");
+	}
+
 	private void testForbiddenConfiguration(String expectedForbiddenMethod, Class<?> clazz) {
 		Set<String> forbiddenMethodInvocations = new HashSet<>();
 		forbiddenMethodInvocations.add(expectedForbiddenMethod);

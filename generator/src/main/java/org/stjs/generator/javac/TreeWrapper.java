@@ -307,7 +307,7 @@ public class TreeWrapper<T extends Tree, JS> {
 	}
 
 	private String getTemplateValue() {
-		Template tpl = context.getAnnotation(element, Template.class);
+		Template tpl = context.getAnnotation(context, element, Template.class);
 		if (tpl == null) {
 			return null;
 		}

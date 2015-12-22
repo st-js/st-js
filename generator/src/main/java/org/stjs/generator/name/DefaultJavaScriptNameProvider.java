@@ -20,7 +20,6 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
-import javax.lang.model.util.ElementFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -218,7 +217,7 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
         }
 
         List<ExecutableElement> sameMethodsFromParents =
-                ElementUtils.getSameMethodsFromSupertypes(ElementUtils.enclosingClass(methodElement), methodElement);
+                ElementUtils.getSameMethodsFromSupertypes(context, ElementUtils.enclosingClass(methodElement), methodElement);
 
         if (sameMethodsFromParents.isEmpty()) {
             return getMethodNameFromClass(context, methodElement);
@@ -289,13 +288,11 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
         if (methodsInClassWithSameName.isEmpty() && !ElementUtils.isConstructor(methodElement)) {
             throw new AssertionError("Should have matched at least the current method.");
         }
-        String methodName = methodElement.getSimpleName().toString();
-
         methodsInClassWithSameName = filterOutNativeMethods(methodsInClassWithSameName);
+        methodsInClassWithSameName = filterOutMethodsWithSameSignature(methodsInClassWithSameName, methodElement);
 
-        boolean isAnOverloadedMethod = (methodsInClassWithSameName.size() >= 2);
-
-        if (isAnOverloadedMethod) {
+        String methodName = methodElement.getSimpleName().toString();
+        if (!methodsInClassWithSameName.isEmpty()) {
             // generate method name with argument types
             List<? extends VariableElement> params = methodElement.getParameters();
             methodName = InternalUtils.generateOverloadedMethodName(context, methodName, params);
@@ -304,6 +301,20 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
         methodName = decorateNonPublicMembers(methodElement, methodName);
 
         return methodName;
+    }
+
+    private List<ExecutableElement> filterOutMethodsWithSameSignature(List<ExecutableElement> methodsInClassWithSameName, ExecutableElement model) {
+        List<ExecutableElement> filteredList = new ArrayList<>();
+
+        String modelSignature = model.toString();
+        for (ExecutableElement executableElement : methodsInClassWithSameName) {
+            if (!modelSignature.equals(executableElement.toString())) {
+                filteredList.add(executableElement);
+            }
+        }
+
+        return filteredList;
+
     }
 
     private List<ExecutableElement> filterOutNativeMethods(List<ExecutableElement> methodsInClassWithSameName) {
@@ -335,7 +346,7 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
         String methodSimpleName = methodElement.getSimpleName().toString();
 
         List<ExecutableElement> methodsInClassWithSameName = new ArrayList<>();
-        List<ExecutableElement> allMethodsInClass = ElementFilter.methodsIn(methodElement.getEnclosingElement().getEnclosedElements());
+        List<ExecutableElement> allMethodsInClass = ElementUtils.getAllMethodsIn(ElementUtils.enclosingClass(methodElement));
         for (ExecutableElement method : allMethodsInClass) {
             if (method.getSimpleName().toString().equals(methodSimpleName)) {
                 methodsInClassWithSameName.add(method);
