@@ -303,7 +303,8 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
         return methodName;
     }
 
-    private List<ExecutableElement> filterOutMethodsWithSameSignature(List<ExecutableElement> methodsInClassWithSameName, ExecutableElement model) {
+    private List<ExecutableElement> filterOutMethodsWithSameSignature(
+            List<ExecutableElement> methodsInClassWithSameName, ExecutableElement model) {
         List<ExecutableElement> filteredList = new ArrayList<>();
 
         String modelSignature = model.toString();

@@ -52,7 +52,8 @@ public class MethodOverloadManyToSingleCheck implements CheckContributor<MethodT
         }
 
         Map<String, List<ExecutableElement>> allMethodNamesFromSuperTypes =
-                mapExecutableElementsToResolvedName(context, ElementUtils.getAllMethodsFromSupertypes(ElementUtils.enclosingClass(methodElement)));
+                mapExecutableElementsToResolvedName(context,
+                        ElementUtils.getAllMethodsFromSupertypes(ElementUtils.enclosingClass(methodElement)));
 
         checkAllMethodsWithTheSameNameHaveTheSameSignature(context, tree, methodElement, allMethodNamesFromSuperTypes);
         checkAllMethodsWithTheSameSignatureHaveTheSameName(context, tree, methodElement, allMethodNamesFromSuperTypes);
@@ -85,11 +86,11 @@ public class MethodOverloadManyToSingleCheck implements CheckContributor<MethodT
                             model.getEnclosingElement().getSimpleName(),
                             model.toString(),
                             methodName,
-                            buildOverridenMethodErrorMessage_sameNameButDifferentSignature(methodNameConflict)));
+                            buildOverridenMethodErrorMessageSameNameButDifferentSignature(methodNameConflict)));
         }
     }
 
-    private String buildOverridenMethodErrorMessage_sameNameButDifferentSignature(List<ExecutableElement> methodList) {
+    private String buildOverridenMethodErrorMessageSameNameButDifferentSignature(List<ExecutableElement> methodList) {
         StringBuilder sb = new StringBuilder();
 
         for (ExecutableElement executableElement : methodList) {
@@ -139,11 +140,12 @@ public class MethodOverloadManyToSingleCheck implements CheckContributor<MethodT
                             model.toString(),
                             methodName,
                             model.toString(),
-                            buildOverridenMethodErrorMessage_sameSignatureButDifferentName(context, methodNameConflict)));
+                            buildOverridenMethodErrorMessageSameSignatureButDifferentName(context, methodNameConflict)));
         }
     }
 
-    private String buildOverridenMethodErrorMessage_sameSignatureButDifferentName(GenerationContext context, List<ExecutableElement> methodList) {
+    private String buildOverridenMethodErrorMessageSameSignatureButDifferentName(
+            GenerationContext context, List<ExecutableElement> methodList) {
         StringBuilder sb = new StringBuilder();
 
         for (ExecutableElement executableElement : methodList) {
@@ -170,7 +172,8 @@ public class MethodOverloadManyToSingleCheck implements CheckContributor<MethodT
         return sb.toString();
     }
 
-    private Map<String, List<ExecutableElement>> mapExecutableElementsToResolvedName(GenerationContext context, List<ExecutableElement> allMethodsFromSupertypes) {
+    private Map<String, List<ExecutableElement>> mapExecutableElementsToResolvedName(
+            GenerationContext context, List<ExecutableElement> allMethodsFromSupertypes) {
         Map<String, List<ExecutableElement>> executableElementByResolvedName = new HashMap<>();
 
         for (ExecutableElement sameMethodFromParent : allMethodsFromSupertypes) {

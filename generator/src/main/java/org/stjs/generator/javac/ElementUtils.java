@@ -8,7 +8,6 @@ import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.javascript.annotation.JSOverloadName;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
