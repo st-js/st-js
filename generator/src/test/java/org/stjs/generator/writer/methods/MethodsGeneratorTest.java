@@ -300,11 +300,18 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
     }
 
     @Test
-    public void testMethodsOverloadName_with_typed_class() {
-        assertCodeContains(Methods32_overloadName_with_typed_class.class, "" +
-                "    constructor.SubClass = stjs.extend(constructor.SubClass, Methods32_overloadName_with_typed_class.GenericInterface, [], function(constructor, prototype) {\n" +
+    public void testMethodsOverloadName_with_specific_typed_class() {
+        assertCodeContains(Methods32a_overloadName_with_specific_typed_class.class, "" +
+                "    constructor.SubClassSpecific = stjs.extend(constructor.SubClassSpecific, Methods32a_overloadName_with_specific_typed_class.GenericInterface, [], function(constructor, prototype) {\n" +
                 "        prototype.aMethod = function(s) {};\n" +
                 "    }, {}, {});");
+    }
+
+    @Test
+    public void testMethodsOverloadName_with_generic_typed_class() {
+        assertCodeContains(Methods32b_overloadName_with_generic_typed_class.class, "" +
+                "    constructor.SubClassGeneric = stjs.extend(constructor.SubClassGeneric, Methods32b_overloadName_with_generic_typed_class.GenericInterface, [], function(constructor, prototype) {\n" +
+                "        prototype.aMethod = function(t) {};\n");
     }
 
     @Test
