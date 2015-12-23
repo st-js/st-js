@@ -2,7 +2,7 @@ package org.stjs.generator.writer.methods;
 
 import org.stjs.javascript.Map;
 
-public class Methods11_b {
+public class Methods11b_varArgs {
 
 	public void test(Map<String, Object> props) {
 	}

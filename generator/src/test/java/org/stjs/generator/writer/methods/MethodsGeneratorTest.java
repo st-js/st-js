@@ -89,14 +89,14 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
     @Test
     public void testVarArgsMethod3() {
         // only one var arg argument is allowed and the name should be "arguments" -> like the js variable
-        assertCodeContains(Methods11.class, "prototype.method=function(_arguments){}");
+        assertCodeContains(Methods11a_varArgs.class, "prototype.method=function(_arguments){}");
     }
 
     @Test
     public void testVarArgsMethod4Native() {
-        assertCodeContains(Methods11_b.class, "prototype.test=function(props){}");
+        assertCodeContains(Methods11b_varArgs.class, "prototype.test=function(props){}");
 
-        assertCodeDoesNotContain(Methods11_b.class, "prototype.method=function");
+        assertCodeDoesNotContain(Methods11b_varArgs.class, "prototype.method=function");
     }
 
     @Test
@@ -341,4 +341,12 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
             Assert.assertTrue("The expected forbidden method wasn't found: " + expectedForbiddenMethod, e.getMessage().contains(expectedForbiddenMethod));
         }
     }
+
+    @Test
+    public void testStjsArray_push_varArgs() throws Exception {
+        assertCodeContains(Methods34_StjsArray_push_varArgs.class, "" +
+                "        stjsArray.push(\"a\");\n" +
+                "        stjsArray.push(\"b\", \"c\");\n");
+    }
+
 }

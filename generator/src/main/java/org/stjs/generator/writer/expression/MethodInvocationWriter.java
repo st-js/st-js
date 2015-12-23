@@ -52,8 +52,10 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 		List<JS> arguments = new ArrayList<>();
 		Symbol.MethodSymbol symbol = (Symbol.MethodSymbol) InternalUtils.symbol(tree);
 
+		boolean methodOwnerIsStJsArray = symbol.owner.getQualifiedName().toString().equals(Array.class.getCanonicalName());
+
 		// We must convert the var arg params to a an Array
-		if (symbol != null && symbol.isVarArgs() && symbol.getAnnotation(Template.class) == null) {
+		if (!methodOwnerIsStJsArray && isSymbolVarArg(symbol)) {
 			buildArgumentsWithVarArgs(visitor, tree, context, symbol, arguments);
 		} else {
 			for (Tree arg : tree.getArguments()) {
@@ -64,13 +66,15 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 		return arguments;
 	}
 
+	private static boolean isSymbolVarArg(Symbol.MethodSymbol symbol) {
+		return symbol != null && symbol.isVarArgs() && symbol.getAnnotation(Template.class) == null;
+	}
+
 	private static <JS> void buildArgumentsWithVarArgs(WriterVisitor<JS> visitor, MethodInvocationTree tree,
 													   GenerationContext<JS> context, Symbol.MethodSymbol symbol, List<JS> arguments) {
 		List<JS> varArgs = new ArrayList<>();
 		List<? extends ExpressionTree> treeArguments = tree.getArguments();
 		List<Symbol.VarSymbol> symbolParameters = symbol.getParameters();
-
-		boolean methodOwnerIsStJsArray = symbol.owner.getQualifiedName().toString().equals(Array.class.getCanonicalName());
 
 		for (int i = 0; i < treeArguments.size(); i++) {
             ExpressionTree arg = treeArguments.get(i);
@@ -78,13 +82,17 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
             if (symbolParameters.size() > i) {
                 param = symbolParameters.get(i);
             }
-            if (!methodOwnerIsStJsArray && param != null && (param.flags() & Flags.VARARGS) == 0) {
+            if (isVarArgParam(param)) {
                 arguments.add(visitor.scan(arg, context));
             } else {
                 varArgs.add(visitor.scan(arg, context));
             }
         }
 		arguments.add(context.js().array(varArgs));
+	}
+
+	private static boolean isVarArgParam(Symbol.VarSymbol param) {
+		return (param != null) && ((param.flags() & Flags.VARARGS) == 0);
 	}
 
 	public static <JS> String buildTemplateName(MethodInvocationTree tree, GenerationContext<JS> context) {

@@ -37,12 +37,12 @@ public class OverloadConstructorTest extends AbstractStjsTest {
 		assertCodeContains(Overload7_multiple_constructors.class, "" +
 				"    prototype._constructor = function() {\n" +
 				"        this._constructor$String(\"ok\");\n" +
-				"        this._param2.push([\"1\"]);\n" +
+				"        this._param2.push(\"1\");\n" +
 				"        return this;\n" +
 				"    };\n" +
 				"    prototype._constructor$String = function(param1) {\n" +
 				"        this._constructor$String_Array(param1, null);\n" +
-				"        this._param2.push([\"2\"]);\n" +
+				"        this._param2.push(\"2\");\n" +
 				"        return this;\n" +
 				"    };\n" +
 				"    prototype._constructor$String_Array = function(param1, param2) {\n" +
@@ -50,7 +50,7 @@ public class OverloadConstructorTest extends AbstractStjsTest {
 				"        if (param2 != null) {\n" +
 				"            this._param2 = param2;\n" +
 				"        }\n" +
-				"        this._param2.push([\"3\"]);\n" +
+				"        this._param2.push(\"3\");\n" +
 				"        return this;\n" +
 				"    };");
 		assertCodeContains(Overload7_multiple_constructors.class, "" +
