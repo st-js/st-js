@@ -316,15 +316,15 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 
     @Test
     public void testMethodsChangeMethodNameByConfig() {
-        assertCodeContains(Methods33_methodNameChangedByConfig.class, "" +
+        assertCodeContains(Methods33a_methodNameChangedByConfig.class, "" +
                         "    prototype.methodNameWithoutParametersHasBeenChangedByConfig = function() {};\n" +
                         "    prototype.methodNameWithSingleParameterHasBeenChangedByConfig = function(s) {};\n" +
                         "    prototype.methodNameWithMultipleParametersHasBeenChangedByConfig = function(s, i) {};\n",
                 new GeneratorConfigurationBuilder().renamedMethodSignatures(
                         new HashMap<String, String>() {{
-                            put("org.stjs.generator.writer.methods.Methods33_methodNameChangedByConfig.methodNameWithoutParametersToBeChangedByConfig", "methodNameWithoutParametersHasBeenChangedByConfig");
-                            put("org.stjs.generator.writer.methods.Methods33_methodNameChangedByConfig.methodNameWithSingleParameterToBeChangedByConfig$String", "methodNameWithSingleParameterHasBeenChangedByConfig");
-                            put("org.stjs.generator.writer.methods.Methods33_methodNameChangedByConfig.methodNameWithMultipleParametersToBeChangedByConfig$String_int", "methodNameWithMultipleParametersHasBeenChangedByConfig");
+                            put("org.stjs.generator.writer.methods.Methods33a_methodNameChangedByConfig.methodNameWithoutParametersToBeChangedByConfig", "methodNameWithoutParametersHasBeenChangedByConfig");
+                            put("org.stjs.generator.writer.methods.Methods33a_methodNameChangedByConfig.methodNameWithSingleParameterToBeChangedByConfig$String", "methodNameWithSingleParameterHasBeenChangedByConfig");
+                            put("org.stjs.generator.writer.methods.Methods33a_methodNameChangedByConfig.methodNameWithMultipleParametersToBeChangedByConfig$String_int", "methodNameWithMultipleParametersHasBeenChangedByConfig");
                         }})
                         .build());
     }

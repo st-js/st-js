@@ -1,6 +1,6 @@
 package org.stjs.generator.writer.methods;
 
-public class Methods33_methodNameChangedByConfig {
+public class Methods33a_methodNameChangedByConfig {
 
     public void methodNameWithoutParametersToBeChangedByConfig() {
 
