@@ -137,6 +137,16 @@ public final class ElementUtils {
 		}
 	}
 
+	public static TypeElement asTypeElement(GenerationContext<?> context, TypeMirror typeMirror) {
+		if (typeMirror.getKind() == TypeKind.DECLARED) {
+			Name qualifiedName = TypesUtils.getQualifiedName((DeclaredType) typeMirror);
+			TypeElement typeElement = context.getElements().getTypeElement(qualifiedName.toString());
+			return typeElement;
+		} else {
+			return null;
+		}
+	}
+
 	/**
 	 * Returns the qualified name of the inner most class enclosing the provided {@code Element}
 	 * @param element an element enclosed by a class, or a {@code TypeElement}

@@ -104,4 +104,14 @@ public class InlineObjectsGeneratorTest extends AbstractStjsTest {
 		Assert.assertEquals(true, result);
 	}
 
+	@Test
+	public void testInnerClassInitializingFieldFromParent() {
+
+		assertCodeContains(InlineObjects12a_InnerClass_initializingFieldFromParent.class, "" +
+				"            this._abstractClassLevel1FieldCopy = this._outerClass$0._abstractClassLevel1Field;\n" +
+				"            this._abstractClassLevel2FieldCopy = this._outerClass$0._abstractClassLevel2Field;\n" +
+				"            this._concreteClassFieldCopy = this._outerClass$0._concreteClassField;");
+
+	}
+
 }

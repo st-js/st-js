@@ -7,6 +7,7 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.util.TreePath;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.TreeUtils;
 
 import javax.lang.model.element.Element;
@@ -14,6 +15,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import java.util.List;
 
 public final class Scopes {
 	private Scopes() {
@@ -58,8 +60,28 @@ public final class Scopes {
 			if (!(type instanceof DeclaredType)) {
 				return false;
 			}
+
+			if (isTypeInClassHierarchy(context, outerTypeErasure, type)) {
+				return true;
+			}
 		}
+
 		return false;
+	}
+
+	private static boolean isTypeInClassHierarchy(GenerationContext<Void> context, TypeMirror outerTypeErasure, TypeMirror type) {
+		while (true) {
+			TypeElement typeElement = ElementUtils.asTypeElement(context, type);
+
+			if (typeElement != null) {
+				type = context.getTypes().erasure(typeElement.getSuperclass());
+				if (context.getTypes().isSameType(type, outerTypeErasure)) {
+					return true;
+				}
+			} else {
+				return false;
+			}
+		}
 	}
 
 	public static ClassTree findEnclosingClassSkipAnonymousInitializer(TreePath path) {
