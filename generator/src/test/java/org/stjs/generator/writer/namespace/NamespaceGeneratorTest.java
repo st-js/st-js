@@ -111,10 +111,7 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 
 		assertCodeContains(Namespace13_generator_configuration.class, "" +
 						"stjs.ns(\"my.own.namespace\");\n" +
-						"my.own.namespace.Namespace13_generator_configuration = function(outerClass$0) {\n" +
-						"    this._outerClass$0 = outerClass$0;\n" +
-						"};\n" +
-						"my.own.namespace.Namespace13_generator_configuration = stjs.extend(my.own.namespace.Namespace13_generator_configuration, null, [], function(constructor, prototype) {",
+						"my.own.namespace.Namespace13_generator_configuration = function() {}",
 				generatorConfigurationBuilder.build());
 		assertCodeContains(Namespace13_generator_configuration.class, "" +
 						"var date = new java_util_custom_namespace.Date()._constructor();",

@@ -219,27 +219,8 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 	}
 
 	private boolean isInnerClass(MethodTree tree, GenerationContext<JS> context) {
-		Element element = TreeUtils.elementFromDeclaration(tree).getEnclosingElement();
-		if (ElementKind.CLASS.equals(element.getKind())) {
-			String typeName = getTypeNameForElement(context, element);
-			return typeName.contains(".");
-		}
-		return false;
-	}
-
-	private String getTypeNameForElement(GenerationContext<JS> context, Element element) {
-		String typeName = context.getNames().getTypeName(context, element.asType(), DependencyType.EXTENDS);
-		Namespace annotationNamespace = element.getAnnotation(Namespace.class);
-		if (annotationNamespace != null) {
-			return typeName.replaceAll(annotationNamespace.value() + ".", "");
-		}
-		// Check the package namespace
-		String packageNamespace = NamespaceUtil.resolvePackageNamespace(ElementUtils.enclosingPackage(element).toString(),
-				context.getBuiltProjectClassLoader());
-		if (packageNamespace != null && !packageNamespace.isEmpty()) {
-			return typeName.replaceAll(packageNamespace + ".", "");
-		}
-		return typeName;
+		Element classElement = TreeUtils.elementFromDeclaration(tree).getEnclosingElement();
+		return ElementUtils.isInnerClass(classElement);
 	}
 
 	private String getOuterClassAccessorParamName(MethodTree tree) {
@@ -301,10 +282,10 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		int deepnessLevel = Scopes.getElementDeepnessLevel(element);
 
 		// Create a target such as 'this._outerClass$x'
-		String scopeAccessorPrefix = Scopes.buildOuterClassAccessTargetPrefix();
 		JS innerClassConstructorParam = context.js().name(GeneratorConstants.INNER_CLASS_CONSTRUCTOR_PARAM_PREFIX
 				+ GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR + deepnessLevel);
 
+		String scopeAccessorPrefix = Scopes.buildOuterClassAccessTargetPrefix();
 		String scopeAccessorVariable = scopeAccessorPrefix + GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR + deepnessLevel;
 
 		return context.js().expressionStatement(
