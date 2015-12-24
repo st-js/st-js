@@ -4,6 +4,7 @@ import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
+import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.Tree;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
@@ -20,6 +21,8 @@ import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.annotation.Template;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,17 +80,17 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 		List<Symbol.VarSymbol> symbolParameters = symbol.getParameters();
 
 		for (int i = 0; i < treeArguments.size(); i++) {
-            ExpressionTree arg = treeArguments.get(i);
-            Symbol.VarSymbol param = null;
-            if (symbolParameters.size() > i) {
-                param = symbolParameters.get(i);
-            }
-            if (isVarArgParam(param)) {
-                arguments.add(visitor.scan(arg, context));
-            } else {
-                varArgs.add(visitor.scan(arg, context));
-            }
-        }
+			ExpressionTree arg = treeArguments.get(i);
+			Symbol.VarSymbol param = null;
+			if (symbolParameters.size() > i) {
+				param = symbolParameters.get(i);
+			}
+			if (isVarArgParam(param)) {
+				arguments.add(visitor.scan(arg, context));
+			} else {
+				varArgs.add(visitor.scan(arg, context));
+			}
+		}
 		arguments.add(context.js().array(varArgs));
 	}
 

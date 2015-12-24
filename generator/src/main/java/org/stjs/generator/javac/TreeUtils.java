@@ -860,5 +860,10 @@ public final class TreeUtils {
 		return correctClass && correctMethod;
 	}
 
+	public static TypeElement getEnclosingClass(TreePath treePath) {
+		ClassTree callingClassTree = TreeUtils.enclosingClass(treePath);
+		TypeElement classTypeElement = TreeUtils.elementFromDeclaration(callingClassTree);
+		return classTypeElement;
+	}
 }
 // CHECKSTYLE:ON

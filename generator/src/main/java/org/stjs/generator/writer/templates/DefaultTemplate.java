@@ -1,14 +1,17 @@
 package org.stjs.generator.writer.templates;
 
+import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.tools.javac.code.Symbol;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.utils.Scopes;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
@@ -16,6 +19,7 @@ import org.stjs.generator.writer.expression.MethodInvocationWriter;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
 
@@ -63,8 +67,25 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		JS superType = constructSuperType(context, typeElement, methodName);
 
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
+
+		addOuterClassReferenceParameters(tree, context, methodElement, arguments);
+
 		arguments.add(0, context.js().keyword(Keyword.THIS));
 		return context.js().functionCall(context.js().property(superType, "call"), arguments);
+	}
+
+	private void addOuterClassReferenceParameters(MethodInvocationTree tree, GenerationContext<JS> context, Element methodElement, List<JS> arguments) {
+		Element enclosingClassForMethod = methodElement.getEnclosingElement();
+		if (ElementUtils.isInnerClass(enclosingClassForMethod) && !JavaNodes.isStatic(enclosingClassForMethod)) {
+			TypeElement callingClass = TreeUtils.getEnclosingClass(context.getCurrentPath());
+
+			int deepnessLevel = ElementUtils.getInnerClassDeepnessLevel(callingClass);
+
+			String scopeAccessorPrefix = Scopes.buildOuterClassAccessTargetPrefix();
+			String scopeAccessorVariable = scopeAccessorPrefix + GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR + deepnessLevel;
+
+			arguments.add(0, context.js().name(scopeAccessorVariable));
+		}
 	}
 
 	private JS constructSuperType(GenerationContext<JS> context, TypeElement typeElement, String methodName) {
@@ -104,4 +125,5 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		}
 		return null;
 	}
+
 }

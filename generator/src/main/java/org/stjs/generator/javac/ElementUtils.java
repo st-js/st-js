@@ -445,4 +445,23 @@ public final class ElementUtils {
 		return constructorCount > 1;
 	}
 
+	public static boolean isClass(Element element) {
+		return (element != null) && (element.getKind() == ElementKind.CLASS);
+	}
+
+	public static boolean isInnerClass(Element element) {
+		return isClass(element) && isClass(element.getEnclosingElement());
+	}
+
+	public static int getInnerClassDeepnessLevel(Element element) {
+		int deepnessLevel = -1;
+
+		while (isInnerClass(element)) {
+			deepnessLevel++;
+			element = element.getEnclosingElement();
+		}
+
+		return deepnessLevel;
+	}
+
 }

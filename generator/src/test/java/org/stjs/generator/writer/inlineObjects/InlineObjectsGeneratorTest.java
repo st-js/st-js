@@ -106,12 +106,20 @@ public class InlineObjectsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testInnerClassInitializingFieldFromParent() {
-
 		assertCodeContains(InlineObjects12a_InnerClass_initializingFieldFromParent.class, "" +
 				"            this._abstractClassLevel1FieldCopy = this._outerClass$0._abstractClassLevel1Field;\n" +
 				"            this._abstractClassLevel2FieldCopy = this._outerClass$0._abstractClassLevel2Field;\n" +
 				"            this._concreteClassFieldCopy = this._outerClass$0._concreteClassField;");
 
+	}
+
+	@Test
+	public void testInnerClassHierarchy() {
+		assertCodeContains(InlineObjects11c_InnerClass_hierarchy.class,
+				"InlineObjects11c_InnerClass_hierarchy.InnerClassA.call(this, this._outerClass$0, \"B-\" + id);");
+
+		Object result = execute(InlineObjects11c_InnerClass_hierarchy.class);
+		Assert.assertEquals("Received call from: A-B-InnerClass", result);
 	}
 
 }
