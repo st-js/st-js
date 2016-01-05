@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,16 +32,6 @@ import java.util.logging.Logger;
  */
 public class GeneratorConfigurationBuilder {
 	private static final Logger LOG = Logger.getLogger(Generator.class.getName());
-	public static final String CONFIG_PROPERTIES_RESOURCES_FILENAME = "config.properties";
-	public static final String SPLIT_CHAR_TOKEN = "${SPLIT_CHAR}";
-	public static final String CONFIG_PROPERTIES_REGEX = "\\s*" + SPLIT_CHAR_TOKEN + "\\s*";
-	public static final String CONFIG_PROPERTIES_SPLIT_CHAR = ",";
-	public static final String CONFIG_PROPERTIES_MAP_SPLIT_CHAR = ":";
-	public static final String ALLOWED_JAVA_LANG_CLASSES_CONFIG_KEY = "allowedJavaLangClasses";
-	public static final String ALLOWED_PACKAGES_CONFIG_KEY = "allowedPackages";
-	public static final String RENAMED_METHOD_SIGNATURES_CONFIG_KEY = "renamedMethodSignatures";
-	public static final String NAMESPACES_CONFIG_KEY = "namespaces";
-	public static final String FORBIDDEN_METHOD_INVOCATIONS_CONFIG_KEY = "forbiddenMethodInvocations";
 
 	private final Collection<String> allowedPackages = new HashSet<>();
 	private final Collection<String> allowedJavaLangClasses = new HashSet<>();
@@ -175,8 +164,14 @@ public class GeneratorConfigurationBuilder {
 	}
 
 	public GeneratorConfiguration build() {
+		InputStream configFileInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(GeneratorConfigurationConfigParser.CONFIG_PROPERTIES_RESOURCES_FILENAME);
 		try {
-			buildFromConfigFile();
+			if (configFileInputStream == null) {
+				throw new FileNotFoundException("property file '" + GeneratorConfigurationConfigParser.CONFIG_PROPERTIES_RESOURCES_FILENAME + "' not found in the resources.");
+			}
+
+			GeneratorConfigurationConfigParser configParser = new GeneratorConfigurationConfigParser();
+			configParser.readFromConfigFile(configFileInputStream, this);
 		}
 		catch (IOException e) {
 			LOG.log(Level.SEVERE, "IOException should not have been thrown.", e);
@@ -198,59 +193,5 @@ public class GeneratorConfigurationBuilder {
 				classResolver == null ? new DefaultClassResolver(stjsClassLoader) : classResolver, //
 				isSynchronizedAllowed //
 		);
-	}
-
-	private void buildFromConfigFile() throws IOException {
-		Properties prop = new Properties();
-		InputStream inputStream = null;
-		try {
-			inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(CONFIG_PROPERTIES_RESOURCES_FILENAME);
-
-			if (inputStream == null) {
-				throw new FileNotFoundException("property file '" + CONFIG_PROPERTIES_RESOURCES_FILENAME + "' not found in the resources.");
-			}
-			prop.load(inputStream);
-
-			String allowedJavaLangClassesConfig = prop.getProperty(ALLOWED_JAVA_LANG_CLASSES_CONFIG_KEY);
-			String allowedPackagesConfig = prop.getProperty(ALLOWED_PACKAGES_CONFIG_KEY);
-			String forbiddenMethodInvocationsConfig = prop.getProperty(FORBIDDEN_METHOD_INVOCATIONS_CONFIG_KEY);
-			String namespacesConfig = prop.getProperty(NAMESPACES_CONFIG_KEY);
-			String renamedMethodSignaturesConfig = prop.getProperty(RENAMED_METHOD_SIGNATURES_CONFIG_KEY);
-
-			readConfigKey(allowedJavaLangClassesConfig, allowedJavaLangClasses);
-			readConfigKey(allowedPackagesConfig, allowedPackages);
-			readConfigKey(forbiddenMethodInvocationsConfig, forbiddenMethodInvocations);
-			readConfigKeyAsMap(namespacesConfig, namespaces);
-			readConfigKeyAsMap(renamedMethodSignaturesConfig, renamedMethodSignatures);
-		}
-		finally {
-			if (inputStream != null) {
-				inputStream.close();
-			}
-		}
-	}
-
-	private void readConfigKeyAsMap(String config, Map<String, String> map) {
-		if (config != null && !config.isEmpty()) {
-			Map<String, String> namespacesMap = processConfigKeyAsMap(config);
-			map.putAll(namespacesMap);
-		}
-	}
-
-	private void readConfigKey(String config, Collection<String> collection) {
-		if (config != null && !config.isEmpty()) {
-			collection.addAll(Arrays.asList(config.split(CONFIG_PROPERTIES_REGEX.replace(SPLIT_CHAR_TOKEN, CONFIG_PROPERTIES_SPLIT_CHAR))));
-        }
-	}
-
-	private Map<String, String> processConfigKeyAsMap(String config) {
-		Map<String, String> map = new HashMap<>();
-		String[] pairs = config.split(CONFIG_PROPERTIES_REGEX.replace(SPLIT_CHAR_TOKEN, CONFIG_PROPERTIES_SPLIT_CHAR));
-		for (int i = 0; i < pairs.length; i++) {
-            String pair = pairs[i];
-            String[] keyValue = pair.split(CONFIG_PROPERTIES_REGEX.replace(SPLIT_CHAR_TOKEN, CONFIG_PROPERTIES_MAP_SPLIT_CHAR));
-			map.put(keyValue[0], keyValue[1]);
-        }
-		return map;
 	}
 }
