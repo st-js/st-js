@@ -33,14 +33,17 @@ import java.util.logging.Logger;
  */
 public class GeneratorConfigurationBuilder {
 	private static final Logger LOG = Logger.getLogger(Generator.class.getName());
-	private static final String CONFIG_PROPERTIES_RESOURCES_FILENAME = "config.properties";
-	private static final String CONFIG_PROPERTIES_SPLIT_REGEX = "\\s*,\\s*";
-	private static final String CONFIG_PROPERTIES_MAP_SPLIT_REGEX = "\\s*:\\s*";
-	private static final String ALLOWED_JAVA_LANG_CLASSES_CONFIG_KEY = "allowedJavaLangClasses";
-	private static final String ALLOWED_PACKAGES_CONFIG_KEY = "allowedPackages";
-	private static final String RENAMED_METHOD_SIGNATURES_CONFIG_KEY = "renamedMethodSignatures";
-	private static final String NAMESPACES_CONFIG_KEY = "namespaces";
-	private static final String FORBIDDEN_METHOD_INVOCATIONS_CONFIG_KEY = "forbiddenMethodInvocations";
+	public static final String CONFIG_PROPERTIES_RESOURCES_FILENAME = "config.properties";
+	public static final String SPLIT_CHAR_TOKEN = "${SPLIT_CHAR}";
+	public static final String CONFIG_PROPERTIES_REGEX = "\\s*" + SPLIT_CHAR_TOKEN + "\\s*";
+	public static final String CONFIG_PROPERTIES_SPLIT_CHAR = ",";
+	public static final String CONFIG_PROPERTIES_MAP_SPLIT_CHAR = ":";
+	public static final String ALLOWED_JAVA_LANG_CLASSES_CONFIG_KEY = "allowedJavaLangClasses";
+	public static final String ALLOWED_PACKAGES_CONFIG_KEY = "allowedPackages";
+	public static final String RENAMED_METHOD_SIGNATURES_CONFIG_KEY = "renamedMethodSignatures";
+	public static final String NAMESPACES_CONFIG_KEY = "namespaces";
+	public static final String FORBIDDEN_METHOD_INVOCATIONS_CONFIG_KEY = "forbiddenMethodInvocations";
+
 	private final Collection<String> allowedPackages = new HashSet<>();
 	private final Collection<String> allowedJavaLangClasses = new HashSet<>();
 	private final Collection<String> annotations = new HashSet<>();
@@ -236,16 +239,16 @@ public class GeneratorConfigurationBuilder {
 
 	private void readConfigKey(String config, Collection<String> collection) {
 		if (config != null && !config.isEmpty()) {
-			collection.addAll(Arrays.asList(config.split(CONFIG_PROPERTIES_SPLIT_REGEX)));
+			collection.addAll(Arrays.asList(config.split(CONFIG_PROPERTIES_REGEX.replace(SPLIT_CHAR_TOKEN, CONFIG_PROPERTIES_SPLIT_CHAR))));
         }
 	}
 
 	private Map<String, String> processConfigKeyAsMap(String config) {
 		Map<String, String> map = new HashMap<>();
-		String[] pairs = config.split(CONFIG_PROPERTIES_SPLIT_REGEX);
+		String[] pairs = config.split(CONFIG_PROPERTIES_REGEX.replace(SPLIT_CHAR_TOKEN, CONFIG_PROPERTIES_SPLIT_CHAR));
 		for (int i = 0; i < pairs.length; i++) {
             String pair = pairs[i];
-            String[] keyValue = pair.split(CONFIG_PROPERTIES_MAP_SPLIT_REGEX);
+            String[] keyValue = pair.split(CONFIG_PROPERTIES_REGEX.replace(SPLIT_CHAR_TOKEN, CONFIG_PROPERTIES_MAP_SPLIT_CHAR));
 			map.put(keyValue[0], keyValue[1]);
         }
 		return map;
