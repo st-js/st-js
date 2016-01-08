@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>org.st-js</groupId>
 		<artifactId>stjs</artifactId>
-		<version>3.3.1.48-mirego-SNAPSHOT</version>
+		<version>3.3.1.48-mirego</version>
 	</parent>
 
 	<repositories>
