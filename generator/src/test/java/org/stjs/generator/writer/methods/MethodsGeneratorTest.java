@@ -315,6 +315,18 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
     }
 
     @Test
+    public void testMethodsOverloadName_with_generic_typed_class_C() {
+        assertCodeContains(Methods32c_overloadName_extends.class, "" +
+                "    constructor.SpecificType = stjs.extend(constructor.SpecificType, Methods32c_overloadName_extends.AbstractClass, [], function(constructor, prototype) {\n" +
+                "        prototype._aMethod = function(item) {};\n" +
+                "    }");
+        assertCodeContains(Methods32c_overloadName_extends.class, "" +
+                "    constructor.AbstractClass = stjs.extend(constructor.AbstractClass, null, [], function(constructor, prototype) {\n" +
+                "        prototype._aMethod = function(item) {};\n" +
+                "    }");
+    }
+
+    @Test
     public void testMethodsChangeMethodNameByConfig() {
         assertCodeContains(Methods33a_methodNameChangedByConfig.class, "" +
                         "    prototype.methodNameWithoutParametersHasBeenChangedByConfig = function() {};\n" +
