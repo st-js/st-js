@@ -315,15 +315,25 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
     }
 
     @Test
-    public void testMethodsOverloadName_with_generic_typed_class_C() {
-        assertCodeContains(Methods32c_overloadName_extends.class, "" +
-                "    constructor.SpecificType = stjs.extend(constructor.SpecificType, Methods32c_overloadName_extends.AbstractClass, [], function(constructor, prototype) {\n" +
+    public void testMethodsOverloadName_extends_baseclass_with_typed_vars_and_override_concrete_method() {
+        assertCodeContains(Methods32c_overloadName_extends_baseclass_with_typed_vars_and_override_concrete_method.class, "" +
+                "    constructor.SpecificType = stjs.extend(constructor.SpecificType, Methods32c_overloadName_extends_baseclass_with_typed_vars_and_override_concrete_method.AbstractClass, [], function(constructor, prototype) {\n" +
                 "        prototype._aMethod = function(item) {};\n" +
                 "    }");
-        assertCodeContains(Methods32c_overloadName_extends.class, "" +
+        assertCodeContains(Methods32c_overloadName_extends_baseclass_with_typed_vars_and_override_concrete_method.class, "" +
                 "    constructor.AbstractClass = stjs.extend(constructor.AbstractClass, null, [], function(constructor, prototype) {\n" +
                 "        prototype._aMethod = function(item) {};\n" +
                 "    }");
+    }
+
+    @Test
+    public void testMethodsOverloadName_override_method_declaring_typedvar_type() {
+        assertCodeContains(Methods32d_overloadName_override_method_declaring_typedvar_type.class, "" +
+                "    constructor.TheInterface = stjs.extend(constructor.TheInterface, null, [], function(constructor, prototype) {\n" +
+                "        prototype.add = function(list, value) {};");
+        assertCodeContains(Methods32d_overloadName_override_method_declaring_typedvar_type.class, "" +
+                "    constructor.TheClass = stjs.extend(constructor.TheClass, null, [Methods32d_overloadName_override_method_declaring_typedvar_type.TheInterface], function(constructor, prototype) {\n" +
+                "        prototype.add = function(list, value) {};");
     }
 
     @Test

@@ -369,6 +369,9 @@ public final class ElementUtils {
             return false;
         }
 
+        if (context.getTypes().isSubsignature((ExecutableType)executableElement1.asType(), (ExecutableType)executableElement2.asType())) {
+            return true;
+        }
 
         TypeElement enclosingClass1 = enclosingClass(executableElement1);
         TypeElement enclosingClass2 = enclosingClass(executableElement2);
