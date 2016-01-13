@@ -95,7 +95,7 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testEnumValues() {
 		assertCodeContains(Enums12_for_values.class, "" +
-				"        for (var index$v in SimpleEnum.values()) {\n" +
+				"        for (var index$v = 0; index$v < SimpleEnum.values().length; index$v++) {\n" +
 				"            var v = SimpleEnum.values()[index$v];\n" +
 				"        }\n");
 	}

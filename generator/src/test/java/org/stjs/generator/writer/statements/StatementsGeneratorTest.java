@@ -18,7 +18,7 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testForEach() {
 		assertCodeContains(Statements2.class, "" +
-				"        for (var index$arg in args) {\n" +
+				"        for (var index$arg = 0; index$arg < args.length; index$arg++) {\n" +
 				"            var arg = args[index$arg];\n" +
 				"        }");
 	}
