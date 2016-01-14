@@ -60,7 +60,8 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 				"    constructor.THIRD = new Enums9_fields(3);\n" +
 				"    constructor.THIRD._name = \"THIRD\";\n" +
 				"    constructor.THIRD._ordinal = 2;\n" +
-				"    prototype._value = 0;\n" +
+				"    constructor._values = [constructor.FIRST, constructor.SECOND, constructor.THIRD];\n" +
+                "    prototype._value = 0;\n" +
 				"    prototype.getValue = function() {\n" +
 				"        return this._value;\n" +
 				"    };");
@@ -89,6 +90,7 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 				"    constructor.THIRD = new Enums11_with_constructor(3);\n" +
 				"    constructor.THIRD._name = \"THIRD\";\n" +
 				"    constructor.THIRD._ordinal = 2;\n" +
+                "    constructor._values = [constructor.FIRST, constructor.SECOND, constructor.THIRD];\n" +
 				"    prototype._privateFieldValue = 0;");
 	}
 
@@ -120,11 +122,23 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 				"    constructor.THIRD = new Enums13_implement_interface(\"third\");\n" +
 				"    constructor.THIRD._name = \"THIRD\";\n" +
 				"    constructor.THIRD._ordinal = 3;\n" +
+                "    constructor._values = [constructor.NONE, constructor.FIRST, constructor.SECOND, constructor.THIRD];\n" +
 				"    prototype._keyStr = null;\n" +
 				"    prototype.getKey = function() {\n" +
 				"        return this._keyStr;\n" +
-				"    };\n" +
-				"    constructor._values = [constructor.NONE, constructor.FIRST, constructor.SECOND, constructor.THIRD];");
+				"    };");
+	}
+
+	@Test
+	public void testEnumValuesShouldBeAvailableRightAfterDeclarationOfEntries() throws Exception {
+		assertCodeContains(Enums14_inner_static_filed_using_enum_values.class, "" +
+                "        constructor.THIRD._ordinal = 2;\n" +
+                "        constructor._values = [constructor.FIRST, constructor.SECOND, constructor.THIRD];\n" +
+                "        constructor.aValueFromMyEnum = Enums14_inner_static_filed_using_enum_values.MyEnum.values()[1];"
+        );
+
+		String result = (String) execute(Enums14_inner_static_filed_using_enum_values.class);
+		Assert.assertEquals("SECOND", result);
 	}
 
 	@Test

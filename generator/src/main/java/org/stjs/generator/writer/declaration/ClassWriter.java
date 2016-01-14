@@ -182,22 +182,40 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		@SuppressWarnings("unchecked")
 		List<JS> params = Arrays.asList(context.js().name(JavascriptKeywords.CONSTRUCTOR), context.js().name(JavascriptKeywords.PROTOTYPE));
 
+		boolean enumValuesPropertyGenerated = false;
 		List<JS> enumValues = new ArrayList<>();
 		for (int i = 0; i < nonConstructors.size(); i++) {
 			Tree member = nonConstructors.get(i);
-			stmts.add(visitor.scan(member, context));
+			JS newStatement = visitor.scan(member, context);
+
 			if (isMemberAnEnumEntry(member, enumEntries)) {
+				stmts.add(newStatement);
 				generateEnumSignatureForMember(context, stmts, enumValues, i, member);
+			} else {
+				if (!enumValuesPropertyGenerated) {
+					// _values must be set at the end of the statements to make sure all object are available to the javascript
+					generateEnumValuesProperty(context, stmts, enumValues);
+					enumValuesPropertyGenerated = true;
+				}
+
+				stmts.add(newStatement);
 			}
 		}
-		// _values must be set at the end of the statements to make sure all object are available to the javascript
+
+		if (!enumValuesPropertyGenerated) {
+			// _values must be set at the end of the statements to make sure all object are available to the javascript
+			generateEnumValuesProperty(context, stmts, enumValues);
+		}
+
+		return context.js().function(null, params, context.js().block(stmts));
+	}
+
+	private void generateEnumValuesProperty(GenerationContext<JS> context, List<JS> stmts, List<JS> enumValues) {
 		if (!enumValues.isEmpty()) {
 			JS enumValuesProperty = context.js().property(context.js().name(JavascriptKeywords.CONSTRUCTOR), GeneratorConstants.ENUM_VALUES_PROPERTY);
 			stmts.add(context.js().expressionStatement(
 					context.js().assignment(AssignOperator.ASSIGN, enumValuesProperty, context.js().array(enumValues))));
 		}
-
-		return context.js().function(null, params, context.js().block(stmts));
 	}
 
 	private void generateMultipleConstructorsAsStaticInitializers(WriterVisitor<JS> visitor, GenerationContext<JS> context,

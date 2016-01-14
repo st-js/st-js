@@ -92,7 +92,7 @@ public class StringMethodsTest extends AbstractStjsTest {
                         "int: 1\n" +
                         "long: 1\n" +
                         "char: a\n" +
-                        "Object: an abject\n" +
+                        "Object: an object\n" +
                         "float: 1.2\n" +
                         "double: 1.3",
                 result);
