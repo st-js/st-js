@@ -4,6 +4,7 @@ import com.sun.source.tree.EnhancedForLoopTree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TypesUtils;
+import org.stjs.generator.javascript.BinaryOperator;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.javascript.UnaryOperator;
 import org.stjs.generator.writer.WriterContributor;
@@ -12,6 +13,7 @@ import org.stjs.javascript.Array;
 
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.util.Arrays;
 import java.util.Collections;
 
 /**
@@ -92,19 +94,22 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 		//
 		// Translated Javascript:
 		// ---------------------------------------------
-		//   for (var index$element in this._anIntArray) {
+		//   for (var index$element = 0; index$element < this._anIntArray.length; i++) {
 		//     var element = this._anIntArray[index$element];
 		//     sum += element;
 		//   }
 		String initialIteratorName = tree.getVariable().getName().toString();
-		String newIteratorName = "index$" + initialIteratorName;
+		String forLoopIndexVariableNameString = "index$" + initialIteratorName;
+		JS forLoopIndexVariableName = js.name(forLoopIndexVariableNameString);
 
-		JS arrayAccessByIndex = context.js().elementGet(iterated, js.name(newIteratorName));
-		JS newIterator = js.variableDeclaration(false, newIteratorName, null);
-		JS arrayAccessedObject = js.variableDeclaration(true, initialIteratorName, arrayAccessByIndex);
-		JS newBody = js.addStatementBeginning(body, arrayAccessedObject);
+		JS loopInit = js.variableDeclaration(false, forLoopIndexVariableNameString, js.code("0"));
+		JS loopCondition = context.js().binary(BinaryOperator.LESS_THAN, Arrays.<JS>asList(forLoopIndexVariableName, js.property(iterated, "length")));
+		JS update = context.js().unary(UnaryOperator.POSTFIX_INCREMENT, forLoopIndexVariableName);
 
-		return context.withPosition(tree, context.js().forInLoop(newIterator, iterated, newBody));
+		JS forLoopBody = js.addStatementBeginning(body,
+				js.variableDeclaration(true, initialIteratorName, js.elementGet(iterated, forLoopIndexVariableName)));
+
+		return context.withPosition(tree, context.js().forLoop(loopInit, loopCondition, update, forLoopBody));
 	}
 
 	private boolean isNativeArray(TypeMirror iteratedType) {
