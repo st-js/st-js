@@ -126,4 +126,10 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 				"    };\n" +
 				"    constructor._values = [constructor.NONE, constructor.FIRST, constructor.SECOND, constructor.THIRD];");
 	}
+
+	@Test
+	public void testCanGetEnumConstantsFromClass() throws Exception {
+		String result = (String) execute(Enums14_getEnumConstants.class);
+		Assert.assertEquals("FIRST,SECOND,THIRD,", result);
+	}
 }
