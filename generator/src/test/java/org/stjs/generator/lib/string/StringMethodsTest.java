@@ -1,5 +1,6 @@
 package org.stjs.generator.lib.string;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.stjs.generator.utils.AbstractStjsTest;
 
@@ -82,4 +83,19 @@ public class StringMethodsTest extends AbstractStjsTest {
 				"        test.indexOf$int(1);\n" +
 				"        test.indexOf$int_int(1, 0);");
 	}
+
+    @Test
+    public void testValueOf() throws Exception {
+        String result = (String) execute(String15_valueOf.class);
+        Assert.assertEquals("" +
+                        "boolean: true\n" +
+                        "int: 1\n" +
+                        "long: 1\n" +
+                        "char: a\n" +
+                        "Object: an abject\n" +
+                        "float: 1.2\n" +
+                        "double: 1.3",
+                result);
+    }
+
 }
