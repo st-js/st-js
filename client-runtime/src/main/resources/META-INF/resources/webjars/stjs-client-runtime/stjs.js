@@ -544,6 +544,9 @@ stjs.extend(JavaEnum, null, [], function(constructor, prototype) {
   constructor.values = function() {
     return this._values;
   };
+  constructor.getEnumConstants = function() {
+    return this._values;
+  }
   constructor.valueOf$String = function() {
     var value = arguments[0];
     // No values to compare with, assume the caller want the value of ourself
