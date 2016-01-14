@@ -169,9 +169,37 @@ if(!String.prototype.getClass){
 	String.prototype.getClass=stjs.JavalikeGetClass;
 }
 
+if(!String.prototype.isEmpty){
+	String.prototype.isEmpty=function(it){
+		return this.length == 0;
+	};
+}
+
 //force valueof to match the Java's behavior
 String.valueOf=function(value){
 	return new String(value);
+};
+
+String.valueOf$Object = function(o) {
+    return o == null ? "null" : o.toString();
+};
+String.valueOf$boolean = function(b) {
+    return "" + b;
+};
+String.valueOf$char = function(c) {
+    return "" + c;
+};
+String.valueOf$int = function(i) {
+    return "" + i;
+};
+String.valueOf$long = function(l) {
+    return "" + l;
+};
+String.valueOf$float = function(f) {
+    return "" + f;
+};
+String.valueOf$double = function(d) {
+    return "" + d;
 };
 
 /* Number */
