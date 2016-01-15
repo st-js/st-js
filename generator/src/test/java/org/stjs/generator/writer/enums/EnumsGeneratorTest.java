@@ -50,8 +50,7 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 				"    constructor.InnerClass = stjs.extend(constructor.InnerClass, null, [Enums8_interface_declaration], function(constructor, prototype) {\n" +
 				"        prototype.methodReturningEnum = function() {\n" +
 				"            return SimpleEnum.FIRST;\n" +
-				"        };\n" +
-				"    }, {}, {});");
+				"        };");
 	}
 
 	@Test

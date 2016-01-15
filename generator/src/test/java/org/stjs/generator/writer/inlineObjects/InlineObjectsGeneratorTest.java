@@ -77,7 +77,7 @@ public class InlineObjectsGeneratorTest extends AbstractStjsTest {
 				"            prototype.doIt = function() {\n" +
 				"                return this$0.outerMethod();\n" +
 				"            };\n" +
-				"        }, {}, {}))().doIt();\n" +
+				"        }, {}, {}, \"InlineObjects11_AnonymousClass_calling_outer.InlineObjects11_AnonymousClass_calling_outer$1\"))().doIt();\n" +
 				"    };\n");
 		assertCodeContains(InlineObjects11_AnonymousClass_calling_outer.class, "" +
 				"    prototype.doIt2 = function() {\n" +
@@ -89,12 +89,12 @@ public class InlineObjectsGeneratorTest extends AbstractStjsTest {
 				"                    prototype.doIt = function() {\n" +
 				"                        return this$0.outerMethod() + this$1.superDoIt();\n" +
 				"                    };\n" +
-				"                }, {}, {}))().doIt();\n" +
+				"                }, {}, {}, \"InlineObjects11_AnonymousClass_calling_outer.InlineObjects11_AnonymousClass_calling_outer$2.InlineObjects11_AnonymousClass_calling_outer$2$1\"))().doIt();\n" +
 				"            };\n" +
 				"            prototype.superDoIt = function() {\n" +
 				"                return \"superDoIt() --> \" + this$0.outerMethod();\n" +
 				"            };\n" +
-				"        }, {}, {}))().doIt();\n" +
+				"        }, {}, {}, \"InlineObjects11_AnonymousClass_calling_outer.InlineObjects11_AnonymousClass_calling_outer$2\"))().doIt();\n" +
 				"    };");
 	}
 

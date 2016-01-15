@@ -230,7 +230,7 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
                 "    this._aCollectionArray = [];\n" +
                 "    this._anInterfaceArray = [new (stjs.extend(function Fields28_array$1() {}, null, [Fields28_array.SimpleInterface], function(constructor, prototype) {\n" +
                 "        prototype.doNothing = function() {};\n" +
-                "    }, {}, {}))()];\n" +
+                "    }, {}, {}, \"Fields28_array.Fields28_array$1\"))()];\n" +
                 "    this._anIntThreeDimensArrayInitialized = [[[0]]];");
     }
 
