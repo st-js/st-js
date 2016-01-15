@@ -142,8 +142,7 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 				"                this._outerClass$1 = outerClass$1;\n" +
 				"            };\n" +
 				"            constructor.InnerDeep = stjs.extend(constructor.InnerDeep, null, [], function(constructor, prototype) {\n" +
-				"                prototype._a = null;\n" +
-				"            }, {}, {});");
+				"                prototype._a = null;");
 	}
 
 	@Test
@@ -185,7 +184,7 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 				"    };\n" +
 				"    constructor.Holder = stjs.extend(constructor.Holder, null, [], function(constructor, prototype) {\n" +
 				"        constructor._VALUE = 2;\n" +
-				"    }, {}, {});\n" +
+				"    }, {}, {}, \"InnerTypes20.Holder\");\n" +
 				"    constructor._currentValue = InnerTypes20.Holder._VALUE;\n");
 	}
 

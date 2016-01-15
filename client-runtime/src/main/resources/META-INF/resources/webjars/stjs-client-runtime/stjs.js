@@ -372,7 +372,7 @@ stjs.copyInexistentProps=function(from, to){
 	return to;
 };
 
-stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescription, _annotations){
+stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescription, _annotations, _simpleClassName){
 	if(typeof(_typeDescription) !== "object"){
 		// stjs 1.3+ always passes an non-null object to _typeDescription => The code calling stjs.extend
 		// was generated with version 1.2 or earlier, so let's call the 1.2 version of stjs.extend
@@ -419,6 +419,7 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 
 	_constructor.$typeDescription = _typeDescription;
 	_constructor.$annotations = _annotations;
+	_constructor.$simpleClassName = _simpleClassName;
 
 	// add the default equals method if it is not present yet, and we don't have a superclass
 	if(_super == null){

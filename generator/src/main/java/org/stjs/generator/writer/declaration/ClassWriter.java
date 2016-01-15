@@ -579,6 +579,13 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		}
 	}
 
+	private String getClassNameAsString(ClassTree tree, GenerationContext<JS> context) {
+		Element type = TreeUtils.elementFromDeclaration(tree);
+		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
+
+		return typeName;
+	}
+
 	public JS getClassName(ClassTree tree, GenerationContext<JS> context) {
 		Element type = TreeUtils.elementFromDeclaration(tree);
 		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
@@ -615,6 +622,7 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		JS members = getMembers(visitor, tree, context, enumEntries);
 		JS typeDesc = getTypeDescription(visitor, tree, context);
 		JS annotationDesc = getAnnotationDescription(visitor, tree, context);
+		JS simpleClassName = js.string(getClassNameAsString(tree, context));
 		boolean anonymousClass = tree.getSimpleName().length() == 0;
 
 		if (anonymousClass) {
@@ -625,7 +633,7 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 
 		@SuppressWarnings("unchecked")
 		JS extendsCall = js.functionCall(js.property(js.name(GeneratorConstants.STJS), "extend"),
-				Arrays.asList(name, superClazz, interfaces, members, typeDesc, annotationDesc));
+				Arrays.asList(name, superClazz, interfaces, members, typeDesc, annotationDesc, simpleClassName));
 		if (anonymousClass) {
 			stmts.add(extendsCall);
 		} else {

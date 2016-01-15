@@ -115,7 +115,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
         assertCodeContains(Methods15.class, "stjs.extend(Methods15, null, [], function(constructor, prototype){" //
                 + "prototype._doSomething=function(){};" //
                 + "prototype._doSomethingElse=function(){};" //
-                + "}, {}, {});");
+                + "}, {}, {}, \"Methods15\");");
     }
 
     @Test
@@ -124,7 +124,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
         assertCodeContains(Methods15b.class, "stjs.extend(Methods15b, null, [], function(constructor, prototype){" //
                 + "prototype.doSomething=function(){};" //
                 + "prototype.doSomethingElse=function(){};" //
-                + "}, {}, {});");
+                + "}, {}, {}, \"Methods15b\");");
     }
 
     @Test
@@ -239,8 +239,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
                 "        };\n" +
                 "        prototype.getMessage$String = function(userName) {\n" +
                 "            return \"Hello \" + userName + \"!\";\n" +
-                "        };\n" +
-                "    }, {}, {});\n");
+                "        };\n");
     }
 
     @Test
@@ -249,13 +248,13 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
                 "    constructor.BaseClass = stjs.extend(constructor.BaseClass, null, [], function(constructor, prototype) {\n" +
                 "        prototype.aMethod1 = function(i) {};\n" +
                 "        prototype.aMethod2 = function(i) {};\n" +
-                "    }, {}, {});");
+                "    }");
         assertCodeContains(Methods28_overloadNameConflict_Subclass_with_same_name_method_but_different_signatures.class, "" +
                 "    constructor.SubClass = stjs.extend(constructor.SubClass, Methods28_overloadNameConflict_Subclass_with_same_name_method_but_different_signatures.BaseClass, [], function(constructor, prototype) {\n" +
                 "        prototype.aMethod1$String = function(s) {};\n" +
                 "        prototype.aMethod2 = function(i) {};\n" +
                 "        prototype.aMethod2$String = function(s) {};\n" +
-                "    }, {}, {});\n");
+                "    }");
     }
 
     @Test
@@ -275,16 +274,16 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
         assertCodeContains(Methods30_overloadNameConflict_Resolved_by_JSOverloadName_annotation.class, "" +
                 "    constructor.Interface1 = stjs.extend(constructor.Interface1, null, [], function(constructor, prototype) {\n" +
                 "        prototype.aMethod = function(i) {};\n" +
-                "    }, {}, {});");
+                "    }");
         assertCodeContains(Methods30_overloadNameConflict_Resolved_by_JSOverloadName_annotation.class, "" +
                 "    constructor.Interface2 = stjs.extend(constructor.Interface2, null, [], function(constructor, prototype) {\n" +
                 "        prototype.aMethodWithString = function(s) {};\n" +
-                "    }, {}, {});");
+                "    }");
         assertCodeContains(Methods30_overloadNameConflict_Resolved_by_JSOverloadName_annotation.class, "" +
                 "    constructor.SubClass = stjs.extend(constructor.SubClass, null, [Methods30_overloadNameConflict_Resolved_by_JSOverloadName_annotation.Interface1, Methods30_overloadNameConflict_Resolved_by_JSOverloadName_annotation.Interface2], function(constructor, prototype) {\n" +
                 "        prototype.aMethod = function(i) {};\n" +
                 "        prototype.aMethodWithString = function(s) {};\n" +
-                "    }, {}, {});");
+                "    }");
     }
 
     @Test
@@ -304,7 +303,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
         assertCodeContains(Methods32a_overloadName_with_specific_typed_class.class, "" +
                 "    constructor.SubClassSpecific = stjs.extend(constructor.SubClassSpecific, Methods32a_overloadName_with_specific_typed_class.GenericInterface, [], function(constructor, prototype) {\n" +
                 "        prototype.aMethod = function(s) {};\n" +
-                "    }, {}, {});");
+                "    }");
     }
 
     @Test

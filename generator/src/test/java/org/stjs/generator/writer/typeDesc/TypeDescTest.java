@@ -1,12 +1,13 @@
 package org.stjs.generator.writer.typeDesc;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.stjs.generator.utils.AbstractStjsTest;
 
 public class TypeDescTest extends AbstractStjsTest {
 	@Test
 	public void testBasicField() {
-		assertCodeContains(TypeDesc1.class, "{});");
+		assertCodeContains(TypeDesc1.class, "{}, \"TypeDesc1\");");
 	}
 
 	@Test
@@ -37,5 +38,17 @@ public class TypeDescTest extends AbstractStjsTest {
 	@Test
 	public void testWildcards() {
 		assertCodeContains(TypeDesc7.class, "{field:{name:\"MyType1\", arguments:[\"Object\"]}}");
+	}
+
+	@Test
+	public void testClassGenerationContainsClassName() {
+		String result = (String) execute(TypeDesc8_get_simpleClassName.class);
+		Assert.assertEquals("TypeDesc8_get_simpleClassName", result);
+	}
+
+	@Test
+	public void testInnerClassClassName() {
+		assertCodeContains(TypeDesc9_innerClass_simpleClassName.class,
+				"constructor.InnerClass = stjs.extend(constructor.InnerClass, null, [], null, {}, {}, \"TypeDesc9_innerClass_simpleClassName.InnerClass\");");
 	}
 }
