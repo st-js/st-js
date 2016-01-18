@@ -52,6 +52,10 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 	}
 
 	public static <JS> List<JS> buildArguments(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
+		return buildArguments(visitor, tree, tree.getArguments(), context);
+	}
+
+	public static <JS> List<JS> buildArguments(WriterVisitor<JS> visitor, Tree tree, List<? extends ExpressionTree> methodArguments, GenerationContext<JS> context) {
 		List<JS> arguments = new ArrayList<>();
 		Symbol.MethodSymbol symbol = (Symbol.MethodSymbol) InternalUtils.symbol(tree);
 
@@ -59,9 +63,9 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 
 		// We must convert the var arg params to a an Array
 		if (!methodOwnerIsStJsArray && isSymbolVarArg(symbol)) {
-			buildArgumentsWithVarArgs(visitor, tree, context, symbol, arguments);
+			buildArgumentsWithVarArgs(visitor, methodArguments, context, symbol, arguments);
 		} else {
-			for (Tree arg : tree.getArguments()) {
+			for (Tree arg : methodArguments) {
 				arguments.add(visitor.scan(arg, context));
 			}
 		}
@@ -73,10 +77,9 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 		return symbol != null && symbol.isVarArgs() && symbol.getAnnotation(Template.class) == null;
 	}
 
-	private static <JS> void buildArgumentsWithVarArgs(WriterVisitor<JS> visitor, MethodInvocationTree tree,
+	private static <JS> void buildArgumentsWithVarArgs(WriterVisitor<JS> visitor, List<? extends ExpressionTree> treeArguments,
 													   GenerationContext<JS> context, Symbol.MethodSymbol symbol, List<JS> arguments) {
 		List<JS> varArgs = new ArrayList<>();
-		List<? extends ExpressionTree> treeArguments = tree.getArguments();
 		List<Symbol.VarSymbol> symbolParameters = symbol.getParameters();
 
 		for (int i = 0; i < treeArguments.size(); i++) {
