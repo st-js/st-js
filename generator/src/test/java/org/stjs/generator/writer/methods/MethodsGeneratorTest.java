@@ -90,7 +90,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 
     @Test
     public void testVarArgsConstructor() {
-        assertCodeContains(Methods10_constructor_varargs.class, "new Methods10_constructor_varargs.ClassWithVarArgInConstructor(this, [\"A\", \"B\", \"C\"]);");
+        assertCodeContains(Methods10b_constructor_vararg.class, "new Methods10b_constructor_vararg.ClassWithVarArgInConstructor(this, [\"A\", \"B\", \"C\"]);");
     }
 
     @Test

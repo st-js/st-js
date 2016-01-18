@@ -487,17 +487,26 @@ stjs.getParameterAnnotation = function(clz, methodName, idx, annType) {
 };
 
 /**
- * checks if the child is an instanceof parent. it checks recursively if "parent" is the child itself or it's found somewhere in the $inherit array
+ * checks if an object is an instanceof parentClass.
  */
-stjs.isInstanceOf=function(child, parent){
-	if (child == null)
+stjs.isInstanceOf=function(instance, parentClass){
+	if (instance == null)
 		return false;
-	if (child === parent)
+	return (stjs.classInheritsFrom(instance.constructor, parentClass));
+}
+
+/**
+ * checks if a class inherits from parent class. it checks recursively if "parent" is the child itself or it's found somewhere in the $inherit array
+ */
+stjs.classInheritsFrom=function(childClass, parentClass){
+	if (childClass == null)
+		return false;
+	if (childClass === parentClass)
 		return true;
-	if (!child.$inherit)
+	if (!childClass.$inherit)
 		return false;
-	for(var i = 0; i < child.$inherit.length; ++i){
-		if (stjs.isInstanceOf(child.$inherit[i], parent)) {
+	for(var i = 0; i < childClass.$inherit.length; ++i){
+		if (stjs.classInheritsFrom(childClass.$inherit[i], parentClass)) {
 			return true;
 		}
 	}
