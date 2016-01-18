@@ -72,18 +72,25 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
         assertCodeContains(Methods14.class, "var x = (String).fromCharCode(65,66,67)");
     }
 
+
     @Test
-    public void testVarArgsMethod1() {
-        assertCodeContains(Methods9.class, "prototype.method = function(params) {};");
+    public void testVarArgsParameters() {
+        assertCodeContains(Methods10_basic_varargs.class, "var invokedWithVarArgAsFirstParameters = obj.methodVarArgAsFirstParameter([\"A\", \"B\", \"C\"]);");
+        assertCodeContains(Methods10_basic_varargs.class, "var invokedWithVargArgAsSecondParameters = obj.methodVarArgAsSecondParameter(0, [\"1\", \"2\", \"3\"]);");
+
+        assertCodeContains(Methods10_basic_varargs.class, "var invokedWithMissingVarArgAsFirstParameters = obj.methodVarArgAsFirstParameter([]);");
+        assertCodeContains(Methods10_basic_varargs.class, "var invokedWithMissingVarArgAsSecondParameters = obj.methodVarArgAsSecondParameter(0, []);");
+
+        assertCodeContains(Methods10_basic_varargs.class, "var invokedStaticMethodVarArgAsFirstParameter = Methods10_basic_varargs.staticMethodVarArgAsFirstParameter([\"D\", \"E\", \"F\"]);");
+        assertCodeContains(Methods10_basic_varargs.class, "var invokedStaticMethodVarArgAsSecondParameters = Methods10_basic_varargs.staticMethodVarArgAsSecondParameter(0, [\"H\", \"I\", \"J\"]);");
+
+        Object result = execute(Methods10_basic_varargs.class);
+        Assert.assertEquals("A,B,C-1,2,3---D,E,F-H,I,J.", result);
     }
 
     @Test
-    public void testVarArgsMethod2() {
-        Object result = execute(Methods10_basic_varargs.class);
-        Assert.assertEquals("123", result);
-        assertCodeContains(Methods10_basic_varargs.class, "" +
-                "        var test = new Methods10_basic_varargs().method(0, []);\n" +
-                "        return new Methods10_basic_varargs().method(0, [\"1\", \"2\", \"3\"]);");
+    public void testVarArgsConstructor() {
+        assertCodeContains(Methods10_constructor_varargs.class, "new Methods10_constructor_varargs.ClassWithVarArgInConstructor(this, [\"A\", \"B\", \"C\"]);");
     }
 
     @Test
