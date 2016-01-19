@@ -113,4 +113,9 @@ public class StringMethodsTest extends AbstractStjsTest {
 		Assert.assertEquals(true, execute(String18_toCharArray.class));
 	}
 
+	@Test
+	public void testReplaceWithCharSequence() {
+		Assert.assertEquals(true, execute(String19_replaceWithCharSequence.class));
+	}
+
 }

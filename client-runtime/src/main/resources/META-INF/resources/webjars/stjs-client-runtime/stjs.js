@@ -139,6 +139,11 @@ if (!String.prototype.replaceFirst){
 	}
 }
 
+String.prototype.replace$CharSequence_CharSequence=function(target, replacement) {
+  var splitedParts = this.split(target.toString());
+  return splitedParts.join(replacement.toString())
+}
+
 String.prototype.indexOf$String=function(str) {
     return this.indexOf(str);
 }
