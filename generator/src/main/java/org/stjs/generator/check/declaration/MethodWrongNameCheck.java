@@ -11,7 +11,7 @@ public class MethodWrongNameCheck implements CheckContributor<MethodTree> {
 
 	@Override
 	public Void visit(CheckVisitor visitor, MethodTree tree, GenerationContext<Void> context) {
-		JavascriptKeywords.checkIdentifier(tree, tree.getName().toString(), context);
+		JavascriptKeywords.checkIdentifier(tree, context.getNames().getMethodName(context, tree), context);
 		return null;
 	}
 
