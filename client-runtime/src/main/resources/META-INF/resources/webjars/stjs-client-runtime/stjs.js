@@ -186,6 +186,12 @@ if(!String.prototype.isEmpty){
 	};
 }
 
+if(!String.prototype.toCharArray){
+	String.prototype.toCharArray=function(){
+		return this.split('');
+	};
+}
+
 //force valueof to match the Java's behavior
 String.valueOf=function(value){
 	return new String(value);
@@ -371,6 +377,9 @@ Boolean.valueOf$String=function(value){
 }
 
 /* Array */
+// Supports:
+//   createJavaArray(3) --> creates a new array of 3 elements initialized with 'null' values
+//   createJavaArray(null, "A", "B", "C") --> creates a new array of 3 elements initialized with specified values
 stjs.createJavaArray = function() {
     var argsArray = Array.prototype.slice.call(arguments);
     var arraySize = argsArray[0];

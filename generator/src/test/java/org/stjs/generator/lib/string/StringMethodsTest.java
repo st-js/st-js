@@ -105,7 +105,12 @@ public class StringMethodsTest extends AbstractStjsTest {
 
 	@Test
 	public void testSubstring() {
-		Assert.assertEquals(true, execute(String16_IndexOf.class));
+		Assert.assertEquals(true, execute(String17_Substring.class));
+	}
+
+	@Test
+	public void testToCharArray() {
+		Assert.assertEquals(true, execute(String18_toCharArray.class));
 	}
 
 }
