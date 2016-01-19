@@ -140,12 +140,23 @@ if (!String.prototype.replaceFirst){
 }
 
 String.prototype.indexOf$String=function(str) {
-    return this.indexOf(str) >= 0;
+    return this.indexOf(str);
 }
 
-String.prototype.indexOf$String_int=stjs.NOT_IMPLEMENTED;
+String.prototype.indexOf$String_int=function(str, pos) {
+    return this.indexOf(str, pos);
+}
+
 String.prototype.indexOf$int=stjs.NOT_IMPLEMENTED;
 String.prototype.indexOf$int_int=stjs.NOT_IMPLEMENTED;
+
+String.prototype.substring$int=function(startIndex) {
+    return this.substring(startIndex, this.length);
+}
+
+String.prototype.substring$int_int=function(startIndex, endIndex) {
+    return this.substring(startIndex, endIndex);
+}
 
 String.prototype.regionMatches$boolean_int_String_int_int=function(ignoreCase, toffset, other, ooffset, len) {
     if (toffset < 0 || ooffset < 0 || other == null || toffset + len > this.length || ooffset + len > other.length)
