@@ -1,5 +1,6 @@
 package org.stjs.generator.writer.statements;
 
+import junit.framework.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.GeneratorConfiguration;
@@ -70,7 +71,33 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testInstanceof() {
-		assertCodeContains(Statements10.class, "stjs.isInstanceOf(arg.constructor, Statements10)");
+		assertCodeContains(Statements10.class, "stjs.isInstanceOf(arg, Statements10)");
+	}
+
+	@Test
+	public void testExecuteInstanceof_InstanceOfDirectClass_evaluatesTrue() {
+		Assert.assertEquals(true, execute(Statements10b_InstanceOfDirectClass_evaluatesTrue.class));
+	}
+
+	@Test
+	public void testExecuteInstanceof_InstanceOfParentClass_evaluatesTrue() {
+		Assert.assertEquals(true, execute(Statements10c_InstanceOfParentClass_evaluatesTrue.class));
+	}
+
+	@Test
+	public void testExecuteInstanceof_InstanceOfClassNotInHierarchy_evaluatesFalse() {
+		Assert.assertEquals(false, execute(Statements10d_InstanceOfClassNotInHierarchy_evaluatesFalse.class));
+	}
+
+	@Test
+	public void testExecuteInstanceof_InstanceOfNullObject_evaluatesFalse() {
+		Assert.assertEquals(false, execute(Statements10e_InstanceOfNullObject_evaluatesFalse.class));
+	}
+
+	@Test
+	public void testExecuteInstanceofNullObject() {
+		Boolean executeResult = (Boolean) execute(Statements10e_InstanceOfNullObject_evaluatesFalse.class);
+		Assert.assertEquals(false, executeResult.booleanValue());
 	}
 
 	@Test

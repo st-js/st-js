@@ -23,9 +23,9 @@ public class InstanceofWriter<JS> implements WriterContributor<InstanceOfTree, J
 		// TODO do I need a check or parenthesis around !?
 
 		TypeMirror type = context.getTrees().getTypeMirror(new TreePath(context.getCurrentPath(), tree.getType()));
-		JS getConstructor = context.js().property(visitor.scan(tree.getExpression(), context), JavascriptKeywords.CONSTRUCTOR);
+		JS thObject = visitor.scan(tree.getExpression(), context);
 		JS targetInst = context.js().property(context.js().name("stjs"), "isInstanceOf");
 		JS typeName = context.js().name(context.getNames().getTypeName(context, type, DependencyType.STATIC));
-		return context.js().functionCall(targetInst, Arrays.asList(getConstructor, typeName));
+		return context.js().functionCall(targetInst, Arrays.asList(thObject, typeName));
 	}
 }
