@@ -20,7 +20,7 @@ public class NumberMethodsTest extends AbstractStjsTest {
 
 	@Test
 	public void testValueOf() {
-		assertEquals(123.0, executeAndReturnNumber(Number3.class), 0);
+		assertEquals(true, execute(Number3_NumberValueOf.class));
 	}
 
 	@Test
@@ -29,4 +29,10 @@ public class NumberMethodsTest extends AbstractStjsTest {
 				"        var test = Integer.parseInt$String(\"test\");\n" +
 				"        var testRadix = Integer.parseInt$String_int(\"test\", 10);\n");
 	}
+
+	@Test
+	public void testConvertToValue() {
+		assertEquals(true, execute(Number5_IntValue.class));
+	}
+
 }

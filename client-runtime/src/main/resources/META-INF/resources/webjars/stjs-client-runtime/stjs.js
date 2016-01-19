@@ -244,34 +244,34 @@ Number.valueOf$String_int=function(str, radix) {
 /* type conversion - approximative as Javascript only has integers and doubles */
 if (!Number.prototype.intValue) {
 	Number.prototype.intValue=function(){
-		return parseInt(this);
+    	return this.valueOf();
 	}
 }
 if (!Number.prototype.shortValue) {
 	Number.prototype.shortValue=function(){
-		return parseInt(this);
+		return this.valueOf();
 	}
 }
 if (!Number.prototype.longValue) {
 	Number.prototype.longValue=function(){
-		return parseInt(this);
+    	return this.valueOf();
 	}
 }
 if (!Number.prototype.byteValue) {
 	Number.prototype.byteValue=function(){
-		return parseInt(this);
+    	return this.valueOf();
 	}
 }
 
 if (!Number.prototype.floatValue) {
 	Number.prototype.floatValue=function(){
-		return parseFloat(this);
+    	return this.valueOf();
 	}
 }
 
 if (!Number.prototype.doubleValue) {
 	Number.prototype.doubleValue=function(){
-		return parseFloat(this);
+    	return this.valueOf();
 	}
 }
 
@@ -314,7 +314,23 @@ if(!Number.prototype.getClass){
 
 //force valueof to match approximately the Java's behavior (for Integer.valueOf it returns in fact a double)
 Number.valueOf=function(value){
-	return new Number(value).valueOf();
+	return new Number(value);
+}
+
+Integer.valueOf$int=function(value){
+	return new Number(value);
+}
+
+Integer.valueOf$String=function(value){
+	return new Number(value);
+}
+
+Long.valueOf$long=function(value){
+	return new Number(value);
+}
+
+Long.valueOf$String=function(value){
+	return new Number(value);
 }
 
 /* Boolean */
