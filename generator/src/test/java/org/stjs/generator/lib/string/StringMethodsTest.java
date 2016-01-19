@@ -98,4 +98,14 @@ public class StringMethodsTest extends AbstractStjsTest {
                 result);
     }
 
+	@Test
+	public void testIndexOf() {
+		Assert.assertEquals(true, execute(String16_IndexOf.class));
+	}
+
+	@Test
+	public void testSubstring() {
+		Assert.assertEquals(true, execute(String16_IndexOf.class));
+	}
+
 }

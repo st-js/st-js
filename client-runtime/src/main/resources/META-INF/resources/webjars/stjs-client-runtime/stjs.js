@@ -1073,6 +1073,23 @@ var Throwable = function(message, cause){
 stjs.extend(Throwable, Error, [], function(constructor, prototype){
 	prototype.detailMessage = null;
 	prototype.cause = null;
+
+    prototype._constructor = function() {
+        return this;
+    };
+    prototype._constructor$String = function(message) {
+        this.detailMessage = message;
+        return this;
+    };
+    prototype._constructor$String_Throwable = function(message, cause) {
+        this.detailMessage = message;
+        this.cause = cause;
+        return this;
+    };
+    prototype._constructor$Throwable = function(cause) {
+        this.cause = cause;
+        return this;
+    };
 	prototype.getMessage = function() {
         return this.detailMessage;
     };
@@ -1104,12 +1121,49 @@ var Exception = function(message, cause){
 	Throwable.call(this, message, cause);
 };
 stjs.extend(Exception, Throwable, [], function(constructor, prototype){
+    prototype._constructor = function() {
+        Throwable.call(this);
+        return this;
+    };
+    prototype._constructor$String = function(detailMessage) {
+        Throwable.call(this, detailMessage);
+        return this;
+    };
+    prototype._constructor$String_Throwable = function(detailMessage, throwable) {
+        Throwable.call(this, detailMessage, throwable);
+        return this;
+    };
+    prototype._constructor$Throwable = function(throwable) {
+        Throwable.call(this, throwable);
+        return this;
+    };
+    constructor._serialVersionUID = -3387516993124229948;
 }, {});
 
 var RuntimeException = function(message, cause){
 	Exception.call(this, message, cause);
 };
 stjs.extend(RuntimeException, Exception, [], function(constructor, prototype){
+    prototype._constructor = function() {
+        Exception.call(this);
+        return this;
+    };
+    prototype._constructor$String = function(detailMessage) {
+        Exception.call(this, detailMessage);
+        return this;
+    };
+    prototype._constructor$String_Throwable = function(detailMessage, throwable) {
+        Exception.call(this, detailMessage, throwable);
+        return this;
+    };
+    prototype._constructor$Throwable = function(throwable) {
+        Exception.call(this, throwable);
+        return this;
+    };
+    prototype._constructor$String_Throwable_boolean_boolean = function(message, cause, enableSuppression, writableStackTrace) {
+        Exception.call(this, message, cause, enableSuppression, writableStackTrace);
+        return this;
+    };
 }, {});
 
 var Iterator = function() {};
