@@ -325,9 +325,33 @@ if(!Boolean.prototype.getClass){
 	Boolean.prototype.getClass=stjs.JavalikeGetClass;
 }
 
+if (!Boolean.TRUE) {
+    Boolean.TRUE = new Boolean(true);
+}
+if (!Boolean.FALSE) {
+    Boolean.FALSE = new Boolean(false);
+}
+
+if (!Boolean.prototype.booleanValue) {
+    Boolean.prototype.booleanValue=function(){
+        return this.valueOf();
+    }
+}
+
 //force valueof to match the Java's behavior
-Boolean.valueOf=function(value){
-	return new Boolean(value).valueOf();
+Boolean.valueOf$boolean=function(value){
+    if (value) {
+	    return Boolean.TRUE;
+	} else {
+	    return Boolean.FALSE;
+	}
+}
+Boolean.valueOf$String=function(value){
+    if (value != null && value.toLowerCase() == 'true') {
+	    return Boolean.TRUE;
+	} else {
+	    return Boolean.FALSE;
+	}
 }
 
 /* Array */
