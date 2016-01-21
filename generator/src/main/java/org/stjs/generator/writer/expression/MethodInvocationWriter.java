@@ -4,7 +4,6 @@ import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
-import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.Tree;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
@@ -22,7 +21,8 @@ import org.stjs.javascript.Array;
 import org.stjs.javascript.annotation.Template;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.type.TypeKind;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,7 +62,7 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 		boolean methodOwnerIsStJsArray = symbol.owner.getQualifiedName().toString().equals(Array.class.getCanonicalName());
 
 		// We must convert the var arg params to a an Array
-		if (!methodOwnerIsStJsArray && isSymbolVarArg(symbol)) {
+		if (!methodOwnerIsStJsArray && isSymbolVarArg(context, symbol)) {
 			buildArgumentsWithVarArgs(visitor, methodArguments, context, symbol, arguments);
 		} else {
 			for (Tree arg : methodArguments) {
@@ -73,8 +73,23 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 		return arguments;
 	}
 
-	private static boolean isSymbolVarArg(Symbol.MethodSymbol symbol) {
-		return symbol != null && symbol.isVarArgs() && symbol.getAnnotation(Template.class) == null;
+	private static boolean isSymbolVarArg(GenerationContext context, Symbol.MethodSymbol symbol) {
+		return symbol != null && symbol.isVarArgs() && !isTemplateMethod(context, symbol);
+	}
+
+	private static boolean isTemplateMethod(GenerationContext context, ExecutableElement executableElement) {
+		if (executableElement.getAnnotation(Template.class) != null) {
+			return true;
+		}
+
+		List<ExecutableElement> sameMethodFromParents = ElementUtils.getSameMethodFromParents(context, executableElement);
+		for (ExecutableElement sameMethodFromParent : sameMethodFromParents) {
+			if (sameMethodFromParent.getAnnotation(Template.class) != null) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private static <JS> void buildArgumentsWithVarArgs(WriterVisitor<JS> visitor, List<? extends ExpressionTree> treeArguments,
@@ -82,23 +97,36 @@ public class MethodInvocationWriter<JS> implements WriterContributor<MethodInvoc
 		List<JS> varArgs = new ArrayList<>();
 		List<Symbol.VarSymbol> symbolParameters = symbol.getParameters();
 
+		boolean varArgIsAlreadyAnArray = false;
+
 		for (int i = 0; i < treeArguments.size(); i++) {
 			ExpressionTree arg = treeArguments.get(i);
-			Symbol.VarSymbol param = null;
-			if (symbolParameters.size() > i) {
-				param = symbolParameters.get(i);
-			}
-			if (isVarArgParam(param)) {
-				arguments.add(visitor.scan(arg, context));
+
+			boolean isWithinVarArgRange = i >= symbolParameters.size() - 1;
+
+			if (isWithinVarArgRange) {
+				if (isArgumentAnArray(arg)) {
+					varArgIsAlreadyAnArray = true;
+					arguments.add(visitor.scan(arg, context));
+				} else {
+					varArgs.add(visitor.scan(arg, context));
+				}
 			} else {
-				varArgs.add(visitor.scan(arg, context));
+				arguments.add(visitor.scan(arg, context));
 			}
 		}
-		arguments.add(context.js().array(varArgs));
+		if (!varArgIsAlreadyAnArray) {
+			arguments.add(context.js().array(varArgs));
+		}
 	}
 
-	private static boolean isVarArgParam(Symbol.VarSymbol param) {
-		return (param != null) && ((param.flags() & Flags.VARARGS) == 0);
+	private static boolean isArgumentAnArray(ExpressionTree arg) {
+		Element element = TreeUtils.elementFromUse(arg);
+		if (element == null) {
+			return false;
+		}
+
+		return ElementUtils.getType(element).getKind() == TypeKind.ARRAY;
 	}
 
 	public static <JS> String buildTemplateName(MethodInvocationTree tree, GenerationContext<JS> context) {

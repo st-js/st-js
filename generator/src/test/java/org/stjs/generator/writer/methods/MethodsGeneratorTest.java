@@ -78,19 +78,23 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
         assertCodeContains(Methods10_basic_varargs.class, "var invokedWithVarArgAsFirstParameters = obj.methodVarArgAsFirstParameter([\"A\", \"B\", \"C\"]);");
         assertCodeContains(Methods10_basic_varargs.class, "var invokedWithVargArgAsSecondParameters = obj.methodVarArgAsSecondParameter(0, [\"1\", \"2\", \"3\"]);");
 
-        assertCodeContains(Methods10_basic_varargs.class, "var invokedWithMissingVarArgAsFirstParameters = obj.methodVarArgAsFirstParameter([]);");
-        assertCodeContains(Methods10_basic_varargs.class, "var invokedWithMissingVarArgAsSecondParameters = obj.methodVarArgAsSecondParameter(0, []);");
+        assertCodeContains(Methods10_basic_varargs.class, "var missingVarArgInvokedWithAsFirstParameters = obj.methodVarArgAsFirstParameter([]);");
+        assertCodeContains(Methods10_basic_varargs.class, "var missingVarArgInvokedWithAsSecondParameters = obj.methodVarArgAsSecondParameter(0, []);");
 
-        assertCodeContains(Methods10_basic_varargs.class, "var invokedStaticMethodVarArgAsFirstParameter = Methods10_basic_varargs.staticMethodVarArgAsFirstParameter([\"D\", \"E\", \"F\"]);");
+        assertCodeContains(Methods10_basic_varargs.class, "var invokedStaticMethodVarArgAsSecondParameters = Methods10_basic_varargs.staticMethodVarArgAsSecondParameter(0, [\"H\", \"I\", \"J\"]);");
         assertCodeContains(Methods10_basic_varargs.class, "var invokedStaticMethodVarArgAsSecondParameters = Methods10_basic_varargs.staticMethodVarArgAsSecondParameter(0, [\"H\", \"I\", \"J\"]);");
 
+        assertCodeContains(Methods10_basic_varargs.class, "var arrayAsVarArgInvokedWithAsFirstParameters = obj.methodVarArgAsFirstParameter(stringArray);");
+        assertCodeContains(Methods10_basic_varargs.class, "var arrayAsVarArgInvokedWithAsSecondParameters = obj.methodVarArgAsSecondParameter(0, stringArray);");
+
         Object result = execute(Methods10_basic_varargs.class);
-        Assert.assertEquals("A,B,C-1,2,3---D,E,F-H,I,J.", result);
+        Assert.assertEquals("A,B,C-1,2,3---D,E,F-H,I,J-K,L,M-N,O,P.", result);
     }
 
     @Test
     public void testVarArgsConstructor() {
-        assertCodeContains(Methods10b_constructor_vararg.class, "new Methods10b_constructor_vararg.ClassWithVarArgInConstructor(this, [\"A\", \"B\", \"C\"]);");
+        assertCodeContains(Methods10b_constructor_vararg.class, "new ClassWithVarArgInConstructorAsSingleParameter([\"A\", \"B\", \"C\"]);");
+        assertCodeContains(Methods10b_constructor_vararg.class, "new ClassWithVarArgInConstructorAsSecondParameter(0, [\"A\", \"B\", \"C\"])");
     }
 
     @Test
