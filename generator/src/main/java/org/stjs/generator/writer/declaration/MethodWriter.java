@@ -205,7 +205,7 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 
 	private void decorateBodyWithOuterClassAccessor(MethodTree tree, GenerationContext<JS> context, List<JS> params, JS body,
 													boolean isAnonymousConstructor) {
-		if (!isAnonymousConstructor && isInnerClass(tree, context)) {
+		if (!isAnonymousConstructor && isInnerClass(tree) && !isStaticNestedClass(tree)) {
             context.js().addStatementBeginning(body, addConstructorOuterClassAccessor(tree, context));
             params.add(0, context.js().name(getOuterClassAccessorParamName(tree)));
         }
@@ -218,9 +218,14 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
         }
 	}
 
-	private boolean isInnerClass(MethodTree tree, GenerationContext<JS> context) {
+	private boolean isInnerClass(MethodTree tree) {
 		Element classElement = TreeUtils.elementFromDeclaration(tree).getEnclosingElement();
 		return ElementUtils.isInnerClass(classElement);
+	}
+
+	private boolean isStaticNestedClass(MethodTree tree) {
+		Element classElement = TreeUtils.elementFromDeclaration(tree).getEnclosingElement();
+		return ElementUtils.isInnerClass(classElement) && ElementUtils.isStatic(classElement);
 	}
 
 	private String getOuterClassAccessorParamName(MethodTree tree) {

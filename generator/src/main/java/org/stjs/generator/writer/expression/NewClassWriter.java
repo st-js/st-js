@@ -158,13 +158,7 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 		List<JS> params = arguments(visitor, tree, context);
 
 		if (ElementKind.CLASS.equals(type.getKind())) {
-			String innerClassCheckTypeName = typeName;
-			Namespace annotationNamespace = type.getAnnotation(Namespace.class);
-			if (annotationNamespace != null) {
-				innerClassCheckTypeName = innerClassCheckTypeName.replaceAll(annotationNamespace.value() + ".", "");
-			}
-			if (innerClassCheckTypeName.contains(".")) {
-				// This is an inner class, let's add they keyword this as first param
+			if (isNonStaticInnerClass(type)) {
 				params.add(0, context.js().name(GeneratorConstants.THIS));
 			}
 		}
@@ -175,6 +169,10 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 			params.clear();
 		}
 		return context.js().newExpression(context.js().name(typeName), params);
+	}
+
+	private boolean isNonStaticInnerClass(Element type) {
+		return ElementUtils.isInnerClass(type) && !ElementUtils.isStatic(type);
 	}
 
 	@Override

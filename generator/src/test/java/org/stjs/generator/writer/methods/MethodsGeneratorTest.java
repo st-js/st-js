@@ -240,8 +240,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
     @Test
     public void testOverrideAndOverloadInSubClass_generation() throws Exception {
         assertCodeContains(Methods27_overrride_and_overload_in_subclass_no_conflict.class, "" +
-                "    constructor.SubClassClass = function(outerClass$0) {\n" +
-                "        this._outerClass$0 = outerClass$0;\n" +
+                "    constructor.SubClassClass = function() {\n" +
                 "        Methods27_overrride_and_overload_in_subclass_no_conflict.BaseClass.call(this);\n" +
                 "    };\n" +
                 "    constructor.SubClassClass = stjs.extend(constructor.SubClassClass, Methods27_overrride_and_overload_in_subclass_no_conflict.BaseClass, [Methods27_overrride_and_overload_in_subclass_no_conflict.Interface1], function(constructor, prototype) {\n" +
