@@ -389,11 +389,11 @@ public final class ElementUtils {
             Type type2 = methodType2.getParameterTypes().get(i);
 
             if (!type1.tsym.equals(type2.tsym)) {
-                if (!classContainsTypedParameter(enclosingClass1, executableElement1.getParameters().get(i).asType())) {
+                if (!classContainsTypedParameter(enclosingClass1, executableElement1.getParameters().get(i).asType(), context)) {
                     return false;
                 }
 
-                if (!classContainsTypedParameter(enclosingClass2, executableElement2.getParameters().get(i).asType())) {
+                if (!classContainsTypedParameter(enclosingClass2, executableElement2.getParameters().get(i).asType(), context)) {
                     return false;
                 }
 
@@ -406,11 +406,12 @@ public final class ElementUtils {
         return true;
     }
 
-    private static boolean classContainsTypedParameter(TypeElement classTypeElement, TypeMirror typeMirror) {
+    private static boolean classContainsTypedParameter(TypeElement classTypeElement, TypeMirror typeMirror, GenerationContext context) {
         Symbol.ClassSymbol classSymbol = (Symbol.ClassSymbol) classTypeElement;
+        com.sun.tools.javac.util.List<Type> allparams = classSymbol.asType().allparams();
 
-        for (Symbol.TypeSymbol typeParameter : classSymbol.getTypeParameters()) {
-            if (typeParameter.asType().equals(typeMirror)) {
+        for (Type allparam : allparams) {
+            if (context.getTypes().isAssignable(allparam.getLowerBound(), typeMirror)) {
                 return true;
             }
         }
