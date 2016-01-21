@@ -8,18 +8,27 @@ public class Methods10_basic_varargs<T> {
 		String invokedWithVarArgAsFirstParameters = obj.methodVarArgAsFirstParameter("A", "B", "C");
 		String invokedWithVargArgAsSecondParameters = obj.methodVarArgAsSecondParameter(0, "1", "2", "3");
 
-		String invokedWithMissingVarArgAsFirstParameters = obj.methodVarArgAsFirstParameter();
-		String invokedWithMissingVarArgAsSecondParameters = obj.methodVarArgAsSecondParameter(0);
+		String missingVarArgInvokedWithAsFirstParameters = obj.methodVarArgAsFirstParameter();
+		String missingVarArgInvokedWithAsSecondParameters = obj.methodVarArgAsSecondParameter(0);
 
 		String invokedStaticMethodVarArgAsFirstParameter = staticMethodVarArgAsFirstParameter("D", "E", "F");
 		String invokedStaticMethodVarArgAsSecondParameters = staticMethodVarArgAsSecondParameter(0, "H", "I", "J");
 
+		String[] stringArray;
+		stringArray = new String[]{"K", "L", "M"};
+		String arrayAsVarArgInvokedWithAsFirstParameters = obj.methodVarArgAsFirstParameter(stringArray);
+
+		stringArray = new String[]{"N", "O", "P"};
+		String arrayAsVarArgInvokedWithAsSecondParameters = obj.methodVarArgAsSecondParameter(0, stringArray);
+
 		return invokedWithVarArgAsFirstParameters + "-" +
 				invokedWithVargArgAsSecondParameters + "-" +
-				invokedWithMissingVarArgAsFirstParameters + "-" +
-				invokedWithMissingVarArgAsSecondParameters + "-" +
+				missingVarArgInvokedWithAsFirstParameters + "-" +
+				missingVarArgInvokedWithAsSecondParameters + "-" +
 				invokedStaticMethodVarArgAsFirstParameter + "-" +
-				invokedStaticMethodVarArgAsSecondParameters + ".";
+				invokedStaticMethodVarArgAsSecondParameters + "-" +
+				arrayAsVarArgInvokedWithAsFirstParameters + "-" +
+				arrayAsVarArgInvokedWithAsSecondParameters + ".";
 	}
 
 	public String methodVarArgAsFirstParameter(T... strings) {
