@@ -148,7 +148,14 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testSynchronizedBlock() {
 		GeneratorConfiguration configuration = new GeneratorConfigurationBuilder().setSynchronizedAllowed(true).build();
-		assertCodeContains(Statements17.class, "for (var i = 0; i < 10; ++i) {}", configuration);
+		assertCodeContains(Statements17.class, "" +
+				"        var result = 0;\n" +
+				"        result = result + 999;\n" +
+				"        for (var i = 0; i < 10; ++i) {\n" +
+				"            result = result + i;\n" +
+				"        }\n" +
+				"        return result;",
+				configuration);
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
