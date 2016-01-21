@@ -4,8 +4,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConfigurationBuilder;
-import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.utils.AbstractStjsTest;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -344,6 +344,24 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
                 "    constructor.TheClass = stjs.extend(constructor.TheClass, null, [Methods32d_overloadName_override_method_declaring_typedvar_type.TheInterface], function(constructor, prototype) {\n" +
                 "        prototype.add = function(list, value) {};");
     }
+
+    @Test
+    public void testMethodsOverloadName_with_specific_typed_class_including_generics() {
+        assertCodeContains(Methods32e_overloadName_with_specific_typed_class_including_generics.class,
+                "" +
+                        "    constructor.GenericInterface = stjs.extend(constructor.GenericInterface, null, [], function(constructor, prototype) {\n" +
+                        "        prototype.aMethod = function(t) {};\n" +
+                        "    }",
+
+                "" +
+                        "    prototype.method = function() {\n" +
+                        "        return new (stjs.extend(function Methods32e_overloadName_with_specific_typed_class_including_generics$1() {}, null, [Methods32e_overloadName_with_specific_typed_class_including_generics.GenericInterface], function(constructor, prototype) {\n" +
+                        "            prototype.aMethod = function(dto) {\n" +
+                        "                return 1234;\n" +
+                        "            };\n" +
+                        "        }");
+    }
+
 
     @Test
     public void testMethodsChangeMethodNameByConfig() {
