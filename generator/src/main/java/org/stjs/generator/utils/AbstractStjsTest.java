@@ -273,7 +273,7 @@ public abstract class AbstractStjsTest {
 		return this.generator.getExistingStjsClass(Thread.currentThread().getContextClassLoader(), clazz);
 	}
 
-	public void assertCodeContains(Class<?> clazz, String snippet) {
+	public void assertCodeContains(Class<?> clazz, String... snippet) {
 		assertCodeContains(generate(clazz), snippet);
 	}
 
@@ -284,10 +284,13 @@ public abstract class AbstractStjsTest {
 	/**
 	 * checks if the searched snippet is found inside the given code. The whitespaces are not taken into account
 	 */
-	public void assertCodeContains(String code, String snippet) {
+	public void assertCodeContains(String code, String... snippets) {
 		String cleanCode = code.replaceAll("\\s+", "");
-		String cleanSnippet = snippet.replaceAll("\\s+", "");
-		assertTrue("[" + snippet + "] not in \n" + code, cleanCode.contains(cleanSnippet));
+
+		for (String snippet : snippets) {
+			String cleanSnippet = snippet.replaceAll("\\s+", "");
+			assertTrue("[" + snippet + "] not in \n" + code, cleanCode.contains(cleanSnippet));
+		}
 	}
 
 	public void assertCodeDoesNotContain(Class<?> clazz, String snippet) {

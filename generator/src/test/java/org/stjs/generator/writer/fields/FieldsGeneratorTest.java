@@ -120,8 +120,7 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
                 "    prototype.getPublicField = function() {\n" +
                 "        return this.publicField;\n" +
                 "    };\n" +
-                "    constructor.InnerClass = function(outerClass$0, parent) {\n" +
-                "        this._outerClass$0 = outerClass$0;\n" +
+                "    constructor.InnerClass = function(parent) {\n" +
                 "        this._parent = parent;\n" +
                 "    };\n" +
                 "    constructor.InnerClass = stjs.extend(constructor.InnerClass, null, [], function(constructor, prototype) {\n" +
