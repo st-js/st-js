@@ -4,6 +4,7 @@ import com.sun.source.tree.CatchTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.TryTree;
 import com.sun.source.tree.VariableTree;
+import com.sun.tools.internal.ws.processor.generator.GeneratorException;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javascript.BinaryOperator;
@@ -29,6 +30,8 @@ public class TryWriter<JS> implements WriterContributor<TryTree, JS> {
 
     @Override
     public JS visit(WriterVisitor<JS> visitor, TryTree tree, GenerationContext<JS> context) {
+        blockTryWithResources(tree);
+
         JS tryBlock = visitor.scan(tree.getBlock(), context);
 
         List<JS> catchClauses = getCatchClauses(visitor, context, tree.getCatches());
@@ -37,6 +40,13 @@ public class TryWriter<JS> implements WriterContributor<TryTree, JS> {
             finallyBlock = visitor.scan(tree.getFinallyBlock(), context);
         }
         return context.withPosition(tree, context.js().tryStatement(tryBlock, catchClauses, finallyBlock));
+    }
+
+    private void blockTryWithResources(TryTree tree) {
+        List<? extends Tree> resources = tree.getResources();
+        if (resources != null && resources.size() > 0) {
+            throw new GeneratorException("try-with-resources is not supported");
+        }
     }
 
     private List<JS> getCatchClauses(WriterVisitor<JS> visitor, GenerationContext<JS> context, List<? extends CatchTree> catchTrees) {

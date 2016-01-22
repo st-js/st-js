@@ -1,7 +1,9 @@
 package org.stjs.generator.writer.trycatch;
 
+import com.sun.tools.internal.ws.processor.generator.GeneratorException;
 import org.junit.Assert;
 import org.junit.Test;
+import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.utils.AbstractStjsTest;
 
@@ -77,6 +79,16 @@ public class TryCatchTest extends AbstractStjsTest {
                 "        }");
 
         Assert.assertEquals("CustomExceptionA or CustomExceptionB: A RuntimeException for test purpose... this should be catched!!", execute(TryCatch5_multipleExceptionTypesOnCatchClause.class));
+    }
+
+    @Test
+    public void testBlockTryCatchWithResourceCheck() {
+        try {
+            generate(TryCatch6_tryWithResources.class);
+            Assert.fail("Should not get here: an exception was expected");
+        } catch (GeneratorException e) {
+            Assert.assertTrue(e.getMessage().contains("try-with-resources is not supported"));
+        }
     }
 
 }
