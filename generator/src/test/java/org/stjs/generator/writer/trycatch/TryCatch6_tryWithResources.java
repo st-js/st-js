@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class TryCatch6_tryWithResources {
 
-    public static class MyCloseable implements org.stjs.generator.writer.trycatch.AutoCloseable, java.lang.AutoCloseable {
+    public static class MyCloseable implements org.stjs.generator.writer.trycatch.ducktyping.AutoCloseable, java.lang.AutoCloseable {
 
         @Override
         public void close() throws IOException {
