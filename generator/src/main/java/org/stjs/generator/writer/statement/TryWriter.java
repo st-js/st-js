@@ -1,11 +1,13 @@
 package org.stjs.generator.writer.statement;
 
 import com.sun.source.tree.CatchTree;
-import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.Tree;
 import com.sun.source.tree.TryTree;
 import com.sun.source.tree.VariableTree;
+import com.sun.tools.internal.ws.processor.generator.GeneratorException;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javascript.BinaryOperator;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.writer.WriterContributor;
@@ -28,6 +30,8 @@ public class TryWriter<JS> implements WriterContributor<TryTree, JS> {
 
     @Override
     public JS visit(WriterVisitor<JS> visitor, TryTree tree, GenerationContext<JS> context) {
+        blockTryWithResources(tree);
+
         JS tryBlock = visitor.scan(tree.getBlock(), context);
 
         List<JS> catchClauses = getCatchClauses(visitor, context, tree.getCatches());
@@ -36,6 +40,13 @@ public class TryWriter<JS> implements WriterContributor<TryTree, JS> {
             finallyBlock = visitor.scan(tree.getFinallyBlock(), context);
         }
         return context.withPosition(tree, context.js().tryStatement(tryBlock, catchClauses, finallyBlock));
+    }
+
+    private void blockTryWithResources(TryTree tree) {
+        List<? extends Tree> resources = tree.getResources();
+        if (resources != null && resources.size() > 0) {
+            throw new GeneratorException("try-with-resources is not supported");
+        }
     }
 
     private List<JS> getCatchClauses(WriterVisitor<JS> visitor, GenerationContext<JS> context, List<? extends CatchTree> catchTrees) {
@@ -86,18 +97,39 @@ public class TryWriter<JS> implements WriterContributor<TryTree, JS> {
     private JS generateCheckInstanceOfExceptionClass(GenerationContext<JS> context, CatchTree catchTree) {
         // Generate the following:
         //     stjs.isInstanceOf($exception, MyExceptionClassA)
-        return context.js().functionCall(
-                context.js().name("stjs.isInstanceOf"),
-                Arrays.<JS>asList(
-                        context.js().name(EXCEPTION_VARIABLE_NAME),
-                        getExceptionClassTypeName(context, catchTree)));
+
+        List<JS> exceptionClassTypeNames = getExceptionClassTypeNames(context, catchTree);
+
+        List<JS> conditionStatements = new ArrayList<JS>();
+        for (JS exceptionClassTypeName : exceptionClassTypeNames) {
+            conditionStatements.add(context.js().functionCall(
+                    context.js().name("stjs.isInstanceOf"),
+                    Arrays.<JS>asList(
+                            context.js().name(EXCEPTION_VARIABLE_NAME),
+                            exceptionClassTypeName)));
+        }
+
+        if (conditionStatements.size() == 1) {
+            return conditionStatements.get(0);
+        } else {
+            return context.js().binary(BinaryOperator.CONDITIONAL_OR, conditionStatements);
+        }
     }
 
-    private JS getExceptionClassTypeName(GenerationContext<JS> context, CatchTree catchTree) {
+    private List<JS> getExceptionClassTypeNames(GenerationContext<JS> context, CatchTree catchTree) {
         VariableTree parameter = catchTree.getParameter();
-        Element element = TreeUtils.elementFromUse((ExpressionTree) parameter.getType());
-        String typeName = context.getNames().getTypeName(context, element, DependencyType.OTHER);
-        return context.js().name(typeName);
+
+        Tree parameterType = parameter.getType();
+
+        ArrayList<JS> exceptionClassTypeNames = new ArrayList<>();
+
+        List<Element> types = TreeUtils.getTypesFromTree(parameterType);
+        for (Element type : types) {
+            String typeName = context.getNames().getTypeName(context, type, DependencyType.OTHER);
+            exceptionClassTypeNames.add(context.js().name(typeName));
+        }
+
+        return exceptionClassTypeNames;
     }
 
     private JS generateHandleExceptionBlock(WriterVisitor<JS> visitor, GenerationContext<JS> context, CatchTree catchTree) {
