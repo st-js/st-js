@@ -61,4 +61,22 @@ public class TryCatchTest extends AbstractStjsTest {
         Assert.assertEquals("RuntimeException: A RuntimeException for test purpose... this should be catched!!", execute(TryCatch4_catchExceptionUsingExceptionBaseClass.class));
     }
 
+    @Test
+    public void testTryCatchMultipleExceptionTypesOnCatchClause() {
+        assertCodeContains(TryCatch5_multipleExceptionTypesOnCatchClause.class, "" +
+                "        catch ($exception) {\n" +
+                "            if (stjs.isInstanceOf($exception, TryCatch5_multipleExceptionTypesOnCatchClause.CustomExceptionA) || stjs.isInstanceOf($exception, TryCatch5_multipleExceptionTypesOnCatchClause.CustomExceptionB)) {\n" +
+                "                var e = $exception;\n" +
+                "                array.push(\"CustomExceptionA or CustomExceptionB: \" + e.getMessage());\n" +
+                "            } else if (stjs.isInstanceOf($exception, TryCatch5_multipleExceptionTypesOnCatchClause.CustomExceptionC)) {\n" +
+                "                var e = $exception;\n" +
+                "                array.push(\"CustomExceptionC: \" + e.getMessage());\n" +
+                "            } else {\n" +
+                "                 throw $exception;\n" +
+                "            }\n" +
+                "        }");
+
+        Assert.assertEquals("CustomExceptionA or CustomExceptionB: A RuntimeException for test purpose... this should be catched!!", execute(TryCatch5_multipleExceptionTypesOnCatchClause.class));
+    }
+
 }
