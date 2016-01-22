@@ -24,7 +24,7 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 	public void testEnumReference() {
 		assertCodeContains(Enums2_reference.class, "" +
 				"   constructor.Value = function() {\n" +
-				"        JavaEnum.call(this);\n" +
+				"        stjs.Java.Enum.call(this);\n" +
 				"    };");
 		assertCodeContains(Enums2_reference.class, "" +
 				"    prototype.main = function() {\n" +
@@ -69,14 +69,14 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testEnumsNamespace() {
 		assertCodeContains(Enums10_annotation_namespace.class, "" +
-				"my.enums.Enums10_annotation_namespace = stjs.extend(my.enums.Enums10_annotation_namespace, JavaEnum, [], function(constructor, prototype)");
+				"my.enums.Enums10_annotation_namespace = stjs.extend(my.enums.Enums10_annotation_namespace, stjs.Java.Enum, [], function(constructor, prototype)");
 	}
 
 	@Test
 	public void testEnumConstructor() {
 		assertCodeContains(Enums11_with_constructor.class, "" +
 				"var Enums11_with_constructor = function(initialValue) {\n" +
-				"    JavaEnum.call(this);\n" +
+				"    stjs.Java.Enum.call(this);\n" +
 				"    this._privateFieldValue = initialValue;\n" +
 				"};");
 		assertCodeContains(Enums11_with_constructor.class, "" +
@@ -105,10 +105,10 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 	public void testEnumImplementInterface() {
 		assertCodeContains(Enums13_implement_interface.class, "" +
 				"var Enums13_implement_interface = function(keyStr) {\n" +
-				"    JavaEnum.call(this);\n" +
+				"    stjs.Java.Enum.call(this);\n" +
 				"    this._keyStr = keyStr;\n" +
 				"};\n" +
-				"Enums13_implement_interface = stjs.extend(Enums13_implement_interface, JavaEnum, [KeyType], function(constructor, prototype) {\n" +
+				"Enums13_implement_interface = stjs.extend(Enums13_implement_interface, stjs.Java.Enum, [KeyType], function(constructor, prototype) {\n" +
 				"    constructor.NONE = new Enums13_implement_interface(\"none\");\n" +
 				"    constructor.NONE._name = \"NONE\";\n" +
 				"    constructor.NONE._ordinal = 0;\n" +

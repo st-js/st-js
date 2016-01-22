@@ -609,9 +609,9 @@ stjs.enumeration=function(){
 	return e;
 };
 
-var JavaEnum = function() {};
-
-stjs.extend(JavaEnum, null, [], function(constructor, prototype) {
+stjs.ns("stjs.Java");
+stjs.Java.Enum = function() {};
+stjs.extend(stjs.Java.Enum, null, [], function(constructor, prototype) {
   prototype._name = null;
   prototype._ordinal = null;
   constructor._values = [];
@@ -635,7 +635,7 @@ stjs.extend(JavaEnum, null, [], function(constructor, prototype) {
         return obj;
       }
     }
-    throw new Error("Specified JavaEnum value not found in the enumaration.");
+    throw new Error("Specified Java.Enum value not found in the enumeration: " + value);
   };
   prototype.name = function() {
     return this._name;

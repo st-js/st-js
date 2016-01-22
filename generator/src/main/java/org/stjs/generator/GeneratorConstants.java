@@ -57,9 +57,9 @@ public final class GeneratorConstants {
 
 	public static final String ENUM_VALUES_PROPERTY = "_values";
 
-	public static final String ENUM_CLASS = "Enum";
-
-	public static final String TRANSPILED_ENUM_CLASS = "JavaEnum";
+//	public static final String ENUM_CLASS = "Enum";
+//
+//	public static final String TRANSPILED_ENUM_CLASS = "stjs.Java.Enum";
 
 	public static final String AUTO_GENERATED_ELEMENT_SEPARATOR = "$";
 

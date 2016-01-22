@@ -90,9 +90,9 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 
 	private JS constructSuperType(GenerationContext<JS> context, TypeElement typeElement, String methodName) {
 		String typeName = context.getNames().getTypeName(context, typeElement, DependencyType.STATIC);
-		if (typeName.equals(GeneratorConstants.ENUM_CLASS)) {
-			typeName = GeneratorConstants.TRANSPILED_ENUM_CLASS;
-		}
+//		if (typeName.equals(GeneratorConstants.ENUM_CLASS)) {
+//			typeName = GeneratorConstants.TRANSPILED_ENUM_CLASS;
+//		}
 		return context.js().name(GeneratorConstants.SUPER.equals(methodName) ? typeName : typeName + ".prototype." + methodName);
 	}
 
