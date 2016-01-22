@@ -101,7 +101,7 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
                 // Block 1
                 "" +
                         "    constructor.InnerEnum = function() {\n" +
-                        "        JavaEnum.call(this);\n" +
+                        "        stjs.Java.Enum.call(this);\n" +
                         "    };",
 
                 // Block 2
@@ -167,9 +167,9 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
     public void testEnumInsideInner() {
         String code = generate(InnerTypes17.class);
         assertCodeContains(code, "var InnerTypes17 = function(){};" + "InnerTypes17 = stjs.extend(InnerTypes17, null, [], function(constructor, prototype){");
-        assertCodeContains(code, "var deep = InnerTypes17.Inner._Enum.a;");
+        assertCodeContains(code, "var deep = InnerTypes17.Inner._EnumInsideNestedClass.a;");
         assertCodeContains(code, "stjs.extend(constructor.Inner, null, [], function(constructor, prototype){");
-        assertCodeContains(code, "constructor.Enum = stjs.extend(constructor.Enum, JavaEnum");
+        assertCodeContains(code, "constructor.EnumInsideNestedClass = stjs.extend(constructor.EnumInsideNestedClass, stjs.Java.Enum");
     }
 
     @Test

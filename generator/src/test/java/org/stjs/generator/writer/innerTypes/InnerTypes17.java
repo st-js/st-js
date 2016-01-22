@@ -4,11 +4,11 @@ package org.stjs.generator.writer.innerTypes;
 public class InnerTypes17 {
 
 	public static void main() {
-		Inner.Enum deep = Inner.Enum.a;
+		Inner.EnumInsideNestedClass deep = Inner.EnumInsideNestedClass.a;
 	}
 
 	private static class Inner {
-		enum Enum {
+		enum EnumInsideNestedClass {
 			a, b, c;
 		}
 	}

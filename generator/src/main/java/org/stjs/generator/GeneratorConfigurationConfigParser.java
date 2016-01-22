@@ -90,7 +90,13 @@ public class GeneratorConfigurationConfigParser {
         for (int i = 0; i < pairs.length; i++) {
             String pair = pairs[i];
             String[] keyValue = pair.split(CONFIG_PROPERTIES_REGEX.replace(SPLIT_CHAR_TOKEN, CONFIG_PROPERTIES_MAP_SPLIT_CHAR));
-            map.put(keyValue[0], keyValue[1]);
+            String key = keyValue[0];
+            String value = "";
+            if (keyValue.length >= 2) {
+                value = keyValue[1];
+            }
+
+            map.put(key, value);
         }
         return map;
     }

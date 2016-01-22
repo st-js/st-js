@@ -163,16 +163,23 @@ public class TreeWrapper<T extends Tree, JS> {
 		if (nsAnnotation != null) {
 			return nsAnnotation.value();
 		}
+
+		String longestMatchingKey = "";
+		String namespace = null;
 		GeneratorConfiguration configuration = context.getConfiguration();
 		Map<String, String> namespacesFromConfig = configuration.getNamespaces();
 		for (Map.Entry<String, String> entry : namespacesFromConfig.entrySet()) {
 			String key = entry.getKey();
 			if (key != null && element.asType().toString().startsWith(key)) {
-				return entry.getValue();
+				String matchingNamespace = entry.getValue();
+				if (longestMatchingKey.length() < key.length()) {
+					longestMatchingKey = key;
+					namespace = matchingNamespace;
+				}
 			}
 		}
 
-		return null;
+		return namespace;
 	}
 
 	private String getTypeElementNamespace() {

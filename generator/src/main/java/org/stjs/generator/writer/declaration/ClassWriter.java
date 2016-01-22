@@ -72,7 +72,11 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 	 */
 	private JS getSuperClass(ClassTree clazz, GenerationContext<JS> context) {
 		if (clazz.getKind() == Tree.Kind.ENUM) {
-			return context.js().name(GeneratorConstants.TRANSPILED_ENUM_CLASS);
+			String enumClassName = context.getNames().getTypeName(
+					context,
+					context.getElements().getTypeElement(Enum.class.getName()),
+					DependencyType.EXTENDS);
+			return context.js().name(enumClassName);
 		}
 
 		Element type = TreeUtils.elementFromDeclaration(clazz);

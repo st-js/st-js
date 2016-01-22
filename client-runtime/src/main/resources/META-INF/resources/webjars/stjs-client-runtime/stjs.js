@@ -421,6 +421,8 @@ stjs.ns=function(path){
 	return obj;
 };
 
+stjs.ns("stjs.Java");
+
 stjs.copyProps=function(from, to){
 	for(var key in from){
 		if (!stjs.skipCopy.hasOwnProperty(key))
@@ -609,9 +611,8 @@ stjs.enumeration=function(){
 	return e;
 };
 
-var JavaEnum = function() {};
-
-stjs.extend(JavaEnum, null, [], function(constructor, prototype) {
+stjs.Java.Enum = function() {};
+stjs.extend(stjs.Java.Enum, null, [], function(constructor, prototype) {
   prototype._name = null;
   prototype._ordinal = null;
   constructor._values = [];
@@ -635,7 +636,7 @@ stjs.extend(JavaEnum, null, [], function(constructor, prototype) {
         return obj;
       }
     }
-    throw new Error("Specified JavaEnum value not found in the enumaration.");
+    throw new Error("Specified Java.Enum value not found in the enumeration: " + value);
   };
   prototype.name = function() {
     return this._name;
@@ -1103,7 +1104,7 @@ stjs.STJSAssert.assertStateTrue = function(position, code, condition) {
 		stjs.assertHandler(position, code, "Wrong state. Condition is false");
 }
 /** exception **/
-var Throwable = function(message, cause){
+stjs.Java.Throwable = function(message, cause){
 	Error.call(this);
 	if(typeof Error.captureStackTrace === 'function'){
 		// nice way to capture the stack trace for chrome
@@ -1124,7 +1125,7 @@ var Throwable = function(message, cause){
 		this.cause = message;
 	}
 };
-stjs.extend(Throwable, Error, [], function(constructor, prototype){
+stjs.extend(stjs.Java.Throwable, Error, [], function(constructor, prototype){
 	prototype.detailMessage = null;
 	prototype.cause = null;
 
@@ -1171,64 +1172,63 @@ stjs.extend(Throwable, Error, [], function(constructor, prototype){
 	 };
 }, {});
 
-var Exception = function(message, cause){
-	Throwable.call(this, message, cause);
+stjs.Java.Exception = function(message, cause){
+	stjs.Java.Throwable.call(this, message, cause);
 };
-stjs.extend(Exception, Throwable, [], function(constructor, prototype){
+stjs.extend(stjs.Java.Exception, stjs.Java.Throwable, [], function(constructor, prototype){
     prototype._constructor = function() {
-        Throwable.call(this);
+        stjs.Java.Throwable.call(this);
         return this;
     };
     prototype._constructor$String = function(detailMessage) {
-        Throwable.call(this, detailMessage);
+        stjs.Java.Throwable.call(this, detailMessage);
         return this;
     };
     prototype._constructor$String_Throwable = function(detailMessage, throwable) {
-        Throwable.call(this, detailMessage, throwable);
+        stjs.Java.Throwable.call(this, detailMessage, throwable);
         return this;
     };
     prototype._constructor$Throwable = function(throwable) {
-        Throwable.call(this, throwable);
+        stjs.Java.Throwable.call(this, throwable);
         return this;
     };
-    constructor._serialVersionUID = -3387516993124229948;
 }, {});
 
-var RuntimeException = function(message, cause){
-	Exception.call(this, message, cause);
+stjs.Java.RuntimeException = function(message, cause){
+	stjs.Java.Exception.call(this, message, cause);
 };
-stjs.extend(RuntimeException, Exception, [], function(constructor, prototype){
+stjs.extend(stjs.Java.RuntimeException, stjs.Java.Exception, [], function(constructor, prototype){
     prototype._constructor = function() {
-        Exception.call(this);
+        stjs.Java.Exception.call(this);
         return this;
     };
     prototype._constructor$String = function(detailMessage) {
-        Exception.call(this, detailMessage);
+        stjs.Java.Exception.call(this, detailMessage);
         return this;
     };
     prototype._constructor$String_Throwable = function(detailMessage, throwable) {
-        Exception.call(this, detailMessage, throwable);
+        stjs.Java.Exception.call(this, detailMessage, throwable);
         return this;
     };
     prototype._constructor$Throwable = function(throwable) {
-        Exception.call(this, throwable);
+        stjs.Java.Exception.call(this, throwable);
         return this;
     };
     prototype._constructor$String_Throwable_boolean_boolean = function(message, cause, enableSuppression, writableStackTrace) {
-        Exception.call(this, message, cause, enableSuppression, writableStackTrace);
+        stjs.Java.Exception.call(this, message, cause, enableSuppression, writableStackTrace);
         return this;
     };
 }, {});
 
-var Iterator = function() {};
-Iterator = stjs.extend(Iterator, null, [], function(constructor, prototype) {
+stjs.Java.Iterator = function() {};
+stjs.Java.Iterator = stjs.extend(stjs.Java.Iterator, null, [], function(constructor, prototype) {
     prototype.hasNext = function() {};
     prototype.next = function() {};
     prototype.remove = function() {};
 }, {}, {});
 
-var Iterable = function() {};
-Iterable = stjs.extend(Iterable, null, [], function(constructor, prototype) {
+stjs.Java.Iterable = function() {};
+stjs.Java.Iterable = stjs.extend(stjs.Java.Iterable, null, [], function(constructor, prototype) {
     prototype.iterator = function() {};
 }, {}, {});
 
@@ -1246,4 +1246,3 @@ stjs.getField=function(obj, field){
 		return stjs.getFieldHandler(obj, field);
 	return obj[field];
 };
-
