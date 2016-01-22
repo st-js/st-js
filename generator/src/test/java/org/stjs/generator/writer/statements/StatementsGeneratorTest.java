@@ -166,7 +166,7 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testCatch() {
-		assertCodeContains(Statements19.class, "catch(e){throw new RuntimeException()._constructor$Throwable(e);}");
+		assertCodeContains(Statements19.class, "catch(e){throw new stjs.Java.RuntimeException()._constructor$Throwable(e);}");
 	}
 
 	@Test

@@ -15,7 +15,7 @@ public class TryCatchTest extends AbstractStjsTest {
                 "        try {\n" +
                 "            array.push(\"before throw\");\n" +
                 "            if (true) {\n" +
-                "                 throw new RuntimeException()._constructor();\n" +
+                "                 throw new stjs.Java.RuntimeException()._constructor();\n" +
                 "            }\n" +
                 "            array.push(\"after throw\");\n" +
                 "        }catch (t) {\n" +
