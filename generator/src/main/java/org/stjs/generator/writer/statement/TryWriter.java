@@ -6,6 +6,7 @@ import com.sun.source.tree.TryTree;
 import com.sun.source.tree.VariableTree;
 import com.sun.tools.internal.ws.processor.generator.GeneratorException;
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javascript.BinaryOperator;
 import org.stjs.generator.javascript.JavaScriptBuilder;
@@ -45,7 +46,7 @@ public class TryWriter<JS> implements WriterContributor<TryTree, JS> {
     private void blockTryWithResources(TryTree tree) {
         List<? extends Tree> resources = tree.getResources();
         if (resources != null && resources.size() > 0) {
-            throw new GeneratorException("try-with-resources is not supported");
+            throw new STJSRuntimeException("try-with-resources is not supported");
         }
     }
 

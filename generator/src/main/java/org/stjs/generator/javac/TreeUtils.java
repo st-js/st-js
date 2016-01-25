@@ -33,6 +33,8 @@ import com.sun.tools.internal.ws.processor.generator.GeneratorException;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.tree.JCTree;
+import org.stjs.generator.JavascriptClassGenerationException;
+import org.stjs.generator.STJSRuntimeException;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
@@ -854,7 +856,7 @@ public final class TreeUtils {
             assert element != null : "Unable to find Element from tree.";
             typeList.add(element);
         } else {
-            throw new GeneratorException("Unexpected Tree Type: " + node.getKind() + " - " + node.getClass().getName());
+            throw new STJSRuntimeException("Unexpected Tree Type: " + node.getKind() + " - " + node.getClass().getName());
         }
 
         return typeList;

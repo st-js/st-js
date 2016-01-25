@@ -86,7 +86,7 @@ public class TryCatchTest extends AbstractStjsTest {
         try {
             generate(TryCatch6_tryWithResources.class);
             Assert.fail("Should not get here: an exception was expected");
-        } catch (GeneratorException e) {
+        } catch (STJSRuntimeException e) {
             Assert.assertTrue(e.getMessage().contains("try-with-resources is not supported"));
         }
     }
