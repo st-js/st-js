@@ -22,8 +22,10 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class implements the naming strategy transforming Java element names in JavaScript names.
@@ -36,6 +38,13 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 
     private final Map<String, DependencyType> resolvedRootTypes = new HashMap<String, DependencyType>();
     private final Map<TypeMirror, TypeInfo> resolvedTypes = new HashMap<TypeMirror, TypeInfo>();
+    private Set<String> stjsProvidedTypes = new HashSet<String>(){{
+        add("java.lang.String");
+        add("java.lang.Number");
+        add("java.lang.Boolean");
+        add("java.lang.Integer");
+        add("java.lang.Long");
+    }};
 
     private class TypeInfo {
         private final String fullName;
@@ -166,7 +175,8 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 
     private void addResolvedType(Element rootTypeElement, DependencyType depType) {
         String name = ElementUtils.getQualifiedClassName(rootTypeElement).toString();
-        if (!name.startsWith("java.lang.")) {
+
+        if (!stjsProvidedTypes.contains(name)) {
             DependencyType prevDepType = resolvedRootTypes.get(name);
             if (prevDepType == null || depType.isStricter(prevDepType)) {
                 resolvedRootTypes.put(name, depType);
