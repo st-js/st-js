@@ -20,6 +20,7 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,6 +60,8 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
         add(RuntimeException.class.getCanonicalName());
         add(Iterator.class.getCanonicalName());
         add(Iterable.class.getCanonicalName());
+
+        add(StandardCharsets.class.getCanonicalName());
     }};
 
     private class TypeInfo {
