@@ -23,6 +23,7 @@ import javax.lang.model.type.WildcardType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,11 +40,25 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
     private final Map<String, DependencyType> resolvedRootTypes = new HashMap<String, DependencyType>();
     private final Map<TypeMirror, TypeInfo> resolvedTypes = new HashMap<TypeMirror, TypeInfo>();
     private Set<String> stjsProvidedTypes = new HashSet<String>(){{
-        add("java.lang.String");
-        add("java.lang.Number");
-        add("java.lang.Boolean");
-        add("java.lang.Integer");
-        add("java.lang.Long");
+        add(Object.class.getCanonicalName());
+
+        add(String.class.getCanonicalName());
+        add(java.lang.Math.class.getCanonicalName());
+
+        add(Number.class.getCanonicalName());
+        add(Boolean.class.getCanonicalName());
+        add(Integer.class.getCanonicalName());
+        add(Long.class.getCanonicalName());
+        add(Byte.class.getCanonicalName());
+        add(Double.class.getCanonicalName());
+        add(Float.class.getCanonicalName());
+        add(Short.class.getCanonicalName());
+
+        add(Throwable.class.getCanonicalName());
+        add(Exception.class.getCanonicalName());
+        add(RuntimeException.class.getCanonicalName());
+        add(Iterator.class.getCanonicalName());
+        add(Iterable.class.getCanonicalName());
     }};
 
     private class TypeInfo {
