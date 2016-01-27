@@ -1144,7 +1144,7 @@ stjs.STJSAssert.assertStateTrue = function(position, code, condition) {
 	if (!condition && stjs.assertHandler)
 		stjs.assertHandler(position, code, "Wrong state. Condition is false");
 }
-/** exception **/
+/** exceptions **/
 stjs.Java.Throwable = function(message, cause){
 	Error.call(this);
 	if(typeof Error.captureStackTrace === 'function'){
