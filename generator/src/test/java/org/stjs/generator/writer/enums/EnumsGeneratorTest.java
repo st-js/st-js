@@ -47,7 +47,7 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testEnumDeclarationInInterface() {
 		assertCodeContains(Enums8_interface_declaration.class, "" +
-				"    constructor.InnerClass = stjs.extend(constructor.InnerClass, null, [Enums8_interface_declaration], function(constructor, prototype) {\n" +
+				"    constructor.InnerClass = stjs.extend(constructor.InnerClass, stjs.Java.Object, [Enums8_interface_declaration], function(constructor, prototype) {\n" +
 				"        prototype.methodReturningEnum = function() {\n" +
 				"            return SimpleEnum.FIRST;\n" +
 				"        };");

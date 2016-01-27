@@ -542,6 +542,10 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 		}
 	}
 
+    constructor.getSimpleName = function() {
+        return _simpleClassName;
+    }
+
 	// build package and assign
 	return	_constructor;
 };
@@ -574,6 +578,24 @@ stjs.extend12=function( _constructor,  _super, _implements){
 	// build package and assign
 	return	_constructor;
 };
+
+stjs._nextObjectUid = 1;
+
+stjs.defineJavaObjectUniqueId = function(owner) {
+    return owner._$java_objectUid;
+}
+
+stjs.Java.Object = function() {
+  stjs.defineJavaObjectUniqueId(this);
+};
+stjs.Java.Object = stjs.extend(stjs.Java.Object, null, [], function(constructor, prototype) {
+  prototype._$java_objectUid = 0;
+
+  prototype.$java_hashCode = function() {
+    return this._$java_objectUid;
+  };
+
+}, {}, {});
 
 /**
  * return type's annotations
@@ -1001,6 +1023,7 @@ stjs.parseJSON = (function () {
 stjs.isArray=function( obj ) {
     return stjs.toString.call(obj) === "[object Array]";
 };
+stjs.isArray = Array.isArray;
 
 /**
  * cls can by the type of the return.

@@ -15,7 +15,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
     @Test
     public void testPublicInstanceMethod() {
         assertCodeContains(Methods1.class, //
-                "stjs.extend(Methods1, null, [], function(constructor, prototype){" + //
+                "stjs.extend(Methods1, stjs.Java.Object, [], function(constructor, prototype){" + //
                         "prototype.method = function(arg1,arg2){return 0;}");
     }
 
@@ -34,14 +34,14 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
     @Test
     public void testPublicStaticMethod() {
         assertCodeContains(Methods3.class, //
-                "stjs.extend(Methods3, null, [], function(constructor, prototype){" + //
+                "stjs.extend(Methods3, stjs.Java.Object, [], function(constructor, prototype){" + //
                         "constructor.method = function(arg1,arg2){");
     }
 
     @Test
     public void testPrivateStaticMethod() {
         assertCodeContains(Methods4.class, //
-                "stjs.extend(Methods4, null, [], function(constructor, prototype){" + //
+                "stjs.extend(Methods4, stjs.Java.Object, [], function(constructor, prototype){" + //
                         "constructor._method = function(arg1,arg2){");
     }
 
@@ -123,7 +123,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
     @Test
     public void testAbstractMethod() {
         // the class only contains abstract methods, therefore nothing must be generated
-        assertCodeContains(Methods15.class, "stjs.extend(Methods15, null, [], function(constructor, prototype){" //
+        assertCodeContains(Methods15.class, "stjs.extend(Methods15, stjs.Java.Object, [], function(constructor, prototype){" //
                 + "prototype._doSomething=function(){};" //
                 + "prototype._doSomethingElse=function(){};" //
                 + "}, {}, {}, \"Methods15\");");
@@ -132,7 +132,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
     @Test
     public void testInterfaceMethods() {
         // the class only contains abstract methods, therefore nothing must be generated
-        assertCodeContains(Methods15b.class, "stjs.extend(Methods15b, null, [], function(constructor, prototype){" //
+        assertCodeContains(Methods15b.class, "stjs.extend(Methods15b, stjs.Java.Object, [], function(constructor, prototype){" //
                 + "prototype.doSomething=function(){};" //
                 + "prototype.doSomethingElse=function(){};" //
                 + "}, {}, {}, \"Methods15b\");");
@@ -141,7 +141,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
     @Test
     public void testSynchronizedMethod() {
         GeneratorConfiguration configuration = new GeneratorConfigurationBuilder().setSynchronizedAllowed(true).build();
-        assertCodeContains(Methods16.class, "stjs.extend(Methods16, null, [], function(constructor, prototype)" +
+        assertCodeContains(Methods16.class, "stjs.extend(Methods16, stjs.Java.Object, [], function(constructor, prototype)" +
                 "{ prototype.method = function() {" +
                 "for (var i = 0; i < 10; i++) {}" +
                 "}" +
@@ -255,7 +255,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
     @Test
     public void testOverloadNameConflict_Subclass_with_same_name_method_but_different_signature() {
         assertCodeContains(Methods28_overloadNameConflict_Subclass_with_same_name_method_but_different_signatures.class, "" +
-                "    constructor.BaseClass = stjs.extend(constructor.BaseClass, null, [], function(constructor, prototype) {\n" +
+                "    constructor.BaseClass = stjs.extend(constructor.BaseClass, stjs.Java.Object, [], function(constructor, prototype) {\n" +
                 "        prototype.aMethod1 = function(i) {};\n" +
                 "        prototype.aMethod2 = function(i) {};\n" +
                 "    }");
@@ -282,15 +282,15 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
     @Test
     public void testOverloadNameConflict_Subclass_with_same_name_method_but_different_signatures() {
         assertCodeContains(Methods30_overloadNameConflict_Resolved_by_JSOverloadName_annotation.class, "" +
-                "    constructor.Interface1 = stjs.extend(constructor.Interface1, null, [], function(constructor, prototype) {\n" +
+                "    constructor.Interface1 = stjs.extend(constructor.Interface1, stjs.Java.Object, [], function(constructor, prototype) {\n" +
                 "        prototype.aMethod = function(i) {};\n" +
                 "    }");
         assertCodeContains(Methods30_overloadNameConflict_Resolved_by_JSOverloadName_annotation.class, "" +
-                "    constructor.Interface2 = stjs.extend(constructor.Interface2, null, [], function(constructor, prototype) {\n" +
+                "    constructor.Interface2 = stjs.extend(constructor.Interface2, stjs.Java.Object, [], function(constructor, prototype) {\n" +
                 "        prototype.aMethodWithString = function(s) {};\n" +
                 "    }");
         assertCodeContains(Methods30_overloadNameConflict_Resolved_by_JSOverloadName_annotation.class, "" +
-                "    constructor.SubClass = stjs.extend(constructor.SubClass, null, [Methods30_overloadNameConflict_Resolved_by_JSOverloadName_annotation.Interface1, Methods30_overloadNameConflict_Resolved_by_JSOverloadName_annotation.Interface2], function(constructor, prototype) {\n" +
+                "    constructor.SubClass = stjs.extend(constructor.SubClass, stjs.Java.Object, [Methods30_overloadNameConflict_Resolved_by_JSOverloadName_annotation.Interface1, Methods30_overloadNameConflict_Resolved_by_JSOverloadName_annotation.Interface2], function(constructor, prototype) {\n" +
                 "        prototype.aMethod = function(i) {};\n" +
                 "        prototype.aMethodWithString = function(s) {};\n" +
                 "    }");
@@ -330,7 +330,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
                 "        prototype._aMethod = function(item) {};\n" +
                 "    }");
         assertCodeContains(Methods32c_overloadName_extends_baseclass_with_typed_vars_and_override_concrete_method.class, "" +
-                "    constructor.AbstractClass = stjs.extend(constructor.AbstractClass, null, [], function(constructor, prototype) {\n" +
+                "    constructor.AbstractClass = stjs.extend(constructor.AbstractClass, stjs.Java.Object, [], function(constructor, prototype) {\n" +
                 "        prototype._aMethod = function(item) {};\n" +
                 "    }");
     }
@@ -338,10 +338,10 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
     @Test
     public void testMethodsOverloadName_override_method_declaring_typedvar_type() {
         assertCodeContains(Methods32d_overloadName_override_method_declaring_typedvar_type.class, "" +
-                "    constructor.TheInterface = stjs.extend(constructor.TheInterface, null, [], function(constructor, prototype) {\n" +
+                "    constructor.TheInterface = stjs.extend(constructor.TheInterface, stjs.Java.Object, [], function(constructor, prototype) {\n" +
                 "        prototype.add = function(list, value) {};");
         assertCodeContains(Methods32d_overloadName_override_method_declaring_typedvar_type.class, "" +
-                "    constructor.TheClass = stjs.extend(constructor.TheClass, null, [Methods32d_overloadName_override_method_declaring_typedvar_type.TheInterface], function(constructor, prototype) {\n" +
+                "    constructor.TheClass = stjs.extend(constructor.TheClass, stjs.Java.Object, [Methods32d_overloadName_override_method_declaring_typedvar_type.TheInterface], function(constructor, prototype) {\n" +
                 "        prototype.add = function(list, value) {};");
     }
 
@@ -349,13 +349,13 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
     public void testMethodsOverloadName_with_specific_typed_class_including_generics() {
         assertCodeContains(Methods32e_overloadName_with_specific_typed_class_including_generics.class,
                 "" +
-                        "    constructor.GenericInterface = stjs.extend(constructor.GenericInterface, null, [], function(constructor, prototype) {\n" +
+                        "    constructor.GenericInterface = stjs.extend(constructor.GenericInterface, stjs.Java.Object, [], function(constructor, prototype) {\n" +
                         "        prototype.aMethod = function(t) {};\n" +
                         "    }",
 
                 "" +
                         "    prototype.method = function() {\n" +
-                        "        return new (stjs.extend(function Methods32e_overloadName_with_specific_typed_class_including_generics$1() {}, null, [Methods32e_overloadName_with_specific_typed_class_including_generics.GenericInterface], function(constructor, prototype) {\n" +
+                        "        return new (stjs.extend(function Methods32e_overloadName_with_specific_typed_class_including_generics$1() {}, stjs.Java.Object, [Methods32e_overloadName_with_specific_typed_class_including_generics.GenericInterface], function(constructor, prototype) {\n" +
                         "            prototype.aMethod = function(dto) {\n" +
                         "                return 1234;\n" +
                         "            };\n" +
