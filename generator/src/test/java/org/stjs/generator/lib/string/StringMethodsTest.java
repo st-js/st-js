@@ -118,4 +118,13 @@ public class StringMethodsTest extends AbstractStjsTest {
 		Assert.assertEquals(true, execute(String19_replaceWithCharSequence.class));
 	}
 
+	@Test
+	public void testCanConvertStringToUtf8Bytes() throws Exception {
+		Assert.assertEquals("C3A9C3A2C3A7", execute(String20_getBytesUtf8.class));
+	}
+
+	@Test
+	public void testStringFormat() throws Exception {
+		Assert.assertEquals(true, execute(String21_stringFormat.class));
+	}
 }
