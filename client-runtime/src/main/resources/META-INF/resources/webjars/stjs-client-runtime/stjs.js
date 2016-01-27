@@ -382,6 +382,11 @@ Boolean.valueOf$String=function(value){
 }
 
 /* Array */
+Array.prototype._clone = function() {
+  return this.slice();
+}
+
+// createJavaArray
 // Supports:
 //   createJavaArray(3) --> creates a new array of 3 elements initialized with 'null' values
 //   createJavaArray(null, "A", "B", "C") --> creates a new array of 3 elements initialized with specified values
