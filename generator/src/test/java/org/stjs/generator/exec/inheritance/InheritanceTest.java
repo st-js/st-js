@@ -17,15 +17,6 @@ public class InheritanceTest extends AbstractStjsTest {
 		assertEquals(2.0, executeAndReturnNumber(Inheritance2.class), 0);
 	}
 
-	/**
-	 * Verifies that .js files generated with ST-JS 1.2 (and therefore using the 1.2 version of stjs.extends) will still
-	 * run correctly when executed with the current version.
-	 */
-	@Test
-	public void testExtendCompatibilityWith12() {
-		assertEquals("4 2 WXYZ undefined", execute("src/test/resources/javascript/Inheritance-generated-with-1.2.js"));
-	}
-
 	@Test
 	public void testInstanceofSuperClass() {
 		assertEquals(1.0, executeAndReturnNumber(Inheritance3.class), 0);

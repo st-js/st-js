@@ -46,9 +46,8 @@ stjs.JavalikeGetClass = function(){
 };
 
 /* String */
-if (!String.prototype.equals) {
-	String.prototype.equals=stjs.JavalikeEquals;
-}
+String.prototype.$java_equals=stjs.JavalikeEquals;
+
 if (!String.prototype.getBytes) {
 	String.prototype.getBytes=stjs.NOT_IMPLEMENTED;
 }
@@ -181,9 +180,7 @@ if(!String.prototype.contains){
 	};
 }
 
-if(!String.prototype.getClass){
-	String.prototype.getClass=stjs.JavalikeGetClass;
-}
+String.prototype.$java_getClass=stjs.JavalikeGetClass;
 
 if(!String.prototype.isEmpty){
 	String.prototype.isEmpty=function(it){
@@ -364,12 +361,10 @@ if (!Number.prototype.isNaN) {
 		return isNaN(this);
 	}
 }
-if (!Number.prototype.equals) {
-	Number.prototype.equals=stjs.JavalikeEquals;
-}
-if(!Number.prototype.getClass){
-	Number.prototype.getClass=stjs.JavalikeGetClass;
-}
+
+Number.prototype.$java_equals=stjs.JavalikeEquals;
+
+Number.prototype.$java_getClass=stjs.JavalikeGetClass;
 
 //force valueof to match approximately the Java's behavior (for Integer.valueOf it returns in fact a double)
 Number.valueOf=function(value){
@@ -393,12 +388,9 @@ Long.valueOf$String=function(value){
 }
 
 /* Boolean */
-if (!Boolean.prototype.equals) {
-	Boolean.prototype.equals=stjs.JavalikeEquals;
-}
-if(!Boolean.prototype.getClass){
-	Boolean.prototype.getClass=stjs.JavalikeGetClass;
-}
+Boolean.prototype.$java_equals=stjs.JavalikeEquals;
+
+Boolean.prototype.$java_getClass=stjs.JavalikeGetClass;
 
 if (!Boolean.TRUE) {
     Boolean.TRUE = new Boolean(true);
@@ -493,12 +485,6 @@ stjs.copyInexistentProps=function(from, to){
 };
 
 stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescription, _annotations, _simpleClassName){
-	if(typeof(_typeDescription) !== "object"){
-		// stjs 1.3+ always passes an non-null object to _typeDescription => The code calling stjs.extend
-		// was generated with version 1.2 or earlier, so let's call the 1.2 version of stjs.extend
-		return stjs.extend12.apply(this, arguments);
-	}
-
 	_constructor.$inherit=[];
 
 	if(_super != null){
@@ -546,15 +532,11 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
         return this._$stjs_objectUid;
     }
 
-	// add the default equals method if it is not present yet, and we don't have a superclass
-	if(_super == null){
-		if(!_constructor.prototype.equals) {
-			_constructor.prototype.equals = stjs.JavalikeEquals;
-		}
-		if(!_constructor.prototype.getClass) {
-			_constructor.prototype.getClass = stjs.JavalikeGetClass;
-		}
-	}
+    _constructor.$java_hashCode = function() {
+        return this._$stjs_objectUid;
+    }
+
+    _constructor.$java_equals = stjs.JavalikeEquals;
 
     constructor.getSimpleName = function() {
         return _simpleClassName;
@@ -564,34 +546,6 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 	return	_constructor;
 };
 
-/**
- * 1.2 and earlier version of stjs.extend. Included for backwards compatibility
- */
-stjs.extend12=function( _constructor,  _super, _implements){
-	var I = function(){};
-	I.prototype	= _super.prototype;
-	_constructor.prototype	= new I();
-
-	//copy static properties for super and interfaces
-	// assign every method from proto instance
-	for(var a = 1; a < arguments.length; ++a){
-		stjs.copyProps(arguments[a], _constructor);
-	}
-	// remember the correct constructor
-	_constructor.prototype.constructor	= _constructor;
-
-	// add the default equals method if we don't have a superclass. Code generated with version 1.2 will
-	// override this method is equals() is present in the original java code.
-	// this was not part of the original 1.2 version of extends, however forward compatibility
-	// with 1.3 requires it
-	if(_super == null){
-		_constructor.prototype.equals = stjs.JavalikeEquals;
-		_constructor.prototype.getClass = stjs.JavalikeGetClass;
-	}
-
-	// build package and assign
-	return	_constructor;
-};
 
 stjs._nextObjectUid = 1;
 
@@ -600,6 +554,10 @@ stjs.Java.Object = function() {
 
 stjs.Java.Object = stjs.extend(stjs.Java.Object, null, [], function(constructor, prototype) {
   prototype._$stjs_objectUid = 0;
+
+  prototype.$java_equals = stjs.JavalikeEquals;
+
+  prototype.$java_getClass = stjs.JavalikeGetClass;
 
   prototype.$java_hashCode = function() {
     if (this._$stjs_objectUid == 0) {
@@ -673,7 +631,7 @@ stjs.enumEntry.prototype.ordinal=function(){
 stjs.enumEntry.prototype.toString=function(){
 	return this._name;
 };
-stjs.enumEntry.prototype.equals=stjs.JavalikeEquals;
+stjs.enumEntry.prototype.$java_equals=stjs.JavalikeEquals;
 
 stjs.enumeration=function(){
 	var i;
@@ -726,7 +684,6 @@ stjs.extend(stjs.Java.Enum, stjs.Java.Object, [], function(constructor, prototyp
   prototype.toString = function() {
     return this._name;
   };
-  prototype.equals = stjs.JavalikeEquals;
 }, {});
 
 /**

@@ -93,13 +93,13 @@ public class SpecialMethodGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testSpecialEquals() {
 		// no longer [x.equals(y) -> x == y], but keep equals as is
-		assertCodeContains(SpecialMethod10.class, "x.equals(2)");
+		assertCodeContains(SpecialMethod10.class, "x.$java_equals(2)");
 	}
 
 	@Test
 	public void testSpecialNotEquals() {
 		// no longer [!x.equals(y) -> !(x == y)], but keep equals as is
-		assertCodeContains(SpecialMethod11.class, "!x.equals(2)");
+		assertCodeContains(SpecialMethod11.class, "!x.$java_equals(2)");
 	}
 
 	@Test

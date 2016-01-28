@@ -36,6 +36,16 @@ public class TestUtils {
         }
     }
 
+    public static void assertNotEquals(Object val1, Object val2, String message) {
+        if (val1 == val2) {
+            return;
+        }
+
+        if ((val1 != null) && (val1.equals(val2))) {
+            fail("Values should not be equal: Value1 [" + nullSafeToString(val1) + "], Value2 [" + nullSafeToString(val2) + "]: " + message);
+        }
+    }
+
     public static void assertEquals(int expectedValue, int currentValue, String message) {
         if (expectedValue == currentValue) {
             return;
