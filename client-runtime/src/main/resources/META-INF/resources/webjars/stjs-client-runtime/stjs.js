@@ -541,6 +541,11 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 	_constructor.$annotations = _annotations;
 	_constructor.$simpleClassName = _simpleClassName;
 
+    _constructor._$stjs_objectUid = stjs._nextObjectUid++;
+    _constructor.$java_hashCode = function() {
+        return this._$stjs_objectUid;
+    }
+
 	// add the default equals method if it is not present yet, and we don't have a superclass
 	if(_super == null){
 		if(!_constructor.prototype.equals) {
@@ -594,13 +599,13 @@ stjs.Java.Object = function() {
 };
 
 stjs.Java.Object = stjs.extend(stjs.Java.Object, null, [], function(constructor, prototype) {
-  prototype._hashCode = 0;
+  prototype._$stjs_objectUid = 0;
 
   prototype.$java_hashCode = function() {
-    if (this._hashCode == 0) {
-        this._hashCode = stjs._nextObjectUid++;
+    if (this._$stjs_objectUid == 0) {
+        this._$stjs_objectUid = stjs._nextObjectUid++;
     }
-    return this._hashCode;
+    return this._$stjs_objectUid;
   };
 
 }, {}, {}, "stjs.Java.Object");
