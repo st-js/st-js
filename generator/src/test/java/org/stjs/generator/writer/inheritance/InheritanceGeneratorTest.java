@@ -7,7 +7,7 @@ public class InheritanceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testImplements() {
-		assertCodeContains(Inheritance1.class, "stjs.extend(Inheritance1, null, [MyInterface],");
+		assertCodeContains(Inheritance1.class, "stjs.extend(Inheritance1, stjs.Java.Object, [MyInterface],");
 	}
 
 	@Test
@@ -23,17 +23,17 @@ public class InheritanceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testExtendsMore() {
-		assertCodeContains(Inheritance4.class, "stjs.extend(Inheritance4, null, [MyInterface, MyInterface2],");
+		assertCodeContains(Inheritance4.class, "stjs.extend(Inheritance4, stjs.Java.Object, [MyInterface, MyInterface2],");
 	}
 
 	@Test
 	public void testAbstractAndGeneric() {
-		assertCodeContains(Inheritance5.class, "stjs.extend(Inheritance5, null, [MyInterface3],");
+		assertCodeContains(Inheritance5.class, "stjs.extend(Inheritance5, stjs.Java.Object, [MyInterface3],");
 	}
 
 	@Test
 	public void testImplementsSyntheticType() {
-		assertCodeContains(Inheritance6.class, "stjs.extend(Inheritance6, null, [],");
+		assertCodeContains(Inheritance6.class, "stjs.extend(Inheritance6, stjs.Java.Object, [],");
 	}
 
 	@Test

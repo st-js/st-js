@@ -83,7 +83,7 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 
 		if (clazz.getExtendsClause() == null || type.getKind() == ElementKind.INTERFACE) {
 			// no super class found
-			return context.js().keyword(Keyword.NULL);
+			return context.js().code("stjs.Java.Object");
 		}
 
 		TreeWrapper<Tree, JS> superType = context.getCurrentWrapper().child(clazz.getExtendsClause());

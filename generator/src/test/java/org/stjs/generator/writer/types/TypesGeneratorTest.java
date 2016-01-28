@@ -11,6 +11,11 @@ public class TypesGeneratorTest extends AbstractStjsTest {
 	}
 
 	@Test
+	public void testAllClassesExtendsJavaObject() {
+		assertCodeContains(Types1.class, "Types1 = stjs.extend(Types1, stjs.Java.Object, [], null, {}, {}, \"Types1\");");
+	}
+
+	@Test
 	public void testAllowedrrays() {
 		// should not break in the annotation's array
 		generate(Types3.class);
