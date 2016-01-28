@@ -30,4 +30,9 @@ public class HashCodeTest extends AbstractStjsTest {
     public void testHashCodeCustomClassOverridenHashCode() throws Exception {
         Assert.assertEquals(true, execute(HashCode5_customClassOverridenHashCode.class));
     }
+
+    @Test
+    public void testClassHashCode() throws Exception {
+        Assert.assertEquals(true, execute(HashCode6_javaLangClass_HashCode.class));
+    }
 }
