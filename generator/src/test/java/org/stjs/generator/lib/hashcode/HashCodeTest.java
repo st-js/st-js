@@ -35,4 +35,9 @@ public class HashCodeTest extends AbstractStjsTest {
     public void testClassHashCode() throws Exception {
         Assert.assertEquals(true, execute(HashCode6_javaLangClass_HashCode.class));
     }
+
+    @Test
+    public void testClassEquals() throws Exception {
+        Assert.assertEquals(true, execute(HashCode6_javaLangClass_HashCode.class));
+    }
 }
