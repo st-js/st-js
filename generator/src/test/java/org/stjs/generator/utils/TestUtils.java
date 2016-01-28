@@ -1,4 +1,4 @@
-package org.stjs.generator;
+package org.stjs.generator.utils;
 
 import org.stjs.javascript.JSObjectAdapter;
 
@@ -17,7 +17,6 @@ public class TestUtils {
     }
 
     public static String joinCharArray(char[] charArray) {
-        assertEquals("", "", "");
         String result = "";
         for (char c : charArray) {
             result = result + c;
@@ -37,12 +36,37 @@ public class TestUtils {
         }
     }
 
+    public static void assertEquals(int expectedValue, int currentValue, String message) {
+        if (expectedValue == currentValue) {
+            return;
+        } else {
+            String errorMessage = "Expecting [" + nullSafeToString(expectedValue) + "], Current [" + nullSafeToString(currentValue) + "]: " + message;
+            JSObjectAdapter.$js("throw new Error(errorMessage)");
+        }
+    }
+
     public static String nullSafeToString(Object o) {
         if (o == null) {
             return "null";
         } else {
             return o.toString();
         }
+    }
+
+    public static void fail(String message) {
+        JSObjectAdapter.$js("throw new Error(message)");
+    }
+
+    public static void assertSameInstance(Object obj1, Object obj2, String message) {
+        if (!areSameInstance(obj1, obj2)) {
+            fail("Assertion error for '" + message + "': " + obj1 + " != " + obj2);
+        }
+    }
+
+    public static boolean areSameInstance(Object obj1, Object obj2) {
+        boolean areEquals = false;
+        JSObjectAdapter.$js("areEquals = (obj1 === obj2)");
+        return areEquals;
     }
 
 }

@@ -271,6 +271,15 @@ var Integer=Number;
 var Long=Number;
 var Short=Number;
 
+// Primitive hashCode
+stjs.primitiveHashCode = function() {
+  return this.valueOf();
+}
+
+Number.prototype.$java_hashCode = stjs.primitiveHashCode;
+String.prototype.$java_hashCode = stjs.primitiveHashCode;
+Boolean.prototype.$java_hashCode = function() { return this.valueOf() ? 1231 : 1237; }
+
 Number.parseInt$String=function(str) {
     return parseInt(str);
 }
@@ -581,21 +590,20 @@ stjs.extend12=function( _constructor,  _super, _implements){
 
 stjs._nextObjectUid = 1;
 
-stjs.defineJavaObjectUniqueId = function(owner) {
-    return owner._$java_objectUid;
-}
-
 stjs.Java.Object = function() {
-  stjs.defineJavaObjectUniqueId(this);
 };
+
 stjs.Java.Object = stjs.extend(stjs.Java.Object, null, [], function(constructor, prototype) {
-  prototype._$java_objectUid = 0;
+  prototype._hashCode = 0;
 
   prototype.$java_hashCode = function() {
-    return this._$java_objectUid;
+    if (this._hashCode == 0) {
+        this._hashCode = stjs._nextObjectUid++;
+    }
+    return this._hashCode;
   };
 
-}, {}, {});
+}, {}, {}, "stjs.Java.Object");
 
 /**
  * return type's annotations
@@ -678,7 +686,7 @@ stjs.enumeration=function(){
 };
 
 stjs.Java.Enum = function() {};
-stjs.extend(stjs.Java.Enum, null, [], function(constructor, prototype) {
+stjs.extend(stjs.Java.Enum, stjs.Java.Object, [], function(constructor, prototype) {
   prototype._name = null;
   prototype._ordinal = null;
   constructor._values = [];

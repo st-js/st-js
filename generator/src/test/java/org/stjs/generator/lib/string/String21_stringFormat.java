@@ -1,6 +1,6 @@
 package org.stjs.generator.lib.string;
 
-import org.stjs.generator.TestUtils;
+import org.stjs.generator.utils.TestUtils;
 
 public class String21_stringFormat {
 
