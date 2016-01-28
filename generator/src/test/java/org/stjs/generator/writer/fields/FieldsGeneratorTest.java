@@ -291,8 +291,8 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
     @Test
     public void testInitializeObjectField() {
         assertCodeContains(Fields33_object_field_initializer.class, "{\n" +
-                "    this._privateObject = new Object();\n" +
-                "    this.publicObject = new Object();\n" +
+                "    this._privateObject = new stjs.Java.Object();\n" +
+                "    this.publicObject = new stjs.Java.Object();\n" +
                 "    this._defaultedValue = Fields33_object_field_initializer._DEFAULT_VALUE;\n" +
                 "};");
         assertCodeContains(Fields33_object_field_initializer.class, "{\n" +
