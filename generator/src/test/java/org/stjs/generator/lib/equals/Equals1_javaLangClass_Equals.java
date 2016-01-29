@@ -1,8 +1,8 @@
-package org.stjs.generator.lib.hashcode;
+package org.stjs.generator.lib.equals;
 
 import org.stjs.generator.utils.TestUtils;
 
-public class HashCode7_javaLangClass_Equals {
+public class Equals1_javaLangClass_Equals {
 
     public static class ClassA {
     }

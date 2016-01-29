@@ -7,37 +7,45 @@ import org.stjs.generator.GeneratorConfigurationBuilder;
 public class AnnotationGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testSimpleClassAnnotation() {
-		assertCodeContains(Annotation1.class, "_:{\"Immutable\":{}}", new GeneratorConfigurationBuilder().annotations("Immutable").build());
+		assertCodeContains(Annotation1.class,
+				new GeneratorConfigurationBuilder().annotations("Immutable").build(),
+				"_:{\"Immutable\":{}}");
 	}
 
 	@Test
 	public void testClassAnnotationWithMultipleValue() {
-		assertCodeContains(Annotation2.class, "_:{\"MyAnnotations.WithMultipleValues\":{n:2}}",
-				new GeneratorConfigurationBuilder().annotations("MyAnnotations.WithMultipleValues").build());
+		assertCodeContains(Annotation2.class,
+				new GeneratorConfigurationBuilder().annotations("MyAnnotations.WithMultipleValues").build(),
+				"_:{\"MyAnnotations.WithMultipleValues\":{n:2}}"
+				);
 	}
 
 	@Test
 	public void testClassAnnotationWithSingleValue() {
-		assertCodeContains(Annotation2b.class, "_:{\"MyAnnotations.WithSingleValue\":{value:4}}", new GeneratorConfigurationBuilder()
-				.annotations("MyAnnotations.WithSingleValue").build());
+		assertCodeContains(Annotation2b.class,
+				new GeneratorConfigurationBuilder().annotations("MyAnnotations.WithSingleValue").build(),
+				"_:{\"MyAnnotations.WithSingleValue\":{value:4}}");
 	}
 
 	@Test
 	public void testFieldAnnotationWithValue() {
-		assertCodeContains(Annotation3.class, "field:{\"MyAnnotations.WithMultipleValues\":{n:2, m:\"100\"}}",
-				new GeneratorConfigurationBuilder().annotations("MyAnnotations.WithMultipleValues").build());
+		assertCodeContains(Annotation3.class,
+				new GeneratorConfigurationBuilder().annotations("MyAnnotations.WithMultipleValues").build(),
+				"field:{\"MyAnnotations.WithMultipleValues\":{n:2, m:\"100\"}}");
 	}
 
 	@Test
 	public void testMethodAnnotationWithValue() {
-		assertCodeContains(Annotation4.class, "method:{\"MyAnnotations.WithArrayValue\":{value:[\"a\", \"b\"]}}",
-				new GeneratorConfigurationBuilder().annotations("MyAnnotations.WithArrayValue").build());
+		assertCodeContains(Annotation4.class,
+				new GeneratorConfigurationBuilder().annotations("MyAnnotations.WithArrayValue").build(),
+				"method:{\"MyAnnotations.WithArrayValue\":{value:[\"a\", \"b\"]}}");
 	}
 
 	@Test
 	public void testMethodParamAnnotationWithValue() {
-		assertCodeContains(Annotation5.class, "method$1:{\"MyAnnotations.WithMultipleValues\":{n:2+3}}", new GeneratorConfigurationBuilder()
-				.annotations("MyAnnotations.WithMultipleValues").build());
+		assertCodeContains(Annotation5.class,
+				new GeneratorConfigurationBuilder().annotations("MyAnnotations.WithMultipleValues").build(),
+				"method$1:{\"MyAnnotations.WithMultipleValues\":{n:2+3}}");
 	}
 
 	@Test

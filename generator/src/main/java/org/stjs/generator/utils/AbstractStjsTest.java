@@ -78,6 +78,10 @@ public abstract class AbstractStjsTest {
 		return convert(executeOrGenerate(clazz, true, false));
 	}
 
+	public Object execute(Class<?> clazz, GeneratorConfiguration extraConfig) {
+		return convert(executeOrGenerate(clazz, true, false, extraConfig));
+	}
+
 	public double executeAndReturnNumber(Class<?> clazz) {
 		return executeAndReturnNumber(clazz, null);
 	}
@@ -277,7 +281,7 @@ public abstract class AbstractStjsTest {
 		assertCodeContains(generate(clazz), snippet);
 	}
 
-	public void assertCodeContains(Class<?> clazz, String snippet, GeneratorConfiguration extraConfig) {
+	public void assertCodeContains(Class<?> clazz, GeneratorConfiguration extraConfig, String... snippet) {
 		assertCodeContains(generate(clazz, extraConfig), snippet);
 	}
 

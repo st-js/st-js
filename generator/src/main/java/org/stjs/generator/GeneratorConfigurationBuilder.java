@@ -108,8 +108,18 @@ public class GeneratorConfigurationBuilder {
 		return this;
 	}
 
+	public GeneratorConfigurationBuilder namespaces(String javaPackage, String jsNamespace) {
+		namespaces.put(javaPackage, jsNamespace);
+		return this;
+	}
+
 	public GeneratorConfigurationBuilder renamedMethodSignatures(Map<String, String> renamedMethodSignaturesMap) {
 		renamedMethodSignatures.putAll(renamedMethodSignaturesMap);
+		return this;
+	}
+
+	public GeneratorConfigurationBuilder renamedMethodSignature(String methodSignature, String newName) {
+		renamedMethodSignatures.put(methodSignature, newName);
 		return this;
 	}
 

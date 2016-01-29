@@ -3,7 +3,6 @@ package org.stjs.generator.writer.statements;
 import junit.framework.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.utils.AbstractStjsTest;
@@ -147,15 +146,15 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testSynchronizedBlock() {
-		GeneratorConfiguration configuration = new GeneratorConfigurationBuilder().setSynchronizedAllowed(true).build();
-		assertCodeContains(Statements17.class, "" +
-				"        var result = 0;\n" +
-				"        result = result + 999;\n" +
-				"        for (var i = 0; i < 10; ++i) {\n" +
-				"            result = result + i;\n" +
-				"        }\n" +
-				"        return result;",
-				configuration);
+		assertCodeContains(Statements17.class,
+				new GeneratorConfigurationBuilder().setSynchronizedAllowed(true).build(),
+				"" +
+						"        var result = 0;\n" +
+						"        result = result + 999;\n" +
+						"        for (var i = 0; i < 10; ++i) {\n" +
+						"            result = result + i;\n" +
+						"        }\n" +
+						"        return result;");
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)

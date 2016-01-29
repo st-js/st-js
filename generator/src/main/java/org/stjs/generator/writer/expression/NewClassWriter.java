@@ -11,7 +11,6 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.Tree;
-import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
@@ -26,9 +25,6 @@ import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.declaration.MethodWriter;
-import org.stjs.javascript.Array;
-import org.stjs.javascript.annotation.Namespace;
-import org.stjs.javascript.annotation.Template;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
