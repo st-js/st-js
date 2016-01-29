@@ -266,18 +266,6 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
             }
 
             if (allMethodNamesFromSuperTypes.size() >= 2) {
-
-                Map<String, List<ExecutableElement>> ALLMETHODNAMESFROMSUPERTYPES = new HashMap<>();
-                for (ExecutableElement sameMethodFromParent : sameMethodsFromParents) {
-                    String methodName = getMethodName(context, sameMethodFromParent);
-
-                    List<ExecutableElement> matchingExecutableElements = ALLMETHODNAMESFROMSUPERTYPES.get(methodName);
-                    if (matchingExecutableElements == null) {
-                        matchingExecutableElements = new ArrayList<>();
-                        ALLMETHODNAMESFROMSUPERTYPES.put(methodName, matchingExecutableElements);
-                    }
-                    matchingExecutableElements.add(sameMethodFromParent);
-                }
                 context.addError(context.getCurrentPath().getCompilationUnit(),
                         String.format(
                                 "Method name conflict for method with signature: [%s.%s]. "
