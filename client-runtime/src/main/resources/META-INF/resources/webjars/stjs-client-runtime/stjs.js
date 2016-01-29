@@ -542,6 +542,10 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
         return _simpleClassName;
     }
 
+    constructor.getName = function() {
+        return _simpleClassName;
+    }
+
 	// build package and assign
 	return	_constructor;
 };

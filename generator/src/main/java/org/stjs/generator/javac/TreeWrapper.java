@@ -168,9 +168,12 @@ public class TreeWrapper<T extends Tree, JS> {
 		String namespace = null;
 		GeneratorConfiguration configuration = context.getConfiguration();
 		Map<String, String> namespacesFromConfig = configuration.getNamespaces();
+
 		for (Map.Entry<String, String> entry : namespacesFromConfig.entrySet()) {
 			String key = entry.getKey();
-			if (key != null && element.asType().toString().startsWith(key)) {
+			String elementName = element.asType().toString();
+			if (key != null &&
+					(elementName.equals(key) || (key.endsWith(".") && elementName.startsWith(key))))  {
 				String matchingNamespace = entry.getValue();
 				if (longestMatchingKey.length() < key.length()) {
 					longestMatchingKey = key;

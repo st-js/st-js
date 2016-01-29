@@ -10,10 +10,6 @@ import org.stjs.generator.writer.namespace.packageLevel.empty.deep.PackageNamesp
 import org.stjs.generator.writer.namespace.samples.SampleClassToOverrideName;
 import org.stjs.generator.writer.namespace.samples.SampleClassToOverrideName_ButWithLongerName;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
 public class NamespaceGeneratorTest extends AbstractStjsTest {
     @Test
     public void testDecl() {
@@ -102,31 +98,10 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 
     @Test
     public void testNamespaceDefinedInConfiguration() {
-        String datePackage = Date.class.getCanonicalName();
-        Map<String, String> namespaces = new HashMap<>();
-        namespaces.put(datePackage, "java_util_custom_namespace");
-        // Test starts with package name
-        namespaces.put("org.stjs.generator.writer", "my.own.namespace");
-
-        GeneratorConfigurationBuilder generatorConfigurationBuilder = new GeneratorConfigurationBuilder();
-        generatorConfigurationBuilder.namespaces(namespaces);
-        generatorConfigurationBuilder.allowedPackage(datePackage);
-
-        assertCodeContains(Namespace13_generator_configuration.class,
-                generatorConfigurationBuilder.build(),
-                "" +
-                        "stjs.ns(\"my.own.namespace\");\n" +
-                        "my.own.namespace.Namespace13_generator_configuration = function() {}");
-        assertCodeContains(Namespace13_generator_configuration.class,
-                generatorConfigurationBuilder.build(),
-                "" +
-                        "var date = new java_util_custom_namespace.Date()._constructor();");
-    }
-
-    @Test
-    public void testNamespaceDefinedInConfiguration_SpecificClass_vs_wildCard_NamespaceDeclaration() {
         GeneratorConfiguration config = new GeneratorConfigurationBuilder()
+                // package prefix
                 .namespaces("org.stjs.generator.writer.namespace.samples.", "overriden.wildcard.namespace")
+                // exact class name
                 .namespaces("org.stjs.generator.writer.namespace.samples.SampleClassToOverrideName", "overriden.specificclass.namespace")
                 .build();
 
@@ -134,7 +109,7 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
         assertCodeContains(SampleClassToOverrideName_ButWithLongerName.class, config, "overriden.wildcard.namespace.SampleClassToOverrideName_ButWithLongerName = function() {};");
 
         assertCodeContains(
-                Namespace14_generator_configuration_specificClass_vs_wildcard.class,
+                Namespace13_generator_configuration_specificClass_vs_wildcard.class,
 
                 "new overriden.specificclass.namespace.SampleClassToOverrideName();",
 
