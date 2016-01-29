@@ -484,7 +484,7 @@ stjs.copyInexistentProps=function(from, to){
 	return to;
 };
 
-stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescription, _annotations, _simpleClassName){
+stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescription, _annotations, _className){
 	_constructor.$inherit=[];
 
 	if(_super != null){
@@ -525,7 +525,7 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 
 	_constructor.$typeDescription = _typeDescription;
 	_constructor.$annotations = _annotations;
-	_constructor.$simpleClassName = _simpleClassName;
+	_constructor.$className = _className;
 
     _constructor._$stjs_objectUid = stjs._nextObjectUid++;
     _constructor.$java_hashCode = function() {
@@ -538,12 +538,13 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
 
     _constructor.$java_equals = stjs.JavalikeEquals;
 
-    constructor.getSimpleName = function() {
-        return _simpleClassName;
+    _constructor.$java_getSimpleName = function() {
+        var nameParts = this.$className.split(".");
+        return nameParts[nameParts.length - 1]
     }
 
-    constructor.getName = function() {
-        return _simpleClassName;
+    _constructor.$java_getName = function() {
+        return this.$className;
     }
 
 	// build package and assign
