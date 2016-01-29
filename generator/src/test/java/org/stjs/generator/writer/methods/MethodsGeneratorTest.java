@@ -2,12 +2,10 @@ package org.stjs.generator.writer.methods;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.JavascriptFileGenerationException;
 import org.stjs.generator.utils.AbstractStjsTest;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -140,12 +138,14 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 
     @Test
     public void testSynchronizedMethod() {
-        GeneratorConfiguration configuration = new GeneratorConfigurationBuilder().setSynchronizedAllowed(true).build();
-        assertCodeContains(Methods16.class, "stjs.extend(Methods16, stjs.Java.Object, [], function(constructor, prototype)" +
-                "{ prototype.method = function() {" +
-                "for (var i = 0; i < 10; i++) {}" +
-                "}" +
-                ";}", configuration);
+        assertCodeContains(Methods16.class,
+                new GeneratorConfigurationBuilder().setSynchronizedAllowed(true).build(),
+                "" +
+                        "stjs.extend(Methods16, stjs.Java.Object, [], function(constructor, prototype)" +
+                        "{ prototype.method = function() {" +
+                        "for (var i = 0; i < 10; i++) {}" +
+                        "}" +
+                        ";}");
     }
 
     @Test(expected = JavascriptFileGenerationException.class)
@@ -365,17 +365,17 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 
     @Test
     public void testMethodsChangeMethodNameByConfig() {
-        assertCodeContains(Methods33a_methodNameChangedByConfig.class, "" +
+        assertCodeContains(Methods33a_methodNameChangedByConfig.class,
+                new GeneratorConfigurationBuilder()
+                        .renamedMethodSignature("org.stjs.generator.writer.methods.Methods33a_methodNameChangedByConfig.methodNameWithoutParametersToBeChangedByConfig", "methodNameWithoutParametersHasBeenChangedByConfig")
+                        .renamedMethodSignature("org.stjs.generator.writer.methods.Methods33a_methodNameChangedByConfig.methodNameWithSingleParameterToBeChangedByConfig$String", "methodNameWithSingleParameterHasBeenChangedByConfig")
+                        .renamedMethodSignature("org.stjs.generator.writer.methods.Methods33a_methodNameChangedByConfig.methodNameWithMultipleParametersToBeChangedByConfig$String_int", "methodNameWithMultipleParametersHasBeenChangedByConfig")
+                        .build(),
+                "" +
                         "    prototype.methodNameWithoutParametersHasBeenChangedByConfig = function() {};\n" +
                         "    prototype.methodNameWithSingleParameterHasBeenChangedByConfig = function(s) {};\n" +
-                        "    prototype.methodNameWithMultipleParametersHasBeenChangedByConfig = function(s, i) {};\n",
-                new GeneratorConfigurationBuilder().renamedMethodSignatures(
-                        new HashMap<String, String>() {{
-                            put("org.stjs.generator.writer.methods.Methods33a_methodNameChangedByConfig.methodNameWithoutParametersToBeChangedByConfig", "methodNameWithoutParametersHasBeenChangedByConfig");
-                            put("org.stjs.generator.writer.methods.Methods33a_methodNameChangedByConfig.methodNameWithSingleParameterToBeChangedByConfig$String", "methodNameWithSingleParameterHasBeenChangedByConfig");
-                            put("org.stjs.generator.writer.methods.Methods33a_methodNameChangedByConfig.methodNameWithMultipleParametersToBeChangedByConfig$String_int", "methodNameWithMultipleParametersHasBeenChangedByConfig");
-                        }})
-                        .build());
+                        "    prototype.methodNameWithMultipleParametersHasBeenChangedByConfig = function(s, i) {};\n"
+                );
     }
 
     private void testForbiddenConfiguration(String expectedForbiddenMethod, Class<?> clazz) {
