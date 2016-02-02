@@ -18,7 +18,7 @@ public class Fields28_array {
         this.aStringArray = new String[]{"a", "b", "c", "d", "e"};
         this.anIntTwoDimensArray = new int[][]{{0, 1}, {2, 3}};
         this.aCharArray = new char[]{ 'n', 'o', 't', ' ', 'a', ' ', 'S', 't', 'r', 'i', 'n', 'g' };
-        this.anObjectArray = new Object[]{new SimpleObject(this.anIntTwoDimensArray), new SimpleObject(new int[][]{{0}})};
+        this.anObjectArray = new Object[]{new SimpleObjectWithTwoDimensionArrayAsConstructor(this.anIntTwoDimensArray), new SimpleObjectWithTwoDimensionArrayAsConstructor(new int[][]{{0}})};
         this.aFloatArray = new float[]{2f, 3.6969f};
         this.aCollectionArray = new Collection[]{};
         this.anInterfaceArray = new SimpleInterface[]{new SimpleInterface() {
@@ -30,10 +30,10 @@ public class Fields28_array {
         this.anIntThreeDimensArrayInitialized = new int[][][]{{{0}}};
     }
 
-    private class SimpleObject {
+    private static class SimpleObjectWithTwoDimensionArrayAsConstructor {
         private int[][] anIntTwoDimensArray;
 
-        public SimpleObject(int[][] anIntTwoDimensArray) {
+        public SimpleObjectWithTwoDimensionArrayAsConstructor(int[][] anIntTwoDimensArray) {
             this.anIntTwoDimensArray = anIntTwoDimensArray;
         }
     }

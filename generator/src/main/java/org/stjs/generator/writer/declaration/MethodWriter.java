@@ -105,59 +105,6 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		return true;
 	}
 
-	private void addFieldInitializersToConstructor(WriterVisitor<JS> visitor, JS constructorBody, GenerationContext<JS> context) {
-		List<JS> expressions = new ArrayList<>();
-
-		for (Tree tree : context.getCurrentWrapper().getEnclosingType().getTree().getMembers()) {
-			if (tree.getKind() == Tree.Kind.VARIABLE) {
-				TreeWrapper<VariableTree, JS> variableTreeWrapper = context.wrap(TreeUtils.elementFromDeclaration((VariableTree) tree));
-				if (isFieldInitializerRequired(variableTreeWrapper)) {
-					expressions.add(context.js().expressionStatement(
-							context.js().assignment(AssignOperator.ASSIGN,
-									context.js().property(
-											context.js().name(JavascriptKeywords.THIS),
-											FieldUtils.getFieldName(variableTreeWrapper.getTree())
-									),
-									visitor.scan(
-											variableTreeWrapper.getTree().getInitializer(),
-											context)
-							)
-					));
-				}
-			}
-		}
-
-		Collections.reverse(expressions);
-
-		for (JS expression : expressions) {
-			context.js().addStatementBeginning(constructorBody, expression);
-		}
-	}
-
-	private boolean isFieldInitializerRequired(TreeWrapper<VariableTree, JS> variableTreeWrapper) {
-		if (!FieldUtils.isFieldDeclaration(variableTreeWrapper.getContext())) {
-			return false;
-		}
-
-		if (MemberWriters.shouldSkip(variableTreeWrapper)) {
-			return false;
-		}
-
-		if (variableTreeWrapper.isStatic()) {
-			return false;
-		}
-
-		if (variableTreeWrapper.getTree().getInitializer() == null) {
-			return false;
-		}
-
-		if (FieldUtils.isInitializerLiteral(variableTreeWrapper.getTree().getInitializer())) {
-			return false;
-		}
-
-		return true;
-	}
-
 	@Override
 	@SuppressWarnings("PMD.CyclomaticComplexity")
 	public JS visit(WriterVisitor<JS> visitor, MethodTree tree, GenerationContext<JS> context) {
@@ -170,20 +117,15 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 
 		JS body = visitor.scan(tree.getBody(), context);
 
-		if (JavaNodes.isConstructor(tree) && JavaNodes.hasMultipleConstructors(context.getCurrentPath())) {
-			// Multiple constructors are generated as static methods within the class
-			//    prototype._constructor$String = function(string) {
-			body = context.withPosition(tree, context.js().block(new ArrayList<JS>()));
-		}
+//		if (JavaNodes.isConstructor(tree) && JavaNodes.hasMultipleConstructors(context.getCurrentPath())) {
+//			// Multiple constructors are generated as static methods within the class
+//			//    prototype._constructor$String = function(string) {
+//			body = context.withPosition(tree, context.js().block(new ArrayList<JS>()));
+//		}
 
 		// set if needed Type$1 name, if this is an anonymous type constructor
 		String anonymousTypeConstructorName = getAnonymousTypeConstructorName(tree, context);
 		boolean isAnonymousConstructor = (anonymousTypeConstructorName != null);
-
-		if (JavaNodes.isConstructor(tree)) {
-			addFieldInitializersToConstructor(visitor, body, context);
-			decorateBodyWithOuterClassAccessor(tree, context, params, body, isAnonymousConstructor);
-		}
 
 		if (!isAnonymousConstructor) {
 			decorateBodyWithScopeAccessor(tree, context, body);
@@ -201,14 +143,6 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		} else {
 			return constructorOrPrototypePrefix;
 		}
-	}
-
-	private void decorateBodyWithOuterClassAccessor(MethodTree tree, GenerationContext<JS> context, List<JS> params, JS body,
-													boolean isAnonymousConstructor) {
-		if (!isAnonymousConstructor && isInnerClass(tree) && !isStaticNestedClass(tree)) {
-            context.js().addStatementBeginning(body, addConstructorOuterClassAccessor(tree, context));
-            params.add(0, context.js().name(getOuterClassAccessorParamName(tree)));
-        }
 	}
 
 	private void decorateBodyWithScopeAccessor(MethodTree tree, GenerationContext<JS> context, JS body) {

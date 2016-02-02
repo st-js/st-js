@@ -7,6 +7,7 @@ import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewArrayTree;
+import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Symbol;
@@ -25,21 +26,26 @@ import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.javascript.NameValue;
 import org.stjs.generator.javascript.UnaryOperator;
 import org.stjs.generator.name.DependencyType;
+import org.stjs.generator.utils.FieldUtils;
 import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.utils.Scopes;
 import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
+import org.stjs.javascript.annotation.Native;
 import org.stjs.javascript.annotation.STJSBridge;
 import org.stjs.javascript.annotation.ServerSide;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import java.lang.annotation.RetentionPolicy;
@@ -130,25 +136,76 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 	/**
 	 * @return the JavaScript node for the class' constructor
 	 */
-	private JS getConstructor(WriterVisitor<JS> visitor, ClassTree clazz, GenerationContext<JS> context) {
-		for (Tree member : clazz.getMembers()) {
-			if (JavaNodes.isConstructor(member)) {
-				// TODO skip the "native" constructors
-				JS node = visitor.scan(member, context);
-				if (node != null) {
-					return node;
-				}
-			}
+	private JS getConstructor(WriterVisitor<JS> visitor, ClassTree clazz, GenerationContext<JS> context, String constructorFunctionName) {
+		TypeElement typeElement = TreeUtils.elementFromDeclaration(clazz);
+
+		List<String> outerClassParameterNames = Scopes.buildOuterClassParametersAsString(null, typeElement);
+		List<JS> outerClassParametersDeclaration = new ArrayList<>();
+		List<JS> outerClassVariableAssignment = new ArrayList<>();
+		for (String outerClassParameterName : outerClassParameterNames) {
+			outerClassParametersDeclaration.add(context.js().name(outerClassParameterName));
+
+			// this._outerClass$0 = outerClass$0;
+			JS variableAssigment =
+					context.js().expressionStatement(
+							context.js().assignment(
+									AssignOperator.ASSIGN,
+									context.js().property(
+											context.js().name(GeneratorConstants.THIS),
+											GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX + outerClassParameterName),
+									context.js().name(outerClassParameterName)));
+			outerClassVariableAssignment.add(variableAssigment);
 		}
-		// no constructor found : interfaces, return an empty function
-		return context.js().function(null, Collections.<JS> emptyList(), null);
+
+		JS constructorBody = context.js().block(outerClassVariableAssignment);
+
+		addCallToSuperFieldInitializer(context, constructorBody, typeElement);
+		for (JS js : getFieldInitializers(visitor, clazz, context)) {
+			context.js().addStatement(constructorBody, js);
+		}
+
+		return context.js().function(
+				constructorFunctionName,
+				outerClassParametersDeclaration,
+				constructorBody);
 	}
 
-	private List<MethodTree> getConstructors(ClassTree clazz) {
+	private void addCallToSuperFieldInitializer(GenerationContext<JS> context, JS constructorBody, TypeElement typeElement) {
+		TypeMirror superclass = typeElement.getSuperclass();
+
+		if (isCallToSuperTypeConstructorRequired(superclass)) {
+			JavaScriptBuilder<JS> js = context.js();
+			String superClassName = context.getNames().getTypeName(context, superclass, DependencyType.EXTENDS);
+
+            List<JS> parameters = new ArrayList<>();
+            parameters.add(js.name(GeneratorConstants.THIS));
+
+            parameters.addAll(Scopes.buildOuterClassParametersAsNames(context, typeElement, context.getTypes().asElement(superclass)));
+
+            js.addStatement(
+                    constructorBody,
+                    js.expressionStatement(
+                            js.functionCall(
+                                    js.property(js.name(superClassName), "call"),
+                                    parameters)));
+        }
+	}
+
+    private boolean isCallToSuperTypeConstructorRequired(TypeMirror superclass) {
+        return superclass.getKind() != TypeKind.NONE &&
+                !JavaNodes.sameRawType(superclass, Object.class) &&
+                !JavaNodes.sameRawType(superclass, Enum.class);
+    }
+
+    private List<MethodTree> getConstructors(ClassTree clazz) {
 		List<MethodTree> constructors = new ArrayList<>();
 		for (Tree member : clazz.getMembers()) {
 			if (JavaNodes.isConstructor(member)) {
-				constructors.add((MethodTree) member);
+				MethodTree methodTree = (MethodTree) member;
+				ExecutableElement executableElement = TreeUtils.elementFromDeclaration(methodTree);
+				if (executableElement.getAnnotation(ServerSide.class) == null && executableElement.getAnnotation(Native.class) == null)  {
+					constructors.add(methodTree);
+				}
 			}
 		}
 		return constructors;
@@ -174,14 +231,15 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 
 		List<Tree> nonConstructors = getAllMembersExceptConstructors(clazz);
 
-		if (nonConstructors.isEmpty()) {
-			return context.js().keyword(Keyword.NULL);
-		}
+//		if (nonConstructors.isEmpty()) {
+//			return context.js().keyword(Keyword.NULL);
+//		}
 
 		List<JS> stmts = new ArrayList<>();
 
 		// Generate multiple constructors methods to support them as static initializers.
-		generateMultipleConstructorsAsStaticInitializers(visitor, context, stmts, clazz);
+		stmts.addAll(
+				generateMultipleConstructorsAsStaticInitializers(visitor, context, clazz));
 
 		@SuppressWarnings("unchecked")
 		List<JS> params = Arrays.asList(context.js().name(JavascriptKeywords.CONSTRUCTOR), context.js().name(JavascriptKeywords.PROTOTYPE));
@@ -222,30 +280,61 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		}
 	}
 
-	private void generateMultipleConstructorsAsStaticInitializers(WriterVisitor<JS> visitor, GenerationContext<JS> context,
-																  List<JS> stmts, ClassTree clazz) {
+	private List<JS> generateMultipleConstructorsAsStaticInitializers(WriterVisitor<JS> visitor, GenerationContext<JS> context,
+																  ClassTree clazz) {
+		List<JS> stmts = new ArrayList<>();
+
 		if (!JavaNodes.hasMultipleConstructors(context.getCurrentPath())) {
-			return;
+			return stmts;
 		}
 
 		Element type = TreeUtils.elementFromDeclaration(clazz);
 		String constructorName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
 
+		JavaScriptBuilder<JS> js = context.js();
+
 		List<MethodTree> constructors = getConstructors(clazz);
 		for (MethodTree constructor : constructors) {
 			Element element = InternalUtils.symbol(constructor);
-			if (element instanceof Symbol.MethodSymbol) {
-				constructorName = InternalUtils.generateOverloadeConstructorName(context, ((Symbol.MethodSymbol) element).params());
+			if (!isDefaultConstructorDelegatinOnlyToSuperDefaultConstructor(constructor)) {
+				if (element instanceof Symbol.MethodSymbol) {
+					constructorName = InternalUtils.generateOverloadeConstructorName(context, ((Symbol.MethodSymbol) element).params());
+				}
+
+				JS block = visitor.scan(constructor.getBody(), context);
+				List<JS> params = MethodWriter.getParams(constructor.getParameters(), context);
+				JS member = js.property(js.name(JavascriptKeywords.PROTOTYPE), constructorName);
+				JS declaration = js.function(null, params, block);
+
+				addReturnThisStatementForChaining(context, block);
+
+				stmts.add(context.js().expressionStatement(js.assignment(AssignOperator.ASSIGN, member, declaration)));
 			}
-			JS block = visitor.scan(constructor.getBody(), context);
-			List<JS> params = MethodWriter.getParams(constructor.getParameters(), context);
-			JS member = context.js().property(getMemberTarget(context.getCurrentWrapper()), constructorName);
-			JS declaration = context.js().function(null, params, block);
-
-			addReturnThisStatementForChaining(context, block);
-
-			stmts.add(context.js().expressionStatement(context.js().assignment(AssignOperator.ASSIGN, member, declaration)));
 		}
+
+		return stmts;
+	}
+
+	private boolean isDefaultConstructorDelegatinOnlyToSuperDefaultConstructor(MethodTree constructor) {
+		if (constructor.getParameters().size() != 0) {
+			return false;
+		}
+
+		BlockTree body = constructor.getBody();
+		if (body.getStatements().size() == 1) {
+			StatementTree statementTree = body.getStatements().get(0);
+			if (statementTree instanceof JCTree.JCExpressionStatement) {
+				JCTree.JCExpressionStatement expressionStatement = (JCTree.JCExpressionStatement) statementTree;
+
+				JCTree.JCExpression expression = expressionStatement.getExpression();
+				ExecutableElement element = ElementUtils.asExecutableElement(TreeUtils.elementFromUse(expression));
+
+				if (element != null && ElementUtils.isConstructor(element) && element.getParameters().size() == 0) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -561,26 +650,25 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		return true;
 	}
 
-	private void addConstructorStatement(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
-		boolean anonymousClass = tree.getSimpleName().length() == 0;
-		if (anonymousClass) {
-			// anonymous class - nothing to do the constructor will be added directly
-			return;
-		}
-
+	private JS addConstructorVariableDeclaration(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts, JS constructorFunction) {
 		JavaScriptBuilder<JS> js = context.js();
 		Element type = TreeUtils.elementFromDeclaration(tree);
 		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
+		JS variableName;
 
 		if (typeName.contains(".")) {
 			// inner class or namespace
 			// generate [ns.]typeName = function() {...}
-			stmts.add(js.expressionStatement(js.assignment(AssignOperator.ASSIGN, getClassName(tree, context), getConstructor(visitor, tree, context))));
+			variableName = getClassName(tree, context);
+			stmts.add(js.expressionStatement(js.assignment(AssignOperator.ASSIGN,variableName, constructorFunction)));
 		} else {
 			// regular class
 			// generate var typeName = function() {...}
-			stmts.add(js.variableDeclaration(true, typeName, getConstructor(visitor, tree, context)));
+			variableName = js.name(typeName);
+			stmts.add(js.variableDeclaration(true, typeName, constructorFunction));
 		}
+
+		return variableName;
 	}
 
 	private String getClassNameAsString(ClassTree tree, GenerationContext<JS> context) {
@@ -620,28 +708,37 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 
 		List<String> enumEntries = generateEnumEntries(tree);
 
-		JS name = getClassName(tree, context);
+		String classNameAsString = getClassNameAsString(tree, context);
+		JS className = js.string(classNameAsString);
 		JS superClazz = getSuperClass(tree, context);
 		JS interfaces = getInterfaces(tree, context);
 		JS members = getMembers(visitor, tree, context, enumEntries);
 		JS typeDesc = getTypeDescription(visitor, tree, context);
 		JS annotationDesc = getAnnotationDescription(visitor, tree, context);
-		JS simpleClassName = js.string(getClassNameAsString(tree, context));
-		boolean anonymousClass = tree.getSimpleName().length() == 0;
+		boolean isAnonymousClass = tree.getSimpleName().length() == 0;
 
-		if (anonymousClass) {
-			// anonymous class
-			name = getConstructor(visitor, tree, context);
+		String constructorFunctionName = "";
+		if (isAnonymousClass) {
+			String[] classNameParts = classNameAsString.split("\\.");
+			constructorFunctionName = classNameParts[classNameParts.length - 1];
 		}
-		addConstructorStatement(visitor, tree, context, stmts);
+
+		JS constructorFunction = getConstructor(visitor, tree, context, constructorFunctionName);
+
+		JS constructorFunctionForExtendsCall;
+		if (isAnonymousClass) {
+			constructorFunctionForExtendsCall = constructorFunction;
+		} else {
+			constructorFunctionForExtendsCall = addConstructorVariableDeclaration(visitor, tree, context, stmts, constructorFunction);
+		}
 
 		@SuppressWarnings("unchecked")
 		JS extendsCall = js.functionCall(js.property(js.name(GeneratorConstants.STJS), "extend"),
-				Arrays.asList(name, superClazz, interfaces, members, typeDesc, annotationDesc, simpleClassName));
-		if (anonymousClass) {
+				Arrays.asList(constructorFunctionForExtendsCall, superClazz, interfaces, members, typeDesc, annotationDesc, className));
+		if (isAnonymousClass) {
 			stmts.add(extendsCall);
 		} else {
-			stmts.add(context.withPosition(tree, js.expressionStatement(js.assignment(AssignOperator.ASSIGN, name, extendsCall))));
+			stmts.add(context.withPosition(tree, js.expressionStatement(js.assignment(AssignOperator.ASSIGN, constructorFunctionForExtendsCall, extendsCall))));
 		}
 		addStaticInitializers(visitor, tree, context, stmts);
 		addMainMethodCall(tree, stmts, context);
@@ -659,4 +756,54 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		}
 		return false;
 	}
+
+	private List<JS> getFieldInitializers(WriterVisitor<JS> visitor, ClassTree classElement, GenerationContext<JS> context) {
+		List<JS> expressions = new ArrayList<>();
+
+		for (Tree tree : classElement.getMembers()) {
+			if (tree.getKind() == Tree.Kind.VARIABLE) {
+				TreeWrapper<VariableTree, JS> variableTreeWrapper = context.wrap(TreeUtils.elementFromDeclaration((VariableTree) tree));
+				if (isFieldInitializerRequired(variableTreeWrapper)) {
+					expressions.add(context.js().expressionStatement(
+							context.js().assignment(AssignOperator.ASSIGN,
+									context.js().property(
+											context.js().name(JavascriptKeywords.THIS),
+											FieldUtils.getFieldName(variableTreeWrapper.getTree())
+									),
+									visitor.scan(
+											variableTreeWrapper.getTree().getInitializer(),
+											context)
+							)
+					));
+				}
+			}
+		}
+
+		return expressions;
+	}
+
+	private boolean isFieldInitializerRequired(TreeWrapper<VariableTree, JS> variableTreeWrapper) {
+//		if (!FieldUtils.isFieldDeclaration(variableTreeWrapper.getContext())) {
+//			return false;
+//		}
+
+		if (MemberWriters.shouldSkip(variableTreeWrapper)) {
+			return false;
+		}
+
+		if (variableTreeWrapper.isStatic()) {
+			return false;
+		}
+
+		if (variableTreeWrapper.getTree().getInitializer() == null) {
+			return false;
+		}
+
+//		if (FieldUtils.isInitializerLiteral(variableTreeWrapper.getTree().getInitializer())) {
+//			return false;
+//		}
+
+		return true;
+	}
+
 }

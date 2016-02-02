@@ -18,6 +18,7 @@ package org.stjs.javascript;
 import java.util.*;
 
 import org.stjs.javascript.annotation.BrowserCompatibility;
+import org.stjs.javascript.annotation.JSOverloadName;
 import org.stjs.javascript.annotation.ServerSide;
 import org.stjs.javascript.annotation.Template;
 import org.stjs.javascript.functions.Callback1;
@@ -661,6 +662,7 @@ public class Array<V> implements Iterable<String> {
 	 *
 	 * @return the string representation of the values in this <tt>Array</tt>, separated by a comma.
 	 */
+	@JSOverloadName("join")
 	public String join() {
 		return join(",");
 	}
@@ -674,6 +676,7 @@ public class Array<V> implements Iterable<String> {
 	 *
 	 * @return the string representation of the values in this <tt>Array</tt>, separated by the specified separator.
 	 */
+	@JSOverloadName("join")
 	public String join(String separator) {
 		StringBuilder builder = new StringBuilder();
 		String realSeparator = "";

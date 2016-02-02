@@ -20,19 +20,20 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 
     @Test
     public void testDeclarationAndAccessInnerTypeInstanceMethod() {
-        assertCodeContains(InnerTypes3.class,
-                "stjs.extend(constructor.InnerType, stjs.Java.Object, [], function(constructor, prototype){prototype.innerMethod=function()");
-        assertCodeContains(InnerTypes3.class, "new InnerTypes3.InnerType(this).innerMethod()");
+        assertCodeContains(InnerTypes3.class, "" +
+                "    constructor.InnerType = stjs.extend(constructor.InnerType, stjs.Java.Object, [], function(constructor, prototype) {\n" +
+                "        prototype.innerMethod = function() {};\n");
+        assertCodeContains(InnerTypes3.class, "new InnerTypes3.InnerType(this)._constructor().innerMethod();");
         assertCodeContains(InnerTypes3.class, "var x = new InnerTypes3.InnerType(this)");
         assertCodeDoesNotContain(InnerTypes3.class, "function(constructor, prototype){InnerTypes3.InnerType=");
     }
 
     @Test
     public void testDeclarationAndAccessInnerTypeInstanceField() {
-        assertCodeContains(InnerTypes4.class,
-                "stjs.extend(constructor.InnerType, stjs.Java.Object, [], function(constructor, prototype){prototype.innerField=0");
-        assertCodeContains(InnerTypes4.class, "new InnerTypes4.InnerType().innerField");
-        assertCodeDoesNotContain(InnerTypes4.class, "function(constructor,prototype){InnerTypes4.InnerType=");
+        String code = generate(InnerTypes4.class);
+        assertCodeContains(code, "stjs.extend(constructor.InnerType, stjs.Java.Object, [], function(constructor, prototype) {\n" +
+                "        prototype.innerField = 0;");
+        assertCodeContains(code, "new InnerTypes4.InnerType()._constructor().innerField");
     }
 
     @Test
@@ -44,7 +45,7 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
     public void testCallToQualifiedOuterType() {
         assertCodeContains(InnerTypes6.class, "var m = this._outerClass$0._n;");
         assertCodeContains(InnerTypes6.class, "" +
-                "    constructor.InnerType = function(outerClass$0) {\n" +
+                "    constructor.InnerType = function (outerClass$0) {\n" +
                 "        this._outerClass$0 = outerClass$0;\n" +
                 "    };");
     }
@@ -89,27 +90,38 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
     public void testNonStaticInnerType() {
         // for non-static inner classes the constructor contains as first parameter the type of the outer type
         assertCodeContains(InnerTypes10.class, "" +
-                "    constructor.InnerClass = function(outerClass$0, p) {\n" +
-                "        this._outerClass$0 = outerClass$0;");
+                "    constructor.InnerClass = function (outerClass$0) {\n" +
+                "        this._outerClass$0 = outerClass$0;\n" +
+                "    };\n");
+
+        assertCodeContains(InnerTypes10.class, "" +
+                "        prototype._constructor$MyBean = function(p) {\n" +
+                "            this._p = p.find(\"\");\n" +
+                "            return this;\n" +
+                "        };\n");
+
+
     }
 
     @Test
     public void testNonStaticInnerEnum() {
         // for non-static inner classes the constructor contains as first parameter the type of the outer type
         // also enum has first two params name and ordinal
-        assertCodeContains(InnerTypes11.class,
-                // Block 1
-                "" +
-                        "    constructor.InnerEnum = function() {\n" +
-                        "        stjs.Java.Enum.call(this);\n" +
-                        "    };",
+        String code = generate(InnerTypes11.class);
 
-                // Block 2
-                "" +
-                        "        constructor.a = new InnerTypes11.InnerEnum();\n" +
-                        "        constructor.a._name = \"a\";\n" +
-                        "        constructor.a._ordinal = 0;\n" +
-                        "        constructor._values = [constructor.a];");
+        assertCodeContains(code, "" +
+                "    constructor.InnerEnum = function () {};\n" +
+                "    constructor.InnerEnum = stjs.extend(constructor.InnerEnum, stjs.Java.Enum, [], function(constructor, prototype) {\n" +
+                "        prototype._constructor = function() {\n" +
+                "            stjs.Java.Enum.prototype._constructor$String_int.call(this);\n" +
+                "            return this;\n" +
+                "        };\n");
+
+        assertCodeContains(code, "" +
+                "        constructor.a = new InnerTypes11.InnerEnum()._constructor();\n" +
+                "        constructor.a._name = \"a\";\n" +
+                "        constructor.a._ordinal = 0;\n" +
+                "        constructor._values = [constructor.a];\n");
 
     }
 
@@ -123,28 +135,36 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
     public void testDeadCode2() {
         // check bug where inner types where not correctly detected
         assertCodeContains(InnerTypes13.class, "" +
-                "    constructor.Button = function(content, handler) {};\n" +
-                "    constructor.Button = stjs.extend(constructor.Button, stjs.Java.Object, [], null, {}, {}, \"InnerTypes13.Button\");");
+                "constructor.Button = function () {};\n" +
+                "    constructor.Button = stjs.extend(constructor.Button, stjs.Java.Object, [], function(constructor, prototype) {\n" +
+                "        prototype._constructor$Object_Callback0 = function(content, handler) {\n" +
+                "            return this;\n" +
+                "        };\n" +
+                "    }, {}, {}, \"InnerTypes13.Button\");");
     }
 
     @Test
     public void testInnerInsideInner() {
         String code = generate(InnerTypes15.class);
         assertCodeContains(code,
-                // Validation Block
-                "var InnerTypes15 = function(){};" + "InnerTypes15 = stjs.extend(InnerTypes15, stjs.Java.Object, [], function(constructor, prototype){",
+                "var InnerTypes15 = function(){};" + "InnerTypes15 = stjs.extend(InnerTypes15, stjs.Java.Object, [], function(constructor, prototype){");
 
-                // Validation Block
-                "var deep = new InnerTypes15.Inner.InnerDeep()",
+        assertCodeContains(code,
+                "var deep = new InnerTypes15.Inner.InnerDeep()");
 
-                // Validation Block
-                "    constructor.Inner = function() {};\n" +
-                "    constructor.Inner = stjs.extend(constructor.Inner, stjs.Java.Object, [], function(constructor, prototype) {",
+        assertCodeContains(code, "" +
+                "    constructor.Inner = function () {\n" +
+                "        this._a = \"a\";\n" +
+                "    };\n" +
+                "    constructor.Inner = stjs.extend(constructor.Inner, stjs.Java.Object, [], function(constructor, prototype) {");
 
-                // Validation Block
-                "        constructor.InnerDeep = function() {};\n" +
+        assertCodeContains(code, "" +
+                "        constructor.InnerDeep = function () {\n" +
+                "            this._b = \"b\";\n" +
+                "        };\n" +
                 "        constructor.InnerDeep = stjs.extend(constructor.InnerDeep, stjs.Java.Object, [], function(constructor, prototype) {\n" +
-                "            prototype._b = null;\n");
+                "            prototype._b = null;\n" +
+                "        }");
     }
 
     @Test
@@ -154,13 +174,15 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
         assertCodeContains(code, "var o = new (stjs.extend(function InnerTypes16$1(){}, stjs.Java.Object, [], function(constructor, prototype){");
         assertCodeContains(code, "" +
                 "            prototype.denver = function() {\n" +
-                "                var deep = new InnerTypes16.InnerTypes16$1.InnerDeep(this);\n" +
+                "                var deep = new InnerTypes16.InnerTypes16$1.InnerDeep(this)._constructor();\n" +
                 "            };\n" +
-                "            constructor.InnerDeep = function(outerClass$1) {\n" +
-                "                this._outerClass$1 = outerClass$1;\n" +
+                "            constructor.InnerDeep = function (outerClass$0) {\n" +
+                "                this._outerClass$0 = outerClass$0;\n" +
+                "                this._a = null;\n" +
                 "            };\n" +
                 "            constructor.InnerDeep = stjs.extend(constructor.InnerDeep, stjs.Java.Object, [], function(constructor, prototype) {\n" +
-                "                prototype._a = null;");
+                "                prototype._a = null;\n" +
+                "            }");
     }
 
     @Test
@@ -197,11 +219,10 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
         assertEquals(2, ((Number) result).intValue());
 
         assertCodeContains(InnerTypes20.class, "" +
-                "    constructor.Holder = function() {};\n" +
+                "    constructor.Holder = function () {};\n" +
                 "    constructor.Holder = stjs.extend(constructor.Holder, stjs.Java.Object, [], function(constructor, prototype) {\n" +
-                "        constructor._VALUE = 2;\n" +
-                "    }, {}, {}, \"InnerTypes20.Holder\");\n" +
-                "    constructor._currentValue = InnerTypes20.Holder._VALUE;\n");
+                "        constructor._INNER_VALUE = 2;\n" +
+                "    }, {}, {}, \"InnerTypes20.Holder\");");
     }
 
     @Test
@@ -223,14 +244,10 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 
     @Test
     public void testStaticInnerClassDoNotReceiveRefToParent() {
-        assertCodeContains(InnerTypes24_static_inner_class_do_not_receive_ref_to_parent.class,
-                "" +
-                        "        var obj = new InnerTypes24_static_inner_class_do_not_receive_ref_to_parent.Inner();",
+        assertCodeContains(InnerTypes24_static_inner_class_do_not_receive_ref_to_parent.class, "" +
+                "        var obj = new InnerTypes24_static_inner_class_do_not_receive_ref_to_parent.Inner()._constructor();");
 
-                "" +
-                        "        constructor.Inner = function() {\n" +
-                        "        };\n");
-
-
+        assertCodeContains(InnerTypes24_static_inner_class_do_not_receive_ref_to_parent.class, "" +
+                "        constructor.Inner = function() {};");
     }
 }

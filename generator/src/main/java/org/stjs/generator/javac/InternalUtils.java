@@ -453,28 +453,25 @@ public final class InternalUtils {
                 builder.append(AnnotationConstants.JS_OVERLOAD_NAME_METHOD_PARAMS_SEPARATOR);
             }
 
-            TypeMirror typeMirror = context.getTypes().erasure(param.asType());
-
-            if (TypesUtils.isPrimitive(typeMirror)) {
-                builder.append(typeMirror.toString());
-            } else if (typeMirror.getKind() == TypeKind.ARRAY) {
-                builder.append("Array");
-                builder.append(AnnotationConstants.JS_OVERLOAD_NAME_DEFAULT_VALUE);
-
-                Type.ArrayType arrayType = (Type.ArrayType) typeMirror;
-
-                String typeName = arrayType.elemtype.toString();
-                TypeElement typeElement = context.getElements().getTypeElement(typeName);
-                if (typeElement != null) {
-                    typeName = typeElement.getSimpleName().toString();
-                }
-                builder.append(typeName);
-            } else {
-                TypeElement typeElement = context.getElements().getTypeElement(typeMirror.toString());
-                builder.append(typeElement.getSimpleName().toString());
-            }
+            generateParamName(context, param.asType(), builder);
         }
         return builder.toString();
+    }
+
+    private static void generateParamName(GenerationContext context, TypeMirror typeMirror, StringBuilder builder) {
+        TypeMirror erasedTypeMirror = context.getTypes().erasure(typeMirror);
+
+        if (TypesUtils.isPrimitive(erasedTypeMirror)) {
+            builder.append(erasedTypeMirror.toString());
+        } else if (erasedTypeMirror.getKind() == TypeKind.ARRAY) {
+            builder.append("Array");
+            builder.append(AnnotationConstants.JS_OVERLOAD_NAME_DEFAULT_VALUE);
+            generateParamName(context, ((Type.ArrayType) erasedTypeMirror).elemtype, builder);
+        } else {
+            TypeElement typeElement = context.getElements().getTypeElement(erasedTypeMirror.toString());
+            builder.append(typeElement.getSimpleName().toString());
+        }
+
     }
 
 }

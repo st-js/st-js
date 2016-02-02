@@ -26,7 +26,7 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
     public void testExtends() {
         assertCodeContains(Namespace2.class, "constructor.Child = stjs.extend(constructor.Child, a.b.Namespace2, [],");
         // call super
-        assertCodeContains(Namespace2.class, "a.b.Namespace2.call(this)");
+        assertCodeContains(Namespace2.class, "a.b.Namespace2.prototype._constructor.call(this)");
     }
 
     @Test
@@ -63,7 +63,8 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 
     @Test
     public void testInlineConstruct() {
-        assertCodeContains(Namespace8.class, "stjs.extend(function Namespace8$1(){a.b.Namespace8.call(this);}, a.b.Namespace8, [], ");
+        assertCodeContains(Namespace8.class, "" +
+                "stjs.extend(function Namespace8$1() {a.b.Namespace8.call(this);}, a.b.Namespace8, []");
     }
 
     @Test(expected = JavascriptFileGenerationException.class)
@@ -111,9 +112,9 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
         assertCodeContains(
                 Namespace13_generator_configuration_specificClass_vs_wildcard.class,
 
-                "new overriden.specificclass.namespace.SampleClassToOverrideName();",
+                "new overriden.specificclass.namespace.SampleClassToOverrideName()",
 
-                "new overriden.wildcard.namespace.SampleClassToOverrideName_ButWithLongerName();"
+                "new overriden.wildcard.namespace.SampleClassToOverrideName_ButWithLongerName()"
         );
     }
 

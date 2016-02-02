@@ -2,6 +2,7 @@ package org.stjs.generator.writer.expression;
 
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BlockTree;
+import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionStatementTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.IdentifierTree;
@@ -11,7 +12,6 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.Tree;
-import com.sun.tools.javac.code.Symbol;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.ElementUtils;
@@ -22,13 +22,14 @@ import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.javascript.NameValue;
 import org.stjs.generator.name.DependencyType;
+import org.stjs.generator.utils.Scopes;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.declaration.MethodWriter;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -122,7 +123,6 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 		JS func = visitor.scan(method, tw.getContext());
 
 		int specialThisParamPos = MethodWriter.getTHISParamPos(((MethodTree) method).getParameters());
-		// accessOuterScope(visitor, tree, context) ||
 		if (specialThisParamPos >= 0) {
 			// bind for inline functions accessing the outher scope or with special this
 			JavaScriptBuilder<JS> js = tw.getContext().js();
@@ -149,29 +149,33 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 	}
 
 	private JS getRegularNewExpression(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {
-		Element type = TreeUtils.elementFromUse(tree.getIdentifier());
-		String typeName = context.getNames().getTypeName(context, type, DependencyType.STATIC);
-		List<JS> params = arguments(visitor, tree, context);
+		Element newClassToCreate = TreeUtils.elementFromUse(tree.getIdentifier());
+		ExecutableElement executableElement = TreeUtils.elementFromUse(tree);
 
-		if (ElementKind.CLASS.equals(type.getKind())) {
-			if (isNonStaticInnerClass(type)) {
-				params.add(0, context.js().name(GeneratorConstants.THIS));
-			}
-		}
+		String typeName = context.getNames().getTypeName(context, newClassToCreate, DependencyType.STATIC);
+		List<JS> params = arguments(visitor, tree, context);
 
 		if (identifierHasMultipleConstructors(tree.getIdentifier())) {
 			// For the concept of multiple constructors, a static init method is called with these params,
-			// we call the default no params constructor in those cases
-			params.clear();
+			// we call the default constructor in those cases with references to OuterClasses
+			JS newInstanceStatement = context.js().newExpression(
+                    context.js().name(typeName),
+                    buildOuterClassConstructorParametersAsNames(context, newClassToCreate));
+
+			String constructorName = InternalUtils.generateOverloadeConstructorName(context, executableElement.getParameters());
+			return context.js().functionCall(context.js().property(newInstanceStatement, constructorName), params);
+		} else {
+			return context.js().newExpression(context.js().name(typeName), params);
 		}
-		return context.js().newExpression(context.js().name(typeName), params);
 	}
 
-	private boolean isNonStaticInnerClass(Element type) {
-		return ElementUtils.isInnerClass(type) && !ElementUtils.isStatic(type);
-	}
+    private Iterable<JS> buildOuterClassConstructorParametersAsNames(GenerationContext<JS> context, Element newClassToCreate) {
+        TypeElement callingClass = TreeUtils.elementFromDeclaration(TreeUtils.enclosingClass(context.getCurrentWrapper().getPath().getParentPath()));
+        List<JS> outerClassesParams = Scopes.buildOuterClassParametersAsNames(context, callingClass, newClassToCreate);
+        return outerClassesParams;
+    }
 
-	@Override
+    @Override
 	public JS visit(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {
 		TreeWrapper<NewClassTree, JS> tw = context.getCurrentWrapper();
 		JS js = getInlineFunctionDeclaration(visitor, tw);
@@ -191,13 +195,6 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 
 		js = getRegularNewExpression(visitor, tree, context);
 
-		if (identifierHasMultipleConstructors(tree.getIdentifier())) {
-			List<JS> params = arguments(visitor, tree, context);
-			ExecutableElement element = TreeUtils.elementFromUse(tree);
-			String constructorName = InternalUtils.generateOverloadeConstructorName(context, ((Symbol.MethodSymbol) element).getParameters());
-			js = context.js().functionCall(context.js().property(js, constructorName), params);
-		}
-
 		return js;
 	}
 
@@ -205,4 +202,6 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 		Element identifierElement = TreeUtils.elementFromUse(tree);
 		return ElementUtils.hasMultipleConstructors(identifierElement);
 	}
+
+
 }

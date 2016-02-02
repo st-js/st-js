@@ -6,13 +6,17 @@ import org.stjs.generator.utils.AbstractStjsTest;
 public class CallSuperGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testCallSuperConstructorObject() {
-		// in fact the call to super should not be generated
 		assertCodeContains(CallSuper1.class, "CallSuper1 = function(){}");
+
+		// in fact the call to super should not be generated
+		assertCodeDoesNotContain(CallSuper1.class, "prototype._constructor");
 	}
 
 	@Test
 	public void testCallSuperConstructorParent() {
-		assertCodeContains(CallSuper2.class, "CallSuper2 = function(arg){ SuperClass2.call(this, arg);}");
+		assertCodeContains(CallSuper2.class, "var CallSuper2 = function () {\n" +
+				"    SuperClass2.call(this);\n" +
+				"};");
 	}
 
 	@Test
@@ -54,13 +58,15 @@ public class CallSuperGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testAddCallSuperConstructorDefined() {
 		// call to super should be generated, when not defined explicitely
-		assertCodeContains(CallSuper8.class, "CallSuper8 = function(x){SuperClass.call(this);var y = x;}");
+		assertCodeContains(CallSuper8.class, "" +
+				"SuperClass.prototype._constructor.call(this);\n" +
+				"        var y = x;");
 	}
 
 	@Test
-	public void testAddCallSuperConstructorUndefined() {
-		// call to super should be generated, when not defined explicitely
-		assertCodeContains(CallSuper9.class, "CallSuper9 = function(){SuperClass.call(this);}");
+	public void testCallToSuperConstructorNotDefined() {
+		assertCodeDoesNotContain(CallSuper9.class, "" +
+				"    prototype._constructor = function()");
 	}
 
 	@Test

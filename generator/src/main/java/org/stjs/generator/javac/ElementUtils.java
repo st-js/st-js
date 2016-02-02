@@ -156,6 +156,13 @@ public final class ElementUtils {
         }
     }
 
+    public static ExecutableElement asExecutableElement(Element element) {
+        if (element instanceof ExecutableElement) {
+            return (ExecutableElement) element;
+        } else {
+            return null;
+        }
+    }
     /**
      * Returns the qualified name of the inner most class enclosing the provided {@code Element}
      *
@@ -477,14 +484,15 @@ public final class ElementUtils {
     }
 
     public static boolean hasMultipleConstructors(Element element) {
-        int constructorCount = 0;
-        List<? extends Element> enclosedElements = element.getEnclosedElements();
-        for (Element enclosedElement : enclosedElements) {
-            if (isConstructor(enclosedElement) && !JavaNodes.isNative(enclosedElement)) {
-                constructorCount++;
-            }
-        }
-        return constructorCount > 1;
+//        int constructorCount = 0;
+//        List<? extends Element> enclosedElements = element.getEnclosedElements();
+//        for (Element enclosedElement : enclosedElements) {
+//            if (isConstructor(enclosedElement) && !JavaNodes.isNative(enclosedElement)) {
+//                constructorCount++;
+//            }
+//        }
+//        return constructorCount > 1;
+        return true;
     }
 
     public static boolean isClass(Element element) {
@@ -492,7 +500,7 @@ public final class ElementUtils {
     }
 
     public static boolean isInnerClass(Element element) {
-        return isClass(element) && isClass(element.getEnclosingElement());
+        return isClass(element) && isClass(element.getEnclosingElement()) && !ElementUtils.isStatic(element);
     }
 
     public static int getInnerClassDeepnessLevel(Element element) {

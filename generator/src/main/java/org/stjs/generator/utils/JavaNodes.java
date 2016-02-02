@@ -9,6 +9,7 @@ import com.sun.source.tree.VariableTree;
 import com.sun.source.util.TreePath;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.JavascriptClassGenerationException;
+import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TypesUtils;
@@ -43,15 +44,16 @@ public final class JavaNodes {
 	}
 
 	public static boolean hasMultipleConstructors(ClassTree classTree) {
-		int constructorCount = 0;
-		List<? extends Tree> treeMembers = classTree.getMembers();
-		for (Tree member : treeMembers) {
-			Element symbolElement = InternalUtils.symbol(member);
-			if (JavaNodes.isConstructor(member) && !JavaNodes.isNative(symbolElement)) {
-				constructorCount++;
-			}
-		}
-		return constructorCount > 1;
+		return true;
+//		int constructorCount = 0;
+//		List<? extends Tree> treeMembers = classTree.getMembers();
+//		for (Tree member : treeMembers) {
+//			Element symbolElement = InternalUtils.symbol(member);
+//			if (JavaNodes.isConstructor(member) && !JavaNodes.isNative(symbolElement)) {
+//				constructorCount++;
+//			}
+//		}
+//		return constructorCount > 1;
 	}
 
 	public static boolean sameRawType(TypeMirror type1, Class<?> clazz) {

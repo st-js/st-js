@@ -6,7 +6,7 @@ public class InlineObjects11_AnonymousClass_calling_outer {
         return new Dummy() {
             @Override
             public String doIt() {
-                return outerMethod();
+                return "doIt()_Dummy.doIt()_outerMethod-" + outerMethod();
             }
         }.doIt();
     }
@@ -19,20 +19,21 @@ public class InlineObjects11_AnonymousClass_calling_outer {
                 return new Dummy() {
                     @Override
                     public String doIt() {
-                        return outerMethod() + superDoIt();
+                        // call outer class
+                        return "doIt2()_SuperDummy.doIt()_Dummy.doIt()_outerMethod-" + outerMethod() + "_superDoIt-" + superDoIt();
                     }
                 }.doIt();
             }
 
             @Override
             public String superDoIt() {
-                return "superDoIt() --> " + outerMethod();
+                return "inSuperDoIt_outerMethod-" + outerMethod();
             }
         }.doIt();
     }
 
     public String outerMethod() {
-        return "InlineObjects11_AnonymousClass_calling_outer.outerMethod()";
+        return "InsideOuterMethod!";
     }
 
     private interface Dummy {
@@ -43,4 +44,11 @@ public class InlineObjects11_AnonymousClass_calling_outer {
         String doIt();
         String superDoIt();
     }
+
+    public static String main(String[] args) {
+        return
+                "#1- " + new InlineObjects11_AnonymousClass_calling_outer().doIt() + "\n" +
+                "#2- " + new InlineObjects11_AnonymousClass_calling_outer().doIt2();
+    }
+
 }

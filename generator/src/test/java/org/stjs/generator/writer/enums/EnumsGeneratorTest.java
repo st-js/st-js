@@ -8,13 +8,13 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testSimpleEnumDeclaration() {
 		assertCodeContains(SimpleEnum.class, "" +
-				"    constructor.FIRST = new SimpleEnum();\n" +
+				"    constructor.FIRST = new SimpleEnum()._constructor();\n" +
 				"    constructor.FIRST._name = \"FIRST\";\n" +
 				"    constructor.FIRST._ordinal = 0;\n" +
-				"    constructor.SECOND = new SimpleEnum();\n" +
+				"    constructor.SECOND = new SimpleEnum()._constructor();\n" +
 				"    constructor.SECOND._name = \"SECOND\";\n" +
 				"    constructor.SECOND._ordinal = 1;\n" +
-				"    constructor.THIRD = new SimpleEnum();\n" +
+				"    constructor.THIRD = new SimpleEnum()._constructor();\n" +
 				"    constructor.THIRD._name = \"THIRD\";\n" +
 				"    constructor.THIRD._ordinal = 2;\n" +
 				"    constructor._values = [constructor.FIRST, constructor.SECOND, constructor.THIRD];");
@@ -23,9 +23,12 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testEnumReference() {
 		assertCodeContains(Enums2_reference.class, "" +
-				"   constructor.Value = function() {\n" +
-				"        stjs.Java.Enum.call(this);\n" +
-				"    };");
+				"    constructor.Value = function () {};\n" +
+				"    constructor.Value = stjs.extend(constructor.Value, stjs.Java.Enum, [], function(constructor, prototype) {\n" +
+				"        prototype._constructor = function() {\n" +
+				"            stjs.Java.Enum.prototype._constructor$String_int.call(this);\n" +
+				"            return this;\n" +
+				"        };");
 		assertCodeContains(Enums2_reference.class, "" +
 				"    prototype.main = function() {\n" +
 				"        var x = Enums2_reference.Value.FIRST;\n" +
@@ -47,23 +50,25 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testEnumDeclarationInInterface() {
 		assertCodeContains(Enums8_interface_declaration.class, "" +
-				"    constructor.InnerClass = stjs.extend(constructor.InnerClass, stjs.Java.Object, [Enums8_interface_declaration], function(constructor, prototype) {\n" +
+				"    constructor.InnerClass = stjs.extend(constructor.InnerClass, stjs.Java.Object, [Enums8_interface_declaration], function(constructor, prototype) {");
+
+		assertCodeContains(Enums8_interface_declaration.class, "" +
 				"        prototype.methodReturningEnum = function() {\n" +
 				"            return SimpleEnum.FIRST;\n" +
-				"        };");
+				"        };\n");
 	}
 
 	@Test
 	public void testEnumWithFieldsDeclaration() {
 		assertCodeContains(Enums9_fields.class, "" +
-				"    constructor.THIRD = new Enums9_fields(3);\n" +
+				"    constructor.THIRD = new Enums9_fields()._constructor$int(3);\n" +
 				"    constructor.THIRD._name = \"THIRD\";\n" +
 				"    constructor.THIRD._ordinal = 2;\n" +
 				"    constructor._values = [constructor.FIRST, constructor.SECOND, constructor.THIRD];\n" +
-                "    prototype._value = 0;\n" +
+				"    prototype._value = 0;\n" +
 				"    prototype.getValue = function() {\n" +
 				"        return this._value;\n" +
-				"    };");
+				"    };\n");
 	}
 
 	@Test
@@ -75,21 +80,22 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testEnumConstructor() {
 		assertCodeContains(Enums11_with_constructor.class, "" +
-				"var Enums11_with_constructor = function(initialValue) {\n" +
-				"    stjs.Java.Enum.call(this);\n" +
-				"    this._privateFieldValue = initialValue;\n" +
-				"};");
+				"    prototype._constructor$int = function(initialValue) {\n" +
+				"        stjs.Java.Enum.prototype._constructor$String_int.call(this);\n" +
+				"        this._privateFieldValue = initialValue;\n" +
+				"        return this;\n" +
+				"    };");
 		assertCodeContains(Enums11_with_constructor.class, "" +
-				"    constructor.FIRST = new Enums11_with_constructor(1);\n" +
+				"    constructor.FIRST = new Enums11_with_constructor()._constructor$int(1);\n" +
 				"    constructor.FIRST._name = \"FIRST\";\n" +
 				"    constructor.FIRST._ordinal = 0;\n" +
-				"    constructor.SECOND = new Enums11_with_constructor(2);\n" +
+				"    constructor.SECOND = new Enums11_with_constructor()._constructor$int(2);\n" +
 				"    constructor.SECOND._name = \"SECOND\";\n" +
 				"    constructor.SECOND._ordinal = 1;\n" +
-				"    constructor.THIRD = new Enums11_with_constructor(3);\n" +
+				"    constructor.THIRD = new Enums11_with_constructor()._constructor$int(3);\n" +
 				"    constructor.THIRD._name = \"THIRD\";\n" +
 				"    constructor.THIRD._ordinal = 2;\n" +
-                "    constructor._values = [constructor.FIRST, constructor.SECOND, constructor.THIRD];\n" +
+				"    constructor._values = [constructor.FIRST, constructor.SECOND, constructor.THIRD];\n" +
 				"    prototype._privateFieldValue = 0;");
 	}
 
@@ -104,28 +110,8 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testEnumImplementInterface() {
 		assertCodeContains(Enums13_implement_interface.class, "" +
-				"var Enums13_implement_interface = function(keyStr) {\n" +
-				"    stjs.Java.Enum.call(this);\n" +
-				"    this._keyStr = keyStr;\n" +
-				"};\n" +
-				"Enums13_implement_interface = stjs.extend(Enums13_implement_interface, stjs.Java.Enum, [KeyType], function(constructor, prototype) {\n" +
-				"    constructor.NONE = new Enums13_implement_interface(\"none\");\n" +
-				"    constructor.NONE._name = \"NONE\";\n" +
-				"    constructor.NONE._ordinal = 0;\n" +
-				"    constructor.FIRST = new Enums13_implement_interface(\"first\");\n" +
-				"    constructor.FIRST._name = \"FIRST\";\n" +
-				"    constructor.FIRST._ordinal = 1;\n" +
-				"    constructor.SECOND = new Enums13_implement_interface(\"second\");\n" +
-				"    constructor.SECOND._name = \"SECOND\";\n" +
-				"    constructor.SECOND._ordinal = 2;\n" +
-				"    constructor.THIRD = new Enums13_implement_interface(\"third\");\n" +
-				"    constructor.THIRD._name = \"THIRD\";\n" +
-				"    constructor.THIRD._ordinal = 3;\n" +
-                "    constructor._values = [constructor.NONE, constructor.FIRST, constructor.SECOND, constructor.THIRD];\n" +
-				"    prototype._keyStr = null;\n" +
-				"    prototype.getKey = function() {\n" +
-				"        return this._keyStr;\n" +
-				"    };");
+				"var Enums13_implement_interface = function () {};\n" +
+				"Enums13_implement_interface = stjs.extend(Enums13_implement_interface, stjs.Java.Enum, [KeyType], ");
 	}
 
 	@Test

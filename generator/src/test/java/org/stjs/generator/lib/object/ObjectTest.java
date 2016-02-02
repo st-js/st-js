@@ -9,7 +9,7 @@ public class ObjectTest extends AbstractStjsTest {
     @Test
     public void testCanCreateJavaObject() {
         assertCodeContains(JavaObject1_canCreateJavaObject.class, "" +
-                "o = new stjs.Java.Object();");
+                "var o = new stjs.Java.Object()._constructor()");
 
         Assert.assertEquals(true, execute(JavaObject1_canCreateJavaObject.class));
     }

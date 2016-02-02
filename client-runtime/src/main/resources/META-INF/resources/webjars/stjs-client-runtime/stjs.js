@@ -558,6 +558,11 @@ stjs.Java.Object = function() {
 };
 
 stjs.Java.Object = stjs.extend(stjs.Java.Object, null, [], function(constructor, prototype) {
+
+  prototype._constructor = function() {
+      return this;
+  };
+
   prototype._$stjs_objectUid = 0;
 
   prototype.$java_equals = stjs.JavalikeEquals;
@@ -622,7 +627,10 @@ stjs.classInheritsFrom=function(childClass, parentClass){
 	return false;
 }
 
-stjs.enumEntry=function(idx, name){
+stjs.enumEntry=function(){
+};
+
+stjs.enumEntry.prototype._constructor$String_int=function(idx, name){
 	this._name = name;
 	this._ordinal = idx;
 };
@@ -680,6 +688,10 @@ stjs.extend(stjs.Java.Enum, stjs.Java.Object, [], function(constructor, prototyp
     }
     throw new Error("Specified Java.Enum value not found in the enumeration: " + value);
   };
+
+  prototype._constructor$String_int=function(idx, name){
+  }
+
   prototype.name = function() {
     return this._name;
   };

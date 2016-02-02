@@ -65,11 +65,7 @@ public class FieldWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		}
 
 		if (treeWrapper.isPrimitiveType()) {
-			if (treeInitializer == null || !FieldUtils.isInitializerLiteral(treeInitializer)) {
-				return getPrimitiveDefaultValue(treeWrapper.getElement(), context);
-			} else {
-				return visitor.scan(treeInitializer, context);
-			}
+			return getPrimitiveDefaultValue(treeWrapper.getElement(), context);
 		}
 
 		return context.js().keyword(Keyword.NULL);

@@ -12,9 +12,11 @@ import java.util.Set;
 public class MethodsGeneratorTest extends AbstractStjsTest {
     @Test
     public void testPublicInstanceMethod() {
-        assertCodeContains(Methods1.class, //
-                "stjs.extend(Methods1, stjs.Java.Object, [], function(constructor, prototype){" + //
-                        "prototype.method = function(arg1,arg2){return 0;}");
+        assertCodeContains(Methods1.class, "" + //
+                "stjs.extend(Methods1, stjs.Java.Object, [], function(constructor, prototype) {\n" +
+                "    prototype.method = function(arg1, arg2) {\n" +
+                "        return 0;\n" +
+                "    };");
     }
 
     @Test
@@ -51,7 +53,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 
     @Test
     public void testConstructor() {
-        assertCodeContains(Methods6.class, "Methods6=function(arg){");
+        assertCodeContains(Methods6.class, "prototype._constructor$String = function(arg) {");
     }
 
     @Test
@@ -91,8 +93,8 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 
     @Test
     public void testVarArgsConstructor() {
-        assertCodeContains(Methods10b_constructor_vararg.class, "new ClassWithVarArgInConstructorAsSingleParameter([\"A\", \"B\", \"C\"]);");
-        assertCodeContains(Methods10b_constructor_vararg.class, "new ClassWithVarArgInConstructorAsSecondParameter(0, [\"A\", \"B\", \"C\"])");
+        assertCodeContains(Methods10b_constructor_vararg.class, "new ClassWithVarArgInConstructorAsSingleParameter()._constructor$Array$String([\"A\", \"B\", \"C\"]);");
+        assertCodeContains(Methods10b_constructor_vararg.class, "new ClassWithVarArgInConstructorAsSecondParameter()._constructor$int_Array$String(0, [\"A\", \"B\", \"C\"])");
     }
 
     @Test
@@ -240,7 +242,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
     @Test
     public void testOverrideAndOverloadInSubClass_generation() throws Exception {
         assertCodeContains(Methods27_overrride_and_overload_in_subclass_no_conflict.class, "" +
-                "    constructor.SubClassClass = function() {\n" +
+                "    constructor.SubClassClass = function () {\n" +
                 "        Methods27_overrride_and_overload_in_subclass_no_conflict.BaseClass.call(this);\n" +
                 "    };\n" +
                 "    constructor.SubClassClass = stjs.extend(constructor.SubClassClass, Methods27_overrride_and_overload_in_subclass_no_conflict.BaseClass, [Methods27_overrride_and_overload_in_subclass_no_conflict.Interface1], function(constructor, prototype) {\n" +

@@ -44,7 +44,7 @@ public class InheritanceGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testExtendsEmptyContructor() {
 		// check that the super constructor is called for empty constructor in the child class
-		assertCodeContains(Inheritance7.class, "MySuperClass.call(this);");
+		assertCodeContains(Inheritance7.class, "MySuperClass.prototype._constructor.call(this);");
 	}
 
 	@Test

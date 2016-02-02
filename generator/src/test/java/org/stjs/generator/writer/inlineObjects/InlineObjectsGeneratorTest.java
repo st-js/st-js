@@ -2,8 +2,8 @@ package org.stjs.generator.writer.inlineObjects;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.utils.AbstractStjsTest;
 
 public class InlineObjectsGeneratorTest extends AbstractStjsTest {
 	@Test
@@ -73,12 +73,13 @@ public class InlineObjectsGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(InlineObjects11_AnonymousClass_calling_outer.class, "" +
 				"    prototype.doIt = function() {\n" +
 				"        var this$0 = this;\n" +
-				"        return new (stjs.extend(function InlineObjects11_AnonymousClass_calling_outer$1() {}, stjs.Java.Object, [InlineObjects11_AnonymousClass_calling_outer.Dummy], function(constructor, prototype) {\n" +
+				"        return new (stjs.extend(function InlineObjects11_AnonymousClass_calling_outer$1() {}, stjs.Java.Object, [InlineObjects11_AnonymousClass_calling_outer.Dummy],");
+
+		assertCodeContains(InlineObjects11_AnonymousClass_calling_outer.class, "" +
 				"            prototype.doIt = function() {\n" +
-				"                return this$0.outerMethod();\n" +
-				"            };\n" +
-				"        }, {}, {}, \"InlineObjects11_AnonymousClass_calling_outer.InlineObjects11_AnonymousClass_calling_outer$1\"))().doIt();\n" +
-				"    };\n");
+				"                return \"doIt()_Dummy.doIt()_outerMethod-\" + this$0.outerMethod();\n" +
+				"            };\n");
+
 		assertCodeContains(InlineObjects11_AnonymousClass_calling_outer.class, "" +
 				"    prototype.doIt2 = function() {\n" +
 				"        var this$0 = this;\n" +
@@ -87,15 +88,20 @@ public class InlineObjectsGeneratorTest extends AbstractStjsTest {
 				"                var this$1 = this;\n" +
 				"                return new (stjs.extend(function InlineObjects11_AnonymousClass_calling_outer$2$1() {}, stjs.Java.Object, [InlineObjects11_AnonymousClass_calling_outer.Dummy], function(constructor, prototype) {\n" +
 				"                    prototype.doIt = function() {\n" +
-				"                        return this$0.outerMethod() + this$1.superDoIt();\n" +
+				"                        return \"doIt2()_SuperDummy.doIt()_Dummy.doIt()_outerMethod-\" + this$0.outerMethod() + \"_superDoIt-\" + this$1.superDoIt();\n" +
 				"                    };\n" +
 				"                }, {}, {}, \"InlineObjects11_AnonymousClass_calling_outer.InlineObjects11_AnonymousClass_calling_outer$2.InlineObjects11_AnonymousClass_calling_outer$2$1\"))().doIt();\n" +
 				"            };\n" +
 				"            prototype.superDoIt = function() {\n" +
-				"                return \"superDoIt() --> \" + this$0.outerMethod();\n" +
+				"                return \"inSuperDoIt_outerMethod-\" + this$0.outerMethod();\n" +
 				"            };\n" +
 				"        }, {}, {}, \"InlineObjects11_AnonymousClass_calling_outer.InlineObjects11_AnonymousClass_calling_outer$2\"))().doIt();\n" +
-				"    };");
+				"    };\n");
+
+		Assert.assertEquals("" +
+						"#1- doIt()_Dummy.doIt()_outerMethod-InsideOuterMethod!\n" +
+						"#2- doIt2()_SuperDummy.doIt()_Dummy.doIt()_outerMethod-InsideOuterMethod!_superDoIt-inSuperDoIt_outerMethod-InsideOuterMethod!",
+				execute(InlineObjects11_AnonymousClass_calling_outer.class));
 	}
 
 	@Test
@@ -116,7 +122,7 @@ public class InlineObjectsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testInnerClassHierarchy() {
 		assertCodeContains(InlineObjects11c_InnerClass_hierarchy.class,
-				"InlineObjects11c_InnerClass_hierarchy.InnerClassA.call(this, this._outerClass$0, \"B-\" + id);");
+				"InlineObjects11c_InnerClass_hierarchy.InnerClassA.prototype._constructor$String.call(this, \"B-\" + id);");
 
 		Object result = execute(InlineObjects11c_InnerClass_hierarchy.class);
 		Assert.assertEquals("Received call from: A-B-InnerClass", result);
