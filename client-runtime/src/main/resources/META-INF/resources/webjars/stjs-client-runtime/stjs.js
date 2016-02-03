@@ -571,6 +571,10 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
         return nameParts[nameParts.length - 1]
     }
 
+    _constructor.$java_getCanonicalName = function() {
+        return this.$className;
+    }
+
     _constructor.$java_getName = function() {
         return this.$className;
     }
