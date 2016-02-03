@@ -436,6 +436,24 @@ Array.prototype._clone = function() {
   return this.slice();
 }
 
+Array.prototype.$java_equals = function(other) {
+  if (other == null) {
+    return false;
+  }
+
+  if (this.length != other.length) {
+    return false;
+  }
+
+  for (var i = 0; i < this.length; i++) {
+    if (this[i] !== other[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 // createJavaArray
 // Supports:
 //   createJavaArray(3) --> creates a new array of 3 elements initialized with 'null' values
