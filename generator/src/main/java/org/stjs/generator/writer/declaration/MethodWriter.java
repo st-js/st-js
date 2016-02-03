@@ -10,26 +10,19 @@ import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.Block;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
-import org.stjs.generator.NamespaceUtil;
-import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.AssignOperator;
-import org.stjs.generator.name.DependencyType;
-import org.stjs.generator.utils.FieldUtils;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.utils.Scopes;
-import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
-import org.stjs.javascript.annotation.Namespace;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -117,12 +110,6 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 
 		JS body = visitor.scan(tree.getBody(), context);
 
-//		if (JavaNodes.isConstructor(tree) && JavaNodes.hasMultipleConstructors(context.getCurrentPath())) {
-//			// Multiple constructors are generated as static methods within the class
-//			//    prototype._constructor$String = function(string) {
-//			body = context.withPosition(tree, context.js().block(new ArrayList<JS>()));
-//		}
-
 		// set if needed Type$1 name, if this is an anonymous type constructor
 		String anonymousTypeConstructorName = getAnonymousTypeConstructorName(tree, context);
 		boolean isAnonymousConstructor = (anonymousTypeConstructorName != null);
@@ -150,22 +137,6 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		if (scopeAccessor != null) {
             context.js().addStatementBeginning(body, scopeAccessor);
         }
-	}
-
-	private boolean isInnerClass(MethodTree tree) {
-		Element classElement = TreeUtils.elementFromDeclaration(tree).getEnclosingElement();
-		return ElementUtils.isInnerClass(classElement);
-	}
-
-	private boolean isStaticNestedClass(MethodTree tree) {
-		Element classElement = TreeUtils.elementFromDeclaration(tree).getEnclosingElement();
-		return ElementUtils.isInnerClass(classElement) && ElementUtils.isStatic(classElement);
-	}
-
-	private String getOuterClassAccessorParamName(MethodTree tree) {
-		Element element = TreeUtils.elementFromDeclaration(tree);
-		int deepnessLevel = Scopes.getElementDeepnessLevel(element);
-		return GeneratorConstants.INNER_CLASS_CONSTRUCTOR_PARAM_PREFIX + GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR + deepnessLevel;
 	}
 
 	/**
@@ -214,21 +185,6 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 			}
 		}
 		return false;
-	}
-
-	private JS addConstructorOuterClassAccessor(MethodTree tree, GenerationContext<JS> context) {
-		Element element = TreeUtils.elementFromDeclaration(tree);
-		int deepnessLevel = Scopes.getElementDeepnessLevel(element);
-
-		// Create a target such as 'this._outerClass$x'
-		JS innerClassConstructorParam = context.js().name(GeneratorConstants.INNER_CLASS_CONSTRUCTOR_PARAM_PREFIX
-				+ GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR + deepnessLevel);
-
-		String scopeAccessorPrefix = Scopes.buildOuterClassAccessTargetPrefix();
-		String scopeAccessorVariable = scopeAccessorPrefix + GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR + deepnessLevel;
-
-		return context.js().expressionStatement(
-				context.js().assignment(AssignOperator.ASSIGN, context.js().name(scopeAccessorVariable), innerClassConstructorParam));
 	}
 
 	private JS addConstructorOrPrototypePrefixIfNeeded(MethodTree tree, GenerationContext<JS> context,
