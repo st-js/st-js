@@ -68,7 +68,6 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		if (ElementUtils.isConstructor(methodElement)) {
 			// transform it into superType.[prototype.method].call(this, args..);
 			JS classPrototype = context.js().property(target, JavascriptKeywords.PROTOTYPE);
-//			addOuterClassReferenceParameters(tree, context, methodElement, arguments);
 			String constructorName = InternalUtils.generateOverloadeConstructorName(context, ((Symbol.MethodSymbol) methodElement).params());
 			target = context.js().property(classPrototype, constructorName);
 		}
@@ -77,20 +76,6 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 
 		return context.js().functionCall(context.js().property(target, "call"), arguments);
 	}
-
-//	private void addOuterClassReferenceParameters(MethodInvocationTree tree, GenerationContext<JS> context, Element methodElement, List<JS> arguments) {
-//		Element enclosingClassForMethod = methodElement.getEnclosingElement();
-//		if (ElementUtils.isInnerClass(enclosingClassForMethod) && !JavaNodes.isStatic(enclosingClassForMethod)) {
-//			TypeElement callingClass = TreeUtils.getEnclosingClass(context.getCurrentPath());
-//
-//			int deepnessLevel = ElementUtils.getInnerClassDeepnessLevel(callingClass);
-//
-//			String scopeAccessorPrefix = Scopes.buildOuterClassAccessTargetPrefix();
-//			String scopeAccessorVariable = scopeAccessorPrefix + GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR + deepnessLevel;
-//
-//			arguments.add(0, context.js().name(scopeAccessorVariable));
-//		}
-//	}
 
 	private JS constructSuperType(GenerationContext<JS> context, TypeElement typeElement, String methodName) {
 		String typeName = context.getNames().getTypeName(context, typeElement, DependencyType.STATIC);
@@ -102,10 +87,6 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		if (isCallToSuper(tree)) {
 			return callToSuper(visitor, tree, context);
 		}
-
-//		if (isCallToSuper(tree)) {
-//			return callToSuperMethod(visitor, tree, context);
-//		}
 
 		JS target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree> getCurrentWrapper());
 

@@ -231,10 +231,6 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 
 		List<Tree> nonConstructors = getAllMembersExceptConstructors(clazz);
 
-//		if (nonConstructors.isEmpty()) {
-//			return context.js().keyword(Keyword.NULL);
-//		}
-
 		List<JS> stmts = new ArrayList<>();
 
 		// Generate multiple constructors methods to support them as static initializers.
@@ -783,10 +779,6 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 	}
 
 	private boolean isFieldInitializerRequired(TreeWrapper<VariableTree, JS> variableTreeWrapper) {
-//		if (!FieldUtils.isFieldDeclaration(variableTreeWrapper.getContext())) {
-//			return false;
-//		}
-
 		if (MemberWriters.shouldSkip(variableTreeWrapper)) {
 			return false;
 		}
@@ -798,10 +790,6 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		if (variableTreeWrapper.getTree().getInitializer() == null) {
 			return false;
 		}
-
-//		if (FieldUtils.isInitializerLiteral(variableTreeWrapper.getTree().getInitializer())) {
-//			return false;
-//		}
 
 		return true;
 	}

@@ -12,6 +12,7 @@ import javax.lang.model.element.Modifier;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.JavaNodes;
@@ -92,7 +93,13 @@ public class MemberReferenceWriter<JS> implements WriterContributor<MemberRefere
 		Element type = methodElement.getEnclosingElement();
 
 		JS typeName = js.name(context.getNames().getTypeName(context, type, DependencyType.STATIC));
-		JS newExpr = context.js().newExpression(typeName, generateArguments(context, methodElement.getParameters().size()));
+
+		JS newExpr =
+					js.functionCall(
+							js.property(
+									js.newExpression(typeName, Collections.emptyList()),
+									InternalUtils.generateOverloadeConstructorName(context, methodElement.getParameters())),
+							generateArguments(context, methodElement.getParameters().size()));
 		return js.function(null, Collections.emptyList(), js.returnStatement(newExpr));
 	}
 
