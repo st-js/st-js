@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>stjs</artifactId>
 		<groupId>org.st-js</groupId>
-		<version>3.3.1.62-mirego</version>
+		<version>3.3.1.63-mirego-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>client-runtime</artifactId>
