@@ -256,6 +256,16 @@ String.prototype.getBytes$Charset = function(charset) {
   return utf8;
 }
 
+/* String: as java.lang.CharSequence */
+String.prototype.$java_length=function() {
+  return this.length;
+}
+
+String.prototype.$java_subSequence$int_int=function(start, end) {
+  return this.substring(start, end)
+}
+
+/* String: static methods */
 String.format$String_Array$Object=function(format, argumentArray) {
   return stjs.sprintf.apply(stjs, [format].concat(argumentArray));
 }
@@ -606,7 +616,12 @@ stjs.getParameterAnnotation = function(clz, methodName, idx, annType) {
 stjs.isInstanceOf=function(instance, parentClass){
 	if (instance == null)
 		return false;
-	return (stjs.classInheritsFrom(instance.constructor, parentClass));
+	var result = stjs.classInheritsFrom(instance.constructor, parentClass);
+
+	if (!result && parentClass === stjs.Java.CharSequence && typeof(instance) == 'string') {
+	    result = true;
+	}
+    return result;
 }
 
 /**
@@ -1112,13 +1127,21 @@ stjs.getField=function(obj, field){
 	return obj[field];
 };
 
+/* java.lang.CharSequence */
+stjs.Java.CharSequence = function () {};
+stjs.Java.CharSequence = stjs.extend(stjs.Java.CharSequence, stjs.Java.Object, [], function(constructor, prototype) {
+    prototype.$java_length = function() {};
+    prototype.$java_charAt = function(index) {};
+    prototype.$java_subSequence = function(start, end) {};
+    prototype.toString = function() {};
+}, {}, {}, "stjs.Java.CharSequence");
 
-// java.nio.Charset
+/* java.nio.Charset */
 stjs.Java.Charset = function() {};
 stjs.Java.Charset = stjs.extend(stjs.Java.Charset, null, [], function(constructor, prototype) {
 }, {}, {});
 
-// java.nio.StandardCharsets
+/* java.nio.StandardCharsets */
 stjs.Java.StandardCharsets = function() {};
 stjs.Java.StandardCharsets = stjs.extend(stjs.Java.StandardCharsets, null, [], function(constructor, prototype) {
   constructor.UTF_8 = new stjs.Java.Charset();

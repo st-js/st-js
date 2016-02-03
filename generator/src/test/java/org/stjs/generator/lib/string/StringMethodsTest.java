@@ -127,4 +127,15 @@ public class StringMethodsTest extends AbstractStjsTest {
 	public void testStringFormat() throws Exception {
 		Assert.assertEquals(true, execute(String21_stringFormat.class));
 	}
+
+	@Test
+	public void testString_string_charSequence_methods() throws Exception {
+		Assert.assertEquals(true, execute(String22_string_charSequence_methods.class));
+	}
+
+	@Test
+	public void testString_instanceof_CharSequence() throws Exception {
+		Assert.assertEquals(true, execute(String23_String_instanceof_CharSequence.class));
+	}
+
 }
