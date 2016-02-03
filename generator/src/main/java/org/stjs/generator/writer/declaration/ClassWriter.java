@@ -7,9 +7,11 @@ import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewArrayTree;
+import com.sun.source.tree.ReturnTree;
 import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
+import com.sun.source.util.TreeScanner;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.tree.JCTree;
 import org.stjs.generator.GenerationContext;
@@ -235,7 +237,7 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 
 		// Generate multiple constructors methods to support them as static initializers.
 		stmts.addAll(
-				generateMultipleConstructorsAsStaticInitializers(visitor, context, clazz));
+				generateMultipleConstructorsAsInitializers(visitor, context, clazz));
 
 		@SuppressWarnings("unchecked")
 		List<JS> params = Arrays.asList(context.js().name(JavascriptKeywords.CONSTRUCTOR), context.js().name(JavascriptKeywords.PROTOTYPE));
@@ -276,8 +278,8 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		}
 	}
 
-	private List<JS> generateMultipleConstructorsAsStaticInitializers(WriterVisitor<JS> visitor, GenerationContext<JS> context,
-																  ClassTree clazz) {
+	private List<JS> generateMultipleConstructorsAsInitializers(WriterVisitor<JS> visitor, GenerationContext<JS> context,
+																ClassTree clazz) {
 		List<JS> stmts = new ArrayList<>();
 
 		if (!JavaNodes.hasMultipleConstructors(context.getCurrentPath())) {
@@ -298,17 +300,78 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 				}
 
 				JS block = visitor.scan(constructor.getBody(), context);
+
+				if (isBodyContainingReturnStatement(constructor)) {
+					// Wrap current body inside a function because the body may contain an early return
+					// which would cause a failure in constructor chaining. The last line of
+					// the constructor must be returnng a reference to "this".
+					// Example:
+					//     _constructor = function() {
+					//         // ------------------------------------------
+					//         // here is the wrapping inside a function -->
+					//         // ------------------------------------------
+					//         (function() {
+					//             // ...original body here
+					//             if (any_boolean_value) {
+					//                 return;
+					//             }
+					//             this.any_flag = true; // this line won't be executed
+					//         }).call();
+					//         // ------------------------------------------
+					//         // <-- here is the wrapping inside a function
+					//         // ------------------------------------------
+					//
+					//         return this; // still returning `this` for constructor chaining
+					//    }
+					//
+					block = js.block(
+							Collections.singletonList(
+									js.expressionStatement(
+											js.functionCall(
+													js.paren(
+															js.property(
+																	js.function(null, Collections.<JS>emptyList(), block),
+																	"call")
+													),
+													Collections.singletonList(js.name(GeneratorConstants.THIS))
+											)
+									)
+							)
+					);
+				}
+
 				List<JS> params = MethodWriter.getParams(constructor.getParameters(), context);
 				JS member = js.property(js.name(JavascriptKeywords.PROTOTYPE), constructorName);
 				JS declaration = js.function(null, params, block);
-
 				addReturnThisStatementForChaining(context, block);
 
-				stmts.add(context.js().expressionStatement(js.assignment(AssignOperator.ASSIGN, member, declaration)));
+				stmts.add(js.expressionStatement(js.assignment(AssignOperator.ASSIGN, member, declaration)));
 			}
 		}
 
 		return stmts;
+	}
+
+	private boolean isBodyContainingReturnStatement(MethodTree constructor) {
+		final boolean[] returnStatementFound = new boolean[1];
+
+		for (StatementTree statementTree : constructor.getBody().getStatements()) {
+			statementTree.accept(
+					new TreeScanner<Object, Object>() {
+						@Override
+						public Object visitReturn(ReturnTree node, Object o) {
+							returnStatementFound[0] = true;
+							return null;
+						}
+					},
+					null);
+
+			if (returnStatementFound[0]) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private boolean isDefaultConstructorDelegatinOnlyToSuperDefaultConstructor(MethodTree constructor) {
