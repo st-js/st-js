@@ -66,6 +66,14 @@ String.prototype.startsWith$String=function(start) {
     return this.startsWith$String_int(start, 0);
 }
 
+String.prototype.$java_split$String=function(pattern){
+    var result = this.split(new RegExp(pattern));
+    if (pattern === "") {
+        result.unshift("");
+    }
+    return result;
+}
+
 if (!String.prototype.endsWith) {
 	String.prototype.endsWith=function(end){
 		if (end == null)
