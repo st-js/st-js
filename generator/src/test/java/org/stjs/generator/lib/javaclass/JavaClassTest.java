@@ -26,7 +26,7 @@ public class JavaClassTest extends AbstractStjsTest {
 
     @Test
     public void testClassGetName() throws Exception {
-        Assert.assertEquals("JavaClassTest3_Class_getName", execute(JavaClassTest3_Class_getName.class));
+        Assert.assertEquals("JavaClassTest3a_Class_getName", execute(JavaClassTest3a_Class_getName.class));
     }
 
     @Test
@@ -37,4 +37,10 @@ public class JavaClassTest extends AbstractStjsTest {
                 )
         );
     }
+
+    @Test
+    public void testClass_getCanonicalName() throws Exception {
+        Assert.assertEquals("JavaClassTest3b_Class_getCanonicalName", execute(JavaClassTest3b_Class_getCanonicalName.class));
+    }
+
 }

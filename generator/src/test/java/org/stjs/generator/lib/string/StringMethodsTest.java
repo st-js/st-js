@@ -138,4 +138,9 @@ public class StringMethodsTest extends AbstractStjsTest {
 		Assert.assertEquals(true, execute(String23_String_instanceof_CharSequence.class));
 	}
 
+	@Test
+	public void testString_String_split() throws Exception {
+		Assert.assertEquals(true, execute(String24_String_split.class));
+	}
+
 }

@@ -9,6 +9,11 @@ public class ArrayMethodsTest extends AbstractStjsTest {
     @Test
     public void testArrayClone() throws Exception {
         Assert.assertEquals("A,B,C - AA,BB,CC", execute(Array1_clone.class));
-
     }
+
+    @Test
+    public void testArrayEquals() throws Exception {
+        Assert.assertEquals(true, execute(Array2_equals.class));
+    }
+
 }

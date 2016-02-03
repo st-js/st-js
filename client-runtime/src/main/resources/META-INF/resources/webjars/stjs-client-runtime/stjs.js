@@ -66,6 +66,14 @@ String.prototype.startsWith$String=function(start) {
     return this.startsWith$String_int(start, 0);
 }
 
+String.prototype.$java_split$String=function(pattern){
+    var result = this.split(new RegExp(pattern));
+    if (pattern === "") {
+        result.unshift("");
+    }
+    return result;
+}
+
 if (!String.prototype.endsWith) {
 	String.prototype.endsWith=function(end){
 		if (end == null)
@@ -436,6 +444,24 @@ Array.prototype._clone = function() {
   return this.slice();
 }
 
+Array.prototype.$java_equals = function(other) {
+  if (other == null) {
+    return false;
+  }
+
+  if (this.length != other.length) {
+    return false;
+  }
+
+  for (var i = 0; i < this.length; i++) {
+    if (this[i] !== other[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 // createJavaArray
 // Supports:
 //   createJavaArray(3) --> creates a new array of 3 elements initialized with 'null' values
@@ -551,6 +577,10 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
     _constructor.$java_getSimpleName = function() {
         var nameParts = this.$className.split(".");
         return nameParts[nameParts.length - 1]
+    }
+
+    _constructor.$java_getCanonicalName = function() {
+        return this.$className;
     }
 
     _constructor.$java_getName = function() {
