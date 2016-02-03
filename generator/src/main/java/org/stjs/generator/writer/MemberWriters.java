@@ -30,7 +30,7 @@ public final class MemberWriters {
 			return tw.getContext().js().name(tw.getEnclosingType().getTypeName(DependencyType.STATIC));
 		}
 
-		if (Scopes.isInvokedElementFromOuterType(tw.getElement(), (GenerationContext<Void>) tw.getContext())) {
+		if (Scopes.isInvokedElementFromOuterType(tw.getElement(), tw)) {
 			return buildTargetForOuterTypeAccess(tw);
 		}
 		return tw.getContext().js().keyword(Keyword.THIS);

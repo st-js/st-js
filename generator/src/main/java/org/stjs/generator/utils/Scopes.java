@@ -9,6 +9,7 @@ import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.TreeWrapper;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -30,12 +31,10 @@ public final class Scopes {
 	 * @param context
      * @return
      */
-	public static boolean isInvokedElementFromOuterType(Element methodElement, GenerationContext<Void> context) {
-		ClassTree enclosingClassTree = findEnclosingClassSkipAnonymousInitializer(context.getCurrentPath());
-
-		TypeElement currentScopeClassElement = TreeUtils.elementFromDeclaration(enclosingClassTree);
+	public static boolean isInvokedElementFromOuterType(Element methodElement, TreeWrapper<?, ?> treeWrapper) {
+		TypeElement currentScopeClassElement = TreeUtils.getEnclosingClass(treeWrapper.getPath());
 		TypeElement methodOwnerElement = (TypeElement) methodElement.getEnclosingElement();
-		return isOuterType(context, methodOwnerElement, currentScopeClassElement);
+		return isOuterType(treeWrapper.getContext(), methodOwnerElement, currentScopeClassElement);
 	}
 
 	/**
@@ -46,7 +45,7 @@ public final class Scopes {
 	 * @param subType
      * @return
      */
-	public static boolean isOuterType(GenerationContext<Void> context, TypeElement outerType, TypeElement subType) {
+	public static boolean isOuterType(GenerationContext<?> context, TypeElement outerType, TypeElement subType) {
 		TypeMirror subTypeErasure = context.getTypes().erasure(subType.asType());
 
 		if (!(subTypeErasure instanceof DeclaredType)) {
@@ -70,7 +69,7 @@ public final class Scopes {
 		return false;
 	}
 
-	private static boolean isTypeInClassHierarchy(GenerationContext<Void> context, TypeMirror outerTypeErasure, TypeMirror type) {
+	private static boolean isTypeInClassHierarchy(GenerationContext<?> context, TypeMirror outerTypeErasure, TypeMirror type) {
 		while (true) {
 			TypeElement typeElement = ElementUtils.asTypeElement(context, type);
 
@@ -166,18 +165,6 @@ public final class Scopes {
 		// if the target class 1 level deeper thant the calling class? add "this" as the last outerclass parameter
 		if (outerClassVarNames.size() <= targetClassDeepnessLevel) {
 			outerClassVarNames.add(GeneratorConstants.THIS);
-		}
-
-		return outerClassVarNames;
-	}
-
-	public static List<String> buildOuterClassAccessPrefixesForDeepness(int maxInnerClassDeepnessId) {
-		// Deepness of 0 mean 1 level of deepness
-		String prefix = GeneratorConstants.INNER_CLASS_CONSTRUCTOR_PARAM_PREFIX + GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR;
-
-		List<String> outerClassVarNames = new ArrayList<>();
-		for (int i = 0; i <= maxInnerClassDeepnessId; i++) {
-			outerClassVarNames.add(prefix + i);
 		}
 
 		return outerClassVarNames;
