@@ -250,4 +250,23 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
         assertCodeContains(InnerTypes24_static_inner_class_do_not_receive_ref_to_parent.class, "" +
                 "        constructor.Inner = function() {};");
     }
+
+    @Test
+    public void testInnerTypes_inner_class_level1_creating_class_level_2() {
+        assertCodeContains(InnerTypes25_inner_class_level1_creating_class_level_2.class, "" +
+                "new InnerTypes25_inner_class_level1_creating_class_level_2.InnerLevel1.InnerLevel2(outerClass$0, this)._constructor();");
+    }
+
+    @Test
+    public void testInnerTypes_inner_class_level2_creating_class_level_1() {
+        assertCodeContains(InnerTypes26_inner_class_level2_creating_class_level_1.class, "" +
+                "new InnerTypes26_inner_class_level2_creating_class_level_1.InnerLevel1(outerClass$0)._constructor();");
+    }
+
+    @Test
+    public void testInnerTypes_inner_class_level1_creating_class_level_1() {
+        assertCodeContains(InnerTypes27_inner_class_level1_creating_class_level_1.class, "" +
+                "new InnerTypes27_inner_class_level1_creating_class_level_1.InnerLevel1B(outerClass$0)._constructor();");
+    }
+
 }
