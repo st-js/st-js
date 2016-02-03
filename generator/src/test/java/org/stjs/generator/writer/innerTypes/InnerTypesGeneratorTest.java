@@ -239,7 +239,7 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 
     @Test
     public void testCallOuterMethodFromAnonymousInit() {
-        assertCodeContains(InnerTypes23.class, "x: this.outerMethod()");
+        assertCodeContains(InnerTypes23.class, "x: this._outerClass$0.outerMethod()");
     }
 
     @Test
@@ -269,4 +269,10 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
                 "new InnerTypes27_inner_class_level1_creating_class_level_1.InnerLevel1B(outerClass$0)._constructor();");
     }
 
+    @Test
+    public void testInnerTypes_acces_outterClass_field_member_from_inner_class() throws Exception {
+        String code = generate(InnerTypes28_acces_outterClass_field_member_from_inner_class.class);
+        assertCodeContains(code, "this._outerClass$0._fieldInOuterType = \"assigning it from the constructor\";");
+        assertCodeContains(code, "this._outerClass$0._fieldInOuterType = \"assigning it from a standard method\";");
+    }
 }
