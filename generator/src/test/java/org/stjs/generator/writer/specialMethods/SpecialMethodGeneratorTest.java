@@ -63,7 +63,7 @@ public class SpecialMethodGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testSpecialMethodAsProp1() {
 		// x.$length() -> x.length
-		assertCodeContains(SpecialMethod7.class, "new TestBridge().length;");
+		assertCodeContains(SpecialMethod7.class, "new TestBridge()._constructor().length;");
 	}
 
 	// @Test
@@ -75,7 +75,7 @@ public class SpecialMethodGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testSpecialLengthAppliedToString() {
 		// x.$length(y) -> x.length = y
-		assertCodeContains(SpecialMethod13.class, "new TestBridge().length = 1");
+		assertCodeContains(SpecialMethod13.class, "new TestBridge()._constructor().length = 1");
 	}
 
 	@Test
@@ -172,7 +172,7 @@ public class SpecialMethodGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testTemplateNone() {
-		assertCodeContains(SpecialMethod22.class, "n = new TestBridge().$get(0)");
+		assertCodeContains(SpecialMethod22.class, "n = new TestBridge()._constructor().$get(0)");
 	}
 
 	@Test
@@ -187,16 +187,16 @@ public class SpecialMethodGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testPrefix() {
-		assertCodeContains(SpecialMethod24.class, "n = new TestBridge().prefix()");
+		assertCodeContains(SpecialMethod24.class, "n = new TestBridge()._constructor().prefix()");
 	}
 
 	@Test
 	public void testPrefixWithParameter() {
-		assertCodeContains(SpecialMethod25.class, "n = new TestBridge().say()");
+		assertCodeContains(SpecialMethod25.class, "n = new TestBridge()._constructor().say()");
 	}
 
 	@Test
 	public void testSuffixWithParameter() {
-		assertCodeContains(SpecialMethod26.class, "new TestBridge().say()");
+		assertCodeContains(SpecialMethod26.class, "new TestBridge()._constructor().say()");
 	}
 }

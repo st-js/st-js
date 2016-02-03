@@ -11,7 +11,10 @@ public class AbstractMemberWriter<JS> {
 		if (tw.getEnclosingType().isGlobal()) {
 			return null;
 		}
-		return tw.getContext().js().name(tw.isStatic() ? JavascriptKeywords.CONSTRUCTOR : JavascriptKeywords.PROTOTYPE);
+
+		String targetString = tw.isStatic() ? JavascriptKeywords.CONSTRUCTOR : JavascriptKeywords.PROTOTYPE;
+
+		return tw.getContext().js().name(targetString);
 	}
 
 }

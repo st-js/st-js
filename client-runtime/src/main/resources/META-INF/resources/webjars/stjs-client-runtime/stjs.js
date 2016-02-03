@@ -558,6 +558,11 @@ stjs.Java.Object = function() {
 };
 
 stjs.Java.Object = stjs.extend(stjs.Java.Object, null, [], function(constructor, prototype) {
+
+  prototype._constructor = function() {
+      return this;
+  };
+
   prototype._$stjs_objectUid = 0;
 
   prototype.$java_equals = stjs.JavalikeEquals;
@@ -622,7 +627,10 @@ stjs.classInheritsFrom=function(childClass, parentClass){
 	return false;
 }
 
-stjs.enumEntry=function(idx, name){
+stjs.enumEntry=function(){
+};
+
+stjs.enumEntry.prototype._constructor$String_int=function(idx, name){
 	this._name = name;
 	this._ordinal = idx;
 };
@@ -680,6 +688,10 @@ stjs.extend(stjs.Java.Enum, stjs.Java.Object, [], function(constructor, prototyp
     }
     throw new Error("Specified Java.Enum value not found in the enumeration: " + value);
   };
+
+  prototype._constructor$String_int=function(idx, name){
+  }
+
   prototype.name = function() {
     return this._name;
   };
@@ -804,196 +816,7 @@ function isEnum(obj){
 
 /******* parsing *************/
 
-/**
- * parse a json string using the type definition to build a typed object hierarchy
- */
-stjs.parseJSON = (function () {
-	  var number
-	      = '(?:-?\\b(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\\b)';
-	  var oneChar = '(?:[^\\0-\\x08\\x0a-\\x1f\"\\\\]'
-	      + '|\\\\(?:[\"/\\\\bfnrt]|u[0-9A-Fa-f]{4}))';
-	  var string = '(?:\"' + oneChar + '*\")';
-
-	  // Will match a value in a well-formed JSON file.
-	  // If the input is not well-formed, may match strangely, but not in an unsafe
-	  // way.
-	  // Since this only matches value tokens, it does not match whitespace, colons,
-	  // or commas.
-	  var jsonToken = new RegExp(
-	      '(?:false|true|null|[\\{\\}\\[\\]]'
-	      + '|' + number
-	      + '|' + string
-	      + ')', 'g');
-
-	  // Matches escape sequences in a string literal
-	  var escapeSequence = new RegExp('\\\\(?:([^u])|u(.{4}))', 'g');
-
-	  // Decodes escape sequences in object literals
-	  var escapes = {
-	    '"': '"',
-	    '/': '/',
-	    '\\': '\\',
-	    'b': '\b',
-	    'f': '\f',
-	    'n': '\n',
-	    'r': '\r',
-	    't': '\t'
-	  };
-	  function unescapeOne(_, ch, hex) {
-	    return ch ? escapes[ch] : String.fromCharCode(parseInt(hex, 16));
-	  }
-
-	  var constructors = {};
-
-	  function constr(name, param){
-		  var c = constructors[name];
-		  if (!c)
-			  constructors[name] = c = eval(name);
-		  return new c(param);
-	  }
-
-	  function convert(type, json){
-		  if (!type)
-			  return json;
-		  var cv = stjs.converters[type.name || type];
-		  if (cv)
-			  return cv(json, type);
-		  //hopefully the type has a string constructor
-		 return constr(type, json);
-	  }
-
-	  function builder(type){
-		  if (!type)
-			  return {};
-			if (typeof type == "function")
-				return new type();
-			if (type.name) {
-				if (type.name == "Map")
-					return {};
-				if (type.name == "Array")
-					return [];
-				return constr(type.name);
-			}
-			return constr(type);
-	  }
-
-	  // A non-falsy value that coerces to the empty string when used as a key.
-	  var EMPTY_STRING = new String('');
-	  var SLASH = '\\';
-
-	  // Constructor to use based on an open token.
-	  var firstTokenCtors = { '{': Object, '[': Array };
-
-	  var hop = Object.hasOwnProperty;
-
-	  function nextMatch(str){
-		  var m = jsonToken.exec(str);
-		  return m != null ? m[0] : null;
-	  }
-	  return function (json, type) {
-	    // Split into tokens
-	    // Construct the object to return
-	    var result;
-	    var tok = nextMatch(json);
-	    var topLevelPrimitive = false;
-	    if ('{' === tok) {
-	      result = builder(type, null);
-	    } else if ('[' === tok) {
-	      result = [];
-	    } else {
-	      // The RFC only allows arrays or objects at the top level, but the JSON.parse
-	      // defined by the EcmaScript 5 draft does allow strings, booleans, numbers, and null
-	      // at the top level.
-	      result = [];
-	      topLevelPrimitive = true;
-	    }
-
-	    // If undefined, the key in an object key/value record to use for the next
-	    // value parsed.
-	    var key;
-	    // Loop over remaining tokens maintaining a stack of uncompleted objects and
-	    // arrays.
-	    var stack = [result];
-	    var stack2 = [type];
-	    for (tok = nextMatch(json); tok != null; tok = nextMatch(json)) {
-
-	      var cont;
-	      switch (tok.charCodeAt(0)) {
-	        default:  // sign or digit
-	          cont = stack[0];
-	          cont[key || cont.length] = +(tok);
-	          key = void 0;
-	          break;
-	        case 0x22:  // '"'
-	          tok = tok.substring(1, tok.length - 1);
-	          if (tok.indexOf(SLASH) !== -1) {
-	            tok = tok.replace(escapeSequence, unescapeOne);
-	          }
-	          cont = stack[0];
-	          if (!key) {
-	            if (cont instanceof Array) {
-	              key = cont.length;
-	            } else {
-	              key = tok || EMPTY_STRING;  // Use as key for next value seen.
-	              stack2[0] = cont.constructor.$typeDescription ? cont.constructor.$typeDescription[key] : stack2[1].arguments[1];
-	              break;
-	            }
-	          }
-	          cont[key] = convert(stack2[0],tok);
-	          key = void 0;
-	          break;
-	        case 0x5b:  // '['
-	          cont = stack[0];
-	          stack.unshift(cont[key || cont.length] = []);
-	          stack2.unshift(stack2[0].arguments[0]);
-	          //put the element type desc
-	          key = void 0;
-	          break;
-	        case 0x5d:  // ']'
-	          stack.shift();
-	          stack2.shift();
-	          break;
-	        case 0x66:  // 'f'
-	          cont = stack[0];
-	          cont[key || cont.length] = false;
-	          key = void 0;
-	          break;
-	        case 0x6e:  // 'n'
-	          cont = stack[0];
-	          cont[key || cont.length] = null;
-	          key = void 0;
-	          break;
-	        case 0x74:  // 't'
-	          cont = stack[0];
-	          cont[key || cont.length] = true;
-	          key = void 0;
-	          break;
-	        case 0x7b:  // '{'
-	          cont = stack[0];
-	          stack.unshift(cont[key || cont.length] = builder(stack2[0]));
-	          stack2.unshift(null);
-	          key = void 0;
-	          break;
-	        case 0x7d:  // '}'
-	          stack.shift();
-	          stack2.shift();
-	          break;
-	      }
-	    }
-	    // Fail if we've got an uncompleted object.
-	    if (topLevelPrimitive) {
-	      if (stack.length !== 1) { throw new Error(); }
-	      result = result[0];
-	    } else {
-	      if (stack.length) { throw new Error(); }
-	    }
-
-	    return result;
-	  };
-})();
-
-
-
+stjs.parseJSON = stjs.NOT_IMPLEMENTED;
 
 stjs.isArray=function( obj ) {
     return stjs.toString.call(obj) === "[object Array]";

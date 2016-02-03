@@ -15,14 +15,14 @@ public class MethodReferenceGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testInstanceMethodRef() {
 		assertCodeContains(MethodRef2.class,
-				"calculate(stjs.bind(\"inc2\"), new MethodRef2(), 1)");
+				"calculate(stjs.bind(\"inc2\"), new MethodRef2()._constructor(), 1)");
 		assertEquals(3, ((Number)execute(MethodRef2.class)).intValue());
 	}
 
 	@Test
 	public void testInstanceMethodRefWithInterface() {
 		assertCodeContains(MethodRef9.class,
-				"calculate(stjs.bind(\"inc2\"), new MethodRef9.IncImpl(), 1)");
+				"calculate(stjs.bind(\"inc2\"), new MethodRef9.IncImpl()._constructor(), 1)");
 		assertEquals(3, ((Number)execute(MethodRef9.class)).intValue());
 	}
 
@@ -34,7 +34,7 @@ public class MethodReferenceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testNewMethodRef() {
-		assertCodeContains(MethodRef4.class, "calculate(function(){return new MethodRef4(arguments[0]);}, 1)");
+		assertCodeContains(MethodRef4.class, "calculate(function(){return new MethodRef4()._constructor$int(arguments[0]);}, 1)");
 		assertEquals(1, ((Number)execute(MethodRef4.class)).intValue());
 	}
 

@@ -1,6 +1,5 @@
 package org.stjs.generator.writer.templates;
 
-import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.tools.javac.code.Symbol;
 import org.stjs.generator.GenerationContext;
@@ -12,6 +11,7 @@ import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.utils.Scopes;
+import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
@@ -19,7 +19,6 @@ import org.stjs.generator.writer.expression.MethodInvocationWriter;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
 
@@ -30,7 +29,7 @@ import java.util.List;
  */
 public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
 
-	private boolean isCallToSuperConstructor(MethodInvocationTree tree) {
+	private boolean isCallToSuper(MethodInvocationTree tree) {
 		if (!TreeUtils.isSuperCall(tree)) {
 			return false;
 		}
@@ -45,9 +44,9 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 	}
 
 	/**
-	 * super(args) -> SuperType.call(this, args)
+	 * super(args) -> SuperType.prototype._constructor$xxx(this, args)
 	 */
-	private JS callToSuperConstructor(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
+	private JS callToSuper(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		Element methodElement = TreeUtils.elementFromUse(tree);
 		TypeElement typeElement = (TypeElement) methodElement.getEnclosingElement();
 
@@ -63,29 +62,19 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 			return null;
 		}
 
-		// transform it into superType.[prototype.method].call(this, args..);
-		JS superType = constructSuperType(context, typeElement, methodName);
-
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
 
-		addOuterClassReferenceParameters(tree, context, methodElement, arguments);
+		JS target = constructSuperType(context, typeElement, methodName);
+		if (ElementUtils.isConstructor(methodElement)) {
+			// transform it into superType.[prototype.method].call(this, args..);
+			JS classPrototype = context.js().property(target, JavascriptKeywords.PROTOTYPE);
+			String constructorName = InternalUtils.generateOverloadeConstructorName(context, ((Symbol.MethodSymbol) methodElement).params());
+			target = context.js().property(classPrototype, constructorName);
+		}
 
 		arguments.add(0, context.js().keyword(Keyword.THIS));
-		return context.js().functionCall(context.js().property(superType, "call"), arguments);
-	}
 
-	private void addOuterClassReferenceParameters(MethodInvocationTree tree, GenerationContext<JS> context, Element methodElement, List<JS> arguments) {
-		Element enclosingClassForMethod = methodElement.getEnclosingElement();
-		if (ElementUtils.isInnerClass(enclosingClassForMethod) && !JavaNodes.isStatic(enclosingClassForMethod)) {
-			TypeElement callingClass = TreeUtils.getEnclosingClass(context.getCurrentPath());
-
-			int deepnessLevel = ElementUtils.getInnerClassDeepnessLevel(callingClass);
-
-			String scopeAccessorPrefix = Scopes.buildOuterClassAccessTargetPrefix();
-			String scopeAccessorVariable = scopeAccessorPrefix + GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR + deepnessLevel;
-
-			arguments.add(0, context.js().name(scopeAccessorVariable));
-		}
+		return context.js().functionCall(context.js().property(target, "call"), arguments);
 	}
 
 	private JS constructSuperType(GenerationContext<JS> context, TypeElement typeElement, String methodName) {
@@ -95,8 +84,8 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
-		if (isCallToSuperConstructor(tree)) {
-			return callToSuperConstructor(visitor, tree, context);
+		if (isCallToSuper(tree)) {
+			return callToSuper(visitor, tree, context);
 		}
 
 		JS target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree> getCurrentWrapper());
@@ -115,7 +104,7 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 	private JS buildConstructorInvocationForMultipleConstructors(MethodInvocationTree tree, GenerationContext<JS> context,
 																 JS target, List<JS> arguments) {
 		ExecutableElement element = TreeUtils.elementFromUse(tree);
-		if (JavaNodes.hasMultipleConstructors(context.getCurrentPath()) && ElementKind.CONSTRUCTOR.equals(element.getKind())) {
+		if (JavaNodes.hasMultipleConstructors(context.getCurrentPath()) && ElementUtils.isConstructor(element)) {
 			// Invocation of a another constructor, let's get the overloaded constructor name and chain the real static constructor
 			String constructorName = InternalUtils.generateOverloadeConstructorName(context, ((Symbol.MethodSymbol) element).getParameters());
 			return context.js().functionCall(context.js().property(target, constructorName), arguments);

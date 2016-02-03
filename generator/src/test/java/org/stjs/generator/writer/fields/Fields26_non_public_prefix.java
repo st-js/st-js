@@ -6,8 +6,8 @@ public class Fields26_non_public_prefix {
     public String publicField;
 
     public String getThisPackageField() {
-        Fields26_non_public_prefix myFields25nonpublicprefix = new Fields26_non_public_prefix();
-        myFields25nonpublicprefix.packageField = "test";
+        Fields26_non_public_prefix myFields26nonpublicprefix = new Fields26_non_public_prefix();
+        myFields26nonpublicprefix.packageField = "test";
 
         return this.packageField;
     }
@@ -43,8 +43,8 @@ public class Fields26_non_public_prefix {
         }
 
         public String getThisPackageField() {
-            Fields26_non_public_prefix myFields25nonpublicprefix = new Fields26_non_public_prefix();
-            myFields25nonpublicprefix.packageField = "test";
+            Fields26_non_public_prefix myFields26nonpublicprefix = new Fields26_non_public_prefix();
+            myFields26nonpublicprefix.packageField = "test";
 
             return this.innerPackageField;
         }

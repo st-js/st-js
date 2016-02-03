@@ -9,6 +9,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.debugging.sourcemap.proto.Mapping;
 import org.stjs.generator.STJSClass;
 import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.utils.PreConditions;
@@ -45,7 +46,12 @@ public class JavascriptToJava {
 		try {
 			contents = Resources.toString(url, Charsets.UTF_8);
 			SourceMapping mapping = SourceMapConsumerFactory.parse(contents);
-			return mapping.getMappingForLine(lineNumber, 1).getLineNumber();
+			Mapping.OriginalMapping originalMapping = mapping.getMappingForLine(lineNumber, 1);
+			if (originalMapping == null) {
+				throw new STJSRuntimeException("Cannot find mapping for: " + path + ":" + lineNumber);
+			}
+
+			return originalMapping.getLineNumber();
 		}
 		catch (IOException e) {
 			throw new STJSRuntimeException(e);

@@ -49,6 +49,6 @@ public class TypeDescTest extends AbstractStjsTest {
 	@Test
 	public void testInnerClassClassName() {
 		assertCodeContains(TypeDesc9_innerClass_simpleClassName.class,
-				"constructor.InnerClass = stjs.extend(constructor.InnerClass, stjs.Java.Object, [], null, {}, {}, \"TypeDesc9_innerClass_simpleClassName.InnerClass\");");
+				"constructor.InnerClass = stjs.extend(constructor.InnerClass, stjs.Java.Object, [], function(constructor, prototype) {}, {}, {}, \"TypeDesc9_innerClass_simpleClassName.InnerClass\");");
 	}
 }

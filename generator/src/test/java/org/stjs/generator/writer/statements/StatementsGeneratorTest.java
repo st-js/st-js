@@ -127,7 +127,7 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testStaticInitializer() {
 		assertCodeContains(Statements14.class, "{" + //
-				"Statements14._instance = new Statements14();" + //
+				"Statements14._instance = new Statements14()._constructor();" + //
 				"var n = Statements14._instance.method();" + //
 				"}");
 	}

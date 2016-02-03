@@ -15,6 +15,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class Scopes {
@@ -132,6 +133,54 @@ public final class Scopes {
 	public static String buildOuterClassAccessTargetPrefix() {
 		return GeneratorConstants.THIS + "." + GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX
 				+ GeneratorConstants.INNER_CLASS_CONSTRUCTOR_PARAM_PREFIX;
+	}
+
+	public static <JS> List<JS> buildOuterClassParametersAsNames(GenerationContext<JS> context, Element callingClass, Element targetClass) {
+
+		List<JS> result = new ArrayList<>();
+		for (String s : buildOuterClassParametersAsString(callingClass, targetClass)) {
+			result.add(context.js().name(s));
+		}
+
+		return result;
+	}
+
+	public static List<String> buildOuterClassParametersAsString(Element callingClass, Element targetClass) {
+		int callingClassDeepnessLevel;
+		if (callingClass == null) {
+			callingClassDeepnessLevel = Integer.MAX_VALUE;
+		} else {
+			callingClassDeepnessLevel = ElementUtils.getInnerClassDeepnessLevel(callingClass);
+		}
+
+		int targetClassDeepnessLevel = ElementUtils.getInnerClassDeepnessLevel(targetClass);
+
+		// Deepness of 0 mean 1 level of deepness
+		String prefix = GeneratorConstants.INNER_CLASS_CONSTRUCTOR_PARAM_PREFIX + GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR;
+
+		List<String> outerClassVarNames = new ArrayList<>();
+		for (int i = 0; i <= Math.min(callingClassDeepnessLevel, targetClassDeepnessLevel); i++) {
+			outerClassVarNames.add(prefix + i);
+		}
+
+		// if the target class 1 level deeper thant the calling class? add "this" as the last outerclass parameter
+		if (outerClassVarNames.size() <= targetClassDeepnessLevel) {
+			outerClassVarNames.add(GeneratorConstants.THIS);
+		}
+
+		return outerClassVarNames;
+	}
+
+	public static List<String> buildOuterClassAccessPrefixesForDeepness(int maxInnerClassDeepnessId) {
+		// Deepness of 0 mean 1 level of deepness
+		String prefix = GeneratorConstants.INNER_CLASS_CONSTRUCTOR_PARAM_PREFIX + GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR;
+
+		List<String> outerClassVarNames = new ArrayList<>();
+		for (int i = 0; i <= maxInnerClassDeepnessId; i++) {
+			outerClassVarNames.add(prefix + i);
+		}
+
+		return outerClassVarNames;
 	}
 
 	public static boolean isRegularInstanceField(Element fieldElement, IdentifierTree tree) {

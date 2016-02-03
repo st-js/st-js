@@ -25,17 +25,20 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 
     @Test
     public void testInstanceFieldAssigned() {
-        assertCodeContains(Fields2.class, "prototype.x = 2;");
+        assertCodeContains(Fields2.class, "" +
+                "Fields2 = function() {\n" +
+                "    this.x = 2;\n" +
+                "}");
     }
 
     @Test
     public void testInstanceFieldAssignedNegative() {
-        assertCodeContains(Fields2b.class, "prototype.x = -2;");
+        assertCodeContains(Fields2b.class, "this.x = -2;");
     }
 
     @Test
     public void testMultipleInstanceField() {
-        assertCodeContains(Fields3.class, "prototype.x = 2; prototype.y = 3;");
+        assertCodeContains(Fields3.class, "this.x = 2; this.y = 3;");
     }
 
     @Test
@@ -51,11 +54,12 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
     @Test
     public void testInstanceFieldInitWithNonLiterals() {
         assertCodeContains(Fields8.class, "{\n" +
+                "    this.x = 2;\n" +
                 "    this.y = this.x;\n" +
                 "}");
 
         assertCodeContains(Fields8.class, "{\n" +
-                "    prototype.x = 2;\n" +
+                "    prototype.x = 0;\n" +
                 "    prototype.y = 0;\n" +
                 "}");
     }
@@ -101,8 +105,8 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
                 "    prototype._privateField = null;\n" +
                 "    prototype.publicField = null;\n" +
                 "    prototype.getThisPackageField = function() {\n" +
-                "        var myFields25nonpublicprefix = new Fields26_non_public_prefix();\n" +
-                "        myFields25nonpublicprefix._packageField = \"test\";\n" +
+                "        var myFields26nonpublicprefix = new Fields26_non_public_prefix()._constructor();\n" +
+                "        myFields26nonpublicprefix._packageField = \"test\";\n" +
                 "        return this._packageField;\n" +
                 "    };\n" +
                 "    prototype.getThisPrivateField = function() {\n" +
@@ -120,17 +124,19 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
                 "    prototype.getPublicField = function() {\n" +
                 "        return this.publicField;\n" +
                 "    };\n" +
-                "    constructor.InnerClass = function(parent) {\n" +
-                "        this._parent = parent;\n" +
-                "    };\n" +
+                "    constructor.InnerClass = function() {};\n" +
                 "    constructor.InnerClass = stjs.extend(constructor.InnerClass, stjs.Java.Object, [], function(constructor, prototype) {\n" +
+                "        prototype._constructor$Fields26_non_public_prefix = function(parent) {\n" +
+                "            this._parent = parent;\n" +
+                "            return this;\n" +
+                "        };\n" +
                 "        prototype._innerPackageField = null;\n" +
                 "        prototype._innerPrivateField = null;\n" +
                 "        prototype.innerPublicField = null;\n" +
                 "        prototype._parent = null;\n" +
                 "        prototype.getThisPackageField = function() {\n" +
-                "            var myFields25nonpublicprefix = new Fields26_non_public_prefix();\n" +
-                "            myFields25nonpublicprefix._packageField = \"test\";\n" +
+                "            var myFields26nonpublicprefix = new Fields26_non_public_prefix()._constructor();\n" +
+                "            myFields26nonpublicprefix._packageField = \"test\";\n" +
                 "            return this._innerPackageField;\n" +
                 "        };\n" +
                 "        prototype.getThisPrivateField = function() {\n" +
@@ -219,18 +225,19 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 
     @Test
     public void testArray() {
-        assertCodeContains(Fields28_array.class, "" +
-                "    this._aBooleanArray = [true, false];\n" +
-                "    this._aStringArray = [\"a\", \"b\", \"c\", \"d\", \"e\"];\n" +
-                "    this._anIntTwoDimensArray = [[0, 1], [2, 3]];\n" +
-                "    this._aCharArray = ['n', 'o', 't', ' ', 'a', ' ', 'S', 't', 'r', 'i', 'n', 'g'];\n" +
-                "    this._anObjectArray = [new Fields28_array.SimpleObject(this, this._anIntTwoDimensArray), new Fields28_array.SimpleObject(this, [[0]])];\n" +
-                "    this._aFloatArray = [2.0, 3.6969];\n" +
-                "    this._aCollectionArray = [];\n" +
-                "    this._anInterfaceArray = [new (stjs.extend(function Fields28_array$1() {}, stjs.Java.Object, [Fields28_array.SimpleInterface], function(constructor, prototype) {\n" +
-                "        prototype.doNothing = function() {};\n" +
-                "    }, {}, {}, \"Fields28_array.Fields28_array$1\"))()];\n" +
-                "    this._anIntThreeDimensArrayInitialized = [[[0]]];");
+        assertCodeContains(Fields28_array.class,
+                "" +
+                        "    this._aBooleanArray = [true, false];\n" +
+                        "    this._aStringArray = [\"a\", \"b\", \"c\", \"d\", \"e\"];\n" +
+                        "    this._anIntTwoDimensArray = [[0, 1], [2, 3]];\n" +
+                        "    this._aCharArray = ['n', 'o', 't', ' ', 'a', ' ', 'S', 't', 'r', 'i', 'n', 'g'];\n" +
+                        "    this._anObjectArray = [new Fields28_array.SimpleObjectWithTwoDimensionArrayAsConstructor()._constructor$Array$Array$int(this._anIntTwoDimensArray), new Fields28_array.SimpleObjectWithTwoDimensionArrayAsConstructor()._constructor$Array$Array$int([[0]])];\n" +
+                        "    this._aFloatArray = [2.0, 3.6969];\n" +
+                        "    this._aCollectionArray = [];\n" +
+                        "        this._anInterfaceArray = [new (stjs.extend(function Fields28_array$1() {}, stjs.Java.Object, [Fields28_array.SimpleInterface], function(constructor, prototype) {\n" +
+                        "            prototype.doNothing = function() {};\n" +
+                        "        }, {}, {}, \"Fields28_array.Fields28_array$1\"))()];\n" +
+                        "    this._anIntThreeDimensArrayInitialized = [[[0]]];");
     }
 
     @Test
@@ -291,17 +298,34 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
     @Test
     public void testInitializeObjectField() {
         assertCodeContains(Fields33_object_field_initializer.class, "{\n" +
-                "    this._privateObject = new stjs.Java.Object();\n" +
-                "    this.publicObject = new stjs.Java.Object();\n" +
-                "    this._defaultedValue = Fields33_object_field_initializer._DEFAULT_VALUE;\n" +
+                "    this._privateObject = new stjs.Java.Object()._constructor();\n" +
+                "    this.publicObject = new stjs.Java.Object()._constructor();\n" +
+                "    this._defaultedValue = Fields33_object_field_initializer._STATIC_VALUE;\n" +
                 "};");
-        assertCodeContains(Fields33_object_field_initializer.class, "{\n" +
-                "    constructor._DEFAULT_VALUE = 3;\n" +
+        assertCodeContains(Fields33_object_field_initializer.class, "" +
+                "{\n" +
+                "    constructor._STATIC_VALUE = 3;\n" +
                 "    prototype._privateObject = null;\n" +
                 "    prototype.publicObject = null;\n" +
                 "    prototype._defaultedValue = 0;\n" +
                 "    prototype.method = function() {};\n" +
                 "}");
+    }
+
+    @Test
+    public void testInitializeFieldsClassHierarchy() {
+        assertCodeContains(Fields34_field_initializer_class_hierarchy.class, "" +
+                "    constructor.BaseClass = function () {\n" +
+                "        this.baseClassField = \"baseClassField\";\n" +
+                "    };\n");
+
+        assertCodeContains(Fields34_field_initializer_class_hierarchy.class, "" +
+                "    constructor.SubClass = function () {\n" +
+                "        Fields34_field_initializer_class_hierarchy.BaseClass.call(this);\n" +
+                "        this.subClassField = \"subClassField\";\n" +
+                "    };\n");
+
+        Assert.assertEquals("baseClassField-baseClassField,subClassField", execute(Fields34_field_initializer_class_hierarchy.class));
     }
 
 }

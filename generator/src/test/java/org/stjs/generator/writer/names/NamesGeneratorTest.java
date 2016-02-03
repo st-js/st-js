@@ -62,7 +62,7 @@ public class NamesGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testStaticAccessFromInstanceNew() {
-		assertCodeContains(Names12.class, "new Names12().constructor.staticMethod()");
+		assertCodeContains(Names12.class, "new Names12()._constructor().constructor.staticMethod()");
 	}
 
 	@Test

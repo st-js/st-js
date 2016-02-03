@@ -32,7 +32,7 @@ public class TryCatchTest extends AbstractStjsTest {
     public void testTryCatchWithMultipleCatchClauses() {
         assertCodeContains(TryCatch2_multipleCatchClauses.class, "" +
                 "        try {\n" +
-                "             throw new TryCatch2_multipleCatchClauses.CustomExceptionA(\"A RuntimeException for test purpose\");\n" +
+                "             throw new TryCatch2_multipleCatchClauses.CustomExceptionA()._constructor$String(\"A RuntimeException for test purpose\");\n" +
                 "        }catch ($exception) {\n" +
                 "            if (stjs.isInstanceOf($exception, TryCatch2_multipleCatchClauses.CustomExceptionA)) {\n" +
                 "                var customA = $exception;\n" +
@@ -54,7 +54,7 @@ public class TryCatchTest extends AbstractStjsTest {
             execute(TryCatch3_multipleCatchClauses_NotExpectedException.class);
             Assert.fail("Should not get here: an exception was expected");
         } catch (STJSRuntimeException e) {
-            Assert.assertTrue(e.getMessage().contains("at line number 27"));
+            Assert.assertTrue("Exception does not contain expected error:\n" + e.getMessage(), e.getMessage().contains("at line number 42"));
         }
     }
 
