@@ -400,4 +400,21 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
                 "        stjsArray.push(\"b\", \"c\");\n");
     }
 
+    @Test
+    public void test_early_return_in_constructor() throws Exception {
+        assertCodeContains(Methods35_early_return_in_constructor.class, "" +
+                "    prototype._constructor$boolean = function(b) {\n" +
+                "        (function() {\n" +
+                "            this.trace.push(\"before if\");\n" +
+                "            if (b) {\n" +
+                "                this.trace.push(\"inside if and before early return\");\n" +
+                "                return;\n" +
+                "            }\n" +
+                "            this.trace.push(\"last line of constructor\");\n" +
+                "        }.call)(this);\n" +
+                "        return this;\n" +
+                "    };\n");
+
+        Assert.assertEquals("before if, last line of constructor ### before if, inside if and before early return", execute(Methods35_early_return_in_constructor.class));
+    }
 }
