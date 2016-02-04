@@ -225,19 +225,24 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 
     @Test
     public void testArray() {
-        assertCodeContains(Fields28_array.class,
-                "" +
-                        "    this._aBooleanArray = [true, false];\n" +
-                        "    this._aStringArray = [\"a\", \"b\", \"c\", \"d\", \"e\"];\n" +
-                        "    this._anIntTwoDimensArray = [[0, 1], [2, 3]];\n" +
-                        "    this._aCharArray = ['n', 'o', 't', ' ', 'a', ' ', 'S', 't', 'r', 'i', 'n', 'g'];\n" +
-                        "    this._anObjectArray = [new Fields28_array.SimpleObjectWithTwoDimensionArrayAsConstructor()._constructor$Array$Array$int(this._anIntTwoDimensArray), new Fields28_array.SimpleObjectWithTwoDimensionArrayAsConstructor()._constructor$Array$Array$int([[0]])];\n" +
-                        "    this._aFloatArray = [2.0, 3.6969];\n" +
-                        "    this._aCollectionArray = [];\n" +
-                        "        this._anInterfaceArray = [new (stjs.extend(function Fields28_array$1() {}, stjs.Java.Object, [Fields28_array.SimpleInterface], function(constructor, prototype) {\n" +
-                        "            prototype.doNothing = function() {};\n" +
-                        "        }, {}, {}, \"Fields28_array.Fields28_array$1\"))()];\n" +
-                        "    this._anIntThreeDimensArrayInitialized = [[[0]]];");
+        String code = generate(Fields28_array.class);
+
+        assertCodeContains(code, "this._aBooleanArray = [true, false];");
+
+        assertCodeContains(code, "this._aStringArray = [\"a\", \"b\", \"c\", \"d\", \"e\"];");
+
+        assertCodeContains(code, "this._anIntTwoDimensArray = [[0, 1], [2, 3]];");
+        assertCodeContains(code, "this._aCharArray = ['n', 'o', 't', ' ', 'a', ' ', 'S', 't', 'r', 'i', 'n', 'g'];");
+        assertCodeContains(code, "this._anObjectArray = [new Fields28_array.SimpleObjectWithTwoDimensionArrayAsConstructor()._constructor$Array$Array$int(this._anIntTwoDimensArray), new Fields28_array.SimpleObjectWithTwoDimensionArrayAsConstructor()._constructor$Array$Array$int([[0]])];");
+        assertCodeContains(code, "this._aFloatArray = [2.0, 3.6969];");
+        assertCodeContains(code, "this._aCollectionArray = [];");
+        assertCodeContains(code, "" +
+                "        this._anInterfaceArray = [new (stjs.extend(function Fields28_array$1(outerClass$0) {\n" +
+                "            this._outerClass$0 = outerClass$0;\n" +
+                "        }, stjs.Java.Object, [Fields28_array.SimpleInterface], function(constructor, prototype) {\n" +
+                "            prototype.doNothing = function() {};\n" +
+                "        }, {}, {}, \"Fields28_array.Fields28_array$1\"))(this)._constructor()];");
+        assertCodeContains(code, "this._anIntThreeDimensArrayInitialized = [[[0]]];");
     }
 
     @Test

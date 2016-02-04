@@ -7,7 +7,6 @@ package org.stjs.generator.javac;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.utils.JavaNodes;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -58,6 +57,20 @@ public final class ElementUtils {
             result = encl;
         }
         return (TypeElement) result;
+    }
+
+    /**
+     * Return the first class found in the enclosing element chain
+     */
+    public static TypeElement enclosingClassOrNull(Element elem) {
+        while (true) {
+            elem = elem.getEnclosingElement();
+            if (ElementUtils.isClass(elem)) {
+                return (TypeElement) elem;
+            } else if (elem == null) {
+                return null;
+            }
+        }
     }
 
     /**
@@ -483,24 +496,12 @@ public final class ElementUtils {
         return "<init>".equals(methodElement.name.toString()) && !methodElement.getModifiers().contains(Modifier.STATIC);
     }
 
-    public static boolean hasMultipleConstructors(Element element) {
-//        int constructorCount = 0;
-//        List<? extends Element> enclosedElements = element.getEnclosedElements();
-//        for (Element enclosedElement : enclosedElements) {
-//            if (isConstructor(enclosedElement) && !JavaNodes.isNative(enclosedElement)) {
-//                constructorCount++;
-//            }
-//        }
-//        return constructorCount > 1;
-        return true;
-    }
-
     public static boolean isClass(Element element) {
         return (element != null) && (element.getKind() == ElementKind.CLASS);
     }
 
     public static boolean isInnerClass(Element element) {
-        return isClass(element) && isClass(element.getEnclosingElement()) && !ElementUtils.isStatic(element);
+        return isClass(element) && (ElementUtils.enclosingClassOrNull(element) != null) && !ElementUtils.isStatic(element);
     }
 
     public static int getInnerClassDeepnessLevel(Element element) {
@@ -508,7 +509,7 @@ public final class ElementUtils {
 
         while (isInnerClass(element)) {
             deepnessLevel++;
-            element = element.getEnclosingElement();
+            element = ElementUtils.enclosingClassOrNull(element);
         }
 
         return deepnessLevel;

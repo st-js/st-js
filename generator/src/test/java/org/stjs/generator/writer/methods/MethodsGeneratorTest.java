@@ -349,19 +349,21 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 
     @Test
     public void testMethodsOverloadName_with_specific_typed_class_including_generics() {
-        assertCodeContains(Methods32e_overloadName_with_specific_typed_class_including_generics.class,
-                "" +
-                        "    constructor.GenericInterface = stjs.extend(constructor.GenericInterface, stjs.Java.Object, [], function(constructor, prototype) {\n" +
-                        "        prototype.aMethod = function(t) {};\n" +
-                        "    }",
+        String code = generate(Methods32e_overloadName_with_specific_typed_class_including_generics.class);
+        assertCodeContains(code, "" +
+                "    constructor.GenericInterface = stjs.extend(constructor.GenericInterface, stjs.Java.Object, [], function(constructor, prototype) {\n" +
+                "        prototype.aMethod = function(t) {};\n" +
+                "    }");
 
-                "" +
-                        "    prototype.method = function() {\n" +
-                        "        return new (stjs.extend(function Methods32e_overloadName_with_specific_typed_class_including_generics$1() {}, stjs.Java.Object, [Methods32e_overloadName_with_specific_typed_class_including_generics.GenericInterface], function(constructor, prototype) {\n" +
-                        "            prototype.aMethod = function(dto) {\n" +
-                        "                return 1234;\n" +
-                        "            };\n" +
-                        "        }");
+        assertCodeContains(code, "" +
+                "    prototype.method = function() {\n" +
+                "        return new (stjs.extend(function Methods32e_overloadName_with_specific_typed_class_including_generics$1(outerClass$0) {\n" +
+                "            this._outerClass$0 = outerClass$0;\n" +
+                "        }, stjs.Java.Object, [Methods32e_overloadName_with_specific_typed_class_including_generics.GenericInterface], function(constructor, prototype) {\n" +
+                "            prototype.aMethod = function(dto) {\n" +
+                "                return 1234;\n" +
+                "            };\n" +
+                "        }, {}, {}, \"Methods32e_overloadName_with_specific_typed_class_including_generics.Methods32e_overloadName_with_specific_typed_class_including_generics$1\"))(this)._constructor();");
     }
 
 

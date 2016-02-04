@@ -137,35 +137,53 @@ public final class Scopes {
 	public static <JS> List<JS> buildOuterClassParametersAsNames(GenerationContext<JS> context, Element callingClass, Element targetClass) {
 
 		List<JS> result = new ArrayList<>();
-		for (String s : buildOuterClassParametersAsString(callingClass, targetClass)) {
+		for (String s : buildNewClassInstanceAllocFunctionParametersAsString(callingClass, targetClass)) {
 			result.add(context.js().name(s));
 		}
 
 		return result;
 	}
 
-	public static List<String> buildOuterClassParametersAsString(Element callingClass, Element targetClass) {
-		int callingClassDeepnessLevel;
-		if (callingClass == null) {
-			callingClassDeepnessLevel = Integer.MAX_VALUE;
-		} else {
-			callingClassDeepnessLevel = ElementUtils.getInnerClassDeepnessLevel(callingClass);
-		}
-
+	public static List<String> buildOuterClassConstructorParametersNames(Element targetClass) {
 		int targetClassDeepnessLevel = ElementUtils.getInnerClassDeepnessLevel(targetClass);
 
 		// Deepness of 0 mean 1 level of deepness
 		String prefix = GeneratorConstants.INNER_CLASS_CONSTRUCTOR_PARAM_PREFIX + GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR;
 
 		List<String> outerClassVarNames = new ArrayList<>();
-		for (int i = 0; i <= Math.min(callingClassDeepnessLevel, targetClassDeepnessLevel); i++) {
+		for (int i = 0; i <= targetClassDeepnessLevel; i++) {
 			outerClassVarNames.add(prefix + i);
 		}
 
-		// if the target class 1 level deeper thant the calling class? add "this" as the last outerclass parameter
+		return outerClassVarNames;
+	}
+
+	public static List<String> buildNewClassInstanceAllocFunctionParametersAsString(Element callingClass, Element targetClass) {
+		int callingClassDeepnessLevel = ElementUtils.getInnerClassDeepnessLevel(callingClass);
+		int targetClassDeepnessLevel = ElementUtils.getInnerClassDeepnessLevel(targetClass);
+
+		// get the list of outer variables based on target class deepness:
+		//   [outerClass$0, outerClass$1, outerClass$2, ...]
+		List<String> outerClassVarNames = buildOuterClassConstructorParametersNames(targetClass);
+
+		// remove any variable that are not available in the calling class scope based on the calling class deepness.
+		while(outerClassVarNames.size() > callingClassDeepnessLevel + 1) {
+			outerClassVarNames.remove(outerClassVarNames.size() - 1);
+		}
+
+		// prefix all variables to get:
+		//   [this._outerClass$0, this._outerClass$1, ...]
+		for (int i = 0; i < outerClassVarNames.size(); i++) {
+			String updatedValue = GeneratorConstants.THIS + "." + GeneratorConstants.NON_PUBLIC_METHODS_AND_FIELDS_PREFIX + outerClassVarNames.get(i);
+			outerClassVarNames.set(i, updatedValue);
+		}
+
+		// if the target class level is deeper than the calling class, add "this" as the last outerclass parameter
 		if (outerClassVarNames.size() <= targetClassDeepnessLevel) {
 			outerClassVarNames.add(GeneratorConstants.THIS);
 		}
+
+		assert outerClassVarNames.size() == targetClassDeepnessLevel + 1;
 
 		return outerClassVarNames;
 	}

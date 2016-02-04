@@ -197,8 +197,8 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
     @Test
     public void testAnonymousInsideAnonymous() {
         String code = generate(InnerTypes18.class);
-        assertCodeContains(code, "var o = new (stjs.extend(function InnerTypes18$1(){}, stjs.Java.Object, [], function(constructor, prototype){");
-        assertCodeContains(code, "var o2 = new (stjs.extend(function InnerTypes18$1$1(){}, stjs.Java.Object, [], function(constructor, prototype){");
+        assertCodeContains(code, "var o = new (stjs.extend(function InnerTypes18$1(){},");
+        assertCodeContains(code, "var o2 = new (stjs.extend(function InnerTypes18$1$1(outerClass$0) {");
     }
 
     @Test
@@ -209,7 +209,7 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
                 "        this._outerClass$0 = outerClass$0;\n" +
                 "    };\n" +
                 "    constructor.Inner = stjs.extend(constructor.Inner, stjs.Java.Object, [], function(constructor, prototype) {");
-        assertCodeContains(code, "return new (stjs.extend(function InnerTypes19$Inner$1(){}, stjs.Java.Object, [], function(constructor, prototype){");
+        assertCodeContains(code, "return new (stjs.extend(function InnerTypes19$Inner$1(outerClass$0, outerClass$1){");
     }
 
     @Test
@@ -254,19 +254,19 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
     @Test
     public void testInnerTypes_inner_class_level1_creating_class_level_2() {
         assertCodeContains(InnerTypes25_inner_class_level1_creating_class_level_2.class, "" +
-                "new InnerTypes25_inner_class_level1_creating_class_level_2.InnerLevel1.InnerLevel2(outerClass$0, this)._constructor();");
+                "new InnerTypes25_inner_class_level1_creating_class_level_2.InnerLevel1.InnerLevel2(this._outerClass$0, this)._constructor();");
     }
 
     @Test
     public void testInnerTypes_inner_class_level2_creating_class_level_1() {
         assertCodeContains(InnerTypes26_inner_class_level2_creating_class_level_1.class, "" +
-                "new InnerTypes26_inner_class_level2_creating_class_level_1.InnerLevel1(outerClass$0)._constructor();");
+                "new InnerTypes26_inner_class_level2_creating_class_level_1.InnerLevel1(this._outerClass$0)._constructor();");
     }
 
     @Test
     public void testInnerTypes_inner_class_level1_creating_class_level_1() {
         assertCodeContains(InnerTypes27_inner_class_level1_creating_class_level_1.class, "" +
-                "new InnerTypes27_inner_class_level1_creating_class_level_1.InnerLevel1B(outerClass$0)._constructor();");
+                "new InnerTypes27_inner_class_level1_creating_class_level_1.InnerLevel1B(this._outerClass$0)._constructor();");
     }
 
     @Test

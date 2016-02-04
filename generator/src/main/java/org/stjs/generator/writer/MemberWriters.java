@@ -48,21 +48,9 @@ public final class MemberWriters {
 		// Find the scope deepness level to which we access the method
 		Element element = TreeUtils.elementFromUse((ExpressionTree) tw.getTree());
 		int deepnessLevel = Scopes.getElementDeepnessLevel(element);
-		String scopeAccessorPrefix = GeneratorConstants.THIS;
-
-		if (!isInvokedFromAnonymousClass(tw.getContext().getCurrentPath())) {
-			// Create a target such as 'this._outerClass$x'
-			scopeAccessorPrefix = Scopes.buildOuterClassAccessTargetPrefix();
-		}
+		String scopeAccessorPrefix = Scopes.buildOuterClassAccessTargetPrefix();
 
 		return tw.getContext().js().name(scopeAccessorPrefix + GeneratorConstants.AUTO_GENERATED_ELEMENT_SEPARATOR + deepnessLevel);
 	}
 
-	private static boolean isInvokedFromAnonymousClass(TreePath currentPath) {
-		ClassTree enclosingClass = Scopes.findEnclosingClassSkipAnonymousInitializer(currentPath);
-		if (enclosingClass != null && enclosingClass.getSimpleName().toString().isEmpty()) {
-			return true;
-		}
-		return false;
-	}
 }
