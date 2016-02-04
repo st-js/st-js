@@ -43,4 +43,8 @@ public class JavaClassTest extends AbstractStjsTest {
         Assert.assertEquals("JavaClassTest3b_Class_getCanonicalName", execute(JavaClassTest3b_Class_getCanonicalName.class));
     }
 
+    @Test
+    public void testClass_isAssignableFrom() throws Exception {
+        Assert.assertEquals(true, execute(JavaClassTest5_Class_isAssignableFrom.class));
+    }
 }
