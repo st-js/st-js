@@ -138,10 +138,10 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 	/**
 	 * @return the JavaScript node for the class' constructor
 	 */
-	private JS getConstructor(WriterVisitor<JS> visitor, ClassTree clazz, GenerationContext<JS> context, String constructorFunctionName) {
+	private JS getAllocFunction(WriterVisitor<JS> visitor, ClassTree clazz, GenerationContext<JS> context, String constructorFunctionName) {
 		TypeElement typeElement = TreeUtils.elementFromDeclaration(clazz);
 
-		List<String> outerClassParameterNames = Scopes.buildOuterClassParametersAsString(null, typeElement);
+		List<String> outerClassParameterNames = Scopes.buildOuterClassConstructorParametersNames(typeElement);
 		List<JS> outerClassParametersDeclaration = new ArrayList<>();
 		List<JS> outerClassVariableAssignment = new ArrayList<>();
 		for (String outerClassParameterName : outerClassParameterNames) {
@@ -281,10 +281,6 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 	private List<JS> generateMultipleConstructorsAsInitializers(WriterVisitor<JS> visitor, GenerationContext<JS> context,
 																ClassTree clazz) {
 		List<JS> stmts = new ArrayList<>();
-
-		if (!JavaNodes.hasMultipleConstructors(context.getCurrentPath())) {
-			return stmts;
-		}
 
 		Element type = TreeUtils.elementFromDeclaration(clazz);
 		String constructorName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
@@ -709,7 +705,7 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		return true;
 	}
 
-	private JS addConstructorVariableDeclaration(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts, JS constructorFunction) {
+	private JS addVariableDeclarationForClassAllocator(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts, JS constructorFunction) {
 		JavaScriptBuilder<JS> js = context.js();
 		Element type = TreeUtils.elementFromDeclaration(tree);
 		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
@@ -782,23 +778,21 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 			constructorFunctionName = classNameParts[classNameParts.length - 1];
 		}
 
-		JS constructorFunction = getConstructor(visitor, tree, context, constructorFunctionName);
+		JS allocFunction = getAllocFunction(visitor, tree, context, constructorFunctionName);
 
-		JS constructorFunctionForExtendsCall;
-		if (isAnonymousClass) {
-			constructorFunctionForExtendsCall = constructorFunction;
-		} else {
-			constructorFunctionForExtendsCall = addConstructorVariableDeclaration(visitor, tree, context, stmts, constructorFunction);
+		if (!isAnonymousClass) {
+			allocFunction = addVariableDeclarationForClassAllocator(visitor, tree, context, stmts, allocFunction);
 		}
 
 		@SuppressWarnings("unchecked")
 		JS extendsCall = js.functionCall(js.property(js.name(GeneratorConstants.STJS), "extend"),
-				Arrays.asList(constructorFunctionForExtendsCall, superClazz, interfaces, members, typeDesc, annotationDesc, className));
-		if (isAnonymousClass) {
-			stmts.add(extendsCall);
-		} else {
-			stmts.add(context.withPosition(tree, js.expressionStatement(js.assignment(AssignOperator.ASSIGN, constructorFunctionForExtendsCall, extendsCall))));
+				Arrays.asList(allocFunction, superClazz, interfaces, members, typeDesc, annotationDesc, className));
+
+		if (!isAnonymousClass) {
+			extendsCall = js.expressionStatement(js.assignment(AssignOperator.ASSIGN, allocFunction, extendsCall));
 		}
+		stmts.add(context.withPosition(tree, extendsCall));
+
 		addStaticInitializers(visitor, tree, context, stmts);
 		addMainMethodCall(tree, stmts, context);
 

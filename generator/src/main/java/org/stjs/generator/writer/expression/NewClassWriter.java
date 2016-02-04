@@ -12,6 +12,7 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.Tree;
+import com.sun.tools.javac.tree.JCTree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.ElementUtils;
@@ -139,9 +140,11 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 			return null;
 		}
 
-		JS typeDeclaration = visitor.scan(tree.getClassBody(), context);
+		Element newClassToCreate = context.getTypes().asElement(InternalUtils.typeOf(tree));
+		JS typeDeclaration = context.js().paren(visitor.scan(tree.getClassBody(), context));
 
-		return context.js().newExpression(context.js().paren(typeDeclaration), arguments(visitor, tree, context));
+		return getNewClassInstanceExpression(visitor, tree, context, newClassToCreate, typeDeclaration);
+
 	}
 
 	private List<JS> arguments(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {
@@ -150,26 +153,24 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 
 	private JS getRegularNewExpression(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context) {
 		Element newClassToCreate = TreeUtils.elementFromUse(tree.getIdentifier());
-		ExecutableElement executableElement = TreeUtils.elementFromUse(tree);
+		JS typeDeclaration = context.js().name(context.getNames().getTypeName(context, newClassToCreate, DependencyType.STATIC));
 
-		String typeName = context.getNames().getTypeName(context, newClassToCreate, DependencyType.STATIC);
-		List<JS> params = arguments(visitor, tree, context);
-
-		if (identifierHasMultipleConstructors(tree.getIdentifier())) {
-			// For the concept of multiple constructors, a static init method is called with these params,
-			// we call the default constructor in those cases with references to OuterClasses
-			JS newInstanceStatement = context.js().newExpression(
-                    context.js().name(typeName),
-                    buildOuterClassConstructorParametersAsNames(context, newClassToCreate));
-
-			String constructorName = InternalUtils.generateOverloadeConstructorName(context, executableElement.getParameters());
-			return context.js().functionCall(context.js().property(newInstanceStatement, constructorName), params);
-		} else {
-			return context.js().newExpression(context.js().name(typeName), params);
-		}
+		return getNewClassInstanceExpression(visitor, tree, context, newClassToCreate, typeDeclaration);
 	}
 
-    private Iterable<JS> buildOuterClassConstructorParametersAsNames(GenerationContext<JS> context, Element newClassToCreate) {
+	private JS getNewClassInstanceExpression(WriterVisitor<JS> visitor, NewClassTree tree, GenerationContext<JS> context, Element newClassToCreate, JS typeDeclaration) {
+		ExecutableElement executableElement = TreeUtils.elementFromUse(tree);
+		List<JS> params = arguments(visitor, tree, context);
+
+		JS newInstanceStatement = context.js().newExpression(
+				typeDeclaration,
+				buildOuterClassConstructorParametersAsNames(context, newClassToCreate));
+
+		String constructorName = InternalUtils.generateOverloadeConstructorName(context, executableElement.getParameters());
+		return context.js().functionCall(context.js().property(newInstanceStatement, constructorName), params);
+	}
+
+	private Iterable<JS> buildOuterClassConstructorParametersAsNames(GenerationContext<JS> context, Element newClassToCreate) {
         TypeElement callingClass = TreeUtils.elementFromDeclaration(TreeUtils.enclosingClass(context.getCurrentWrapper().getPath().getParentPath()));
         List<JS> outerClassesParams = Scopes.buildOuterClassParametersAsNames(context, callingClass, newClassToCreate);
         return outerClassesParams;
@@ -197,11 +198,5 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 
 		return js;
 	}
-
-	private boolean identifierHasMultipleConstructors(ExpressionTree tree) {
-		Element identifierElement = TreeUtils.elementFromUse(tree);
-		return ElementUtils.hasMultipleConstructors(identifierElement);
-	}
-
 
 }

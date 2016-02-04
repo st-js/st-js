@@ -118,7 +118,7 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 			decorateBodyWithScopeAccessor(tree, context, body);
 		}
 
-		if (JavaNodes.isConstructor(tree) && JavaNodes.hasMultipleConstructors(context.getCurrentPath())) {
+		if (JavaNodes.isConstructor(tree)) {
 			params.clear();
 		}
 

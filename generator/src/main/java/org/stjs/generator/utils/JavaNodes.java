@@ -39,23 +39,6 @@ public final class JavaNodes {
 		return "<init>".equals(method.getName().toString()) && !method.getModifiers().getFlags().contains(Modifier.STATIC);
 	}
 
-	public static boolean hasMultipleConstructors(TreePath treePath) {
-		return hasMultipleConstructors(TreeUtils.enclosingClass(treePath));
-	}
-
-	public static boolean hasMultipleConstructors(ClassTree classTree) {
-		return true;
-//		int constructorCount = 0;
-//		List<? extends Tree> treeMembers = classTree.getMembers();
-//		for (Tree member : treeMembers) {
-//			Element symbolElement = InternalUtils.symbol(member);
-//			if (JavaNodes.isConstructor(member) && !JavaNodes.isNative(symbolElement)) {
-//				constructorCount++;
-//			}
-//		}
-//		return constructorCount > 1;
-	}
-
 	public static boolean sameRawType(TypeMirror type1, Class<?> clazz) {
 		if (!(type1 instanceof DeclaredType)) {
 			return false;
