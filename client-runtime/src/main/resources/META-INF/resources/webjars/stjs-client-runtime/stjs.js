@@ -587,6 +587,10 @@ stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescr
         return this.$className;
     }
 
+    _constructor.$java_isAssignableFrom = function(otherClass) {
+        return stjs.classInheritsFrom(otherClass, this);
+    }
+
 	// build package and assign
 	return	_constructor;
 };
