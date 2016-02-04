@@ -105,6 +105,24 @@ public class InlineObjectsGeneratorTest extends AbstractStjsTest {
 	}
 
 	@Test
+	public void testAnonymousClass_using_final_variable_from_calling_method() {
+		assertCodeContains(InlineObjects11d_AnonymousClass_using_variables_from_outerClass.class, "" +
+				"        prototype.doIt = function() {\n" +
+				"            var this$0 = this;\n");
+
+		assertCodeContains(InlineObjects11d_AnonymousClass_using_variables_from_outerClass.class, "" +
+				"return variableDefinedInMethod + \"-\" + this$0._fieldDefinedInOuterClass + \"-\" + this$0._fieldDefinedInOuterBaseClass;");
+
+
+		Assert.assertEquals("variableDefinedInMethod-fieldDefinedInOuterClass-fieldDefinedInOuterBaseClass", execute(InlineObjects11d_AnonymousClass_using_variables_from_outerClass.class));
+	}
+
+	@Test
+	public void testAnonymousClass_2LevelDepth_using_variables_from_outerClass() {
+		Assert.assertEquals("variableDefinedInLevel2AnonymousClass-variableDefinedInLevel1AnonymousClass-variableDefinedInMethod-fieldDefinedInOuterClass-fieldDefinedInOuterBaseClass", execute(InlineObjects11e_AnonymousClass_2LevelDepth_using_variables_from_outerClass.class));
+	}
+
+	@Test
 	public void testCallInnerClassCallingOuter() {
 		Object result = execute(InlineObjects11b_InnerClass_calling_outer.class);
 		Assert.assertEquals(true, result);
