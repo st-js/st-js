@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.st-js</groupId>
 		<artifactId>stjs</artifactId>
-		<version>3.3.1.63-mirego</version>
+		<version>3.3.1.64-mirego-SNAPSHOT</version>
 	</parent>
 
 	<properties>
