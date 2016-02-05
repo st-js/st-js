@@ -1,5 +1,6 @@
 package org.stjs.generator.writer.inheritance;
 
+import junit.framework.Assert;
 import org.junit.Test;
 import org.stjs.generator.utils.AbstractStjsTest;
 
@@ -50,5 +51,10 @@ public class InheritanceGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testExtendsInnerClass() {
 		assertCodeContains(Inheritance8.class, "stjs.extend(Inheritance8, MyClass1.MyInnerClass, [],");
+	}
+
+	@Test
+	public void testPrivateConstructor() throws Exception {
+		Assert.assertEquals("Value passed as parameters on the static constructor method", execute(Inheritance9_private_constructor.class));
 	}
 }
