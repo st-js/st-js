@@ -1,5 +1,6 @@
 package org.stjs.generator.writer.variables;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
@@ -65,4 +66,10 @@ public class VariablesGeneratorTest extends AbstractStjsTest {
 		// the global "x" variable, after generation would in fact be replaced by the parameter
 		generate(Variables9.class);
 	}
+
+	@Test
+	public void testStatic_variable_to_store_singleton_order_do_not_matter() throws Exception {
+		Assert.assertEquals("This is a value returned by the static method", execute(Variables10_static_variable_to_store_singleton_order_do_not_matter.class));
+	}
+
 }
