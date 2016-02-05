@@ -2,6 +2,8 @@ package org.stjs.generator.writer.typeDesc;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.stjs.generator.GeneratorConfiguration;
+import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.utils.AbstractStjsTest;
 
 public class TypeDescTest extends AbstractStjsTest {
@@ -12,32 +14,38 @@ public class TypeDescTest extends AbstractStjsTest {
 
 	@Test
 	public void testArrayOfBasicField() {
-		assertCodeContains(TypeDesc2.class, "{x:{name:\"Array\", arguments:[null]}}");
+		assertCodeContains(TypeDesc2.class,
+				configWithTypeGeneration(),
+				"{x:{name:\"Array\", arguments:[null]}}");
+	}
+
+	private GeneratorConfiguration configWithTypeGeneration() {
+		return new GeneratorConfigurationBuilder().setSkipTypeDescriptionGeneration(false).build();
 	}
 
 	@Test
 	public void testNonBasicField() {
-		assertCodeContains(TypeDesc3.class, "{x:\"Date\"}");
+		assertCodeContains(TypeDesc3.class, configWithTypeGeneration(), "{x:\"Date\"}");
 	}
 
 	@Test
 	public void testArrayOfNonBasicField() {
-		assertCodeContains(TypeDesc4.class, "{x:{name:\"Array\", arguments:[\"Date\"]}}");
+		assertCodeContains(TypeDesc4.class, configWithTypeGeneration(), "{x:{name:\"Array\", arguments:[\"Date\"]}}");
 	}
 
 	@Test
 	public void testMapOfNonBasicField() {
-		assertCodeContains(TypeDesc5.class, "{x:{name:\"Map\", arguments:[null,\"Date\"]}}");
+		assertCodeContains(TypeDesc5.class, configWithTypeGeneration(), "{x:{name:\"Map\", arguments:[null,\"Date\"]}}");
 	}
 
 	@Test
 	public void testEnum() {
-		assertCodeContains(TypeDesc6.class, "{x:{name:\"Enum\", arguments:[\"TypeDesc6.Type\"]}}");
+		assertCodeContains(TypeDesc6.class, configWithTypeGeneration(), "{x:{name:\"Enum\", arguments:[\"TypeDesc6.Type\"]}}");
 	}
 
 	@Test
 	public void testWildcards() {
-		assertCodeContains(TypeDesc7.class, "{field:{name:\"MyType1\", arguments:[\"Object\"]}}");
+		assertCodeContains(TypeDesc7.class, configWithTypeGeneration(), "{field:{name:\"MyType1\", arguments:[\"Object\"]}}");
 	}
 
 	@Test

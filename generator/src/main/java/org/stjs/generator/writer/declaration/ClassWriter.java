@@ -381,6 +381,10 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 
 	@SuppressWarnings("unused")
 	private JS getTypeDescription(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context) {
+		if (context.getConfiguration().skipTypeDescriptionGeneration()) {
+			return context.js().block(Collections.<JS>emptyList());
+		}
+
 		TypeElement type = TreeUtils.elementFromDeclaration(tree);
 
 		List<NameValue<JS>> props = new ArrayList<NameValue<JS>>();
@@ -627,6 +631,7 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		JS classBody = getClassBody(context, visitor, tree);
 
 		JS typeDesc = getTypeDescription(visitor, tree, context);
+
 		JS annotationDesc = getAnnotationDescription(visitor, tree, context);
 		boolean isAnonymousClass = tree.getSimpleName().length() == 0;
 

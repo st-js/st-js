@@ -58,7 +58,9 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 
     @Test
     public void testTypeDesc() {
-        assertCodeContains(Namespace7.class, "field:\"a.b.Namespace7\"");
+        assertCodeContains(Namespace7.class,
+                new GeneratorConfigurationBuilder().setSkipTypeDescriptionGeneration(false).build(),
+                "field:\"a.b.Namespace7\"");
     }
 
     @Test
