@@ -1,17 +1,17 @@
 package org.stjs.generator.writer.enums;
 
 public enum Enums9_fields {
-	FIRST(1),
-	SECOND(2),
-	THIRD(3);
+	FIRST("1"),
+	SECOND("2"),
+	THIRD("3");
 
-	private final int value;
+	private final String value;
 
-	Enums9_fields(int v) {
+	Enums9_fields(String v) {
 		this.value = v;
 	}
 
-	public int getValue() {
+	public String getValue() {
 		return value;
 	}
 }

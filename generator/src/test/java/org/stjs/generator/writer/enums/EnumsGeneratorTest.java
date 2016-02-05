@@ -61,14 +61,11 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testEnumWithFieldsDeclaration() {
 		assertCodeContains(Enums9_fields.class, "" +
-				"    constructor.THIRD = new Enums9_fields()._constructor$int(3);\n" +
-				"    constructor.THIRD._name = \"THIRD\";\n" +
-				"    constructor.THIRD._ordinal = 2;\n" +
-				"    constructor._values = [constructor.FIRST, constructor.SECOND, constructor.THIRD];\n" +
-				"    prototype._value = 0;\n" +
+				"    prototype._value = null;\n" +
 				"    prototype.getValue = function() {\n" +
 				"        return this._value;\n" +
-				"    };\n");
+				"    };\n" +
+				"    constructor.FIRST = new Enums9_fields()._constructor$String(\"1\");");
 	}
 
 	@Test
@@ -86,6 +83,7 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 				"        return this;\n" +
 				"    };");
 		assertCodeContains(Enums11_with_constructor.class, "" +
+				"    prototype._privateFieldValue = 0;" +
 				"    constructor.FIRST = new Enums11_with_constructor()._constructor$int(1);\n" +
 				"    constructor.FIRST._name = \"FIRST\";\n" +
 				"    constructor.FIRST._ordinal = 0;\n" +
@@ -95,8 +93,7 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 				"    constructor.THIRD = new Enums11_with_constructor()._constructor$int(3);\n" +
 				"    constructor.THIRD._name = \"THIRD\";\n" +
 				"    constructor.THIRD._ordinal = 2;\n" +
-				"    constructor._values = [constructor.FIRST, constructor.SECOND, constructor.THIRD];\n" +
-				"    prototype._privateFieldValue = 0;");
+				"    constructor._values = [constructor.FIRST, constructor.SECOND, constructor.THIRD];");
 	}
 
 	@Test
@@ -122,8 +119,7 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
                 "        constructor.aValueFromMyEnum = Enums14_inner_static_filed_using_enum_values.MyEnum.values()[1];"
         );
 
-		String result = (String) execute(Enums14_inner_static_filed_using_enum_values.class);
-		Assert.assertEquals("SECOND", result);
+		Assert.assertEquals("SECOND", execute(Enums14_inner_static_filed_using_enum_values.class));
 	}
 
 	@Test
@@ -131,4 +127,10 @@ public class EnumsGeneratorTest extends AbstractStjsTest {
 		String result = (String) execute(Enums14_getEnumConstants.class);
 		Assert.assertEquals("FIRST,SECOND,THIRD,", result);
 	}
+
+	@Test
+	public void testEnum_with_methods_defined_at_class_level() throws Exception {
+		Assert.assertEquals("ABC", execute(Enums15_enumvalues_as_inner_classes_can_call_methods_in_base_enum.class));
+	}
+
 }

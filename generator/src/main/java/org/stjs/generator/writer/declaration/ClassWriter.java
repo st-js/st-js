@@ -12,7 +12,6 @@ import com.sun.source.tree.StatementTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.util.TreeScanner;
-import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.tree.JCTree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
@@ -53,6 +52,7 @@ import javax.lang.model.type.TypeVariable;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -80,9 +80,13 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 	 */
 	private JS getSuperClass(ClassTree clazz, GenerationContext<JS> context) {
 		if (clazz.getKind() == Tree.Kind.ENUM) {
+			TypeElement enumClassElement = TreeUtils.elementFromDeclaration(clazz);
+
+			TypeElement superclassType = ElementUtils.asTypeElement(context, enumClassElement.getSuperclass());
+
 			String enumClassName = context.getNames().getTypeName(
 					context,
-					context.getElements().getTypeElement(Enum.class.getName()),
+					superclassType,
 					DependencyType.EXTENDS);
 			return context.js().name(enumClassName);
 		}
@@ -199,75 +203,15 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
                 !JavaNodes.sameRawType(superclass, Enum.class);
     }
 
-    private List<MethodTree> getConstructors(ClassTree clazz) {
-		List<MethodTree> constructors = new ArrayList<>();
+	@SuppressWarnings("unchecked")
+	private <T extends Tree> List<T> getFilteredMembers(ClassTree clazz, MemberFilter<T> memberFilter) {
+		List<T> selectedMembers = new ArrayList<>();
 		for (Tree member : clazz.getMembers()) {
-			if (JavaNodes.isConstructor(member)) {
-				MethodTree methodTree = (MethodTree) member;
-				ExecutableElement executableElement = TreeUtils.elementFromDeclaration(methodTree);
-				if (executableElement.getAnnotation(ServerSide.class) == null && executableElement.getAnnotation(Native.class) == null)  {
-					constructors.add(methodTree);
-				}
+			if (memberFilter.passesFilter(member)) {
+				selectedMembers.add((T) member);
 			}
 		}
-		return constructors;
-	}
-
-	private List<Tree> getAllMembersExceptConstructors(ClassTree clazz) {
-		List<Tree> nonConstructors = new ArrayList<Tree>();
-		for (Tree member : clazz.getMembers()) {
-			if (!JavaNodes.isConstructor(member) && !(member instanceof BlockTree)) {
-				nonConstructors.add(member);
-			}
-		}
-		return nonConstructors;
-	}
-
-	/**
-	 * @return the JavaScript node for the class' members
-	 */
-	private JS getMembers(WriterVisitor<JS> visitor, ClassTree clazz, GenerationContext<JS> context, List<String> enumEntries) {
-		// the following members must not appear in the initializer function:
-		// - Single constructor (it is the default behavior, its printed elsewhere)
-		// - abstract methods (they should be omitted)
-
-		List<Tree> nonConstructors = getAllMembersExceptConstructors(clazz);
-
-		List<JS> stmts = new ArrayList<>();
-
-		// Generate multiple constructors methods to support them as static initializers.
-		stmts.addAll(
-				generateMultipleConstructorsAsInitializers(visitor, context, clazz));
-
-		@SuppressWarnings("unchecked")
-		List<JS> params = Arrays.asList(context.js().name(JavascriptKeywords.CONSTRUCTOR), context.js().name(JavascriptKeywords.PROTOTYPE));
-
-		boolean enumValuesPropertyGenerated = false;
-		List<JS> enumValues = new ArrayList<>();
-		for (int i = 0; i < nonConstructors.size(); i++) {
-			Tree member = nonConstructors.get(i);
-			JS newStatement = visitor.scan(member, context);
-
-			if (isMemberAnEnumEntry(member, enumEntries)) {
-				stmts.add(newStatement);
-				generateEnumSignatureForMember(context, stmts, enumValues, i, member);
-			} else {
-				if (!enumValuesPropertyGenerated) {
-					// _values must be set at the end of the statements to make sure all object are available to the javascript
-					generateEnumValuesProperty(context, stmts, enumValues);
-					enumValuesPropertyGenerated = true;
-				}
-
-				stmts.add(newStatement);
-			}
-		}
-
-		if (!enumValuesPropertyGenerated) {
-			// _values must be set at the end of the statements to make sure all object are available to the javascript
-			generateEnumValuesProperty(context, stmts, enumValues);
-		}
-
-		return context.js().function(null, params, context.js().block(stmts));
+		return selectedMembers;
 	}
 
 	private void generateEnumValuesProperty(GenerationContext<JS> context, List<JS> stmts, List<JS> enumValues) {
@@ -276,76 +220,6 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 			stmts.add(context.js().expressionStatement(
 					context.js().assignment(AssignOperator.ASSIGN, enumValuesProperty, context.js().array(enumValues))));
 		}
-	}
-
-	private List<JS> generateMultipleConstructorsAsInitializers(WriterVisitor<JS> visitor, GenerationContext<JS> context,
-																ClassTree clazz) {
-		List<JS> stmts = new ArrayList<>();
-
-		Element type = TreeUtils.elementFromDeclaration(clazz);
-		String constructorName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
-
-		JavaScriptBuilder<JS> js = context.js();
-
-		List<MethodTree> constructors = getConstructors(clazz);
-		for (MethodTree constructor : constructors) {
-			Element element = InternalUtils.symbol(constructor);
-			if (!isDefaultConstructorDelegatinOnlyToSuperDefaultConstructor(constructor)) {
-				if (element instanceof Symbol.MethodSymbol) {
-					constructorName = InternalUtils.generateOverloadeConstructorName(context, ((Symbol.MethodSymbol) element).params());
-				}
-
-				JS block = visitor.scan(constructor.getBody(), context);
-
-				if (isBodyContainingReturnStatement(constructor)) {
-					// Wrap current body inside a function because the body may contain an early return
-					// which would cause a failure in constructor chaining. The last line of
-					// the constructor must be returnng a reference to "this".
-					// Example:
-					//     _constructor = function() {
-					//         // ------------------------------------------
-					//         // here is the wrapping inside a function -->
-					//         // ------------------------------------------
-					//         (function() {
-					//             // ...original body here
-					//             if (any_boolean_value) {
-					//                 return;
-					//             }
-					//             this.any_flag = true; // this line won't be executed
-					//         }).call();
-					//         // ------------------------------------------
-					//         // <-- here is the wrapping inside a function
-					//         // ------------------------------------------
-					//
-					//         return this; // still returning `this` for constructor chaining
-					//    }
-					//
-					block = js.block(
-							Collections.singletonList(
-									js.expressionStatement(
-											js.functionCall(
-													js.paren(
-															js.property(
-																	js.function(null, Collections.<JS>emptyList(), block),
-																	"call")
-													),
-													Collections.singletonList(js.name(GeneratorConstants.THIS))
-											)
-									)
-							)
-					);
-				}
-
-				List<JS> params = MethodWriter.getParams(constructor.getParameters(), context);
-				JS member = js.property(js.name(JavascriptKeywords.PROTOTYPE), constructorName);
-				JS declaration = js.function(null, params, block);
-				addReturnThisStatementForChaining(context, block);
-
-				stmts.add(js.expressionStatement(js.assignment(AssignOperator.ASSIGN, member, declaration)));
-			}
-		}
-
-		return stmts;
 	}
 
 	private boolean isBodyContainingReturnStatement(MethodTree constructor) {
@@ -402,14 +276,6 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		context.js().addStatement(block, returnThis);
 	}
 
-	private boolean isMemberAnEnumEntry(Tree member, List<String> enumEntries) {
-		if (enumEntries != null && member instanceof JCTree.JCVariableDecl) {
-			String enumEntryName = ((JCTree.JCVariableDecl) member).getName().toString();
-			return enumEntries.contains(enumEntryName);
-		}
-		return false;
-	}
-
 	/**
 	 *  Add JS corresponding to the contract of a Java Enum (name() and ordinal()):
 	 *
@@ -418,20 +284,19 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 	 *  constructor._values = [constructor.FIRST];
 	 */
 	private void generateEnumSignatureForMember(GenerationContext<JS> context, List<JS> stmts, List<JS> enumValues, int index, Tree member) {
-		if (member instanceof JCTree.JCVariableDecl) {
-            String enumEntryName = ((JCTree.JCVariableDecl) member).getName().toString();
+		assert member instanceof JCTree.JCVariableDecl;
+		String enumEntryName = ((JCTree.JCVariableDecl) member).getName().toString();
 
-            JS enumConstructorProperty = context.js().property(context.js().name(JavascriptKeywords.CONSTRUCTOR), enumEntryName);
-            JS enumNameProperty = context.js().property(enumConstructorProperty, GeneratorConstants.ENUM_NAME_PROPERTY);
-            JS enumOrdinalProperty = context.js().property(enumConstructorProperty, GeneratorConstants.ENUM_ORDINAL_PROPERTY);
+		JS enumConstructorProperty = context.js().property(context.js().name(JavascriptKeywords.CONSTRUCTOR), enumEntryName);
+		JS enumNameProperty = context.js().property(enumConstructorProperty, GeneratorConstants.ENUM_NAME_PROPERTY);
+		JS enumOrdinalProperty = context.js().property(enumConstructorProperty, GeneratorConstants.ENUM_ORDINAL_PROPERTY);
 
-			stmts.add(context.js().expressionStatement(
-					context.js().assignment(AssignOperator.ASSIGN, enumNameProperty, context.js().string(enumEntryName))));
-            stmts.add(context.js().expressionStatement(
-					context.js().assignment(AssignOperator.ASSIGN, enumOrdinalProperty, context.js().number(index))));
+		stmts.add(context.js().expressionStatement(
+				context.js().assignment(AssignOperator.ASSIGN, enumNameProperty, context.js().string(enumEntryName))));
+		stmts.add(context.js().expressionStatement(
+				context.js().assignment(AssignOperator.ASSIGN, enumOrdinalProperty, context.js().number(index))));
 
-			enumValues.add(enumConstructorProperty);
-        }
+		enumValues.add(enumConstructorProperty);
 	}
 
 	private void addStaticInitializers(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
@@ -516,11 +381,6 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 
 	@SuppressWarnings("unused")
 	private JS getTypeDescription(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context) {
-		// if (isGlobal(type)) {
-		// printer.print(JavascriptKeywords.NULL);
-		// return;
-		// }
-
 		TypeElement type = TreeUtils.elementFromDeclaration(tree);
 
 		List<NameValue<JS>> props = new ArrayList<NameValue<JS>>();
@@ -694,10 +554,8 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		}
 
 		// print members
-		List<Tree> nonConstructors = getAllMembersExceptConstructors(tree);
-		for (Tree member : nonConstructors) {
-			stmts.add(visitor.scan(member, context));
-		}
+		stmts.addAll(
+				getMembers(context, visitor, tree, allMembersExceptConstructorsFilter()));
 
 		addStaticInitializers(visitor, tree, context, stmts);
 		addMainMethodCall(tree, stmts, context);
@@ -761,13 +619,13 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 
 		addNamespace(tree, context, stmts);
 
-		List<String> enumEntries = generateEnumEntries(tree);
-
 		String classNameAsString = getClassNameAsString(tree, context);
 		JS className = js.string(classNameAsString);
 		JS superClazz = getSuperClass(tree, context);
 		JS interfaces = getInterfaces(tree, context);
-		JS members = getMembers(visitor, tree, context, enumEntries);
+
+		JS classBody = getClassBody(context, visitor, tree);
+
 		JS typeDesc = getTypeDescription(visitor, tree, context);
 		JS annotationDesc = getAnnotationDescription(visitor, tree, context);
 		boolean isAnonymousClass = tree.getSimpleName().length() == 0;
@@ -786,7 +644,7 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 
 		@SuppressWarnings("unchecked")
 		JS extendsCall = js.functionCall(js.property(js.name(GeneratorConstants.STJS), "extend"),
-				Arrays.asList(allocFunction, superClazz, interfaces, members, typeDesc, annotationDesc, className));
+				Arrays.asList(allocFunction, superClazz, interfaces, classBody, typeDesc, annotationDesc, className));
 
 		if (!isAnonymousClass) {
 			extendsCall = js.expressionStatement(js.assignment(AssignOperator.ASSIGN, allocFunction, extendsCall));
@@ -797,6 +655,232 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		addMainMethodCall(tree, stmts, context);
 
 		return js.statements(stmts);
+	}
+
+	private JS getClassBody(GenerationContext<JS> context, WriterVisitor<JS> visitor, ClassTree classTree) {
+
+		List<JS> stmts = new ArrayList<>();
+
+		// initializers like "_constructor(...)"
+		stmts.addAll(
+				getConstructorsAsInitializerFunctions(context, visitor, classTree));
+
+		// non-static/non-constructor members
+		stmts.addAll(
+				getMembers(context, visitor, classTree, nonStaticFieldsAndMethodsFilter()));
+
+		// static methods/enum/inner classes
+		stmts.addAll(
+				getMembers(context, visitor, classTree, staticNonFieldsFilter()));
+
+		// initializer block
+		stmts.addAll(
+				getMembers(context, visitor, classTree, staticInitializerFilter()));
+
+		// enum entries
+		stmts.addAll(
+				getEnumEntries(context, visitor, classTree, enumEntryFilter()));
+
+		// static fields members
+		stmts.addAll(
+				getMembers(context, visitor, classTree, staticFieldsFilter()));
+
+		// create function:
+		//     function(constructor, prototype) {...}
+		List<JS> params = Arrays.asList(context.js().name(JavascriptKeywords.CONSTRUCTOR), context.js().name(JavascriptKeywords.PROTOTYPE));
+		return context.js().function(null, params, context.js().block(stmts));
+	}
+
+	private Collection<? extends JS> getEnumEntries(GenerationContext<JS> context, WriterVisitor<JS> visitor, ClassTree classTree, MemberFilter<? extends Tree> memberFilter) {
+		List<JS> stmts = new ArrayList<>();
+
+		List<? extends Tree> enumEntries = getFilteredMembers(classTree, memberFilter);
+
+		List<JS> enumValues = new ArrayList<>();
+		for (int i = 0; i < enumEntries.size(); i++) {
+			Tree member = enumEntries.get(i);
+			JS newStatement = visitor.scan(member, context);
+
+ 			stmts.add(newStatement);
+			generateEnumSignatureForMember(context, stmts, enumValues, i, member);
+		}
+
+		generateEnumValuesProperty(context, stmts, enumValues);
+
+		return stmts;
+	}
+
+	private MemberFilter<? extends Tree> enumEntryFilter() {
+		return new MemberFilter<Tree>() {
+
+			@Override
+			public boolean passesFilter(Tree tree) {
+				Element symbol = InternalUtils.symbol(tree);
+
+				if (symbol == null) {
+					return false;
+				}
+
+				return symbol.getKind() == ElementKind.ENUM_CONSTANT && ElementUtils.isStatic(symbol);
+			}
+		};
+	}
+
+	private MemberFilter<? extends Tree> staticFieldsFilter() {
+		return new MemberFilter<Tree>() {
+
+			@Override
+			public boolean passesFilter(Tree tree) {
+				Element symbol = InternalUtils.symbol(tree);
+
+				if (symbol == null) {
+					return false;
+				}
+
+				return symbol.getKind() == ElementKind.FIELD && ElementUtils.isStatic(symbol);
+			}
+		};
+	}
+
+	private MemberFilter<? extends Tree> staticNonFieldsFilter() {
+		return new MemberFilter<Tree>() {
+
+			@Override
+			public boolean passesFilter(Tree tree) {
+				Element symbol = InternalUtils.symbol(tree);
+
+				if (symbol == null) {
+					return false;
+				}
+
+				return ((symbol.getKind() == ElementKind.METHOD) && ElementUtils.isStatic(symbol)) ||
+						(symbol.getKind() == ElementKind.ENUM) || (symbol.getKind() == ElementKind.CLASS) || (symbol.getKind() == ElementKind.INTERFACE);
+			}
+		};
+	}
+
+	private MemberFilter<? extends Tree> staticInitializerFilter() {
+		return new MemberFilter<Tree>() {
+
+			@Override
+			public boolean passesFilter(Tree tree) {
+
+				if (tree.getKind() == Tree.Kind.BLOCK && ((BlockTree)tree).isStatic() ) {
+					return true;
+				}
+
+				return false;
+			}
+		};
+	}
+
+	private MemberFilter<Tree> nonStaticFieldsAndMethodsFilter() {
+		return new MemberFilter<Tree>() {
+			@Override
+			public boolean passesFilter(Tree member) {
+				return (!JavaNodes.isConstructor(member) && !(member instanceof BlockTree) && !ElementUtils.isStatic(InternalUtils.symbol(member)));
+			}
+		};
+	}
+
+	private List<JS> getConstructorsAsInitializerFunctions(GenerationContext<JS> context, WriterVisitor<JS> visitor, ClassTree classTree) {
+		JavaScriptBuilder<JS> js = context.js();
+		List<JS> stmts = new ArrayList<>();
+
+		List<MethodTree> constructors = getFilteredMembers(classTree, constructorFilter());
+
+		for (MethodTree constructorMethodTree : constructors) {
+			ExecutableElement constructorElement = TreeUtils.elementFromDeclaration(constructorMethodTree);
+			String constructorName = InternalUtils.generateOverloadeConstructorName(context, constructorElement.getParameters());
+
+			JS block = visitor.scan(constructorMethodTree.getBody(), context);
+
+			if (isBodyContainingReturnStatement(constructorMethodTree)) {
+				// Wrap current body inside a function because the body may contain an early return
+				// which would cause a failure in constructor chaining. The last line of
+				// the constructor must be returnng a reference to "this".
+				// Example:
+				//     _constructor = function() {
+				//         // ------------------------------------------
+				//         // here is the wrapping inside a function -->
+				//         // ------------------------------------------
+				//         (function() {
+				//             // ...original body here
+				//             if (any_boolean_value) {
+				//                 return;
+				//             }
+				//             this.any_flag = true; // this line won't be executed
+				//         }).call();
+				//         // ------------------------------------------
+				//         // <-- here is the wrapping inside a function
+				//         // ------------------------------------------
+				//
+				//         return this; // still returning `this` for constructor chaining
+				//    }
+				//
+				block = js.block(
+						Collections.singletonList(
+								js.expressionStatement(
+										js.functionCall(
+												js.paren(
+														js.property(
+																js.function(null, Collections.<JS>emptyList(), block),
+																"call")
+												),
+												Collections.singletonList(js.name(GeneratorConstants.THIS))
+										)
+								)
+						)
+				);
+			}
+
+			List<JS> params = MethodWriter.getParams(constructorMethodTree.getParameters(), context);
+			JS member = js.property(js.name(JavascriptKeywords.PROTOTYPE), constructorName);
+			JS declaration = js.function(null, params, block);
+			addReturnThisStatementForChaining(context, block);
+
+			stmts.add(js.expressionStatement(js.assignment(AssignOperator.ASSIGN, member, declaration)));
+		}
+
+		return stmts;
+	}
+
+	private  List<JS> getMembers(GenerationContext<JS> context, WriterVisitor<JS> visitor, ClassTree classTree, MemberFilter<? extends Tree> memberFilter) {
+		List<JS> stmts = new ArrayList<>();
+
+		for (Tree member : getFilteredMembers(classTree, memberFilter)) {
+			stmts.add(visitor.scan(member, context));
+		}
+
+		return stmts;
+	}
+
+	private MemberFilter constructorFilter() {
+		return new MemberFilter() {
+			@Override
+			public boolean passesFilter(Tree tree) {
+				if (!JavaNodes.isConstructor(tree)) {
+					return false;
+				}
+
+				MethodTree methodTree = (MethodTree) tree;
+				if (isDefaultConstructorDelegatinOnlyToSuperDefaultConstructor(methodTree)) {
+					return false;
+				}
+
+				ExecutableElement constructor = TreeUtils.elementFromDeclaration(methodTree);
+				return (constructor.getAnnotation(ServerSide.class) == null && constructor.getAnnotation(Native.class) == null);
+			}
+		};
+	}
+
+	private MemberFilter<? extends Tree> allMembersExceptConstructorsFilter() {
+		return new MemberFilter<Tree>() {
+			@Override
+			public boolean passesFilter(Tree member) {
+				return (!JavaNodes.isConstructor(member) && !(member instanceof BlockTree));
+			}
+		};
 	}
 
 	private boolean isBridge(ClassTree tree) {
@@ -851,4 +935,7 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		return true;
 	}
 
+	private interface MemberFilter<T> {
+		boolean passesFilter(Tree tree);
+	}
 }
