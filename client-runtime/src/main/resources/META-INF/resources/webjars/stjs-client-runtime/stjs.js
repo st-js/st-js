@@ -523,6 +523,11 @@ stjs.copyInexistentProps=function(from, to){
 stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescription, _annotations, _className){
 	_constructor.$inherit=[];
 
+	if (_super === undefined) {
+	    // this can occurs with inner classes when the BaseClass is defined after the Subclass
+	    throw new Error("_super is undefined when creating class " + _className)
+	}
+
 	if(_super != null){
 		// I is used as a no-op constructor that has the same prototype as _super
 		// we do this because we cannot predict the result of calling new _super()
