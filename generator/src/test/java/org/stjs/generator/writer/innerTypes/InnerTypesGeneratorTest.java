@@ -275,4 +275,11 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
         assertCodeContains(code, "this._outerClass$0._fieldInOuterType = \"assigning it from the constructor\";");
         assertCodeContains(code, "this._outerClass$0._fieldInOuterType = \"assigning it from a standard method\";");
     }
+
+    @Test
+    public void testInnerTypes_anonymous_class_with_constructor_parameters() throws Exception {
+        assertCodeContains(InnerTypes29_anonymous_class_with_constructor_parameters.class, "" +
+                "\"InnerTypes29_anonymous_class_with_constructor_parameters.InnerTypes29_anonymous_class_with_constructor_parameters$1\"))(this)._constructor$String(\"This is the value that has been passed in the constructor\");");
+        Assert.assertEquals("This is the value that has been passed in the constructor", execute(InnerTypes29_anonymous_class_with_constructor_parameters.class));
+    }
 }
