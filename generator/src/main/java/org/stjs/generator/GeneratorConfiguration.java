@@ -31,6 +31,7 @@ public class GeneratorConfiguration {
 	private final GenerationDirectory generationFolder;
 	private final ClassResolver classResolver;
 	private final boolean isSynchronizedAllowed;
+	private final boolean isSkipTypeDescriptionGeneration;
 
 	// We actually have a builder for that, so the number of parameters warning doesn't apply
 	@SuppressWarnings("PMD.ExcessiveParameterList")
@@ -39,7 +40,8 @@ public class GeneratorConfiguration {
 						   Map<String, String> renamedMethodSignatures,
 						   boolean generateArrayHasOwnProperty, boolean generateSourceMap, String sourceEncoding,
 						   Collection<String> annotations, ClassLoader stjsClassLoader, File targetFolder,
-						   GenerationDirectory generationFolder, ClassResolver classResolver, boolean isSynchronizedAllowed) {
+						   GenerationDirectory generationFolder, ClassResolver classResolver,
+						   boolean isSynchronizedAllowed, boolean isSkipTypeDescriptionGeneration) {
 		this.allowedPackages = allowedPackages;
 		this.allowedJavaLangClasses = allowedJavaLangClasses;
 		this.forbiddenMethodInvocations = forbiddenMethodInvocations;
@@ -54,6 +56,7 @@ public class GeneratorConfiguration {
 		this.generationFolder = generationFolder;
 		this.classResolver = classResolver;
 		this.isSynchronizedAllowed = isSynchronizedAllowed;
+		this.isSkipTypeDescriptionGeneration = isSkipTypeDescriptionGeneration;
 	}
 
 	/**
@@ -118,5 +121,9 @@ public class GeneratorConfiguration {
 
 	public boolean isSynchronizedAllowed() {
 		return isSynchronizedAllowed;
+	}
+
+	public boolean skipTypeDescriptionGeneration() {
+		return isSkipTypeDescriptionGeneration;
 	}
 }

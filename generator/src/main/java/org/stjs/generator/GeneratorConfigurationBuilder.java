@@ -43,6 +43,7 @@ public class GeneratorConfigurationBuilder {
 	private boolean generateSourceMap;
 	private String sourceEncoding = Charset.defaultCharset().name();
 	private boolean isSynchronizedAllowed = true;
+	private boolean isSkipTypeDescriptionGeneration = true;
 	private ClassLoader stjsClassLoader;
 	private File targetFolder;
 	private GenerationDirectory generationFolder;
@@ -70,6 +71,7 @@ public class GeneratorConfigurationBuilder {
 			generationFolder(baseConfig.getGenerationFolder());
 			classResolver(baseConfig.getClassResolver());
 			setSynchronizedAllowed(baseConfig.isSynchronizedAllowed());
+			setSkipTypeDescriptionGeneration(baseConfig.skipTypeDescriptionGeneration());
 		}
 	}
 
@@ -173,6 +175,13 @@ public class GeneratorConfigurationBuilder {
 		return this;
 	}
 
+	public GeneratorConfigurationBuilder setSkipTypeDescriptionGeneration(boolean skipTypeDescriptionGeneration) {
+		this.isSkipTypeDescriptionGeneration = skipTypeDescriptionGeneration;
+		return this;
+	}
+
+
+
 	public GeneratorConfiguration build() {
 		InputStream configFileInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(GeneratorConfigurationConfigParser.CONFIG_PROPERTIES_RESOURCES_FILENAME);
 		try {
@@ -201,7 +210,8 @@ public class GeneratorConfigurationBuilder {
 				targetFolder,  //
 				generationFolder, //
 				classResolver == null ? new DefaultClassResolver(stjsClassLoader) : classResolver, //
-				isSynchronizedAllowed //
+				isSynchronizedAllowed, //
+				isSkipTypeDescriptionGeneration
 		);
 	}
 }
