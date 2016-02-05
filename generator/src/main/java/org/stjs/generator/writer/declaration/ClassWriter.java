@@ -531,23 +531,6 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		return context.js().object(props);
 	}
 
-	private List<String> generateEnumEntries(ClassTree tree) {
-		Element type = TreeUtils.elementFromDeclaration(tree);
-
-		if (type.getKind() != ElementKind.ENUM) {
-			return null;
-		}
-
-		List<String> enumEntries = new ArrayList<>();
-		for (Element member : ElementUtils.getAllFieldsIn((TypeElement) type)) {
-			if (member.getKind() == ElementKind.ENUM_CONSTANT) {
-				enumEntries.add(member.getSimpleName().toString());
-			}
-		}
-
-		return enumEntries.isEmpty() ? null : enumEntries;
-	}
-
 	/**
 	 * Special generation for classes marked with {@link org.stjs.javascript.annotation.GlobalScope}. The name of the
 	 * class must appear nowhere.
@@ -769,12 +752,7 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 
 			@Override
 			public boolean passesFilter(Tree tree) {
-
-				if (tree.getKind() == Tree.Kind.BLOCK && ((BlockTree)tree).isStatic() ) {
-					return true;
-				}
-
-				return false;
+				return ((tree instanceof BlockTree) && ((BlockTree) tree).isStatic());
 			}
 		};
 	}
@@ -860,6 +838,7 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		return stmts;
 	}
 
+	@SuppressWarnings("unchecked")
 	private MemberFilter constructorFilter() {
 		return new MemberFilter() {
 			@Override
@@ -868,6 +847,7 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 					return false;
 				}
 
+				assert tree instanceof MethodTree;
 				MethodTree methodTree = (MethodTree) tree;
 				if (isDefaultConstructorDelegatinOnlyToSuperDefaultConstructor(methodTree)) {
 					return false;
