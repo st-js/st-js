@@ -2,6 +2,7 @@ package org.stjs.generator.writer.inheritance;
 
 import junit.framework.Assert;
 import org.junit.Test;
+import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.utils.AbstractStjsTest;
 
 public class InheritanceGeneratorTest extends AbstractStjsTest {
@@ -56,5 +57,15 @@ public class InheritanceGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testPrivateConstructor() throws Exception {
 		Assert.assertEquals("Value passed as parameters on the static constructor method", execute(Inheritance9_private_constructor.class));
+	}
+
+	@Test
+	public void testSubclass_defined_before_baseclass() throws Exception {
+		try {
+			execute(Inheritance10_subclass_defined_before_baseclass.class);
+			Assert.fail("Should not get here. An exception was expected");
+		} catch (STJSRuntimeException e) {
+			Assert.assertTrue(e.getMessage().contains("_super is undefined when creating class Inheritance10_subclass_defined_before_baseclass.SubClass"));
+		}
 	}
 }
