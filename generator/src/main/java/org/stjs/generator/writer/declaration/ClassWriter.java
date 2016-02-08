@@ -639,7 +639,6 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		}
 		stmts.add(context.withPosition(tree, extendsCall));
 
-		addStaticInitializers(visitor, tree, context, stmts);
 		addMainMethodCall(tree, stmts, context);
 
 		return js.statements(stmts);
@@ -657,21 +656,17 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		stmts.addAll(
 				getMembers(context, visitor, classTree, nonStaticFieldsAndMethodsFilter()));
 
-		// static methods/enum/inner classes
+		// static methods/enum classes/inner classes
 		stmts.addAll(
 				getMembers(context, visitor, classTree, staticNonFieldsFilter()));
-
-		// initializer block
-		stmts.addAll(
-				getMembers(context, visitor, classTree, staticInitializerFilter()));
 
 		// enum entries
 		stmts.addAll(
 				getEnumEntries(context, visitor, classTree, enumEntryFilter()));
 
-		// static fields members
+		// static members: fields / static initializer
 		stmts.addAll(
-				getMembers(context, visitor, classTree, staticFieldsFilter()));
+				getMembers(context, visitor, classTree, staticMembersFilter()));
 
 		// create function:
 		//     function(constructor, prototype) {...}
@@ -714,17 +709,20 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		};
 	}
 
-	private MemberFilter<? extends Tree> staticFieldsFilter() {
+	private MemberFilter<? extends Tree> staticMembersFilter() {
 		return new MemberFilter<Tree>() {
 
 			@Override
 			public boolean passesFilter(Tree tree) {
-				Element symbol = InternalUtils.symbol(tree);
+				boolean isStaticInitializerBlock = ((tree instanceof BlockTree) && ((BlockTree) tree).isStatic());
+				if (isStaticInitializerBlock) {
+					return true;
+				}
 
+				Element symbol = InternalUtils.symbol(tree);
 				if (symbol == null) {
 					return false;
 				}
-
 				return symbol.getKind() == ElementKind.FIELD && ElementUtils.isStatic(symbol);
 			}
 		};
@@ -743,16 +741,6 @@ public class ClassWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 
 				return ((symbol.getKind() == ElementKind.METHOD) && ElementUtils.isStatic(symbol)) ||
 						(symbol.getKind() == ElementKind.ENUM) || (symbol.getKind() == ElementKind.CLASS) || (symbol.getKind() == ElementKind.INTERFACE);
-			}
-		};
-	}
-
-	private MemberFilter<? extends Tree> staticInitializerFilter() {
-		return new MemberFilter<Tree>() {
-
-			@Override
-			public boolean passesFilter(Tree tree) {
-				return ((tree instanceof BlockTree) && ((BlockTree) tree).isStatic());
 			}
 		};
 	}
