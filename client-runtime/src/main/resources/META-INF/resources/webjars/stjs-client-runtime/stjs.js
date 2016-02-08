@@ -303,17 +303,15 @@ Number.parseInt$String_int=function(str, radix) {
     return parseInt(str, radix);
 }
 
-Number.valueOf$String=function(str) {
-    return Number.valueOf(Number.parseInt$String(str));
-}
+// java.lang.Integer
+Number.toString$int = function(i) {
+    return new Number(i).toString();
+};
 
-Number.valueOf$int=function(value) {
-    return Number.valueOf(value);
-}
+Number.toString$int_int = function(i, radix) {
+    return new Number(i).toString(radix);
+};
 
-Number.valueOf$String_int=function(str, radix) {
-    return Number.valueOf(Number.parseInt$String_int(str, radix));
-}
 
 /* type conversion - approximative as Javascript only has integers and doubles */
 if (!Number.prototype.intValue) {
@@ -389,20 +387,15 @@ Number.valueOf=function(value){
 	return new Number(value);
 }
 
-Integer.valueOf$int=function(value){
-	return new Number(value);
+Number.valueOf$int=Number.valueOf
+Number.valueOf$long=Number.valueOf;
+
+Number.valueOf$String=function(str) {
+    return Number.valueOf(Number.parseInt$String(str));
 }
 
-Integer.valueOf$String=function(value){
-	return new Number(value);
-}
-
-Long.valueOf$long=function(value){
-	return new Number(value);
-}
-
-Long.valueOf$String=function(value){
-	return new Number(value);
+Number.valueOf$String_int=function(str, radix) {
+    return Number.valueOf(Number.parseInt$String_int(str, radix));
 }
 
 /* Boolean */
