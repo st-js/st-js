@@ -132,6 +132,21 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 				"}");
 	}
 
+	@Test
+	public void testStaticMembers_outputed_in_order_of_declarartion() {
+		assertCodeContains(Statements14b_static_members_order.class, "" +
+				"    constructor._valueA = 10;\n" +
+				"    (function() {\n" +
+				"        Statements14b_static_members_order._valueA = Statements14b_static_members_order._valueA + 100;\n" +
+				"    })();\n" +
+				"    constructor._valueB = Statements14b_static_members_order._valueA;\n" +
+				"    (function() {\n" +
+				"        Statements14b_static_members_order._valueB = Statements14b_static_members_order._valueB + 100;\n" +
+				"    })();\n");
+
+		Assert.assertEquals("A:110 B:210", execute(Statements14b_static_members_order.class));
+	}
+
 	@Test(expected = JavascriptFileGenerationException.class)
 	public void testInstanceInitializer() {
 		generate(Statements15.class);
