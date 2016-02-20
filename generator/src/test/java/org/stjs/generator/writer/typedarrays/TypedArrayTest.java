@@ -84,4 +84,11 @@ public class TypedArrayTest extends AbstractStjsTest {
 
 	}
 
+	@Test
+	public void testArrayMath() throws Exception {
+		assertCodeContains(ArrayMath.class, "c[i]++;");
+		int expected = ArrayMath.method();
+		assertEquals((double) expected, executeAndReturnNumber(ArrayMath.class), 0);
+	}
+
 }
