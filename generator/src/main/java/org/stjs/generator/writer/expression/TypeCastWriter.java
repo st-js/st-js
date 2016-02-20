@@ -1,13 +1,11 @@
 package org.stjs.generator.writer.expression;
 
 import static java.util.Arrays.asList;
-import static javax.lang.model.type.TypeKind.LONG;
-import static javax.lang.model.type.TypeKind.INT;
-import static javax.lang.model.type.TypeKind.SHORT;
-import static javax.lang.model.type.TypeKind.CHAR;
-import static javax.lang.model.type.TypeKind.DOUBLE;
-import static javax.lang.model.type.TypeKind.FLOAT;
 import static javax.lang.model.type.TypeKind.BYTE;
+import static javax.lang.model.type.TypeKind.CHAR;
+import static javax.lang.model.type.TypeKind.INT;
+import static javax.lang.model.type.TypeKind.LONG;
+import static javax.lang.model.type.TypeKind.SHORT;
 import static org.stjs.generator.javascript.BinaryOperator.LEFT_SHIFT;
 import static org.stjs.generator.javascript.BinaryOperator.RIGHT_SHIFT;
 
@@ -32,6 +30,10 @@ import com.sun.tools.javac.code.Type.JCPrimitiveType;
 
 public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 
+	private static final int CHAR_MASK = 0xffff;
+	private static final int BYTE_SHIFT = 24;
+	private static final int SHORT_SHIFT = 16;
+
 	private static final EnumSet<TypeKind> NEED_CAST_TO_INT = EnumSet.of(LONG);
 	private static final EnumSet<TypeKind> NEED_CAST_TO_CHAR = EnumSet.of(LONG, INT, SHORT, BYTE);
 	private static final EnumSet<TypeKind> NEED_CAST_TO_SHORT = EnumSet.of(LONG, INT, CHAR);
@@ -46,7 +48,7 @@ public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 		TypeKind toKind = type.getKind();
 		JavaScriptBuilder<JS> b = context.js();
 
-		if (INT.equals(toKind) && NEED_CAST_TO_INT.contains(fromKind)) {
+		if (needCastToInt(fromKind, toKind)) {
 			// long l = 8*1024*1024*1024;
 			// int a = (int) l;
 			// var a = ((i)|0);
@@ -55,32 +57,32 @@ public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 			return b.paren(or);
 		}
 		
-		if (BYTE.equals(toKind) && NEED_CAST_TO_BYTE.contains(fromKind)) {
+		if (needCastToByte(fromKind, toKind)) {
 			// long l = 8*1024*1024*1024;
 			// byte a = (byte) l;
 			// var a = (l<< 24 >> 24);
 
-			JS lsh = b.binary(LEFT_SHIFT, asList(expr, b.number(24)));
-			JS rsh = b.binary(RIGHT_SHIFT, asList(lsh, b.number(24)));
+			JS lsh = b.binary(LEFT_SHIFT, asList(expr, b.number(BYTE_SHIFT)));
+			JS rsh = b.binary(RIGHT_SHIFT, asList(lsh, b.number(BYTE_SHIFT)));
 			return b.paren(rsh);
 		}
 		
-		if (SHORT.equals(toKind) && NEED_CAST_TO_SHORT.contains(fromKind)) {
+		if (needCastToShort(fromKind, toKind)) {
 			// int i = 2*1024*1024*1024; //MAX_VALUE
 			// short a = (short) i;
 			// var a = ((i)<<16>>16);
 
-			JS lsh = b.binary(LEFT_SHIFT, asList(b.paren(expr), b.number(16)));
-			JS rsh = b.binary(RIGHT_SHIFT, asList(lsh, b.number(16)));
+			JS lsh = b.binary(LEFT_SHIFT, asList(b.paren(expr), b.number(SHORT_SHIFT)));
+			JS rsh = b.binary(RIGHT_SHIFT, asList(lsh, b.number(SHORT_SHIFT)));
 			return b.paren(rsh);
 		}
 		
-		if (CHAR.equals(toKind) && NEED_CAST_TO_CHAR.contains(fromKind)) {
+		if (needCastToChar(fromKind, toKind)) {
 			// int i = 2*1024*1024*1024; //MAX_VALUE
 			// char a = (char) i;
 			// var a = ((i)&0xffff);
 
-			JS and = b.binary(BinaryOperator.AND, asList(b.paren(expr), b.number(0xffff)));
+			JS and = b.binary(BinaryOperator.AND, asList(b.paren(expr), b.number(CHAR_MASK)));
 			return b.paren(and);
 		}
 
@@ -93,19 +95,33 @@ public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 		return expr;
 	}
 
+	private boolean needCastToChar(TypeKind fromKind, TypeKind toKind) {
+		return CHAR.equals(toKind) && NEED_CAST_TO_CHAR.contains(fromKind);
+	}
+
+	private boolean needCastToShort(TypeKind fromKind, TypeKind toKind) {
+		return SHORT.equals(toKind) && NEED_CAST_TO_SHORT.contains(fromKind);
+	}
+
+	private boolean needCastToByte(TypeKind fromKind, TypeKind toKind) {
+		return BYTE.equals(toKind) && NEED_CAST_TO_BYTE.contains(fromKind);
+	}
+
+	private boolean needCastToInt(TypeKind fromKind, TypeKind toKind) {
+		return INT.equals(toKind) && NEED_CAST_TO_INT.contains(fromKind);
+	}
+
 	private TypeKind getKind(ExpressionTree expression) {
 		try {
 			Field field = expression.getClass().getField("type");
 			Object object = field.get(expression);
 			if (object instanceof JCPrimitiveType) {
 				JCPrimitiveType p = (JCPrimitiveType) object;
-				TypeKind kind = p.getKind();
-				return kind;
+				return p.getKind();
 			}
 		}
 		catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return null;
 		}
 		return null;
 	}
