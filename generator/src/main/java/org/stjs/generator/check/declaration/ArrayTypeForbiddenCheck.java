@@ -8,6 +8,8 @@ import org.stjs.generator.writer.declaration.ClassWriter;
 
 import com.sun.source.tree.ArrayTypeTree;
 import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.PrimitiveTypeTree;
+import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
 import com.sun.source.util.TreePath;
 
@@ -21,13 +23,22 @@ public class ArrayTypeForbiddenCheck implements CheckContributor<ArrayTypeTree> 
 
 	@Override
 	public Void visit(CheckVisitor visitor, ArrayTypeTree tree, GenerationContext<Void> context) {
-		if (!argOfMainMethod(context) && !isVarArg(context)) {
-			context.addError(tree, "You cannot use Java arrays because they are incompatible with Javascript arrays. "
-					+ "Use org.stjs.javascript.Array<T> instead. "
-					+ "You can use also the method org.stjs.javascript.Global.$castArray to convert an "
-					+ "existent Java array to the corresponding Array type." + "The only exception is void main(String[] args).");
+		if (!argOfMainMethod(context) && !isVarArg(context) && !isPrimitiveArray(tree)) {
+			context.addError(tree,
+					"You cannot use Java arrays because they are incompatible with Javascript arrays. "
+							+ "Use org.stjs.javascript.Array<T> instead. "
+							+ "You can use also the method org.stjs.javascript.Global.$castArray to convert an "
+							+ "existent Java array to the corresponding Array type." + "The only exception is void main(String[] args).");
 		}
 		return null;
+	}
+
+	private boolean isPrimitiveArray(ArrayTypeTree tree) {
+		Tree type = tree.getType();
+		while (type instanceof ArrayTypeTree) {
+			type = ((ArrayTypeTree) type).getType();
+		}
+		return (type instanceof PrimitiveTypeTree);
 	}
 
 	private boolean isVarArg(GenerationContext<Void> context) {

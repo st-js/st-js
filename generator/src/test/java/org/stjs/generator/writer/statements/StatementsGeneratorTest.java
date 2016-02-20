@@ -31,9 +31,8 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(Statements4.class, "default: break");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
 	public void testArray1() {
-		generate(Statements5.class);
+		assertCodeContains(Statements5.class, "new Int32Array([1, 2, 3])");
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
