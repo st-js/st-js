@@ -10,10 +10,7 @@ import com.sun.source.tree.AnnotationTree;
 import com.sun.source.tree.NewArrayTree;
 import com.sun.source.tree.PrimitiveTypeTree;
 import com.sun.source.tree.Tree;
-import com.sun.source.tree.Tree.Kind;
 import com.sun.source.util.TreePath;
-import com.sun.tools.classfile.Type;
-import com.sun.tools.classfile.Type.ArrayType;
 
 /**
  * this checks that no java array is used. You should use {@link org.stjs.javascript.Array} instead.
@@ -41,15 +38,15 @@ public class NewArrayForbiddenCheck implements CheckContributor<NewArrayTree> {
 		if (type == null) {
 			try {
 				Field field = tree.getClass().getField("type");
-				Object _type = field.get(tree);
-				while (_type instanceof com.sun.tools.javac.code.Type.ArrayType) {
-					com.sun.tools.javac.code.Type.ArrayType atype = (com.sun.tools.javac.code.Type.ArrayType) _type;
+				Object ftype = field.get(tree);
+				while (ftype instanceof com.sun.tools.javac.code.Type.ArrayType) {
+					com.sun.tools.javac.code.Type.ArrayType atype = (com.sun.tools.javac.code.Type.ArrayType) ftype;
 					com.sun.tools.javac.code.Type elemtype2 = atype.elemtype;
 					boolean primitive = elemtype2.isPrimitive();
 					if (primitive) {
 						return primitive;
 					} else {
-						_type = elemtype2;
+						ftype = elemtype2;
 					}
 				}
 			}

@@ -28,54 +28,7 @@ import com.sun.tools.javac.tree.JCTree.JCPrimitiveTypeTree;
  * @author acraciun
  */
 public class NewArrayWriter<JS> implements WriterContributor<NewArrayTree, JS> {
-
 	private final List<JS> emptyList = Collections.<JS>emptyList();
-
-	@Override
-	public JS visit(WriterVisitor<JS> visitor, NewArrayTree tree, GenerationContext<JS> context) {
-		String jsTypename = java2js.get(typeName(tree));
-		if (jsTypename == null) {
-			throw context.addError(tree, "Java array " + tree + " not supported.");
-		}
-		JavaScriptBuilder<JS> b = context.js();
-		JS typeName = b.name(jsTypename);
-		int dim = dim(tree);
-		List<? extends ExpressionTree> dimensions = tree.getDimensions();
-		List<? extends ExpressionTree> initializers = tree.getInitializers();
-		int initsize = initializers == null ? 0 : initializers.size();
-		int dimsize = dimensions.size();
-		if (dim == 1 && dimsize == 0 && initsize == 0) {
-			// new Float32Array()
-			return b.newExpression(typeName, emptyList);
-		}
-
-		if (dim == 1 && initsize == 1) {
-			// new Float32Array([1,2,3])
-			return b.newExpression(typeName, singleDimInit(b, visitor, context, tree.getInitializers().get(0)));
-		}
-		if (dim == 1 && initsize > 1) {
-			JS array = initArray(visitor, context, b, initializers);
-			return b.newExpression(typeName, singletonList(array));
-		}
-		if (dim > 1 && initsize >= 1) {
-			return initArray(visitor, context, b, initializers);
-		}
-
-		if (dim > 1 && dimsize == 0 && initsize == 0) {
-			return b.array(emptyList);
-		}
-		if (dimsize >= 1 && initsize == 0) {
-			JS _js = newPrimitiveArray(typeName, b, dimensions.get(dimsize - 1), visitor, context);
-			for (int i = dimsize - 2; i >= 0; i--) {
-				JS item = apply(b, newArray(b, dimensions.get(i), visitor, context));
-				_js = map(b, item, _js);
-			}
-			return _js;
-		}
-
-		throw context.addError(tree, "Java arrays are not supported. This is a ST-JS bug.");
-	}
-
 	private static Map<String, String> java2js = new HashMap<>();
 
 	static {
@@ -87,21 +40,122 @@ public class NewArrayWriter<JS> implements WriterContributor<NewArrayTree, JS> {
 		java2js.put("double", "Float64Array");
 	}
 
+	private static class TypedArrayTree {
+		private NewArrayTree tree;
+		private String jsTypeName;
+		private int typeDim;
+		private List<? extends ExpressionTree> dimensions;
+		private List<? extends ExpressionTree> initializers;
+		private boolean hasInitializer;
+		private boolean hasDimension;
+	}
+
+	private TypedArrayTree fromNewArrayTree(NewArrayTree tree) {
+		TypedArrayTree t = new TypedArrayTree();
+		t.tree = tree;
+		t.jsTypeName = java2js.get(typeName(tree));
+		t.typeDim = dim(tree);
+		t.dimensions = tree.getDimensions();
+		t.initializers = tree.getInitializers();
+		int initsize = t.initializers == null ? 0 : t.initializers.size();
+		int dimsize = t.dimensions.size();
+		t.hasInitializer = initsize > 0;
+		t.hasDimension = dimsize > 0;
+		return t;
+	}
+
+	@Override
+	public JS visit(WriterVisitor<JS> visitor, NewArrayTree tree, GenerationContext<JS> context) {
+		TypedArrayTree typedArrayTree = fromNewArrayTree(tree);
+
+		sanityCheck(context, typedArrayTree);
+
+		if (typedArrayTree.hasInitializer) {
+			return arrayFromInitializer(visitor, typedArrayTree, context);
+		}
+
+		if (typedArrayTree.hasDimension) {
+			return arrayFromDimension(visitor, typedArrayTree, context);
+		}
+
+		return simpleArray(typedArrayTree, context);
+	}
+
+	private void sanityCheck(GenerationContext<JS> context, TypedArrayTree t) {
+		if (t.jsTypeName == null || t.typeDim < 1) {
+			throw context.addError(t.tree, "Java array " + t.tree + " not supported.");
+		}
+		if (t.hasInitializer && t.hasDimension) {
+			throw context.addError(t.tree, "Java array " + t.tree + " not supported.");
+		}
+
+	}
+
+	private JS simpleArray(TypedArrayTree tree, GenerationContext<JS> context) {
+		JavaScriptBuilder<JS> b = context.js();
+		int typeDim = tree.typeDim;
+		if (typeDim > 1) {
+			// float[][] a = {};
+			// var a = [];
+			return b.array(emptyList);
+		} else {
+			// float[] a = {};
+			// var a = new Float32Array();
+			return newPrimitiveArray(b, b.name(tree.jsTypeName), null);
+		}
+	}
+
+	private JS arrayFromInitializer(WriterVisitor<JS> visitor, TypedArrayTree tree, GenerationContext<JS> context) {
+		List<? extends ExpressionTree> initializers = tree.initializers;
+		JavaScriptBuilder<JS> b = context.js();
+		int typeDim = tree.typeDim;
+		// float[][] a = {{}, {}};
+		// var a = [[], []];
+		JS args = initArgs(visitor, context, b, initializers);
+		if (typeDim > 1) {
+			return args;
+		}
+		// var a = [1,2,3];
+		// new Float32Array([1,2,3])
+		return newPrimitiveArray(b, b.name(tree.jsTypeName), args);
+	}
+
+	private JS arrayFromDimension(WriterVisitor<JS> visitor, TypedArrayTree tree, GenerationContext<JS> context) {
+		JavaScriptBuilder<JS> b = context.js();
+		List<? extends ExpressionTree> dimensions = tree.dimensions;
+		JS typeName = b.name(tree.jsTypeName);
+
+		// float[] a = new float[3]
+		JS args = visitor.scan(dimensions.get(dimensions.size() - 1), context);
+		JS js = newPrimitiveArray(b, typeName, args);
+		for (int i = dimensions.size() - 2; i >= 0; i--) {
+			// float[][][] aaa = new float[1][2][3]
+			JS item = apply(b, newArray(b, dimensions.get(i), visitor, context));
+			js = map(b, item, js);
+		}
+		return js;
+
+	}
+
+	private JS newPrimitiveArray(JavaScriptBuilder<JS> b, JS typeName, JS initArg) {
+		return b.newExpression(typeName, initArg == null ? emptyList : singletonList(initArg));
+	}
+
 	private static String typeName(NewArrayTree tree) {
 		Tree type = tree.getType();
 		if (type == null) {
 			try {
 				Field field = tree.getClass().getField("type");
-				Object _type = field.get(tree);
-				while (_type instanceof com.sun.tools.javac.code.Type.ArrayType) {
-					com.sun.tools.javac.code.Type.ArrayType atype = (com.sun.tools.javac.code.Type.ArrayType) _type;
+				Object ftype = field.get(tree);
+				while (ftype instanceof com.sun.tools.javac.code.Type.ArrayType) {
+					com.sun.tools.javac.code.Type.ArrayType atype = (com.sun.tools.javac.code.Type.ArrayType) ftype;
 					com.sun.tools.javac.code.Type elemtype2 = atype.elemtype;
 					boolean primitive = elemtype2.isPrimitive();
 					if (primitive) {
 						JCPrimitiveType prim = (JCPrimitiveType) elemtype2;
 						return prim.toString();
 					}
-					_type = elemtype2;
+					ftype = elemtype2;
 				}
 
 			}
@@ -116,22 +170,19 @@ public class NewArrayWriter<JS> implements WriterContributor<NewArrayTree, JS> {
 		return null;
 	}
 
-	private JS initArray(WriterVisitor<JS> visitor, GenerationContext<JS> context, JavaScriptBuilder<JS> b,
+	private JS initArgs(WriterVisitor<JS> visitor, GenerationContext<JS> context, JavaScriptBuilder<JS> b,
 			List<? extends ExpressionTree> initializers) {
-		List<JS> _init = new ArrayList<>();
-		for (ExpressionTree init : initializers) {
-			_init.add(visitor.scan(init, context));
+		List<JS> args = new ArrayList<>();
+		if (initializers != null) {
+			for (ExpressionTree init : initializers) {
+				args.add(visitor.scan(init, context));
+			}
 		}
-		return b.array(_init);
+		return b.array(args);
 	}
 
 	private JS map(JavaScriptBuilder<JS> b, JS target, JS returns) {
 		return b.functionCall(map(b, target), singletonList(b.function(null, emptyList, b.returnStatement(returns))));
-	}
-
-	private JS newPrimitiveArray(JS typeName, JavaScriptBuilder<JS> b, ExpressionTree dim, WriterVisitor<JS> visitor,
-			GenerationContext<JS> context) {
-		return b.newExpression(typeName, singleDimension(visitor, context, dim));
 	}
 
 	private JS apply(JavaScriptBuilder<JS> b, JS newArray) {
@@ -151,16 +202,15 @@ public class NewArrayWriter<JS> implements WriterContributor<NewArrayTree, JS> {
 	}
 
 	private static int dim(NewArrayTree tree) {
-		Tree type = tree.getType();
 		int dim = tree.getDimensions().size();
 		if (dim == 0) {
 			try {
 				Field field = tree.getClass().getField("type");
-				Object _type = field.get(tree);
-				while (_type instanceof com.sun.tools.javac.code.Type.ArrayType) {
-					com.sun.tools.javac.code.Type.ArrayType atype = (com.sun.tools.javac.code.Type.ArrayType) _type;
+				Object ftype = field.get(tree);
+				while (ftype instanceof com.sun.tools.javac.code.Type.ArrayType) {
+					com.sun.tools.javac.code.Type.ArrayType atype = (com.sun.tools.javac.code.Type.ArrayType) ftype;
 					com.sun.tools.javac.code.Type elemtype2 = atype.elemtype;
-					_type = elemtype2;
+					ftype = elemtype2;
 					dim++;
 				}
 
@@ -171,13 +221,5 @@ public class NewArrayWriter<JS> implements WriterContributor<NewArrayTree, JS> {
 		}
 		return dim;
 
-	}
-
-	private List<JS> singleDimension(WriterVisitor<JS> visitor, GenerationContext<JS> context, ExpressionTree dim) {
-		return singletonList(visitor.scan(dim, context));
-	}
-
-	private List<JS> singleDimInit(JavaScriptBuilder<JS> b, WriterVisitor<JS> visitor, GenerationContext<JS> context, ExpressionTree init) {
-		return singletonList(b.array(singletonList(visitor.scan(init, context))));
 	}
 }
