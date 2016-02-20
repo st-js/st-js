@@ -5,6 +5,8 @@ import static javax.lang.model.type.TypeKind.LONG;
 import static javax.lang.model.type.TypeKind.INT;
 import static javax.lang.model.type.TypeKind.SHORT;
 import static javax.lang.model.type.TypeKind.CHAR;
+import static javax.lang.model.type.TypeKind.DOUBLE;
+import static javax.lang.model.type.TypeKind.FLOAT;
 import static javax.lang.model.type.TypeKind.BYTE;
 import static org.stjs.generator.javascript.BinaryOperator.LEFT_SHIFT;
 import static org.stjs.generator.javascript.BinaryOperator.RIGHT_SHIFT;
@@ -30,10 +32,10 @@ import com.sun.tools.javac.code.Type.JCPrimitiveType;
 
 public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 
-	private static final EnumSet<TypeKind> BIGGER_THAN_INT = EnumSet.of(LONG);
-	private static final EnumSet<TypeKind> BIGGER_THAN_CHAR = EnumSet.of(LONG, INT, SHORT);
-	private static final EnumSet<TypeKind> BIGGER_THAN_SHORT = EnumSet.of(LONG, INT, CHAR);
-	private static final EnumSet<TypeKind> BIGGER_THAN_BYTE = EnumSet.of(LONG, INT, SHORT, CHAR);
+	private static final EnumSet<TypeKind> NEED_CAST_TO_INT = EnumSet.of(LONG);
+	private static final EnumSet<TypeKind> NEED_CAST_TO_CHAR = EnumSet.of(LONG, INT, SHORT, BYTE);
+	private static final EnumSet<TypeKind> NEED_CAST_TO_SHORT = EnumSet.of(LONG, INT, CHAR);
+	private static final EnumSet<TypeKind> NEED_CAST_TO_BYTE = EnumSet.of(LONG, INT, SHORT, CHAR);
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, TypeCastTree tree, GenerationContext<JS> context) {
@@ -44,7 +46,7 @@ public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 		TypeKind toKind = type.getKind();
 		JavaScriptBuilder<JS> b = context.js();
 
-		if (INT.equals(toKind) && BIGGER_THAN_INT.contains(fromKind)) {
+		if (INT.equals(toKind) && NEED_CAST_TO_INT.contains(fromKind)) {
 			// long l = 8*1024*1024*1024;
 			// int a = (int) l;
 			// var a = ((i)|0);
@@ -53,7 +55,7 @@ public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 			return b.paren(or);
 		}
 		
-		if (BYTE.equals(toKind) && BIGGER_THAN_BYTE.contains(fromKind)) {
+		if (BYTE.equals(toKind) && NEED_CAST_TO_BYTE.contains(fromKind)) {
 			// long l = 8*1024*1024*1024;
 			// byte a = (byte) l;
 			// var a = (l<< 24 >> 24);
@@ -63,7 +65,7 @@ public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 			return b.paren(rsh);
 		}
 		
-		if (SHORT.equals(toKind) && BIGGER_THAN_SHORT.contains(fromKind)) {
+		if (SHORT.equals(toKind) && NEED_CAST_TO_SHORT.contains(fromKind)) {
 			// int i = 2*1024*1024*1024; //MAX_VALUE
 			// short a = (short) i;
 			// var a = ((i)<<16>>16);
@@ -73,7 +75,7 @@ public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 			return b.paren(rsh);
 		}
 		
-		if (CHAR.equals(toKind) && BIGGER_THAN_CHAR.contains(fromKind)) {
+		if (CHAR.equals(toKind) && NEED_CAST_TO_CHAR.contains(fromKind)) {
 			// int i = 2*1024*1024*1024; //MAX_VALUE
 			// char a = (char) i;
 			// var a = ((i)&0xffff);

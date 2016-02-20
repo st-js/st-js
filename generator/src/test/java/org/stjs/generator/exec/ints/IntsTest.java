@@ -2,10 +2,19 @@ package org.stjs.generator.exec.ints;
 
 import static org.junit.Assert.*;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.utils.AbstractStjsTest;
 
 public class IntsTest extends AbstractStjsTest {
+
+	@Test
+	public void testByteMath() throws Exception {
+		byte expected = ByteMath.sum(ByteMath.B1, ByteMath.B2);
+		double expectedDouble = (double) expected;
+		assertEquals(expectedDouble, executeAndReturnNumber(ByteMath.class), 0);
+
+	}
 
 	@Test
 	public void testCastIntToShort() {
@@ -82,6 +91,15 @@ public class IntsTest extends AbstractStjsTest {
 		int expected = ShortToChar.method(ShortToChar.NEG_SHORT);
 		double expectedDouble = (double) expected;
 		assertEquals(expectedDouble, executeAndReturnNumber(ShortToChar.class), 0);
+	}
+
+	@Test
+	@Ignore
+	public void testCastFloatToInt() {
+		// TODO: this does not pass - and i have no idea what to do just yet
+		int expected = FloatToInt.method(FloatToInt.BIG_FLOAT);
+		double expectedDouble = (double) expected;
+		assertEquals(expectedDouble, executeAndReturnNumber(FloatToInt.class), 0);
 	}
 
 	@Test
