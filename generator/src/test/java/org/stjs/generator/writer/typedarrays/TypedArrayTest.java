@@ -7,19 +7,6 @@ import org.stjs.generator.utils.AbstractStjsTest;
 
 public class TypedArrayTest extends AbstractStjsTest {
 
-	int ga() {
-		return 42;
-	}
-
-	@Test
-	public void testDummy() throws Exception {
-		float arr[][] = new float[ga()][];
-		System.out.println(arr[0]);
-		float[][] arr2 = { {}, {} };
-		System.out.println(arr2);
-
-	}
-
 	@Test
 	public void testFloatArray() throws Exception {
 		assertCodeContains(Float32ArrayInit.class, "new Float32Array(1)");
