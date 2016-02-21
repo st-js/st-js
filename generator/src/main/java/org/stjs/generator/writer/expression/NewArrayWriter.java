@@ -33,6 +33,7 @@ public class NewArrayWriter<JS> implements WriterContributor<NewArrayTree, JS> {
 
 	static {
 		java2js.put("int", "Int32Array");
+		java2js.put("boolean", "Int8Array");
 		java2js.put("byte", "Int8Array");
 		java2js.put("char", "Uint16Array");
 		java2js.put("short", "Int16Array");

@@ -90,5 +90,10 @@ public class TypedArrayTest extends AbstractStjsTest {
 		int expected = ArrayMath.method();
 		assertEquals((double) expected, executeAndReturnNumber(ArrayMath.class), 0);
 	}
+	@Test
+	public void testBooleanArray() throws Exception {
+		int expected = BooleanArray.method();
+		assertEquals((double) expected, executeAndReturnNumber(BooleanArray.class), 0);
+	}		
 
 }
