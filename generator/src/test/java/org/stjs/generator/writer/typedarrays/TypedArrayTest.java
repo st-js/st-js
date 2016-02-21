@@ -85,15 +85,37 @@ public class TypedArrayTest extends AbstractStjsTest {
 	}
 
 	@Test
+	public void testMultiInit() throws Exception {
+		String expected = "Array.apply(null, Array(3)).map(function(){return Array(2);});"; //
+		assertCodeContains(MultiInit.class, expected);
+	}
+
+	@Test
+	public void testMultiInit2() throws Exception {
+		/* @formatter:off */
+		String expected = 
+		"var ac = [Array.apply(null, Array(2)).map(function() {"+//
+        "    return new Int32Array(3);"+//
+        "}), Array.apply(null, Array(4)).map(function() {"+//
+        "    return new Int32Array(5);"+//
+        "}), Array.apply(null, Array(6)).map(function() {"+//
+        "    return new Int32Array(7);"+//
+        "})]";
+		/* @formatter:on */
+		assertCodeContains(MultiInit2.class, expected);
+	}
+
+	@Test
 	public void testArrayMath() throws Exception {
 		assertCodeContains(ArrayMath.class, "c[i]++;");
 		int expected = ArrayMath.method();
 		assertEquals((double) expected, executeAndReturnNumber(ArrayMath.class), 0);
 	}
+
 	@Test
 	public void testBooleanArray() throws Exception {
 		int expected = BooleanArray.method();
 		assertEquals((double) expected, executeAndReturnNumber(BooleanArray.class), 0);
-	}		
+	}
 
 }

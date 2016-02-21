@@ -7,6 +7,7 @@ import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
 
 import com.sun.source.tree.AnnotationTree;
+import com.sun.source.tree.ArrayTypeTree;
 import com.sun.source.tree.NewArrayTree;
 import com.sun.source.tree.PrimitiveTypeTree;
 import com.sun.source.tree.Tree;
@@ -35,7 +36,7 @@ public class NewArrayForbiddenCheck implements CheckContributor<NewArrayTree> {
 
 	private boolean isPrimitive(NewArrayTree tree) {
 		Tree type = tree.getType();
-		if (type == null) {
+		if (type == null || type instanceof ArrayTypeTree) {
 			try {
 				Field field = tree.getClass().getField("type");
 				Object ftype = field.get(tree);
@@ -53,7 +54,6 @@ public class NewArrayForbiddenCheck implements CheckContributor<NewArrayTree> {
 			catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 				return false;
 			}
-
 		}
 		return type instanceof PrimitiveTypeTree;
 	}

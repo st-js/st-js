@@ -19,7 +19,8 @@ import org.stjs.generator.writer.WriterVisitor;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.NewArrayTree;
 import com.sun.source.tree.Tree;
-import com.sun.tools.javac.code.Type.JCPrimitiveType;
+import com.sun.tools.javac.code.Type;
+import com.sun.tools.javac.code.Type.ArrayType;
 import com.sun.tools.javac.tree.JCTree.JCPrimitiveTypeTree;
 
 /**
@@ -55,7 +56,7 @@ public class NewArrayWriter<JS> implements WriterContributor<NewArrayTree, JS> {
 		TypedArrayTree t = new TypedArrayTree();
 		t.tree = tree;
 		t.jsTypeName = java2js.get(typeName(tree));
-		t.typeDim = dim(tree);
+		t.typeDim = typeDim(tree);
 		t.dimensions = tree.getDimensions();
 		t.initializers = tree.getInitializers();
 		int initsize = t.initializers == null ? 0 : t.initializers.size();
@@ -125,10 +126,14 @@ public class NewArrayWriter<JS> implements WriterContributor<NewArrayTree, JS> {
 		JavaScriptBuilder<JS> b = context.js();
 		List<? extends ExpressionTree> dimensions = tree.dimensions;
 		JS typeName = b.name(tree.jsTypeName);
-
-		// float[] a = new float[3]
-		JS args = visitor.scan(dimensions.get(dimensions.size() - 1), context);
-		JS js = newPrimitiveArray(b, typeName, args);
+		JS js;
+		if (tree.typeDim == dimensions.size()) {
+			// float[] a = new float[3]
+			JS args = visitor.scan(dimensions.get(dimensions.size() - 1), context);
+			js = newPrimitiveArray(b, typeName, args);
+		} else {
+			js = newArray(b, dimensions.get(dimensions.size() - 1), visitor, context);
+		}
 		for (int i = dimensions.size() - 2; i >= 0; i--) {
 			// float[][][] aaa = new float[1][2][3]
 			JS item = apply(b, newArray(b, dimensions.get(i), visitor, context));
@@ -144,31 +149,27 @@ public class NewArrayWriter<JS> implements WriterContributor<NewArrayTree, JS> {
 
 	private static String typeName(NewArrayTree tree) {
 		Tree type = tree.getType();
-		if (type == null) {
-			try {
-				Field field = tree.getClass().getField("type");
-				Object ftype = field.get(tree);
-				while (ftype instanceof com.sun.tools.javac.code.Type.ArrayType) {
-					com.sun.tools.javac.code.Type.ArrayType atype = (com.sun.tools.javac.code.Type.ArrayType) ftype;
-					com.sun.tools.javac.code.Type elemtype2 = atype.elemtype;
-					boolean primitive = elemtype2.isPrimitive();
-					if (primitive) {
-						JCPrimitiveType prim = (JCPrimitiveType) elemtype2;
-						return prim.toString();
-					}
-					ftype = elemtype2;
-				}
-
-			}
-			catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-				return null;
-			}
-		} else if (type instanceof JCPrimitiveTypeTree) {
+		if (type instanceof JCPrimitiveTypeTree) {
 			JCPrimitiveTypeTree prim = (JCPrimitiveTypeTree) type;
 			return prim.toString();
-
 		}
-		return null;
+		Type elementType = elementType(tree);
+		return elementType.toString();
+	}
+
+	private static Type elementType(NewArrayTree tree) {
+		try {
+			Field field = tree.getClass().getField("type");
+			Type elementType = (Type) field.get(tree);
+			while (elementType instanceof ArrayType) {
+				Type.ArrayType atype = (Type.ArrayType) elementType;
+				elementType = atype.elemtype;
+			}
+			return elementType;
+		}
+		catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+			return null;
+		}
 	}
 
 	private JS initArgs(WriterVisitor<JS> visitor, GenerationContext<JS> context, JavaScriptBuilder<JS> b,
@@ -202,8 +203,9 @@ public class NewArrayWriter<JS> implements WriterContributor<NewArrayTree, JS> {
 		return js.property(js.name("Array"), "apply");
 	}
 
-	private static int dim(NewArrayTree tree) {
-		int dim = tree.getDimensions().size();
+	private static int typeDim(NewArrayTree tree) {
+		// int dim = tree.getDimensions().size();
+		int dim = 0;
 		if (dim == 0) {
 			try {
 				Field field = tree.getClass().getField("type");
