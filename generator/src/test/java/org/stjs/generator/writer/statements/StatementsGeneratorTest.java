@@ -35,10 +35,8 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(Statements5.class, "new Int32Array([1, 2, 3])");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
 	public void testArray2() {
-		// java array creation is forbidden
-		generate(Statements6.class);
+		assertCodeContains(Statements6.class, "[1, 2, 3]");
 	}
 
 	@Ignore

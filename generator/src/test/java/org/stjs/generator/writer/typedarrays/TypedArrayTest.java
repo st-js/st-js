@@ -74,14 +74,13 @@ public class TypedArrayTest extends AbstractStjsTest {
 	@Test
 	public void testTypes() throws Exception {
 		String generated = generate(Types.class);
-		System.out.println(generated);
-		assertCodeContains(generated, "new Int8Array()");
-		assertCodeContains(generated, "new Int16Array()");
-		assertCodeContains(generated, "new Uint16Array()");
-		assertCodeContains(generated, "new Int32Array()");
-		assertCodeContains(generated, "new Float32Array()");
-		assertCodeContains(generated, "new Float64Array()");
-
+		assertCodeContains(generated, "var bool = new Int8Array()");
+		assertCodeContains(generated, "var b = new Int8Array()");
+		assertCodeContains(generated, "var s = new Int16Array()");
+		assertCodeContains(generated, "var c = new Uint16Array()");
+		assertCodeContains(generated, "var i = new Int32Array()");
+		assertCodeContains(generated, "var f = new Float32Array()");
+		assertCodeContains(generated, "var d = new Float64Array()");
 	}
 
 	@Test

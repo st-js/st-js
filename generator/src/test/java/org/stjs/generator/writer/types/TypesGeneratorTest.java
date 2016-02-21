@@ -10,9 +10,8 @@ public class TypesGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(Types1.class, "var Types1 = function(){};");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
 	public void testForbidArrays() {
-		generate(Types2.class);
+		assertCodeContains(Types1.class, "var abc = [\"hello\", \"world\", null];");
 	}
 
 	@Test

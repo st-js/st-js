@@ -84,7 +84,7 @@ public class NewArrayWriter<JS> implements WriterContributor<NewArrayTree, JS> {
 	}
 
 	private void sanityCheck(GenerationContext<JS> context, TypedArrayTree t) {
-		if (t.jsTypeName == null || t.typeDim < 1) {
+		if (t.typeDim < 1) {
 			throw context.addError(t.tree, "Java array " + t.tree + " not supported.");
 		}
 		if (t.hasInitializer && t.hasDimension) {
@@ -96,7 +96,7 @@ public class NewArrayWriter<JS> implements WriterContributor<NewArrayTree, JS> {
 	private JS simpleArray(TypedArrayTree tree, GenerationContext<JS> context) {
 		JavaScriptBuilder<JS> b = context.js();
 		int typeDim = tree.typeDim;
-		if (typeDim > 1) {
+		if (typeDim > 1 || tree.jsTypeName == null) {
 			// float[][] a = {};
 			// var a = [];
 			return b.array(emptyList);
@@ -114,9 +114,10 @@ public class NewArrayWriter<JS> implements WriterContributor<NewArrayTree, JS> {
 		// float[][] a = {{}, {}};
 		// var a = [[], []];
 		JS args = initArgs(visitor, context, b, initializers);
-		if (typeDim > 1) {
+		if (typeDim > 1 || tree.jsTypeName == null) {
 			return args;
 		}
+
 		// var a = [1,2,3];
 		// new Float32Array([1,2,3])
 		return newPrimitiveArray(b, b.name(tree.jsTypeName), args);
@@ -125,9 +126,9 @@ public class NewArrayWriter<JS> implements WriterContributor<NewArrayTree, JS> {
 	private JS arrayFromDimension(WriterVisitor<JS> visitor, TypedArrayTree tree, GenerationContext<JS> context) {
 		JavaScriptBuilder<JS> b = context.js();
 		List<? extends ExpressionTree> dimensions = tree.dimensions;
-		JS typeName = b.name(tree.jsTypeName);
 		JS js;
-		if (tree.typeDim == dimensions.size()) {
+		if (tree.typeDim == dimensions.size() && tree.jsTypeName != null) {
+			JS typeName = b.name(tree.jsTypeName);
 			// float[] a = new float[3]
 			JS args = visitor.scan(dimensions.get(dimensions.size() - 1), context);
 			js = newPrimitiveArray(b, typeName, args);
