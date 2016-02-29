@@ -155,6 +155,17 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 	public void testForNoInit() {
 		assertCodeContains(Statements20c.class, "for(; i < 10; ++i){}");
 	}
+	
+	@Test
+    public void testForNoCondition() {
+        assertCodeContains(Statements20d.class, "for(var i=0; ; ++i)");
+    }
+
+	@Test
+    public void testForNoUpdate() {
+        assertCodeContains(Statements20e.class, "for(var i=0;i<10;)");
+    }
+
 
 	@Test
 	public void testStaticBlock() {

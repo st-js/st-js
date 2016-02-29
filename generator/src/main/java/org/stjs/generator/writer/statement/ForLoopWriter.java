@@ -49,7 +49,8 @@ public class ForLoopWriter<JS> implements WriterContributor<ForLoopTree, JS> {
 		if (tree.getCondition() != null) {
 			return visitor.scan(tree.getCondition(), p);
 		}
-		return null;
+        // 1) empty
+        return p.js().emptyExpression();
 	}
 
 	private JS update(WriterVisitor<JS> visitor, ForLoopTree tree, GenerationContext<JS> p) {
