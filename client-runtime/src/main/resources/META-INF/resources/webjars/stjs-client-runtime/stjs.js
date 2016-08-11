@@ -831,9 +831,13 @@ stjs.typefy=function(obj, cls){
 			  continue;
 		  }
 		  if (typeof prop == "string")
-			  ret[key] = convert(td, prop);
-		  else if (typeof prop == "object")
-			  ret[key] = stjs.typefy(prop, td);
+			ret[key] = convert(td, prop);
+		  else if (typeof prop == "object") {
+				if (typeof td == "string") {
+					td = eval(td);
+		  		}
+				ret[key] = stjs.typefy(prop, td);
+			}
 	  }
 	  return ret;
 };
