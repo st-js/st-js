@@ -36,7 +36,7 @@ public class ArrayFilterTest {
 	 */
 	@Test(expected = Error.class)
 	public void testFilter02() {
-		new Array<Integer>(10).filter(null);
+		new Array<Integer>(10).filter((Function3)null);
 	}
 
 	/**

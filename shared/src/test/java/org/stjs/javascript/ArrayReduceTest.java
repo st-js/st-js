@@ -19,7 +19,7 @@ public class ArrayReduceTest {
 	 */
 	@Test(expected = Error.class)
 	public void testReduce01() {
-		new Array<Integer>(10).reduce(null);
+		new Array<Integer>(10).reduce((Function4)null);
 	}
 
 	/**

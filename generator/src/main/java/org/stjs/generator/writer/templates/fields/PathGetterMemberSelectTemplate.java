@@ -101,7 +101,7 @@ public class PathGetterMemberSelectTemplate<JS> implements WriterContributor<Mem
 	}
 
 	private JS getPath(WriterVisitor<JS> visitor, TreeWrapper<ExpressionTree, JS> tree, GenerationContext<JS> context) {
-		String path = "";
+		StringBuilder path = new StringBuilder();
 		TreeWrapper<ExpressionTree, JS> currentWrapper = tree;
 		String[] params = null;
 		/**
@@ -118,7 +118,7 @@ public class PathGetterMemberSelectTemplate<JS> implements WriterContributor<Mem
 				break;
 			}
 			params = currentWrapper.getFieldTemplateParameters();
-			path = ident(currentTree) + (path.length() > 0 ? "." + path : "");
+			path = new StringBuilder(ident(currentTree)).append(path.length() > 0 ? "." + path : "");
 
 			if (!(currentTree instanceof MemberSelectTree)) {
 				targetIsPartOfPath = true;
@@ -133,9 +133,10 @@ public class PathGetterMemberSelectTemplate<JS> implements WriterContributor<Mem
 
 		JS target = getTarget(visitor, currentWrapper, currentWrapper.getTree(), context, targetIsPartOfPath);
 
+		// NPE is actually detected by checkTemplateParams
 		String methodName = params[0];
 
-		JS pathString = context.js().string(path);
+		JS pathString = context.js().string(path.toString());
 		List<JS> arguments = Collections.singletonList(pathString);
 
 		return context.js().functionCall(context.js().property(target, methodName), arguments);
