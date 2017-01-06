@@ -88,7 +88,7 @@ public class JSCollections {
 
 	@Template("map")
 	@SuppressWarnings("unchecked")
-	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, K k6, Object... morePairs) {
+	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, Object... morePairs) {
 		Map<K, V> m = new Map<K, V>();
 		m.$put(k1, v1);
 		m.$put(k2, v2);
