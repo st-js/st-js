@@ -22,10 +22,15 @@ import org.stjs.javascript.annotation.ServerSide;
 import org.stjs.javascript.annotation.Template;
 import org.stjs.javascript.functions.Callback1;
 import org.stjs.javascript.functions.Callback3;
+import org.stjs.javascript.functions.Function1;
+import org.stjs.javascript.functions.Function2;
 import org.stjs.javascript.functions.Function3;
 import org.stjs.javascript.functions.Function4;
+import org.stjs.javascript.functions.Functions;
 
 import static org.stjs.javascript.JSGlobal.String;
+import static org.stjs.javascript.functions.Functions.f3;
+import static org.stjs.javascript.functions.Functions.f4;
 
 /**
  * This interface represents an array from Javascript.The value may be typed. The iteration is done on the indexes to have the javascript
@@ -1184,6 +1189,16 @@ public class Array<V> implements Iterable<String> {
 		}
 		return true;
 	}
+	
+    public boolean every(final Function2<? super V, Long, Boolean> callbackfn) {
+        return every(f3(callbackfn));
+    }
+
+    public boolean every(final Function1<? super V, Boolean> callbackfn) {
+        Function3 f3 = f3(callbackfn);
+        return every(f3);
+    }
+
 
 	/**
 	 * Returns <tt>true</tt> if the specified callback function returns <tt>true</tt> for at least one element in this
@@ -1232,6 +1247,11 @@ public class Array<V> implements Iterable<String> {
 		}
 		return false;
 	}
+	
+	public boolean some(Function1<? super V, Boolean> callbackfn) {
+	    Function3 f3 = f3(callbackfn);
+        return some(f3);
+	}
 
 	/**
 	 * Constructs a new <tt>Array</tt>, such that the value at each index in the new <tt>Array</tt> is the result of
@@ -1279,6 +1299,15 @@ public class Array<V> implements Iterable<String> {
 		result.$length(lengthBefore);
 		return result;
 	}
+	
+    public <T> Array<T> map(Function2<? super V, Long, T> callbackfn) {
+        return map(f3(callbackfn));
+    }
+
+    public <T> Array<T> map(Function1<? super V, T> callbackfn) {
+        Function3 x = f3(callbackfn);
+        return map(x);
+    }
 
 	/**
 	 * Constructs a new <tt>Array</tt> containing only the elements of this <tt>Array</tt> for which the specified
@@ -1327,6 +1356,16 @@ public class Array<V> implements Iterable<String> {
 		return result;
 	}
 
+    public Array<V> filter(Function2<? super V, Long, Boolean> callbackfn) {
+        return filter(f3(callbackfn));
+
+    }
+
+    public Array<V> filter(Function1<? super V, Boolean> callbackfn) {
+        Function3<? super V, Long, Array<V>, Boolean> f3 = f3(callbackfn);
+        return filter(f3);
+    }
+
 	/**
 	 * Applies the specified function against an accumulator and each value of this <tt>Array</tt> (from left-to-right)
 	 * as to reduce it to a single value, omitting the first element and using it as initial accumulator value.
@@ -1362,6 +1401,11 @@ public class Array<V> implements Iterable<String> {
 	public V reduce(Function4<V, V, Long, Array<V>, V> callbackfn) {
 		return doReduce(callbackfn, UNSET, true);
 	}
+	
+    public V reduce(Function2<V, V, V> callbackfn) {
+        Function4 f4 = f4(callbackfn);
+        return reduce(f4);
+    }
 
 	/**
 	 * Applies the specified function against an accumulator and each value of this <tt>Array</tt> (from left-to-right)
@@ -1397,6 +1441,12 @@ public class Array<V> implements Iterable<String> {
 	public <T> T reduce(Function4<T, ? super V, Long, ? super Array<V>, T> callbackfn, T initialValue) {
 		return doReduce(callbackfn, initialValue, true);
 	}
+	
+    public <T> T reduce(Function2<T, ? super V, T> callbackfn, T initialValue) {
+        Function4 f4 = f4(callbackfn);
+        return (T) reduce(f4, initialValue);
+    }
+
 
 	/**
 	 * Applies the specified function against an accumulator and each value of this <tt>Array</tt> (from right-to-left)
@@ -1433,6 +1483,11 @@ public class Array<V> implements Iterable<String> {
 	public V reduceRight(Function4<V, V, Long, Array<V>, V> callbackfn) {
 		return doReduce(callbackfn, UNSET, false);
 	}
+	
+    public V reduceRight(Function2<V, V, V> callbackfn) {
+        Function4 f4 = f4(callbackfn);
+        return reduceRight(f4);
+    }
 
 	/**
 	 * Applies the specified function against an accumulator and each value of this <tt>Array</tt> (from right-to-left)
@@ -1468,6 +1523,11 @@ public class Array<V> implements Iterable<String> {
 	public <T> T reduceRight(Function4<T, ? super V, Long, ? super Array<V>, T> callbackfn, T initialValue) {
 		return doReduce(callbackfn, initialValue, false);
 	}
+
+    public <T> T reduceRight(Function2<T, ? super V, T> callbackfn, T initialValue) {
+        Function4 f4 = f4(callbackfn);
+        return (T) reduceRight(f4);
+    }
 
 	private <T> T doReduce(Function4<T, ? super V, Long, ? super Array<V>, T> callbackfn, Object initialValue, boolean isForward){
 		if(callbackfn == null){
