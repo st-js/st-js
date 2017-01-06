@@ -37,7 +37,7 @@ public class ArrayMapTest {
 	 */
 	@Test(expected = Error.class)
 	public void testMap02() {
-		new Array<>(10).map(null);
+		new Array<>(10).map((Function3)null);
 	}
 
 	/**

@@ -20,7 +20,7 @@ public class ArrayEveryTest {
 	@Test(expected = Error.class)
 	public void testEvery00(){
 		Array<Object> arr = $array();
-		arr.every(null);
+		arr.every((Function3)null);
 	}
 
 	@Test

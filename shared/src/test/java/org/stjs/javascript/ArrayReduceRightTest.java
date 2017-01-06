@@ -19,7 +19,7 @@ public class ArrayReduceRightTest {
 	 */
 	@Test(expected = Error.class)
 	public void testReduceRight01() {
-		new Array<Integer>(10).reduceRight(null);
+		new Array<Integer>(10).reduceRight((Function4)null);
 	}
 
 	/**
