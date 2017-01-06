@@ -15,7 +15,21 @@
  */
 package org.stjs.javascript;
 
-import java.util.*;
+import static org.stjs.javascript.JSGlobal.String;
+import static org.stjs.javascript.functions.Functions.f3;
+import static org.stjs.javascript.functions.Functions.f4;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.stjs.javascript.annotation.BrowserCompatibility;
 import org.stjs.javascript.annotation.ServerSide;
@@ -26,11 +40,6 @@ import org.stjs.javascript.functions.Function1;
 import org.stjs.javascript.functions.Function2;
 import org.stjs.javascript.functions.Function3;
 import org.stjs.javascript.functions.Function4;
-import org.stjs.javascript.functions.Functions;
-
-import static org.stjs.javascript.JSGlobal.String;
-import static org.stjs.javascript.functions.Functions.f3;
-import static org.stjs.javascript.functions.Functions.f4;
 
 /**
  * This interface represents an array from Javascript.The value may be typed. The iteration is done on the indexes to have the javascript
@@ -41,8 +50,7 @@ import static org.stjs.javascript.functions.Functions.f4;
  * array.$set(key, value) => array[key]=value It is generally a bad idea for code written in ST-JS to create subclasses of Array, as that will
  * not be translated properly. However, it may be useful for some bridges.
  * <p>
- * The documentation of this class is mostly adapted from the ECMAScript 5.1 Specification:
- * http://www.ecma-international.org/ecma-262/5.1/
+ * The documentation of this class is mostly adapted from the ECMAScript 5.1 Specification: http://www.ecma-international.org/ecma-262/5.1/
  * <p>
  * Browser compatibility information comes from: http://kangax.github.io/es5-compat-table
  * @author acraciun, npiguet
@@ -66,8 +74,7 @@ public class Array<V> implements Iterable<String> {
 	/**
 	 * Constructs a new empty <tt>Array</tt> and sets it's <tt>length</tt> property to <tt>len</tt>.
 	 *
-	 * @param len
-	 *            the length of this new array
+	 * @param len the length of this new array
 	 */
 	public Array(Number len) {
 		double signedLen = len.doubleValue();
@@ -79,9 +86,8 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Constructs an Array based on a java.lang.List. This constructor can only be used on server side code. The
-	 * returned array has the same length as the List, and has no unset indices. Indices that are null
-	 * in the List are considered to be set to null in the returned Array.
+	 * Constructs an Array based on a java.lang.List. This constructor can only be used on server side code. The returned array has the same
+	 * length as the List, and has no unset indices. Indices that are null in the List are considered to be set to null in the returned Array.
 	 *
 	 * @param values the list of values to add to this array
 	 * @return a new Array that is equivalent to the specified List
@@ -94,12 +100,10 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Constructs a new <tt>Array</tt> containing all the specified elements in the order in which they appear in the
-	 * argument list. If the specified values contain exactly one element, and that element is a Number, then this
-	 * constructor behaves like <tt>Array(Number)</tt>.
+	 * Constructs a new <tt>Array</tt> containing all the specified elements in the order in which they appear in the argument list. If the
+	 * specified values contain exactly one element, and that element is a Number, then this constructor behaves like <tt>Array(Number)</tt>.
 	 *
-	 * @param values
-	 *            the values to add to this array, in the order in which they appear in the argument list
+	 * @param values the values to add to this array, in the order in which they appear in the argument list
 	 */
 	@SafeVarargs
 	public Array(V... values) {
@@ -117,13 +121,12 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Returns a java.lang.List that corresponds to this Array. This method can only be called from server side code
-	 * and cannot be used in code that is translated to JavaScript.
+	 * Returns a java.lang.List that corresponds to this Array. This method can only be called from server side code and cannot be used in code
+	 * that is translated to JavaScript.
 	 *
 	 * @return a List that corresponds this Array
-	 * @throws IllegalStateException if the Array contains more than Integer.MAX_VALUE elements,
-	 *                               if it contains non-Array elements or
-	 *                               if it has some unset indices (holes)
+	 * @throws IllegalStateException if the Array contains more than Integer.MAX_VALUE elements, if it contains non-Array elements or if it has
+	 *             some unset indices (holes)
 	 */
 	@ServerSide
 	public List<V> toList() {
@@ -133,7 +136,7 @@ public class Array<V> implements Iterable<String> {
 		} else if (this.nonArrayElements.size() > 0) {
 			throw new IllegalStateException("Array contains non-array elements: " + this.nonArrayElements.keySet());
 
-		} else if(this.length != this.setElements){
+		} else if (this.length != this.setElements) {
 			throw new IllegalStateException("Array is sparse");
 		}
 
@@ -145,16 +148,14 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Returns an <tt>Iterator</tt> that allow this <tt>Array</tt> to be used in foreach statements. The returned
-	 * iterator is designed to make Java for-each statements on <tt>Arrays</tt> match the corresponding JavaScript
-	 * for-in statement. As a result, the returned iterator will iterate over the indices of the <tt>Array</tt>
-	 * converted to <tt>String</tt> (the JavaScript behavior) instead of iterating directly over the values (the Java
-	 * behavior).
+	 * Returns an <tt>Iterator</tt> that allow this <tt>Array</tt> to be used in foreach statements. The returned iterator is designed to make
+	 * Java for-each statements on <tt>Arrays</tt> match the corresponding JavaScript for-in statement. As a result, the returned iterator will
+	 * iterate over the indices of the <tt>Array</tt> converted to <tt>String</tt> (the JavaScript behavior) instead of iterating directly over
+	 * the values (the Java behavior).
 	 *
 	 * <p>
-	 * This method is marked as Deprecated because you should never call this method directly in code that will be
-	 * translated to JavaScript; the generated JavaScript code will not work because the prototype of Array in
-	 * JavaScript does not contain any <tt>iterator</tt> method.
+	 * This method is marked as Deprecated because you should never call this method directly in code that will be translated to JavaScript; the
+	 * generated JavaScript code will not work because the prototype of Array in JavaScript does not contain any <tt>iterator</tt> method.
 	 * <p>
 	 * You may safely call this method from a Java runtime if necessary.
 	 */
@@ -195,7 +196,7 @@ public class Array<V> implements Iterable<String> {
 		};
 	}
 
-	private Iterator<Entry<V>> entryIterator(final long actualStart, final long actualEndExcluded, final boolean isForward){
+	private Iterator<Entry<V>> entryIterator(final long actualStart, final long actualEndExcluded, final boolean isForward) {
 		return new Iterator<Entry<V>>() {
 			private ArrayStore<V> prevStore = array;
 			private Long prevKey = 0L;
@@ -221,8 +222,8 @@ public class Array<V> implements Iterable<String> {
 				throw new UnsupportedOperationException();
 			}
 
-			private void updateEntryIterator(){
-				if(prevStore != array){
+			private void updateEntryIterator() {
+				if (prevStore != array) {
 					prevStore = array;
 					iter = array.entryIterator(prevKey + (isForward ? 1 : -1), actualEndExcluded, isForward);
 				}
@@ -231,11 +232,9 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Translated to <tt>array[index]</tt> in JavaScript, returns the element at the specified index in this
-	 * <tt>Array</tt>.
+	 * Translated to <tt>array[index]</tt> in JavaScript, returns the element at the specified index in this <tt>Array</tt>.
 	 *
-	 * @param index
-	 *            the index
+	 * @param index the index
 	 * @return the element a the specified index
 	 */
 	@Template("get")
@@ -244,15 +243,13 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Translated to <tt>array[index]</tt> in JavaScript, returns the element at the specified index in this
-	 * <tt>Array</tt>.
+	 * Translated to <tt>array[index]</tt> in JavaScript, returns the element at the specified index in this <tt>Array</tt>.
 	 *
-	 * @param index
-	 *            the index
+	 * @param index the index
 	 * @return the element a the specified index
 	 */
 	@Template("get")
-	public V $get(long index){
+	public V $get(long index) {
 		if (index < 0) {
 			// index is not an array index, so we'll look into the non-array element values
 			return this.nonArrayElements.get(Long.toString(index));
@@ -263,11 +260,9 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Translated to <tt>array[index]</tt> in JavaScript, returns the element at the specified index in this
-	 * <tt>Array</tt>.
+	 * Translated to <tt>array[index]</tt> in JavaScript, returns the element at the specified index in this <tt>Array</tt>.
 	 *
-	 * @param index
-	 *            the index
+	 * @param index the index
 	 * @return the element a the specified index
 	 */
 	@Template("get")
@@ -298,27 +293,23 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Translated to <tt>array[index] = value</tt> in JavaScript, sets the element at the specified index in this
-	 * <tt>Array</tt> to the specified value.
+	 * Translated to <tt>array[index] = value</tt> in JavaScript, sets the element at the specified index in this <tt>Array</tt> to the specified
+	 * value.
 	 *
-	 * @param index
-	 *            the index
-	 * @param value
-	 *            the value
+	 * @param index the index
+	 * @param value the value
 	 */
 	@Template("set")
 	public void $set(int index, V value) {
-		this.$set((long)index, value);
+		this.$set((long) index, value);
 	}
 
 	/**
-	 * Translated to <tt>array[index] = value</tt> in JavaScript, sets the element at the specified index in this
-	 * <tt>Array</tt> to the specified value.
+	 * Translated to <tt>array[index] = value</tt> in JavaScript, sets the element at the specified index in this <tt>Array</tt> to the specified
+	 * value.
 	 *
-	 * @param index
-	 *            the index
-	 * @param value
-	 *            the value
+	 * @param index the index
+	 * @param value the value
 	 */
 	@Template("set")
 	public void $set(long index, V value) {
@@ -332,13 +323,11 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Translated to <tt>array[index] = value</tt> in JavaScript, sets the element at the specified index in this
-	 * <tt>Array</tt> to the specified value.
+	 * Translated to <tt>array[index] = value</tt> in JavaScript, sets the element at the specified index in this <tt>Array</tt> to the specified
+	 * value.
 	 *
-	 * @param index
-	 *            the index
-	 * @param value
-	 *            the value
+	 * @param index the index
+	 * @param value the value
 	 */
 	@Template("set")
 	public void $set(String index, V value) {
@@ -351,16 +340,14 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Deletes the element at the specified index from this <tt>Array</tt>, leaving an empty hole. Unlike
-	 * <tt>splice()</tt> This method does not affect the length of this <tt>Array</tt>, it only unsets the value at the
-	 * specified index. After <tt>$delete()</tt> is called on an index, that index will not be iterated over any more in
-	 * for-each loops on this <tt>Array</tt>. <tt>$delete()</tt> can also be used to remove non-array elements from this
-	 * <tt>Array</tt> (e.g. <tt>myArray.$delete("foobar")</tt>).
+	 * Deletes the element at the specified index from this <tt>Array</tt>, leaving an empty hole. Unlike <tt>splice()</tt> This method does not
+	 * affect the length of this <tt>Array</tt>, it only unsets the value at the specified index. After <tt>$delete()</tt> is called on an index,
+	 * that index will not be iterated over any more in for-each loops on this <tt>Array</tt>. <tt>$delete()</tt> can also be used to remove
+	 * non-array elements from this <tt>Array</tt> (e.g. <tt>myArray.$delete("foobar")</tt>).
 	 * <p>
 	 * <tt>myArray.$delete(index)</tt> is translated to <tt>delete myArray[index]</tt> in JavaScript.
 	 *
-	 * @param index
-	 *            the index
+	 * @param index the index
 	 * @return true
 	 */
 	@Template("delete")
@@ -375,34 +362,30 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Deletes the element at the specified index from this <tt>Array</tt>, leaving an empty hole. Unlike
-	 * <tt>splice()</tt> This method does not affect the length of this <tt>Array</tt>, it only unsets the value at the
-	 * specified index. After <tt>$delete()</tt> is called on an index, that index will not be iterated over any more in
-	 * for-each loops on this <tt>Array</tt>. <tt>$delete()</tt> can also be used to remove non-array elements from this
-	 * <tt>Array</tt> (e.g. <tt>myArray.$delete("foobar")</tt>)
+	 * Deletes the element at the specified index from this <tt>Array</tt>, leaving an empty hole. Unlike <tt>splice()</tt> This method does not
+	 * affect the length of this <tt>Array</tt>, it only unsets the value at the specified index. After <tt>$delete()</tt> is called on an index,
+	 * that index will not be iterated over any more in for-each loops on this <tt>Array</tt>. <tt>$delete()</tt> can also be used to remove
+	 * non-array elements from this <tt>Array</tt> (e.g. <tt>myArray.$delete("foobar")</tt>)
 	 * <p>
 	 * <tt>myArray.$delete(index)</tt> is translated to <tt>delete myArray[index]</tt> in JavaScript.
 	 *
-	 * @param index
-	 *            the index
+	 * @param index the index
 	 * @return true
 	 */
 	@Template("delete")
 	public boolean $delete(int index) {
-		return this.$delete((long)index);
+		return this.$delete((long) index);
 	}
 
 	/**
-	 * Deletes the element at the specified index from this <tt>Array</tt>, leaving an empty hole. Unlike
-	 * <tt>splice()</tt> This method does not affect the length of this <tt>Array</tt>, it only unsets the value at the
-	 * specified index. After <tt>$delete()</tt> is called on an index, that index will not be iterated over any more in
-	 * for-each loops on this <tt>Array</tt>. <tt>$delete()</tt> can also be used to remove non-array elements from this
-	 * <tt>Array</tt> (e.g. <tt>myArray.$delete("foobar")</tt>)
+	 * Deletes the element at the specified index from this <tt>Array</tt>, leaving an empty hole. Unlike <tt>splice()</tt> This method does not
+	 * affect the length of this <tt>Array</tt>, it only unsets the value at the specified index. After <tt>$delete()</tt> is called on an index,
+	 * that index will not be iterated over any more in for-each loops on this <tt>Array</tt>. <tt>$delete()</tt> can also be used to remove
+	 * non-array elements from this <tt>Array</tt> (e.g. <tt>myArray.$delete("foobar")</tt>)
 	 * <p>
 	 * <tt>myArray.$delete(index)</tt> is translated to <tt>delete myArray[index]</tt> in JavaScript.
 	 *
-	 * @param index
-	 *            the index
+	 * @param index the index
 	 * @return true
 	 */
 	@Template("delete")
@@ -455,8 +438,8 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Translated to <tt>array.length</tt> in JavaScript, returns the length of this <tt>Array</tt>. The returned value
-	 * is always greater than the highest index in this <tt>Array</tt>.
+	 * Translated to <tt>array.length</tt> in JavaScript, returns the length of this <tt>Array</tt>. The returned value is always greater than
+	 * the highest index in this <tt>Array</tt>.
 	 *
 	 * @return the length of this <tt>Array</tt>.
 	 */
@@ -469,12 +452,10 @@ public class Array<V> implements Iterable<String> {
 	 * Translated to <tt>array.length = newLength</tt> in JavaScript, sets the length of this <tt>Array</tt>.
 	 *
 	 * <p>
-	 * Attempting to set the length property of this <tt>Array</tt> to a value that is numerically less than or equal to
-	 * the largest index contained within this <tt>Array</tt> will result in the <tt>Array</tt> being truncated to the
-	 * new length.
+	 * Attempting to set the length property of this <tt>Array</tt> to a value that is numerically less than or equal to the largest index
+	 * contained within this <tt>Array</tt> will result in the <tt>Array</tt> being truncated to the new length.
 	 *
-	 * @param newLength
-	 *            the new length of this <tt>Array</tt>
+	 * @param newLength the new length of this <tt>Array</tt>
 	 */
 	@Template("toProperty")
 	public void $length(int newLength) {
@@ -508,12 +489,10 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Appends all the elements of each of the specified <tt>Arrays</tt> in order to the elements of this <tt>Array</tt>
-	 * . This method does not change the existing arrays, but returns a new array, containing the values of the joined
-	 * arrays.
+	 * Appends all the elements of each of the specified <tt>Arrays</tt> in order to the elements of this <tt>Array</tt> . This method does not
+	 * change the existing arrays, but returns a new array, containing the values of the joined arrays.
 	 *
-	 * @param arrays
-	 *            the <tt>Arrays</tt> to be concatenated to this <tt>Array</tt>
+	 * @param arrays the <tt>Arrays</tt> to be concatenated to this <tt>Array</tt>
 	 * @return a new <tt>Array</tt>, containing all the elements of the joined <tt>Arrays</tt>.
 	 */
 	@SafeVarargs
@@ -546,12 +525,10 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Appends all the specified elements in the order they appear in the arguments list to the elements of this
-	 * <tt>Array</tt>. This method does not change the existing arrays, but returns a new array, containing the values
-	 * of the joined arrays.
+	 * Appends all the specified elements in the order they appear in the arguments list to the elements of this <tt>Array</tt>. This method does
+	 * not change the existing arrays, but returns a new array, containing the values of the joined arrays.
 	 *
-	 * @param values
-	 *            the elements to be concatenated to this <tt>Array</tt>
+	 * @param values the elements to be concatenated to this <tt>Array</tt>
 	 * @return a new <tt>Array</tt>, containing all the elements of the joined <tt>Arrays</tt>.
 	 */
 	@SafeVarargs
@@ -579,8 +556,7 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Searches this <tt>Array</tt> for the specified item, and returns its position. Items are compared for equality
-	 * using the === operator.
+	 * Searches this <tt>Array</tt> for the specified item, and returns its position. Items are compared for equality using the === operator.
 	 *
 	 * <p>
 	 * The search will start at the beginning and end at the end of the <tt>Array</tt>.
@@ -591,8 +567,7 @@ public class Array<V> implements Iterable<String> {
 	 * <p>
 	 * If the item is present more than once, <tt>indexOf</tt> returns the position of the first occurrence.
 	 *
-	 * @param element
-	 *            the item to search for
+	 * @param element the item to search for
 	 * @return the index at which the element was found, -1 if not found
 	 */
 	@BrowserCompatibility("IE:9+")
@@ -601,8 +576,7 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Searches this <tt>Array</tt> for the specified item, and returns its position. Items are compared for equality
-	 * using the === operator.
+	 * Searches this <tt>Array</tt> for the specified item, and returns its position. Items are compared for equality using the === operator.
 	 *
 	 * <p>
 	 * The search will start at the specified position and end the search at the end of the <tt>Array</tt>.
@@ -611,17 +585,15 @@ public class Array<V> implements Iterable<String> {
 	 * Returns -1 if the item is not found.
 	 *
 	 * <p>
-	 * If the specified position is greater than or equal to the length of this <tt>array</tt>, this <tt>Array</tt> is
-	 * not searched and -1 is returned. If <tt>start</tt> is negative, it will be treated as <tt>length+start</tt>. If
-	 * the computed starting element is less than 0, this whole <tt>Array</tt> will be searched.
+	 * If the specified position is greater than or equal to the length of this <tt>array</tt>, this <tt>Array</tt> is not searched and -1 is
+	 * returned. If <tt>start</tt> is negative, it will be treated as <tt>length+start</tt>. If the computed starting element is less than 0,
+	 * this whole <tt>Array</tt> will be searched.
 	 *
 	 * <p>
 	 * If the item is present more than once, <tt>indexOf</tt> method returns the position of the first occurrence.
 	 *
-	 * @param element
-	 *            the item to search for
-	 * @param start
-	 *            where to start the search. Negative values will start at the given position counting from the end
+	 * @param element the item to search for
+	 * @param start where to start the search. Negative values will start at the given position counting from the end
 	 * @return the index at which the element was found, -1 if not found
 	 */
 	@BrowserCompatibility("IE:9+")
@@ -658,8 +630,8 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Converts all of the elements of this <tt>Array</tt> to <tt>Strings</tt>, and concatenates these <tt>Strings</tt>
-	 * using a single comma (",") as a separator.
+	 * Converts all of the elements of this <tt>Array</tt> to <tt>Strings</tt>, and concatenates these <tt>Strings</tt> using a single comma
+	 * (",") as a separator.
 	 *
 	 * <p>
 	 * If this <tt>Array</tt> is empty, the empty string is returned.
@@ -671,8 +643,8 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Converts all of the elements of this <tt>Array</tt> to <tt>Strings</tt>, and concatenates these <tt>Strings</tt>
-	 * using the specified separator.
+	 * Converts all of the elements of this <tt>Array</tt> to <tt>Strings</tt>, and concatenates these <tt>Strings</tt> using the specified
+	 * separator.
 	 *
 	 * <p>
 	 * If this <tt>Array</tt> is empty, the empty string is returned.
@@ -710,11 +682,10 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * The specified elements are appended at the end of this <tt>Array</tt> in the order in which they appear in the
-	 * arguments list and the new length of this <tt>Array</tt> is returned.
+	 * The specified elements are appended at the end of this <tt>Array</tt> in the order in which they appear in the arguments list and the new
+	 * length of this <tt>Array</tt> is returned.
 	 *
-	 * @param values
-	 *            the values to be appended
+	 * @param values the values to be appended
 	 * @return the new length of this <tt>Array</tt>
 	 */
 	@SafeVarargs
@@ -724,8 +695,7 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * The elements of this <tt>Array</tt> are rearranged so as to reverse their order, and this <tt>Array</tt> is
-	 * returned.
+	 * The elements of this <tt>Array</tt> are rearranged so as to reverse their order, and this <tt>Array</tt> is returned.
 	 *
 	 * @return this <tt>Array</tt>
 	 */
@@ -751,8 +721,8 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Returns a new <tt>Array</tt> containing all the elements of this <tt>Array</tt> starting from the given start
-	 * index until the end of this <tt>Array</tt>.
+	 * Returns a new <tt>Array</tt> containing all the elements of this <tt>Array</tt> starting from the given start index until the end of this
+	 * <tt>Array</tt>.
 	 *
 	 * <p>
 	 * If <tt>start</tt> is negative, it is treated as <tt>length+start</tt>.
@@ -760,35 +730,30 @@ public class Array<V> implements Iterable<String> {
 	 * <p>
 	 * If the selection range falls outside of this <tt>array</tt>, an empty <tt>Array</tt> is returned.
 	 *
-	 * @param start
-	 *            the index from which to start the selection. Use negative values to specified an index starting from
-	 *            the end of this <tt>Array</tt>.
-	 * @return a new <tt>Array</tt> containing all the elements of this <tt>Array</tt> starting from the given start
-	 *         index until the end of the <tt>Array</tt>.
+	 * @param start the index from which to start the selection. Use negative values to specified an index starting from the end of this
+	 *            <tt>Array</tt>.
+	 * @return a new <tt>Array</tt> containing all the elements of this <tt>Array</tt> starting from the given start index until the end of the
+	 *         <tt>Array</tt>.
 	 */
 	public Array<V> slice(int start) {
 		return slice(start, this.$length());
 	}
 
 	/**
-	 * Returns a new <tt>Array</tt> containing all the elements of this <tt>Array</tt> starting from the given start
-	 * index and ending at (but not including) the given end index.
+	 * Returns a new <tt>Array</tt> containing all the elements of this <tt>Array</tt> starting from the given start index and ending at (but not
+	 * including) the given end index.
 	 *
 	 * <p>
-	 * If <tt>start</tt> is negative, it is treated as <tt>length+start</tt>. If <tt>end</tt> is negative, it is treated
-	 * as <tt>length+end</tt>.
+	 * If <tt>start</tt> is negative, it is treated as <tt>length+start</tt>. If <tt>end</tt> is negative, it is treated as <tt>length+end</tt>.
 	 *
 	 * <p>
 	 * If the selection range falls outside of this <tt>Array</tt>, an empty <tt>Array</tt> is returned.
 	 *
-	 * @param start
-	 *            the index from which to start the selection. Use negative values to specified an index starting from
-	 *            the end
-	 * @param end
-	 *            the index at which to end the selection (the element at this index is excluded). Use negative values
-	 *            to specified an index starting from the end
-	 * @return a new <tt>Array</tt> containing all the elements of this <tt>Array</tt> starting from the given start
-	 *         index and ending at the given end index
+	 * @param start the index from which to start the selection. Use negative values to specified an index starting from the end
+	 * @param end the index at which to end the selection (the element at this index is excluded). Use negative values to specified an index
+	 *            starting from the end
+	 * @return a new <tt>Array</tt> containing all the elements of this <tt>Array</tt> starting from the given start index and ending at the
+	 *         given end index
 	 */
 	public Array<V> slice(int start, int end) {
 		long actualStart;
@@ -809,17 +774,14 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Deletes the specified number of elements from this <tt>Array</tt> starting at specified start index, and returns
-	 * a new <tt>Array</tt> containing the deleted elements (if any).
+	 * Deletes the specified number of elements from this <tt>Array</tt> starting at specified start index, and returns a new <tt>Array</tt>
+	 * containing the deleted elements (if any).
 	 *
 	 * <p>
 	 * If <tt>start</tt> is negative, it is treated as <tt>length+start</tt>.
 	 *
-	 * @param start
-	 *            the index at which to start deleting elements. Use negative values to specified an index starting from
-	 *            the end
-	 * @param deleteCount
-	 *            the number of elements to be deleted
+	 * @param start the index at which to start deleting elements. Use negative values to specified an index starting from the end
+	 * @param deleteCount the number of elements to be deleted
 	 * @return a new <tt>Array</tt> containing the deleted elements (if any)
 	 */
 	public Array<V> splice(int start, int deleteCount) {
@@ -827,20 +789,15 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Deletes the specified number of elements from this <tt>Array</tt> starting at specified start index, replaces the
-	 * deleted elements with the specified values, and returns a new <tt>Array</tt> containing the deleted elements (if
-	 * any).
+	 * Deletes the specified number of elements from this <tt>Array</tt> starting at specified start index, replaces the deleted elements with
+	 * the specified values, and returns a new <tt>Array</tt> containing the deleted elements (if any).
 	 *
 	 * <p>
 	 * If <tt>start</tt> is negative, it is treated as <tt>length+start</tt>.
 	 *
-	 * @param start
-	 *            the index at which to start deleting elements. Use negative values to specify an index starting from
-	 *            the end.
-	 * @param deleteCount
-	 *            the number of elements to be deleted
-	 * @param values
-	 *            the elements with which the deleted elements must be replaced
+	 * @param start the index at which to start deleting elements. Use negative values to specify an index starting from the end.
+	 * @param deleteCount the number of elements to be deleted
+	 * @param values the elements with which the deleted elements must be replaced
 	 * @return a new <tt>Array</tt> containing the deleted elements (if any)
 	 */
 	@SafeVarargs
@@ -883,16 +840,15 @@ public class Array<V> implements Iterable<String> {
 	 * Sorts the elements of this <tt>Array</tt> using the natural order of their string representations.
 	 *
 	 * <p>
-	 * The sort is not necessarily stable (that is, elements that compare equal do not necessarily remain in their
-	 * original order).
+	 * The sort is not necessarily stable (that is, elements that compare equal do not necessarily remain in their original order).
 	 *
 	 * <p>
 	 * <tt>sort</tt> returns this <tt>Array</tt>.
 	 *
 	 * <p>
-	 * <strong>Note1:</strong> Because non-existent property values always compare greater than undefined property
-	 * values, and undefined always compares greater than any other value, undefined property values always sort to the
-	 * end of the result, followed by non-existent property values.
+	 * <strong>Note1:</strong> Because non-existent property values always compare greater than undefined property values, and undefined always
+	 * compares greater than any other value, undefined property values always sort to the end of the result, followed by non-existent property
+	 * values.
 	 *
 	 * @return this array
 	 */
@@ -904,8 +860,7 @@ public class Array<V> implements Iterable<String> {
 	 * Sorts the elements of this <tt>Array</tt> using the specified SortFunction to determine ordering.
 	 *
 	 * <p>
-	 * The sort is not necessarily stable (that is, elements that compare equal do not necessarily remain in their
-	 * original order).
+	 * The sort is not necessarily stable (that is, elements that compare equal do not necessarily remain in their original order).
 	 *
 	 * <p>
 	 * This methods return this <tt>Array</tt>.
@@ -914,20 +869,19 @@ public class Array<V> implements Iterable<String> {
 	 * If the specified SortFunction is null, then this method is equivalent to <tt>sort()</tt>.
 	 *
 	 * <p>
-	 * If <tt>comparefn</tt> is not a consistent comparison function for the elements of this <tt>Array</tt>, the
-	 * behaviour of sort is implementation-defined.
+	 * If <tt>comparefn</tt> is not a consistent comparison function for the elements of this <tt>Array</tt>, the behaviour of sort is
+	 * implementation-defined.
 	 *
 	 * <p>
-	 * <strong>Note1:</strong> Because non-existent property values always compare greater than undefined property
-	 * values, and undefined always compares greater than any other value, undefined property values always sort to the
-	 * end of the result, followed by non-existent property values.
+	 * <strong>Note1:</strong> Because non-existent property values always compare greater than undefined property values, and undefined always
+	 * compares greater than any other value, undefined property values always sort to the end of the result, followed by non-existent property
+	 * values.
 	 *
-	 * @param comparefn
-	 *            a sort function that can compare elements of this <tt>Array</tt>.
+	 * @param comparefn a sort function that can compare elements of this <tt>Array</tt>.
 	 * @return this <tt>Array</tt>
 	 */
 	public Array<V> sort(SortFunction<? super V> comparefn) {
-		if(comparefn == null) {
+		if (comparefn == null) {
 			this.array.sort(defaultSortComparator());
 		} else {
 			this.array.sort(comparefn);
@@ -935,7 +889,7 @@ public class Array<V> implements Iterable<String> {
 		return this;
 	}
 
-	private SortFunction<V> defaultSortComparator(){
+	private SortFunction<V> defaultSortComparator() {
 		return new SortFunction<V>() {
 			@Override
 			public int $invoke(V a, V b) {
@@ -947,12 +901,10 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Prepends the specified values to the start of this <tt>Array</tt>, such that their order within this
-	 * <tt>Array</tt> is the same as the order in which they appear in the argument list. Returns the new length of this
-	 * <tt>Array</tt>.
+	 * Prepends the specified values to the start of this <tt>Array</tt>, such that their order within this <tt>Array</tt> is the same as the
+	 * order in which they appear in the argument list. Returns the new length of this <tt>Array</tt>.
 	 *
-	 * @param values
-	 *            the values to the prepended to the start of this <tt>Array</tt>
+	 * @param values the values to the prepended to the start of this <tt>Array</tt>
 	 * @return the new length of this <tt>Array</tt>
 	 */
 	@SafeVarargs
@@ -962,26 +914,22 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Calls the specified callback function once for each element present in this <tt>Array</tt>, in ascending order.
-	 * <tt>callbackfn</tt> is called only for elements of this <tt>Array</tt> which actually exist; it is not called for
-	 * missing elements of this <tt>Array</tt>.
+	 * Calls the specified callback function once for each element present in this <tt>Array</tt>, in ascending order. <tt>callbackfn</tt> is
+	 * called only for elements of this <tt>Array</tt> which actually exist; it is not called for missing elements of this <tt>Array</tt>.
 	 *
 	 * <p>
 	 * <tt>callbackfn</tt> is called with the value of the element as its argument.
 	 *
 	 * <p>
-	 * <tt>forEach</tt> does not directly mutate this <tt>Array</tt> but this <tt>Array</tt> may be mutated by the calls
-	 * to <tt>callbackfn</tt>.
+	 * <tt>forEach</tt> does not directly mutate this <tt>Array</tt> but this <tt>Array</tt> may be mutated by the calls to <tt>callbackfn</tt>.
 	 *
 	 * <p>
-	 * The range of elements processed by <tt>forEach</tt> is set before the first call to <tt>callbackfn</tt>. Elements
-	 * which are appended to this <tt>Array</tt> after the call to <tt>forEach</tt> begins will not be visited by
-	 * <tt>callbackfn</tt>. If existing elements of this <tt>Array</tt> are changed, their value as passed to callback
-	 * will be the value at the time <tt>forEach</tt> visits them; elements that are deleted after the call to
-	 * <tt>forEach</tt> begins and before being visited are not visited.
+	 * The range of elements processed by <tt>forEach</tt> is set before the first call to <tt>callbackfn</tt>. Elements which are appended to
+	 * this <tt>Array</tt> after the call to <tt>forEach</tt> begins will not be visited by <tt>callbackfn</tt>. If existing elements of this
+	 * <tt>Array</tt> are changed, their value as passed to callback will be the value at the time <tt>forEach</tt> visits them; elements that
+	 * are deleted after the call to <tt>forEach</tt> begins and before being visited are not visited.
 	 *
-	 * @param callbackfn
-	 *            the callback function to be called for each element
+	 * @param callbackfn the callback function to be called for each element
 	 */
 	@BrowserCompatibility("IE:9+")
 	public void forEach(final Callback1<? super V> callbackfn) {
@@ -994,35 +942,31 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Calls the specified callback function once for each element present in this <tt>Array</tt>, in ascending order.
-	 * <tt>callbackfn</tt> is called only for elements of this <tt>Array</tt> which actually exist; it is not called for
-	 * missing elements of this <tt>Array</tt>.
+	 * Calls the specified callback function once for each element present in this <tt>Array</tt>, in ascending order. <tt>callbackfn</tt> is
+	 * called only for elements of this <tt>Array</tt> which actually exist; it is not called for missing elements of this <tt>Array</tt>.
 	 *
 	 * <p>
-	 * <tt>callbackfn</tt> is called with three arguments: the value of the element, the index of the element, and the
-	 * <tt>Array</tt> being traversed (this <tt>Array</tt>).
+	 * <tt>callbackfn</tt> is called with three arguments: the value of the element, the index of the element, and the <tt>Array</tt> being
+	 * traversed (this <tt>Array</tt>).
 	 *
 	 * <p>
-	 * <tt>forEach</tt> does not directly mutate this <tt>Array</tt> but this <tt>Array</tt> may be mutated by the calls
-	 * to <tt>callbackfn</tt>.
+	 * <tt>forEach</tt> does not directly mutate this <tt>Array</tt> but this <tt>Array</tt> may be mutated by the calls to <tt>callbackfn</tt>.
 	 *
 	 * <p>
-	 * The range of elements processed by <tt>forEach</tt> is set before the first call to <tt>callbackfn</tt>. Elements
-	 * which are appended to this <tt>Array</tt> after the call to <tt>forEach</tt> begins will not be visited by
-	 * <tt>callbackfn</tt>. If existing elements of this <tt>Array</tt> are changed, their value as passed to callback
-	 * will be the value at the time <tt>forEach</tt> visits them; elements that are deleted after the call to
-	 * <tt>forEach</tt> begins and before being visited are not visited.
+	 * The range of elements processed by <tt>forEach</tt> is set before the first call to <tt>callbackfn</tt>. Elements which are appended to
+	 * this <tt>Array</tt> after the call to <tt>forEach</tt> begins will not be visited by <tt>callbackfn</tt>. If existing elements of this
+	 * <tt>Array</tt> are changed, their value as passed to callback will be the value at the time <tt>forEach</tt> visits them; elements that
+	 * are deleted after the call to <tt>forEach</tt> begins and before being visited are not visited.
 	 *
-	 * @param callbackfn
-	 *            the callback function to be called for each element
+	 * @param callbackfn the callback function to be called for each element
 	 */
 	@BrowserCompatibility("IE:9+")
 	public void forEach(Callback3<? super V, Long, ? super Array<V>> callbackfn) {
-		if(callbackfn == null){
+		if (callbackfn == null) {
 			throw new Error("TypeError", "callbackfn is null");
 		}
 		Iterator<Entry<V>> iter = this.entryIterator(0, $length(), true);
-		while(iter.hasNext()){
+		while (iter.hasNext()) {
 			Entry<V> val = iter.next();
 			callbackfn.$invoke(val.value, val.key, this);
 		}
@@ -1051,8 +995,8 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Converts all the elements of this <tt>Array</tt> to their String representation, concatenates them using a comma
-	 * as a separator. Calling this method is equivalent to calling <tt>join()</tt>.
+	 * Converts all the elements of this <tt>Array</tt> to their String representation, concatenates them using a comma as a separator. Calling
+	 * this method is equivalent to calling <tt>join()</tt>.
 	 *
 	 * @return the string representation of the values in this <tt>Array</tt>, separated by a comma.
 	 */
@@ -1062,13 +1006,11 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Converts all the elements of this <tt>Array</tt> to Strings using their toLocaleString method, and concatenate
-	 * the resulting Strings by a separator String that has been derived in an implementation-defined locale-specific
-	 * way. The result of calling this function is intended to be analogous to the result of <tt>toString()</tt>, except
-	 * that the result of this function is intended to be locale-specific.
+	 * Converts all the elements of this <tt>Array</tt> to Strings using their toLocaleString method, and concatenate the resulting Strings by a
+	 * separator String that has been derived in an implementation-defined locale-specific way. The result of calling this function is intended
+	 * to be analogous to the result of <tt>toString()</tt>, except that the result of this function is intended to be locale-specific.
 	 *
-	 * @return a string representation of all the elements in this <tt>Array</tt>, separated by a locale-specific
-	 *         separator
+	 * @return a string representation of all the elements in this <tt>Array</tt>, separated by a locale-specific separator
 	 */
 	public String toLocaleString() {
 		StringBuilder builder = new StringBuilder();
@@ -1085,18 +1027,16 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Searches the elements of this <tt>Array</tt> in descending order for the specified element, and returns the index
-	 * of the last position at which the element was found, or -1 if not found.
+	 * Searches the elements of this <tt>Array</tt> in descending order for the specified element, and returns the index of the last position at
+	 * which the element was found, or -1 if not found.
 	 *
 	 * <p>
 	 * Elements are compared for equality using the <tt>===</tt> operator.
 	 *
 	 * <p>
-	 * If there are multiple occurrences of the specified element in this <tt>Array</tt>, then the largest index among
-	 * occurrences is returned.
+	 * If there are multiple occurrences of the specified element in this <tt>Array</tt>, then the largest index among occurrences is returned.
 	 *
-	 * @param searchElement
-	 *            the element to search for
+	 * @param searchElement the element to search for
 	 * @return the last index where this element is in this <tt>Array</tt>, or -1 if not found
 	 */
 	@BrowserCompatibility("IE:9+")
@@ -1105,25 +1045,21 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Searches the elements of this <tt>Array</tt> in descending order starting at the specified index for the
-	 * specified element, and returns the index of the last index at which the element was found, or -1 if not found.
+	 * Searches the elements of this <tt>Array</tt> in descending order starting at the specified index for the specified element, and returns
+	 * the index of the last index at which the element was found, or -1 if not found.
 	 *
 	 * <p>
 	 * Elements are compared for equality using the === operator.
 	 *
 	 * <p>
-	 * If there are multiple occurrences of the specified element in this <tt>Array</tt>, then the largest index among
-	 * occurrences is returned.
+	 * If there are multiple occurrences of the specified element in this <tt>Array</tt>, then the largest index among occurrences is returned.
 	 *
 	 * <p>
-	 * If <tt>fromIndex</tt> is greater than or equal to the length of this <tt>Array</tt>, the whole array will be
-	 * searched. If <tt>fromIndex</tt> is negative, then it is treated as <tt>length+fromIndex</tt>. If the computed
-	 * index is less than 0, -1 is returned.
+	 * If <tt>fromIndex</tt> is greater than or equal to the length of this <tt>Array</tt>, the whole array will be searched. If
+	 * <tt>fromIndex</tt> is negative, then it is treated as <tt>length+fromIndex</tt>. If the computed index is less than 0, -1 is returned.
 	 *
-	 * @param searchElement
-	 *            The element to search for
-	 * @param fromIndex
-	 *            the index from which to start searching
+	 * @param searchElement The element to search for
+	 * @param fromIndex the index from which to start searching
 	 * @return the last index where this element is in this <tt>Array</tt>, or -1 if not found
 	 */
 	@BrowserCompatibility("IE:9+")
@@ -1141,41 +1077,35 @@ public class Array<V> implements Iterable<String> {
 	}
 
 	/**
-	 * Returns <tt>true</tt> if the specified callback function returns <tt>true</tt> for every element in this
-	 * <tt>Array</tt>.
+	 * Returns <tt>true</tt> if the specified callback function returns <tt>true</tt> for every element in this <tt>Array</tt>.
 	 *
 	 * <p>
-	 * <tt>callbackfn</tt> is called on each element in ascending order until one of the calls returns <tt>false</tt>.
-	 * Once <tt>callbackfn</tt> has returned false for the first time, the search in this <tt>Array</tt> is interrupted,
-	 * <tt>callbackfn</tt> is never called on any more elements and <tt>every</tt> returns <tt>false</tt>. If
-	 * <tt>callbackfn</tt> returned <tt>true</tt> for all the elements, then <tt>every</tt> returns <tt>true</tt>.
-	 * <tt>callbackfn</tt> is called only for elements of this <tt>Array</tt> which actually exist; it is not called for
-	 * missing elements of this <tt>Array</tt>.
+	 * <tt>callbackfn</tt> is called on each element in ascending order until one of the calls returns <tt>false</tt>. Once <tt>callbackfn</tt>
+	 * has returned false for the first time, the search in this <tt>Array</tt> is interrupted, <tt>callbackfn</tt> is never called on any more
+	 * elements and <tt>every</tt> returns <tt>false</tt>. If <tt>callbackfn</tt> returned <tt>true</tt> for all the elements, then
+	 * <tt>every</tt> returns <tt>true</tt>. <tt>callbackfn</tt> is called only for elements of this <tt>Array</tt> which actually exist; it is
+	 * not called for missing elements of this <tt>Array</tt>.
 	 *
 	 * <p>
-	 * <tt>callbackfn</tt> has 3 arguments: the value of the element, the index of the element, and the <tt>Array</tt>
-	 * being traversed (this <tt>Array</tt>).
+	 * <tt>callbackfn</tt> has 3 arguments: the value of the element, the index of the element, and the <tt>Array</tt> being traversed (this
+	 * <tt>Array</tt>).
 	 *
 	 * <p>
-	 * <tt>every</tt> does not directly mutate this <tt>Array</tt>, but this <tt>Array</tt> may be mutated by the calls
-	 * to <tt>callbackfn</tt>.
+	 * <tt>every</tt> does not directly mutate this <tt>Array</tt>, but this <tt>Array</tt> may be mutated by the calls to <tt>callbackfn</tt>.
 	 *
 	 * <p>
-	 * The range of elements processed by <tt>every</tt> is set before the first call to <tt>callbackfn</tt>. Elements
-	 * which are appended to this <tt>Array</tt> after the call to <tt>every</tt> begins will not be visited by
-	 * <tt>callbackfn</tt>. If existing elements of this <tt>Array</tt> are changed, their value as passed to
-	 * <tt>callbackfn</tt> will be the value at the time <tt>every</tt> visits them; elements that are deleted after the
-	 * call to <tt>every</tt> begins and before being visited are not visited. <tt>every</tt> acts like the "for all"
-	 * quantifier in mathematics. In particular, for an empty <tt>Array</tt>, it returns <tt>true</tt>.
+	 * The range of elements processed by <tt>every</tt> is set before the first call to <tt>callbackfn</tt>. Elements which are appended to this
+	 * <tt>Array</tt> after the call to <tt>every</tt> begins will not be visited by <tt>callbackfn</tt>. If existing elements of this
+	 * <tt>Array</tt> are changed, their value as passed to <tt>callbackfn</tt> will be the value at the time <tt>every</tt> visits them;
+	 * elements that are deleted after the call to <tt>every</tt> begins and before being visited are not visited. <tt>every</tt> acts like the
+	 * "for all" quantifier in mathematics. In particular, for an empty <tt>Array</tt>, it returns <tt>true</tt>.
 	 *
-	 * @param callbackfn
-	 *            the callback function to call
-	 * @return <tt>true</tt> if </tt>callbackfn</tt> returns <tt>true</tt> for ALL the elements in this <tt>Array</tt>,
-	 *         <tt>false</tt> if not
+	 * @param callbackfn the callback function to call
+	 * @return <tt>true</tt> if </tt>callbackfn</tt> returns <tt>true</tt> for ALL the elements in this <tt>Array</tt>, <tt>false</tt> if not
 	 */
 	@BrowserCompatibility("IE:9+")
 	public boolean every(Function3<? super V, Long, ? super Array<V>, Boolean> callbackfn) {
-		if(callbackfn == null){
+		if (callbackfn == null) {
 			throw new Error("TypeError", "callbackfn is null");
 		}
 		Iterator<Entry<V>> iter = this.entryIterator(0, this.$length(), true);
@@ -1189,51 +1119,45 @@ public class Array<V> implements Iterable<String> {
 		}
 		return true;
 	}
-	
-    public boolean every(final Function2<? super V, Long, Boolean> callbackfn) {
-        return every(f3(callbackfn));
-    }
 
-    public boolean every(final Function1<? super V, Boolean> callbackfn) {
-        Function3 f3 = f3(callbackfn);
-        return every(f3);
-    }
+	public boolean every(final Function2<? super V, Long, Boolean> callbackfn) {
+		return every(f3(callbackfn));
+	}
 
+	public boolean every(final Function1<? super V, Boolean> callbackfn) {
+		Function3 f3 = f3(callbackfn);
+		return every(f3);
+	}
 
 	/**
-	 * Returns <tt>true</tt> if the specified callback function returns <tt>true</tt> for at least one element in this
-	 * <tt>Array</tt>.
+	 * Returns <tt>true</tt> if the specified callback function returns <tt>true</tt> for at least one element in this <tt>Array</tt>.
 	 *
 	 * <p>
-	 * <tt>some</tt> calls <tt>callbackfn</tt> once for each element present in this <tt>Array</tt>, in ascending order,
-	 * until it finds one where <tt>callbackfn</tt> returns <tt>true</tt>. If such an element is found, <tt>some</tt>
-	 * immediately returns <tt>true</tt>. Otherwise, <tt>some</tt> returns <tt>false</tt>. <tt>callbackfn</tt> is called
-	 * only for elements of this <tt>Array</tt> which actually exist; it is not called for missing elements of this
-	 * <tt>Array</tt>.
+	 * <tt>some</tt> calls <tt>callbackfn</tt> once for each element present in this <tt>Array</tt>, in ascending order, until it finds one where
+	 * <tt>callbackfn</tt> returns <tt>true</tt>. If such an element is found, <tt>some</tt> immediately returns <tt>true</tt>. Otherwise,
+	 * <tt>some</tt> returns <tt>false</tt>. <tt>callbackfn</tt> is called only for elements of this <tt>Array</tt> which actually exist; it is
+	 * not called for missing elements of this <tt>Array</tt>.
 	 *
 	 * <p>
-	 * <tt>callbackfn</tt> has three arguments: the value of the element, the index of the element, and the
-	 * <tt>Array</tt> being traversed (this <tt>Array</tt>).
+	 * <tt>callbackfn</tt> has three arguments: the value of the element, the index of the element, and the <tt>Array</tt> being traversed (this
+	 * <tt>Array</tt>).
 	 *
-	 * <tt>some</tt> does not directly mutate this <tt>Array</tt> but this <tt>Array</tt> may be mutated by the calls to
-	 * <tt>callbackfn</tt>.
+	 * <tt>some</tt> does not directly mutate this <tt>Array</tt> but this <tt>Array</tt> may be mutated by the calls to <tt>callbackfn</tt>.
 	 *
 	 * <p>
-	 * The range of elements processed by <tt>some</tt> is set before the first call to <tt>callbackfn</tt>. Elements
-	 * that are appended to this <tt>Array</tt> after the call to <tt>some</tt> begins will not be visited by
-	 * <tt>callbackfn</tt>. If existing elements of this <tt>Array</tt> are changed, their value as passed to
-	 * <tt>callbackfn</tt> will be the value at the time that <tt>some</tt> visits them; elements that are deleted after
-	 * the call to <tt>some</tt> begins and before being visited are not visited. <tt>some</tt> acts like the "exists"
-	 * quantifier in mathematics. In particular, for an empty <tt>Array</tt>, it returns <tt>false</tt>.
+	 * The range of elements processed by <tt>some</tt> is set before the first call to <tt>callbackfn</tt>. Elements that are appended to this
+	 * <tt>Array</tt> after the call to <tt>some</tt> begins will not be visited by <tt>callbackfn</tt>. If existing elements of this
+	 * <tt>Array</tt> are changed, their value as passed to <tt>callbackfn</tt> will be the value at the time that <tt>some</tt> visits them;
+	 * elements that are deleted after the call to <tt>some</tt> begins and before being visited are not visited. <tt>some</tt> acts like the
+	 * "exists" quantifier in mathematics. In particular, for an empty <tt>Array</tt>, it returns <tt>false</tt>.
 	 *
-	 * @param callbackfn
-	 *            the callback function to call
-	 * @return <tt>true</tt> if <tt>callbackfn</tt> returns <tt>true</tt> for at least one element in this
-	 *         <tt>Array</tt>, <tt>false</tt> otherwise
+	 * @param callbackfn the callback function to call
+	 * @return <tt>true</tt> if <tt>callbackfn</tt> returns <tt>true</tt> for at least one element in this <tt>Array</tt>, <tt>false</tt>
+	 *         otherwise
 	 */
 	@BrowserCompatibility("IE:9+")
 	public boolean some(Function3<? super V, Long, ? super Array<V>, Boolean> callbackfn) {
-		if(callbackfn == null){
+		if (callbackfn == null) {
 			throw new Error("TypeError", "callbackfn is null");
 		}
 		Iterator<Entry<V>> iter = this.entryIterator(0, this.$length(), true);
@@ -1247,43 +1171,40 @@ public class Array<V> implements Iterable<String> {
 		}
 		return false;
 	}
-	
+
 	public boolean some(Function1<? super V, Boolean> callbackfn) {
-	    Function3 f3 = f3(callbackfn);
-        return some(f3);
+		Function3 f3 = f3(callbackfn);
+		return some(f3);
 	}
 
 	/**
-	 * Constructs a new <tt>Array</tt>, such that the value at each index in the new <tt>Array</tt> is the result of
-	 * calling the specified callback function on the value at the corresponding index in this <tt>Array</tt>.
+	 * Constructs a new <tt>Array</tt>, such that the value at each index in the new <tt>Array</tt> is the result of calling the specified
+	 * callback function on the value at the corresponding index in this <tt>Array</tt>.
 	 *
 	 * <p>
-	 * <tt>map</tt> calls <tt>callbackfn</tt> once for each element in this <tt>Array</tt>, in ascending order, and
-	 * constructs a new <tt>Array</tt> from the results. <tt>callbackfn</tt> is called only for elements of the array
-	 * which actually exist; it is not called for missing elements of this <tt>Array</tt>.
+	 * <tt>map</tt> calls <tt>callbackfn</tt> once for each element in this <tt>Array</tt>, in ascending order, and constructs a new
+	 * <tt>Array</tt> from the results. <tt>callbackfn</tt> is called only for elements of the array which actually exist; it is not called for
+	 * missing elements of this <tt>Array</tt>.
 	 *
 	 * <p>
-	 * <tt>callbackfn</tt> has three arguments: the value of the element, the index of the element, and the
-	 * <tt>Array</tt> being traversed (this <tt>Array</tt>).
+	 * <tt>callbackfn</tt> has three arguments: the value of the element, the index of the element, and the <tt>Array</tt> being traversed (this
+	 * <tt>Array</tt>).
 	 *
 	 * <p>
-	 * <tt>map</tt> does not directly mutate this <tt>Array</tt> but this <tt>Array</tt> may be mutated by the calls to
-	 * <tt>callbackfn</tt>.
+	 * <tt>map</tt> does not directly mutate this <tt>Array</tt> but this <tt>Array</tt> may be mutated by the calls to <tt>callbackfn</tt>.
 	 *
 	 * <p>
-	 * The range of elements processed by <tt>map</tt> is set before the first call to <tt>callbackfn</tt>. Elements
-	 * which are appended to this <tt>Array</tt> after the call to <tt>map</tt> begins will not be visited by
-	 * <tt>callbackfn</tt>. If existing elements of this <tt>Array</tt> are changed, their value as passed to
-	 * <tt>callbackfn</tt> will be the value at the time <tt>map</tt> visits them; elements that are deleted after the
-	 * call to <tt>map</tt> begins and before being visited are not visited.
+	 * The range of elements processed by <tt>map</tt> is set before the first call to <tt>callbackfn</tt>. Elements which are appended to this
+	 * <tt>Array</tt> after the call to <tt>map</tt> begins will not be visited by <tt>callbackfn</tt>. If existing elements of this
+	 * <tt>Array</tt> are changed, their value as passed to <tt>callbackfn</tt> will be the value at the time <tt>map</tt> visits them; elements
+	 * that are deleted after the call to <tt>map</tt> begins and before being visited are not visited.
 	 *
-	 * @param callbackfn
-	 *            the callback used to create the elements of the new array
+	 * @param callbackfn the callback used to create the elements of the new array
 	 * @return a new <tt>Array</tt> containing new elements as returned by the specified callback function
 	 */
 	@BrowserCompatibility("IE:9+")
 	public <T> Array<T> map(Function3<? super V, Long, ? super Array<V>, T> callbackfn) {
-		if(callbackfn == null){
+		if (callbackfn == null) {
 			throw new Error("TypeError", "callbackfn is null");
 		}
 		int lengthBefore = this.$length();
@@ -1299,49 +1220,45 @@ public class Array<V> implements Iterable<String> {
 		result.$length(lengthBefore);
 		return result;
 	}
-	
-    public <T> Array<T> map(Function2<? super V, Long, T> callbackfn) {
-        return map(f3(callbackfn));
-    }
 
-    public <T> Array<T> map(Function1<? super V, T> callbackfn) {
-        Function3 x = f3(callbackfn);
-        return map(x);
-    }
+	public <T> Array<T> map(Function2<? super V, Long, T> callbackfn) {
+		return map(f3(callbackfn));
+	}
+
+	public <T> Array<T> map(Function1<? super V, T> callbackfn) {
+		Function3 x = f3(callbackfn);
+		return map(x);
+	}
 
 	/**
-	 * Constructs a new <tt>Array</tt> containing only the elements of this <tt>Array</tt> for which the specified
-	 * callback function returns <tt>true</tt>.
+	 * Constructs a new <tt>Array</tt> containing only the elements of this <tt>Array</tt> for which the specified callback function returns
+	 * <tt>true</tt>.
 	 *
 	 * <p>
-	 * <tt>filter</tt> calls <tt>callbackfn</tt> once for each element in this <tt>Array</tt>, in ascending order, and
-	 * constructs a new <tt>Array</tt> of all the values for which <tt>callbackfn</tt> returns <tt>true</tt>.
-	 * <tt>callbackfn</tt> is called only for elements of this <tt>Array</tt> which actually exist; it is not called for
-	 * missing elements of this <tt>Array</tt>.
+	 * <tt>filter</tt> calls <tt>callbackfn</tt> once for each element in this <tt>Array</tt>, in ascending order, and constructs a new
+	 * <tt>Array</tt> of all the values for which <tt>callbackfn</tt> returns <tt>true</tt>. <tt>callbackfn</tt> is called only for elements of
+	 * this <tt>Array</tt> which actually exist; it is not called for missing elements of this <tt>Array</tt>.
 	 *
 	 * <p>
-	 * <tt>callbackfn</tt> has three arguments: the value of the element, the index of the element, and the
-	 * <tt>Array</tt> being traversed (this <tt>Array</tt>).
+	 * <tt>callbackfn</tt> has three arguments: the value of the element, the index of the element, and the <tt>Array</tt> being traversed (this
+	 * <tt>Array</tt>).
 	 *
 	 * <p>
-	 * <tt>filter</tt> does not directly mutate this <tt>Array</tt>, but this <tt>Array</tt> may be mutated by the calls
-	 * to <tt>callbackfn</tt>.
+	 * <tt>filter</tt> does not directly mutate this <tt>Array</tt>, but this <tt>Array</tt> may be mutated by the calls to <tt>callbackfn</tt>.
 	 *
 	 * <p>
-	 * The range of elements processed by <tt>filter</tt> is set before the first call to <tt>callbackfn</tt>. Elements
-	 * which are appended to this <tt>Array</tt> after the call to <tt>filter</tt> begins will not be visited by
-	 * <tt>callbackfn</tt>. If existing elements of this <tt>Array</tt> are changed their value as passed to
-	 * <tt>callbackfn</tt> will be the value at the time <tt>filter</tt> visits them; elements that are deleted after
-	 * the call to <tt>filter</tt> begins and before being visited are not visited.
+	 * The range of elements processed by <tt>filter</tt> is set before the first call to <tt>callbackfn</tt>. Elements which are appended to
+	 * this <tt>Array</tt> after the call to <tt>filter</tt> begins will not be visited by <tt>callbackfn</tt>. If existing elements of this
+	 * <tt>Array</tt> are changed their value as passed to <tt>callbackfn</tt> will be the value at the time <tt>filter</tt> visits them;
+	 * elements that are deleted after the call to <tt>filter</tt> begins and before being visited are not visited.
 	 *
-	 * @param callbackfn
-	 *            the callback function used to decide if an element should be appended to the new <tt>Array</tt>
-	 * @return a new <tt>Array</tt> containing only the elements of this <tt>Array</tt> for which the specified callback
-	 *         function returns <tt>true</tt>.
+	 * @param callbackfn the callback function used to decide if an element should be appended to the new <tt>Array</tt>
+	 * @return a new <tt>Array</tt> containing only the elements of this <tt>Array</tt> for which the specified callback function returns
+	 *         <tt>true</tt>.
 	 */
 	@BrowserCompatibility("IE:9+")
 	public Array<V> filter(Function3<? super V, Long, ? super Array<V>, Boolean> callbackfn) {
-		if(callbackfn == null){
+		if (callbackfn == null) {
 			throw new Error("TypeError", "callbackfn is null");
 		}
 		Iterator<Entry<V>> iter = this.entryIterator(0, this.$length(), true);
@@ -1349,174 +1266,157 @@ public class Array<V> implements Iterable<String> {
 		while (iter.hasNext()) {
 			Entry<V> entry = iter.next();
 			boolean selected = callbackfn.$invoke(entry.value, entry.key, this);
-			if(selected){
+			if (selected) {
 				result.push(entry.value);
 			}
 		}
 		return result;
 	}
 
-    public Array<V> filter(Function2<? super V, Long, Boolean> callbackfn) {
-        return filter(f3(callbackfn));
+	public Array<V> filter(Function2<? super V, Long, Boolean> callbackfn) {
+		return filter(f3(callbackfn));
 
-    }
+	}
 
-    public Array<V> filter(Function1<? super V, Boolean> callbackfn) {
-        Function3<? super V, Long, Array<V>, Boolean> f3 = f3(callbackfn);
-        return filter(f3);
-    }
+	public Array<V> filter(Function1<? super V, Boolean> callbackfn) {
+		Function3<? super V, Long, Array<V>, Boolean> f3 = f3(callbackfn);
+		return filter(f3);
+	}
 
 	/**
-	 * Applies the specified function against an accumulator and each value of this <tt>Array</tt> (from left-to-right)
-	 * as to reduce it to a single value, omitting the first element and using it as initial accumulator value.
+	 * Applies the specified function against an accumulator and each value of this <tt>Array</tt> (from left-to-right) as to reduce it to a
+	 * single value, omitting the first element and using it as initial accumulator value.
 	 *
 	 * <p>
-	 * <tt>reduce</tt> calls the callback, as a function, once for each element present in this <tt>Array</tt> except
-	 * for the first one, in ascending order.
+	 * <tt>reduce</tt> calls the callback, as a function, once for each element present in this <tt>Array</tt> except for the first one, in
+	 * ascending order.
 	 *
 	 * <p>
-	 * <tt>callbackfn</tt> has four arguments: the <tt>previousValue</tt> (or value from the previous call to
-	 * <tt>callbackfn</tt>), the <tt>currentValue</tt> (value of the current element), the <tt>currentIndex</tt>, and
-	 * the <tt>Array</tt> being traversed (this <tt>Array</tt>). The first time that callback is called (that is, on the
-	 * second element element of this <tt>array</tt>) <tt>previousValue</tt> will be equal to the first value in this
-	 * <tt>Array</tt> and <tt>currentValue</tt> will be equal to the second. It is a TypeError if this <tt>Array</tt>
-	 * contains no elements.
+	 * <tt>callbackfn</tt> has four arguments: the <tt>previousValue</tt> (or value from the previous call to <tt>callbackfn</tt>), the
+	 * <tt>currentValue</tt> (value of the current element), the <tt>currentIndex</tt>, and the <tt>Array</tt> being traversed (this
+	 * <tt>Array</tt>). The first time that callback is called (that is, on the second element element of this <tt>array</tt>)
+	 * <tt>previousValue</tt> will be equal to the first value in this <tt>Array</tt> and <tt>currentValue</tt> will be equal to the second. It
+	 * is a TypeError if this <tt>Array</tt> contains no elements.
 	 *
 	 * <p>
-	 * <tt>reduce</tt> does not directly mutate this <tt>Array</tt> but this <tt>Array</tt> may be mutated by the calls
-	 * to <tt>callbackfn</tt>.
+	 * <tt>reduce</tt> does not directly mutate this <tt>Array</tt> but this <tt>Array</tt> may be mutated by the calls to <tt>callbackfn</tt>.
 	 *
 	 * <p>
-	 * The range of elements processed by <tt>reduce</tt> is set before the first call to <tt>callbackfn</tt>. Elements
-	 * that are appended to this <tt>Array</tt> after the call to <tt>reduce</tt> begins will not be visited by
-	 * <tt>callbackfn</tt>. If existing elements of this <tt>Array</tt> are changed, their value as passed to
-	 * <tt>callbackfn</tt> will be the value at the time <tt>reduce</tt> visits them; elements that are deleted after
-	 * the call to <tt>reduce</tt> begins and before being visited are not visited.
+	 * The range of elements processed by <tt>reduce</tt> is set before the first call to <tt>callbackfn</tt>. Elements that are appended to this
+	 * <tt>Array</tt> after the call to <tt>reduce</tt> begins will not be visited by <tt>callbackfn</tt>. If existing elements of this
+	 * <tt>Array</tt> are changed, their value as passed to <tt>callbackfn</tt> will be the value at the time <tt>reduce</tt> visits them;
+	 * elements that are deleted after the call to <tt>reduce</tt> begins and before being visited are not visited.
 	 *
-	 * @param callbackfn
-	 *            the function used to reduce the array to a single value
+	 * @param callbackfn the function used to reduce the array to a single value
 	 * @return a single value derived from calling the callback function on all the elements of this <tt>Array</tt>
 	 */
 	@BrowserCompatibility("IE:9+, Safari:4+, Opera:10.50+")
 	public V reduce(Function4<V, V, Long, Array<V>, V> callbackfn) {
 		return doReduce(callbackfn, UNSET, true);
 	}
-	
-    public V reduce(Function2<V, V, V> callbackfn) {
-        Function4 f4 = f4(callbackfn);
-        return reduce(f4);
-    }
+
+	public V reduce(Function2<V, V, V> callbackfn) {
+		Function4<V, V, Long, Array<V>, V> f4 = f4(callbackfn);
+		return reduce(f4);
+	}
 
 	/**
-	 * Applies the specified function against an accumulator and each value of this <tt>Array</tt> (from left-to-right)
-	 * as to reduce it to a single value.
+	 * Applies the specified function against an accumulator and each value of this <tt>Array</tt> (from left-to-right) as to reduce it to a
+	 * single value.
 	 *
 	 * <p>
-	 * <tt>reduce</tt> calls the callback, as a function, once for each element present in this <tt>Array</tt>, in
-	 * ascending order.
+	 * <tt>reduce</tt> calls the callback, as a function, once for each element present in this <tt>Array</tt>, in ascending order.
 	 *
 	 * <p>
-	 * <tt>callbackfn</tt> has four arguments: the <tt>previousValue</tt> (or value from the previous call to
-	 * <tt>callbackfn</tt>), the <tt>currentValue</tt> (value of the current element), the <tt>currentIndex</tt>, and
-	 * the <tt>Array</tt> being traversed (this <tt>Array</tt>). The first time that callback is called
-	 * <tt>previousValue</tt> will be equal to <tt>initialValue</tt> and <tt>currentValue</tt> will be equal to the
-	 * first value in this <tt>Array</tt>.
+	 * <tt>callbackfn</tt> has four arguments: the <tt>previousValue</tt> (or value from the previous call to <tt>callbackfn</tt>), the
+	 * <tt>currentValue</tt> (value of the current element), the <tt>currentIndex</tt>, and the <tt>Array</tt> being traversed (this
+	 * <tt>Array</tt>). The first time that callback is called <tt>previousValue</tt> will be equal to <tt>initialValue</tt> and
+	 * <tt>currentValue</tt> will be equal to the first value in this <tt>Array</tt>.
 	 *
 	 * <p>
-	 * <tt>reduce</tt> does not directly mutate this <tt>Array</tt> but this <tt>Array</tt> may be mutated by the calls
-	 * to <tt>callbackfn</tt>.
+	 * <tt>reduce</tt> does not directly mutate this <tt>Array</tt> but this <tt>Array</tt> may be mutated by the calls to <tt>callbackfn</tt>.
 	 *
 	 * <p>
-	 * The range of elements processed by <tt>reduce</tt> is set before the first call to <tt>callbackfn</tt>. Elements
-	 * that are appended to this <tt>Array</tt> after the call to <tt>reduce</tt> begins will not be visited by
-	 * <tt>callbackfn</tt>. If existing elements of this <tt>Array</tt> are changed, their value as passed to
-	 * <tt>callbackfn</tt> will be the value at the time <tt>reduce</tt> visits them; elements that are deleted after
-	 * the call to <tt>reduce</tt> begins and before being visited are not visited.
+	 * The range of elements processed by <tt>reduce</tt> is set before the first call to <tt>callbackfn</tt>. Elements that are appended to this
+	 * <tt>Array</tt> after the call to <tt>reduce</tt> begins will not be visited by <tt>callbackfn</tt>. If existing elements of this
+	 * <tt>Array</tt> are changed, their value as passed to <tt>callbackfn</tt> will be the value at the time <tt>reduce</tt> visits them;
+	 * elements that are deleted after the call to <tt>reduce</tt> begins and before being visited are not visited.
 	 *
-	 * @param callbackfn
-	 *            the function used to reduce this <tt>Array</tt> to a single value
+	 * @param callbackfn the function used to reduce this <tt>Array</tt> to a single value
 	 * @return a single value derived from calling the callback function on all the elements of this <tt>Array</tt>
 	 */
 	@BrowserCompatibility("IE:9+, Safari:4+, Opera:10.50+")
 	public <T> T reduce(Function4<T, ? super V, Long, ? super Array<V>, T> callbackfn, T initialValue) {
 		return doReduce(callbackfn, initialValue, true);
 	}
-	
-    public <T> T reduce(Function2<T, ? super V, T> callbackfn, T initialValue) {
-        Function4 f4 = f4(callbackfn);
-        return (T) reduce(f4, initialValue);
-    }
 
+	public <T> T reduce(Function2<T, ? super V, T> callbackfn, T initialValue) {
+		Function4<T, ? super V, Long, Array<V>, T> f4 = f4(callbackfn);
+		return reduce(f4, initialValue);
+	}
 
 	/**
-	 * Applies the specified function against an accumulator and each value of this <tt>Array</tt> (from right-to-left)
-	 * as to reduce it to a single value, omitting the first element and using it as initial accumulator value.
+	 * Applies the specified function against an accumulator and each value of this <tt>Array</tt> (from right-to-left) as to reduce it to a
+	 * single value, omitting the first element and using it as initial accumulator value.
 	 *
 	 * <p>
-	 * <tt>reduceRight</tt> calls the callback, as a function, once for each element present in this <tt>Array</tt>
-	 * except for the first one, in descending order.
+	 * <tt>reduceRight</tt> calls the callback, as a function, once for each element present in this <tt>Array</tt> except for the first one, in
+	 * descending order.
 	 *
 	 * <p>
-	 * <tt>callbackfn</tt> has four arguments: the <tt>previousValue</tt> (or value from the previous call to
-	 * <tt>callbackfn</tt>), the <tt>currentValue</tt> (value of the current element), the <tt>currentIndex</tt>, and
-	 * the <tt>Array</tt> being traversed (this <tt>Array</tt>). The first time that callback is called (that is, on the
-	 * second-to-last element element of this <tt>array</tt>) <tt>previousValue</tt> will be equal to the last value in
-	 * this <tt>Array</tt> and <tt>currentValue</tt> will be equal to the second-to-last. It is a TypeError if this
-	 * <tt>Array</tt> contains no elements.
+	 * <tt>callbackfn</tt> has four arguments: the <tt>previousValue</tt> (or value from the previous call to <tt>callbackfn</tt>), the
+	 * <tt>currentValue</tt> (value of the current element), the <tt>currentIndex</tt>, and the <tt>Array</tt> being traversed (this
+	 * <tt>Array</tt>). The first time that callback is called (that is, on the second-to-last element element of this <tt>array</tt>)
+	 * <tt>previousValue</tt> will be equal to the last value in this <tt>Array</tt> and <tt>currentValue</tt> will be equal to the
+	 * second-to-last. It is a TypeError if this <tt>Array</tt> contains no elements.
 	 *
 	 * <p>
-	 * <tt>reduceRight</tt> does not directly mutate this <tt>Array</tt> but this <tt>Array</tt> may be mutated by the
-	 * calls to <tt>callbackfn</tt>.
+	 * <tt>reduceRight</tt> does not directly mutate this <tt>Array</tt> but this <tt>Array</tt> may be mutated by the calls to
+	 * <tt>callbackfn</tt>.
 	 *
 	 * <p>
-	 * The range of elements processed by <tt>reduceRight</tt> is set before the first call to <tt>callbackfn</tt>.
-	 * Elements that are appended to this <tt>Array</tt> after the call to <tt>reduceRight</tt> begins will not be
-	 * visited by <tt>callbackfn</tt>. If existing elements of this <tt>Array</tt> are changed, their value as passed to
-	 * <tt>callbackfn</tt> will be the value at the time <tt>reduceRight</tt> visits them; elements that are deleted
-	 * after the call to <tt>reduceRight</tt> begins and before being visited are not visited.
+	 * The range of elements processed by <tt>reduceRight</tt> is set before the first call to <tt>callbackfn</tt>. Elements that are appended to
+	 * this <tt>Array</tt> after the call to <tt>reduceRight</tt> begins will not be visited by <tt>callbackfn</tt>. If existing elements of this
+	 * <tt>Array</tt> are changed, their value as passed to <tt>callbackfn</tt> will be the value at the time <tt>reduceRight</tt> visits them;
+	 * elements that are deleted after the call to <tt>reduceRight</tt> begins and before being visited are not visited.
 	 *
-	 * @param callbackfn
-	 *            the function used to reduce the array to a single value
+	 * @param callbackfn the function used to reduce the array to a single value
 	 * @return a single value derived from calling the callback function on all the elements of this <tt>Array</tt>
 	 */
 	@BrowserCompatibility("IE:9+, Safari:4+, Opera:10.50+")
 	public V reduceRight(Function4<V, V, Long, Array<V>, V> callbackfn) {
 		return doReduce(callbackfn, UNSET, false);
 	}
-	
-    public V reduceRight(Function2<V, V, V> callbackfn) {
-        Function4 f4 = f4(callbackfn);
-        return reduceRight(f4);
-    }
+
+	public V reduceRight(Function2<V, V, V> callbackfn) {
+		Function4<V, V, Long, Array<V>, V> f4 = f4(callbackfn);
+		return reduceRight(f4);
+	}
 
 	/**
-	 * Applies the specified function against an accumulator and each value of this <tt>Array</tt> (from right-to-left)
-	 * as to reduce it to a single value.
+	 * Applies the specified function against an accumulator and each value of this <tt>Array</tt> (from right-to-left) as to reduce it to a
+	 * single value.
 	 *
 	 * <p>
-	 * <tt>reduceRight</tt> calls the callback, as a function, once for each element present in this <tt>Array</tt>, in
-	 * descending order.
+	 * <tt>reduceRight</tt> calls the callback, as a function, once for each element present in this <tt>Array</tt>, in descending order.
 	 *
 	 * <p>
-	 * <tt>callbackfn</tt> has four arguments: the <tt>previousValue</tt> (or value from the previous call to
-	 * <tt>callbackfn</tt>), the <tt>currentValue</tt> (value of the current element), the <tt>currentIndex</tt>, and
-	 * the <tt>Array</tt> being traversed (this <tt>Array</tt>). The first time that callback is called
-	 * <tt>previousValue</tt> will be equal to <tt>initialValue</tt> and <tt>currentValue</tt> will be equal to the last
-	 * value in this <tt>Array</tt>.
+	 * <tt>callbackfn</tt> has four arguments: the <tt>previousValue</tt> (or value from the previous call to <tt>callbackfn</tt>), the
+	 * <tt>currentValue</tt> (value of the current element), the <tt>currentIndex</tt>, and the <tt>Array</tt> being traversed (this
+	 * <tt>Array</tt>). The first time that callback is called <tt>previousValue</tt> will be equal to <tt>initialValue</tt> and
+	 * <tt>currentValue</tt> will be equal to the last value in this <tt>Array</tt>.
 	 *
 	 * <p>
-	 * <tt>reduceRight</tt> does not directly mutate this <tt>Array</tt> but this <tt>Array</tt> may be mutated by the
-	 * calls to <tt>callbackfn</tt>.
+	 * <tt>reduceRight</tt> does not directly mutate this <tt>Array</tt> but this <tt>Array</tt> may be mutated by the calls to
+	 * <tt>callbackfn</tt>.
 	 *
 	 * <p>
-	 * The range of elements processed by <tt>reduceRight</tt> is set before the first call to <tt>callbackfn</tt>.
-	 * Elements that are appended to this <tt>Array</tt> after the call to <tt>reduceRight</tt> begins will not be
-	 * visited by <tt>callbackfn</tt>. If existing elements of this <tt>Array</tt> are changed, their value as passed to
-	 * <tt>callbackfn</tt> will be the value at the time <tt>reduceRight</tt> visits them; elements that are deleted
-	 * after the call to <tt>reduceRight</tt> begins and before being visited are not visited.
+	 * The range of elements processed by <tt>reduceRight</tt> is set before the first call to <tt>callbackfn</tt>. Elements that are appended to
+	 * this <tt>Array</tt> after the call to <tt>reduceRight</tt> begins will not be visited by <tt>callbackfn</tt>. If existing elements of this
+	 * <tt>Array</tt> are changed, their value as passed to <tt>callbackfn</tt> will be the value at the time <tt>reduceRight</tt> visits them;
+	 * elements that are deleted after the call to <tt>reduceRight</tt> begins and before being visited are not visited.
 	 *
-	 * @param callbackfn
-	 *            the function used to reduce this <tt>Array</tt> to a single value
+	 * @param callbackfn the function used to reduce this <tt>Array</tt> to a single value
 	 * @return a single value derived from calling the callback function on all the elements of this <tt>Array</tt>
 	 */
 	@BrowserCompatibility("IE:9+, Safari:4+, Opera:10.50+")
@@ -1524,39 +1424,39 @@ public class Array<V> implements Iterable<String> {
 		return doReduce(callbackfn, initialValue, false);
 	}
 
-    public <T> T reduceRight(Function2<T, ? super V, T> callbackfn, T initialValue) {
-        Function4 f4 = f4(callbackfn);
-        return (T) reduceRight(f4);
-    }
+	public <T> T reduceRight(Function2<T, ? super V, T> callbackfn, T initialValue) {
+		Function4 f4 = f4(callbackfn);
+		return (T) reduceRight(f4);
+	}
 
-	private <T> T doReduce(Function4<T, ? super V, Long, ? super Array<V>, T> callbackfn, Object initialValue, boolean isForward){
-		if(callbackfn == null){
+	private <T> T doReduce(Function4<T, ? super V, Long, ? super Array<V>, T> callbackfn, Object initialValue, boolean isForward) {
+		if (callbackfn == null) {
 			throw new Error("TypeError", "callbackfn is null");
 		}
 
 		Iterator<Entry<V>> iter;
-		if(isForward) {
+		if (isForward) {
 			iter = this.entryIterator(0, this.$length(), true);
 		} else {
 			iter = this.entryIterator(this.$length(), -1, false);
 		}
 
 		T accumulator;
-		if(initialValue == UNSET){
+		if (initialValue == UNSET) {
 			// when initialValue is UNSET (the parameter was not specified)
 			// then the types T and V are the same.
-			if(!iter.hasNext()){
+			if (!iter.hasNext()) {
 				throw new Error("TypeError", "Array is empty and initialValue was not provided");
 			}
 			@SuppressWarnings("unchecked")
-			T temp = (T)iter.next().value;
+			T temp = (T) iter.next().value;
 			accumulator = temp;
 
 		} else {
 			// when initialValue is set (ie: not UNSET, the parameter was specified, but may be null)
 			// then the type of initialValue is T
 			@SuppressWarnings("unchecked")
-			T temp = (T)initialValue;
+			T temp = (T) initialValue;
 			accumulator = temp;
 		}
 
@@ -1573,7 +1473,7 @@ public class Array<V> implements Iterable<String> {
 	 * @param o the object to check
 	 * @return true if the object is an Array, false if not
 	 */
-	public static boolean isArray(Object o){
+	public static boolean isArray(Object o) {
 		return o instanceof Array;
 	}
 
@@ -1627,8 +1527,8 @@ public class Array<V> implements Iterable<String> {
 	private final class PackedArrayStore<E> extends ArrayStore<E> {
 
 		/**
-		 * We can't use <E> instead of <Object> here, because we must be able to make a difference between elements set
-		 * to null, and unset elements (represented by UNSET).
+		 * We can't use <E> instead of <Object> here, because we must be able to make a difference between elements set to null, and unset
+		 * elements (represented by UNSET).
 		 */
 		private ArrayList<Object> elements;
 
@@ -1653,7 +1553,7 @@ public class Array<V> implements Iterable<String> {
 				// between both types of ArrayStore
 				return true;
 			}
-			if (newElementCount == 0 || (newLength / newElementCount) >= 6) {
+			if (newElementCount == 0 || newLength / newElementCount >= 6) {
 				// if we have more than 5/6 unset elements, we're better off with SparseArrayStore
 				// thresholds between the two ArrayStore types don't match: see length condition
 				return false;
@@ -1709,23 +1609,23 @@ public class Array<V> implements Iterable<String> {
 		@Override
 		public void sort(final SortFunction<? super E> comparefn) {
 			// This comparator implements the SortCompare algorithm in section 15.4.4.11 of the ECMA-262 Specification
-			Comparator<Object> comparator = new Comparator<Object>(){
+			Comparator<Object> comparator = new Comparator<Object>() {
 				@Override
 				@SuppressWarnings("unchecked")
 				public int compare(Object x, Object y) {
-					if(x == UNSET && y == UNSET){
+					if (x == UNSET && y == UNSET) {
 						return 0;
 					}
-					if(x == UNSET){
+					if (x == UNSET) {
 						return 1;
 					}
-					if(y == UNSET){
+					if (y == UNSET) {
 						return -1;
 					}
 
 					// In Java we don't have undefined values, so we skip steps 10 through 12
 
-					return comparefn.$invoke((E)x, (E)y);
+					return comparefn.$invoke((E) x, (E) y);
 				}
 			};
 
@@ -1886,7 +1786,7 @@ public class Array<V> implements Iterable<String> {
 				// between both types of ArrayStore
 				return false;
 			}
-			if ((newLength / newElementCount) < 3) {
+			if (newLength / newElementCount < 3) {
 				// if we have less than 2/3 empty elements, we're better off with PackedArrayStore.
 				// thresholds between the two ArrayStore types don't match: see length condition
 				return false;
@@ -1933,14 +1833,14 @@ public class Array<V> implements Iterable<String> {
 			long lenght = $length();
 			Set<Long> indices = new HashSet<>(this.elements.keySet()); // new instance to avoid concurrent modification
 			Set<Long> alreadySwitched = new HashSet<>();
-			for(Long index : indices){
-				if(alreadySwitched.contains(index)){
+			for (Long index : indices) {
+				if (alreadySwitched.contains(index)) {
 					continue;
 				}
 
 				E value = this.elements.get(index);
 				long newIndex = length - 1 - index;
-				if(this.elements.containsKey(newIndex)){
+				if (this.elements.containsKey(newIndex)) {
 					// there is already an element at this index, we must exchange both values
 					// and record the one at that location as already switched
 					E temp = this.elements.get(newIndex);
@@ -1959,7 +1859,7 @@ public class Array<V> implements Iterable<String> {
 		@Override
 		public void sort(final SortFunction<? super E> comparefn) {
 			ArrayList<E> values = new ArrayList<>(this.elements.values());
-			Comparator<E> comparator = new Comparator<E>(){
+			Comparator<E> comparator = new Comparator<E>() {
 				@Override
 				public int compare(E x, E y) {
 					// We do not have to worry about unset/undefined values, because they are not
@@ -1970,8 +1870,8 @@ public class Array<V> implements Iterable<String> {
 			Collections.sort(values, comparator);
 
 			this.elements.clear(); // don't create a new instance, so we don't disrupt any iterators or submaps.
-			for(int i = 0; i < values.size(); i ++){
-				this.elements.put((long)i, values.get(i));
+			for (int i = 0; i < values.size(); i++) {
+				this.elements.put((long) i, values.get(i));
 			}
 		}
 
@@ -1987,7 +1887,7 @@ public class Array<V> implements Iterable<String> {
 
 				private long lastProduced;
 				{
-					if(isForward){
+					if (isForward) {
 						lastProduced = actualStart - 1;
 					} else {
 						lastProduced = actualStart + 1;
@@ -1996,7 +1896,7 @@ public class Array<V> implements Iterable<String> {
 
 				@Override
 				public boolean hasNext() {
-					if(isForward){
+					if (isForward) {
 						Long nextKey = elements.higherKey(lastProduced);
 						return nextKey != null && nextKey < actualEndExcluded;
 					}
@@ -2007,7 +1907,7 @@ public class Array<V> implements Iterable<String> {
 				@Override
 				public Entry<E> next() {
 					Long nextKey;
-					if(isForward){
+					if (isForward) {
 						nextKey = elements.higherKey(lastProduced);
 					} else {
 						nextKey = elements.lowerKey(lastProduced);
