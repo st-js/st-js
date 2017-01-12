@@ -1,9 +1,11 @@
 package org.stjs.generator.writer.inlineObjects;
 
 import org.stjs.javascript.annotation.STJSBridge;
+import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.annotation.Template;
 
 @STJSBridge
+@SyntheticType
 public class BridgePojo {
 
 	@Template("toProperty")
