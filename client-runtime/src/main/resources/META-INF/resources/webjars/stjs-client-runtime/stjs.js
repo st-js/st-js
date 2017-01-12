@@ -288,6 +288,18 @@ stjs.copyInexistentProps=function(from, to){
 	return to;
 };
 
+//wrap the varags method into another method that unwraps the parameters nicely.
+stjs.varargs = function(func, varargsIndex){
+    return function(){
+        // unpack all the arguments that are before the start of the varags
+        // pack all of the varags into a nice Array
+        var args = Array.prototype.slice.call(arguments, 0, varargsIndex);
+        args.push(Array.prototype.slice.call(arguments, varargsIndex));
+        // now invoke the generated method
+        return func.apply(this, args);
+    };
+};
+
 stjs.extend=function(_constructor, _super, _implements, _initializer, _typeDescription, _annotations){
 	if(typeof(_typeDescription) !== "object"){
 		// stjs 1.3+ always passes an non-null object to _typeDescription => The code calling stjs.extend

@@ -15,12 +15,10 @@ import com.sun.source.tree.VariableTree;
 public class MethodVarArgParamCheck implements CheckContributor<MethodTree> {
 
 	private void checkVarArg(MethodTree tree, VariableTree param, GenerationContext<Void> context) {
-		if (!param.getName().toString().equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
-			context.addError(param, "You can only have a vararg parameter that has to be called 'arguments'");
-
-		}
-		if (tree.getParameters().size() != 1) {
-			context.addError(tree, "You can only have a vararg parameter that has to be called 'arguments'");
+		if (param.getName().toString().equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
+			if (tree.getParameters().size() != 1) {
+				context.addError(tree, "'arguments' parameter has to be the only parameter of the method");
+			}
 		}
 	}
 

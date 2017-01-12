@@ -1,6 +1,7 @@
 package org.stjs.generator.writer.declaration;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.lang.model.element.Element;
@@ -86,6 +87,16 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		return true;
 	}
 
+	private int getVarArgs(MethodTree method) {
+		for (int i = 0; i < method.getParameters().size(); ++i) {
+			VariableTree param = method.getParameters().get(i);
+			if (InternalUtils.isVarArg(param) && !param.getName().toString().equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, MethodTree tree, GenerationContext<JS> context) {
 		TreeWrapper<MethodTree, JS> tw = context.getCurrentWrapper();
@@ -101,6 +112,11 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		String name = getAnonymousTypeConstructorName(tree, context);
 
 		JS decl = context.js().function(name, params, body);
+		int varArgsIndex = getVarArgs(tree);
+		if (varArgsIndex >= 0) {
+			JS varArgsWrapper = context.js().property(context.js().name("stjs"), "varargs");
+			decl = context.js().functionCall(varArgsWrapper, Arrays.asList(decl, context.js().number(2)));
+		}
 
 		// add the constructor.<name> or prototype.<name> if needed
 		if (!JavaNodes.isConstructor(tree) && !isMethodOfJavascriptFunction(context.getCurrentWrapper())) {
