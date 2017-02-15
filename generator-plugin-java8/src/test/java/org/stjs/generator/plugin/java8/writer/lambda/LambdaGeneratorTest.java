@@ -44,7 +44,7 @@ public class LambdaGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testLambaAccessMethodOuterScopeExecute() {
-		assertEquals(4, ((Number)execute(Lambda6b.class)).intValue());
+		assertEquals(4, ((Number) execute(Lambda6b.class)).intValue());
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
@@ -103,4 +103,10 @@ public class LambdaGeneratorTest extends AbstractStjsTest {
 		double n = executeAndReturnNumber(Lambda14.class);
 		assertEquals(15.0, n, 0);
 	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testOneMethodInterfaceNonLambda() {
+		generate(Lambda15.class);
+	}
+
 }
