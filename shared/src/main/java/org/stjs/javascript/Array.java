@@ -45,7 +45,7 @@ import org.stjs.javascript.functions.Function4;
  * This interface represents an array from Javascript.The value may be typed. The iteration is done on the indexes to have the javascript
  * equivalent of <br>
  * <b>for(var key in array)</b> <br>
- * The methods are prefixed with $ to let the generator know that is should generate braket access instead, i.e <br>
+ * The methods are prefixed with $ to let the generator know that is should generate bracket access instead, i.e <br>
  * array.$get(key) => array[key] <br>
  * array.$set(key, value) => array[key]=value It is generally a bad idea for code written in ST-JS to create subclasses of Array, as that will
  * not be translated properly. However, it may be useful for some bridges.
