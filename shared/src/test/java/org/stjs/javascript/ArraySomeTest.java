@@ -18,7 +18,7 @@ public class ArraySomeTest {
 	@Test(expected = Error.class)
 	public void testSome00() {
 		Array<Object> arr = $array();
-		arr.some(null);
+		arr.some((Function3)null);
 	}
 
 	/**

@@ -1,8 +1,8 @@
 package org.stjs.generator.writer.inlineObjects;
 
 import org.junit.Test;
-import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.utils.AbstractStjsTest;
 
 public class InlineObjectsGeneratorTest extends AbstractStjsTest {
 	@Test
@@ -15,8 +15,7 @@ public class InlineObjectsGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(InlineObjects1a.class, "o = {}");
 	}
 
-	@Test(
-			expected = JavascriptFileGenerationException.class)
+	@Test(expected = JavascriptFileGenerationException.class)
 	public void testInlineObjectAndOtherStatements() {
 		// other statements cannot be put inside the initializing blocks
 		generate(InlineObjects2.class);
@@ -42,28 +41,32 @@ public class InlineObjectsGeneratorTest extends AbstractStjsTest {
 	}
 
 	@Test
-	public void testAssignmentWithToPropertyTemplate(){
+	public void testAssignmentWithToPropertyTemplate() {
 		assertCodeContains(InlineObjects6.class, "o={x:\"hello\",x:12}");
 	}
 
-
 	@Test(expected = JavascriptFileGenerationException.class)
-	public void testAssignmentWithToPropertyTemplateGetter(){
+	public void testAssignmentWithToPropertyTemplateGetter() {
 		generate(InlineObjects7.class);
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
-	public void testAssignmentWithToPropertyTemplateOnAnotherType(){
+	public void testAssignmentWithToPropertyTemplateOnAnotherType() {
 		generate(InlineObjects8.class);
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
-	public void testAssignmentThatLooksLikeToPropertyTemplateButIsnt(){
+	public void testAssignmentThatLooksLikeToPropertyTemplateButIsnt() {
 		generate(InlineObjects9.class);
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
-	public void testAssignmentThatLooksLikeToPropertyTemplateButIsnt2(){
+	public void testAssignmentThatLooksLikeToPropertyTemplateButIsnt2() {
 		generate(InlineObjects10.class);
+	}
+
+	@Test(expected = JavascriptFileGenerationException.class)
+	public void testDoNotAllowNonSyntheticTypesForInline() {
+		generate(InlineObjects11.class);
 	}
 }

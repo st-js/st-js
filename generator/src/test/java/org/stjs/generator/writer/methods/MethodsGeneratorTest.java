@@ -1,8 +1,8 @@
 package org.stjs.generator.writer.methods;
 
 import org.junit.Test;
-import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.utils.AbstractStjsTest;
 
 public class MethodsGeneratorTest extends AbstractStjsTest {
 	@Test
@@ -59,18 +59,6 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testAdapterForStatic() {
 		assertCodeContains(Methods14.class, "var x = (String).fromCharCode(65,66,67)");
-	}
-
-	@Test(expected = JavascriptFileGenerationException.class)
-	public void testVarArgsMethod1() {
-		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
-		generate(Methods9.class);
-	}
-
-	@Test(expected = JavascriptFileGenerationException.class)
-	public void testVarArgsMethod2() {
-		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
-		generate(Methods10.class);
 	}
 
 	@Test

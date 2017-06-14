@@ -64,26 +64,33 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 	private JS getObjectInitializer(WriterVisitor<JS> visitor, TreeWrapper<NewClassTree, JS> tw) {
 		NewClassTree tree = tw.getTree();
 		BlockTree initBlock = getDoubleBracesBlock(tree);
-		if (initBlock == null && !tw.child(tree.getIdentifier()).isSyntheticType()) {
+		if (initBlock == null) {
+			if (tw.child(tree.getIdentifier()).isSyntheticType()) {
+				// the syntethic type will generate {} constructor even without the initBlock
+				return tw.getContext().js().object(new ArrayList<NameValue<JS>>());
+			}
+			return null;
+		}
+
+		if (!tw.child(tree.getIdentifier()).isSyntheticType()) {
+			// this is already checked and not allowed
 			return null;
 		}
 
 		List<NameValue<JS>> props = new ArrayList<NameValue<JS>>();
-		if (initBlock != null) {
-			for (StatementTree stmt : initBlock.getStatements()) {
-				// check the right type of statements x=y is done in NewClassObjectInitCheck
-				ExpressionTree expr = ((ExpressionStatementTree) stmt).getExpression();
+		for (StatementTree stmt : initBlock.getStatements()) {
+			// check the right type of statements x=y is done in NewClassObjectInitCheck
+			ExpressionTree expr = ((ExpressionStatementTree) stmt).getExpression();
 
-				if (expr instanceof AssignmentTree) {
-					AssignmentTree assign = (AssignmentTree) expr;
-					props.add(NameValue.of(getPropertyName(assign.getVariable()), visitor.scan(assign.getExpression(), tw.getContext())));
+			if (expr instanceof AssignmentTree) {
+				AssignmentTree assign = (AssignmentTree) expr;
+				props.add(NameValue.of(getPropertyName(assign.getVariable()), visitor.scan(assign.getExpression(), tw.getContext())));
 
-				} else {
-					MethodInvocationTree meth = (MethodInvocationTree) expr;
-					String propertyName = MethodToPropertyTemplate.getPropertyName(meth);
-					JS value = visitor.scan(meth.getArguments().get(0), tw.getContext());
-					props.add(NameValue.of(propertyName, value));
-				}
+			} else {
+				MethodInvocationTree meth = (MethodInvocationTree) expr;
+				String propertyName = MethodToPropertyTemplate.getPropertyName(meth);
+				JS value = visitor.scan(meth.getArguments().get(0), tw.getContext());
+				props.add(NameValue.of(propertyName, value));
 			}
 		}
 		return tw.getContext().js().object(props);

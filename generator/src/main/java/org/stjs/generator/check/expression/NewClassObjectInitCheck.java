@@ -89,6 +89,10 @@ public class NewClassObjectInitCheck implements CheckContributor<NewClassTree> {
 		}
 
 		if (initBlock != null) {
+			if (!tw.child(tree.getIdentifier()).isSyntheticType()) {
+				context.addError(tree, "Object creation block (double braces {{}}) is only allowed for classes annotated with @SyntheticType");
+			}
+
 			for (StatementTree stmt : initBlock.getStatements()) {
 				checkStatement(stmt, context);
 			}
