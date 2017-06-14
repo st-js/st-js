@@ -520,7 +520,7 @@ public class Date {
 	 * @param day the new day of month
 	 */
 	public void setDate(int day) {
-		setField(getCalendar(true), Calendar.DAY_OF_WEEK, day);
+		setField(getCalendar(true), Calendar.DAY_OF_MONTH, day);
 	}
 
 	/**
