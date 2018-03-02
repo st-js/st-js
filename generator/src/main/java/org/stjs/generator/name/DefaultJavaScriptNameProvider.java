@@ -3,7 +3,9 @@ package org.stjs.generator.name;
 import java.util.HashMap;
 import java.util.Map;
 import javax.lang.model.element.Element;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
 
@@ -83,6 +85,29 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 			String fullName = addNameSpace(rootTypeElement, context, name);
 			resolvedTypes.put(type, new TypeInfo(fullName, rootTypeElement));
 			return fullName;
+		}
+		if (type instanceof ArrayType) {
+		    ArrayType atype = (ArrayType) type;
+		    TypeMirror componentType = atype.getComponentType();
+		    TypeKind kind = componentType.getKind();
+		    switch (kind) {
+            case BOOLEAN:
+                return "Int8Array";
+            case BYTE:
+                return "Int8Array";
+            case SHORT:
+                return "Int16Array";
+            case CHAR:
+                return "Uint16Array";
+            case INT:
+                return "Int32Array";
+            case FLOAT:
+                return "Float32Array";
+            case DOUBLE:
+                return "Float64Array";
+            default:
+                return "Array";
+            }
 		}
 		if (type instanceof WildcardType) {
 			// ? extends Type1 super Type2

@@ -82,6 +82,12 @@ public class TypedArrayTest extends AbstractStjsTest {
 		assertCodeContains(generated, "var f = new Float32Array()");
 		assertCodeContains(generated, "var d = new Float64Array()");
 	}
+	
+	@Test
+    public void testPrimitiveArrayFields() throws Exception {
+        String generated = generate(PrimitiveArrayFields.class);
+        assertCodeContains(generated, "bool: \"Int8Array\", b: \"Int8Array\", s: \"Int16Array\", c: \"Uint16Array\", i: \"Int32Array\", f: \"Float32Array\", d: \"Float64Array\", bool2d: \"Array\"");
+    }
 
 	@Test
 	public void testMultiInit() throws Exception {
@@ -116,5 +122,11 @@ public class TypedArrayTest extends AbstractStjsTest {
 		int expected = BooleanArray.method();
 		assertEquals((double) expected, executeAndReturnNumber(BooleanArray.class), 0);
 	}
-
+	
+	@Test
+	public void testInstanceOf() {
+		String generated = generate(ArrayInstanceOf.class);
+		assertCodeContains(generated, "isInstanceOf(o.constructor, Int8Array)");
+		assertEquals(44., executeAndReturnNumber(ArrayInstanceOf.class), 0.01);
+	}
 }
