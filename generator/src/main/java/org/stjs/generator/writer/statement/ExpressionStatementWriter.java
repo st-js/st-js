@@ -20,28 +20,28 @@ public class ExpressionStatementWriter<JS> implements WriterContributor<Expressi
 
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, ExpressionStatementTree tree, GenerationContext<JS> context) {
-        JavaScriptBuilder<JS> js = context.js();
-        ExpressionTree expressionTree = tree.getExpression();
-	    if (Kind.PLUS_ASSIGNMENT.equals(expressionTree.getKind()) && expressionTree instanceof JCAssignOp) {
-            JCAssignOp asgn = (JCAssignOp) expressionTree;
-            JCExpression lhs = asgn.lhs;
-            JCExpression rhs = asgn.rhs;
-            if (TypeKind.CHAR == rhs.type.getKind()) {
-                //handle: 
-                //String s = "a";
-                //s += 'b';
-                JS left = visitor.scan(lhs, context);
-                JS right = visitor.scan(rhs, context);
-                right = js.functionCall(js.property(js.name("String"), "fromCharCode"), asList(right));
-                JS assignment = js.assignment(AssignOperator.PLUS_ASSIGNMENT, left, right);
-                return context.withPosition(tree, js.expressionStatement(assignment));
-            }
-        }
+		JavaScriptBuilder<JS> js = context.js();
+		ExpressionTree expressionTree = tree.getExpression();
+		if (Kind.PLUS_ASSIGNMENT.equals(expressionTree.getKind()) && expressionTree instanceof JCAssignOp) {
+			JCAssignOp asgn = (JCAssignOp) expressionTree;
+			JCExpression lhs = asgn.lhs;
+			JCExpression rhs = asgn.rhs;
+			if (TypeKind.CHAR == rhs.type.getKind()) {
+				// handle:
+				// String s = "a";
+				// s += 'b';
+				JS left = visitor.scan(lhs, context);
+				JS right = visitor.scan(rhs, context);
+				right = js.functionCall(js.property(js.name("String"), "fromCharCode"), asList(right));
+				JS assignment = js.assignment(AssignOperator.PLUS_ASSIGNMENT, left, right);
+				return context.withPosition(tree, js.expressionStatement(assignment));
+			}
+		}
 		JS expression = visitor.scan(expressionTree, context);
 		if (expression == null) {
 			return null;
 		}
-        JS expressionStatement = js.expressionStatement(expression);
-        return context.withPosition(tree, expressionStatement);
+		JS expressionStatement = js.expressionStatement(expression);
+		return context.withPosition(tree, expressionStatement);
 	}
 }
