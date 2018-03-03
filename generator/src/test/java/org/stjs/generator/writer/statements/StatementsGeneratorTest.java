@@ -69,7 +69,7 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testLiterals() {
 		// "abc", "\"", "'", 'a', '\'', 1D, 2f, 1l);
-		assertCodeContains(Statements9.class, "\"abc\", \"\\\"\", \"'\", 'a', '\\'', 1.0, 2.0, 1");
+		assertCodeContains(Statements9.class, "\"abc\", \"\\\"\", \"'\", 'a'.charCodeAt(0), '\\''.charCodeAt(0), 1.0, 2.0, 1");
 	}
 
 	@Test

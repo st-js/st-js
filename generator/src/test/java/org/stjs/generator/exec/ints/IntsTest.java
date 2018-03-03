@@ -80,13 +80,6 @@ public class IntsTest extends AbstractStjsTest {
 	}
 
 	@Test
-	public void testCastCharToShort() {
-		int expected = CharToShort.method(CharToShort.BIG_CHAR);
-		double expectedDouble = (double) expected;
-		assertEquals(expectedDouble, executeAndReturnNumber(CharToShort.class), 0);
-	}
-
-	@Test
 	public void testCastShortToChar() {
 		int expected = ShortToChar.method(ShortToChar.NEG_SHORT);
 		double expectedDouble = (double) expected;
