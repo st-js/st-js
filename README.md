@@ -124,18 +124,18 @@ Are considered equivalent no attempt for Java compatibility is made.
 | long to byte    | `((l)<<24>>24)` | 
 | long to short   | `((l)<<16>>16)` | 
 | long to char    | `((l)&0xfff)`   |
-| long to int     | `var i = l|0`   |
+| long to int     | `var i = l\|0`   |
 | long to float   | `var f = l`     |
 | long to double  | `var d = l`     |
 | float to byte   | `((f)<<24>>24)` | 
 | float to short  | `((f)<<16>>16)` | 
 | float to char   | `((f)&0xfff)`   |
-| float to int    | `var i = f|0`   |
+| float to int    | `var i = f\|0`   |
 | float to long   | `var l = f`     |
 | float to double | `var d = f`     |
 | double to byte  | `((d)<<24>>24)` | 
 | double to short | `((d)<<16>>16)` | 
 | double to char  | `((d)&0xfff)`   |
-| double to int   | `var i = d|0`   |
+| double to int   | `var i = d\|0`   |
 | double to long  | `var l = d`     |
 | double to float | `var f = d`     |
