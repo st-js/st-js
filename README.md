@@ -131,11 +131,11 @@ Are considered equivalent no attempt for Java compatibility is made.
 | float to short  | `((f)<<16>>16)` | 
 | float to char   | `((f)&0xfff)`   |
 | float to int    | `var i = f\|0`   |
-| float to long   | `var l = f`     |
+| float to long   | `var l = stjs.trunc(f)`     |
 | float to double | `var d = f`     |
 | double to byte  | `((d)<<24>>24)` | 
 | double to short | `((d)<<16>>16)` | 
 | double to char  | `((d)&0xfff)`   |
 | double to int   | `var i = d\|0`   |
-| double to long  | `var l = d`     |
+| double to long  | `var l = stjs.trunc(d)`     |
 | double to float | `var f = d`     |
