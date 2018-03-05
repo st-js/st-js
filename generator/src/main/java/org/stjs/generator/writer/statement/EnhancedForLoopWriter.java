@@ -150,17 +150,15 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 		//   }
 		String initialForLoopVariableName = tree.getVariable().getName().toString();
 
-		JS iteratorMethodCall = js.number(0);
-
-		String newIteratorName = "index$" + initialForLoopVariableName;
+		String newIndexName = "index$" + initialForLoopVariableName;
 		String newArrayName = "arr$" + initialForLoopVariableName;
-		JS newArray = js.name(newArrayName);
-		JS index = js.name(newIteratorName);
-		JS init = js.variableDeclaration(false, Arrays.asList(NameValue.of(newIteratorName, iteratorMethodCall), NameValue.of(newArrayName, iterated)));
-		JS condition = js.binary(BinaryOperator.LESS_THAN, Arrays.asList(index, js.property(newArray, "length")));
+		JS tmpArray = js.name(newArrayName);
+		JS index = js.name(newIndexName);
+		JS init = js.variableDeclaration(false, Arrays.asList(NameValue.of(newIndexName, js.number(0)), NameValue.of(newArrayName, iterated)));
+		JS condition = js.binary(BinaryOperator.LESS_THAN, Arrays.asList(index, js.property(tmpArray, "length")));
 		JS update = js.unary(UnaryOperator.POSTFIX_INCREMENT, index);
 
-		JS iteratorNextStatement = js.variableDeclaration(true, initialForLoopVariableName, js.elementGet(newArray, index));
+		JS iteratorNextStatement = js.variableDeclaration(true, initialForLoopVariableName, js.elementGet(tmpArray, index));
 		JS newBody = js.addStatementBeginning(body, iteratorNextStatement);
 
 		return context.withPosition(tree, context.js().forLoop(init, condition, update, newBody));
