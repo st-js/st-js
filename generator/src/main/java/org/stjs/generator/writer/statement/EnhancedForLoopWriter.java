@@ -8,6 +8,7 @@ import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TypesUtils;
 import org.stjs.generator.javascript.BinaryOperator;
 import org.stjs.generator.javascript.JavaScriptBuilder;
+import org.stjs.generator.javascript.NameValue;
 import org.stjs.generator.javascript.UnaryOperator;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
@@ -137,26 +138,29 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 		// Java source code:
 		// ---------------------------------------------
 		//   String[] myStringArray = ...
-		//	 for (String oneOfTheString : myStringArray) {
-		//	   // do whatever you want with 'oneOfTheString'
+		//	 for (String str : myStringArray) {
+		//	   // do whatever you want with 'str'
 		//	 }
 		//
 		// Translated Javascript:
 		// ---------------------------------------------
-		//   for (var index$oneOfTheString = 0; index$oneOfTheString < myStringArray.length; index$oneOfTheString++) {
-		//     var oneOfTheString = myStringArray[index$oneOfTheString];
+		//   for (var index$str = 0, arr$str = myStringArray; index$str < arr$str.length; index$str++) {
+		//     var str = arr$str[index$str];
+		//	   // do whatever you want with 'str'
 		//   }
 		String initialForLoopVariableName = tree.getVariable().getName().toString();
 
 		JS iteratorMethodCall = js.number(0);
 
 		String newIteratorName = "index$" + initialForLoopVariableName;
+		String newArrayName = "arr$" + initialForLoopVariableName;
+		JS newArray = js.name(newArrayName);
 		JS index = js.name(newIteratorName);
-		JS init = js.variableDeclaration(false, newIteratorName, iteratorMethodCall);
-		JS condition = js.binary(BinaryOperator.LESS_THAN, Arrays.asList(index, js.property(iterated, "length")));
+		JS init = js.variableDeclaration(false, Arrays.asList(NameValue.of(newIteratorName, iteratorMethodCall), NameValue.of(newArrayName, iterated)));
+		JS condition = js.binary(BinaryOperator.LESS_THAN, Arrays.asList(index, js.property(newArray, "length")));
 		JS update = js.unary(UnaryOperator.POSTFIX_INCREMENT, index);
 
-		JS iteratorNextStatement = js.variableDeclaration(true, initialForLoopVariableName, js.elementGet(iterated, index));
+		JS iteratorNextStatement = js.variableDeclaration(true, initialForLoopVariableName, js.elementGet(newArray, index));
 		JS newBody = js.addStatementBeginning(body, iteratorNextStatement);
 
 		return context.withPosition(tree, context.js().forLoop(init, condition, update, newBody));

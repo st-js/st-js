@@ -55,16 +55,16 @@ var objarr = [[["hello"], ["world"], []], [[1, 2], [3, 4]], Array.apply(null, Ar
 
 Enhanced for loop over Java arrays will iterate over values instead of keys
 ```java
-String[] arr = {"hello", "world"};
-for(String s : arr) {
+String[] msg = {"hello", "world"};
+for(String s : msg) {
 	console.log(s);
 }
 ```
 
 ```javascript
-var arr = ["hello", "world"];
-for(var index$arr = 0; index$arr < arr.length; index$arr++) {
-	var s = arr[index$arr];
+var msg = ["hello", "world"];
+for(var index$s = 0, arr$s = msg; index$s < arr$s.length; index$s++) {
+	var s = arr$s[index$s];
 	console.log(s);
 }
 ```
