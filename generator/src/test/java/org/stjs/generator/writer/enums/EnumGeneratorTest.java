@@ -1,5 +1,7 @@
 package org.stjs.generator.writer.enums;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
@@ -31,8 +33,8 @@ public class EnumGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testEnumValues() {
-		assertCodeContains(Enums6.class, "for(var v in Enums6.Value.values())");
-		assertCodeContains(Enums6.class, "constructor.Value = stjs.enumeration(\"a\", \"b\", \"c\");");
+		String expected = Enums6.main(null);
+		assertEquals(expected, execute(Enums6.class));
 	}
 
 	@Test
