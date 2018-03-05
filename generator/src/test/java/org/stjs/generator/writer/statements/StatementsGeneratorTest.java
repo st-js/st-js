@@ -14,12 +14,6 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 	}
 
 	@Test
-	public void testForEach() {
-		// XXX this is not exactly correct as arg here is the index not the value
-		assertCodeContains(Statements2.class, "for (var arg in args) {");
-	}
-
-	@Test
 	public void testWhile() {
 		assertCodeContains(Statements3.class, "while(i < 5) {");
 	}
