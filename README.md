@@ -59,6 +59,7 @@ String[] arr = {"hello", "world"};
 for(String s : arr) {
 	console.log(s);
 }
+```
 
 ```javascript
 var arr = ["hello", "world"];
