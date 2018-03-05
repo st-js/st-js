@@ -31,4 +31,9 @@ public class ArrayTest extends AbstractStjsTest {
 		assertCodeContains(ObjectMultiInit2.class, expected);
 	}
 
+	@Test
+	public void testEnhancedForLoopArray() throws Exception {
+		String expected = EnhancedForLoopArray.method();
+		assertEquals(expected, execute(EnhancedForLoopArray.class));
+	}
 }

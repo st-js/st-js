@@ -51,6 +51,23 @@ var objarr = [[["hello"], ["world"], []], [[1, 2], [3, 4]], Array.apply(null, Ar
 | `double[]`  | `Float64Array` |
 | `long[]`    | `Array`        |
 
+### Foreach 
+
+Enhanced for loop over Java arrays will iterate over values instead of keys
+```java
+String[] arr = {"hello", "world"};
+for(String s : arr) {
+	console.log(s);
+}
+
+```javascript
+var arr = ["hello", "world"];
+for(var index$arr = 0; index$arr < arr.length; index$arr++) {
+	var s = arr[index$arr];
+	console.log(s);
+}
+```
+
 ### `long`
 
 There is no support for 64bit integer type in JavaScript. Max value for an integer is 2^53-1

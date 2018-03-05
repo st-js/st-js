@@ -8,6 +8,12 @@ import org.stjs.generator.utils.AbstractStjsTest;
 public class TypedArrayTest extends AbstractStjsTest {
 
 	@Test
+	public void testEnhancedForLoopArray() throws Exception {
+		int expected = EnhancedForLoopIntArray.method();
+		assertEquals(expected, executeAndReturnNumber(EnhancedForLoopIntArray.class), 0.01);
+	}
+
+	@Test
 	public void testFloatArray() throws Exception {
 		assertCodeContains(Float32ArrayInit.class, "new Float32Array(1)");
 	}

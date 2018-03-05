@@ -1,10 +1,12 @@
 package org.stjs.generator.writer.statement;
 
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TypesUtils;
+import org.stjs.generator.javascript.BinaryOperator;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.javascript.UnaryOperator;
 import org.stjs.generator.writer.WriterContributor;
@@ -14,6 +16,7 @@ import org.stjs.javascript.Map;
 
 import com.sun.source.tree.EnhancedForLoopTree;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 /**
@@ -70,14 +73,14 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 		JS body = visitor.scan(tree.getStatement(), context);
 
 		TypeMirror iteratedType = InternalUtils.typeOf(tree.getExpression());
-
 		if (TypesUtils.isDeclaredOfName(iteratedType, Array.class.getName())
 				|| TypesUtils.isDeclaredOfName(iteratedType, Map.class.getName())) {
 			return generateForEachInObject(tree, context, iterator, iterated, body);
 
 		} else if (isErasuredClassAssignableFromType(Iterable.class, iteratedType, context)) {
 			return generateForEachWithIterable(tree, context, iterated, body);
-
+		} else if (TypeKind.ARRAY == iteratedType.getKind()) {
+			return generateForWithIndex(tree, context, iterated, body);
 		} else {
 			return context.withPosition(tree, context.js().forInLoop(iterator, iterated, body));
 		}
@@ -123,6 +126,37 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 
 		JS iteratorNextStatement = js.variableDeclaration(true, initialForLoopVariableName,
 			js.functionCall(js.property(forLoopIterator, "next"), Collections.<JS>emptyList()));
+		JS newBody = js.addStatementBeginning(body, iteratorNextStatement);
+
+		return context.withPosition(tree, context.js().forLoop(init, condition, update, newBody));
+	}
+	
+	private JS generateForWithIndex(EnhancedForLoopTree tree, GenerationContext<JS> context, JS iterated, JS body) {
+		JavaScriptBuilder<JS> js = context.js();
+
+		// Java source code:
+		// ---------------------------------------------
+		//   String[] myStringArray = ...
+		//	 for (String oneOfTheString : myStringArray) {
+		//	   // do whatever you want with 'oneOfTheString'
+		//	 }
+		//
+		// Translated Javascript:
+		// ---------------------------------------------
+		//   for (var index$oneOfTheString = 0; index$oneOfTheString < myStringArray.length; index$oneOfTheString++) {
+		//     var oneOfTheString = myStringArray[index$oneOfTheString];
+		//   }
+		String initialForLoopVariableName = tree.getVariable().getName().toString();
+
+		JS iteratorMethodCall = js.number(0);
+
+		String newIteratorName = "index$" + initialForLoopVariableName;
+		JS index = js.name(newIteratorName);
+		JS init = js.variableDeclaration(false, newIteratorName, iteratorMethodCall);
+		JS condition = js.binary(BinaryOperator.LESS_THAN, Arrays.asList(index, js.property(iterated, "length")));
+		JS update = js.unary(UnaryOperator.POSTFIX_INCREMENT, index);
+
+		JS iteratorNextStatement = js.variableDeclaration(true, initialForLoopVariableName, js.elementGet(iterated, index));
 		JS newBody = js.addStatementBeginning(body, iteratorNextStatement);
 
 		return context.withPosition(tree, context.js().forLoop(init, condition, update, newBody));
