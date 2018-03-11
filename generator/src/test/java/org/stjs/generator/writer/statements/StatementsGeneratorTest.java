@@ -14,12 +14,6 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 	}
 
 	@Test
-	public void testForEach() {
-		// XXX this is not exactly correct as arg here is the index not the value
-		assertCodeContains(Statements2.class, "for (var arg in args) {");
-	}
-
-	@Test
 	public void testWhile() {
 		assertCodeContains(Statements3.class, "while(i < 5) {");
 	}
@@ -31,15 +25,12 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(Statements4.class, "default: break");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
 	public void testArray1() {
-		generate(Statements5.class);
+		assertCodeContains(Statements5.class, "new Int32Array([1, 2, 3])");
 	}
 
-	@Test(expected = JavascriptFileGenerationException.class)
 	public void testArray2() {
-		// java array creation is forbidden
-		generate(Statements6.class);
+		assertCodeContains(Statements6.class, "[1, 2, 3]");
 	}
 
 	@Ignore
@@ -72,7 +63,7 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testLiterals() {
 		// "abc", "\"", "'", 'a', '\'', 1D, 2f, 1l);
-		assertCodeContains(Statements9.class, "\"abc\", \"\\\"\", \"'\", 'a', '\\'', 1.0, 2.0, 1");
+		assertCodeContains(Statements9.class, "\"abc\", \"\\\"\", \"'\", 'a'.charCodeAt(0), '\\''.charCodeAt(0), 1.0, 2.0, 1");
 	}
 
 	@Test
@@ -158,6 +149,17 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 	public void testForNoInit() {
 		assertCodeContains(Statements20c.class, "for(; i < 10; ++i){}");
 	}
+	
+	@Test
+    public void testForNoCondition() {
+        assertCodeContains(Statements20d.class, "for(var i=0; ; ++i)");
+    }
+
+	@Test
+    public void testForNoUpdate() {
+        assertCodeContains(Statements20e.class, "for(var i=0;i<10;)");
+    }
+
 
 	@Test
 	public void testStaticBlock() {

@@ -6,9 +6,11 @@ public class Enums6 {
 	}
 
 	@SuppressWarnings("unused")
-	public void main() {
+	public static String main(String[] args) {
+		String result = "";
 		for (Value v : Value.values()) {
-			//
+			result += v.name() + ":" + v.ordinal();
 		}
+		return result;
 	}
 }

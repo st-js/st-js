@@ -3,7 +3,9 @@ package org.stjs.generator.name;
 import java.util.HashMap;
 import java.util.Map;
 import javax.lang.model.element.Element;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
 
@@ -27,9 +29,19 @@ import com.sun.source.util.TreePath;
 public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 	private static final String JAVA_LANG_PACKAGE = "java.lang.";
 	private static final int JAVA_LANG_LENGTH = JAVA_LANG_PACKAGE.length();
-
+	private static final Map<TypeKind, String> JS_ARRAY_TYPES = new HashMap<>();
 	private final Map<String, DependencyType> resolvedRootTypes = new HashMap<String, DependencyType>();
 	private final Map<TypeMirror, TypeInfo> resolvedTypes = new HashMap<TypeMirror, TypeInfo>();
+
+	static {
+		JS_ARRAY_TYPES.put(TypeKind.BOOLEAN, "Int8Array");
+		JS_ARRAY_TYPES.put(TypeKind.BYTE, "Int8Array");
+		JS_ARRAY_TYPES.put(TypeKind.SHORT, "Int16Array");
+		JS_ARRAY_TYPES.put(TypeKind.CHAR, "Uint16Array");
+		JS_ARRAY_TYPES.put(TypeKind.INT, "Int32Array");
+		JS_ARRAY_TYPES.put(TypeKind.FLOAT, "Float32Array");
+		JS_ARRAY_TYPES.put(TypeKind.DOUBLE, "Float64Array");
+	}
 
 	private class TypeInfo {
 		private final String fullName;
@@ -84,12 +96,22 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 			resolvedTypes.put(type, new TypeInfo(fullName, rootTypeElement));
 			return fullName;
 		}
+		if (type instanceof ArrayType) {
+			return handleArrayType((ArrayType) type);
+		}
 		if (type instanceof WildcardType) {
 			// ? extends Type1 super Type2
 			// XXX what to return here !?
 			return "Object";
 		}
 		return type.toString();
+	}
+
+	private static String handleArrayType(ArrayType atype) {
+		TypeMirror componentType = atype.getComponentType();
+		TypeKind kind = componentType.getKind();
+		String jsType = JS_ARRAY_TYPES.get(kind);
+		return jsType == null ? "Array" : jsType;
 	}
 
 	private void typeNotAllowedException(GenerationContext<?> context, String name) {
