@@ -1,6 +1,5 @@
 package org.stjs.command.line;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -10,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -33,35 +33,39 @@ public class CommandLineIntegrationTest {
 		assertNotNull(projectUrl);
 
 		ProcessBuilder pb;
-		if(windows ){
-			pb = new ProcessBuilder(
-					WINDOWS_PATH,
-					new File(projectRoot, "src").getAbsolutePath(),
-					new File(projectRoot, "lib").getAbsolutePath(),
-					OUTPUT_DIR
-			);
+		if (windows) {
+			pb = new ProcessBuilder(WINDOWS_PATH, new File(projectRoot, "src").getAbsolutePath(), new File(projectRoot, "lib").getAbsolutePath(),
+					OUTPUT_DIR);
 		} else {
-			//unix - need to call /bin/sh because the script does not have the execution flags set
-			pb = new ProcessBuilder(
-					"/bin/sh",
-					UNIX_PATH,
-					new File(projectRoot, "src").getAbsolutePath(),
-					new File(projectRoot, "lib").getAbsolutePath(),
-					OUTPUT_DIR
-			);
+			// unix - need to call /bin/sh because the script does not have the execution flags set
+			pb = new ProcessBuilder("/bin/sh", UNIX_PATH, new File(projectRoot, "src").getAbsolutePath(),
+					new File(projectRoot, "lib").getAbsolutePath(), OUTPUT_DIR);
 		}
-					
-		
 
 		try {
 			Process p = pb.start();
-			String errors = CharStreams.toString(new InputStreamReader(p.getErrorStream()));
-			assertEquals("", errors);
+			String errorsAsText = CharStreams.toString(new InputStreamReader(p.getErrorStream()));
+			String[] errors = errorsAsText.split("\\n");
+			for (String error : errors) {
+				if (!skipMessage(error)) {
+					Assert.fail("Found error:" + error);
+				}
+			}
 
 			assertTrue(new File(OUTPUT_DIR, "org/stjs/hello/HelloWorld.js").exists());
 		}
 		catch (IOException e) {
 			throw e;
 		}
+	}
+
+	private boolean skipMessage(String error) {
+		if (error.isEmpty()) {
+			return true;
+		}
+		if (error.contains("JAVA_OPTIONS")) {
+			return true;
+		}
+		return false;
 	}
 }

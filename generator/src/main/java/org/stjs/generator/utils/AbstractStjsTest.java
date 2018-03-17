@@ -215,10 +215,9 @@ public abstract class AbstractStjsTest {
 				.allowedPackage("org.stjs.javascript") //
 				.allowedPackage("org.stjs.generator") //
 				.allowedPackage(clazz.getPackage().getName()) //
-				.generateSourceMap(withSourceMap) //
+				.sourceEncoding("UTF-8").generateSourceMap(withSourceMap) //
 				.stjsClassLoader(classLoader) //
-				.generationFolder(generationFolder)
-				.targetFolder(new File("target", "test-classes"))
+				.generationFolder(generationFolder).targetFolder(new File("target", "test-classes"))
 				.classResolver(new LazyGenerationClassResolver(classLoader, new LazyGenerator() {
 					@Override
 					public ClassWithJavascript generateJavaScript(String className) {
@@ -236,8 +235,7 @@ public abstract class AbstractStjsTest {
 		try {
 			File jsFile = new File(stjsClass.getJavascriptFiles().get(0).getPath());
 			String content = Files.toString(jsFile, Charset.defaultCharset());
-			List<ClassWithJavascript> allDeps =
-					new DependencyCollector().orderAllDependencies(stjsClass);
+			List<ClassWithJavascript> allDeps = new DependencyCollector().orderAllDependencies(stjsClass);
 			for (ClassWithJavascript dep : allDeps) {
 				for (URI js : dep.getJavascriptFiles()) {
 					if (dep instanceof BridgeClass) {
@@ -334,12 +332,12 @@ public abstract class AbstractStjsTest {
 		}
 	}
 
-	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED",
-			justification = "this is for tests only")
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings(
+			value = "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED", justification = "this is for tests only")
 	public ClassLoader buildClassLoader() {
 		File generationPath = new File("target", TEMP_GENERATION_PATH);
 		try {
-			URL[] urls = {generationPath.toURI().toURL()};
+			URL[] urls = { generationPath.toURI().toURL() };
 			return new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
 		}
 		catch (Exception e) {
