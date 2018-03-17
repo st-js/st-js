@@ -99,6 +99,7 @@
 					<configuration>
 						<preparationGoals>clean install</preparationGoals>
 						<autoVersionSubmodules>true</autoVersionSubmodules>
+						<mavenExecutorId>forked-path</mavenExecutorId>
 					</configuration>
 				</plugin>
 			</plugins>
