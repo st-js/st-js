@@ -8,7 +8,6 @@ cache:
 
 jdk:
   - oraclejdk8
-  - oraclejdk7
 
 # Do this in install, as the normal way to do it, would
 # do a `mvn install` here. we want to do it all at once.
