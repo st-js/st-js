@@ -20,9 +20,13 @@ import java.text.DecimalFormat;
 class JSAbstractOperations {
 
 	private static final DecimalFormat PLAIN_INTEGER_FORMAT = new DecimalFormat("#0");
+	/** Constant <code>UINT_MAX_VALUE</code> */
 	public static final BigInteger UINT_MAX_VALUE = new BigInteger("4294967296"); // = 2^32
+	/** Constant <code>UINT_MAX_VALUE_D</code> */
 	public static final Double UINT_MAX_VALUE_D = 4294967296.0; // = 2^32
+	/** Constant <code>SINT_MAX_VALUE</code> */
 	public static final BigInteger SINT_MAX_VALUE = new BigInteger("2147483648"); // = 2^31
+	/** Constant <code>USHORT_MAX_VALUE</code> */
 	public static final BigInteger USHORT_MAX_VALUE = new BigInteger("65536"); // = 2^16
 
 	/**

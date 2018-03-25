@@ -21,7 +21,7 @@ import com.sun.source.util.TreeScanner;
 /**
  * this class checks that you don't use in the same method variables or parameters with the same name as a global scoped
  * field. This is to avoid situations like this one:
- * 
+ *
  * <pre>
  * void m() {
  * 	if (true) {
@@ -30,9 +30,9 @@ import com.sun.source.util.TreeScanner;
  * 	int y = GlobalVars.x;
  * }
  * </pre>
- * 
+ *
  * After generation you'll have:
- * 
+ *
  * <pre>
  * function m() {
  * 	if (true) {
@@ -41,10 +41,11 @@ import com.sun.source.util.TreeScanner;
  * 	var y = x;
  * }
  * </pre>
- * 
+ *
  * The global x will be in fact hidden by the local variable.
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class IdentifierGlobalScopeNameClashCheck implements CheckContributor<IdentifierTree> {
 
@@ -85,6 +86,14 @@ public class IdentifierGlobalScopeNameClashCheck implements CheckContributor<Ide
 		}, null);
 	}
 
+	/**
+	 * <p>checkGlobalScope.</p>
+	 *
+	 * @param tree a {@link com.sun.source.tree.ExpressionTree} object.
+	 * @param name a {@link java.lang.String} object.
+	 * @param context a {@link org.stjs.generator.GenerationContext} object.
+	 * @return a {@link java.lang.Void} object.
+	 */
 	public static Void checkGlobalScope(final ExpressionTree tree, final String name, final GenerationContext<Void> context) {
 		Element fieldElement = TreeUtils.elementFromUse(tree);
 		if (fieldElement == null || fieldElement.getKind() != ElementKind.FIELD) {
@@ -107,6 +116,7 @@ public class IdentifierGlobalScopeNameClashCheck implements CheckContributor<Ide
 		return null;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, IdentifierTree tree, GenerationContext<Void> context) {
 

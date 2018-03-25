@@ -13,27 +13,52 @@ import org.mozilla.javascript.ast.NodeVisitor;
 class CodeFragment extends AstNode {
 	private String code;
 
+	/**
+	 * <p>Constructor for CodeFragment.</p>
+	 */
 	public CodeFragment() {
 		this(0, 0);
 	}
 
+	/**
+	 * <p>Constructor for CodeFragment.</p>
+	 *
+	 * @param pos a int.
+	 */
 	public CodeFragment(int pos) {
 		this(pos, 0);
 	}
 
+	/**
+	 * <p>Constructor for CodeFragment.</p>
+	 *
+	 * @param pos a int.
+	 * @param len a int.
+	 */
 	public CodeFragment(int pos, int len) {
 		super(pos, len);
 		this.type = Token.LAST_TOKEN + 2;
 	}
 
+	/**
+	 * <p>Getter for the field <code>code</code>.</p>
+	 *
+	 * @return a {@link java.lang.String} object.
+	 */
 	public String getCode() {
 		return code;
 	}
 
+	/**
+	 * <p>Setter for the field <code>code</code>.</p>
+	 *
+	 * @param code a {@link java.lang.String} object.
+	 */
 	public void setCode(String code) {
 		this.code = code;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String toSource(int depth) {
 		StringBuilder sb = new StringBuilder();
@@ -44,6 +69,7 @@ class CodeFragment extends AstNode {
 		return sb.toString();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visit(NodeVisitor visitor) {
 		visitor.visit(this);

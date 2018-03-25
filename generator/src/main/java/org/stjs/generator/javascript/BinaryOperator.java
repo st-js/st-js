@@ -9,8 +9,9 @@ import com.sun.source.tree.Tree.Kind;
 
 /**
  * this is the list of the JavaScript operators and how they map on Java AST element Kind and Rhino token IDs
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public enum BinaryOperator {
 	// math
@@ -41,10 +42,20 @@ public enum BinaryOperator {
 		this.javaScript = javaScript;
 	}
 
+	/**
+	 * <p>Getter for the field <code>java</code>.</p>
+	 *
+	 * @return a {@link com.sun.source.tree.Tree.Kind} object.
+	 */
 	public Kind getJava() {
 		return java;
 	}
 
+	/**
+	 * <p>Getter for the field <code>javaScript</code>.</p>
+	 *
+	 * @return a int.
+	 */
 	public int getJavaScript() {
 		return javaScript;
 	}
@@ -58,6 +69,12 @@ public enum BinaryOperator {
 		}
 	}
 
+	/**
+	 * <p>valueOf.</p>
+	 *
+	 * @param javaOperator a {@link com.sun.source.tree.Tree.Kind} object.
+	 * @return a {@link org.stjs.generator.javascript.BinaryOperator} object.
+	 */
 	public static BinaryOperator valueOf(Kind javaOperator) {
 		return BY_JAVA_OPERATOR.get(javaOperator);
 	}

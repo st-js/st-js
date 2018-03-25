@@ -28,7 +28,9 @@ import com.sun.source.tree.VariableTree;
 
 /**
  * checks the a field name or method exists only once in the class and its hierchy
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree> {
 
@@ -120,6 +122,7 @@ public class ClassDuplicateMemberNameCheck implements CheckContributor<ClassTree
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, ClassTree tree, GenerationContext<Void> context) {
 		Multimap<String, Element> names = LinkedListMultimap.create();

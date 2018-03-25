@@ -22,6 +22,12 @@ import org.codehaus.jackson.map.deser.StdDeserializerProvider;
 import org.codehaus.jackson.map.module.SimpleModule;
 import org.stjs.javascript.Date;
 
+/**
+ * <p>STJSModule class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class STJSModule {
 	private static class STJSSimpleModule extends SimpleModule {
 		public STJSSimpleModule(String name, Version version) {
@@ -30,6 +36,11 @@ public class STJSModule {
 		}
 	}
 
+	/**
+	 * <p>getModule.</p>
+	 *
+	 * @return a {@link org.codehaus.jackson.map.Module} object.
+	 */
 	public static Module getModule() {
 		SimpleModule module = new STJSSimpleModule("MyModule", new Version(1, 0, 0, null));
 		module.addSerializer(new JSArraySerializer());
@@ -39,6 +50,11 @@ public class STJSModule {
 		return module;
 	}
 
+	/**
+	 * <p>getDeserializerProvider.</p>
+	 *
+	 * @return a {@link org.codehaus.jackson.map.DeserializerProvider} object.
+	 */
 	public static DeserializerProvider getDeserializerProvider() {
 		StdDeserializerProvider provider = new StdDeserializerProvider();
 		return provider;

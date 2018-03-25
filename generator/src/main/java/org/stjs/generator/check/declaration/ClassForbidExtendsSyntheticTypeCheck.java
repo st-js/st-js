@@ -15,8 +15,9 @@ import com.sun.source.tree.Tree;
  * this checks that a class or interface does not try to extend or implement a
  * {@link org.stjs.javascript.annotation.SyntheticType} as the code for this class does not exist in reality, so the
  * calls to any method of such a type may end up in a runtime error.
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class ClassForbidExtendsSyntheticTypeCheck implements CheckContributor<ClassTree> {
 	private void checkInterface(TreeWrapper<Tree, Void> iface) {
@@ -25,6 +26,7 @@ public class ClassForbidExtendsSyntheticTypeCheck implements CheckContributor<Cl
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, ClassTree tree, GenerationContext<Void> context) {
 		TreeWrapper<ClassTree, Void> tw = context.getCurrentWrapper();

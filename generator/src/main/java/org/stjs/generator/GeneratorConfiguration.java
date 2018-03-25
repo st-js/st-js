@@ -16,6 +16,12 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Set;
 
+/**
+ * <p>GeneratorConfiguration class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class GeneratorConfiguration {
 	private final Collection<String> allowedPackages;
 	private final Set<String> allowedJavaLangClasses;
@@ -46,6 +52,8 @@ public class GeneratorConfiguration {
 	}
 
 	/**
+	 * <p>Getter for the field <code>allowedPackages</code>.</p>
+	 *
 	 * @return the parent packages that contain the classes that can be called from the processed source file. Note that sub-packages of a
 	 *         package from this collection are also allowed. java.lang is implicit
 	 */
@@ -53,42 +61,83 @@ public class GeneratorConfiguration {
 		return allowedPackages;
 	}
 
+	/**
+	 * <p>Getter for the field <code>allowedJavaLangClasses</code>.</p>
+	 *
+	 * @return a {@link java.util.Set} object.
+	 */
 	public Set<String> getAllowedJavaLangClasses() {
 		return allowedJavaLangClasses;
 	}
 
+	/**
+	 * <p>isGenerateArrayHasOwnProperty.</p>
+	 *
+	 * @return a boolean.
+	 */
 	public boolean isGenerateArrayHasOwnProperty() {
 		return generateArrayHasOwnProperty;
 	}
 
+	/**
+	 * <p>isGenerateSourceMap.</p>
+	 *
+	 * @return a boolean.
+	 */
 	public boolean isGenerateSourceMap() {
 		return generateSourceMap;
 	}
 
+	/**
+	 * <p>Getter for the field <code>sourceEncoding</code>.</p>
+	 *
+	 * @return a {@link java.lang.String} object.
+	 */
 	public String getSourceEncoding() {
 		return sourceEncoding;
 	}
 
 	/**
 	 * these are annotations to be generated
-	 * @return
+	 *
+	 * @return a {@link java.util.Set} object.
 	 */
 	public Set<String> getAnnotations() {
 		return annotations;
 	}
 
+	/**
+	 * <p>Getter for the field <code>stjsClassLoader</code>.</p>
+	 *
+	 * @return a {@link java.lang.ClassLoader} object.
+	 */
 	public ClassLoader getStjsClassLoader() {
 		return stjsClassLoader;
 	}
 
+	/**
+	 * <p>Getter for the field <code>generationFolder</code>.</p>
+	 *
+	 * @return a {@link org.stjs.generator.GenerationDirectory} object.
+	 */
 	public GenerationDirectory getGenerationFolder() {
 		return generationFolder;
 	}
 
+	/**
+	 * <p>Getter for the field <code>targetFolder</code>.</p>
+	 *
+	 * @return a {@link java.io.File} object.
+	 */
 	public File getTargetFolder() {
 		return targetFolder;
 	}
 
+	/**
+	 * <p>Getter for the field <code>classResolver</code>.</p>
+	 *
+	 * @return a {@link org.stjs.generator.ClassResolver} object.
+	 */
 	public ClassResolver getClassResolver() {
 		return classResolver;
 	}

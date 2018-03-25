@@ -7,33 +7,39 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.stjs.generator.GenerationDirectory;
 import org.stjs.generator.Generator;
 import org.stjs.generator.GeneratorConstants;
 
 /**
+ * <p>
+ * TestSTJSMojo class.
+ * </p>
  *
- * @goal generate-test
- * @phase process-test-classes
- * @requiresDependencyResolution test
+ * 
  * @author acraciun
- *
+ * @version $Id: $Id
  */
+@Mojo(
+		name = "generate-test", defaultPhase = LifecyclePhase.PROCESS_TEST_CLASSES, requiresDependencyResolution = ResolutionScope.TEST)
 public class TestSTJSMojo extends AbstractSTJSMojo {
 	private static final String MAVEN_TEST_SKIP = "maven.test.skip";
 
 	/**
 	 * The source directories containing the sources to be compiled.
 	 *
-	 * @parameter default-value="${project.testCompileSourceRoots}"
-	 * @required
 	 */
+	@Parameter(
+			defaultValue = "${project.testCompileSourceRoots}", required = true)
 	private List<String> compileSourceRoots;
 
 	/**
@@ -41,52 +47,60 @@ public class TestSTJSMojo extends AbstractSTJSMojo {
 	 * Specify where to place generated source files
 	 * </p>
 	 *
-	 * @parameter default-value="${project.build.directory}/generated-test-js"
 	 */
+	@Parameter(
+			defaultValue = "${project.build.directory}/generated-test-js")
 	private File generatedTestSourcesDirectory;
 
 	/**
-	 * @parameter default-value="${project.build.testOutputDirectory}"
 	 */
+	@Parameter(
+			defaultValue = "${project.build.testOutputDirectory}")
 	private File buildOutputDirectory;
 
+	/** {@inheritDoc} */
 	@Override
 	protected List<String> getCompileSourceRoots() {
 		return compileSourceRoots;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	protected GenerationDirectory getGeneratedSourcesDirectory() throws MojoExecutionException {
 		try {
 			File baseDir = project.getBasedir();
-			File classpath = new File(generatedTestSourcesDirectory.getAbsolutePath().substring(
-					baseDir.getAbsolutePath().length() + 1));
+			File classpath = new File(generatedTestSourcesDirectory.getAbsolutePath().substring(baseDir.getAbsolutePath().length() + 1));
 			URI runtimePath = new URI("classpath:/");
 
 			GenerationDirectory gendir = new GenerationDirectory(generatedTestSourcesDirectory, classpath, runtimePath);
 			return gendir;
 
-		}catch(URISyntaxException use){
+		}
+		catch (URISyntaxException use) {
 			throw new MojoExecutionException("Could not generate runtime path");
 		}
 	}
 
+	/** {@inheritDoc} */
 	@SuppressWarnings("unchecked")
 	@Override
 	protected List<String> getClasspathElements() throws DependencyResolutionRequiredException {
 		return project.getTestClasspathElements();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	protected boolean getCopyStjsSupportFile() {
 		return false;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	protected File getBuildOutputDirectory() {
 		return buildOutputDirectory;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if ("true".equals(System.getProperty(MAVEN_TEST_SKIP))) {
@@ -103,13 +117,23 @@ public class TestSTJSMojo extends AbstractSTJSMojo {
 		return file;
 	}
 
+	/** {@inheritDoc} */
 	@Override
-	protected void filesGenerated(Generator generator, GenerationDirectory gendir) throws MojoFailureException,
-			MojoExecutionException {
+	protected void filesGenerated(Generator generator, GenerationDirectory gendir) throws MojoFailureException, MojoExecutionException {
 		super.filesGenerated(generator, gendir);
 		writeClasspathFolder(gendir);
 	}
 
+	/**
+	 * <p>
+	 * writeClasspathFolder.
+	 * </p>
+	 *
+	 * @param gendir
+	 *            a {@link org.stjs.generator.GenerationDirectory} object.
+	 * @throws org.apache.maven.plugin.MojoFailureException
+	 *             if any.
+	 */
 	@SuppressWarnings("unchecked")
 	protected void writeClasspathFolder(GenerationDirectory gendir) throws MojoFailureException {
 		File cpFile = new File(getTestTempDirectory(), GeneratorConstants.CLASSPATH_FILE);
@@ -118,14 +142,16 @@ public class TestSTJSMojo extends AbstractSTJSMojo {
 			fw = new PrintWriter(new FileWriter(cpFile));
 			fw.println(gendir.getClasspath().getPath());
 			fw.println(project.getBuild().getDirectory() + "/" + project.getBuild().getFinalName());
-			for (Artifact art : (Set<Artifact>) project.getArtifacts()) {
+			for (Artifact art : project.getArtifacts()) {
 				if ("war".equals(art.getType())) {
 					fw.println(getWarDirectory(art.getFile()));
 				}
 			}
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new MojoFailureException("Cannot write STJS classpath file " + cpFile, e);
-		} finally {
+		}
+		finally {
 			if (fw != null) {
 				fw.close();
 			}

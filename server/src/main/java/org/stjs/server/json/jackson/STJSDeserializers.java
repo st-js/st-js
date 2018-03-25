@@ -18,7 +18,14 @@ import org.codehaus.jackson.type.JavaType;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Map;
 
+/**
+ * <p>STJSDeserializers class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class STJSDeserializers extends SimpleDeserializers {
+	/** {@inheritDoc} */
 	@Override
 	public JsonDeserializer<?> findBeanDeserializer(JavaType type, DeserializationConfig config,
 			DeserializerProvider provider, BeanDescription beanDesc, BeanProperty property) throws JsonMappingException {
@@ -35,6 +42,7 @@ public class STJSDeserializers extends SimpleDeserializers {
 		return super.findBeanDeserializer(type, config, provider, beanDesc, property);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public JsonDeserializer<?> findCollectionDeserializer(CollectionType type, DeserializationConfig config,
 			DeserializerProvider provider, BeanDescription beanDesc, BeanProperty property,
@@ -48,6 +56,7 @@ public class STJSDeserializers extends SimpleDeserializers {
 				elementDeserializer);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public JsonDeserializer<?> findCollectionLikeDeserializer(CollectionLikeType type, DeserializationConfig config,
 			DeserializerProvider provider, BeanDescription beanDesc, BeanProperty property,
@@ -62,6 +71,7 @@ public class STJSDeserializers extends SimpleDeserializers {
 				elementTypeDeserializer, elementDeserializer);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public JsonDeserializer<?> findMapDeserializer(MapType type, DeserializationConfig config,
 			DeserializerProvider provider, BeanDescription beanDesc, BeanProperty property,
@@ -75,6 +85,7 @@ public class STJSDeserializers extends SimpleDeserializers {
 				elementTypeDeserializer, elementDeserializer);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public JsonDeserializer<?> findMapLikeDeserializer(MapLikeType type, DeserializationConfig config,
 			DeserializerProvider provider, BeanDescription beanDesc, BeanProperty property,

@@ -23,11 +23,24 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * <p>Lists class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public final class Lists {
 	private Lists() {
 		//
 	}
 
+	/**
+	 * <p>getOnlyElement.</p>
+	 *
+	 * @param elems a {@link java.lang.Iterable} object.
+	 * @param <T> a T object.
+	 * @return a T object.
+	 */
 	public static <T> T getOnlyElement(Iterable<T> elems) {
 		if (elems instanceof List<?>) {
 			List<T> list = (List<T>) elems;
@@ -41,6 +54,14 @@ public final class Lists {
 		return obj;
 	}
 
+	/**
+	 * <p>union.</p>
+	 *
+	 * @param list1 a {@link java.util.List} object.
+	 * @param list2 a {@link java.util.List} object.
+	 * @param <T> a T object.
+	 * @return a {@link java.util.List} object.
+	 */
 	public static <T> List<T> union(final List<T> list1, final List<T> list2) {
 		return new AbstractList<T>() {
 
@@ -59,10 +80,25 @@ public final class Lists {
 		};
 	}
 
+	/**
+	 * <p>append.</p>
+	 *
+	 * @param coll a {@link java.util.List} object.
+	 * @param appendee a T object.
+	 * @param <T> a T object.
+	 * @return a {@link java.util.List} object.
+	 */
 	public static <T> List<T> append(List<T> coll, T appendee) {
 		return union(coll, Collections.singletonList(appendee));
 	}
 
+	/**
+	 * <p>isNullOrEmpty.</p>
+	 *
+	 * @param list a {@link java.util.Collection} object.
+	 * @param <T> a T object.
+	 * @return a boolean.
+	 */
 	public static <T> boolean isNullOrEmpty(Collection<T> list) {
 		return list == null || list.isEmpty();
 	}

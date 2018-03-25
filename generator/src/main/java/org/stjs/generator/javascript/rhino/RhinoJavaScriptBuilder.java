@@ -61,8 +61,9 @@ import com.google.debugging.sourcemap.SourceMapGenerator;
 
 /**
  * this JavaScript builder uses the rhino AST nodes to build the synthax tree.
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 @SuppressWarnings("PMD.ExcessivePublicCount")
 public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
@@ -72,6 +73,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	private static final int PROP_JAVA_END_LINE_NO = propId++;
 	private static final int PROP_JAVA_END_COLUMN_NO = propId++;
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode name(CharSequence name) {
 		Name n = new Name();
@@ -79,6 +81,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return n;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode label(CharSequence name) {
 		Label n = new Label();
@@ -86,11 +89,13 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return n;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode asExpressionList(Iterable<AstNode> nodes) {
 		return binary(BinaryOperator.COMMA, nodes);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode block(Iterable<AstNode> statements) {
 		Block block = new Block();
@@ -102,6 +107,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return block;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode elementGet(AstNode target, AstNode index) {
 		ElementGet prop = new ElementGet();
@@ -110,6 +116,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return prop;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode newExpression(AstNode target, Iterable<AstNode> arguments) {
 		NewExpression ne = new NewExpression();
@@ -120,6 +127,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return ne;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode array(Iterable<AstNode> values) {
 		ArrayLiteral array = new ArrayLiteral();
@@ -129,6 +137,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return array;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode string(String value) {
 		StringLiteral expr = new StringLiteral();
@@ -137,6 +146,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return expr;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode paren(AstNode expr) {
 		ParenthesizedExpression paren = new ParenthesizedExpression();
@@ -144,6 +154,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return paren;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode position(AstNode node, int javaStartLineNumber, int javaStartColumnNumber, int javaEndLineNumber, int javaEndColumnNumber) {
 		node.putIntProp(PROP_JAVA_LINE_NO, javaStartLineNumber);
@@ -153,22 +164,47 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return node;
 	}
 
+	/**
+	 * <p>getLineNumber.</p>
+	 *
+	 * @param node a {@link org.mozilla.javascript.ast.AstNode} object.
+	 * @return a int.
+	 */
 	public static int getLineNumber(AstNode node) {
 		return node.getIntProp(PROP_JAVA_LINE_NO, -1);
 	}
 
+	/**
+	 * <p>getColumnNumber.</p>
+	 *
+	 * @param node a {@link org.mozilla.javascript.ast.AstNode} object.
+	 * @return a int.
+	 */
 	public static int getColumnNumber(AstNode node) {
 		return node.getIntProp(PROP_JAVA_COLUMN_NO, -1);
 	}
 
+	/**
+	 * <p>getEndLineNumber.</p>
+	 *
+	 * @param node a {@link org.mozilla.javascript.ast.AstNode} object.
+	 * @return a int.
+	 */
 	public static int getEndLineNumber(AstNode node) {
 		return node.getIntProp(PROP_JAVA_END_LINE_NO, -1);
 	}
 
+	/**
+	 * <p>getEndColumnNumber.</p>
+	 *
+	 * @param node a {@link org.mozilla.javascript.ast.AstNode} object.
+	 * @return a int.
+	 */
 	public static int getEndColumnNumber(AstNode node) {
 		return node.getIntProp(PROP_JAVA_END_COLUMN_NO, -1);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode breakStatement(AstNode label) {
 		BreakStatement b = new BreakStatement();
@@ -189,6 +225,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return (T) node;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode caseStatement(AstNode expression, Iterable<AstNode> statements) {
 		SwitchCase s = new SwitchCase();
@@ -201,6 +238,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return s;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode catchClause(AstNode varName, AstNode body) {
 		CatchClause c = new CatchClause();
@@ -215,6 +253,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return c;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode continueStatement(AstNode label) {
 		ContinueStatement c = new ContinueStatement();
@@ -222,6 +261,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return c;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode function(String name, Iterable<AstNode> params, AstNode body) {
 		FunctionNode func = new FunctionNode();
@@ -246,6 +286,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return prop;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode object(Iterable<NameValue<AstNode>> props) {
 		ObjectLiteral object = new ObjectLiteral();
@@ -255,6 +296,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return object;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode doLoop(AstNode condition, AstNode body) {
 		DoLoop loop = new DoLoop();
@@ -263,16 +305,19 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return loop;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode emptyStatement() {
 		return new EmptyStatement();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode emptyExpression() {
 		return new EmptyExpression();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode forInLoop(AstNode iterator, AstNode iterated, AstNode body) {
 		ForInLoop loop = new ForInLoop();
@@ -282,6 +327,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return loop;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode forLoop(AstNode init, AstNode condition, AstNode update, AstNode body) {
 		ForLoop loop = new ForLoop();
@@ -292,6 +338,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return loop;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode ifStatement(AstNode condition, AstNode thenPart, AstNode elsePart) {
 		IfStatement ifs = new IfStatement();
@@ -301,6 +348,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return ifs;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode addStatement(AstNode blockOrStatement, AstNode statement) {
 		if (blockOrStatement instanceof Block) {
@@ -317,6 +365,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return block;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode addStatementBeginning(AstNode blockOrStatement, AstNode statement) {
 		if (blockOrStatement instanceof Block) {
@@ -336,6 +385,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return block;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode labeledStatement(AstNode label, AstNode statement) {
 		LabeledStatement s = new LabeledStatement();
@@ -344,6 +394,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return s;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode returnStatement(AstNode returnValue) {
 		ReturnStatement r = new ReturnStatement();
@@ -351,6 +402,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return r;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode switchStatement(AstNode expr, Iterable<AstNode> cases) {
 		SwitchStatement s = new SwitchStatement();
@@ -363,6 +415,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return s;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode functionCall(AstNode target, Iterable<AstNode> arguments) {
 		FunctionCall fc = new FunctionCall();
@@ -373,6 +426,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return fc;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode property(AstNode target, CharSequence name) {
 		if (target == null) {
@@ -384,6 +438,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return prop;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode variableDeclaration(boolean statement, Iterable<NameValue<AstNode>> vars) {
 		VariableDeclaration varDecl = new VariableDeclaration();
@@ -397,6 +452,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return varDecl;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode variableDeclaration(boolean statement, CharSequence name, AstNode init) {
 		VariableDeclaration vars = new VariableDeclaration();
@@ -408,6 +464,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return vars;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode tryStatement(AstNode tryBlock, Iterable<AstNode> catchClauses, AstNode finallyBlock) {
 		TryStatement t = new TryStatement();
@@ -419,6 +476,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return t;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode whileLoop(AstNode condition, AstNode body) {
 		WhileLoop w = new WhileLoop();
@@ -427,6 +485,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return w;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode root(Iterable<AstNode> children) {
 		AstRoot r = new AstRoot();
@@ -438,6 +497,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return r;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode code(String code) {
 		CodeFragment c = new CodeFragment();
@@ -445,11 +505,13 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return c;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String toString(AstNode node) {
 		return node.toSource();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode conditionalExpression(AstNode test, AstNode trueExpr, AstNode falseExpr) {
 		ConditionalExpression c = new ConditionalExpression();
@@ -459,6 +521,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return c;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode character(String c) {
 		StringLiteral s = new StringLiteral();
@@ -467,6 +530,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return s;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode number(Number n) {
 		NumberLiteral l = new NumberLiteral();
@@ -474,6 +538,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return l;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode statements(Iterable<AstNode> stmts) {
 		Statements s = new Statements();
@@ -485,6 +550,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return s;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode assignment(AssignOperator operator, AstNode left, AstNode right) {
 		Assignment a = new Assignment();
@@ -494,6 +560,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return a;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode binary(BinaryOperator operator, Iterable<AstNode> operands) {
 		// this is to deal with the COMMA operator who can have less than two operands
@@ -518,6 +585,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return list;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode keyword(Keyword token) {
 		KeywordLiteral k = new KeywordLiteral();
@@ -525,6 +593,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return k;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode unary(UnaryOperator operator, AstNode operand) {
 		UnaryExpression u = new UnaryExpression();
@@ -534,6 +603,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return u;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode expressionStatement(AstNode expr) {
 		ExpressionStatement e = new ExpressionStatement();
@@ -549,6 +619,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public SourceMapGenerator writeJavaScript(AstNode javascriptRoot, File inputFile, boolean generateSourceMap, Writer writer) {
 		RhinoJavaScriptWriter jsw = new RhinoJavaScriptWriter(writer, inputFile, generateSourceMap);
@@ -558,6 +629,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return jsw.getSourceMapGenerator();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode comment(AstNode node, String comment) {
 		if (node == null) {
@@ -569,6 +641,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return node;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public AstNode throwStatement(AstNode expr) {
 		ThrowStatement s = new ThrowStatement();

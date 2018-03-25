@@ -14,6 +14,12 @@ import javax.lang.model.util.Elements;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.Tree;
 
+/**
+ * <p>AnnotationHelper class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public final class AnnotationHelper {
 	private static final String ANNOTATED_PACKAGE = "annotation.";
 
@@ -21,6 +27,15 @@ public final class AnnotationHelper {
 		// private
 	}
 
+	/**
+	 * <p>getAnnotation.</p>
+	 *
+	 * @param elements a {@link javax.lang.model.util.Elements} object.
+	 * @param elements a {@link javax.lang.model.util.Elements} object.
+	 * @param element a {@link javax.lang.model.element.Element} object.
+	 * @param annotationType a {@link java.lang.Class} object.
+	 * @return a T object.
+	 */
 	public static <T extends Annotation> T getAnnotation(Elements elements, Element element, Class<T> annotationType) {
 		if (!(element instanceof ExecutableElement)) {
 			return element == null ? null : element.getAnnotation(annotationType);
@@ -91,6 +106,12 @@ public final class AnnotationHelper {
 		return member.getSimpleName().equals(methodElement.getSimpleName());
 	}
 
+	/**
+	 * <p>getRetentionType.</p>
+	 *
+	 * @param annotationType a {@link com.sun.source.tree.Tree} object.
+	 * @return a {@link java.lang.annotation.RetentionPolicy} object.
+	 */
 	public static RetentionPolicy getRetentionType(Tree annotationType) {
 		if (!(annotationType instanceof ExpressionTree)) {
 			return null;

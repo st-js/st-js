@@ -23,10 +23,14 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.Tree;
 
 /**
- * this check verifies that only one method (or constructor) with a given name has actually a body, all the other should be marked as native (or
- * @Native). More the method having the body must be the more generic than the other overloaded methods, so , when generated in the JavaScript,
- *           it knows how to handle all the calls.
+ * this check verifies that only one method (or constructor) with a given name has actually a body, all the other should
+ * be marked as native (or
+ *
+ * Native annotation). More the method having the body must be the more generic than the other overloaded methods, so ,
+ * when generated in the JavaScript, it knows how to handle all the calls.
+ * 
  * @author acraciun
+ * @version $Id: $Id
  */
 public class MethodOverloadCheck implements CheckContributor<MethodTree> {
 	private static boolean isMoreGenericVarArg(GenerationContext<Void> context, ExecutableElement more, ExecutableElement less) {
@@ -54,7 +58,9 @@ public class MethodOverloadCheck implements CheckContributor<MethodTree> {
 	}
 
 	/**
-	 * return true if the "more" method can be called with arguments that have the type of the "less" method. i.e. is more generic
+	 * return true if the "more" method can be called with arguments that have the type of the "less" method. i.e. is
+	 * more generic
+	 * 
 	 * @param context
 	 * @param more
 	 * @param less
@@ -86,12 +92,12 @@ public class MethodOverloadCheck implements CheckContributor<MethodTree> {
 		}
 		// here I have all the methods with the same name, other than the ckecked method
 		if (!isMoreGeneric(context, methodElement, (ExecutableElement) memberElement, hasVarArgs)) {
-			context.addError(tree,
-					"There is a method in the class (or one of its parents) having the same name with the method named [" + tree.getName()
-							+ "] but is less generic");
+			context.addError(tree, "There is a method in the class (or one of its parents) having the same name with the method named ["
+					+ tree.getName() + "] but is less generic");
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, MethodTree tree, GenerationContext<Void> context) {
 		ExecutableElement methodElement = TreeUtils.elementFromDeclaration(tree);
@@ -109,9 +115,8 @@ public class MethodOverloadCheck implements CheckContributor<MethodTree> {
 		TypeElement typeElement = (TypeElement) methodElement.getEnclosingElement();
 		// for constructors take only the class's other constructors. For regular methods, checks agains all the methods
 		// in the class' hierarchy
-		List<? extends Element> allMembers =
-				methodElement.getKind() == ElementKind.CONSTRUCTOR ? typeElement.getEnclosedElements() : context.getElements().getAllMembers(
-						typeElement);
+		List<? extends Element> allMembers = methodElement.getKind() == ElementKind.CONSTRUCTOR ? typeElement.getEnclosedElements()
+				: context.getElements().getAllMembers(typeElement);
 
 		for (Element memberElement : allMembers) {
 			if (memberElement.getAnnotation(ServerSide.class) == null) {

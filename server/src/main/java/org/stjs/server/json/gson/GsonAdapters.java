@@ -21,7 +21,18 @@ import org.stjs.javascript.Map;
 
 import com.google.gson.GsonBuilder;
 
+/**
+ * <p>GsonAdapters class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class GsonAdapters {
+	/**
+	 * <p>addAll.</p>
+	 *
+	 * @param builder a {@link com.google.gson.GsonBuilder} object.
+	 */
 	public static void addAll(GsonBuilder builder) {
 		builder.registerTypeAdapter(Map.class, new JSMapAdapter());
 		builder.registerTypeAdapter(Array.class, new JSArrayAdapter());

@@ -8,7 +8,7 @@ import org.stjs.generator.writer.expression.MethodInvocationWriter;
 import com.sun.source.tree.MethodInvocationTree;
 
 /**
- * array.$get(x) -> array[x], or $get(obj, prop) -> obj[prop]
+ * array.$get(x) &gt; array[x], or $get(obj, prop) &gt; obj[prop]
  * 
  * @author acraciun
  */
@@ -24,10 +24,10 @@ public class GetTemplate<JS> implements WriterContributor<MethodInvocationTree, 
 		JS target = null;
 		int arg = 0;
 		if (argCount == 1) {
-			// array.$get(x) -> array[x]
+			// array.$get(x) &gt; array[x]
 			target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree>getCurrentWrapper());
 		} else {
-			// $get(obj, prop) -> obj[prop]
+			// $get(obj, prop) &gt; obj[prop]
 			target = context.js().paren(visitor.scan(tree.getArguments().get(arg++), context));
 		}
 

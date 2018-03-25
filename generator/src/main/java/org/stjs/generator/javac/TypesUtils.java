@@ -14,8 +14,10 @@ import javax.lang.model.util.Types;
 import com.sun.tools.javac.model.JavacTypes;
 
 /**
- * A utility class that helps with {@link TypeMirror}s.
- * 
+ * A utility class that helps with {@link javax.lang.model.type.TypeMirror}s.
+ *
+ * @author acraciun
+ * @version $Id: $Id
  */
 // TODO: This class needs significant restructuring
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
@@ -31,7 +33,7 @@ public final class TypesUtils {
 
 	/**
 	 * Gets the fully qualified name for a provided type. It returns an empty name if type is an anonymous type.
-	 * 
+	 *
 	 * @param type
 	 *            the declared type
 	 * @return the name corresponding to that type
@@ -43,7 +45,7 @@ public final class TypesUtils {
 
 	/**
 	 * Checks if the type represents a java.lang.Object declared type.
-	 * 
+	 *
 	 * @param type
 	 *            the type
 	 * @return true iff type represents java.lang.Object
@@ -54,7 +56,7 @@ public final class TypesUtils {
 
 	/**
 	 * Checks if the type represents a java.lang.Class declared type.
-	 * 
+	 *
 	 * @param type
 	 *            the type
 	 * @return true iff type represents java.lang.Class
@@ -67,7 +69,7 @@ public final class TypesUtils {
 	 * Checks if the type represents a java.lang.String declared type. TODO: it would be cleaner to use
 	 * String.class.getCanonicalName(), but the two existing methods above don't do that, I guess for performance
 	 * reasons.
-	 * 
+	 *
 	 * @param type
 	 *            the type
 	 * @return true iff type represents java.lang.String
@@ -78,7 +80,7 @@ public final class TypesUtils {
 
 	/**
 	 * Checks if the type represents a boolean type, that is either boolean (primitive type) or java.lang.Boolean.
-	 * 
+	 *
 	 * @param type
 	 *            the type to test
 	 * @return true iff type represents a boolean type
@@ -89,10 +91,11 @@ public final class TypesUtils {
 
 	/**
 	 * Check if the type represent a declared type of the given qualified name
-	 * 
+	 *
 	 * @param type
 	 *            the type
 	 * @return type iff type represents a declared type of the qualified name
+	 * @param qualifiedName a {@link java.lang.CharSequence} object.
 	 */
 	public static boolean isDeclaredOfName(TypeMirror type, CharSequence qualifiedName) {
 		// type = ((com.sun.tools.javac.code.Type)type).unannotatedType();
@@ -101,6 +104,12 @@ public final class TypesUtils {
 
 	}
 
+	/**
+	 * <p>isBoxedPrimitive.</p>
+	 *
+	 * @param type a {@link javax.lang.model.type.TypeMirror} object.
+	 * @return a boolean.
+	 */
 	public static boolean isBoxedPrimitive(TypeMirror type) {
 		if (type.getKind() != TypeKind.DECLARED) {
 			return false;
@@ -115,6 +124,13 @@ public final class TypesUtils {
 	}
 
 	/** @return type represents a Throwable type (e.g. Exception, Error) **/
+	/**
+	 * <p>isThrowable.</p>
+	 *
+	 * @return a boolean.
+	 * @param type a {@link javax.lang.model.type.TypeMirror} object.
+	 * @return a boolean.
+	 */
 	public static boolean isThrowable(TypeMirror type) {
 		while (type != null && type.getKind() == TypeKind.DECLARED) {
 			DeclaredType dt = (DeclaredType) type;
@@ -130,8 +146,9 @@ public final class TypesUtils {
 
 	/**
 	 * Returns true iff the argument is a primitive type.
-	 * 
+	 *
 	 * @return whether the argument is a primitive type
+	 * @param type a {@link javax.lang.model.type.TypeMirror} object.
 	 */
 	public static boolean isPrimitive(TypeMirror type) {
 		// type = ((com.sun.tools.javac.code.Type) type).unannotatedType();
@@ -152,8 +169,10 @@ public final class TypesUtils {
 
 	/**
 	 * Returns true iff the arguments are both the same primitive types.
-	 * 
+	 *
 	 * @return whether the arguments are the same primitive types
+	 * @param left a {@link javax.lang.model.type.TypeMirror} object.
+	 * @param right a {@link javax.lang.model.type.TypeMirror} object.
 	 */
 	public static boolean areSamePrimitiveTypes(TypeMirror left, TypeMirror right) {
 		if (!isPrimitive(left) || !isPrimitive(right)) {
@@ -165,8 +184,9 @@ public final class TypesUtils {
 
 	/**
 	 * Returns true iff the argument is a primitive numeric type.
-	 * 
+	 *
 	 * @return whether the argument is a primitive numeric type
+	 * @param type a {@link javax.lang.model.type.TypeMirror} object.
 	 */
 	public static boolean isNumeric(TypeMirror type) {
 		// type = ((com.sun.tools.javac.code.Type) type).unannotatedType();
@@ -186,8 +206,9 @@ public final class TypesUtils {
 
 	/**
 	 * Returns true iff the argument is an integral type.
-	 * 
+	 *
 	 * @return whether the argument is an integral type
+	 * @param type a {@link javax.lang.model.type.TypeMirror} object.
 	 */
 	public static boolean isIntegral(TypeMirror type) {
 		// type = ((com.sun.tools.javac.code.Type) type).unannotatedType();
@@ -205,8 +226,9 @@ public final class TypesUtils {
 
 	/**
 	 * Returns true iff the argument is a floating point type.
-	 * 
+	 *
 	 * @return whether the argument is a floating point type
+	 * @param type a {@link javax.lang.model.type.TypeMirror} object.
 	 */
 	public static boolean isFloating(TypeMirror type) {
 		// type = ((com.sun.tools.javac.code.Type) type).unannotatedType();
@@ -221,10 +243,12 @@ public final class TypesUtils {
 
 	/**
 	 * Returns the widened numeric type for an arithmetic operation performed on a value of the left type and the right
-	 * type. Defined in JLS 5.6.2. We return a {@link TypeKind} because creating a {@link TypeMirror} requires a
-	 * {@link Types} object from the {@link javax.annotation.processing.ProcessingEnvironment}.
-	 * 
+	 * type. Defined in JLS 5.6.2. We return a {@link javax.lang.model.type.TypeKind} because creating a {@link javax.lang.model.type.TypeMirror} requires a
+	 * {@link javax.lang.model.util.Types} object from the {@link javax.annotation.processing.ProcessingEnvironment}.
+	 *
 	 * @return the result of widening numeric conversion, or NONE when the conversion cannot be performed
+	 * @param left a {@link javax.lang.model.type.TypeMirror} object.
+	 * @param right a {@link javax.lang.model.type.TypeMirror} object.
 	 */
 	public static TypeKind widenedNumericType(TypeMirror left, TypeMirror right) {
 		if (!isNumeric(left) || !isNumeric(right)) {
@@ -252,7 +276,7 @@ public final class TypesUtils {
 	/**
 	 * If the argument is a bounded TypeVariable or WildcardType, return its non-variable, non-wildcard upper bound.
 	 * Otherwise, return the type itself.
-	 * 
+	 *
 	 * @param type
 	 *            a type
 	 * @return the non-variable, non-wildcard upper bound of a type, if it has one, or itself if it has no bounds
@@ -281,7 +305,12 @@ public final class TypesUtils {
 	}
 
 	/**
-	 * Returns the {@link TypeMirror} for a given {@link Class}.
+	 * Returns the {@link javax.lang.model.type.TypeMirror} for a given {@link java.lang.Class}.
+	 *
+	 * @param types a {@link javax.lang.model.util.Types} object.
+	 * @param elements a {@link javax.lang.model.util.Elements} object.
+	 * @param clazz a {@link java.lang.Class} object.
+	 * @return a {@link javax.lang.model.type.TypeMirror} object.
 	 */
 	public static TypeMirror typeFromClass(Types types, Elements elements, Class<?> clazz) {
 		if (clazz == void.class) {
@@ -304,7 +333,11 @@ public final class TypesUtils {
 	}
 
 	/**
-	 * Returns an {@link ArrayType} with elements of type {@code componentType}.
+	 * Returns an {@link javax.lang.model.type.ArrayType} with elements of type {@code componentType}.
+	 *
+	 * @param types a {@link javax.lang.model.util.Types} object.
+	 * @param componentType a {@link javax.lang.model.type.TypeMirror} object.
+	 * @return a {@link javax.lang.model.type.ArrayType} object.
 	 */
 	public static ArrayType createArrayType(Types types, TypeMirror componentType) {
 		JavacTypes t = (JavacTypes) types;

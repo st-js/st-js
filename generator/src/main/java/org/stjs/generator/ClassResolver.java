@@ -18,10 +18,23 @@ package org.stjs.generator;
 /**
  * this interface is used to lazily resolve a class with its corresponding javascript, when the list of dependencies is
  * browsed.
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public interface ClassResolver {
+	/**
+	 * <p>resolve.</p>
+	 *
+	 * @param className a {@link java.lang.String} object.
+	 * @return a {@link org.stjs.generator.ClassWithJavascript} object.
+	 */
 	ClassWithJavascript resolve(String className);
+	/**
+	 * <p>resolveJavaClass.</p>
+	 *
+	 * @param className a {@link java.lang.String} object.
+	 * @return a {@link java.lang.Class} object.
+	 */
 	Class<?> resolveJavaClass(String className);
 }

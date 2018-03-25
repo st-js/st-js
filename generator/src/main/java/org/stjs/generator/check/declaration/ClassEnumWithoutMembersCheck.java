@@ -16,8 +16,9 @@ import com.sun.source.tree.VariableTree;
 
 /**
  * this class checks that no member is added to an enum declaration (other than of course the enum constants)
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class ClassEnumWithoutMembersCheck implements CheckContributor<ClassTree> {
 
@@ -35,6 +36,7 @@ public class ClassEnumWithoutMembersCheck implements CheckContributor<ClassTree>
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, ClassTree tree, GenerationContext<Void> context) {
 		TypeElement typeElement = TreeUtils.elementFromDeclaration(tree);

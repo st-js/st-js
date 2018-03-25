@@ -15,6 +15,12 @@
  */
 package org.stjs.javascript;
 
+/**
+ * <p>RegExp class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class RegExp {
 	public boolean global;
 	public boolean ignoreCase;
@@ -22,18 +28,52 @@ public class RegExp {
 	public boolean multiline;
 	public String source;
 
+	/**
+	 * <p>Constructor for RegExp.</p>
+	 *
+	 * @param pattern a {@link java.lang.String} object.
+	 */
 	public RegExp(String pattern) {//
 	}
 
+	/**
+	 * <p>Constructor for RegExp.</p>
+	 *
+	 * @param pattern a {@link java.lang.String} object.
+	 * @param modifiers a {@link java.lang.String} object.
+	 */
 	public RegExp(String pattern, String modifiers) {
 		//
 	}
 
+	/**
+	 * <p>compile.</p>
+	 *
+	 * @param pattern a {@link java.lang.String} object.
+	 * @param modifiers a {@link java.lang.String} object.
+	 */
 	public native void compile(String pattern, String modifiers);
 
+	/**
+	 * <p>compile.</p>
+	 *
+	 * @param pattern a {@link java.lang.String} object.
+	 */
 	public native void compile(String pattern);
 
+	/**
+	 * <p>exec.</p>
+	 *
+	 * @param source a {@link java.lang.String} object.
+	 * @return a {@link org.stjs.javascript.RegExpMatch} object.
+	 */
 	public native RegExpMatch exec(String source);
 
+	/**
+	 * <p>test.</p>
+	 *
+	 * @param source a {@link java.lang.String} object.
+	 * @return a boolean.
+	 */
 	public native boolean test(String source);
 }

@@ -23,13 +23,21 @@ import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.stjs.javascript.Map;
 
+/**
+ * <p>JSMapSerializer class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class JSMapSerializer extends JsonSerializer<Map<?, ?>> {
+	/** {@inheritDoc} */
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public Class<Map<?, ?>> handledType() {
 		return (Class) Map.class;
 	}
 
+	/** {@inheritDoc} */
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public void serialize(Map<?, ?> map, JsonGenerator gen, SerializerProvider provider) throws IOException, JsonProcessingException {

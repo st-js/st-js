@@ -15,12 +15,26 @@
  */
 package org.stjs.generator.executor;
 
+/**
+ * <p>ExecutionResult class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class ExecutionResult {
 	private final String stdOut;
 	private final String stdErr;
 	private final int exitValue;
 	private final Object result;
 
+	/**
+	 * <p>Constructor for ExecutionResult.</p>
+	 *
+	 * @param result a {@link java.lang.Object} object.
+	 * @param stdOut a {@link java.lang.String} object.
+	 * @param stdErr a {@link java.lang.String} object.
+	 * @param exitValue a int.
+	 */
 	public ExecutionResult(Object result, String stdOut, String stdErr, int exitValue) {
 		this.stdOut = stdOut;
 		this.stdErr = stdErr;
@@ -28,22 +42,43 @@ public class ExecutionResult {
 		this.result = result;
 	}
 
+	/**
+	 * <p>Getter for the field <code>stdOut</code>.</p>
+	 *
+	 * @return a {@link java.lang.String} object.
+	 */
 	public String getStdOut() {
 		return stdOut;
 	}
 
+	/**
+	 * <p>Getter for the field <code>stdErr</code>.</p>
+	 *
+	 * @return a {@link java.lang.String} object.
+	 */
 	public String getStdErr() {
 		return stdErr;
 	}
 
+	/**
+	 * <p>Getter for the field <code>exitValue</code>.</p>
+	 *
+	 * @return a int.
+	 */
 	public int getExitValue() {
 		return exitValue;
 	}
 
+	/**
+	 * <p>Getter for the field <code>result</code>.</p>
+	 *
+	 * @return a {@link java.lang.Object} object.
+	 */
 	public Object getResult() {
 		return result;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		if (stdOut.isEmpty() && stdErr.isEmpty()) {

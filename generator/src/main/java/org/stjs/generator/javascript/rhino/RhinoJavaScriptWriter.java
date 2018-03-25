@@ -59,6 +59,7 @@ import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
  * This class visits a JavaScript AST tree and generate the corresponding source code. It handles also the source maps.
  *
  * @author acraciun
+ * @version $Id: $Id
  */
 @SuppressWarnings("PMD.ExcessivePublicCount")
 public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
@@ -83,6 +84,13 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	private FilePosition javaPosition;
 	private FilePosition javaScriptPosition;
 
+	/**
+	 * <p>Constructor for RhinoJavaScriptWriter.</p>
+	 *
+	 * @param writer a {@link java.io.Writer} object.
+	 * @param inputFile a {@link java.io.File} object.
+	 * @param generateSourceMap a boolean.
+	 */
 	public RhinoJavaScriptWriter(Writer writer, File inputFile, boolean generateSourceMap) {
 		this.writer = writer;
 		this.inputFile = inputFile;
@@ -90,16 +98,29 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		this.sourceMapGenerator = generateSourceMap ? SourceMapGeneratorFactory.getInstance(SourceMapFormat.V3) : null;
 	}
 
+	/**
+	 * <p>indent.</p>
+	 *
+	 * @return a {@link org.stjs.generator.javascript.rhino.RhinoJavaScriptWriter} object.
+	 */
 	protected RhinoJavaScriptWriter indent() {
 		level++;
 		return this;
 	}
 
+	/**
+	 * <p>unindent.</p>
+	 *
+	 * @return a {@link org.stjs.generator.javascript.rhino.RhinoJavaScriptWriter} object.
+	 */
 	protected RhinoJavaScriptWriter unindent() {
 		level--;
 		return this;
 	}
 
+	/**
+	 * <p>makeIndent.</p>
+	 */
 	protected void makeIndent() {
 		for (int i = 0; i < level; i++) {
 			try {
@@ -112,6 +133,12 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		}
 	}
 
+	/**
+	 * <p>print.</p>
+	 *
+	 * @param arg a {@link java.lang.String} object.
+	 * @return a {@link org.stjs.generator.javascript.rhino.RhinoJavaScriptWriter} object.
+	 */
 	protected RhinoJavaScriptWriter print(String arg) {
 		if (!indented) {
 			makeIndent();
@@ -128,6 +155,12 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		return this;
 	}
 
+	/**
+	 * <p>printComments.</p>
+	 *
+	 * @param node a {@link org.mozilla.javascript.ast.AstNode} object.
+	 * @return a {@link org.stjs.generator.javascript.rhino.RhinoJavaScriptWriter} object.
+	 */
 	protected RhinoJavaScriptWriter printComments(AstNode node) {
 		String comment = node.getJsDoc();
 		if (comment != null) {
@@ -141,12 +174,23 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		return this;
 	}
 
+	/**
+	 * <p>println.</p>
+	 *
+	 * @param arg a {@link java.lang.String} object.
+	 * @return a {@link org.stjs.generator.javascript.rhino.RhinoJavaScriptWriter} object.
+	 */
 	public RhinoJavaScriptWriter println(String arg) {
 		print(arg);
 		println();
 		return this;
 	}
 
+	/**
+	 * <p>println.</p>
+	 *
+	 * @return a {@link org.stjs.generator.javascript.rhino.RhinoJavaScriptWriter} object.
+	 */
 	public RhinoJavaScriptWriter println() {
 		try {
 			writer.append('\n');
@@ -161,6 +205,11 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		return this;
 	}
 
+	/**
+	 * <p>startPosition.</p>
+	 *
+	 * @param node a {@link org.mozilla.javascript.ast.AstNode} object.
+	 */
 	protected void startPosition(AstNode node) {
 		if (generateSourceMap) {
 			javaPosition = new FilePosition(RhinoJavaScriptBuilder.getLineNumber(node) - 1, RhinoJavaScriptBuilder.getColumnNumber(node) - 1);
@@ -171,7 +220,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	/**
 	 * this is only for statements on several lines to be able to catch end of inline function defintions
 	 *
-	 * @param node
+	 * @param node a {@link org.mozilla.javascript.ast.AstNode} object.
 	 */
 	protected void endPosition(AstNode node) {
 		if (generateSourceMap) {
@@ -184,6 +233,9 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		}
 	}
 
+	/**
+	 * <p>addMapping.</p>
+	 */
 	protected void addMapping() {
 		if (generateSourceMap) {
 			FilePosition endJavaScriptPosition = new FilePosition(currentLine, currentColumn);
@@ -194,6 +246,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitArrayLiteral(ArrayLiteral a, Boolean param) {
 		print("[");
@@ -203,6 +256,12 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		print("]");
 	}
 
+	/**
+	 * <p>printList.</p>
+	 *
+	 * @param items a {@link java.util.List} object.
+	 * @param param a {@link java.lang.Boolean} object.
+	 */
 	protected <T extends AstNode> void printList(List<T> items, Boolean param) {
 		int max = items.size();
 		int count = 0;
@@ -217,12 +276,21 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitAssignment(Assignment a, Boolean param) {
 		printComments(a);
 		printBinaryOperator(a.getType(), a.getLeft(), a.getRight(), param);
 	}
 
+	/**
+	 * <p>printBinaryOperator.</p>
+	 *
+	 * @param op a int.
+	 * @param left a {@link org.mozilla.javascript.ast.AstNode} object.
+	 * @param right a {@link org.mozilla.javascript.ast.AstNode} object.
+	 * @param param a {@link java.lang.Boolean} object.
+	 */
 	protected void printBinaryOperator(int op, AstNode left, AstNode right, Boolean param) {
 		visitorSupport.accept(left, this, param);
 		print(" ");
@@ -231,6 +299,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		visitorSupport.accept(right, this, param);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitAstRoot(AstRoot r, Boolean param) {
 		for (Node child : r) {
@@ -239,6 +308,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		addSourceMapURL();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitBlock(Block block, Boolean param) {
 		if (block.getFirstChild() == null) {
@@ -253,6 +323,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		unindent().print("}");
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitBreakStatemen(BreakStatement b, Boolean param) {
 		startPosition(b);
@@ -265,6 +336,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitCatchClause(CatchClause c, Boolean param) {
 		print("catch (");
@@ -273,6 +345,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		visitorSupport.accept(c.getBody(), this, param);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitConditionalExpression(ConditionalExpression c, Boolean param) {
 		visitorSupport.accept(c.getTestExpression(), this, param);
@@ -282,6 +355,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		visitorSupport.accept(c.getFalseExpression(), this, param);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitContinueStatement(ContinueStatement c, Boolean param) {
 		startPosition(c);
@@ -294,6 +368,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitDoLoop(DoLoop d, Boolean param) {
 		startPosition(d);
@@ -305,6 +380,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitElementGet(ElementGet eg, Boolean param) {
 		visitorSupport.accept(eg.getTarget(), this, param);
@@ -313,6 +389,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		print("]");
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitEmptyStatement(EmptyStatement s, Boolean param) {
 		startPosition(s);
@@ -320,11 +397,13 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitEmptyExpression(EmptyExpression s, Boolean param) {
 		// do nothing
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitExpressionStatement(ExpressionStatement e, Boolean param) {
 		printComments(e);
@@ -352,6 +431,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitForInLoop(ForInLoop f, Boolean param) {
 		startPosition(f);
@@ -364,6 +444,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitForLoop(ForLoop f, Boolean param) {
 		startPosition(f);
@@ -378,6 +459,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitFunctionCall(FunctionCall fc, Boolean param) {
 		visitorSupport.accept(fc.getTarget(), this, param);
@@ -388,6 +470,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		print(")");
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitFunctionNode(FunctionNode f, Boolean param) {
 		printComments(f);
@@ -409,6 +492,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		// }
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitIfStatement(IfStatement ifs, Boolean param) {
 		startPosition(ifs);
@@ -426,6 +510,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitInfixExpression(InfixExpression ie, Boolean param) {
 		visitorSupport.accept(ie.getLeft(), this, param);
@@ -435,6 +520,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		visitorSupport.accept(ie.getRight(), this, param);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitKeywordLiteral(KeywordLiteral k, Boolean param) {
 		switch (k.getType()) {
@@ -458,12 +544,14 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitLabel(Label label, Boolean param) {
 		print(label.getName());
 		println(":");
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitLabeledStatement(LabeledStatement labelStatement, Boolean param) {
 		for (Label label : labelStatement.getLabels()) {
@@ -474,11 +562,13 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		unindent();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitName(Name name, Boolean param) {
 		print(name.getIdentifier());
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitNewExpression(NewExpression ne, Boolean param) {
 		print("new ");
@@ -494,11 +584,13 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitNumberLitera(NumberLiteral n, Boolean param) {
 		print(n.getValue());
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitObjectLiteral(ObjectLiteral p, Boolean param) {
 		print("{");
@@ -508,6 +600,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		print("}");
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitObjectProperty(ObjectProperty p, Boolean param) {
 		visitorSupport.accept(p.getLeft(), this, param);
@@ -517,6 +610,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		visitorSupport.accept(p.getRight(), this, param);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitParenthesizedExpression(ParenthesizedExpression p, Boolean param) {
 		print("(");
@@ -524,6 +618,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		print(")");
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitPropertyGet(PropertyGet p, Boolean param) {
 		visitorSupport.accept(p.getLeft(), this, param);
@@ -531,6 +626,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		visitorSupport.accept(p.getRight(), this, param);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitReturnStatement(ReturnStatement r, Boolean param) {
 		startPosition(r);
@@ -543,6 +639,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitStatements(Statements s, Boolean param) {
 		printComments(s);
@@ -551,6 +648,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitStringLiteral(StringLiteral expr, Boolean param) {
 		print(Character.toString(expr.getQuoteCharacter()));
@@ -558,6 +656,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		print(Character.toString(expr.getQuoteCharacter()));
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitSwitchCase(SwitchCase s, Boolean param) {
 		if (s.getExpression() == null) {
@@ -576,6 +675,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitSwitchStatement(SwitchStatement s, Boolean param) {
 		startPosition(s);
@@ -591,6 +691,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitTryStatement(TryStatement t, Boolean param) {
 		startPosition(t);
@@ -607,6 +708,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitUnaryExpression(UnaryExpression u, Boolean param) {
 		int type = u.getType();
@@ -622,6 +724,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitVariableDeclaration(VariableDeclaration v, Boolean param) {
 		printComments(v);
@@ -636,6 +739,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitVariableInitializer(VariableInitializer v, Boolean param) {
 		visitorSupport.accept(v.getTarget(), this, param);
@@ -645,6 +749,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitWhileLoop(WhileLoop w, Boolean param) {
 		startPosition(w);
@@ -655,6 +760,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitThrowStatement(ThrowStatement e, Boolean param) {
 		startPosition(e);
@@ -664,6 +770,9 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 
 	}
 
+	/**
+	 * <p>addSourceMapURL.</p>
+	 */
 	public void addSourceMapURL() {
 		if (generateSourceMap) {
 			addMapping();
@@ -671,10 +780,16 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		}
 	}
 
+	/**
+	 * <p>Getter for the field <code>sourceMapGenerator</code>.</p>
+	 *
+	 * @return a {@link com.google.debugging.sourcemap.SourceMapGenerator} object.
+	 */
 	public SourceMapGenerator getSourceMapGenerator() {
 		return sourceMapGenerator;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visitCodeFragment(CodeFragment c, Boolean param) {
 		if (c.getCode() != null) {

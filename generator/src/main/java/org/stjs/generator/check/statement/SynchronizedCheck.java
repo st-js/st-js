@@ -8,11 +8,13 @@ import com.sun.source.tree.SynchronizedTree;
 
 /**
  * ths synchronized blocks are illegal, as there is no threading model in JavaScript
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class SynchronizedCheck implements CheckContributor<SynchronizedTree> {
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, SynchronizedTree tree, GenerationContext<Void> context) {
 		context.addError(tree, "Synchronized blocks are not supported by Javascript");

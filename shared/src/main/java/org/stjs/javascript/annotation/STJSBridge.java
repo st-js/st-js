@@ -24,8 +24,9 @@ import java.lang.annotation.Target;
  * This annotation is used to mark types that part of a bridge library (like the jquery one). The source the javascript
  * implementation is found should be set. The annotation can also be set on the package containing the type or any other
  * parent package.
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 @Target({ ElementType.TYPE , ElementType.PACKAGE})
 @Retention(RetentionPolicy.RUNTIME)

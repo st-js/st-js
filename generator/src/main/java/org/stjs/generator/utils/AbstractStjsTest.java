@@ -40,6 +40,12 @@ import com.google.common.base.Strings;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 
+/**
+ * <p>Abstract AbstractStjsTest class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 @SuppressWarnings("PMD")
 public abstract class AbstractStjsTest {
 
@@ -47,41 +53,70 @@ public abstract class AbstractStjsTest {
 
 	private Generator generator;
 
+	/**
+	 * <p>Constructor for AbstractStjsTest.</p>
+	 */
 	public AbstractStjsTest() {
 	}
 
 	/**
+	 * <p>generate.</p>
+	 *
 	 * @return the javascript code generator from the given class
+	 * @param clazz a {@link java.lang.Class} object.
 	 */
 	public String generate(Class<?> clazz) {
 		return (String) executeOrGenerate(clazz, false, false);
 	}
 
 	/**
+	 * <p>generate.</p>
+	 *
 	 * @return the javascript code generator from the given class
+	 * @param clazz a {@link java.lang.Class} object.
+	 * @param config a {@link org.stjs.generator.GeneratorConfiguration} object.
 	 */
 	public String generate(Class<?> clazz, GeneratorConfiguration config) {
 		return (String) executeOrGenerate(clazz, false, false, config);
 	}
 
 	/**
+	 * <p>generateWithSourcemap.</p>
+	 *
 	 * @return the javascript code generator from the given class
+	 * @param clazz a {@link java.lang.Class} object.
 	 */
 	public String generateWithSourcemap(Class<?> clazz) {
 		return (String) executeOrGenerate(clazz, false, true);
 	}
 
 	/**
+	 * <p>execute.</p>
+	 *
 	 * @return the javascript code generator from the given class
+	 * @param clazz a {@link java.lang.Class} object.
 	 */
 	public Object execute(Class<?> clazz) {
 		return convert(executeOrGenerate(clazz, true, false));
 	}
 
+	/**
+	 * <p>executeAndReturnNumber.</p>
+	 *
+	 * @param clazz a {@link java.lang.Class} object.
+	 * @return a double.
+	 */
 	public double executeAndReturnNumber(Class<?> clazz) {
 		return executeAndReturnNumber(clazz, null);
 	}
 
+	/**
+	 * <p>executeAndReturnNumber.</p>
+	 *
+	 * @param clazz a {@link java.lang.Class} object.
+	 * @param extraConfig a {@link org.stjs.generator.GeneratorConfiguration} object.
+	 * @return a double.
+	 */
 	public double executeAndReturnNumber(Class<?> clazz, GeneratorConfiguration extraConfig) {
 		Object obj = convert(executeOrGenerate(clazz, true, false, extraConfig));
 		if (obj == null) {
@@ -93,6 +128,12 @@ public abstract class AbstractStjsTest {
 		return Double.NaN;
 	}
 
+	/**
+	 * <p>execute.</p>
+	 *
+	 * @param preGeneratedJs a {@link java.lang.String} object.
+	 * @return a {@link java.lang.Object} object.
+	 */
 	public Object execute(String preGeneratedJs) {
 		try {
 			File jsfile = new File(preGeneratedJs);
@@ -267,20 +308,42 @@ public abstract class AbstractStjsTest {
 		}
 	}
 
+	/**
+	 * <p>stjsClass.</p>
+	 *
+	 * @param clazz a {@link java.lang.Class} object.
+	 * @return a {@link org.stjs.generator.ClassWithJavascript} object.
+	 */
 	public ClassWithJavascript stjsClass(Class<?> clazz) {
 		return this.generator.getExistingStjsClass(Thread.currentThread().getContextClassLoader(), clazz);
 	}
 
+	/**
+	 * <p>assertCodeContains.</p>
+	 *
+	 * @param clazz a {@link java.lang.Class} object.
+	 * @param snippet a {@link java.lang.String} object.
+	 */
 	public void assertCodeContains(Class<?> clazz, String snippet) {
 		assertCodeContains(generate(clazz), snippet);
 	}
 
+	/**
+	 * <p>assertCodeContains.</p>
+	 *
+	 * @param clazz a {@link java.lang.Class} object.
+	 * @param snippet a {@link java.lang.String} object.
+	 * @param extraConfig a {@link org.stjs.generator.GeneratorConfiguration} object.
+	 */
 	public void assertCodeContains(Class<?> clazz, String snippet, GeneratorConfiguration extraConfig) {
 		assertCodeContains(generate(clazz, extraConfig), snippet);
 	}
 
 	/**
 	 * checks if the searched snippet is found inside the given code. The whitespaces are not taken into account
+	 *
+	 * @param code a {@link java.lang.String} object.
+	 * @param snippet a {@link java.lang.String} object.
 	 */
 	public void assertCodeContains(String code, String snippet) {
 		String cleanCode = code.replaceAll("\\s+", "");
@@ -288,16 +351,32 @@ public abstract class AbstractStjsTest {
 		assertTrue("[" + snippet + "] not in \n" + code, cleanCode.contains(cleanSnippet));
 	}
 
+	/**
+	 * <p>assertCodeDoesNotContain.</p>
+	 *
+	 * @param clazz a {@link java.lang.Class} object.
+	 * @param snippet a {@link java.lang.String} object.
+	 */
 	public void assertCodeDoesNotContain(Class<?> clazz, String snippet) {
 		assertCodeDoesNotContain(generate(clazz), snippet);
 	}
 
+	/**
+	 * <p>assertCodeDoesNotContain.</p>
+	 *
+	 * @param clazz a {@link java.lang.Class} object.
+	 * @param snippet a {@link java.lang.String} object.
+	 * @param extraConfig a {@link org.stjs.generator.GeneratorConfiguration} object.
+	 */
 	public void assertCodeDoesNotContain(Class<?> clazz, String snippet, GeneratorConfiguration extraConfig) {
 		assertCodeDoesNotContain(generate(clazz, extraConfig), snippet);
 	}
 
 	/**
 	 * checks if the searched snippet is not found inside the given code. The whitespaces are not taken into account
+	 *
+	 * @param code a {@link java.lang.String} object.
+	 * @param snippet a {@link java.lang.String} object.
 	 */
 	public void assertCodeDoesNotContain(String code, String snippet) {
 		String cleanCode = code.replaceAll("\\s+", "");
@@ -332,6 +411,11 @@ public abstract class AbstractStjsTest {
 		}
 	}
 
+	/**
+	 * <p>buildClassLoader.</p>
+	 *
+	 * @return a {@link java.lang.ClassLoader} object.
+	 */
 	@edu.umd.cs.findbugs.annotations.SuppressWarnings(
 			value = "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED", justification = "this is for tests only")
 	public ClassLoader buildClassLoader() {

@@ -31,9 +31,9 @@ import org.codehaus.plexus.compiler.util.scan.mapping.SuffixMapping;
 /**
  * This class checks if the files corresponding to a source file are older than the corresponding .class. It checks this
  * instead of the source file's timestamp to be able to regenerate the code when a "clean" is made.
- * 
+ *
  * @author jdcasey,acraciun
- * 
+ * @version $Id: $Id
  */
 @SuppressWarnings("rawtypes")
 public class StaleClassSourceScanner extends AbstractSourceInclusionScanner {
@@ -53,14 +53,33 @@ public class StaleClassSourceScanner extends AbstractSourceInclusionScanner {
 	//
 	// ----------------------------------------------------------------------
 
+	/**
+	 * <p>Constructor for StaleClassSourceScanner.</p>
+	 *
+	 * @param classTargetDir a {@link java.io.File} object.
+	 */
 	public StaleClassSourceScanner(File classTargetDir) {
 		this(0, Collections.singleton("**/*"), Collections.EMPTY_SET, classTargetDir);
 	}
 
+	/**
+	 * <p>Constructor for StaleClassSourceScanner.</p>
+	 *
+	 * @param lastUpdatedWithinMsecs a long.
+	 * @param classTargetDir a {@link java.io.File} object.
+	 */
 	public StaleClassSourceScanner(long lastUpdatedWithinMsecs, File classTargetDir) {
 		this(lastUpdatedWithinMsecs, Collections.singleton("**/*"), Collections.EMPTY_SET, classTargetDir);
 	}
 
+	/**
+	 * <p>Constructor for StaleClassSourceScanner.</p>
+	 *
+	 * @param lastUpdatedWithinMsecs a long.
+	 * @param sourceIncludes a {@link java.util.Set} object.
+	 * @param sourceExcludes a {@link java.util.Set} object.
+	 * @param classTargetDir a {@link java.io.File} object.
+	 */
 	public StaleClassSourceScanner(long lastUpdatedWithinMsecs, Set sourceIncludes, Set sourceExcludes,
 			File classTargetDir) {
 		this.lastUpdatedWithinMsecs = lastUpdatedWithinMsecs;
@@ -85,6 +104,7 @@ public class StaleClassSourceScanner extends AbstractSourceInclusionScanner {
 	// SourceInclusionScanner Implementation
 	// ----------------------------------------------------------------------
 
+	/** {@inheritDoc} */
 	@SuppressWarnings("unchecked")
 	public Set getIncludedSources(File sourceDir, File targetDir) throws InclusionScanException {
 		List srcMappings = getSourceMappings();

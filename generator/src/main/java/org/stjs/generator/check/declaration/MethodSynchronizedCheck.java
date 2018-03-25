@@ -13,10 +13,13 @@ import com.sun.source.tree.Tree;
 
 /**
  * this class checks that you don't have synchornized methods, as this feature is not supported in JavaScript
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class MethodSynchronizedCheck implements CheckContributor<MethodTree> {
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, MethodTree tree, GenerationContext<Void> context) {
 		TreeWrapper<Tree, Void> tw = context.getCurrentWrapper();

@@ -29,8 +29,15 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+/**
+ * <p>JSDateAdapter class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class JSDateAdapter implements JsonSerializer<Date>, JsonDeserializer<Date> {
 
+	/** {@inheritDoc} */
 	@Override
 	public Date deserialize(JsonElement elem, Type typeOfT, JsonDeserializationContext context)
 			throws JsonParseException {
@@ -40,6 +47,7 @@ public class JSDateAdapter implements JsonSerializer<Date>, JsonDeserializer<Dat
 		return new Date(elem.getAsString());
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public JsonElement serialize(Date src, Type typeOfSrc, JsonSerializationContext context) {
 		if (src == null) {

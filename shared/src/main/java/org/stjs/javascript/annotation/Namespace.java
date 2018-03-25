@@ -24,8 +24,9 @@ import java.lang.annotation.Target;
  * This annotation is used to mark a Javascript name space for the given type. It can also be applied to the entire
  * package. The same namespace can be used for different Java packages. But be aware that the class names should be
  * unique within the same namespace!
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 @Target({ ElementType.TYPE, ElementType.PACKAGE })
 @Retention(RetentionPolicy.RUNTIME)

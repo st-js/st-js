@@ -44,13 +44,16 @@ import com.google.common.io.Files;
  * information, as the original Java code will no longer be available with the library.
  *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class STJSClass implements ClassWithJavascript {
 	private static final Logger LOG = Logger.getLogger(STJSClass.class.getName());
 
 	private static final String DEPENDENCIES_PROP = "dependencies";
+	/** Constant <code>CLASS_PROP="class"</code> */
 	public static final String CLASS_PROP = "class";
 	private static final String GENERATED_JS_FILE_PROP = "js";
+	/** Constant <code>JS_NAMESPACE="jsNamespace"</code> */
 	public static final String JS_NAMESPACE = "jsNamespace";
 
 	private final Properties properties;
@@ -70,6 +73,10 @@ public class STJSClass implements ClassWithJavascript {
 	/**
 	 * constructor for storage, instances created with this constructor are very short lived and should only be used to
 	 * output the small .stjs properties file that resides next to .class files
+	 *
+	 * @param classResolver a {@link org.stjs.generator.ClassResolver} object.
+	 * @param targetFolder a {@link java.io.File} object.
+	 * @param javaClass a {@link java.lang.Class} object.
 	 */
 	public STJSClass(ClassResolver classResolver, File targetFolder, Class<?> javaClass) {
 		PreConditions.checkNotNull(classResolver);
@@ -84,6 +91,10 @@ public class STJSClass implements ClassWithJavascript {
 
 	/**
 	 * constructor for loading
+	 *
+	 * @param classResolver a {@link org.stjs.generator.ClassResolver} object.
+	 * @param classLoader a {@link java.lang.ClassLoader} object.
+	 * @param javaClass a {@link java.lang.Class} object.
 	 */
 	public STJSClass(ClassResolver classResolver, ClassLoader classLoader, Class<?> javaClass) {
 		PreConditions.checkNotNull(classResolver);
@@ -190,6 +201,11 @@ public class STJSClass implements ClassWithJavascript {
 		return ns;
 	}
 
+	/**
+	 * <p>getStjsPropertiesFile.</p>
+	 *
+	 * @return a {@link java.io.File} object.
+	 */
 	public File getStjsPropertiesFile() {
 		File propFile = new File(targetFolder, ClassUtils.getPropertiesFileName(getJavaClassName()));
 		if (!propFile.getParentFile().exists() && !propFile.getParentFile().mkdirs()) {
@@ -198,6 +214,9 @@ public class STJSClass implements ClassWithJavascript {
 		return propFile;
 	}
 
+	/**
+	 * <p>store.</p>
+	 */
 	public void store() {
 		if (targetFolder == null) {
 			throw new IllegalStateException("This properties file was open for read only");
@@ -224,11 +243,21 @@ public class STJSClass implements ClassWithJavascript {
 		}
 	}
 
+	/**
+	 * <p>Setter for the field <code>javascriptNamespace</code>.</p>
+	 *
+	 * @param jsNamespace a {@link java.lang.String} object.
+	 */
 	public void setJavascriptNamespace(String jsNamespace) {
 		this.javascriptNamespace = jsNamespace;
 		properties.put(JS_NAMESPACE, jsNamespace);
 	}
 
+	/**
+	 * <p>Setter for the field <code>dependencies</code>.</p>
+	 *
+	 * @param deps a {@link java.util.Map} object.
+	 */
 	public void setDependencies(Map<String, DependencyType> deps) {
 
 		if (deps == null) {
@@ -242,6 +271,11 @@ public class STJSClass implements ClassWithJavascript {
 		}
 	}
 
+	/**
+	 * <p>Setter for the field <code>generatedJavascriptFile</code>.</p>
+	 *
+	 * @param generatedJavascriptFile a {@link java.net.URI} object.
+	 */
 	public void setGeneratedJavascriptFile(URI generatedJavascriptFile) {
 		this.generatedJavascriptFile = generatedJavascriptFile;
 		if (generatedJavascriptFile == null) {
@@ -252,16 +286,19 @@ public class STJSClass implements ClassWithJavascript {
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public final String getJavaClassName() {
 		return javaClass.getName();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Class<?> getJavaClass() {
 		return this.javaClass;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String getJavascriptClassName() {
 		String simpleName = getJavaClass().getSimpleName();
@@ -272,11 +309,13 @@ public class STJSClass implements ClassWithJavascript {
 		return simpleName;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String getJavascriptNamespace() {
 		return this.javascriptNamespace;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public List<URI> getJavascriptFiles() {
 		if (generatedJavascriptFile == null) {
@@ -285,6 +324,7 @@ public class STJSClass implements ClassWithJavascript {
 		return Collections.singletonList(generatedJavascriptFile);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public List<ClassWithJavascript> getDirectDependencies() {
 		if (directDependencies == null) {
@@ -296,6 +336,7 @@ public class STJSClass implements ClassWithJavascript {
 		return directDependencies;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Map<ClassWithJavascript, DependencyType> getDirectDependencyMap() {
 		if (directDependenciesMap == null) {
@@ -307,11 +348,13 @@ public class STJSClass implements ClassWithJavascript {
 		return directDependenciesMap;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		return "STJSClass [javaClassName=" + getJavaClassName() + "]";
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -320,6 +363,7 @@ public class STJSClass implements ClassWithJavascript {
 		return result;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {

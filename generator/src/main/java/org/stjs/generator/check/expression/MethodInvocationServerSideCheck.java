@@ -12,10 +12,13 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * this check verifies that you don't call a method from the outer type as in javaScript this scope is not accessible.
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class MethodInvocationServerSideCheck implements CheckContributor<MethodInvocationTree> {
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, MethodInvocationTree tree, GenerationContext<Void> context) {
 		Element methodElement = TreeUtils.elementFromUse(tree);

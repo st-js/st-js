@@ -25,6 +25,7 @@ import com.sun.source.util.TreePath;
  * This class implements the naming strategy transforming Java element names in JavaScript names.
  *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 	private static final String JAVA_LANG_PACKAGE = "java.lang.";
@@ -70,6 +71,7 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 		return namespace + "." + name;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String getTypeName(GenerationContext<?> context, TypeMirror type, DependencyType dependencyType) {
 		TypeInfo typeInfo = resolvedTypes.get(type);
@@ -190,23 +192,27 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String getVariableName(GenerationContext<?> context, IdentifierTree treeNode, TreePath path) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String getMethodName(GenerationContext<?> context, MethodTree tree, TreePath path) {
 		return tree.getName().toString();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String getMethodName(GenerationContext<?> context, MethodInvocationTree tree, TreePath path) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String getTypeName(GenerationContext<?> context, Element type, DependencyType dependencyType) {
 		if (type == null) {
@@ -215,6 +221,7 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 		return getTypeName(context, type.asType(), dependencyType);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Map<String, DependencyType> getResolvedTypes() {
 		return resolvedRootTypes;

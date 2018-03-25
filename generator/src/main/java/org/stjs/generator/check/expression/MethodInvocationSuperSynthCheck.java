@@ -16,9 +16,9 @@ import com.sun.source.tree.Tree;
 /**
  * this check verifies that you don't call a method from the super type if that is a synthetic type, as the actual
  * definition of this type does not exist.
- * 
+ *
  * @author acraciun
- * 
+ * @version $Id: $Id
  */
 public class MethodInvocationSuperSynthCheck implements CheckContributor<MethodInvocationTree> {
 
@@ -47,6 +47,7 @@ public class MethodInvocationSuperSynthCheck implements CheckContributor<MethodI
 		return false;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, MethodInvocationTree tree, GenerationContext<Void> context) {
 		TreeWrapper<MethodInvocationTree, Void> tw = context.getCurrentWrapper();

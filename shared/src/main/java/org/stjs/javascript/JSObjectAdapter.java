@@ -23,8 +23,9 @@ import org.stjs.javascript.annotation.Template;
 /**
  * here are the methods existent in Javascript for objects and inexistent in the Java counterpart. The generator should
  * generate the correct code
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 @Adapter
 public final class JSObjectAdapter {
@@ -32,15 +33,42 @@ public final class JSObjectAdapter {
 		//
 	}
 
+	/**
+	 * <p>$get.</p>
+	 *
+	 * @param obj a {@link java.lang.Object} object.
+	 * @param property a {@link java.lang.String} object.
+	 * @return a {@link java.lang.Object} object.
+	 */
 	@Template("get")
 	public native static Object $get(Object obj, String property);
 
+	/**
+	 * <p>$put.</p>
+	 *
+	 * @param obj a {@link java.lang.Object} object.
+	 * @param property a {@link java.lang.String} object.
+	 * @param value a {@link java.lang.Object} object.
+	 */
 	@Template("put")
 	public native static void $put(Object obj, String property, Object value);
 
+	/**
+	 * <p>hasOwnProperty.</p>
+	 *
+	 * @param obj a {@link java.lang.Object} object.
+	 * @param property a {@link java.lang.String} object.
+	 * @return a boolean.
+	 */
 	@Template("adapter")
 	public native static boolean hasOwnProperty(Object obj, String property);
 
+	/**
+	 * <p>toLocaleString.</p>
+	 *
+	 * @param obj a {@link java.lang.Object} object.
+	 * @return a {@link java.lang.String} object.
+	 */
 	@Template("adapter")
 	public static String toLocaleString(Object obj) {
 		if (obj == null) {
@@ -62,18 +90,50 @@ public final class JSObjectAdapter {
 		}
 	}
 
+	/**
+	 * <p>$prototype.</p>
+	 *
+	 * @param obj a {@link java.lang.Object} object.
+	 * @return a {@link org.stjs.javascript.Map} object.
+	 */
 	@Template("toProperty")
 	public native static Map<String, Object> $prototype(Object obj);
 
+	/**
+	 * <p>$constructor.</p>
+	 *
+	 * @param obj a {@link java.lang.Object} object.
+	 * @return a {@link java.lang.Object} object.
+	 */
 	@Template("toProperty")
 	public native static Object $constructor(Object obj);
 
+	/**
+	 * <p>$properties.</p>
+	 *
+	 * @param obj a {@link java.lang.Object} object.
+	 * @return a {@link org.stjs.javascript.Map} object.
+	 */
 	@Template("properties")
 	public native static Map<String, Object> $properties(Object obj);
 
+	/**
+	 * <p>$object.</p>
+	 *
+	 * @param properties a {@link org.stjs.javascript.Map} object.
+	 * @param <T> a T object.
+	 * @return a T object.
+	 */
 	@Template("properties")
 	public native static <T> T $object(Map<String, Object> properties);
 
+	/**
+	 * <p>$js.</p>
+	 *
+	 * @param code a {@link java.lang.String} object.
+	 * @param <T> a T object.
+	 * @return a T object.
+	 */
 	@Template("js")
 	public native static <T> T $js(String code);
 }

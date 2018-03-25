@@ -9,11 +9,13 @@ import com.sun.source.tree.ArrayTypeTree;
 /**
  * this class checks that you don't use java arrays in the code (the only exception is the main method - but maybe this
  * only should also be forbidden). You should use {@link org.stjs.javascript.Array instead}.
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class ArrayTypeForbiddenCheck implements CheckContributor<ArrayTypeTree> {
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, ArrayTypeTree tree, GenerationContext<Void> context) {
 		return null;

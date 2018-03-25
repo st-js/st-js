@@ -42,7 +42,9 @@ import com.sun.source.util.Trees;
 
 /**
  * This class can resolve an identifier or a method in the given source context. There is one context create for each generation process.
+ *
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
+ * @version $Id: $Id
  */
 public class GenerationContext<JS> implements TreePathHolder {
 
@@ -74,6 +76,16 @@ public class GenerationContext<JS> implements TreePathHolder {
 	private final Map<Tree, TreeWrapper<?, JS>> cacheWrappers = Maps.newIdentityHashMap();
 	private final Map<Element, TreeWrapper<?, JS>> cacheWrappersByElement = Maps.newIdentityHashMap();
 
+	/**
+	 * <p>Constructor for GenerationContext.</p>
+	 *
+	 * @param inputFile a {@link java.io.File} object.
+	 * @param configuration a {@link org.stjs.generator.GeneratorConfiguration} object.
+	 * @param names a {@link org.stjs.generator.name.JavaScriptNameProvider} object.
+	 * @param trees a {@link com.sun.source.util.Trees} object.
+	 * @param cacheAnnotations a {@link java.util.Map} object.
+	 * @param javaScriptBuilder a {@link org.stjs.generator.javascript.JavaScriptBuilder} object.
+	 */
 	public GenerationContext(File inputFile, GeneratorConfiguration configuration, JavaScriptNameProvider names, Trees trees,
 			Map<AnnotationCacheKey, Object> cacheAnnotations, JavaScriptBuilder<JS> javaScriptBuilder) {
 		this.inputFile = inputFile;
@@ -85,64 +97,133 @@ public class GenerationContext<JS> implements TreePathHolder {
 		this.cacheAnnotations = cacheAnnotations;
 	}
 
+	/**
+	 * <p>Getter for the field <code>inputFile</code>.</p>
+	 *
+	 * @return a {@link java.io.File} object.
+	 */
 	public File getInputFile() {
 		return inputFile;
 	}
 
+	/**
+	 * <p>Getter for the field <code>configuration</code>.</p>
+	 *
+	 * @return a {@link org.stjs.generator.GeneratorConfiguration} object.
+	 */
 	public GeneratorConfiguration getConfiguration() {
 		return configuration;
 	}
 
+	/**
+	 * <p>Getter for the field <code>names</code>.</p>
+	 *
+	 * @return a {@link org.stjs.generator.name.JavaScriptNameProvider} object.
+	 */
 	public JavaScriptNameProvider getNames() {
 		return names;
 	}
 
+	/**
+	 * <p>Getter for the field <code>trees</code>.</p>
+	 *
+	 * @return a {@link com.sun.source.util.Trees} object.
+	 */
 	public Trees getTrees() {
 		return trees;
 	}
 
+	/**
+	 * <p>Setter for the field <code>trees</code>.</p>
+	 *
+	 * @param trees a {@link com.sun.source.util.Trees} object.
+	 */
 	public void setTrees(Trees trees) {
 		this.trees = trees;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public TreePath getCurrentPath() {
 		return currentPath;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void setCurrentPath(TreePath currentPath) {
 		this.currentPath = currentPath;
 	}
 
+	/**
+	 * <p>Getter for the field <code>elements</code>.</p>
+	 *
+	 * @return a {@link javax.lang.model.util.Elements} object.
+	 */
 	public Elements getElements() {
 		return elements;
 	}
 
+	/**
+	 * <p>Setter for the field <code>elements</code>.</p>
+	 *
+	 * @param elements a {@link javax.lang.model.util.Elements} object.
+	 */
 	public void setElements(Elements elements) {
 		this.elements = elements;
 	}
 
+	/**
+	 * <p>Getter for the field <code>types</code>.</p>
+	 *
+	 * @return a {@link javax.lang.model.util.Types} object.
+	 */
 	public Types getTypes() {
 		return types;
 	}
 
+	/**
+	 * <p>Setter for the field <code>types</code>.</p>
+	 *
+	 * @param types a {@link javax.lang.model.util.Types} object.
+	 */
 	public void setTypes(Types types) {
 		this.types = types;
 	}
 
+	/**
+	 * <p>Getter for the field <code>checks</code>.</p>
+	 *
+	 * @return a {@link org.stjs.generator.check.Checks} object.
+	 */
 	public Checks getChecks() {
 		return checks;
 	}
 
+	/**
+	 * <p>Getter for the field <code>compilationUnit</code>.</p>
+	 *
+	 * @return a {@link com.sun.source.tree.CompilationUnitTree} object.
+	 */
 	public CompilationUnitTree getCompilationUnit() {
 		return compilationUnit;
 	}
 
+	/**
+	 * <p>Setter for the field <code>compilationUnit</code>.</p>
+	 *
+	 * @param compilationUnit a {@link com.sun.source.tree.CompilationUnitTree} object.
+	 */
 	public void setCompilationUnit(CompilationUnitTree compilationUnit) {
 		this.compilationUnit = compilationUnit;
 	}
 
+	/**
+	 * <p>addError.</p>
+	 *
+	 * @param tree a {@link com.sun.source.tree.Tree} object.
+	 * @param message a {@link java.lang.String} object.
+	 * @return a {@link org.stjs.generator.JavascriptFileGenerationException} object.
+	 */
 	public JavascriptFileGenerationException addError(Tree tree, String message) {
 		if (compilationUnit == null) {
 			return new JavascriptFileGenerationException(new SourcePosition(inputFile, 0, 0), message);
@@ -158,9 +239,10 @@ public class GenerationContext<JS> implements TreePathHolder {
 
 	/**
 	 * add the position of the Java original node in the generated node.
-	 * @param tree
-	 * @param node
-	 * @return
+	 *
+	 * @param tree a {@link com.sun.source.tree.Tree} object.
+	 * @param node a JS object.
+	 * @return a JS object.
 	 */
 	public JS withPosition(Tree tree, JS node) {
 		if (compilationUnit == null) {
@@ -178,7 +260,9 @@ public class GenerationContext<JS> implements TreePathHolder {
 	}
 
 	/**
-	 * @param tree
+	 * <p>getStartLine.</p>
+	 *
+	 * @param tree a {@link com.sun.source.tree.Tree} object.
 	 * @return the starting line of the given tree node
 	 */
 	public int getStartLine(Tree tree) {
@@ -189,14 +273,31 @@ public class GenerationContext<JS> implements TreePathHolder {
 		return (int) (startPos >= 0 ? compilationUnit.getLineMap().getLineNumber(startPos) : 0);
 	}
 
+	/**
+	 * <p>js.</p>
+	 *
+	 * @return a {@link org.stjs.generator.javascript.JavaScriptBuilder} object.
+	 */
 	public JavaScriptBuilder<JS> js() {
 		return javaScriptBuilder;
 	}
 
+	/**
+	 * <p>writeJavaScript.</p>
+	 *
+	 * @param astRoot a JS object.
+	 * @param writer a {@link java.io.Writer} object.
+	 */
 	public void writeJavaScript(JS astRoot, Writer writer) {
 		sourceMapGenerator = javaScriptBuilder.writeJavaScript(astRoot, inputFile, configuration.isGenerateSourceMap(), writer);
 	}
 
+	/**
+	 * <p>writeSourceMap.</p>
+	 *
+	 * @param sourceMapWriter a {@link java.io.Writer} object.
+	 * @throws java.io.IOException if any.
+	 */
 	public void writeSourceMap(Writer sourceMapWriter) throws IOException {
 		// you need to call first writeJavaScript
 		if (sourceMapGenerator == null) {
@@ -205,10 +306,21 @@ public class GenerationContext<JS> implements TreePathHolder {
 		sourceMapGenerator.appendTo(sourceMapWriter, inputFile.getName().replaceAll("\\.java$", ".js"));
 	}
 
+	/**
+	 * <p>getCurrentWrapper.</p>
+	 *
+	 * @return a {@link org.stjs.generator.javac.TreeWrapper} object.
+	 */
 	public <T extends Tree> TreeWrapper<T, JS> getCurrentWrapper() {
 		return wrap(currentPath);
 	}
 
+	/**
+	 * <p>wrap.</p>
+	 *
+	 * @param path a {@link com.sun.source.util.TreePath} object.
+	 * @return a {@link org.stjs.generator.javac.TreeWrapper} object.
+	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Tree> TreeWrapper<T, JS> wrap(TreePath path) {
 		TreeWrapper<T, JS> tw = (TreeWrapper<T, JS>) cacheWrappers.get(path.getLeaf());
@@ -232,6 +344,12 @@ public class GenerationContext<JS> implements TreePathHolder {
 		return path;
 	}
 
+	/**
+	 * <p>wrap.</p>
+	 *
+	 * @param enclosingElement a {@link javax.lang.model.element.Element} object.
+	 * @return a {@link org.stjs.generator.javac.TreeWrapper} object.
+	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Tree> TreeWrapper<T, JS> wrap(Element enclosingElement) {
 		TreeWrapper<T, JS> tw = (TreeWrapper<T, JS>) cacheWrappersByElement.get(enclosingElement);
@@ -243,10 +361,22 @@ public class GenerationContext<JS> implements TreePathHolder {
 		return tw;
 	}
 
+	/**
+	 * <p>getBuiltProjectClassLoader.</p>
+	 *
+	 * @return a {@link java.lang.ClassLoader} object.
+	 */
 	public ClassLoader getBuiltProjectClassLoader() {
 		return configuration.getStjsClassLoader();
 	}
 
+	/**
+	 * <p>getAnnotation.</p>
+	 *
+	 * @param element a {@link javax.lang.model.element.Element} object.
+	 * @param annotationType a {@link java.lang.Class} object.
+	 * @return a T object.
+	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Annotation> T getAnnotation(Element element, Class<T> annotationType) {
 		AnnotationCacheKey key = new AnnotationCacheKey(annotationType, element);

@@ -27,19 +27,55 @@ import org.stjs.generator.name.DependencyType;
  * during the bridge construction
  *
  * @author acraciun
+ * @version $Id: $Id
  */
 public interface ClassWithJavascript {
+	/**
+	 * <p>getJavaClassName.</p>
+	 *
+	 * @return a {@link java.lang.String} object.
+	 */
 	String getJavaClassName();
 
+	/**
+	 * <p>getJavaClass.</p>
+	 *
+	 * @return a {@link java.lang.Class} object.
+	 */
 	Class<?> getJavaClass();
 
+	/**
+	 * <p>getJavascriptClassName.</p>
+	 *
+	 * @return a {@link java.lang.String} object.
+	 */
 	String getJavascriptClassName();
 
+	/**
+	 * <p>getJavascriptNamespace.</p>
+	 *
+	 * @return a {@link java.lang.String} object.
+	 */
 	String getJavascriptNamespace();
 
+	/**
+	 * <p>getJavascriptFiles.</p>
+	 *
+	 * @return a {@link java.util.List} object.
+	 */
 	List<URI> getJavascriptFiles();
 
+	/**
+	 * <p>getDirectDependencies.</p>
+	 *
+	 * @return a {@link java.util.List} object.
+	 */
 	List<ClassWithJavascript> getDirectDependencies();
 
+	/**
+	 * <p>getDirectDependencyMap.</p>
+	 *
+	 * @return a {@link java.util.Map} object.
+	 */
 	Map<ClassWithJavascript, DependencyType> getDirectDependencyMap();
 }

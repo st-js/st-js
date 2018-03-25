@@ -11,11 +11,13 @@ import com.sun.source.tree.Tree;
 
 /**
  * this class verifies that you use @Template only inside a bridge
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class MethodDeclarationTemplateCheck implements CheckContributor<MethodTree> {
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, MethodTree tree, GenerationContext<Void> context) {
 		TreeWrapper<Tree, Void> tw = context.getCurrentWrapper();

@@ -23,8 +23,15 @@ import org.codehaus.jackson.map.DeserializationContext;
 import org.codehaus.jackson.map.JsonDeserializer;
 import org.stjs.javascript.Date;
 
+/**
+ * <p>JSDateDeserializer class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class JSDateDeserializer extends JsonDeserializer<Date> {
 
+	/** {@inheritDoc} */
 	@Override
 	public Date deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
 		return new Date(jp.getText());

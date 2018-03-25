@@ -16,6 +16,12 @@ import com.sun.source.tree.Tree;
 import com.sun.source.tree.UnaryTree;
 import com.sun.source.tree.VariableTree;
 
+/**
+ * <p>FieldInitializerCheck class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class FieldInitializerCheck implements CheckContributor<VariableTree> {
 
 	private boolean checkInitializer(VariableTree tree) {
@@ -34,6 +40,7 @@ public class FieldInitializerCheck implements CheckContributor<VariableTree> {
 		return false;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, VariableTree tree, GenerationContext<Void> context) {
 		Element element = TreeUtils.elementFromDeclaration(tree);

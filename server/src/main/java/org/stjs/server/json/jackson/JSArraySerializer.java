@@ -25,14 +25,22 @@ import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.stjs.javascript.Array;
 
+/**
+ * <p>JSArraySerializer class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class JSArraySerializer extends JsonSerializer<Array<?>> {
 
+	/** {@inheritDoc} */
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Override
 	public Class<Array<?>> handledType() {
 		return (Class) Array.class;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void serialize(Array<?> array, JsonGenerator gen, SerializerProvider provider) throws IOException, JsonProcessingException {
 		if (array == null) {

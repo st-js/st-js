@@ -9,7 +9,7 @@ import org.stjs.generator.writer.expression.MethodInvocationWriter;
 import com.sun.source.tree.MethodInvocationTree;
 
 /**
- * array.$set(index, value) -> array[index] = value, or $set(obj, prop, value) -> obj[prop]=value
+ * array.$set(index, value) &gt; array[index] = value, or $set(obj, prop, value) &gt; obj[prop]=value
  *
  * @author acraciun
  */
@@ -26,10 +26,10 @@ public class PutTemplate<JS> implements WriterContributor<MethodInvocationTree, 
 		JS target = null;
 		int arg = 0;
 		if (argCount == 2) {
-			// array.$get(x) -> array[x]
+			// array.$get(x) &gt; array[x]
 			target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree>getCurrentWrapper());
 		} else {
-			// $get(obj, prop) -> obj[prop]
+			// $get(obj, prop) &gt; obj[prop]
 			target = context.js().paren(visitor.scan(tree.getArguments().get(arg++), context));
 		}
 		JS eg = context.js().elementGet(target, visitor.scan(tree.getArguments().get(arg++), context));

@@ -13,9 +13,9 @@ import org.stjs.generator.writer.expression.MethodInvocationWriter;
 import com.sun.source.tree.MethodInvocationTree;
 
 /**
- * $method() => $method and <br>
- * $method(x) => $method = x and $staticMethod(x) => x.$method and <br>
- * $staticMethod(x, y) => x.$method = y
+ * $method() =&gt; $method and <br>
+ * $method(x) =&gt; $method = x and $staticMethod(x) =&gt; x.$method and <br>
+ * $staticMethod(x, y) =&gt; x.$method = y
  *
  * @author acraciun
  */

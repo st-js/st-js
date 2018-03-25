@@ -31,31 +31,56 @@ import java.net.URI;
  * </li>
  * </ul>
  * The 3 parts are different for the files generated for the main classes compared to the test classes
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class GenerationDirectory {
 	private final File generatedSourcesAbsolutePath;
 	private final URI generatedSourcesRuntimePath;
 	private final File classpath;
 
+	/**
+	 * <p>Constructor for GenerationDirectory.</p>
+	 *
+	 * @param generatedSourcesAbsolutePath a {@link java.io.File} object.
+	 * @param classpath a {@link java.io.File} object.
+	 * @param generatedSourcesRuntimePath a {@link java.net.URI} object.
+	 */
 	public GenerationDirectory(File generatedSourcesAbsolutePath, File classpath, URI generatedSourcesRuntimePath) {
 		this.generatedSourcesAbsolutePath = generatedSourcesAbsolutePath;
 		this.generatedSourcesRuntimePath = generatedSourcesRuntimePath;
 		this.classpath = classpath;
 	}
 
+	/**
+	 * <p>Getter for the field <code>generatedSourcesAbsolutePath</code>.</p>
+	 *
+	 * @return a {@link java.io.File} object.
+	 */
 	public File getGeneratedSourcesAbsolutePath() {
 		return generatedSourcesAbsolutePath;
 	}
 
+	/**
+	 * <p>Getter for the field <code>generatedSourcesRuntimePath</code>.</p>
+	 *
+	 * @return a {@link java.net.URI} object.
+	 */
 	public URI getGeneratedSourcesRuntimePath() {
 		return generatedSourcesRuntimePath;
 	}
 
+	/**
+	 * <p>Getter for the field <code>classpath</code>.</p>
+	 *
+	 * @return a {@link java.io.File} object.
+	 */
 	public File getClasspath() {
 		return classpath;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		return "GenerationDirectory [generatedSourcesAbsolutePath=" + generatedSourcesAbsolutePath + ", classpath=" + classpath

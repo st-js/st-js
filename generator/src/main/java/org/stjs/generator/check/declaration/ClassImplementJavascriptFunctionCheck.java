@@ -11,8 +11,9 @@ import com.sun.source.tree.Tree;
 /**
  * check that a class does not implement a @JavaScript annotated interface as this is reserved to build inline
  * functions.
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class ClassImplementJavascriptFunctionCheck implements CheckContributor<ClassTree> {
 
@@ -23,6 +24,7 @@ public class ClassImplementJavascriptFunctionCheck implements CheckContributor<C
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, ClassTree tree, GenerationContext<Void> context) {
 		if (tree.getSimpleName().toString().isEmpty()) {

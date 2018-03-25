@@ -17,8 +17,9 @@ import com.sun.source.tree.Tree;
  * as for @GlobalScope - global classes, there is not class declaration, the members are attached directly to the
  * JavaScript global object (i.e. the window when running in the browser), the instance members have no meaning, so
  * forbid them.
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class ClassGlobalInstanceMembersCheck implements CheckContributor<ClassTree> {
 
@@ -33,6 +34,7 @@ public class ClassGlobalInstanceMembersCheck implements CheckContributor<ClassTr
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, ClassTree tree, GenerationContext<Void> context) {
 		TreeWrapper<ClassTree, Void> tw = context.getCurrentWrapper();

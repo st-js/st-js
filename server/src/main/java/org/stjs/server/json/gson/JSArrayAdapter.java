@@ -32,8 +32,15 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+/**
+ * <p>JSArrayAdapter class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class JSArrayAdapter implements JsonSerializer<Array<?>>, JsonDeserializer<Array<?>> {
 
+	/** {@inheritDoc} */
 	@Override
 	public Array<?> deserialize(JsonElement elem, Type type, JsonDeserializationContext ctx) throws JsonParseException {
 		if (elem == null) {
@@ -49,6 +56,7 @@ public class JSArrayAdapter implements JsonSerializer<Array<?>>, JsonDeserialize
 		return array;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public JsonElement serialize(Array<?> array, Type type, JsonSerializationContext ctx) {
 		if (array == null) {

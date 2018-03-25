@@ -12,6 +12,12 @@ import org.stjs.javascript.annotation.ServerSide;
 
 import com.sun.source.tree.IdentifierTree;
 
+/**
+ * <p>IdentifierAccessServerSideCheck class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class IdentifierAccessServerSideCheck implements CheckContributor<IdentifierTree> {
 
 	private boolean isRegularField(Element fieldElement, IdentifierTree tree) {
@@ -25,6 +31,7 @@ public class IdentifierAccessServerSideCheck implements CheckContributor<Identif
 		return true;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, IdentifierTree tree, GenerationContext<Void> context) {
 		Element fieldElement = TreeUtils.elementFromUse(tree);

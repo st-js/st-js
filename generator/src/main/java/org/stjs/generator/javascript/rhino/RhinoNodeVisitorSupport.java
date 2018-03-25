@@ -45,10 +45,11 @@ import org.mozilla.javascript.ast.VariableInitializer;
 import org.mozilla.javascript.ast.WhileLoop;
 
 /**
- * 
+ *
  * this class helps using a type visitor as the rhino library does not provide one out of the box
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(justification = "The type check is done by looking in the map", value = "BC_UNCONFIRMED_CAST")
 @SuppressWarnings("PMD.CouplingBetweenObjects")
@@ -312,6 +313,14 @@ public class RhinoNodeVisitorSupport {
 		});
 	}
 
+	/**
+	 * <p>accept.</p>
+	 *
+	 * @param node a {@link org.mozilla.javascript.Node} object.
+	 * @param visitor a {@link org.stjs.generator.javascript.rhino.AstVisitor} object.
+	 * @param param a T object.
+	 * @param <T> a T object.
+	 */
 	public <T> void accept(Node node, AstVisitor<T> visitor, T param) {
 		Caller caller = callers.get(node.getClass());
 		if (caller != null) {

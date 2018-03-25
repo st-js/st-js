@@ -13,9 +13,11 @@ import com.sun.source.tree.ClassTree;
  * be used as such
  *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class ClassNamespaceCheck implements CheckContributor<ClassTree> {
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, ClassTree tree, GenerationContext<Void> context) {
 		String namespace = context.getCurrentWrapper().getNamespace();

@@ -19,6 +19,12 @@ import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.util.TreePath;
 
+/**
+ * <p>IdentifierAccessOuterScopeCheck class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class IdentifierAccessOuterScopeCheck implements CheckContributor<IdentifierTree> {
 
 	private static boolean isInsideInizializerBlock(TreePath path) {
@@ -38,8 +44,8 @@ public class IdentifierAccessOuterScopeCheck implements CheckContributor<Identif
 	/**
 	 * if the block is an anonymous initializer, then return the outer class
 	 *
-	 * @param element
-	 * @return
+	 * @param path a {@link com.sun.source.util.TreePath} object.
+	 * @return a {@link com.sun.source.tree.ClassTree} object.
 	 */
 	public static ClassTree enclosingClassSkipAnonymousInitializer(TreePath path) {
 		TreePath enclosingClassTreePath = TreeUtils.enclosingPathOfType(path, ClassTree.class);
@@ -56,10 +62,10 @@ public class IdentifierAccessOuterScopeCheck implements CheckContributor<Identif
 	/**
 	 * true if outerType is striclty the outer type of the subtype
 	 *
-	 * @param context
-	 * @param outerType
-	 * @param subType
-	 * @return
+	 * @param context a {@link org.stjs.generator.GenerationContext} object.
+	 * @param outerType a {@link javax.lang.model.element.TypeElement} object.
+	 * @param subType a {@link javax.lang.model.element.TypeElement} object.
+	 * @return a boolean.
 	 */
 	public static boolean isOuterType(GenerationContext<Void> context, TypeElement outerType, TypeElement subType) {
 		TypeMirror subTypeErasure = context.getTypes().erasure(subType.asType());
@@ -85,6 +91,13 @@ public class IdentifierAccessOuterScopeCheck implements CheckContributor<Identif
 		return type1.toString().equals(type2.toString());
 	}
 
+	/**
+	 * <p>isRegularInstanceField.</p>
+	 *
+	 * @param fieldElement a {@link javax.lang.model.element.Element} object.
+	 * @param tree a {@link com.sun.source.tree.IdentifierTree} object.
+	 * @return a boolean.
+	 */
 	public static boolean isRegularInstanceField(Element fieldElement, IdentifierTree tree) {
 		if (fieldElement == null || fieldElement.getKind() != ElementKind.FIELD) {
 			// only meant for fields
@@ -101,6 +114,7 @@ public class IdentifierAccessOuterScopeCheck implements CheckContributor<Identif
 		return true;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, IdentifierTree tree, GenerationContext<Void> context) {
 		Element fieldElement = TreeUtils.elementFromUse(tree);

@@ -29,10 +29,11 @@ import java.lang.annotation.Target;
  * normally supplied to the Javascript method. For the number.toFixed example, the adapter will have a method
  * NumberAdapter.toFixed(String number, int position). The generated javascript code is the expected one:
  * number.toFixer(position).
- * 
+ *
  * Note: The adapter's method must be all static.
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 @Target({ ElementType.TYPE, ElementType.PACKAGE })
 @Retention(RetentionPolicy.RUNTIME)

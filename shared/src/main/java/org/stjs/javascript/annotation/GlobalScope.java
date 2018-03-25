@@ -24,8 +24,9 @@ import java.lang.annotation.Target;
  * This annotation is used to mark a global scope type. This means that all its static methods and fields will be called
  * without prefixing it with the name of the type. It is useful to define global objects that are defined by external
  * libraries.
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 @Target({ ElementType.TYPE, ElementType.PACKAGE })
 @Retention(RetentionPolicy.RUNTIME)

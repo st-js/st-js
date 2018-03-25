@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
  * This annotation annotates interfaces that are used to simulate Javascript functions. When implementing inline one of
  * those interfaces, the generated Javascript code will be an anonymous function. Consequently whenever in the code the
  * unique method of this interface is called, it will be generated a direct call to the function. Example:<br>
- * 
+ *
  * <pre>
  * doSomething(new Function1&lt;P, R&gt;() {
  * 	public R $invoke(P param) {
@@ -32,30 +32,30 @@ import java.lang.annotation.Target;
  * 	}
  * });
  * </pre>
- * 
+ *
  * will generate:<br>
- * 
+ *
  * <pre>
  *  doSomething(function(param) {
  * 	});
  * </pre>
- * 
+ *
  * And <br>
- * 
+ *
  * <pre>
  * Function1&lt;String,Integer&gt; f = ...;
  * Integer x = f.$invoke("test");
  * </pre>
- * 
+ *
  * will generate:<br>
- * 
+ *
  * <pre>
  * var f = ...;
  * var x = f("test");
  * </pre>
- * 
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 @Target({ ElementType.TYPE, ElementType.PACKAGE })
 @Retention(RetentionPolicy.RUNTIME)

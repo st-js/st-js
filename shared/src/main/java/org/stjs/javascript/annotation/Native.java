@@ -24,8 +24,9 @@ import java.lang.annotation.Target;
  * This annotation can be added on constructors only and it's the equivalent of using "native" keyword on methods, i.e.
  * its code is not generated. This is because the "native" keyword cannot be used on constructor. It's useful when the
  * code already exists in JavaScript or when you want to overload the constructor.
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 @Target({ ElementType.CONSTRUCTOR, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)

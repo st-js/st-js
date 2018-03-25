@@ -21,9 +21,10 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * Use this class to build a configuration needed by the {@link Generator}
+ * Use this class to build a configuration needed by the {@link org.stjs.generator.Generator}
  *
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
+ * @version $Id: $Id
  */
 public class GeneratorConfigurationBuilder {
 	private final Collection<String> allowedPackages = new HashSet<String>();
@@ -37,11 +38,19 @@ public class GeneratorConfigurationBuilder {
 	private GenerationDirectory generationFolder;
 	private ClassResolver classResolver;
 
+	/**
+	 * <p>Constructor for GeneratorConfigurationBuilder.</p>
+	 */
 	public GeneratorConfigurationBuilder() {
 		// Set a default value for the source encoding.
 		sourceEncoding = Charset.defaultCharset().name();
 	}
 
+	/**
+	 * <p>Constructor for GeneratorConfigurationBuilder.</p>
+	 *
+	 * @param baseConfig a {@link org.stjs.generator.GeneratorConfiguration} object.
+	 */
 	public GeneratorConfigurationBuilder(GeneratorConfiguration baseConfig) {
 		this();
 		if (baseConfig != null) {
@@ -58,71 +67,154 @@ public class GeneratorConfigurationBuilder {
 		}
 	}
 
+	/**
+	 * <p>allowedPackage.</p>
+	 *
+	 * @param packageName a {@link java.lang.String} object.
+	 * @return a {@link org.stjs.generator.GeneratorConfigurationBuilder} object.
+	 */
 	public GeneratorConfigurationBuilder allowedPackage(String packageName) {
 		allowedPackages.add(packageName);
 		return this;
 	}
 
+	/**
+	 * <p>allowedJavaLangClasses.</p>
+	 *
+	 * @param className a {@link java.lang.String} object.
+	 * @return a {@link org.stjs.generator.GeneratorConfigurationBuilder} object.
+	 */
 	public GeneratorConfigurationBuilder allowedJavaLangClasses(String className) {
 		allowedJavaLangClasses.add(className);
 		return this;
 	}
 
+	/**
+	 * <p>allowedPackages.</p>
+	 *
+	 * @param packageNames a {@link java.util.Collection} object.
+	 * @return a {@link org.stjs.generator.GeneratorConfigurationBuilder} object.
+	 */
 	public GeneratorConfigurationBuilder allowedPackages(Collection<String> packageNames) {
 		allowedPackages.addAll(packageNames);
 		return this;
 	}
 
+	/**
+	 * <p>allowedJavaLangClasses.</p>
+	 *
+	 * @param classNames a {@link java.util.Collection} object.
+	 * @return a {@link org.stjs.generator.GeneratorConfigurationBuilder} object.
+	 */
 	public GeneratorConfigurationBuilder allowedJavaLangClasses(Collection<String> classNames) {
 		allowedJavaLangClasses.addAll(classNames);
 		return this;
 	}
 
+	/**
+	 * <p>generateArrayHasOwnProperty.</p>
+	 *
+	 * @param b a boolean.
+	 * @return a {@link org.stjs.generator.GeneratorConfigurationBuilder} object.
+	 */
 	public GeneratorConfigurationBuilder generateArrayHasOwnProperty(boolean b) {
 		generateArrayHasOwnProperty = b;
 		return this;
 	}
 
+	/**
+	 * <p>generateSourceMap.</p>
+	 *
+	 * @param b a boolean.
+	 * @return a {@link org.stjs.generator.GeneratorConfigurationBuilder} object.
+	 */
 	public GeneratorConfigurationBuilder generateSourceMap(boolean b) {
 		generateSourceMap = b;
 		return this;
 	}
 
+	/**
+	 * <p>sourceEncoding.</p>
+	 *
+	 * @param sourceEncoding a {@link java.lang.String} object.
+	 * @return a {@link org.stjs.generator.GeneratorConfigurationBuilder} object.
+	 */
 	public GeneratorConfigurationBuilder sourceEncoding(String sourceEncoding) {
 		this.sourceEncoding = sourceEncoding;
 		return this;
 	}
 
+	/**
+	 * <p>annotations.</p>
+	 *
+	 * @param annotationNames a {@link java.lang.String} object.
+	 * @return a {@link org.stjs.generator.GeneratorConfigurationBuilder} object.
+	 */
 	public GeneratorConfigurationBuilder annotations(String... annotationNames) {
 		annotations.addAll(Arrays.asList(annotationNames));
 		return this;
 	}
 
+	/**
+	 * <p>annotations.</p>
+	 *
+	 * @param annotationNames a {@link java.util.Collection} object.
+	 * @return a {@link org.stjs.generator.GeneratorConfigurationBuilder} object.
+	 */
 	public GeneratorConfigurationBuilder annotations(Collection<String> annotationNames) {
 		annotations.addAll(annotationNames);
 		return this;
 	}
 
+	/**
+	 * <p>stjsClassLoader.</p>
+	 *
+	 * @param stjsClassLoader a {@link java.lang.ClassLoader} object.
+	 * @return a {@link org.stjs.generator.GeneratorConfigurationBuilder} object.
+	 */
 	public GeneratorConfigurationBuilder stjsClassLoader(ClassLoader stjsClassLoader) {
 		this.stjsClassLoader = stjsClassLoader;
 		return this;
 	}
 
+	/**
+	 * <p>targetFolder.</p>
+	 *
+	 * @param targetFolder a {@link java.io.File} object.
+	 * @return a {@link org.stjs.generator.GeneratorConfigurationBuilder} object.
+	 */
 	public GeneratorConfigurationBuilder targetFolder(File targetFolder) {
 		this.targetFolder = targetFolder;
 		return this;
 	}
 
+	/**
+	 * <p>generationFolder.</p>
+	 *
+	 * @param generationFolder a {@link org.stjs.generator.GenerationDirectory} object.
+	 * @return a {@link org.stjs.generator.GeneratorConfigurationBuilder} object.
+	 */
 	public GeneratorConfigurationBuilder generationFolder(GenerationDirectory generationFolder) {
 		this.generationFolder = generationFolder;
 		return this;
 	}
 
+	/**
+	 * <p>classResolver.</p>
+	 *
+	 * @param classResolver a {@link org.stjs.generator.ClassResolver} object.
+	 * @return a {@link org.stjs.generator.GeneratorConfigurationBuilder} object.
+	 */
 	public GeneratorConfigurationBuilder classResolver(ClassResolver classResolver) {
 		this.classResolver = classResolver;
 		return this;
 	}
 
+	/**
+	 * <p>build.</p>
+	 *
+	 * @return a {@link org.stjs.generator.GeneratorConfiguration} object.
+	 */
 	public GeneratorConfiguration build() {
 		allowedJavaLangClasses.add("Object");
 		allowedJavaLangClasses.add("Class");

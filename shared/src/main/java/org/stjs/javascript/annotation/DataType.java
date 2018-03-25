@@ -25,9 +25,10 @@ import java.lang.annotation.Target;
  * constructor of these types should be replaced with a anonymous object constructor in javascript: {}. If annotated
  * type is an interface, when the Javascript code is generated for a class implementing this interface, the interface
  * name does not appear in the "extends" part.
- * 
- * @deprecated Use {@link SyntheticType} instead
+ *
+ * @deprecated Use {@link org.stjs.javascript.annotation.SyntheticType} instead
  * @author acraciun
+ * @version $Id: $Id
  */
 @Target({ ElementType.TYPE, ElementType.PACKAGE })
 @Retention(RetentionPolicy.RUNTIME)

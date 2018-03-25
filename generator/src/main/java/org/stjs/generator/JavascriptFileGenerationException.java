@@ -19,33 +19,59 @@ import javax.annotation.Nonnull;
 
 /**
  * This is the exception thrown by the Generator.
- * 
+ *
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
+ * @version $Id: $Id
  */
 public class JavascriptFileGenerationException extends STJSRuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	private final SourcePosition sourcePosition;
 
+	/**
+	 * <p>Constructor for JavascriptFileGenerationException.</p>
+	 *
+	 * @param sourcePosition a {@link org.stjs.generator.SourcePosition} object.
+	 * @param message a {@link java.lang.String} object.
+	 * @param cause a {@link java.lang.Throwable} object.
+	 */
 	public JavascriptFileGenerationException(@Nonnull SourcePosition sourcePosition, String message, Throwable cause) {
 		super(message, cause);
 		this.sourcePosition = sourcePosition;
 	}
 
+	/**
+	 * <p>Constructor for JavascriptFileGenerationException.</p>
+	 *
+	 * @param sourcePosition a {@link org.stjs.generator.SourcePosition} object.
+	 * @param message a {@link java.lang.String} object.
+	 */
 	public JavascriptFileGenerationException(@Nonnull SourcePosition sourcePosition, String message) {
 		super(message);
 		this.sourcePosition = sourcePosition;
 	}
 
+	/**
+	 * <p>Constructor for JavascriptFileGenerationException.</p>
+	 *
+	 * @param sourcePosition a {@link org.stjs.generator.SourcePosition} object.
+	 * @param cause a {@link java.lang.Throwable} object.
+	 */
 	public JavascriptFileGenerationException(@Nonnull SourcePosition sourcePosition, Throwable cause) {
 		super(cause);
 		this.sourcePosition = sourcePosition;
 	}
 
+	/**
+	 * <p>Getter for the field <code>sourcePosition</code>.</p>
+	 *
+	 * @return a {@link org.stjs.generator.SourcePosition} object.
+	 */
 	public SourcePosition getSourcePosition() {
 		return sourcePosition;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

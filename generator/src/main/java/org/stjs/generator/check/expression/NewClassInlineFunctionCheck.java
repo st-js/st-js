@@ -14,6 +14,12 @@ import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
 
+/**
+ * <p>NewClassInlineFunctionCheck class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class NewClassInlineFunctionCheck implements CheckContributor<NewClassTree> {
 
 	private boolean checkMember(Tree member, GenerationContext<Void> context, boolean hasMethod) {
@@ -29,6 +35,7 @@ public class NewClassInlineFunctionCheck implements CheckContributor<NewClassTre
 		return false;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, NewClassTree tree, GenerationContext<Void> context) {
 		TreeWrapper<ClassTree, Void> tw = context.getCurrentWrapper();

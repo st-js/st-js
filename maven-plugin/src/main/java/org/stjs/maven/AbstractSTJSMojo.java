@@ -38,6 +38,8 @@ import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.compiler.util.scan.InclusionScanException;
 import org.codehaus.plexus.compiler.util.scan.SourceInclusionScanner;
@@ -68,9 +70,12 @@ import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
 import com.google.debugging.sourcemap.SourceMapGeneratorV3;
 
 /**
- * This is the Maven plugin that launches the Javascript generator. The plugin needs a list of packages containing the Java classes that will
- * processed to generate the corresponding Javascript classes. The Javascript files are generated in a configured target folder.
+ * This is the Maven plugin that launches the Javascript generator. The plugin needs a list of packages containing the
+ * Java classes that will processed to generate the corresponding Javascript classes. The Javascript files are generated
+ * in a configured target folder.
+ *
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
+ * @version $Id: $Id
  */
 abstract public class AbstractSTJSMojo extends AbstractMojo {
 	private static final Logger LOG = Logger.getLogger(AbstractSTJSMojo.class.getName());
@@ -78,79 +83,132 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	private static final Object PACKAGE_INFO_JAVA = "package-info.java";
 
 	/**
-	 * @parameter expression="${project}"
-	 * @required
-	 * @readonly
+	
 	 */
+	@Parameter(
+			defaultValue = "${project}", required = true, readonly = true)
 	protected MavenProject project;
 
 	/**
-	 * @component
 	 */
+	@Component
 	protected BuildContext buildContext;
 	/**
 	 * The list of packages that can be referenced from the classes that will be processed by the generator
-	 * @parameter
+	 * 
 	 */
+	@Parameter
 	protected List<String> allowedPackages;
 
 	/**
 	 * A list of inclusion filters for the compiler.
-	 * @parameter
+	 * 
 	 */
+	@Parameter
 	protected Set<String> includes = new HashSet<String>();
 
 	/**
 	 * A list of exclusion filters for the compiler.
-	 * @parameter
+	 * 
 	 */
+	@Parameter
 	protected Set<String> excludes = new HashSet<String>();
 
 	/**
-	 * Sets the granularity in milliseconds of the last modification date for testing whether a source needs recompilation.
-	 * @parameter expression="${lastModGranularityMs}" default-value="0"
+	 * Sets the granularity in milliseconds of the last modification date for testing whether a source needs
+	 * recompilation.
+	 * 
 	 */
+	@Parameter(
+			defaultValue = "0")
 	protected int staleMillis;
 
 	/**
 	 * If true the check, if (!array.hasOwnProperty(index)) continue; is added in each "for" array iteration
-	 * @parameter expression="${generateArrayHasOwnProperty}" default-value="true"
+	 * 
 	 */
+	@Parameter(
+			defaultValue = "true")
 	protected boolean generateArrayHasOwnProperty;
 
 	/**
-	 * If true, it generates for each JavaScript the corresponding source map back to the corresponding Java file. It also copies the Java source
-	 * file in the same folder as the generated Javascript file.
-	 * @parameter expression="${generateSourceMap}" default-value="false"
+	 * If true, it generates for each JavaScript the corresponding source map back to the corresponding Java file. It
+	 * also copies the Java source file in the same folder as the generated Javascript file.
+	 * 
 	 */
+	@Parameter(
+			defaultValue = "false")
 	protected boolean generateSourceMap;
 
 	/**
 	 * If true, it packs all the generated Javascript file (using the correct dependency order) into a single file named
 	 * ${project.artifactName}.js
-	 * @parameter expression="${pack}" default-value="false"
+	 * 
 	 */
+	@Parameter(
+			defaultValue = "false")
 	protected boolean pack;
 
 	/**
-	 * @parameter expression="${sourceEncoding}" default-value="${project.build.sourceEncoding}"
 	 */
+	@Parameter(
+			defaultValue = "${project.build.sourceEncoding}")
 	private String sourceEncoding;
 
 	/**
 	 * A list of annotations to be generated
-	 * @parameter
+	 * 
 	 */
+	@Parameter
 	protected Set<String> annotations = new HashSet<String>();
 
+	/**
+	 * <p>
+	 * getCompileSourceRoots.
+	 * </p>
+	 *
+	 * @return a {@link java.util.List} object.
+	 */
 	abstract protected List<String> getCompileSourceRoots();
 
+	/**
+	 * <p>
+	 * getGeneratedSourcesDirectory.
+	 * </p>
+	 *
+	 * @return a {@link org.stjs.generator.GenerationDirectory} object.
+	 * @throws org.apache.maven.plugin.MojoExecutionException
+	 *             if any.
+	 */
 	abstract protected GenerationDirectory getGeneratedSourcesDirectory() throws MojoExecutionException;
 
+	/**
+	 * <p>
+	 * getBuildOutputDirectory.
+	 * </p>
+	 *
+	 * @return a {@link java.io.File} object.
+	 */
 	abstract protected File getBuildOutputDirectory();
 
+	/**
+	 * <p>
+	 * getClasspathElements.
+	 * </p>
+	 *
+	 * @return a {@link java.util.List} object.
+	 * @throws org.apache.maven.artifact.DependencyResolutionRequiredException
+	 *             if any.
+	 */
 	abstract protected List<String> getClasspathElements() throws DependencyResolutionRequiredException;
 
+	/**
+	 * <p>
+	 * getCopyStjsSupportFile.
+	 * </p>
+	 *
+	 * @return a boolean.
+	 */
 	abstract protected boolean getCopyStjsSupportFile();
 
 	private ClassLoader getBuiltProjectClassLoader() throws MojoExecutionException {
@@ -169,6 +227,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		GenerationDirectory gendir = getGeneratedSourcesDirectory();
@@ -225,8 +284,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				}
 				File absoluteSource = new File(sourceDir, source.getPath());
 				try {
-					File absoluteTarget =
-							(File) mapping.getTargetFiles(gendir.getGeneratedSourcesAbsolutePath(), source.getPath()).iterator().next();
+					File absoluteTarget = (File) mapping.getTargetFiles(gendir.getGeneratedSourcesAbsolutePath(), source.getPath()).iterator()
+							.next();
 					if (getLog().isDebugEnabled()) {
 						getLog().debug("Generating " + absoluteTarget);
 					}
@@ -284,7 +343,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		StrongConnectivityInspector<String, DefaultEdge> inspector = new StrongConnectivityInspector<String, DefaultEdge>(dependencyGraph);
 		List<Set<String>> components = inspector.stronglyConnectedSets();
 
-		for (Iterator<Set<String>> it = components.iterator(); it.hasNext(); ) {
+		for (Iterator<Set<String>> it = components.iterator(); it.hasNext();) {
 			Set<String> component = it.next();
 			if (component.size() == 1) {
 				it.remove();
@@ -299,10 +358,13 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 	/**
 	 * packs all the files in a single file
+	 *
 	 * @param generator
+	 *            a {@link org.stjs.generator.Generator} object.
 	 * @param gendir
-	 * @throws MojoFailureException
-	 * @throws MojoExecutionException
+	 *            a {@link org.stjs.generator.GenerationDirectory} object.
+	 * @throws org.apache.maven.plugin.MojoFailureException
+	 * @throws org.apache.maven.plugin.MojoExecutionException
 	 */
 	protected void packFiles(Generator generator, GenerationDirectory gendir) throws MojoFailureException, MojoExecutionException {
 		if (!pack) {
@@ -328,8 +390,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				sources = accumulateSources(gendir, sourceDir, mapping, stjsMapping, Integer.MIN_VALUE);
 				for (File source : sources) {
 
-					File absoluteTarget =
-							(File) mapping.getTargetFiles(gendir.getGeneratedSourcesAbsolutePath(), source.getPath()).iterator().next();
+					File absoluteTarget = (File) mapping.getTargetFiles(gendir.getGeneratedSourcesAbsolutePath(), source.getPath()).iterator()
+							.next();
 
 					String className = getClassNameForSource(source.getPath());
 					if (!absoluteTarget.exists()) {
@@ -341,8 +403,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 					if (getLog().isDebugEnabled()) {
 						getLog().debug("Packing " + absoluteTarget);
 					}
-					ClassWithJavascript cjs =
-							generator.getExistingStjsClass(builtProjectClassLoader, builtProjectClassLoader.loadClass(className));
+					ClassWithJavascript cjs = generator.getExistingStjsClass(builtProjectClassLoader,
+							builtProjectClassLoader.loadClass(className));
 					dependencyGraph.addVertex(className);
 					for (Map.Entry<ClassWithJavascript, DependencyType> dep : cjs.getDirectDependencyMap().entrySet()) {
 						if (dep.getKey() instanceof STJSClass) {
@@ -370,9 +432,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 				if (targetFile != null) {
 					// for this project's files
 					if (generateSourceMap) {
-						currentLine = SourceMapUtils
-								.appendFileSkipSourceMap(gendir.getGeneratedSourcesAbsolutePath(), allSourcesFile, targetFile, currentLine,
-										packSourceMap, sourceEncoding);
+						currentLine = SourceMapUtils.appendFileSkipSourceMap(gendir.getGeneratedSourcesAbsolutePath(), allSourcesFile,
+								targetFile, currentLine, packSourceMap, sourceEncoding);
 					} else {
 						Files.copy(targetFile, allSourcesFile);
 					}
@@ -412,6 +473,20 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 	}
 
+	/**
+	 * <p>
+	 * filesGenerated.
+	 * </p>
+	 *
+	 * @param generator
+	 *            a {@link org.stjs.generator.Generator} object.
+	 * @param gendir
+	 *            a {@link org.stjs.generator.GenerationDirectory} object.
+	 * @throws org.apache.maven.plugin.MojoFailureException
+	 *             if any.
+	 * @throws org.apache.maven.plugin.MojoExecutionException
+	 *             if any.
+	 */
 	protected void filesGenerated(Generator generator, GenerationDirectory gendir) throws MojoFailureException, MojoExecutionException {
 		// copy the javascript support
 		try {
@@ -428,8 +503,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	}
 
 	/**
-	 * @return the list of Java source files to processed (those which are older than the corresponding Javascript file). The returned files are
-	 *         relative to the given source directory.
+	 * @return the list of Java source files to processed (those which are older than the corresponding Javascript
+	 *         file). The returned files are relative to the given source directory.
 	 */
 	private Collection<String> accumulatePackages(File sourceDir) throws MojoExecutionException {
 		final Collection<String> result = new HashSet<String>();
@@ -441,7 +516,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		ds.setFollowSymlinks(true);
 		ds.addDefaultExcludes();
 		ds.setBasedir(sourceDir);
-		ds.setIncludes(new String[] {"**/*.java"});
+		ds.setIncludes(new String[]{ "**/*.java" });
 		ds.scan();
 		for (String fileName : ds.getIncludedFiles()) {
 			File file = new File(fileName);
@@ -463,8 +538,8 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	}
 
 	/**
-	 * @return the list of Java source files to processed (those which are older than the corresponding Javascript file). The returned files are
-	 *         relative to the given source directory.
+	 * @return the list of Java source files to processed (those which are older than the corresponding Javascript
+	 *         file). The returned files are relative to the given source directory.
 	 */
 	@SuppressWarnings("unchecked")
 	private List<File> accumulateSources(GenerationDirectory gendir, File sourceDir, SourceMapping jsMapping, SourceMapping stjsMapping,
@@ -505,6 +580,15 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		return result;
 	}
 
+	/**
+	 * <p>
+	 * getSourceInclusionScanner.
+	 * </p>
+	 *
+	 * @param staleMillis
+	 *            a int.
+	 * @return a {@link org.codehaus.plexus.compiler.util.scan.SourceInclusionScanner} object.
+	 */
 	protected SourceInclusionScanner getSourceInclusionScanner(int staleMillis) {
 		SourceInclusionScanner scanner;
 

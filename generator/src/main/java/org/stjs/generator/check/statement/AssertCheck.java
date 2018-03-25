@@ -8,11 +8,13 @@ import com.sun.source.tree.AssertTree;
 
 /**
  * Java asserts don't have an equivalent - at language level in JavaScript
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class AssertCheck implements CheckContributor<AssertTree> {
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, AssertTree tree, GenerationContext<Void> context) {
 		context.addError(tree, "Assert statement is not supported by JavaScript.");

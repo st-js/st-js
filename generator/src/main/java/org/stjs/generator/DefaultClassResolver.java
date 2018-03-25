@@ -7,16 +7,25 @@ import org.stjs.generator.utils.ClassUtils;
 
 /**
  * this class lazily generates the dependencies
+ *
+ * @author acraciun
+ * @version $Id: $Id
  */
 public class DefaultClassResolver implements ClassResolver {
 
 	private final ClassLoader classLoader;
 	private final Map<String, ClassWithJavascript> cache = new HashMap<>();
 
+	/**
+	 * <p>Constructor for DefaultClassResolver.</p>
+	 *
+	 * @param classLoader a {@link java.lang.ClassLoader} object.
+	 */
 	public DefaultClassResolver(ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public ClassWithJavascript resolve(String className) {
 		ClassWithJavascript clazz = this.cache.get(className);
@@ -29,6 +38,7 @@ public class DefaultClassResolver implements ClassResolver {
 		return clazz;
 	}
 
+	/** {@inheritDoc} */
 	public Class<?> resolveJavaClass(String className) {
 		try {
 			return classLoader.loadClass(className);
@@ -38,6 +48,12 @@ public class DefaultClassResolver implements ClassResolver {
 		}
 	}
 
+	/**
+	 * <p>getParentClassName.</p>
+	 *
+	 * @param className a {@link java.lang.String} object.
+	 * @return a {@link java.lang.String} object.
+	 */
 	protected String getParentClassName(String className) {
 		String parentClassName = className;
 		int pos = parentClassName.indexOf('$');
@@ -48,6 +64,12 @@ public class DefaultClassResolver implements ClassResolver {
 		return parentClassName;
 	}
 
+	/**
+	 * <p>doResolve.</p>
+	 *
+	 * @param className a {@link java.lang.String} object.
+	 * @return a {@link org.stjs.generator.ClassWithJavascript} object.
+	 */
 	protected ClassWithJavascript doResolve(String className) {
 		String parentClassName = getParentClassName(className);
 		// try first if to see if it's a bridge class

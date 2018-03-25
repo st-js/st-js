@@ -65,7 +65,7 @@ public class DefaultMemberSelectTemplate<JS> implements WriterContributor<Member
 		JS target = getTarget(visitor, tree, context);
 
 		if (GeneratorConstants.CLASS.equals(tree.getIdentifier().toString())) {
-			// When ClassName.class -> ClassName
+			// When ClassName.class &gt; ClassName
 			return target;
 		}
 		return context.js().property(target, tree.getIdentifier().toString());

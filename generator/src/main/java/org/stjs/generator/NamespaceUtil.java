@@ -9,12 +9,29 @@ import java.util.Properties;
 
 import org.stjs.javascript.annotation.Namespace;
 
+/**
+ * <p>
+ * NamespaceUtil class.
+ * </p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public final class NamespaceUtil {
 
 	private NamespaceUtil() {
 		// nobody should extend this class
 	}
 
+	/**
+	 * <p>
+	 * resolveNamespace.
+	 * </p>
+	 *
+	 * @param clazz
+	 *            a {@link java.lang.Class} object.
+	 * @return a {@link java.lang.String} object.
+	 */
 	public static String resolveNamespace(Class<?> clazz) {
 		String ns = resolveNamespaceSimple(clazz);
 		if (ns == null && clazz.getPackage() != null) {
@@ -24,6 +41,17 @@ public final class NamespaceUtil {
 		return ns;
 	}
 
+	/**
+	 * <p>
+	 * resolveNamespace.
+	 * </p>
+	 *
+	 * @param className
+	 *            a {@link java.lang.String} object.
+	 * @param classLoader
+	 *            a {@link java.lang.ClassLoader} object.
+	 * @return a {@link java.lang.String} object.
+	 */
 	public static String resolveNamespace(String className, ClassLoader classLoader) {
 		try {
 			Class<?> clazz = Class.forName(className, false, classLoader);
@@ -34,6 +62,17 @@ public final class NamespaceUtil {
 		}
 	}
 
+	/**
+	 * <p>
+	 * resolvePackageNamespace.
+	 * </p>
+	 *
+	 * @param packageName
+	 *            a {@link java.lang.String} object.
+	 * @param classLoader
+	 *            a {@link java.lang.ClassLoader} object.
+	 * @return a {@link java.lang.String} object.
+	 */
 	public static String resolvePackageNamespace(String packageName, ClassLoader classLoader) {
 		Package pack = getPackage(packageName, classLoader);
 		if (pack != null) {
@@ -53,6 +92,17 @@ public final class NamespaceUtil {
 		return resolvePackageNamespace(packageName.substring(0, lastDotIndex), classLoader);
 	}
 
+	/**
+	 * <p>
+	 * resolveNamespaceSimple.
+	 * </p>
+	 *
+	 * @param className
+	 *            a {@link java.lang.String} object.
+	 * @param classLoader
+	 *            a {@link java.lang.ClassLoader} object.
+	 * @return a {@link java.lang.String} object.
+	 */
 	public static String resolveNamespaceSimple(String className, ClassLoader classLoader) {
 		try {
 			Class<?> clazz = Class.forName(className, false, classLoader);
@@ -63,6 +113,15 @@ public final class NamespaceUtil {
 		}
 	}
 
+	/**
+	 * <p>
+	 * resolveNamespaceSimple.
+	 * </p>
+	 *
+	 * @param clazz
+	 *            a {@link java.lang.Class} object.
+	 * @return a {@link java.lang.String} object.
+	 */
 	public static String resolveNamespaceSimple(Class<?> clazz) {
 		String ns = getNamespaceAnnotationValue(clazz, clazz.getClassLoader());
 		if (ns != null) {
@@ -120,10 +179,10 @@ public final class NamespaceUtil {
 	}
 
 	/**
-	 * Returns an instance of the @Namespace annotation class that is loaded from the specified ClassLoader.
-	 * In most cases, the current thread runs within the maven plugin which uses a different ClassLoader than
-	 * the one that contains the classpath of the project that is being compile. This method is useful to make
-	 * sure that calling Class.getAnnotation or Package.getAnnotation returns the expected result.
+	 * Returns an instance of the @Namespace annotation class that is loaded from the specified ClassLoader. In most
+	 * cases, the current thread runs within the maven plugin which uses a different ClassLoader than the one that
+	 * contains the classpath of the project that is being compile. This method is useful to make sure that calling
+	 * Class.getAnnotation or Package.getAnnotation returns the expected result.
 	 */
 	@SuppressWarnings("unchecked")
 	private static Class<? extends Annotation> getNamespaceClass(ClassLoader classLoader) throws ClassNotFoundException {

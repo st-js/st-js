@@ -22,8 +22,9 @@ import javax.annotation.concurrent.Immutable;
 
 /**
  * This class indicated a position in a source file (line, column) where the given identifier starts.
- * 
+ *
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
+ * @version $Id: $Id
  */
 @Immutable
 // PMD cannot correctly handle final fields
@@ -38,24 +39,47 @@ public final class SourcePosition implements Serializable {
 	private final int line;
 	private final int column;
 
+	/**
+	 * <p>Constructor for SourcePosition.</p>
+	 *
+	 * @param file a {@link java.io.File} object.
+	 * @param beginLine a int.
+	 * @param beginColumn a int.
+	 */
 	public SourcePosition(File file, int beginLine, int beginColumn) {
 		this.line = beginLine;
 		this.column = beginColumn;
 		this.file = file;
 	}
 
+	/**
+	 * <p>Getter for the field <code>line</code>.</p>
+	 *
+	 * @return a int.
+	 */
 	public int getLine() {
 		return line;
 	}
 
+	/**
+	 * <p>Getter for the field <code>column</code>.</p>
+	 *
+	 * @return a int.
+	 */
 	public int getColumn() {
 		return column;
 	}
 
+	/**
+	 * <p>Getter for the field <code>file</code>.</p>
+	 *
+	 * @return a {@link java.io.File} object.
+	 */
 	public File getFile() {
 		return file;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -66,6 +90,7 @@ public final class SourcePosition implements Serializable {
 		return result;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -94,6 +119,7 @@ public final class SourcePosition implements Serializable {
 		return true;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		return line + ":" + column;

@@ -25,7 +25,7 @@ import com.google.common.collect.Maps;
  * this class looks for packages in the classpath
  *
  * @author acraciun
- *
+ * @version $Id: $Id
  */
 public class PackageInternalsFinder {
 	private final ClassLoader classLoader;
@@ -33,10 +33,23 @@ public class PackageInternalsFinder {
 
 	private final Map<String, List<JavaFileObject>> cachePackageEntries = Maps.newHashMap();
 
+	/**
+	 * <p>Constructor for PackageInternalsFinder.</p>
+	 *
+	 * @param classLoader a {@link java.lang.ClassLoader} object.
+	 */
 	public PackageInternalsFinder(ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
+	/**
+	 * <p>find.</p>
+	 *
+	 * @param packageName a {@link java.lang.String} object.
+	 * @param recursive a boolean.
+	 * @return a {@link java.util.List} object.
+	 * @throws java.io.IOException if any.
+	 */
 	public List<JavaFileObject> find(String packageName, boolean recursive) throws IOException {
 		String javaPackageName = packageName.replaceAll("\\.", "/");
 

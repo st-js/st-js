@@ -24,12 +24,20 @@ import org.codehaus.jackson.map.SerializerProvider;
 import org.stjs.javascript.Date;
 import org.stjs.server.json.JSDateUtils;
 
+/**
+ * <p>JSDateSerializer class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class JSDateSerializer extends JsonSerializer<Date> {
+	/** {@inheritDoc} */
 	@Override
 	public Class<Date> handledType() {
 		return Date.class;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void serialize(Date value, JsonGenerator gen, SerializerProvider provider) throws IOException,
 			JsonProcessingException {

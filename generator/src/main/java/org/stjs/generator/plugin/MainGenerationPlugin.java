@@ -116,13 +116,20 @@ import com.sun.source.tree.VariableTree;
  * this is the main generation plugin that adds all the needed checks and writers.
  *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 
+	/**
+	 * <p>newContext.</p>
+	 *
+	 * @return a {@link org.stjs.generator.GenerationContext} object.
+	 */
 	public GenerationContext<JS> newContext() {
 		return null;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void contributeCheckVisitor(CheckVisitor visitor) {
 		visitor.contribute(new VariableFinalInLoopCheck());
@@ -166,6 +173,7 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void contributeWriteVisitor(WriterVisitor<JS> visitor) {
 		visitor.contribute(new CompilationUnitWriter<JS>());
@@ -246,6 +254,11 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		return DiscriminatorKey.of(MemberSelectWriter.class.getSimpleName(), name);
 	}
 
+	/**
+	 * <p>addMethodCallTemplates.</p>
+	 *
+	 * @param visitor a {@link org.stjs.generator.writer.WriterVisitor} object.
+	 */
 	protected void addMethodCallTemplates(WriterVisitor<JS> visitor) {
 		visitor.contribute(template("adapter"), new AdapterTemplate<JS>());
 		visitor.contribute(template("array"), new ArrayTemplate<JS>());
@@ -266,6 +279,11 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(template("none"), new DefaultTemplate<JS>());
 	}
 
+	/**
+	 * <p>addFieldTemplates.</p>
+	 *
+	 * @param visitor a {@link org.stjs.generator.writer.WriterVisitor} object.
+	 */
 	protected void addFieldTemplates(WriterVisitor<JS> visitor) {
 		String none = "none";
 		String property = "property";
@@ -294,6 +312,7 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(memberSelectTemplate(path), new PathGetterMemberSelectTemplate<JS>());
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean loadByDefault() {
 		return true;

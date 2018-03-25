@@ -14,8 +14,11 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.StandardLocation;
 
 /**
+ * <p>CustomClassloaderJavaFileManager class.</p>
+ *
  * @author atamur
  * @since 15-Oct-2009
+ * @version $Id: $Id
  */
 public class CustomClassloaderJavaFileManager implements JavaFileManager {
 	private final ClassLoader classLoader;
@@ -24,6 +27,12 @@ public class CustomClassloaderJavaFileManager implements JavaFileManager {
 
 	@edu.umd.cs.findbugs.annotations.SuppressWarnings(
 			value = "DP_CREATE_CLASSLOADER_INSIDE_DO_PRIVILEGED", justification = "harmless")
+	/**
+	 * <p>Constructor for CustomClassloaderJavaFileManager.</p>
+	 *
+	 * @param classLoader a {@link java.lang.ClassLoader} object.
+	 * @param standardFileManager a {@link javax.tools.StandardJavaFileManager} object.
+	 */
 	public CustomClassloaderJavaFileManager(ClassLoader classLoader, StandardJavaFileManager standardFileManager) {
 		// acraciun: for an unclear reason Java 7 screws up with the classloader and getResource gets in trouble. issue
 		// #41
@@ -32,6 +41,7 @@ public class CustomClassloaderJavaFileManager implements JavaFileManager {
 		finder = new PackageInternalsFinder(this.classLoader);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public ClassLoader getClassLoader(Location location) {
 		if (location == StandardLocation.CLASS_PATH) {
@@ -40,6 +50,7 @@ public class CustomClassloaderJavaFileManager implements JavaFileManager {
 		return standardFileManager.getClassLoader(location);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String inferBinaryName(Location location, JavaFileObject file) {
 		if (file instanceof CustomJavaFileObject) {
@@ -50,16 +61,19 @@ public class CustomClassloaderJavaFileManager implements JavaFileManager {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean isSameFile(FileObject a, FileObject b) {
 		throw new UnsupportedOperationException();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean handleOption(String current, Iterator<String> remaining) {
 		throw new UnsupportedOperationException();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean hasLocation(Location location) {
 		return location == StandardLocation.CLASS_PATH || location == StandardLocation.PLATFORM_CLASS_PATH; // we don't
@@ -75,37 +89,44 @@ public class CustomClassloaderJavaFileManager implements JavaFileManager {
 																											// compilation
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public JavaFileObject getJavaFileForInput(Location location, String className, JavaFileObject.Kind kind) throws IOException {
 		throw new UnsupportedOperationException();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public JavaFileObject getJavaFileForOutput(Location location, String className, JavaFileObject.Kind kind, FileObject sibling)
 			throws IOException {
 		throw new UnsupportedOperationException();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public FileObject getFileForInput(Location location, String packageName, String relativeName) throws IOException {
 		throw new UnsupportedOperationException();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public FileObject getFileForOutput(Location location, String packageName, String relativeName, FileObject sibling) throws IOException {
 		throw new UnsupportedOperationException();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void flush() throws IOException {
 		// do nothing
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void close() throws IOException {
 		// do nothing
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Iterable<JavaFileObject> list(Location location, String packageName, Set<JavaFileObject.Kind> kinds, boolean recurse)
 			throws IOException {
@@ -125,6 +146,7 @@ public class CustomClassloaderJavaFileManager implements JavaFileManager {
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public int isSupportedOption(String option) {
 		return -1;

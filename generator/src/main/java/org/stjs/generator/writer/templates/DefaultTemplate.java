@@ -31,7 +31,7 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 
 		Element methodElement = TreeUtils.elementFromUse(tree);
 		if (JavaNodes.isStatic(methodElement)) {
-			// this is a call of type super.staticMethod(args) -> it should be handled as a simple call to staticMethod
+			// this is a call of type super.staticMethod(args) &gt; it should be handled as a simple call to staticMethod
 			return false;
 		}
 
@@ -39,7 +39,7 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 	}
 
 	/**
-	 * super(args) -> SuperType.call(this, args)
+	 * super(args) &gt; SuperType.call(this, args)
 	 */
 	private JS callToSuperConstructor(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		Element methodElement = TreeUtils.elementFromUse(tree);

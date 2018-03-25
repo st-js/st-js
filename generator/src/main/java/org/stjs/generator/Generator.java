@@ -61,11 +61,13 @@ import com.sun.tools.javac.api.JavacTool;
  * This class parses a Java source file, launches several visitors and finally generate the corresponding Javascript.
  *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class Generator {
 	private static final Logger LOG = Logger.getLogger(Generator.class.getName());
 	private static final int EXECUTOR_TERMINAL_TIMEOUT = 10;
 	private static final String STJS_FILE = "stjs.js";
+	/** Constant <code>STJS_PATH="META-INF/resources/webjars/stjs-client-"{trunked}</code> */
 	public static final String STJS_PATH = "META-INF/resources/webjars/stjs-client-runtime/" + STJS_FILE;
 	private final GenerationPlugins<Object> plugins;
 	private StandardJavaFileManager fileManager;
@@ -75,6 +77,11 @@ public class Generator {
 	private final GeneratorConfiguration config;
 
 	@SuppressWarnings("PMD.DoNotUseThreads")
+	/**
+	 * <p>Constructor for Generator.</p>
+	 *
+	 * @param config a {@link org.stjs.generator.GeneratorConfiguration} object.
+	 */
 	public Generator(GeneratorConfiguration config) {
 		plugins = new GenerationPlugins<>();
 		this.config = config;
@@ -88,6 +95,9 @@ public class Generator {
 		};
 	}
 
+	/**
+	 * <p>close.</p>
+	 */
 	@edu.umd.cs.findbugs.annotations.SuppressWarnings("BC_UNCONFIRMED_CAST")
 	public void close() {
 		try {
@@ -108,6 +118,13 @@ public class Generator {
 		}
 	}
 
+	/**
+	 * <p>getOutputFile.</p>
+	 *
+	 * @param generationFolder a {@link java.io.File} object.
+	 * @param className a {@link java.lang.String} object.
+	 * @return a {@link java.io.File} object.
+	 */
 	public File getOutputFile(File generationFolder, String className) {
 		return getOutputFile(generationFolder, className, true);
 	}
@@ -119,6 +136,14 @@ public class Generator {
 		);
 	}
 
+	/**
+	 * <p>getOutputFile.</p>
+	 *
+	 * @param generationFolder a {@link java.io.File} object.
+	 * @param className a {@link java.lang.String} object.
+	 * @param generateDirectory a boolean.
+	 * @return a {@link java.io.File} object.
+	 */
 	public File getOutputFile(File generationFolder, String className, boolean generateDirectory) {
 		File output = new File(generationFolder, className.replace('.', File.separatorChar) + ".js");
 		if (generateDirectory && !output.getParentFile().exists() && !output.getParentFile().mkdirs()) {
@@ -138,7 +163,13 @@ public class Generator {
 	}
 
 	/**
+	 * <p>generateJavascript.</p>
+	 *
 	 * @return the list of imports needed by the generated class
+	 * @param className a {@link java.lang.String} object.
+	 * @param sourceFolder a {@link java.io.File} object.
+	 * @throws org.stjs.generator.JavascriptFileGenerationException if any.
+	 * @throws org.stjs.generator.JavascriptFileGenerationException if any.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ClassWithJavascript generateJavascript(String className, File sourceFolder) throws JavascriptFileGenerationException {
@@ -243,6 +274,8 @@ public class Generator {
 	/**
 	 * This method copies the Javascript support file (stjs.js currently) to the desired folder. This method should be
 	 * called after the processing of all the files.
+	 *
+	 * @param folder a {@link java.io.File} object.
 	 */
 	public void copyJavascriptSupport(File folder) {
 		URL resourceUrl = Resources.getResource(STJS_PATH);
@@ -263,6 +296,10 @@ public class Generator {
 
 	/**
 	 * This method assumes the javascript code for the given class was already generated
+	 *
+	 * @param classLoader a {@link java.lang.ClassLoader} object.
+	 * @param testClass a {@link java.lang.Class} object.
+	 * @return a {@link org.stjs.generator.ClassWithJavascript} object.
 	 */
 	public ClassWithJavascript getExistingStjsClass(ClassLoader classLoader, Class<?> testClass) {
 		return config.getClassResolver().resolve(testClass.getName());

@@ -21,8 +21,9 @@ import org.stjs.javascript.annotation.Template;
 /**
  * here are the methods existent in Javascript for number objects and inexistent in the Java counterpart. The generator
  * should generate the correct code
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 @Adapter
 public final class JSNumberAdapter {
@@ -30,15 +31,43 @@ public final class JSNumberAdapter {
 		//
 	}
 
+	/**
+	 * <p>toFixed.</p>
+	 *
+	 * @param n a {@link java.lang.Number} object.
+	 * @param positions a int.
+	 * @return a {@link java.lang.String} object.
+	 */
 	@Template("adapter")
 	public native static String toFixed(Number n, int positions);
 
+	/**
+	 * <p>toFixed.</p>
+	 *
+	 * @param n a {@link java.lang.String} object.
+	 * @param positions a int.
+	 * @return a {@link java.lang.String} object.
+	 */
 	@Template("adapter")
 	public native static String toFixed(String n, int positions);
 
+	/**
+	 * <p>toExponential.</p>
+	 *
+	 * @param n a {@link java.lang.Number} object.
+	 * @param positions a int.
+	 * @return a {@link java.lang.String} object.
+	 */
 	@Template("adapter")
 	public native static String toExponential(Number n, int positions);
 
+	/**
+	 * <p>toPrecision.</p>
+	 *
+	 * @param n a {@link java.lang.Number} object.
+	 * @param positions a int.
+	 * @return a {@link java.lang.String} object.
+	 */
 	@Template("adapter")
 	public native static String toPrecision(Number n, int positions);
 

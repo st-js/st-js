@@ -32,6 +32,12 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 
+/**
+ * <p>RhinoExecutor class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class RhinoExecutor {
 	private Object addScript(ScriptEngine engine, File scriptFile) throws ScriptException {
 		Reader input = null;
@@ -48,6 +54,14 @@ public class RhinoExecutor {
 		}
 	}
 
+	/**
+	 * <p>run.</p>
+	 *
+	 * @param srcFiles a {@link java.util.Collection} object.
+	 * @param mainClassDisabled a boolean.
+	 * @return a {@link org.stjs.generator.executor.ExecutionResult} object.
+	 * @throws javax.script.ScriptException if any.
+	 */
 	public ExecutionResult run(Collection<File> srcFiles, boolean mainClassDisabled) throws ScriptException {
 		ScriptEngineManager factory = new ScriptEngineManager();
 		ScriptEngine engine = factory.getEngineByName("JavaScript");

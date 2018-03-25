@@ -17,9 +17,17 @@ package org.stjs.generator;
 
 import java.util.regex.Pattern;
 
+/**
+ * <p>GeneratorConstants class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public final class GeneratorConstants {
+	/** Constant <code>SPECIAL_THIS="THIS"</code> */
 	public static final String SPECIAL_THIS = "THIS";
 
+	/** Constant <code>STJS="stjs"</code> */
 	public static final String STJS = "stjs";
 
 	/**
@@ -27,16 +35,22 @@ public final class GeneratorConstants {
 	 */
 	public static final String SPECIAL_INLINE_TYPE = "_InlineType";
 
+	/** Constant <code>SUPER="super"</code> */
 	public static final String SUPER = "super";
 
+	/** Constant <code>THIS="this"</code> */
 	public static final String THIS = "this";
 
+	/** Constant <code>CLASS="class"</code> */
 	public static final String CLASS = "class";
 
+	/** Constant <code>ARGUMENTS_PARAMETER="arguments"</code> */
 	public static final String ARGUMENTS_PARAMETER = "arguments";
 
+	/** Constant <code>TYPE_DESCRIPTION_PROPERTY="$typeDescription"</code> */
 	public static final String TYPE_DESCRIPTION_PROPERTY = "$typeDescription";
 
+	/** Constant <code>NAMESPACE_PATTERN</code> */
 	public static final Pattern NAMESPACE_PATTERN = Pattern.compile("([A-Za-z_][A-Za-z_0-9]*)(?:\\.([A-Za-z_][A-Za-z_0-9]*))*");
 
 	/**

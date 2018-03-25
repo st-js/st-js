@@ -31,6 +31,12 @@ import org.codehaus.jackson.type.JavaType;
 import org.stjs.javascript.JSCollections;
 import org.stjs.javascript.Map;
 
+/**
+ * <p>JSMapDeserializer class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class JSMapDeserializer extends ContainerDeserializer<Map<String, Object>> {
 
 	final protected JavaType _mapType;
@@ -55,6 +61,14 @@ public class JSMapDeserializer extends ContainerDeserializer<Map<String, Object>
 	 * /**********************************************************
 	 */
 
+	/**
+	 * <p>Constructor for JSMapDeserializer.</p>
+	 *
+	 * @param mapType a {@link org.codehaus.jackson.type.JavaType} object.
+	 * @param keyDeser a {@link org.codehaus.jackson.map.KeyDeserializer} object.
+	 * @param valueDeser a {@link org.codehaus.jackson.map.JsonDeserializer} object.
+	 * @param valueTypeDeser a {@link org.codehaus.jackson.map.TypeDeserializer} object.
+	 */
 	public JSMapDeserializer(JavaType mapType, KeyDeserializer keyDeser, JsonDeserializer<Object> valueDeser, TypeDeserializer valueTypeDeser) {
 		super(Map.class);
 		_mapType = mapType;
@@ -68,11 +82,13 @@ public class JSMapDeserializer extends ContainerDeserializer<Map<String, Object>
 	 * /**********************************************************
 	 */
 
+	/** {@inheritDoc} */
 	@Override
 	public JavaType getContentType() {
 		return _mapType.getContentType();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public JsonDeserializer<Object> getContentDeserializer() {
 		return _valueDeserializer;
@@ -83,6 +99,7 @@ public class JSMapDeserializer extends ContainerDeserializer<Map<String, Object>
 	 * /**********************************************************
 	 */
 
+	/** {@inheritDoc} */
 	@Override
 	public Map<String, Object> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
 		// Ok: must point to START_OBJECT, FIELD_NAME or END_OBJECT
@@ -97,6 +114,7 @@ public class JSMapDeserializer extends ContainerDeserializer<Map<String, Object>
 		return result;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Map<String, Object> deserialize(JsonParser jp, DeserializationContext ctxt, Map<String, Object> result) throws IOException,
 			JsonProcessingException {
@@ -109,6 +127,7 @@ public class JSMapDeserializer extends ContainerDeserializer<Map<String, Object>
 		return result;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Object deserializeWithType(JsonParser jp, DeserializationContext ctxt, TypeDeserializer typeDeserializer) throws IOException,
 			JsonProcessingException {
@@ -121,10 +140,16 @@ public class JSMapDeserializer extends ContainerDeserializer<Map<String, Object>
 	 * /**********************************************************
 	 */
 
+	/**
+	 * <p>getMapClass.</p>
+	 *
+	 * @return a {@link java.lang.Class} object.
+	 */
 	public final Class<?> getMapClass() {
 		return _mapType.getRawClass();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public JavaType getValueType() {
 		return _mapType;
@@ -135,6 +160,15 @@ public class JSMapDeserializer extends ContainerDeserializer<Map<String, Object>
 	 * /**********************************************************
 	 */
 
+	/**
+	 * <p>_readAndBind.</p>
+	 *
+	 * @param jp a {@link org.codehaus.jackson.JsonParser} object.
+	 * @param ctxt a {@link org.codehaus.jackson.map.DeserializationContext} object.
+	 * @param result a {@link org.stjs.javascript.Map} object.
+	 * @throws java.io.IOException if any.
+	 * @throws org.codehaus.jackson.JsonProcessingException if any.
+	 */
 	protected final void _readAndBind(JsonParser jp, DeserializationContext ctxt, Map<String, Object> result) throws IOException,
 			JsonProcessingException {
 		JsonToken t = jp.getCurrentToken();
@@ -169,6 +203,13 @@ public class JSMapDeserializer extends ContainerDeserializer<Map<String, Object>
 	}
 
 	// note: copied form BeanDeserializer; should try to share somehow...
+	/**
+	 * <p>wrapAndThrow.</p>
+	 *
+	 * @param t a {@link java.lang.Throwable} object.
+	 * @param ref a {@link java.lang.Object} object.
+	 * @throws java.io.IOException if any.
+	 */
 	protected void wrapAndThrow(Throwable t, Object ref) throws IOException {
 		// to handle StackOverflow:
 		while ((t instanceof InvocationTargetException) && (t.getCause() != null)) {

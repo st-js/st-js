@@ -29,10 +29,11 @@ import com.sun.source.tree.Tree;
 import com.sun.source.util.TreePath;
 
 /**
- * this class is a wrapper around a {@link Tree} node to give you easier access to the most important methods of the
+ * this class is a wrapper around a {@link com.sun.source.tree.Tree} node to give you easier access to the most important methods of the
  * elements in the AST
  *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class TreeWrapper<T extends Tree, JS> {
 	private final TreePath path;
@@ -40,12 +41,25 @@ public class TreeWrapper<T extends Tree, JS> {
 	private final Element element;
 	private String jsNamespace;
 
+	/**
+	 * <p>Constructor for TreeWrapper.</p>
+	 *
+	 * @param path a {@link com.sun.source.util.TreePath} object.
+	 * @param context a {@link org.stjs.generator.GenerationContext} object.
+	 */
 	public TreeWrapper(@Nonnull TreePath path, @Nonnull GenerationContext<JS> context) {
 		this.context = context;
 		this.path = path;
 		this.element = getElement(path.getLeaf());
 	}
 
+	/**
+	 * <p>Constructor for TreeWrapper.</p>
+	 *
+	 * @param element a {@link javax.lang.model.element.Element} object.
+	 * @param path a {@link com.sun.source.util.TreePath} object.
+	 * @param context a {@link org.stjs.generator.GenerationContext} object.
+	 */
 	public TreeWrapper(@Nonnull Element element, @Nonnull TreePath path, @Nonnull GenerationContext<JS> context) {
 		this.context = context;
 		this.path = path;
@@ -56,34 +70,69 @@ public class TreeWrapper<T extends Tree, JS> {
 		return InternalUtils.symbol(tree);
 	}
 
+	/**
+	 * <p>getTree.</p>
+	 *
+	 * @return a T object.
+	 */
 	@SuppressWarnings("unchecked")
 	public T getTree() {
 		return (T) path.getLeaf();
 	}
 
+	/**
+	 * <p>Getter for the field <code>path</code>.</p>
+	 *
+	 * @return a {@link com.sun.source.util.TreePath} object.
+	 */
 	public TreePath getPath() {
 		return path;
 	}
 
+	/**
+	 * <p>Getter for the field <code>context</code>.</p>
+	 *
+	 * @return a {@link org.stjs.generator.GenerationContext} object.
+	 */
 	public GenerationContext<JS> getContext() {
 		return context;
 	}
 
+	/**
+	 * <p>isFinal.</p>
+	 *
+	 * @return a boolean.
+	 */
 	public boolean isFinal() {
 		Set<Modifier> modifiers = element.getModifiers();
 		return modifiers.contains(Modifier.FINAL);
 	}
 
+	/**
+	 * <p>isStatic.</p>
+	 *
+	 * @return a boolean.
+	 */
 	public boolean isStatic() {
 		Set<Modifier> modifiers = element.getModifiers();
 		return modifiers.contains(Modifier.STATIC);
 	}
 
+	/**
+	 * <p>isAbstract.</p>
+	 *
+	 * @return a boolean.
+	 */
 	public boolean isAbstract() {
 		Set<Modifier> modifiers = element.getModifiers();
 		return modifiers.contains(Modifier.ABSTRACT);
 	}
 
+	/**
+	 * <p>isSuper.</p>
+	 *
+	 * @return a boolean.
+	 */
 	public boolean isSuper() {
 		if (!(getTree() instanceof IdentifierTree)) {
 			return false;
@@ -91,6 +140,11 @@ public class TreeWrapper<T extends Tree, JS> {
 		return GeneratorConstants.SUPER.equals(((IdentifierTree) getTree()).getName().toString());
 	}
 
+	/**
+	 * <p>isPrimitiveType.</p>
+	 *
+	 * @return a boolean.
+	 */
 	public boolean isPrimitiveType() {
 		return TypesUtils.isPrimitive(element.asType());
 	}
@@ -114,14 +168,29 @@ public class TreeWrapper<T extends Tree, JS> {
 		return pack == null ? null : pack.getAnnotation(annotationType);
 	}
 
+	/**
+	 * <p>isJavaScriptFunction.</p>
+	 *
+	 * @return a boolean.
+	 */
 	public boolean isJavaScriptFunction() {
 		return getAnnotation(JavascriptFunction.class) != null;
 	}
 
+	/**
+	 * <p>isGlobal.</p>
+	 *
+	 * @return a boolean.
+	 */
 	public boolean isGlobal() {
 		return getAnnotation(GlobalScope.class) != null;
 	}
 
+	/**
+	 * <p>getNamespace.</p>
+	 *
+	 * @return a {@link java.lang.String} object.
+	 */
 	public String getNamespace() {
 		if (jsNamespace == null) {
 			jsNamespace = doGetNamespace();
@@ -189,14 +258,30 @@ public class TreeWrapper<T extends Tree, JS> {
 		return NamespaceUtil.resolveNamespace(qualifiedName, context.getBuiltProjectClassLoader());
 	}
 
+	/**
+	 * <p>isInnerType.</p>
+	 *
+	 * @return a boolean.
+	 */
 	public boolean isInnerType() {
 		return element.getEnclosingElement().getKind() != ElementKind.PACKAGE;
 	}
 
+	/**
+	 * <p>child.</p>
+	 *
+	 * @param child a C object.
+	 * @return a {@link org.stjs.generator.javac.TreeWrapper} object.
+	 */
 	public <C extends Tree> TreeWrapper<C, JS> child(C child) {
 		return context.wrap(new TreePath(path, child));
 	}
 
+	/**
+	 * <p>parent.</p>
+	 *
+	 * @return a {@link org.stjs.generator.javac.TreeWrapper} object.
+	 */
 	public <P extends Tree> TreeWrapper<P, JS> parent() {
 		if (path.getParentPath() != null) {
 			return context.wrap(path.getParentPath());
@@ -204,32 +289,67 @@ public class TreeWrapper<T extends Tree, JS> {
 		return null;
 	}
 
+	/**
+	 * <p>isSyntheticType.</p>
+	 *
+	 * @return a boolean.
+	 */
 	@SuppressWarnings("deprecation")
 	public boolean isSyntheticType() {
 		return getAnnotation(SyntheticType.class) != null || getAnnotation(DataType.class) != null;
 	}
 
+	/**
+	 * <p>isNative.</p>
+	 *
+	 * @return a boolean.
+	 */
 	public boolean isNative() {
 		return element.getModifiers().contains(Modifier.NATIVE) || element.getAnnotation(Native.class) != null;
 	}
 
+	/**
+	 * <p>isServerSide.</p>
+	 *
+	 * @return a boolean.
+	 */
 	public boolean isServerSide() {
 		return element.getAnnotation(ServerSide.class) != null;
 	}
 
+	/**
+	 * <p>isJavaScriptPrimitive.</p>
+	 *
+	 * @return a boolean.
+	 */
 	public boolean isJavaScriptPrimitive() {
 		TypeMirror type = element.asType();
 		return TypesUtils.isPrimitive(type) || TypesUtils.isBoxedPrimitive(type) || TypesUtils.isString(type);
 	}
 
+	/**
+	 * <p>Getter for the field <code>element</code>.</p>
+	 *
+	 * @return a {@link javax.lang.model.element.Element} object.
+	 */
 	public Element getElement() {
 		return element;
 	}
 
+	/**
+	 * <p>getEnclosingType.</p>
+	 *
+	 * @return a {@link org.stjs.generator.javac.TreeWrapper} object.
+	 */
 	public TreeWrapper<ClassTree, JS> getEnclosingType() {
 		return context.wrap(element.getEnclosingElement());
 	}
 
+	/**
+	 * <p>getCurrentType.</p>
+	 *
+	 * @return a {@link org.stjs.generator.javac.TreeWrapper} object.
+	 */
 	public TreeWrapper<ClassTree, JS> getCurrentType() {
 		TreePath classPath = TreeUtils.enclosingPathOfType(path, ClassTree.class);
 		if (classPath == null) {
@@ -240,24 +360,47 @@ public class TreeWrapper<T extends Tree, JS> {
 	}
 
 	/**
+	 * <p>getTypeName.</p>
+	 *
 	 * @return the type's name if the tree belongs to a type, undefined otherwise
+	 * @param depType a {@link org.stjs.generator.name.DependencyType} object.
 	 */
 	public String getTypeName(DependencyType depType) {
 		return context.getNames().getTypeName(context, element, depType);
 	}
 
+	/**
+	 * <p>addError.</p>
+	 *
+	 * @param message a {@link java.lang.String} object.
+	 */
 	public void addError(String message) {
 		context.addError(getTree(), message);
 	}
 
+	/**
+	 * <p>getMethodTemplate.</p>
+	 *
+	 * @return a {@link java.lang.String} object.
+	 */
 	public String getMethodTemplate() {
 		return stripParameters(getTemplateValue());
 	}
 
+	/**
+	 * <p>getMethodTemplateParameters.</p>
+	 *
+	 * @return an array of {@link java.lang.String} objects.
+	 */
 	public String[] getMethodTemplateParameters() {
 		return getTemplateParameters(getTemplateValue());
 	}
 
+	/**
+	 * <p>getFieldTemplate.</p>
+	 *
+	 * @return a {@link java.lang.String} object.
+	 */
 	public String getFieldTemplate() {
 		if (element == null || element.getKind() != ElementKind.FIELD) {
 			return null;
@@ -265,6 +408,11 @@ public class TreeWrapper<T extends Tree, JS> {
 		return stripParameters(getTemplateValue());
 	}
 
+	/**
+	 * <p>getFieldTemplateParameters.</p>
+	 *
+	 * @return an array of {@link java.lang.String} objects.
+	 */
 	public String[] getFieldTemplateParameters() {
 		if (element == null || element.getKind() != ElementKind.FIELD) {
 			return new String[ 0 ];

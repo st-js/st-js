@@ -33,12 +33,19 @@ import org.stjs.javascript.annotation.STJSBridge;
  * library. As dependencies it can have other bridge classes or even stjs classes.
  *
  * @author acraciun
+ * @version $Id: $Id
  */
 @Immutable
 public class BridgeClass implements ClassWithJavascript {
 	private final Class<?> clazz;
 	private final String jsNamespace;
 
+	/**
+	 * <p>Constructor for BridgeClass.</p>
+	 *
+	 * @param classResolver a {@link org.stjs.generator.ClassResolver} object.
+	 * @param clazz a {@link java.lang.Class} object.
+	 */
 	public BridgeClass(ClassResolver classResolver, Class<?> clazz) {
 		PreConditions.checkNotNull(classResolver);
 		PreConditions.checkNotNull(clazz);
@@ -52,16 +59,19 @@ public class BridgeClass implements ClassWithJavascript {
 		this.jsNamespace = ns;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String getJavaClassName() {
 		return clazz.getName();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Class<?> getJavaClass() {
 		return this.clazz;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String getJavascriptNamespace() {
 		return this.jsNamespace;
@@ -71,6 +81,7 @@ public class BridgeClass implements ClassWithJavascript {
 		return bridgeAnnotation != null && bridgeAnnotation.sources() != null && bridgeAnnotation.sources().length > 0;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public List<URI> getJavascriptFiles() {
 		STJSBridge bridgeAnnotation = ClassUtils.getAnnotation(clazz, STJSBridge.class);
@@ -92,18 +103,21 @@ public class BridgeClass implements ClassWithJavascript {
 		return files;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public List<ClassWithJavascript> getDirectDependencies() {
 		// TODO use annotations
 		return Collections.emptyList();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Map<ClassWithJavascript, DependencyType> getDirectDependencyMap() {
 		// TODO use annotations
 		return Collections.emptyMap();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String getJavascriptClassName() {
 		String simpleName = getJavaClass().getSimpleName();
@@ -114,6 +128,7 @@ public class BridgeClass implements ClassWithJavascript {
 		return simpleName;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -126,6 +141,7 @@ public class BridgeClass implements ClassWithJavascript {
 	// return clazz;
 	// }
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -142,6 +158,7 @@ public class BridgeClass implements ClassWithJavascript {
 		return clazz == other.clazz;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		return "BridgeClass:" + clazz.getName();

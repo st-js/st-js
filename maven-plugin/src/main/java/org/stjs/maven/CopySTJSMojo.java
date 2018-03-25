@@ -26,46 +26,55 @@ import java.util.jar.Manifest;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 /**
  * This Maven plugin copies the Javascript (generated or bridged) from dependencies to the final artifact
- * @goal copy-js
- * @phase prepare-package
- * @requiresDependencyResolution compile
+ *
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
+ * @version $Id: $Id
  */
+@Mojo(
+		name = "copy-js", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, requiresDependencyResolution = ResolutionScope.COMPILE)
 public class CopySTJSMojo extends AbstractMojo {
 
 	private static final String STJS_LIBRARY_ENTRY = "STJS-Library";
 
-	/**
-	 * @parameter expression="${project}"
-	 * @required
-	 * @readonly
-	 */
+	@Parameter(
+			defaultValue = "${project}", readonly = true, required = true)
 	protected MavenProject project;
 
 	/**
-	 * Sets the granularity in milliseconds of the last modification date for testing whether a source needs recompilation.
-	 * @parameter expression="${lastModGranularityMs}" default-value="0"
+	 * Sets the granularity in milliseconds of the last modification date for testing whether a source needs
+	 * recompilation.
+	 * 
 	 */
+	@Parameter(
+			defaultValue = "0")
 	protected int staleMillis;
 
 	/**
 	 * <p>
 	 * Specify where to place generated source files
 	 * </p>
-	 * @parameter default-value="${project.build.directory}/${project.build.finalName}/generated-js"
+	 * 
 	 */
+	@Parameter(
+			defaultValue = "${project.build.directory}/${project.build.finalName}/generated-js")
 	private File generatedSourcesDirectory;
 
+	/** {@inheritDoc} */
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		getLog().info("Copying javascript files from dependencies to this artifact");
 
 		try {
 			FilenameFilter skipClasses = new FilenameFilter() {
+				@Override
 				public boolean accept(File dir, String name) {
 					name = name.toLowerCase();
 					return !name.endsWith(".class");

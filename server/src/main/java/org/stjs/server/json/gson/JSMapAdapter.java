@@ -30,8 +30,15 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+/**
+ * <p>JSMapAdapter class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class JSMapAdapter implements JsonSerializer<Map<?, ?>>, JsonDeserializer<Map<?, ?>> {
 
+	/** {@inheritDoc} */
 	@Override
 	public Map<?, ?> deserialize(JsonElement elem, Type type, JsonDeserializationContext ctx) throws JsonParseException {
 		if (elem == null) {
@@ -47,6 +54,7 @@ public class JSMapAdapter implements JsonSerializer<Map<?, ?>>, JsonDeserializer
 		return map;
 	}
 
+	/** {@inheritDoc} */
 	@SuppressWarnings("unchecked")
 	@Override
 	public JsonElement serialize(Map<?, ?> map, Type typeOfSrc, JsonSerializationContext ctx) {

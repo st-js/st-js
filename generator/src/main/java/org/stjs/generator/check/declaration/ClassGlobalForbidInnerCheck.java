@@ -10,8 +10,9 @@ import com.sun.source.tree.Tree;
 
 /**
  * as for @GlobalScope - forbid inner types of global classes - they make no sense
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class ClassGlobalForbidInnerCheck implements CheckContributor<ClassTree> {
 
@@ -22,6 +23,7 @@ public class ClassGlobalForbidInnerCheck implements CheckContributor<ClassTree> 
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, ClassTree tree, GenerationContext<Void> context) {
 		TreeWrapper<ClassTree, Void> tw = context.getCurrentWrapper();

@@ -11,13 +11,14 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * This template can be used to prefix the name of a method that can be Java keyword.<br>
- * When used without parameters as <tt>@Template("prefix")</tt>, this template simply strips the
- * leading character of the Java method name<br>
- * $method() => method() or _method() => method() <br>
+ * When used without parameters as <tt>{@literal @}Template("prefix")</tt>, this template simply strips the leading
+ * character of the Java method name<br>
+ * $method() =&gt; method() or _method() =&gt; method() <br>
  *
- * When used with a single parameters, this template removes the first <tt>param.length</tt> characters
- * from the java method name and makes the first letter of the resulting identifier lowercase<br>
- * @Template("prefix(special)") specialMethod() => method(), or @Template("prefix(foo)") fooBar() => bar()
+ * When used with a single parameters, this template removes the first <tt>param.length</tt> characters from the java
+ * method name and makes the first letter of the resulting identifier lowercase<br>
+ * {@literal @}Template("prefix(special)") specialMethod() =&gt; method(), or {@literal @}Template("prefix(foo)")
+ * fooBar() =&gt; bar()
  *
  * @author acraciun
  */
@@ -37,7 +38,7 @@ public class PrefixTemplate<JS> implements WriterContributor<MethodInvocationTre
 			// backwards compatible behavior
 			return original.substring(1);
 		}
-		String transformed = original.substring(prefixParams[ 0 ].length());
+		String transformed = original.substring(prefixParams[0].length());
 		transformed = Character.toLowerCase(transformed.charAt(0)) + transformed.substring(1);
 		return transformed;
 	}

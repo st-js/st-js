@@ -21,6 +21,12 @@ import java.util.regex.Pattern;
 import org.stjs.generator.JavascriptClassGenerationException;
 import org.stjs.javascript.annotation.STJSBridge;
 
+/**
+ * <p>ClassUtils class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public final class ClassUtils {
 	/**
 	 * these are packages that don't have the annotation but are considered as bridges
@@ -33,6 +39,13 @@ public final class ClassUtils {
 		//
 	}
 
+	/**
+	 * <p>getClazz.</p>
+	 *
+	 * @param builtProjectClassLoader a {@link java.lang.ClassLoader} object.
+	 * @param className a {@link java.lang.String} object.
+	 * @return a {@link java.lang.Class} object.
+	 */
 	public static Class<?> getClazz(ClassLoader builtProjectClassLoader, String className) {
 		try {
 			return builtProjectClassLoader.loadClass(className);
@@ -42,6 +55,13 @@ public final class ClassUtils {
 		}
 	}
 
+	/**
+	 * <p>isBridge.</p>
+	 *
+	 * @param builtProjectClassLoader a {@link java.lang.ClassLoader} object.
+	 * @param clazz a {@link java.lang.Class} object.
+	 * @return a boolean.
+	 */
 	@SuppressWarnings("unchecked")
 	public static boolean isBridge(ClassLoader builtProjectClassLoader, Class<?> clazz) {
 		boolean ok = hasAnnotation(clazz, (Class<? extends Annotation>) getClazz(builtProjectClassLoader, STJSBridge.class.getName()));
@@ -54,10 +74,24 @@ public final class ClassUtils {
 		return false;
 	}
 
+	/**
+	 * <p>hasAnnotation.</p>
+	 *
+	 * @param clazz a {@link java.lang.Class} object.
+	 * @param annotationClass a {@link java.lang.Class} object.
+	 * @return a boolean.
+	 */
 	public static boolean hasAnnotation(Class<?> clazz, Class<? extends Annotation> annotationClass) {
 		return getAnnotation(clazz, annotationClass) != null;
 	}
 
+	/**
+	 * <p>getAnnotation.</p>
+	 *
+	 * @param clazz a {@link java.lang.Class} object.
+	 * @param annotationClass a {@link java.lang.Class} object.
+	 * @return a T object.
+	 */
 	public static <T extends Annotation> T getAnnotation(Class<?> clazz, Class<T> annotationClass) {
 		if (clazz == null) {
 			return null;
@@ -75,6 +109,12 @@ public final class ClassUtils {
 		return clazz.getPackage().getAnnotation(annotationClass);
 	}
 
+	/**
+	 * <p>getPropertiesFileName.</p>
+	 *
+	 * @param className a {@link java.lang.String} object.
+	 * @return a {@link java.lang.String} object.
+	 */
 	public static String getPropertiesFileName(String className) {
 		return className.replace('.', '/') + ".stjs";
 	}

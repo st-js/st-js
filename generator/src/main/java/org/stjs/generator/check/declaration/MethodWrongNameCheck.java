@@ -7,8 +7,15 @@ import org.stjs.generator.writer.JavascriptKeywords;
 
 import com.sun.source.tree.MethodTree;
 
+/**
+ * <p>MethodWrongNameCheck class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class MethodWrongNameCheck implements CheckContributor<MethodTree> {
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, MethodTree tree, GenerationContext<Void> context) {
 		JavascriptKeywords.checkIdentifier(tree, tree.getName().toString(), context);

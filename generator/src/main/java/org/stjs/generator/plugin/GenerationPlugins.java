@@ -17,9 +17,9 @@ import com.google.common.io.Closeables;
 
 /**
  * This class contains all the generation plugins defined by the users and the default ones
- * 
+ *
  * @author acraciun
- * 
+ * @version $Id: $Id
  */
 public class GenerationPlugins<JS> {
 	private static final String STJS_PLUGINS_CONFIG_FILE = "META-INF/stjs.plugins";
@@ -32,6 +32,9 @@ public class GenerationPlugins<JS> {
 	private CheckVisitor checkVisitor = new CheckVisitor();
 	private WriterVisitor<JS> writerVisitor = new WriterVisitor<JS>();
 
+	/**
+	 * <p>Constructor for GenerationPlugins.</p>
+	 */
 	public GenerationPlugins() {
 
 		MainGenerationPlugin<JS> mainPlugin = new MainGenerationPlugin<JS>();
@@ -118,14 +121,30 @@ public class GenerationPlugins<JS> {
 		return javaVersion.compareTo(runningVersion);
 	}
 
+	/**
+	 * <p>Getter for the field <code>checkVisitor</code>.</p>
+	 *
+	 * @return a {@link org.stjs.generator.check.CheckVisitor} object.
+	 */
 	public CheckVisitor getCheckVisitor() {
 		return checkVisitor;
 	}
 
+	/**
+	 * <p>Getter for the field <code>writerVisitor</code>.</p>
+	 *
+	 * @return a {@link org.stjs.generator.writer.WriterVisitor} object.
+	 */
 	public WriterVisitor<JS> getWriterVisitor() {
 		return writerVisitor;
 	}
 
+	/**
+	 * <p>forClass.</p>
+	 *
+	 * @param clazz a {@link java.lang.Class} object.
+	 * @return a {@link org.stjs.generator.plugin.GenerationPlugins} object.
+	 */
 	@SuppressWarnings("unchecked")
 	public GenerationPlugins<JS> forClass(Class<?> clazz) {
 		UsePlugin usePlugins = clazz.getAnnotation(UsePlugin.class);

@@ -19,9 +19,21 @@ import java.text.SimpleDateFormat;
 
 import org.stjs.javascript.Date;
 
+/**
+ * <p>JSDateUtils class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class JSDateUtils {
 	private final static String DEFAULT_DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
+	/**
+	 * <p>toNormalizedString.</p>
+	 *
+	 * @param d a {@link org.stjs.javascript.Date} object.
+	 * @return a {@link java.lang.String} object.
+	 */
 	public static String toNormalizedString(Date d) {
 		// TODO - improve perf here
 		return new SimpleDateFormat(DEFAULT_DATE_PATTERN).format(new java.util.Date((long) d.getTime()));

@@ -25,6 +25,7 @@ import com.sun.source.tree.StatementTree;
  * new Type(){{x = 1; y = 2; }};
  *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class NewClassObjectInitCheck implements CheckContributor<NewClassTree> {
 
@@ -79,6 +80,7 @@ public class NewClassObjectInitCheck implements CheckContributor<NewClassTree> {
 		return true;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, NewClassTree tree, GenerationContext<Void> context) {
 		BlockTree initBlock = NewClassWriter.getDoubleBracesBlock(tree);

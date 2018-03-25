@@ -20,9 +20,18 @@ import com.google.common.base.Strings;
 /**
  * This class is used to copy files from a folder (inside a jar or on the disk) to another folder. copied from
  * http://stackoverflow.com/questions/1386809/copy-directory-from-a-jar-file
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class FileCopier {
+	/**
+	 * <p>copyFile.</p>
+	 *
+	 * @param toCopy a {@link java.io.File} object.
+	 * @param destFile a {@link java.io.File} object.
+	 * @return a boolean.
+	 */
 	public static boolean copyFile(final File toCopy, final File destFile) {
 		try {
 			return copyStream(new FileInputStream(toCopy), new FileOutputStream(destFile));
@@ -55,6 +64,15 @@ public class FileCopier {
 		return true;
 	}
 
+	/**
+	 * <p>copyJarResourcesRecursively.</p>
+	 *
+	 * @param destDir a {@link java.io.File} object.
+	 * @param jarConnection a {@link java.net.JarURLConnection} object.
+	 * @param filter a {@link java.io.FilenameFilter} object.
+	 * @return a boolean.
+	 * @throws java.io.IOException if any.
+	 */
 	public static boolean copyJarResourcesRecursively(final File destDir, final JarURLConnection jarConnection, FilenameFilter filter)
 			throws IOException {
 
@@ -88,6 +106,14 @@ public class FileCopier {
 		return true;
 	}
 
+	/**
+	 * <p>copyResourcesRecursively.</p>
+	 *
+	 * @param originUrl a {@link java.net.URL} object.
+	 * @param destination a {@link java.io.File} object.
+	 * @param filter a {@link java.io.FilenameFilter} object.
+	 * @return a boolean.
+	 */
 	public static boolean copyResourcesRecursively( //
 			final URL originUrl, final File destination, FilenameFilter filter) {
 		try {
@@ -136,6 +162,13 @@ public class FileCopier {
 		return f.exists() || f.mkdirs();
 	}
 
+	/**
+	 * <p>removeStart.</p>
+	 *
+	 * @param str a {@link java.lang.String} object.
+	 * @param remove a {@link java.lang.String} object.
+	 * @return a {@link java.lang.String} object.
+	 */
 	public static String removeStart(String str, String remove) {
 		if (Strings.isNullOrEmpty(str) || Strings.isNullOrEmpty(remove)) {
 			return str;

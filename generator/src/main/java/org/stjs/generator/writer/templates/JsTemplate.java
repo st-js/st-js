@@ -9,7 +9,7 @@ import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.Tree;
 
 /**
- * $js("code") -> code
+ * $js("code") &gt; code
  * 
  * @author acraciun
  */

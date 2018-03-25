@@ -41,6 +41,9 @@ import com.sun.tools.javac.util.Context;
 /**
  * Static utility methods used by annotation abstractions in this package. Some methods in this class depend on the use
  * of Sun javac internals; any procedure in the Checker Framework that uses a non-public API should be placed here.
+ *
+ * @author acraciun
+ * @version $Id: $Id
  */
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(
 		justification = "copied code", value = "BC_UNCONFIRMED_CAST")
@@ -54,13 +57,13 @@ public final class InternalUtils {
 	}
 
 	/**
-	 * Gets the {@link Element} ("symbol") for the given Tree API node.
-	 * 
+	 * Gets the {@link javax.lang.model.element.Element} ("symbol") for the given Tree API node.
+	 *
 	 * @param tree
-	 *            the {@link Tree} node to get the symbol for
-	 * @throws IllegalArgumentException
+	 *            the {@link com.sun.source.tree.Tree} node to get the symbol for
+	 * @throws java.lang.IllegalArgumentException
 	 *             if {@code tree} is null or is not a valid javac-internal tree (JCTree)
-	 * @return the {@code {@link Symbol} for the given tree, or null if one could not be found
+	 * @return the {@link com.sun.tools.javac.code.Symbol} for the given tree, or null if one could not be found
 	 */
 	public static/* @Nullable */Element symbol(/* @Nullable */Tree tree) {
 		if (tree == null) {
@@ -85,8 +88,8 @@ public final class InternalUtils {
 		case TYPE_PARAMETER:
 			return TreeInfo.symbolFor((JCTree) tree);
 
-			// symbol() only works on MethodSelects, so we need to get it manually
-			// for method invocations.
+		// symbol() only works on MethodSelects, so we need to get it manually
+		// for method invocations.
 		case METHOD_INVOCATION:
 			return TreeInfo.symbol(((JCMethodInvocation) tree).getMethodSelect());
 
@@ -116,7 +119,7 @@ public final class InternalUtils {
 	/**
 	 * Determines whether or not the node referred to by the given {@link com.sun.source.util.TreePath} is an anonymous
 	 * constructor (the constructor for an anonymous class.
-	 * 
+	 *
 	 * @param method
 	 *            the {@link com.sun.source.util.TreePath} for a node that may be an anonymous constructor
 	 * @return true if the given path points to an anonymous constructor, false if it does not
@@ -143,10 +146,11 @@ public final class InternalUtils {
 	 * Determines the symbol for a constructor given an invocation via {@code new}. If the tree is a declaration of an
 	 * anonymous class, then method returns constructor that gets invoked in the extended class, rather than the
 	 * anonymous constructor implicitly added by the constructor (JLS 15.9.5.1)
-	 * 
+	 *
 	 * @param tree
 	 *            the constructor invocation
-	 * @return the {@link ExecutableElement} corresponding to the constructor call in {@code tree}
+	 * @return the {@link javax.lang.model.element.ExecutableElement} corresponding to the constructor call in
+	 *         {@code tree}
 	 */
 	public static ExecutableElement constructor(NewClassTree tree) {
 
@@ -215,6 +219,15 @@ public final class InternalUtils {
 	// return Collections.emptyList();
 	// }
 
+	/**
+	 * <p>
+	 * typeOf.
+	 * </p>
+	 *
+	 * @param tree
+	 *            a {@link com.sun.source.tree.Tree} object.
+	 * @return a {@link javax.lang.model.type.TypeMirror} object.
+	 */
 	public static TypeMirror typeOf(Tree tree) {
 		return ((JCTree) tree).type;
 	}
@@ -228,20 +241,24 @@ public final class InternalUtils {
 
 	/**
 	 * Returns whether a TypeMirror represents a class type.
+	 *
+	 * @param type
+	 *            a {@link javax.lang.model.type.TypeMirror} object.
+	 * @return a boolean.
 	 */
 	public static boolean isClassType(TypeMirror type) {
 		return type instanceof Type.ClassType;
 	}
 
 	/**
-	 * Returns the least upper bound of two {@link TypeMirror}s.
-	 * 
+	 * Returns the least upper bound of two {@link javax.lang.model.type.TypeMirror}s.
+	 *
 	 * @param processingEnv
-	 *            The {@link ProcessingEnvironment} to use.
+	 *            The {@link javax.annotation.processing.ProcessingEnvironment} to use.
 	 * @param tm1
-	 *            A {@link TypeMirror}.
+	 *            A {@link javax.lang.model.type.TypeMirror}.
 	 * @param tm2
-	 *            A {@link TypeMirror}.
+	 *            A {@link javax.lang.model.type.TypeMirror}.
 	 * @return The least upper bound of {@code tm1} and {@code tm2}.
 	 */
 	public static TypeMirror leastUpperBound(ProcessingEnvironment processingEnv, TypeMirror tm1, TypeMirror tm2) {
@@ -294,14 +311,14 @@ public final class InternalUtils {
 	}
 
 	/**
-	 * Returns the greatest lower bound of two {@link TypeMirror}s.
-	 * 
+	 * Returns the greatest lower bound of two {@link javax.lang.model.type.TypeMirror}s.
+	 *
 	 * @param processingEnv
-	 *            The {@link ProcessingEnvironment} to use.
+	 *            The {@link javax.annotation.processing.ProcessingEnvironment} to use.
 	 * @param tm1
-	 *            A {@link TypeMirror}.
+	 *            A {@link javax.lang.model.type.TypeMirror}.
 	 * @param tm2
-	 *            A {@link TypeMirror}.
+	 *            A {@link javax.lang.model.type.TypeMirror}.
 	 * @return The greatest lower bound of {@code tm1} and {@code tm2}.
 	 */
 	public static TypeMirror greatestLowerBound(ProcessingEnvironment processingEnv, TypeMirror tm1, TypeMirror tm2) {
@@ -345,6 +362,12 @@ public final class InternalUtils {
 	/**
 	 * Returns the return type of a method, where the "raw" return type of that method is given (i.e., the return type
 	 * might still contain unsubstituted type variables), given the receiver of the method call.
+	 *
+	 * @param methodType
+	 *            a {@link javax.lang.model.type.TypeMirror} object.
+	 * @param substitutedReceiverType
+	 *            a {@link javax.lang.model.type.TypeMirror} object.
+	 * @return a {@link javax.lang.model.type.TypeMirror} object.
 	 */
 	public static TypeMirror substituteMethodReturnType(TypeMirror methodType, TypeMirror substitutedReceiverType) {
 		if (methodType.getKind() != TypeKind.TYPEVAR) {
@@ -366,7 +389,7 @@ public final class InternalUtils {
 
 	/**
 	 * Helper function to extract the javac Context from the javac processing environment.
-	 * 
+	 *
 	 * @param env
 	 *            the processing environment
 	 * @return the javac Context
@@ -376,7 +399,12 @@ public final class InternalUtils {
 	}
 
 	/**
+	 * <p>
+	 * getSimpleName.
+	 * </p>
+	 *
 	 * @param element
+	 *            a {@link javax.lang.model.element.Element} object.
 	 * @return Type$1 for inner types
 	 */
 	public static String getSimpleName(Element element) {
@@ -395,7 +423,12 @@ public final class InternalUtils {
 	}
 
 	/**
+	 * <p>
+	 * isVarArg.
+	 * </p>
+	 *
 	 * @param tree
+	 *            a {@link com.sun.source.tree.Tree} object.
 	 * @return true if the node is a vararg
 	 */
 	public static boolean isVarArg(Tree tree) {
@@ -414,6 +447,15 @@ public final class InternalUtils {
 		return false;
 	}
 
+	/**
+	 * <p>
+	 * isSynthetic.
+	 * </p>
+	 *
+	 * @param tree
+	 *            a {@link com.sun.source.tree.Tree} object.
+	 * @return a boolean.
+	 */
 	public static boolean isSynthetic(Tree tree) {
 
 		/* @Nullable */Element e = InternalUtils.symbol(tree);
@@ -427,6 +469,15 @@ public final class InternalUtils {
 		return false;
 	}
 
+	/**
+	 * <p>
+	 * isSyntheticConstructor.
+	 * </p>
+	 *
+	 * @param tree
+	 *            a {@link com.sun.source.tree.Tree} object.
+	 * @return a boolean.
+	 */
 	public static boolean isSyntheticConstructor(Tree tree) {
 		Element e = InternalUtils.symbol(tree);
 		if (e == null || e.getKind() != ElementKind.CONSTRUCTOR) {

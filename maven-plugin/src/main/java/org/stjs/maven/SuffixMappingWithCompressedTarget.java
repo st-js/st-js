@@ -25,9 +25,9 @@ import org.codehaus.plexus.compiler.util.scan.mapping.SourceMapping;
  * This class maps a source to a target folder by both changing the suffix and compressing the target folder by
  * suppressing a part of the folder structure. That is it will transform a file [src folder]/org/stjs/example/Test.java
  * in [target folder]/Test.java
- * 
+ *
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
- * 
+ * @version $Id: $Id
  */
 public class SuffixMappingWithCompressedTarget implements SourceMapping {
 	private final String sourceSuffix;
@@ -36,6 +36,13 @@ public class SuffixMappingWithCompressedTarget implements SourceMapping {
 
 	private final String removePrefix;
 
+	/**
+	 * <p>Constructor for SuffixMappingWithCompressedTarget.</p>
+	 *
+	 * @param removePrefix a {@link java.lang.String} object.
+	 * @param sourceSuffix a {@link java.lang.String} object.
+	 * @param targetSuffix a {@link java.lang.String} object.
+	 */
 	public SuffixMappingWithCompressedTarget(String removePrefix, String sourceSuffix, String targetSuffix) {
 		this.sourceSuffix = sourceSuffix;
 
@@ -43,6 +50,7 @@ public class SuffixMappingWithCompressedTarget implements SourceMapping {
 		this.removePrefix = removePrefix;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Set<File> getTargetFiles(File targetDir, String source) {
 		Set<File> targetFiles = new HashSet<File>();

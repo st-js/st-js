@@ -25,9 +25,21 @@ import org.stjs.generator.STJSRuntimeException;
 
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
+/**
+ * <p>NodeJSExecutor class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class NodeJSExecutor {
 	private static final String NODE_JS = "node";
 
+	/**
+	 * <p>run.</p>
+	 *
+	 * @param srcFile a {@link java.io.File} object.
+	 * @return a {@link org.stjs.generator.executor.ExecutionResult} object.
+	 */
 	@SuppressWarnings(
 			value = "REC_CATCH_EXCEPTION")
 	public ExecutionResult run(File srcFile) {

@@ -9,63 +9,78 @@ import java.util.List;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.stjs.generator.GenerationDirectory;
 
 /**
+ * <p>
+ * MainSTJSMojo class.
+ * </p>
+ *
  * @author acraciun
- * @goal generate
- * @phase process-classes
- * @requiresDependencyResolution compile
+ * @version $Id: $Id
  */
+@Mojo(
+		name = "generate", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresDependencyResolution = ResolutionScope.COMPILE)
+
 public class MainSTJSMojo extends AbstractSTJSMojo {
 
 	/**
 	 * The source directories containing the sources to be compiled.
 	 *
-	 * @parameter default-value="${project.compileSourceRoots}"
-	 * @required
 	 */
+	@Parameter(
+			defaultValue = "${project.compileSourceRoots}", required = true)
 	private List<String> compileSourceRoots;
 
 	/**
 	 * <p>
 	 * Specify where to place generated source files. Cannot be set with &lt;webjar&gt;true&lt;/webjar&gt; <br>
 	 * Default value for war: "${project.build.directory}/${project.build.finalName}/generated-js" <br>
-	 * Default value for jar: "${project.build.outputDirectory}"
-	 * Default value for webjar: "${project.build.outputDirectory}/META-INF/resources/webjar/${project.artifactId}/${project.version}"
+	 * Default value for jar: "${project.build.outputDirectory}" Default value for webjar:
+	 * "${project.build.outputDirectory}/META-INF/resources/webjar/${project.artifactId}/${project.version}"
 	 * </p>
 	 *
-	 * @parameter
 	 */
+	@Parameter
 	private File generatedSourcesDirectory;
 
 	/**
-	 * @parameter default-value="${project.build.outputDirectory}"
 	 */
+	@Parameter(
+			defaultValue = "${project.build.outputDirectory}")
 	private File buildOutputDirectory;
 
 	/**
-	 * Specifies if the ST-JS runtime support file (stjs.js) must be included in your build output. Default value is true.
+	 * Specifies if the ST-JS runtime support file (stjs.js) must be included in your build output. Default value is
+	 * true.
 	 *
 	 * The runtime will not be copied if the "webjar" setting is set to "true"
 	 *
-	 * @parameter default-value="true"
 	 */
+	@Parameter(
+			defaultValue = "true")
 	private boolean includeStjsSupportFile;
 
 	/**
 	 * Sets up ST-JS to generate webjar compliant jars. This option is only compatible with jar packaging and will not
 	 * work if you have explicitly set the value of generatedSourcesDirectory.
 	 *
-	 * @parameter default-value="false"
 	 */
+	@Parameter(
+			defaultValue = "false")
 	private boolean webjar;
 
+	/** {@inheritDoc} */
 	@Override
 	public List<String> getCompileSourceRoots() {
 		return compileSourceRoots;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public GenerationDirectory getGeneratedSourcesDirectory() throws MojoExecutionException {
 
@@ -122,10 +137,10 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 				// .war packaging
 				Path artifactPath = Paths.get(project.getBuild().getDirectory(), project.getBuild().getFinalName());
 				String jsPath = artifactPath.relativize(generatedSourcesPath).toString();
-				if(!jsPath.startsWith("/")){
+				if (!jsPath.startsWith("/")) {
 					jsPath = "/" + jsPath;
 				}
-				if(!jsPath.endsWith("/")){
+				if (!jsPath.endsWith("/")) {
 					jsPath = jsPath + "/";
 				}
 				generatedSourcesRuntimePath = new URI(jsPath);
@@ -143,17 +158,20 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 		return gendir;
 	}
 
+	/** {@inheritDoc} */
 	@SuppressWarnings("unchecked")
 	@Override
 	protected List<String> getClasspathElements() throws DependencyResolutionRequiredException {
 		return project.getCompileClasspathElements();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	protected boolean getCopyStjsSupportFile() {
 		return !webjar && includeStjsSupportFile;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	protected File getBuildOutputDirectory() {
 		return buildOutputDirectory;

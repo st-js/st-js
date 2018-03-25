@@ -29,6 +29,7 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
  * of the scripts for a given html page. As in Java cyclic dependency is possible the list may be incorrect.
  *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class DependencyCollector {
 
@@ -47,10 +48,28 @@ public class DependencyCollector {
 		return -1;
 	}
 
+	/**
+	 * <p>
+	 * orderAllDependencies.
+	 * </p>
+	 *
+	 * @param root
+	 *            a {@link org.stjs.generator.ClassWithJavascript} object.
+	 * @return a {@link java.util.List} object.
+	 */
 	public List<ClassWithJavascript> orderAllDependencies(ClassWithJavascript root) {
 		return orderAllDependencies(Collections.singletonList(root));
 	}
 
+	/**
+	 * <p>
+	 * orderAllDependencies.
+	 * </p>
+	 *
+	 * @param roots
+	 *            a {@link java.util.List} object.
+	 * @return a {@link java.util.List} object.
+	 */
 	public List<ClassWithJavascript> orderAllDependencies(List<ClassWithJavascript> roots) {
 		List<ClassWithJavascript> deps = new ArrayList<>();
 		Set<ClassWithJavascript> visited = new HashSet<>();
@@ -103,23 +122,21 @@ public class DependencyCollector {
 	public static class DependencyComparator implements Comparator<Class<?>> {
 
 		/**
-		 * Calling getDeclaredClasses repeatedly is very expensive. We'll just cache the result of this
-		 * for the lifetime of this DependencyComparator instance. Don't create static instances of this class
-		 * or you will be leaking ClassLoaders.
+		 * Calling getDeclaredClasses repeatedly is very expensive. We'll just cache the result of this for the lifetime
+		 * of this DependencyComparator instance. Don't create static instances of this class or you will be leaking
+		 * ClassLoaders.
 		 */
 		private final ConcurrentHashMap<Class<?>, Class<?>[]> declaredClasses = new ConcurrentHashMap<>();
 
 		/**
-		 /**
-		 * -1: if "b" or any child type of "b" (at any level) extends from "a" or any of "a"'s child type <br>
+		 * /** -1: if "b" or any child type of "b" (at any level) extends from "a" or any of "a"'s child type <br>
 		 * 1: the other way around<br>
-		 * 0: if none of the cases
-		 *
+		 * 0: if none of the cases.<br>
+		 * Throws if there is a situation where the method cannot decide weather it should return -1 or 1
+		 * 
 		 * @param a
 		 * @param b
 		 * @return
-		 * @throws if
-		 *             there is a situation where the method cannot decide weather it should return -1 or 1
 		 */
 		@Override
 		public int compare(Class<?> a, Class<?> b) {

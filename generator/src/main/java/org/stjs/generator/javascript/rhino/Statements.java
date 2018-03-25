@@ -23,14 +23,28 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
  */
 class Statements extends AstNode {
 
+	/**
+	 * <p>Constructor for Statements.</p>
+	 */
 	public Statements() {
 		this(0, 0);
 	}
 
+	/**
+	 * <p>Constructor for Statements.</p>
+	 *
+	 * @param pos a int.
+	 */
 	public Statements(int pos) {
 		this(pos, 0);
 	}
 
+	/**
+	 * <p>Constructor for Statements.</p>
+	 *
+	 * @param pos a int.
+	 * @param len a int.
+	 */
 	public Statements(int pos, int len) {
 		super(pos, len);
 		this.type = Token.LAST_TOKEN + 1;
@@ -38,6 +52,8 @@ class Statements extends AstNode {
 
 	/**
 	 * Alias for {@link #addChild}.
+	 *
+	 * @param statement a {@link org.mozilla.javascript.ast.AstNode} object.
 	 */
 	public void addStatement(AstNode statement) {
 		addChild(statement);
@@ -50,6 +66,7 @@ class Statements extends AstNode {
 		return (AstNode) n;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String toSource(int depth) {
 		StringBuilder sb = new StringBuilder();
@@ -61,6 +78,7 @@ class Statements extends AstNode {
 		return sb.toString();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void visit(NodeVisitor v) {
 		if (v.visit(this)) {

@@ -22,6 +22,12 @@ import com.google.debugging.sourcemap.SourceMapping;
 
 import static java.lang.Integer.parseInt;
 
+/**
+ * <p>JavascriptToJava class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class JavascriptToJava {
 	private final static Pattern STACKTRACE_UNIVERSAL_JS_PATTERN = Pattern
 			.compile("\\s*(?:at)?\\s*(?:([\\w$]+)\\.)*(\\w*\\s?\\w+)[\\s\\@]?\\(?([^\\)]+)\\)?");
@@ -31,10 +37,22 @@ public class JavascriptToJava {
 
 	private final ClassLoader classLoader;
 
+	/**
+	 * <p>Constructor for JavascriptToJava.</p>
+	 *
+	 * @param testClassLoader a {@link java.lang.ClassLoader} object.
+	 */
 	public JavascriptToJava(ClassLoader testClassLoader) {
 		this.classLoader = testClassLoader;
 	}
 
+	/**
+	 * <p>getJavaLine.</p>
+	 *
+	 * @param path a {@link java.lang.String} object.
+	 * @param lineNumber a int.
+	 * @return a int.
+	 */
 	public int getJavaLine(String path, int lineNumber) {
 		String sourceMapFile = path.replaceAll("\\.js$", ".map");
 		URL url = classLoader.getResource(sourceMapFile.substring(1));
@@ -134,8 +152,9 @@ public class JavascriptToJava {
 	 *
 	 * where url is in the form of http://localhost:xxxx/org/stjs/TestClass.js:row:col
 	 *
-	 * @param javascriptStacktrace
-	 * @return
+	 * @param javascriptStacktrace a {@link java.lang.String} object.
+	 * @param lineSeparator a {@link java.lang.String} object.
+	 * @return an array of {@link java.lang.StackTraceElement} objects.
 	 */
 	public StackTraceElement[] buildStacktrace(String javascriptStacktrace, String lineSeparator) {
 		PreConditions.checkNotNull(javascriptStacktrace);

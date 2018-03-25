@@ -11,11 +11,18 @@ import org.stjs.javascript.annotation.ServerSide;
 import com.sun.source.tree.MemberSelectTree;
 
 /**
- * @see {@link IdentifierGlobalScopeNameClashCheck}
+ * <p>
+ * MemberSelectServerSideCheck class.
+ * </p>
+ *
+ * see {@link org.stjs.generator.check.expression.IdentifierGlobalScopeNameClashCheck}
+ * 
  * @author acraciun
+ * @version $Id: $Id
  */
 public class MemberSelectServerSideCheck implements CheckContributor<MemberSelectTree> {
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, MemberSelectTree tree, GenerationContext<Void> context) {
 		Element element = TreeUtils.elementFromUse(tree);

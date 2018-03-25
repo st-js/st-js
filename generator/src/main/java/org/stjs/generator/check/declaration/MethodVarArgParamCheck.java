@@ -12,6 +12,12 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
 
+/**
+ * <p>MethodVarArgParamCheck class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class MethodVarArgParamCheck implements CheckContributor<MethodTree> {
 
 	private void checkVarArg(MethodTree tree, VariableTree param, GenerationContext<Void> context) {
@@ -20,6 +26,7 @@ public class MethodVarArgParamCheck implements CheckContributor<MethodTree> {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Void visit(CheckVisitor visitor, MethodTree tree, GenerationContext<Void> context) {
 		TreeWrapper<Tree, Void> tw = context.getCurrentWrapper();

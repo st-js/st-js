@@ -29,6 +29,12 @@ import org.codehaus.jackson.type.JavaType;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.JSCollections;
 
+/**
+ * <p>JSArrayDeserializer class.</p>
+ *
+ * @author acraciun
+ * @version $Id: $Id
+ */
 public class JSArrayDeserializer extends ContainerDeserializer<Array<Object>> {
 
 	// // Configuration
@@ -45,6 +51,13 @@ public class JSArrayDeserializer extends ContainerDeserializer<Array<Object>> {
 	 */
 	final TypeDeserializer _valueTypeDeserializer;
 
+	/**
+	 * <p>Constructor for JSArrayDeserializer.</p>
+	 *
+	 * @param collectionType a {@link org.codehaus.jackson.type.JavaType} object.
+	 * @param valueDeser a {@link org.codehaus.jackson.map.JsonDeserializer} object.
+	 * @param valueTypeDeser a {@link org.codehaus.jackson.map.TypeDeserializer} object.
+	 */
 	public JSArrayDeserializer(JavaType collectionType, JsonDeserializer<Object> valueDeser,
 			TypeDeserializer valueTypeDeser) {
 		super(collectionType.getRawClass());
@@ -58,11 +71,13 @@ public class JSArrayDeserializer extends ContainerDeserializer<Array<Object>> {
 	 * /**********************************************************
 	 */
 
+	/** {@inheritDoc} */
 	@Override
 	public JavaType getContentType() {
 		return _collectionType.getContentType();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public JsonDeserializer<Object> getContentDeserializer() {
 		return _valueDeserializer;
@@ -73,6 +88,7 @@ public class JSArrayDeserializer extends ContainerDeserializer<Array<Object>> {
 	 * /**********************************************************
 	 */
 
+	/** {@inheritDoc} */
 	@Override
 	public Array<Object> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException,
 			JsonProcessingException {
@@ -81,6 +97,7 @@ public class JSArrayDeserializer extends ContainerDeserializer<Array<Object>> {
 		return deserialize(jp, ctxt, result);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Array<Object> deserialize(JsonParser jp, DeserializationContext ctxt, Array<Object> result)
 			throws IOException, JsonProcessingException {
@@ -108,6 +125,7 @@ public class JSArrayDeserializer extends ContainerDeserializer<Array<Object>> {
 		return result;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Object deserializeWithType(JsonParser jp, DeserializationContext ctxt, TypeDeserializer typeDeserializer)
 			throws IOException, JsonProcessingException {

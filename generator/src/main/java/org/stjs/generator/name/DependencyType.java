@@ -5,6 +5,7 @@ package org.stjs.generator.name;
  * this enum describes the types of dependencies that can arrise between different classes.
  *
  * @author acraciun
+ * @version $Id: $Id
  */
 public enum DependencyType {
 	EXTENDS(""), // for backward compatibility - the files with no prefix are considered EXTENDS <=> required to appear
@@ -17,10 +18,21 @@ public enum DependencyType {
 		this.prefix = prefix;
 	}
 
+	/**
+	 * <p>Getter for the field <code>prefix</code>.</p>
+	 *
+	 * @return a {@link java.lang.String} object.
+	 */
 	public String getPrefix() {
 		return prefix;
 	}
 
+	/**
+	 * <p>getTypeName.</p>
+	 *
+	 * @param typeWithPrefix a {@link java.lang.String} object.
+	 * @return a {@link java.lang.String} object.
+	 */
 	public static String getTypeName(String typeWithPrefix) {
 		if (typeWithPrefix == null || typeWithPrefix.isEmpty()) {
 			return typeWithPrefix;
@@ -29,6 +41,12 @@ public enum DependencyType {
 		return pos < 0 ? typeWithPrefix : typeWithPrefix.substring(pos + 1);
 	}
 
+	/**
+	 * <p>getDependencyType.</p>
+	 *
+	 * @param typeWithPrefix a {@link java.lang.String} object.
+	 * @return a {@link org.stjs.generator.name.DependencyType} object.
+	 */
 	public static DependencyType getDependencyType(String typeWithPrefix) {
 		if (typeWithPrefix == null || typeWithPrefix.isEmpty()) {
 			return EXTENDS;
@@ -44,9 +62,10 @@ public enum DependencyType {
 	}
 
 	/**
+	 * <p>getTypeWithPrefix.</p>
 	 *
-	 * @param typeName
-	 * @param depType
+	 * @param typeName a {@link java.lang.String} object.
+	 * @param depType a {@link org.stjs.generator.name.DependencyType} object.
 	 * @return prefix:type or type for EXTENDS
 	 */
 	public static String getTypeWithPrefix(String typeName, DependencyType depType) {
@@ -59,6 +78,12 @@ public enum DependencyType {
 		return depType.prefix + ":" + typeName;
 	}
 
+	/**
+	 * <p>isStricter.</p>
+	 *
+	 * @param otherType a {@link org.stjs.generator.name.DependencyType} object.
+	 * @return a boolean.
+	 */
 	public boolean isStricter(DependencyType otherType) {
 		return ordinal() < otherType.ordinal();
 	}

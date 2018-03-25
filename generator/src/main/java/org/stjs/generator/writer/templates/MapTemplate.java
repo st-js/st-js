@@ -11,7 +11,7 @@ import org.stjs.generator.writer.WriterVisitor;
 import com.sun.source.tree.MethodInvocationTree;
 
 /**
- * $map(n1, v1, n2, v2) -> {n1: v1, n2: v2}
+ * $map(n1, v1, n2, v2) &gt; {n1: v1, n2: v2}
  * 
  * @author acraciun
  */

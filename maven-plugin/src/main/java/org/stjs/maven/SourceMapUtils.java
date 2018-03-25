@@ -15,11 +15,25 @@ import com.google.debugging.sourcemap.SourceMapParseException;
 
 /**
  * remake the source map merge of closure compiler in order to allow the rewrite of the original source map's path
- * 
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 public class SourceMapUtils {
 
+	/**
+	 * <p>appendFileSkipSourceMap.</p>
+	 *
+	 * @param gendir a {@link java.io.File} object.
+	 * @param allSourcesFile a {@link java.io.OutputStream} object.
+	 * @param jsFile a {@link java.io.File} object.
+	 * @param currentLine a int.
+	 * @param packSourcemap a {@link com.google.debugging.sourcemap.SourceMapGeneratorV3} object.
+	 * @param charsetName a {@link java.lang.String} object.
+	 * @return a int.
+	 * @throws java.io.IOException if any.
+	 * @throws com.google.debugging.sourcemap.SourceMapParseException if any.
+	 */
 	public static int appendFileSkipSourceMap(File gendir, OutputStream allSourcesFile, File jsFile, int currentLine,
 			SourceMapGeneratorV3 packSourcemap, String charsetName) throws IOException, SourceMapParseException {
 		Charset charset = charsetName != null ? Charset.forName(charsetName) : Charset.defaultCharset();
@@ -41,6 +55,16 @@ public class SourceMapUtils {
 		return file.getAbsolutePath().substring(folder.getAbsolutePath().length() + 1);
 	}
 
+	/**
+	 * <p>mergeMapSection.</p>
+	 *
+	 * @param sourceMapFile a {@link java.io.File} object.
+	 * @param packSourcemap a {@link com.google.debugging.sourcemap.SourceMapGeneratorV3} object.
+	 * @param line a int.
+	 * @param column a int.
+	 * @param mapSectionContents a {@link java.lang.String} object.
+	 * @throws com.google.debugging.sourcemap.SourceMapParseException if any.
+	 */
 	public static void mergeMapSection(File sourceMapFile, SourceMapGeneratorV3 packSourcemap, int line, int column, String mapSectionContents)
 			throws SourceMapParseException {
 		packSourcemap.setStartingPosition(line, column);

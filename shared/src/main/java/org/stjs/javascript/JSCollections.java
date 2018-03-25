@@ -19,15 +19,24 @@ import org.stjs.javascript.annotation.GlobalScope;
 import org.stjs.javascript.annotation.Template;
 
 /**
- * this class offers map and array builders for both client and server side. For the server side, it delegates the execution to an instance of
- * {@link JSCollectionsImplementor}. On the client side, it simply throws an {@link UnsupportedOperationException} like all the client-side
- * bridges.
+ * this class offers map and array builders for both client and server side. For the server side, it delegates the
+ * execution to an instance of collections. On the client side, it simply throws an
+ * {@link java.lang.UnsupportedOperationException} like all the client-side bridges.
+ *
  * @author acraciun
+ * @version $Id: $Id
  */
 @GlobalScope
 @SuppressWarnings("unchecked")
 public class JSCollections {
 
+	/**
+	 * <p>$array.</p>
+	 *
+	 * @param values a V object.
+	 * @param <V> a V object.
+	 * @return a {@link org.stjs.javascript.Array} object.
+	 */
 	@Template("array")
 	@SafeVarargs
 	public static <V> Array<V> $array(V... values) {
@@ -36,11 +45,27 @@ public class JSCollections {
 		return a;
 	}
 
+	/**
+	 * <p>$map.</p>
+	 *
+	 * @param <K> a K object.
+	 * @param <V> a V object.
+	 * @return a {@link org.stjs.javascript.Map} object.
+	 */
 	@Template("map")
 	public static <K extends String, V> Map<K, V> $map() {
 		return new Map<K, V>();
 	}
 
+	/**
+	 * <p>$map.</p>
+	 *
+	 * @param k1 a K object.
+	 * @param v1 a V object.
+	 * @param <K> a K object.
+	 * @param <V> a V object.
+	 * @return a {@link org.stjs.javascript.Map} object.
+	 */
 	@Template("map")
 	public static <K extends String, V> Map<K, V> $map(K k1, V v1) {
 		Map<K, V> m = new Map<K, V>();
@@ -48,6 +73,17 @@ public class JSCollections {
 		return m;
 	}
 
+	/**
+	 * <p>$map.</p>
+	 *
+	 * @param k1 a K object.
+	 * @param v1 a V object.
+	 * @param k2 a K object.
+	 * @param v2 a V object.
+	 * @param <K> a K object.
+	 * @param <V> a V object.
+	 * @return a {@link org.stjs.javascript.Map} object.
+	 */
 	@Template("map")
 	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2) {
 		Map<K, V> m = new Map<K, V>();
@@ -56,6 +92,19 @@ public class JSCollections {
 		return m;
 	}
 
+	/**
+	 * <p>$map.</p>
+	 *
+	 * @param k1 a K object.
+	 * @param v1 a V object.
+	 * @param k2 a K object.
+	 * @param v2 a V object.
+	 * @param k3 a K object.
+	 * @param v3 a V object.
+	 * @param <K> a K object.
+	 * @param <V> a V object.
+	 * @return a {@link org.stjs.javascript.Map} object.
+	 */
 	@Template("map")
 	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3) {
 		Map<K, V> m = new Map<K, V>();
@@ -65,6 +114,21 @@ public class JSCollections {
 		return m;
 	}
 
+	/**
+	 * <p>$map.</p>
+	 *
+	 * @param k1 a K object.
+	 * @param v1 a V object.
+	 * @param k2 a K object.
+	 * @param v2 a V object.
+	 * @param k3 a K object.
+	 * @param v3 a V object.
+	 * @param k4 a K object.
+	 * @param v4 a V object.
+	 * @param <K> a K object.
+	 * @param <V> a V object.
+	 * @return a {@link org.stjs.javascript.Map} object.
+	 */
 	@Template("map")
 	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
 		Map<K, V> m = new Map<K, V>();
@@ -75,6 +139,23 @@ public class JSCollections {
 		return m;
 	}
 
+	/**
+	 * <p>$map.</p>
+	 *
+	 * @param k1 a K object.
+	 * @param v1 a V object.
+	 * @param k2 a K object.
+	 * @param v2 a V object.
+	 * @param k3 a K object.
+	 * @param v3 a V object.
+	 * @param k4 a K object.
+	 * @param v4 a V object.
+	 * @param k5 a K object.
+	 * @param v5 a V object.
+	 * @param <K> a K object.
+	 * @param <V> a V object.
+	 * @return a {@link org.stjs.javascript.Map} object.
+	 */
 	@Template("map")
 	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {
 		Map<K, V> m = new Map<K, V>();
@@ -86,6 +167,24 @@ public class JSCollections {
 		return m;
 	}
 
+	/**
+	 * <p>$map.</p>
+	 *
+	 * @param k1 a K object.
+	 * @param v1 a V object.
+	 * @param k2 a K object.
+	 * @param v2 a V object.
+	 * @param k3 a K object.
+	 * @param v3 a V object.
+	 * @param k4 a K object.
+	 * @param v4 a V object.
+	 * @param k5 a K object.
+	 * @param v5 a V object.
+	 * @param morePairs a {@link java.lang.Object} object.
+	 * @param <K> a K object.
+	 * @param <V> a V object.
+	 * @return a {@link org.stjs.javascript.Map} object.
+	 */
 	@Template("map")
 	@SuppressWarnings("unchecked")
 	public static <K extends String, V> Map<K, V> $map(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5, Object... morePairs) {
@@ -101,6 +200,13 @@ public class JSCollections {
 		return m;
 	}
 
+	/**
+	 * <p>$castArray.</p>
+	 *
+	 * @param a an array of T[] objects.
+	 * @param <T> a T object.
+	 * @return a {@link org.stjs.javascript.Array} object.
+	 */
 	@Template("properties")
 	public static <T> Array<T> $castArray(T[] a) {
 		return $array(a);
