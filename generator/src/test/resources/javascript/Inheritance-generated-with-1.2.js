@@ -52,7 +52,7 @@ Inheritance.C.$typeDescription=stjs.copyProps(Inheritance.B.$typeDescription, {}
 Inheritance.main = function(args) {
     var b = new Inheritance.B();
     var c = new Inheritance.C();
-    return b.method2(1) + " " + c.method1(1) + " " + Inheritance.C.W + Inheritance.C.X + Inheritance.C.Y + Inheritance.C.Z + " " + c.W;
+    console.log(b.method2(1) + " " + c.method1(1) + " " + Inheritance.C.W + Inheritance.C.X + Inheritance.C.Y + Inheritance.C.Z + " " + c.W);
 };
 Inheritance.$typeDescription={};
 

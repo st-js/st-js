@@ -1,5 +1,7 @@
 package org.stjs.generator.exec.ints;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 public class ShortToChar {
 	public static final short NEG_SHORT = -31001;
 
@@ -12,6 +14,8 @@ public class ShortToChar {
 	}
 
 	public static int main(String[] args) {
-		return ShortToChar.method(NEG_SHORT);
+		int result = ShortToChar.method(NEG_SHORT);
+		$js("console.log(result)");
+		return 1;
 	}
 }

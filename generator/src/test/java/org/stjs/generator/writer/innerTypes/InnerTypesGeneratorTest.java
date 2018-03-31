@@ -145,9 +145,7 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testInnerConstantAssignment() {
-		Object result = execute(InnerTypes20.class);
-		assertNotNull(result);
-		assertEquals(2, ((Number) result).intValue());
+		assertEquals(2.0, executeAndReturnNumber(InnerTypes20.class));
 
 		assertCodeContains(InnerTypes20.class, "constructor.Holder = function(){};"
 				+ "constructor.Holder = stjs.extend(constructor.Holder, null, [], function(constructor, prototype){" + "       constructor.VALUE = 2;"
@@ -156,9 +154,7 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testAnonymousTypeMethodExecution() {
-		Object result = execute(InnerTypes21.class);
-		assertNotNull(result);
-		assertEquals(5, ((Number) result).intValue());
+		assertEquals(5.0, executeAndReturnNumber(InnerTypes21.class));
 	}
 
 	@Test

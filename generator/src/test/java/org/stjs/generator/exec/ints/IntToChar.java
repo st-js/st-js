@@ -1,5 +1,7 @@
 package org.stjs.generator.exec.ints;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 public class IntToChar {
 	public static final int MAX_INT = 2147483647;
 	public static final int MIN_INT = -2147483648;
@@ -13,6 +15,8 @@ public class IntToChar {
 	}
 
 	public static int main(String[] args) {
-		return IntToChar.method(MAX_INT);
+		int result = IntToChar.method(MAX_INT);
+		$js("console.log(result)");
+		return 1;
 	}
 }

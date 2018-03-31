@@ -1,6 +1,7 @@
 package org.stjs.generator.exec.params;
 
 import static org.stjs.javascript.JSCollections.$castArray;
+import static org.stjs.javascript.JSObjectAdapter.$js;
 
 import org.stjs.javascript.Array;
 import org.stjs.javascript.functions.Function2;
@@ -17,6 +18,8 @@ public class VarArgs1 {
 	}
 
 	public static int main(String[] args) {
-		return add(1, 2, 3, 4);
+		int result = add(1, 2, 3, 4);
+		$js("console.log(result)");
+		return 1;
 	}
 }

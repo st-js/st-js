@@ -82,7 +82,7 @@ public class ExecutionResult {
 	@Override
 	public String toString() {
 		if (stdOut.isEmpty() && stdErr.isEmpty()) {
-			return "Execution was sucessful";
+			return "Execution was successful";
 		}
 		return String.format("result: %s, exitValue : %s%nstdout : %s%nstderr :%s", result == null ? "null" : result.toString(), exitValue,
 				stdOut, stdErr);

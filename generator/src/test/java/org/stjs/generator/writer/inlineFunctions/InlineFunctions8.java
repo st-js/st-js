@@ -1,6 +1,7 @@
 package org.stjs.generator.writer.inlineFunctions;
 
 import static org.stjs.javascript.JSCollections.$array;
+import static org.stjs.javascript.JSObjectAdapter.$js;
 
 import org.stjs.javascript.JSFunctionAdapter;
 import org.stjs.javascript.functions.Function1;
@@ -20,7 +21,10 @@ public class InlineFunctions8 {
 		};
 
 		InlineFunctions8 obj = new InlineFunctions8();
-		return JSFunctionAdapter.apply(f, obj, $array());
+		int result = JSFunctionAdapter.apply(f, obj, $array());
+
+		$js("console.log(result)");
+		return 1;
 	}
 
 }

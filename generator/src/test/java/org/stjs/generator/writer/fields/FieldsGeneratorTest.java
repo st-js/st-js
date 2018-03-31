@@ -85,9 +85,7 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testStaticFieldsDependencies() {
-		Object result = execute(Fields14.class);
-		assertNotNull(result);
-		assertEquals(2, ((Number) result).intValue());
+		assertEquals(2.0, executeAndReturnNumber(Fields14.class), 0);
 	}
 
 	@Test

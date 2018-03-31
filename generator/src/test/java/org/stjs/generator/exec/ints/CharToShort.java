@@ -1,5 +1,7 @@
 package org.stjs.generator.exec.ints;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 public class CharToShort {
 	public static final char BIG_CHAR = 33001;
 
@@ -12,6 +14,8 @@ public class CharToShort {
 	}
 
 	public static int main(String[] args) {
-		return CharToShort.method(BIG_CHAR);
+		int result = CharToShort.method(BIG_CHAR);
+		$js("console.log(result)");
+		return 1;
 	}
 }

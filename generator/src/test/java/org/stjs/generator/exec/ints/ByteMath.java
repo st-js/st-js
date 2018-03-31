@@ -1,5 +1,7 @@
 package org.stjs.generator.exec.ints;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 public class ByteMath {
 	public static final byte B1 = 100;
 	public static final byte B2 = 50;
@@ -13,6 +15,9 @@ public class ByteMath {
 	}
 
 	public static int main(String[] args) {
-		return ByteMath.sum(B1, B2);
+		int result = ByteMath.sum(B1, B2);
+
+		$js("console.log(result)");
+		return 1;
 	}
 }

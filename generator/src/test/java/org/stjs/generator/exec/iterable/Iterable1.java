@@ -2,9 +2,11 @@ package org.stjs.generator.exec.iterable;
 
 import java.util.Iterator;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 public class Iterable1 implements Iterable<Integer> {
 
-    public static Object main(String[] args) {
+    public static String main(String[] args) {
         Iterable1 iterable1 = new Iterable1();
 
         String sequence = "";
@@ -12,6 +14,7 @@ public class Iterable1 implements Iterable<Integer> {
             sequence = sequence + i + ",";
         }
 
+        $js("console.log(sequence)");
         return sequence;
     }
 

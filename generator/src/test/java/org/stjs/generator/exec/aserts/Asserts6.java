@@ -3,6 +3,8 @@ package org.stjs.generator.exec.aserts;
 import org.stjs.javascript.functions.Callback3;
 import org.stjs.javascript.stjs.STJSAssert;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 public class Asserts6 {
 	private static int value = 0;
 
@@ -16,6 +18,7 @@ public class Asserts6 {
 			}
 		});
 		STJSAssert.assertStateTrue(false);
-		return value;
+		$js("console.log(this.value)");
+		return 1;
 	}
 }

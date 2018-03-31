@@ -38,7 +38,7 @@ import com.google.common.io.Files;
  * @author acraciun
  * @version $Id: $Id
  */
-public class RhinoExecutor {
+public class RhinoExecutor implements Executor {
 	private Object addScript(ScriptEngine engine, File scriptFile) throws ScriptException {
 		Reader input = null;
 		try {

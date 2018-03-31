@@ -1,5 +1,7 @@
 package org.stjs.generator.writer.typedarrays;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 public class BooleanArray {
 	public static int method() {
 		int _i = 1;
@@ -16,7 +18,10 @@ public class BooleanArray {
 	}
 
 	public static int main(String[] args) {
-		return BooleanArray.method();
+		int result = BooleanArray.method();
+
+		$js("console.log(result)");
+		return 1;
 	}
 
 }

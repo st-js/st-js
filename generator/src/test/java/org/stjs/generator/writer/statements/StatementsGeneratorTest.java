@@ -113,9 +113,7 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testStaticInitializerContainment() {
-		// We must do the weird (Number).intValue() because for some reason the execution returns the
-		// integer 2 when run from eclipse, but return the double 2.0 when run from maven...
-		assertEquals(2, ((Number) execute(Statements16.class)).intValue());
+		assertEquals(2.0, executeAndReturnNumber(Statements16.class), 0);
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)

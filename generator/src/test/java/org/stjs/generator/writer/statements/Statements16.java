@@ -2,6 +2,8 @@ package org.stjs.generator.writer.statements;
 
 import org.stjs.javascript.annotation.GlobalScope;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 @GlobalScope
 public class Statements16 {
 
@@ -14,6 +16,8 @@ public class Statements16 {
 	}
 
 	public static int main(String[] args) {
-		return a;
+		int result = a;
+		$js("console.log(result)");
+		return result;
 	}
 }

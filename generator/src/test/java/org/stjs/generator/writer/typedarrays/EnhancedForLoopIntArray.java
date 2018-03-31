@@ -1,5 +1,7 @@
 package org.stjs.generator.writer.typedarrays;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 public class EnhancedForLoopIntArray {
 
 	static int method() {
@@ -12,7 +14,10 @@ public class EnhancedForLoopIntArray {
 	}
 
 	public static int main(String[] args) {
-		return EnhancedForLoopIntArray.method();
+		int result = EnhancedForLoopIntArray.method();
+
+		$js("console.log(result)");
+		return 1;
 	}
 
 }

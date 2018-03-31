@@ -9,27 +9,27 @@ public class StringMethodsTest extends AbstractStjsTest {
 
 	@Test
 	public void testStartsWith() {
-		assertEquals(true, execute(String1.class));
+		assertEquals(true, executeAndReturnBoolean(String1.class));
 	}
 
 	@Test
 	public void testStartsWithOffset() {
-		assertEquals(true, execute(String2.class));
+		assertEquals(true, executeAndReturnBoolean(String2.class));
 	}
 
 	@Test
 	public void testEndsWith() {
-		assertEquals(true, execute(String3.class));
+		assertEquals(true, executeAndReturnBoolean(String3.class));
 	}
 
 	@Test
 	public void testMatches() {
-		assertEquals(true, execute(String4.class));
+		assertEquals(true, executeAndReturnBoolean(String4.class));
 	}
 
 	@Test
 	public void testNotMatches() {
-		assertEquals(false, execute(String5.class));
+		assertEquals(false, executeAndReturnBoolean(String5.class));
 	}
 
 	@Test
@@ -44,7 +44,7 @@ public class StringMethodsTest extends AbstractStjsTest {
 
 	@Test
 	public void testEqualsIgnoreCase() {
-		assertEquals(true, execute(String8.class));
+		assertEquals(true, executeAndReturnBoolean(String8.class));
 	}
 
 	@Test
@@ -64,11 +64,11 @@ public class StringMethodsTest extends AbstractStjsTest {
 
 	@Test
 	public void testRegionMatches() {
-		assertEquals(true, execute(String12.class));
+		assertEquals(true, executeAndReturnBoolean(String12.class));
 	}
 
 	@Test
 	public void testRegionMatchesIgnoreCase() {
-		assertEquals(true, execute(String13.class));
+		assertEquals(true, executeAndReturnBoolean(String13.class));
 	}
 }

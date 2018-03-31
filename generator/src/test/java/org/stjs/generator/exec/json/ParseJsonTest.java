@@ -4,12 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;
 import org.stjs.javascript.Map;
 
+@Ignore("We don't test JSON with the node runner")
 public class ParseJsonTest extends AbstractStjsTest {
 	@SuppressWarnings("unchecked")
 	private Object getProperty(Object obj, String... props) {

@@ -1,5 +1,7 @@
 package org.stjs.generator.exec.ints;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 public class CharPlusString {
     public static final char CYRILLIC_IA = 'я';
 
@@ -8,6 +10,8 @@ public class CharPlusString {
     }
 
     public static String main(String[] args) {
-        return CharPlusString.method("hello", CYRILLIC_IA);
+        String result = CharPlusString.method("hello", CYRILLIC_IA);
+        $js("console.log(result)");
+        return result;
     }
 }

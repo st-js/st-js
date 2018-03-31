@@ -3,6 +3,7 @@ package org.stjs.generator.utils;
 import static org.junit.Assert.assertTrue;
 import static org.stjs.javascript.JSCollections.$array;
 import static org.stjs.javascript.JSCollections.$map;
+import static org.stjs.javascript.JSGlobal.stjs;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,7 +31,7 @@ import org.stjs.generator.GeneratorConfiguration;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.executor.ExecutionResult;
-import org.stjs.generator.executor.RhinoExecutor;
+import org.stjs.generator.executor.NodeJSExecutor;
 import org.stjs.generator.utils.LazyGenerationClassResolver.LazyGenerator;
 import org.stjs.javascript.Array;
 import org.stjs.javascript.Date;
@@ -100,6 +101,20 @@ public abstract class AbstractStjsTest {
 		return convert(executeOrGenerate(clazz, true, false));
 	}
 
+	public Boolean executeAndReturnBoolean(Class<?> clazz) {
+		return executeAndReturnBoolean(clazz, null);
+	}
+
+	public Boolean executeAndReturnBoolean(Class<?> clazz, GeneratorConfiguration extraConfig) {
+		Object obj = convert(executeOrGenerate(clazz, true, false, extraConfig));
+
+		if (obj instanceof String) {
+			return Boolean.parseBoolean((String) obj);
+		}
+
+		return null;
+	}
+
 	/**
 	 * <p>executeAndReturnNumber.</p>
 	 *
@@ -125,6 +140,15 @@ public abstract class AbstractStjsTest {
 		if (obj instanceof Number) {
 			return ((Number) obj).doubleValue();
 		}
+
+		if (obj instanceof String) {
+			try {
+				return Double.parseDouble((String) obj);
+			} catch (NumberFormatException e) {
+				return Double.NaN;
+			}
+		}
+
 		return Double.NaN;
 	}
 
@@ -137,7 +161,7 @@ public abstract class AbstractStjsTest {
 	public Object execute(String preGeneratedJs) {
 		try {
 			File jsfile = new File(preGeneratedJs);
-			ExecutionResult execResult = new RhinoExecutor().run(Collections.singletonList(jsfile), false);
+			ExecutionResult execResult = new NodeJSExecutor().run(Collections.singletonList(jsfile), false);
 			return convert(execResult.getResult());
 		}
 		catch (ScriptException se) {
@@ -272,7 +296,7 @@ public abstract class AbstractStjsTest {
 		ClassWithJavascript stjsClass = this.generator.generateJavascript(clazz.getName(), sourcePath);
 
 		Timers.start("js-exec");
-		List<File> javascriptFiles = new ArrayList<File>();
+		List<File> javascriptFiles = new ArrayList<>();
 		try {
 			File jsFile = new File(stjsClass.getJavascriptFiles().get(0).getPath());
 			String content = Files.toString(jsFile, Charset.defaultCharset());
@@ -286,7 +310,7 @@ public abstract class AbstractStjsTest {
 					}
 				}
 			}
-			ExecutionResult execResult = new RhinoExecutor().run(javascriptFiles, !execute);
+			ExecutionResult execResult = new NodeJSExecutor().run(javascriptFiles, !execute);
 			if (execute) {
 				return execResult.getResult();
 			}

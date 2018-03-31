@@ -1,5 +1,7 @@
 package org.stjs.generator.exec.ints;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 public class CharLiteralToByte {
 	public static final char CYRILLIC_IA = 'я';
 
@@ -12,6 +14,9 @@ public class CharLiteralToByte {
 	}
 
 	public static int main(String[] args) {
-		return CharLiteralToByte.method(CYRILLIC_IA);
+		int result = CharLiteralToByte.method(CYRILLIC_IA);
+
+		$js("console.log(result)");
+		return 1;
 	}
 }

@@ -1,5 +1,7 @@
 package org.stjs.generator.writer.typedarrays;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 public class ArrayInstanceOf {
 	public static int intArray() {
 		byte[] b = new byte[1];
@@ -12,9 +14,12 @@ public class ArrayInstanceOf {
         }
 		return 42;
 	}
-	
+
 	public static int main(String[] args) {
-        return intArray();
+        int result = intArray();
+
+		$js("console.log(result)");
+		return 1;
     }
 
 }

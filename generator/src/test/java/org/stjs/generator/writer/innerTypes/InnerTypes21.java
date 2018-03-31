@@ -1,5 +1,7 @@
 package org.stjs.generator.writer.innerTypes;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 public class InnerTypes21 {
 
 	public interface Inner {
@@ -12,6 +14,9 @@ public class InnerTypes21 {
 				return 5;
 			}
 		};
-		return obj.getValue();
+		int result = obj.getValue();
+
+		$js("console.log(result)");
+		return result;
 	}
 }

@@ -1,5 +1,7 @@
 package org.stjs.generator.writer.innerTypes;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 public class InnerTypes20 {
 
 	private static class Holder {
@@ -9,6 +11,8 @@ public class InnerTypes20 {
 	private static int currentValue = Holder.VALUE;
 
 	public static int main(String[] args) {
-		return currentValue;
+		int result = currentValue;
+		$js("console.log(result)");
+		return result;
 	}
 }

@@ -50,10 +50,7 @@ public class GlobalScopeGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testGlobalMainMethod() {
-		Object result = execute(GlobalScope8.class);
-		// We must do the weird (Number).intValue() because for some reason the execution returns the
-		// integer 2 when run from eclipse, but return the double 2.0 when run from maven...
-		assertEquals(2, ((Number) result).intValue());
+		assertEquals(2, executeAndReturnNumber(GlobalScope8.class), 0);
 	}
 
 	@Test

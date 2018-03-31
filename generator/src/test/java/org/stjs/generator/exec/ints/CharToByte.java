@@ -1,5 +1,7 @@
 package org.stjs.generator.exec.ints;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 public class CharToByte {
 	public static final char BIG_CHAR = 33001;
 
@@ -12,6 +14,8 @@ public class CharToByte {
 	}
 
 	public static int main(String[] args) {
-		return CharToByte.method(BIG_CHAR);
+		int result = CharToByte.method(BIG_CHAR);
+		$js("console.log(result)");
+		return 1;
 	}
 }

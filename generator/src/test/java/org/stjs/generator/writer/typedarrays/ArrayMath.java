@@ -1,5 +1,7 @@
 package org.stjs.generator.writer.typedarrays;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 public class ArrayMath {
 	public static int method() {
 		int[] a = { 1, 2, 3, 4 };
@@ -15,7 +17,10 @@ public class ArrayMath {
 	}
 
 	public static int main(String[] args) {
-		return ArrayMath.method();
+		int result = ArrayMath.method();
+
+		$js("console.log(result)");
+		return 1;
 	}
 
 }

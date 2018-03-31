@@ -1,5 +1,7 @@
 package org.stjs.generator.exec.ints;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 public class Ints7 {
 	public int method() {
 		int a = 500;
@@ -10,6 +12,8 @@ public class Ints7 {
 	}
 
 	public static int main(String[] args) {
-		return new Ints7().method();
+		int result = new Ints7().method();
+		$js("console.log(result)");
+		return 1;
 	}
 }

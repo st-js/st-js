@@ -33,8 +33,7 @@ public class EnumGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testEnumValues() {
-		String expected = Enums6.main(null);
-		assertEquals(expected, execute(Enums6.class));
+		assertEquals("a:0b:1c:2", execute(Enums6.class));
 	}
 
 	@Test
