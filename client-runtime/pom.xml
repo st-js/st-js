@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>stjs</artifactId>
 		<groupId>org.st-js</groupId>
-		<version>3.4.3-SNAPSHOT</version>
+		<version>3.5.0</version>
 	</parent>
 
 	<artifactId>client-runtime</artifactId>
