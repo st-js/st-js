@@ -26,7 +26,7 @@ import org.stjs.generator.writer.WriterVisitor;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.util.TreePath;
-import com.sun.tools.javac.code.Type.JCPrimitiveType;
+import com.sun.tools.javac.code.Type;
 
 public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 
@@ -56,7 +56,7 @@ public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 			JS or = b.binary(BinaryOperator.OR, asList(b.paren(expr), b.number(0)));
 			return b.paren(or);
 		}
-		
+
 		if (needCastToByte(fromKind, toKind)) {
 			// long l = 8*1024*1024*1024;
 			// byte a = (byte) l;
@@ -66,7 +66,7 @@ public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 			JS rsh = b.binary(RIGHT_SHIFT, asList(lsh, b.number(BYTE_SHIFT)));
 			return b.paren(rsh);
 		}
-		
+
 		if (needCastToShort(fromKind, toKind)) {
 			// int i = 2*1024*1024*1024; //MAX_VALUE
 			// short a = (short) i;
@@ -76,7 +76,7 @@ public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 			JS rsh = b.binary(RIGHT_SHIFT, asList(lsh, b.number(SHORT_SHIFT)));
 			return b.paren(rsh);
 		}
-		
+
 		if (needCastToChar(fromKind, toKind)) {
 			// int i = 2*1024*1024*1024; //MAX_VALUE
 			// char a = (char) i;
@@ -115,8 +115,8 @@ public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 		try {
 			Field field = expression.getClass().getField("type");
 			Object object = field.get(expression);
-			if (object instanceof JCPrimitiveType) {
-				JCPrimitiveType p = (JCPrimitiveType) object;
+			if (object instanceof Type && ((Type) object).isPrimitive()) {
+				Type p = (Type) object;
 				return p.getKind();
 			}
 		}
