@@ -145,49 +145,6 @@
 							</dependency>
 						</dependencies>
 					</plugin>
-
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-pmd-plugin</artifactId>
-						<version>${maven-pmd-plugin.version}</version>
-
-						<configuration>
-							<linkXref>false</linkXref>
-							<printFailingErrors>true</printFailingErrors>
-							<rulesets>
-								<ruleset>/code-analysis/pmd.xml</ruleset>
-							</rulesets>
-							<failurePriority>3</failurePriority>
-							<includeTests>false</includeTests>
-						</configuration>
-						<executions>
-							<execution>
-								<goals>
-									<goal>check</goal>
-								</goals>
-							</execution>
-						</executions>
-						<dependencies>
-							<dependency>
-								<groupId>org.st-js</groupId>
-								<artifactId>code-analysis</artifactId>
-								<version>${project.version}</version>
-							</dependency>
-
-							<dependency>
-								<groupId>net.sourceforge.pmd</groupId>
-								<artifactId>pmd</artifactId>
-								<version>${pmd.version}</version>
-								<!-- Workaround to fix http://jira.codehaus.org/browse/MPLUGIN-221 -->
-								<exclusions>
-									<exclusion>
-										<groupId>com.ibm.icu</groupId>
-										<artifactId>icu4j</artifactId>
-									</exclusion>
-								</exclusions>
-							</dependency>
-						</dependencies>
-					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-checkstyle-plugin</artifactId>
