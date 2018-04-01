@@ -57,10 +57,8 @@
 		<!-- code analysis plugins -->
 		<findbugs-maven-plugin.version>3.0.1</findbugs-maven-plugin.version>
 
-		<maven-pmd-plugin.version>3.0.1</maven-pmd-plugin.version>
 		<maven-checkstyle-plugin.version>2.10</maven-checkstyle-plugin.version>
 		<findbugs.fork>false</findbugs.fork>
-		<pmd.version>5.0.4</pmd.version>
 	</properties>
 
 

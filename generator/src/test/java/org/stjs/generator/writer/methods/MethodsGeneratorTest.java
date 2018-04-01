@@ -58,7 +58,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testAdapterForStatic() {
-		assertCodeContains(Methods14.class, "var x = (String).fromCharCode(65,66,67)");
+		assertCodeContains(Methods14.class, "let x = (String).fromCharCode(65,66,67)");
 	}
 
 	@Test

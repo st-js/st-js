@@ -7,11 +7,11 @@ import org.stjs.generator.utils.AbstractStjsTest;
 public class TypesGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testClassDeclaration() {
-		assertCodeContains(Types1.class, "var Types1 = function(){};");
+		assertCodeContains(Types1.class, "let Types1 = function(){};");
 	}
 
 	public void testForbidArrays() {
-		assertCodeContains(Types1.class, "var abc = [\"hello\", \"world\", null];");
+		assertCodeContains(Types1.class, "let abc = [\"hello\", \"world\", null];");
 	}
 
 	@Test

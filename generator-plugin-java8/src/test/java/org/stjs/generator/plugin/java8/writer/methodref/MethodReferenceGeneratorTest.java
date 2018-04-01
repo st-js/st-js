@@ -10,33 +10,33 @@ public class MethodReferenceGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testStaticMethodRef() {
 		assertCodeContains(MethodRef1.class, "calculate(MethodRef1.inc)");
-		assertEquals(1, ((Number)execute(MethodRef1.class)).intValue());
+		assertEquals(1, executeAndReturnNumber(MethodRef1.class), 0);
 	}
 
 	@Test
 	public void testInstanceMethodRef() {
 		assertCodeContains(MethodRef2.class,
 				"calculate(stjs.bind(\"inc2\"), new MethodRef2(), 1)");
-		assertEquals(3, ((Number)execute(MethodRef2.class)).intValue());
+		assertEquals(3, executeAndReturnNumber(MethodRef2.class), 0);
 	}
 
 	@Test
 	public void testInstanceMethodRefWithInterface() {
 		assertCodeContains(MethodRef9.class,
 				"calculate(stjs.bind(\"inc2\"), new MethodRef9.IncImpl(), 1)");
-		assertEquals(3, ((Number)execute(MethodRef9.class)).intValue());
+		assertEquals(3, executeAndReturnNumber(MethodRef9.class), 0);
 	}
 
 	@Test
 	public void testInstanceWithTargetMethodRef() {
 		assertCodeContains(MethodRef3.class, "calculate(stjs.bind(ref, \"inc2\"), 1)");
-		assertEquals(4, ((Number)execute(MethodRef3.class)).intValue());
+		assertEquals(4, executeAndReturnNumber(MethodRef3.class), 0);
 	}
 
 	@Test
 	public void testNewMethodRef() {
 		assertCodeContains(MethodRef4.class, "calculate(function(){return new MethodRef4(arguments[0]);}, 1)");
-		assertEquals(1, ((Number)execute(MethodRef4.class)).intValue());
+		assertEquals(1, executeAndReturnNumber(MethodRef4.class), 0);
 	}
 
 	@Test

@@ -10,7 +10,7 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testDecl() {
 		assertCodeContains(Namespace1.class, "stjs.ns(\"a.b\");");
-		assertCodeDoesNotContain(Namespace1.class, "var a.b");
+		assertCodeDoesNotContain(Namespace1.class, "let a.b");
 		assertCodeContains(Namespace1.class, "a.b.Namespace1=function()");
 		assertCodeContains(Namespace1.class, "prototype.instanceMethod=function()");
 		assertCodeContains(Namespace1.class, "prototype.instanceField=null");
@@ -28,12 +28,12 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testExtends2() {
 		assertCodeContains(Namespace2a.class, "stjs.extend(a.b.Namespace2a, a.b.Namespace1, [],");
-		assertCodeDoesNotContain(Namespace2a.class, "var a.b");
+		assertCodeDoesNotContain(Namespace2a.class, "let a.b");
 	}
 
 	@Test
 	public void testConstructor() {
-		assertCodeContains(Namespace3.class, "var n = new a.b.Namespace3()");
+		assertCodeContains(Namespace3.class, "let n = new a.b.Namespace3()");
 	}
 
 	@Test

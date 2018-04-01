@@ -3,7 +3,6 @@ package org.stjs.generator.utils;
 import static org.junit.Assert.assertTrue;
 import static org.stjs.javascript.JSCollections.$array;
 import static org.stjs.javascript.JSCollections.$map;
-import static org.stjs.javascript.JSGlobal.stjs;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -112,7 +111,7 @@ public abstract class AbstractStjsTest {
 			return Boolean.parseBoolean((String) obj);
 		}
 
-		return null;
+		return false;
 	}
 
 	/**
@@ -144,7 +143,8 @@ public abstract class AbstractStjsTest {
 		if (obj instanceof String) {
 			try {
 				return Double.parseDouble((String) obj);
-			} catch (NumberFormatException e) {
+			}
+			catch (NumberFormatException e) {
 				return Double.NaN;
 			}
 		}

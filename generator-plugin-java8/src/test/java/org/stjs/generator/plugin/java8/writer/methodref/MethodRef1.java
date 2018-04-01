@@ -2,6 +2,8 @@ package org.stjs.generator.plugin.java8.writer.methodref;
 
 import org.stjs.javascript.functions.Function1;
 
+import static org.stjs.javascript.JSObjectAdapter.$js;
+
 public class MethodRef1 {
 
 	private static int inc(int i) {
@@ -13,6 +15,8 @@ public class MethodRef1 {
 	}
 
 	public static int main(String[] args) {
-		return calculate(MethodRef1::inc);
+		int result = calculate(MethodRef1::inc);
+		$js("console.log(result)");
+		return result;
 	}
 }

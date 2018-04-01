@@ -10,7 +10,7 @@ import org.stjs.generator.JavascriptFileGenerationException;
 public class StatementsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testFor() {
-		assertCodeContains(Statements1.class, "for (var i = 0; i < 10; i++) {");
+		assertCodeContains(Statements1.class, "for (let i = 0; i < 10; i++) {");
 	}
 
 	@Test
@@ -78,12 +78,12 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testForEachInWithIterable() {
-		assertCodeContains(Statements22_ForEachIterable.class, "for (var iterator$oneOfTheString = myStringList.iterator(); iterator$oneOfTheString.hasNext(); ) { var oneOfTheString = iterator$oneOfTheString.next(); }");
+		assertCodeContains(Statements22_ForEachIterable.class, "for (let iterator$oneOfTheString = myStringList.iterator(); iterator$oneOfTheString.hasNext(); ) { let oneOfTheString = iterator$oneOfTheString.next(); }");
 	}
 
 	@Test
 	public void testForEachArrayBlock() {
-		assertCodeContains(Statements12.class, "if (!(a).hasOwnProperty(i)) continue;var x");
+		assertCodeContains(Statements12.class, "if (!(a).hasOwnProperty(i)) continue;let x");
 	}
 
 	@Test
@@ -95,14 +95,14 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 	public void testForEachMapBlock() {
 		String code = generate(Statements13.class);
 		assertCodeDoesNotContain(code, "hasOwnProperty");
-		assertCodeContains(code, "for (var i in a) {");
+		assertCodeContains(code, "for (let i in a) {");
 	}
 
 	@Test
 	public void testStaticInitializer() {
 		assertCodeContains(Statements14.class, "{" + //
 				"Statements14.instance = new Statements14();" + //
-				"var n = Statements14.instance.method();" + //
+				"let n = Statements14.instance.method();" + //
 				"}");
 	}
 
@@ -135,7 +135,7 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testForDoubleInit() {
-		assertCodeContains(Statements20.class, "for(var i = 0, j = 1; i < 10; ++i){}");
+		assertCodeContains(Statements20.class, "for(let i = 0, j = 1; i < 10; ++i){}");
 	}
 
 	@Test
@@ -147,15 +147,15 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 	public void testForNoInit() {
 		assertCodeContains(Statements20c.class, "for(; i < 10; ++i){}");
 	}
-	
+
 	@Test
     public void testForNoCondition() {
-        assertCodeContains(Statements20d.class, "for(var i=0; ; ++i)");
+        assertCodeContains(Statements20d.class, "for(let i=0; ; ++i)");
     }
 
 	@Test
     public void testForNoUpdate() {
-        assertCodeContains(Statements20e.class, "for(var i=0;i<10;)");
+        assertCodeContains(Statements20e.class, "for(let i=0;i<10;)");
     }
 
 

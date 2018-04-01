@@ -9,42 +9,42 @@ import org.stjs.generator.utils.AbstractStjsTest;
 public class LambdaGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testLambdaParamExpression() {
-		assertCodeContains(Lambda1.class, "method(function(x){return x+1;})");
+		assertCodeContains(Lambda1.class, "method((x) =>{return x+1;})");
 	}
 
 	@Test
 	public void testLambdaNoParamExpression() {
-		assertCodeContains(Lambda2.class, "method(function(){return 1;})");
+		assertCodeContains(Lambda2.class, "method(() =>{return 1;})");
 	}
 
 	@Test
 	public void testLambdaNoReturnExpression() {
-		assertCodeContains(Lambda3.class, "method(function(x){var y = x;})");
+		assertCodeContains(Lambda3.class, "method((x) =>{let y = x;})");
 	}
 
 	@Test
 	public void testLambdaTypeResolution() {
-		assertCodeContains(Lambda4.class, "method(function(x){return x.length + 1;})");
+		assertCodeContains(Lambda4.class, "method((x) =>{return x.length + 1;})");
 	}
 
 	@Test
 	public void testLambaAccessFieldOuterScope() {
-		assertCodeContains(Lambda5.class, "var c = stjs.bind(this, function() {return this.field + 1;});");
+		assertCodeContains(Lambda5.class, "let c = () => {return this.field + 1;};");
 	}
 
 	@Test
 	public void testLambaAccessQualifiedFieldOuterScope() {
-		assertCodeContains(Lambda5b.class, "var c = stjs.bind(this, function() {return this.field + 1;});");
+		assertCodeContains(Lambda5b.class, "let c = () => {return this.field + 1;};");
 	}
 
 	@Test
 	public void testLambaAccessMethodOuterScope() {
-		assertCodeContains(Lambda6.class, "var c = stjs.bind(this, function() {return this.outerMethod() + 1;});");
+		assertCodeContains(Lambda6.class, "let c =() => {return this.outerMethod() + 1;};");
 	}
 
 	@Test
 	public void testLambaAccessMethodOuterScopeExecute() {
-		assertEquals(4, ((Number) execute(Lambda6b.class)).intValue());
+		assertEquals(4.0, executeAndReturnNumber(Lambda6b.class), 0);
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
@@ -78,7 +78,7 @@ public class LambdaGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testGenerateBindOuterScope() {
-		assertCodeContains(Lambda10.class, "stjs.bind");
+		assertCodeContains(Lambda10.class, "execute(() => { let n = this.method(); });");
 	}
 
 	@Test
@@ -98,7 +98,7 @@ public class LambdaGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testUsingTHISParamAndOuterScope() {
-		//		assertCodeContains(Lambda14.class, "method(function(){})");
+		//assertCodeContains(Lambda14.class, "method(function(){})");
 
 		double n = executeAndReturnNumber(Lambda14.class);
 		assertEquals(15.0, n, 0);

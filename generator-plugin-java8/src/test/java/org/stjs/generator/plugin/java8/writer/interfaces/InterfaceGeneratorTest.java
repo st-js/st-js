@@ -13,6 +13,6 @@ public class InterfaceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testDefaultMethod() {
-		assertEquals(1, execute(Class2.class));
+		assertEquals(1, executeAndReturnNumber(Class2.class), 0);
 	}
 }

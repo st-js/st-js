@@ -1,6 +1,7 @@
 package org.stjs.generator.plugin.java8.writer.lambda;
 
 import static org.stjs.javascript.JSCollections.$array;
+import static org.stjs.javascript.JSObjectAdapter.$js;
 
 import org.stjs.javascript.JSFunctionAdapter;
 import org.stjs.javascript.functions.Function1;
@@ -24,7 +25,9 @@ public class Lambda14 {
 
 	public static int main(String[] args) {
 		Lambda14 obj = new Lambda14();
-		return JSFunctionAdapter.apply(obj.func(), new Inner(), $array());
+		int result = JSFunctionAdapter.apply(obj.func(), new Inner(), $array());
+		$js("console.log(result)");
+		return result;
 	}
 
 }

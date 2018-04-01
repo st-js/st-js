@@ -23,7 +23,7 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(InnerTypes3.class,
 				"stjs.extend(constructor.InnerType, null, [], function(constructor, prototype){prototype.innerMethod=function()");
 		assertCodeContains(InnerTypes3.class, "new InnerTypes3.InnerType().innerMethod()");
-		assertCodeContains(InnerTypes3.class, "var x = new InnerTypes3.InnerType()");
+		assertCodeContains(InnerTypes3.class, "let x = new InnerTypes3.InnerType()");
 		assertCodeDoesNotContain(InnerTypes3.class, "function(constructor, prototype){InnerTypes3.InnerType=");
 	}
 
@@ -103,8 +103,8 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testInnerInsideInner() {
 		String code = generate(InnerTypes15.class);
-		assertCodeContains(code, "var InnerTypes15 = function(){};" + "InnerTypes15 = stjs.extend(InnerTypes15, null, [], function(constructor, prototype){");
-		assertCodeContains(code, "var deep = new InnerTypes15.Inner.InnerDeep()");
+		assertCodeContains(code, "let InnerTypes15 = function(){};" + "InnerTypes15 = stjs.extend(InnerTypes15, null, [], function(constructor, prototype){");
+		assertCodeContains(code, "let deep = new InnerTypes15.Inner.InnerDeep()");
 		assertCodeContains(code, "constructor.Inner = function (){}; "
 				+ "constructor.Inner = stjs.extend(constructor.Inner, null, [], function(constructor, prototype){");
 		assertCodeContains(code, "constructor.InnerDeep = function (){};"
@@ -114,16 +114,16 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testInnerInsideAnonymous() {
 		String code = generate(InnerTypes16.class);
-		assertCodeContains(code, "var InnerTypes16 = function(){};" + "InnerTypes16 = stjs.extend(InnerTypes16, null, [], function(constructor, prototype){");
-		assertCodeContains(code, "var o = new (stjs.extend(function InnerTypes16$1(){}, Object, [], function(constructor, prototype){");
+		assertCodeContains(code, "let InnerTypes16 = function(){};" + "InnerTypes16 = stjs.extend(InnerTypes16, null, [], function(constructor, prototype){");
+		assertCodeContains(code, "let o = new (stjs.extend(function InnerTypes16$1(){}, Object, [], function(constructor, prototype){");
 		assertCodeContains(code, "};" + "constructor.InnerDeep = function(){}; constructor.InnerDeep = stjs.extend(constructor.InnerDeep, null, [], function(constructor, prototype){");
 	}
 
 	@Test
 	public void testEnumInsideInner() {
 		String code = generate(InnerTypes17.class);
-		assertCodeContains(code, "var InnerTypes17 = function(){};" + "InnerTypes17 = stjs.extend(InnerTypes17, null, [], function(constructor, prototype){");
-		assertCodeContains(code, "var deep = InnerTypes17.Inner.Enum.a;");
+		assertCodeContains(code, "let InnerTypes17 = function(){};" + "InnerTypes17 = stjs.extend(InnerTypes17, null, [], function(constructor, prototype){");
+		assertCodeContains(code, "let deep = InnerTypes17.Inner.Enum.a;");
 		assertCodeContains(code, "stjs.extend(constructor.Inner, null, [], function(constructor, prototype){");
 		assertCodeContains(code, "constructor.Enum=stjs.enumeration(");
 	}
@@ -131,8 +131,8 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testAnonymousInsideAnonymous() {
 		String code = generate(InnerTypes18.class);
-		assertCodeContains(code, "var o = new (stjs.extend(function InnerTypes18$1(){}, Object, [], function(constructor, prototype){");
-		assertCodeContains(code, "var o2 = new (stjs.extend(function InnerTypes18$1$1(){}, Object, [], function(constructor, prototype){");
+		assertCodeContains(code, "let o = new (stjs.extend(function InnerTypes18$1(){}, Object, [], function(constructor, prototype){");
+		assertCodeContains(code, "let o2 = new (stjs.extend(function InnerTypes18$1$1(){}, Object, [], function(constructor, prototype){");
 	}
 
 	@Test

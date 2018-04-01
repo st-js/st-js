@@ -7,17 +7,17 @@ import org.stjs.generator.JavascriptFileGenerationException;
 public class VariablesGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testSimpleVariable() {
-		assertCodeContains(Variables1.class, "var x;");
+		assertCodeContains(Variables1.class, "let x;");
 	}
 
 	@Test
 	public void testSimpleVariableAssigned() {
-		assertCodeContains(Variables2.class, "var x = 2;");
+		assertCodeContains(Variables2.class, "let x = 2;");
 	}
 
 	@Test
 	public void testMultipleVariableAssigned() {
-		assertCodeContains(Variables3.class, "var x = 2, y = 3;");
+		assertCodeContains(Variables3.class, "let x = 2, y = 3;");
 	}
 
 	@Test(

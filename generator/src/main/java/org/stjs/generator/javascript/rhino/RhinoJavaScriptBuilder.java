@@ -5,6 +5,7 @@ import java.io.Writer;
 import java.util.Iterator;
 import java.util.List;
 
+import org.mozilla.javascript.Token;
 import org.mozilla.javascript.Token.CommentType;
 import org.mozilla.javascript.ast.ArrayLiteral;
 import org.mozilla.javascript.ast.Assignment;
@@ -279,6 +280,22 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		return func;
 	}
 
+	/** {@inheritDoc} */
+	@Override
+	public AstNode arrowFunction(Iterable<AstNode> params, AstNode body) {
+		FunctionNode func = new FunctionNode();
+		func.setFunctionType(FunctionNode.ARROW_FUNCTION);
+		func.setParams(list(params));
+		if (body == null) {
+			func.setBody(new Block());
+		} else if (body instanceof Block) {
+			func.setBody(body);
+		} else {
+			func.setBody(addStatement(null, body));
+		}
+		return func;
+	}
+
 	private ObjectProperty objectProperty(CharSequence name, AstNode value) {
 		ObjectProperty prop = new ObjectProperty();
 		prop.setLeft(name(name));
@@ -442,6 +459,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	@Override
 	public AstNode variableDeclaration(boolean statement, Iterable<NameValue<AstNode>> vars) {
 		VariableDeclaration varDecl = new VariableDeclaration();
+		varDecl.setType(Token.LET);
 		varDecl.setIsStatement(statement);
 		for (NameValue<AstNode> v : vars) {
 			VariableInitializer var = new VariableInitializer();
@@ -456,6 +474,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	@Override
 	public AstNode variableDeclaration(boolean statement, CharSequence name, AstNode init) {
 		VariableDeclaration vars = new VariableDeclaration();
+		vars.setType(Token.LET);
 		vars.setIsStatement(statement);
 		VariableInitializer var = new VariableInitializer();
 		var.setTarget(name(name));

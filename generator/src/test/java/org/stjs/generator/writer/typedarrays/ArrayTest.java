@@ -8,12 +8,12 @@ import org.stjs.generator.utils.AbstractStjsTest;
 public class ArrayTest extends AbstractStjsTest {
 	@Test
 	public void testSimple() throws Exception {
-		assertCodeContains(StringArrayInit.class, "var arr = Array(1); var simple = [];");
+		assertCodeContains(StringArrayInit.class, "let arr = Array(1); let simple = [];");
 	}
 
 	@Test
 	public void testOneDimInit() throws Exception {
-		String expected = "var arr = [ \"\", null, \"hello\", \"world\", this.a() ]";
+		String expected = "let arr = [ \"\", null, \"hello\", \"world\", this.a() ]";
 		assertCodeContains(StringArrayInit1.class, expected);
 	}
 

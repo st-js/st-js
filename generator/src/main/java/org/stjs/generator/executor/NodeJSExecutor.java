@@ -42,23 +42,27 @@ public class NodeJSExecutor implements Executor {
 	private static final String NODE_JS = "node";
 	private static final String NODE_JS_WINDOWS = "C:\\Program Files\\nodejs\\node.exe";
 
-	private void addScript(OutputStream out, InputStream in) throws IOException {
-		byte[] buf = new byte[1 << 20];
+	private static final Integer TWENTY = 20;
 
-		int b = 0;
-		while ( (b = in.read(buf)) >= 0) {
+	private void addScript(OutputStream out, InputStream in) throws IOException {
+		byte[] buf = new byte[1 << TWENTY];
+
+		int b = in.read(buf);
+		while (b >= 0) {
 			out.write(buf, 0, b);
 			out.flush();
+
+			b = in.read(buf);
 		}
 
 		out.write("\n\n".getBytes(StandardCharsets.UTF_8));
 	}
 
-	protected boolean isRunningOnWindows() {
+	private boolean isRunningOnWindows() {
 		return System.getProperty("os.name").contains("Windows");
 	}
 
-	String getExecutable() {
+	private String getExecutable() {
 		return isRunningOnWindows() ? NODE_JS_WINDOWS : NODE_JS;
 	}
 

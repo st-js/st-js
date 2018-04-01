@@ -33,22 +33,22 @@ public class TypedArrayTest extends AbstractStjsTest {
 
 	@Test
 	public void testFloatArrayInit00() throws Exception {
-		assertCodeContains(Float32ArrayInit0Empty.class, "var arr = new Float32Array()");
+		assertCodeContains(Float32ArrayInit0Empty.class, "let arr = new Float32Array()");
 	}
 
 	@Test
 	public void testMultiF32AInit0Empty() throws Exception {
-		assertCodeContains(MultiF32AInit0Empty.class, "var arr = [];");
+		assertCodeContains(MultiF32AInit0Empty.class, "let arr = [];");
 	}
 
 	@Test
 	public void testMultiF32AInit0Empty2() throws Exception {
-		assertCodeContains(MultiF32AInit0Empty2.class, "var arr2 = [[]];");
+		assertCodeContains(MultiF32AInit0Empty2.class, "let arr2 = [[]];");
 	}
 
 	@Test
 	public void testMultiF32AInit0Empty3() throws Exception {
-		assertCodeContains(MultiF32AInit0Empty3.class, "var arr3 = [[new Float32Array()]];");
+		assertCodeContains(MultiF32AInit0Empty3.class, "let arr3 = [[new Float32Array()]];");
 	}
 
 	@Test
@@ -59,7 +59,7 @@ public class TypedArrayTest extends AbstractStjsTest {
 	@Test
 	public void testMultiFloatArrayInit1() throws Exception {
 		/* @formatter:off */
-		assertCodeContains(MultiF32AInit1.class, 
+		assertCodeContains(MultiF32AInit1.class,
 				"["
 				+ "["
 			  		+ "new Float32Array([1.2, 2.0, 3, 0.4, this.a()]),"
@@ -80,15 +80,15 @@ public class TypedArrayTest extends AbstractStjsTest {
 	@Test
 	public void testTypes() throws Exception {
 		String generated = generate(Types.class);
-		assertCodeContains(generated, "var bool = new Int8Array()");
-		assertCodeContains(generated, "var b = new Int8Array()");
-		assertCodeContains(generated, "var s = new Int16Array()");
-		assertCodeContains(generated, "var c = new Uint16Array()");
-		assertCodeContains(generated, "var i = new Int32Array()");
-		assertCodeContains(generated, "var f = new Float32Array()");
-		assertCodeContains(generated, "var d = new Float64Array()");
+		assertCodeContains(generated, "let bool = new Int8Array()");
+		assertCodeContains(generated, "let b = new Int8Array()");
+		assertCodeContains(generated, "let s = new Int16Array()");
+		assertCodeContains(generated, "let c = new Uint16Array()");
+		assertCodeContains(generated, "let i = new Int32Array()");
+		assertCodeContains(generated, "let f = new Float32Array()");
+		assertCodeContains(generated, "let d = new Float64Array()");
 	}
-	
+
 	@Test
     public void testPrimitiveArrayFields() throws Exception {
         String generated = generate(PrimitiveArrayFields.class);
@@ -104,8 +104,8 @@ public class TypedArrayTest extends AbstractStjsTest {
 	@Test
 	public void testMultiInit2() throws Exception {
 		/* @formatter:off */
-		String expected = 
-		"var ac = [Array.apply(null, Array(2)).map(function() {"+//
+		String expected =
+		"let ac = [Array.apply(null, Array(2)).map(function() {"+//
         "    return new Int32Array(3);"+//
         "}), Array.apply(null, Array(4)).map(function() {"+//
         "    return new Int32Array(5);"+//
@@ -128,7 +128,7 @@ public class TypedArrayTest extends AbstractStjsTest {
 		int expected = BooleanArray.method();
 		assertEquals((double) expected, executeAndReturnNumber(BooleanArray.class), 0);
 	}
-	
+
 	@Test
 	public void testInstanceOf() {
 		String generated = generate(ArrayInstanceOf.class);

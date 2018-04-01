@@ -473,6 +473,12 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	/** {@inheritDoc} */
 	@Override
 	public void visitFunctionNode(FunctionNode f, Boolean param) {
+
+		if (f.getFunctionType() == FunctionNode.ARROW_FUNCTION) {
+			visitArrowFunctionNode(f, param);
+			return;
+		}
+
 		printComments(f);
 		print("function");
 		if (f.getFunctionName() != null) {
@@ -487,9 +493,19 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 			print(") ");
 		}
 		visitorSupport.accept(f.getBody(), this, param);
-		// if (functionType == FUNCTION_STATEMENT) {
-		// sb.append("\n");
-		// }
+	}
+
+	/** {@inheritDoc} */
+	public void visitArrowFunctionNode(FunctionNode f, Boolean param) {
+		printComments(f);
+		if (f.getParams() == null) {
+			print("() =>");
+		} else {
+			print("(");
+			printList(f.getParams(), param);
+			print(") =>");
+		}
+		visitorSupport.accept(f.getBody(), this, param);
 	}
 
 	/** {@inheritDoc} */
@@ -731,7 +747,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		if (v.isStatement()) {
 			startPosition(v);
 		}
-		print("var ");
+		print(v.getType() == Token.CONST ? "const " : "let ");
 		printList(v.getVariables(), param);
 		if (v.isStatement()) {
 			println(";");

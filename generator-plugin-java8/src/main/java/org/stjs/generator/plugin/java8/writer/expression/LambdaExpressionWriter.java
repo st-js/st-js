@@ -46,61 +46,6 @@ import com.sun.source.util.TreeScanner;
  */
 public class LambdaExpressionWriter<JS> implements WriterContributor<LambdaExpressionTree, JS> {
 
-	private boolean accessOuterScope(LambdaExpressionTree lambda) {
-		AtomicBoolean outerScopeAccess = new AtomicBoolean(false);
-
-		lambda.accept(new TreeScanner<Void, Void>() {
-			private boolean checkStopped;
-
-			@Override
-			public Void visitIdentifier(IdentifierTree tree, Void arg1) {
-				if (checkStopped) {
-					return super.visitIdentifier(tree, arg1);
-				}
-				Element fieldElement = TreeUtils.elementFromUse(tree);
-				if (IdentifierAccessOuterScopeCheck.isRegularInstanceField(fieldElement, tree)
-						|| GeneratorConstants.THIS.equals(tree.getName().toString())) {
-					outerScopeAccess.set(true);
-				}
-				return super.visitIdentifier(tree, arg1);
-			}
-
-			@Override
-			public Void visitClass(ClassTree arg0, Void arg1) {
-				// stop the checks if a new type is encountered
-				checkStopped = true;
-				return super.visitClass(arg0, arg1);
-			}
-
-			@Override
-			public Void visitMethodInvocation(MethodInvocationTree tree, Void arg1) {
-				if (checkStopped) {
-					return super.visitMethodInvocation(tree, arg1);
-				}
-				Element methodElement = TreeUtils.elementFromUse(tree);
-				if (JavaNodes.isStatic(methodElement)) {
-					// only instance methods
-					return super.visitMethodInvocation(tree, arg1);
-				}
-				String name = MethodInvocationWriter.buildMethodName(tree);
-
-				if (GeneratorConstants.THIS.equals(name) || GeneratorConstants.SUPER.equals(name)) {
-					// this and super call are ok
-					return super.visitMethodInvocation(tree, arg1);
-				}
-
-				if (!(tree.getMethodSelect() instanceof IdentifierTree)) {
-					// check for Outer.this check
-					return super.visitMethodInvocation(tree, arg1);
-				}
-				outerScopeAccess.set(true);
-				return super.visitMethodInvocation(tree, arg1);
-			}
-		}, null);
-
-		return outerScopeAccess.get();
-	}
-
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, LambdaExpressionTree tree, GenerationContext<JS> context) {
 		List<JS> params = MethodWriter.getParams(tree.getParameters(), context);
@@ -114,18 +59,16 @@ public class LambdaExpressionWriter<JS> implements WriterContributor<LambdaExpre
 		if (!(tree.getBody() instanceof BlockTree)) {
 			body = js.block(Collections.singleton(body));
 		}
-		JS lambdaFunc = js.function(null, params, body);
-		int specialThisParamPos = MethodWriter.getTHISParamPos(tree.getParameters());
 
-		if (accessOuterScope(tree) || specialThisParamPos >= 0) {
-			// bind for lamdas accessing the outher scope
+		// Functions that have a custom "THIS" should not be arrow functions
+		int specialThisParamPos = MethodWriter.getTHISParamPos(tree.getParameters());
+		if (specialThisParamPos >= 0) {
+			JS lambdaFunc = js.function(null, params, body);
 			JS target = js.keyword(Keyword.THIS);
 			JS stjsBind = js.property(context.js().name("stjs"), "bind");
-			if (specialThisParamPos < 0) {
-				return js.functionCall(stjsBind, Arrays.asList(target, lambdaFunc));
-			}
 			return js.functionCall(stjsBind, Arrays.asList(target, lambdaFunc, js.number(specialThisParamPos)));
 		}
-		return lambdaFunc;
+
+		return js.arrowFunction(params, body);
 	}
 }

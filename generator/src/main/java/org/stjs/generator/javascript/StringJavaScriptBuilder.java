@@ -107,6 +107,13 @@ public class StringJavaScriptBuilder implements JavaScriptBuilder<String> {
 
 	/** {@inheritDoc} */
 	@Override
+	public String arrowFunction(Iterable<String> params, String body) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/** {@inheritDoc} */
+	@Override
 	public String name(CharSequence name) {
 		// TODO Auto-generated method stub
 		return null;
@@ -349,5 +356,4 @@ public class StringJavaScriptBuilder implements JavaScriptBuilder<String> {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

@@ -140,24 +140,24 @@ public class SpecialMethodGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testProperties() {
 		// Map<K,V> x = $properties(obj) -> var x = obj;
-		assertCodeContains(SpecialMethod17.class, "var map = (123);");
+		assertCodeContains(SpecialMethod17.class, "let map = (123);");
 	}
 
 	@Test
 	public void testObject() {
 		// x = $object(map) -> var x = map;
-		assertCodeContains(SpecialMethod18.class, "var p = (map);");
+		assertCodeContains(SpecialMethod18.class, "let p = (map);");
 	}
 
 	@Test
 	public void testCastArray() {
 		// Array<V> x = $castArray(obj[]) -> var x = obj;
-		assertCodeContains(SpecialMethod19.class, "var a = (\"abc\".split(\",\"));");
+		assertCodeContains(SpecialMethod19.class, "let a = (\"abc\".split(\",\"));");
 	}
 
 	@Test
 	public void testKeepJQuery$() {
-		assertCodeContains(SpecialMethod20.class, "var div = $(\"div\");");
+		assertCodeContains(SpecialMethod20.class, "let div = $(\"div\");");
 	}
 
 	@Test

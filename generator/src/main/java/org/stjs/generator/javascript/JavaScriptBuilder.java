@@ -121,6 +121,15 @@ public interface JavaScriptBuilder<T> {
 	T function(@Nullable String name, @Nonnull Iterable<T> params, @Nullable T body);
 
 	/**
+	 * <p>arrow function.</p>
+	 *
+	 * @param params a {@link java.lang.Iterable} object.
+	 * @param body a T object.
+	 * @return a T object.
+	 */
+	T arrowFunction(@Nonnull Iterable<T> params, @Nullable T body);
+
+	/**
 	 * <p>functionCall.</p>
 	 *
 	 * @param target a T object.
