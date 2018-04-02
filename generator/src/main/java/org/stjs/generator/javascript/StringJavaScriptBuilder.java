@@ -219,14 +219,14 @@ public class StringJavaScriptBuilder implements JavaScriptBuilder<String> {
 
 	/** {@inheritDoc} */
 	@Override
-	public String variableDeclaration(boolean statement, Iterable<NameValue<String>> vars) {
+	public String variableDeclaration(boolean statement, Iterable<NameValue<String>> vars, boolean isFinal) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public String variableDeclaration(boolean statement, CharSequence name, String init) {
+	public String variableDeclaration(boolean statement, CharSequence name, String init, boolean isFinal) {
 		// TODO Auto-generated method stub
 		return null;
 	}

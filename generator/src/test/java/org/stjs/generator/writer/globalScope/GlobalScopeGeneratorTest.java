@@ -11,8 +11,9 @@ public class GlobalScopeGeneratorTest extends AbstractStjsTest {
 	public void testGlobalScopeGeneration() {
 		assertCodeDoesNotContain(Globals.class, "stjs.extends");
 		assertCodeDoesNotContain(Globals.class, "Globals");
+		assertCodeContains(Globals.class, "const hey = \"you\";");
 		assertCodeContains(Globals.class, "let field=null");
-		assertCodeContains(Globals.class, "let method=function(");
+		assertCodeContains(Globals.class, "const method=function(");
 		assertCodeContains(Globals.class, "let one=0;let two=0;");
 		assertCodeContains(Globals.class, "main()");
 		assertCodeContains(Globals.class, "(function(){let n = method();})()");

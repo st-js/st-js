@@ -8,6 +8,8 @@ public class Globals {
 		return 0;
 	}
 
+	public static final String hey = "you";
+
 	public static String field;
 
 	public static int one, two;

@@ -12,7 +12,7 @@ import com.sun.source.tree.VariableTree;
 /**
  * this is a special writer called from a block to handle the case of multiple variables declarated on the same line.
  * This is needed because the Javac AST parser has an separate node per variable
- * 
+ *
  * @author acraciun
  */
 public class MultipleVariableWriter<JS> {
@@ -30,6 +30,6 @@ public class MultipleVariableWriter<JS> {
 			}
 			vars.add(NameValue.of(tree.getName(), init));
 		}
-		return context.withPosition(trees.get(0), context.js().variableDeclaration(isStatement, vars));
+		return context.withPosition(trees.get(0), context.js().variableDeclaration(isStatement, vars, false));
 	}
 }

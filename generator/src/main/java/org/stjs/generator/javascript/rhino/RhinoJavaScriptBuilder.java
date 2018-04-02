@@ -59,6 +59,9 @@ import org.stjs.generator.javascript.UnaryOperator;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.debugging.sourcemap.SourceMapGenerator;
+import org.stjs.generator.javascript.rhino.types.Enum;
+
+import javax.annotation.Nonnull;
 
 /**
  * this JavaScript builder uses the rhino AST nodes to build the synthax tree.
@@ -457,9 +460,9 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 
 	/** {@inheritDoc} */
 	@Override
-	public AstNode variableDeclaration(boolean statement, Iterable<NameValue<AstNode>> vars) {
+	public AstNode variableDeclaration(boolean statement, Iterable<NameValue<AstNode>> vars, boolean isFinal) {
 		VariableDeclaration varDecl = new VariableDeclaration();
-		varDecl.setType(Token.LET);
+		varDecl.setType(isFinal ? Token.CONST : Token.LET);
 		varDecl.setIsStatement(statement);
 		for (NameValue<AstNode> v : vars) {
 			VariableInitializer var = new VariableInitializer();
@@ -472,9 +475,9 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 
 	/** {@inheritDoc} */
 	@Override
-	public AstNode variableDeclaration(boolean statement, CharSequence name, AstNode init) {
+	public AstNode variableDeclaration(boolean statement, CharSequence name, AstNode init, boolean isFinal) {
 		VariableDeclaration vars = new VariableDeclaration();
-		vars.setType(Token.LET);
+		vars.setType(isFinal ? Token.CONST : Token.LET);
 		vars.setIsStatement(statement);
 		VariableInitializer var = new VariableInitializer();
 		var.setTarget(name(name));

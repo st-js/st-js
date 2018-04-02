@@ -12,6 +12,7 @@ import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.name.DependencyType;
+import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
@@ -23,7 +24,7 @@ import com.sun.source.tree.VariableTree;
 /**
  * This will add the declaration of a field. This contributor is not added directly, but redirect from
  * {@link org.stjs.generator.writer.statement.VariableWriter}
- * 
+ *
  * @author acraciun
  */
 public class FieldWriter<JS> extends AbstractMemberWriter<JS> implements WriterContributor<VariableTree, JS> {
@@ -79,7 +80,7 @@ public class FieldWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		String fieldName = tree.getName().toString();
 		if (tw.getEnclosingType().isGlobal()) {
 			// var field = init; //for global types
-			return context.js().variableDeclaration(true, fieldName, initializer);
+			return context.js().variableDeclaration(true, fieldName, initializer, JavaNodes.isFinal(tree));
 		}
 		JS member = context.js().property(getMemberTarget(tw), fieldName);
 		return context.js().expressionStatement(context.js().assignment(AssignOperator.ASSIGN, member, initializer));

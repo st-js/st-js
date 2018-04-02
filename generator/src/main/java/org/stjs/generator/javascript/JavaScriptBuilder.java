@@ -232,7 +232,7 @@ public interface JavaScriptBuilder<T> {
 	 * @param vars a {@link java.lang.Iterable} object.
 	 * @return a T object.
 	 */
-	T variableDeclaration(boolean statement, @Nonnull Iterable<NameValue<T>> vars);
+	T variableDeclaration(boolean statement, @Nonnull Iterable<NameValue<T>> vars, boolean isFinal);
 
 	/**
 	 * <p>variableDeclaration.</p>
@@ -242,7 +242,7 @@ public interface JavaScriptBuilder<T> {
 	 * @param init a T object.
 	 * @return a T object.
 	 */
-	T variableDeclaration(boolean statement, @Nonnull CharSequence name, @Nullable T init);
+	T variableDeclaration(boolean statement, @Nonnull CharSequence name, @Nullable T init, boolean isFinal);
 
 	/**
 	 * <p>doLoop.</p>

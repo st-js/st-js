@@ -22,17 +22,17 @@ import java.util.Collections;
 
 /**
  * generates from
- * 
+ *
  * <pre>
  * for (String x : list) {
  * }
  * </pre>
- * 
+ *
  * <pre>
  * for(var x in list) {
  * }
  * </pre>
- * 
+ *
  * Warning: the iteration is on indexes as in JavaScript, not on values as in Java!
  * @author acraciun
  */
@@ -121,17 +121,17 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 
 		String newIteratorName = "iterator$" + initialForLoopVariableName;
 		JS forLoopIterator = js.name(newIteratorName);
-		JS init = js.variableDeclaration(false, newIteratorName, iteratorMethodCall);
+		JS init = js.variableDeclaration(false, newIteratorName, iteratorMethodCall, false);
 		JS condition = js.functionCall(js.property(forLoopIterator, "hasNext"), Collections.<JS>emptyList());
 		JS update = js.emptyExpression();
 
 		JS iteratorNextStatement = js.variableDeclaration(true, initialForLoopVariableName,
-			js.functionCall(js.property(forLoopIterator, "next"), Collections.<JS>emptyList()));
+			js.functionCall(js.property(forLoopIterator, "next"), Collections.<JS>emptyList()), false);
 		JS newBody = js.addStatementBeginning(body, iteratorNextStatement);
 
 		return context.withPosition(tree, context.js().forLoop(init, condition, update, newBody));
 	}
-	
+
 	private JS generateForWithIndex(EnhancedForLoopTree tree, GenerationContext<JS> context, JS iterated, JS body) {
 		JavaScriptBuilder<JS> js = context.js();
 
@@ -154,11 +154,11 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 		String newArrayName = "arr$" + initialForLoopVariableName;
 		JS tmpArray = js.name(newArrayName);
 		JS index = js.name(newIndexName);
-		JS init = js.variableDeclaration(false, Arrays.asList(NameValue.of(newIndexName, js.number(0)), NameValue.of(newArrayName, iterated)));
+		JS init = js.variableDeclaration(false, Arrays.asList(NameValue.of(newIndexName, js.number(0)), NameValue.of(newArrayName, iterated)), false);
 		JS condition = js.binary(BinaryOperator.LESS_THAN, Arrays.asList(index, js.property(tmpArray, "length")));
 		JS update = js.unary(UnaryOperator.POSTFIX_INCREMENT, index);
 
-		JS iteratorNextStatement = js.variableDeclaration(true, initialForLoopVariableName, js.elementGet(tmpArray, index));
+		JS iteratorNextStatement = js.variableDeclaration(true, initialForLoopVariableName, js.elementGet(tmpArray, index), false);
 		JS newBody = js.addStatementBeginning(body, iteratorNextStatement);
 
 		return context.withPosition(tree, context.js().forLoop(init, condition, update, newBody));

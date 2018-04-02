@@ -123,7 +123,7 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 			String methodName = context.getNames().getMethodName(context, tree, context.getCurrentPath());
 			if (tw.getEnclosingType().isGlobal()) {
 				// var method=function() ...; //for global types
-				return context.js().variableDeclaration(true, methodName, decl);
+				return context.js().variableDeclaration(true, methodName, decl, true);
 			}
 			JS member = context.js().property(getMemberTarget(tw), methodName);
 			return context.js().expressionStatement(context.js().assignment(AssignOperator.ASSIGN, member, decl));

@@ -429,7 +429,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			stmts.add(js.expressionStatement(js.assignment(AssignOperator.ASSIGN, js.name(leftSide), enumConstructor)));
 		} else {
 			// regular class
-			stmts.add(js.variableDeclaration(true, Collections.singleton(NameValue.of(typeName, enumConstructor))));
+			stmts.add(js.variableDeclaration(true, Collections.singleton(NameValue.of(typeName, enumConstructor)), false));
 		}
 
 		return true;
@@ -474,7 +474,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		} else {
 			// regular class
 			// generate var typeName = function() {...}
-			stmts.add(js.variableDeclaration(true, typeName, getConstructor(visitor, tree, context)));
+			stmts.add(js.variableDeclaration(true, typeName, getConstructor(visitor, tree, context), false));
 		}
 	}
 
