@@ -40,10 +40,27 @@ if (!String.prototype.equals) {
 	String.prototype.equals=stjs.JavalikeEquals;
 }
 if (!String.prototype.getBytes) {
-	String.prototype.getBytes=stjs.NOT_IMPLEMENTED;
+	String.prototype.getBytes=function() {
+	    var str = this;
+	    var bufView = new Int8Array(str.length);
+	    for (var i=0, strLen=str.length; i < strLen; i++) {
+	      bufView[i] = str.charCodeAt(i);
+	    }
+	    return bufView;
+	};
 }
 if (!String.prototype.getChars) {
 	String.prototype.getChars=stjs.NOT_IMPLEMENTED;
+}
+if (!String.prototype.toCharArray) {
+    String.prototype.toCharArray=function() {
+        var str = this;
+        var bufView = new Uint16Array(str.length);
+        for (var i=0, strLen=str.length; i < strLen; i++) {
+          bufView[i] = str.charCodeAt(i);
+        }
+        return bufView;
+    };
 }
 if (!String.prototype.contentEquals){
 	String.prototype.contentEquals=stjs.NOT_IMPLEMENTED;
