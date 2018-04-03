@@ -61,6 +61,13 @@
 <!-- 			<scope>test</scope> -->
 		</dependency>
 
+		<dependency>
+			<groupId>org.webjars.npm</groupId>
+			<artifactId>typescript</artifactId>
+			<version>2.7.2</version>
+			<scope>test</scope>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.st-js</groupId>
@@ -68,7 +75,7 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 
 
 

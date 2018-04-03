@@ -312,6 +312,10 @@ public abstract class AbstractStjsTest {
 			}
 			ExecutionResult execResult = new NodeJSExecutor().run(javascriptFiles, !execute);
 			if (execute) {
+				if (execResult.getExitValue() != 0) {
+					throw new STJSRuntimeException(execResult.toString());
+				}
+
 				return execResult.getResult();
 			}
 			return content;

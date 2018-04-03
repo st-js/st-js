@@ -66,3 +66,6 @@ local.properties
 
 # PDT-specific
 .buildpath
+
+# VS Code
+.vscode

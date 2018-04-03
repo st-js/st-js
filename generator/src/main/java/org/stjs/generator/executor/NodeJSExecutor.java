@@ -25,7 +25,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.List;
 
+import org.stjs.generator.ClassWithJavascript;
+import org.stjs.generator.DependencyCollector;
 import org.stjs.generator.Generator;
 
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
@@ -76,23 +79,73 @@ public class NodeJSExecutor implements Executor {
 			value = "REC_CATCH_EXCEPTION")
 	public ExecutionResult run(Collection<File> srcFiles, boolean mainClassDisabled) throws ScriptException {
 		try {
-			File temp = File.createTempFile("javascript", ".js");
+			File temp = createTempFile(srcFiles, mainClassDisabled);
+			temp.deleteOnExit();
 
-			OutputStream out = new FileOutputStream(temp);
+			File converted = convertToTS(temp);
+			converted.deleteOnExit();
 
-			addScript(out, Thread.currentThread().getContextClassLoader().getResourceAsStream(Generator.STJS_PATH));
+			return runFile(new String[]{ getExecutable(), converted.getAbsolutePath() });
+		}
+		catch (IOException e) {
+			throw new ScriptException(e);
+		}
+	}
 
-			if (mainClassDisabled) {
-				out.write("stjs.mainCallDisabled=true;".getBytes(StandardCharsets.UTF_8));
-			}
+	private File convertToTS(File toConvert) throws IOException, ScriptException {
+		File temp = File.createTempFile("tsConverter", ".js");
+		temp.deleteOnExit();
 
-			for (File srcFile : srcFiles) {
-				addScript(out, new FileInputStream(srcFile));
-			}
+		OutputStream out = new FileOutputStream(temp);
 
-			out.close();
+		String tsPath = "META-INF/resources/webjars/typescript/2.7.2/lib/typescript.js";
 
-			Process p = Runtime.getRuntime().exec(new String[]{ getExecutable(), temp.getAbsolutePath() });
+		addScript(out, Thread.currentThread().getContextClassLoader().getResourceAsStream(tsPath));
+
+		String script = "\n" +
+				"const fs = require('fs');\n" +
+				"const file = '"+toConvert.getAbsolutePath().replace("\\", "\\\\")+"';\n" +
+				"const source = fs.readFileSync(file, 'utf8');\n" +
+				"const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } });\n" +
+				"if (!compiled.outputText) { process.exit(1); }\n" +
+				"fs.writeFileSync(file.replace('.ts', '.js'), compiled.outputText);\n" +
+				"//console.error(compiled.outputText );\n" +
+				"//process.exit(1);";
+
+		out.write(script.getBytes(StandardCharsets.UTF_8));
+
+		ExecutionResult result = runFile(new String[] { getExecutable(), temp.getAbsolutePath()});
+
+		if (result.getExitValue() != 0) {
+			throw new ScriptException("Failed conversion to TypeScript: " + result.toString());
+		}
+
+		return new File(toConvert.getAbsolutePath().replace(".ts", ".js"));
+	}
+
+	private File createTempFile(Collection<File> srcFiles, boolean mainClassDisabled) throws IOException {
+		File temp = File.createTempFile("javascript", ".ts");
+
+		OutputStream out = new FileOutputStream(temp);
+
+		addScript(out, Thread.currentThread().getContextClassLoader().getResourceAsStream(Generator.STJS_PATH));
+
+		if (mainClassDisabled) {
+			out.write("stjs.mainCallDisabled=true;".getBytes(StandardCharsets.UTF_8));
+		}
+
+		for (File srcFile : srcFiles) {
+			addScript(out, new FileInputStream(srcFile));
+		}
+
+		out.close();
+
+		return temp;
+	}
+
+	private ExecutionResult runFile(String[] args) throws ScriptException {
+		try {
+			Process p = Runtime.getRuntime().exec(args);
 			int exitValue = p.waitFor();
 
 			String output = readStream(p.getInputStream());
