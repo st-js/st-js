@@ -125,7 +125,8 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(code, "let InnerTypes17 = function(){};" + "InnerTypes17 = stjs.extend(InnerTypes17, null, [], function(constructor, prototype){");
 		assertCodeContains(code, "let deep = InnerTypes17.Inner.Enum.a;");
 		assertCodeContains(code, "stjs.extend(constructor.Inner, null, [], function(constructor, prototype){");
-		assertCodeContains(code, "constructor.Enum=stjs.enumeration(");
+		assertCodeContains(code, "enum InnerTypes17_Inner_Enum { a, b, c }");
+		assertCodeContains(code, "constructor.Enum = InnerTypes17_Inner_Enum;");
 	}
 
 	@Test

@@ -6,6 +6,7 @@ import java.util.Map;
 import org.mozilla.javascript.Node;
 import org.mozilla.javascript.ast.ArrayLiteral;
 import org.mozilla.javascript.ast.Assignment;
+import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.Block;
 import org.mozilla.javascript.ast.BreakStatement;
@@ -43,6 +44,7 @@ import org.mozilla.javascript.ast.UnaryExpression;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.mozilla.javascript.ast.WhileLoop;
+import org.stjs.generator.javascript.rhino.types.Enum;
 
 /**
  *
@@ -311,6 +313,12 @@ public class RhinoNodeVisitorSupport {
 				visitor.visitEmptyExpression((EmptyExpression) node, param);
 			}
 		});
+		addCaller(Enum.class, new Caller() {
+			@Override
+			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
+				visitor.visitEnum((Enum) node, param);
+			}
+		});
 	}
 
 	/**
@@ -325,10 +333,12 @@ public class RhinoNodeVisitorSupport {
 		Caller caller = callers.get(node.getClass());
 		if (caller != null) {
 			caller.call(node, visitor, param);
+		} else {
+			throw new RuntimeException("Could not find caller for " + node.getClass().toString());
 		}
 	}
 
-	private static void addCaller(Class<?> nodeClass, Caller caller) {
+	private static void addCaller(Class<? extends AstNode> nodeClass, Caller caller) {
 		callers.put(nodeClass, caller);
 	}
 }

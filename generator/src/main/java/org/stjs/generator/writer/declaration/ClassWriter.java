@@ -134,6 +134,21 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		return context.js().function(null, Collections.<JS> emptyList(), null);
 	}
 
+	private List<Tree> getAllEnums(ClassTree clazz) {
+		List<Tree> enums = new ArrayList<Tree>();
+		for (Tree member : clazz.getMembers()) {
+			if (member instanceof ClassTree && member.getKind() == Tree.Kind.ENUM) {
+				enums.add(member);
+			}
+
+			// Get enums recursively
+			if (member instanceof ClassTree && member.getKind() == Tree.Kind.CLASS) {
+				enums.addAll(getAllEnums((ClassTree) member));
+			}
+		}
+		return enums;
+	}
+
 	private List<Tree> getAllMembersExceptConstructors(ClassTree clazz) {
 		List<Tree> nonConstructors = new ArrayList<Tree>();
 		for (Tree member : clazz.getMembers()) {
@@ -402,7 +417,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	}
 
 	@SuppressWarnings("unused")
-	private boolean generareEnum(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
+	private boolean generateEnumReference(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
 		Element type = TreeUtils.elementFromDeclaration(tree);
 		if (type.getKind() != ElementKind.ENUM) {
 			return false;
@@ -410,29 +425,61 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 
 		JavaScriptBuilder<JS> js = context.js();
 
-		// add all anum entries
-		List<JS> enumEntries = new ArrayList<JS>();
-		for (Element member : ElementUtils.getAllFieldsIn((TypeElement) type)) {
-			if (member.getKind() == ElementKind.ENUM_CONSTANT) {
-				enumEntries.add(js.string(member.getSimpleName().toString()));
-			}
-		}
-
-		JS enumConstructor = js.functionCall(js.property(js.name(GeneratorConstants.STJS), "enumeration"), enumEntries);
-
 		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
-		if (typeName.contains(".")) {
-			// inner class or namespace
-			boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
-			String leftSide = innerClass ? replaceFullNameWithConstructor(typeName) : typeName;
 
-			stmts.add(js.expressionStatement(js.assignment(AssignOperator.ASSIGN, js.name(leftSide), enumConstructor)));
-		} else {
-			// regular class
-			stmts.add(js.variableDeclaration(true, Collections.singleton(NameValue.of(typeName, enumConstructor)), false));
+		boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
+		if (innerClass) {
+			int pos = typeName.lastIndexOf('.');
+
+			// TODO :: change `leftSide` to `js.name(typeName.substring(pos))` once classes are implemented
+			String leftSide = replaceFullNameWithConstructor(typeName);
+			typeName = typeName.replace('.', '_');
+
+			stmts.add(
+					js.expressionStatement(
+							js.assignment(
+									AssignOperator.ASSIGN,
+									js.name(leftSide),
+									js.name(typeName)
+							)
+					)
+			);
 		}
 
 		return true;
+	}
+
+	@SuppressWarnings("unused")
+	private void generateEnum(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
+		Element type = TreeUtils.elementFromDeclaration(tree);
+		if (type.getKind() != ElementKind.ENUM) {
+			return;
+		}
+
+		JavaScriptBuilder<JS> js = context.js();
+
+		// add all enum entries
+		List<String> enumEntries = new ArrayList<>();
+		for (Element member : ElementUtils.getAllFieldsIn((TypeElement) type)) {
+			if (member.getKind() == ElementKind.ENUM_CONSTANT) {
+				enumEntries.add(member.getSimpleName().toString());
+			}
+		}
+
+		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
+		String originalTypeName = typeName;
+
+		typeName = typeName.replace('.', '_');
+		stmts.add(js.enum_(typeName, enumEntries));
+
+		boolean outerClass = type.getEnclosingElement().getKind() == ElementKind.PACKAGE;
+		if (outerClass && !typeName.equals(originalTypeName)) {
+			stmts.add(js.assignment(
+					AssignOperator.ASSIGN,
+					js.name(originalTypeName),
+					js.name(typeName)
+			));
+		}
 	}
 
 	/**
@@ -506,7 +553,27 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 
 		addNamespace(tree, context, stmts);
 
-		if (generareEnum(visitor, tree, context, stmts)) {
+		Element type = TreeUtils.elementFromDeclaration(tree);
+		boolean outerClass = type.getEnclosingElement().getKind() == ElementKind.PACKAGE;
+
+		// Move member enums to the top level
+		if (outerClass) {
+			List<Tree> enums = getAllEnums(tree);
+			for (Tree member : enums) {
+				generateEnum(visitor, (ClassTree) member, context, stmts);
+			}
+		}
+
+		// Render top level enums correctly
+
+		if (type.getKind() == ElementKind.ENUM && outerClass) {
+			generateEnum(visitor, tree, context, stmts);
+			// special construction for enums
+			return js.statements(stmts);
+		}
+
+		// Render members as references to the top level enums
+		if (generateEnumReference(visitor, tree, context, stmts)) {
 			// special construction for enums
 			return js.statements(stmts);
 		}

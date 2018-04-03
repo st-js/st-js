@@ -54,6 +54,7 @@ import com.google.debugging.sourcemap.FilePosition;
 import com.google.debugging.sourcemap.SourceMapFormat;
 import com.google.debugging.sourcemap.SourceMapGenerator;
 import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
+import org.stjs.generator.javascript.rhino.types.Enum;
 
 /**
  * This class visits a JavaScript AST tree and generate the corresponding source code. It handles also the source maps.
@@ -783,7 +784,11 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		print(" throw ");
 		visitorSupport.accept(e.getExpression(), this, param);
 		println(";");
+	}
 
+	@Override
+	public void visitEnum(Enum s, Boolean param) {
+		println(s.toSource(level));
 	}
 
 	/**

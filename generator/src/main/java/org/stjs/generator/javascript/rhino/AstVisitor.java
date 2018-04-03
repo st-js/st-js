@@ -39,6 +39,7 @@ import org.mozilla.javascript.ast.UnaryExpression;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.mozilla.javascript.ast.WhileLoop;
+import org.stjs.generator.javascript.rhino.types.Enum;
 
 /**
  * <p>AstVisitor interface.</p>
@@ -378,4 +379,12 @@ public interface AstVisitor<T> {
 	 * @param param a T object.
 	 */
 	void visitCodeFragment(CodeFragment c, T param);
+
+	/**
+	 * <p>visitEnum.</p>
+	 *
+	 * @param s a {@link org.stjs.generator.javascript.rhino.types.Enum} object.
+	 * @param param a T object.
+	 */
+	void visitEnum(Enum s, T param);
 }

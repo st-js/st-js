@@ -9,10 +9,11 @@ public class Enums6 {
 
 	@SuppressWarnings("unused")
 	public static String main(String[] args) {
+		// TODO :: add checks to disable ".values" ".name" and ".ordinal" calls on enums
 		String result = "";
-		for (Value v : Value.values()) {
-			result += v.name() + ":" + v.ordinal();
-		}
+		result += "a:" + Value.a;
+		result += "b:" + Value.b;
+		result += "c:" + Value.c;
 		$js("console.log(result)");
 		return result;
 	}

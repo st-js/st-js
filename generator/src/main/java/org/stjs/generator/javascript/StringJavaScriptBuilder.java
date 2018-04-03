@@ -5,6 +5,8 @@ import java.io.Writer;
 
 import com.google.debugging.sourcemap.SourceMapGenerator;
 
+import javax.annotation.Nonnull;
+
 /**
  * <p>StringJavaScriptBuilder class.</p>
  *
@@ -291,6 +293,11 @@ public class StringJavaScriptBuilder implements JavaScriptBuilder<String> {
 	@Override
 	public String statements(Iterable<String> stmts) {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String enum_(@Nonnull String name, @Nonnull Iterable<String> values) {
 		return null;
 	}
 

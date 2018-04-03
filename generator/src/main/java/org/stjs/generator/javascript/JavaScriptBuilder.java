@@ -420,6 +420,14 @@ public interface JavaScriptBuilder<T> {
 	T statements(@Nonnull Iterable<T> stmts);
 
 	/**
+	 * Enum
+	 * @param name The enum's name
+	 * @param values a {@link java.lang.Iterable} object.
+	 * @return a T object.
+	 */
+	T enum_(@Nonnull String name, @Nonnull Iterable<String> values);
+
+	/**
 	 * <p>writeJavaScript.</p>
 	 *
 	 * @param javascriptRoot a T object.
