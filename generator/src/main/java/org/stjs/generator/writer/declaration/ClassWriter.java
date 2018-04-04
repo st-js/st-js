@@ -429,8 +429,6 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 
 		boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
 		if (innerClass) {
-			int pos = typeName.lastIndexOf('.');
-
 			// TODO :: change `leftSide` to `js.name(typeName.substring(pos))` once classes are implemented
 			String leftSide = replaceFullNameWithConstructor(typeName);
 			typeName = typeName.replace('.', '_');
@@ -470,7 +468,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		String originalTypeName = typeName;
 
 		typeName = typeName.replace('.', '_');
-		stmts.add(js.enum_(typeName, enumEntries));
+		stmts.add(js.enumDeclaration(typeName, enumEntries));
 
 		boolean outerClass = type.getEnclosingElement().getKind() == ElementKind.PACKAGE;
 		if (outerClass && !typeName.equals(originalTypeName)) {

@@ -573,7 +573,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	}
 
 	@Override
-	public AstNode enum_(@Nonnull String name, @Nonnull Iterable<String> values) {
+	public AstNode enumDeclaration(@Nonnull String name, @Nonnull Iterable<String> values) {
 		return new Enum(name, values);
 	}
 

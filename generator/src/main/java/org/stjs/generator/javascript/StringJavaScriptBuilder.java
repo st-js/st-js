@@ -297,7 +297,7 @@ public class StringJavaScriptBuilder implements JavaScriptBuilder<String> {
 	}
 
 	@Override
-	public String enum_(@Nonnull String name, @Nonnull Iterable<String> values) {
+	public String enumDeclaration(@Nonnull String name, @Nonnull Iterable<String> values) {
 		return null;
 	}
 

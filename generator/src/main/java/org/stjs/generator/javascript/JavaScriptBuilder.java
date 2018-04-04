@@ -425,7 +425,7 @@ public interface JavaScriptBuilder<T> {
 	 * @param values a {@link java.lang.Iterable} object.
 	 * @return a T object.
 	 */
-	T enum_(@Nonnull String name, @Nonnull Iterable<String> values);
+	T enumDeclaration(@Nonnull String name, @Nonnull Iterable<String> values);
 
 	/**
 	 * <p>writeJavaScript.</p>

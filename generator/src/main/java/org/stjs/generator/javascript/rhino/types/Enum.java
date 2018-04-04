@@ -6,11 +6,11 @@ import org.mozilla.javascript.ast.NodeVisitor;
 import java.util.Iterator;
 
 public class Enum extends AstNode {
-	public String name;
-	public Iterable<String> values;
+	private String name;
+	private Iterable<String> values;
 
 	{
-		type = Token.ENUM;
+		type = TSToken.ENUM;
 	}
 
 	public Enum(String name, Iterable<String> values) {
