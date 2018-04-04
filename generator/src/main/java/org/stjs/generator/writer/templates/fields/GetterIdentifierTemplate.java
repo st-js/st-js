@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
@@ -54,8 +55,7 @@ public class GetterIdentifierTemplate<JS> implements WriterContributor<Identifie
 		arguments.add(name);
 
 		if (global) {
-			arguments.add(0, target);
-			return context.js().functionCall(context.js().property(context.js().name("stjs"), "getField"), arguments);
+			return context.js().elementGet(target, name);
 		}
 		return context.js().functionCall(context.js().property(target, "get"), arguments);
 	}

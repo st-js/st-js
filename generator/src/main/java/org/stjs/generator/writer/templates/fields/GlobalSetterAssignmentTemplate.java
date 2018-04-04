@@ -1,10 +1,8 @@
 package org.stjs.generator.writer.templates.fields;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.TreeWrapper;
+import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 
@@ -21,11 +19,11 @@ public class GlobalSetterAssignmentTemplate<JS> implements WriterContributor<Ass
 		TreeWrapper<ExpressionTree, JS> leftSide = context.getCurrentWrapper().child(tree.getVariable());
 		JS target = SetterAssignmentTemplate.getTarget(visitor, leftSide, context);
 
-		List<JS> arguments = new ArrayList<JS>();
-		arguments.add(target);
-		arguments.add(SetterAssignmentTemplate.getField(leftSide, context));
-		arguments.add(right);
+		JS eg = context.js().elementGet(
+				target,
+				SetterAssignmentTemplate.getField(leftSide, context)
+		);
 
-		return context.js().functionCall(context.js().property(context.js().name("stjs"), "setField"), arguments);
+		return context.js().assignment(AssignOperator.ASSIGN, eg, right);
 	}
 }

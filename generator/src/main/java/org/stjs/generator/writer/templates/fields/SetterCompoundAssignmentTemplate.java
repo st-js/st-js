@@ -38,14 +38,14 @@ public class SetterCompoundAssignmentTemplate<JS> implements WriterContributor<C
 		TreeWrapper<ExpressionTree, JS> leftSide = context.getCurrentWrapper().child(tree.getVariable());
 		JS target = SetterAssignmentTemplate.getTarget(visitor, leftSide, context);
 
-		List<JS> arguments = new ArrayList<JS>();
+		if (global) {
+			JS eg = context.js().elementGet(target, SetterAssignmentTemplate.getField(leftSide, context));
+			return context.js().assignment(AssignOperator.ASSIGN, eg, value);
+		}
+
+		List<JS> arguments = new ArrayList<>();
 		arguments.add(SetterAssignmentTemplate.getField(leftSide, context));
 		arguments.add(value);
-
-		if (global) {
-			arguments.add(0, target);
-			return context.js().functionCall(context.js().property(context.js().name("stjs"), "setField"), arguments);
-		}
 		return context.js().functionCall(context.js().property(target, "set"), arguments);
 	}
 }

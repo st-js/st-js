@@ -125,22 +125,6 @@ public final class STJS {
 	public native <T> Map<String, ? extends Object> stringify(T obj, Class<T> cls);
 
 	/**
-	 * this handler will be called any time a field annotated with the template "gsetter" is set. For a statement like this:<br>
-	 * object.field = value;<br>
-	 * The last parameter is true if the function should return the previous value, false/null to return the new value.<br>
-	 * the call will be setFieldHandler-$invoke(object, field, value, value) For example for object.field++ <br>
-	 * the call will be setFieldHandler-$invoke(object, field, object.field+1, false)
-	 */
-	public Function3<Object, String, Object, Boolean> setFieldHandler;
-
-	/**
-	 * this handler will be called any time a field annotated with the template "gsetter" is get. For a statement like this:<br>
-	 * object.field<br>
-	 * the call will be getFieldHandler-$invoke(object, field)
-	 */
-	public Function2<Object, String, Object> getFieldHandler;
-
-	/**
 	 * return the annotations of the given type in the format:
 	 *
 	 * <pre>

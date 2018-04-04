@@ -105,12 +105,12 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testTemplateGlobalSetter1() {
-		assertCodeContains(Fields17.class, "stjs.setField(this, \"field\", n)");
+		assertCodeContains(Fields17.class, "this[\"field\"] = n;");
 	}
 
 	@Test
 	public void testTemplateGlobalSetter2() {
-		assertCodeContains(Fields18.class, "stjs.setField(f, \"field\", n)");
+		assertCodeContains(Fields18.class, "f[\"field\"] = n;");
 	}
 
 	@Test
@@ -125,7 +125,7 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testTemplateGlobalPostIncrement() {
-		assertCodeContains(Fields21.class, "stjs.setField(this, \"field\", stjs.getField(this, \"field\") + 1, true)");
+		assertCodeContains(Fields21.class, "this[\"field\"] = this[\"field\"] + 1");
 	}
 
 	@Test
@@ -135,7 +135,7 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testTemplateGlobalDivideAssign() {
-		assertCodeContains(Fields23.class, "stjs.setField(this, \"field\", stjs.trunc(stjs.getField(this, \"field\") / (2)))");
+		assertCodeContains(Fields23.class, "this[\"field\"] = stjs.trunc(this[\"field\"] / (2))");
 	}
 
 	@Test

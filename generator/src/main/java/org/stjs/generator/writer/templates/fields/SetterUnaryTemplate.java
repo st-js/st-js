@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.TreeWrapper;
+import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.javascript.BinaryOperator;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.javascript.UnaryOperator;
@@ -52,6 +53,11 @@ public class SetterUnaryTemplate<JS> extends DefaultUnaryTemplate<JS> {
 
 		JS value = context.js().binary(binaryOp, Arrays.asList(operand, context.js().number(1)));
 
+		if (global) {
+			JS eg = context.js().elementGet(target, field);
+			return context.js().assignment(AssignOperator.ASSIGN, eg, value);
+		}
+
 		List<JS> arguments = new ArrayList<JS>();
 		arguments.add(field);
 		arguments.add(value);
@@ -59,10 +65,6 @@ public class SetterUnaryTemplate<JS> extends DefaultUnaryTemplate<JS> {
 			arguments.add(context.js().keyword(Keyword.TRUE));
 		}
 
-		if (global) {
-			arguments.add(0, target);
-			return context.js().functionCall(context.js().property(context.js().name("stjs"), "setField"), arguments);
-		}
 		return context.js().functionCall(context.js().property(target, "set"), arguments);
 
 	}

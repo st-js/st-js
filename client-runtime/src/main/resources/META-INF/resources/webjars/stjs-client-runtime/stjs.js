@@ -293,6 +293,7 @@ stjs.varargs = function(func, varargsIndex){
     return function(){
         // unpack all the arguments that are before the start of the varags
         // pack all of the varags into a nice Array
+        // pack all of the varags into a nice Array
         var args = Array.prototype.slice.call(arguments, 0, varargsIndex);
         args.push(Array.prototype.slice.call(arguments, varargsIndex));
         // now invoke the generated method
@@ -547,16 +548,17 @@ stjs.bind=function(obj, method, thisParamPos) {
 
 	var f = function(){
 		var args = arguments;
+
 		if (addThisToParameters) {
 			Array.prototype.splice.call(args, thisParamPos, 0, this);
 		}
+
 		if(useFirstParamAsContext){
 			obj = Array.prototype.shift.call(args);
 		}
 
 		if (typeof method === "string") {
 			return obj[method].apply(obj, args);
-
 		} else {
 			return method.apply(obj, args);
 		}
@@ -995,19 +997,3 @@ var Iterable = function() {};
 Iterable = stjs.extend(Iterable, null, [], function(constructor, prototype) {
     prototype.iterator = function() {};
 }, {}, {});
-
-/** stjs field manipulation */
-stjs.setField=function(obj, field, value, returnOldValue){
-	if (stjs.setFieldHandler)
-		return stjs.setFieldHandler(obj, field, value, returnOldValue);
-	var toReturn = returnOldValue ? obj[field] : value;
-	obj[field] = value;
-	return toReturn;
-};
-
-stjs.getField=function(obj, field){
-	if (stjs.getFieldHandler)
-		return stjs.getFieldHandler(obj, field);
-	return obj[field];
-};
-
