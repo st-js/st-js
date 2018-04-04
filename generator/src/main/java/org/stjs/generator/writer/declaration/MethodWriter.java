@@ -91,16 +91,6 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		return true;
 	}
 
-	private int getVarArgs(MethodTree method) {
-		for (int i = 0; i < method.getParameters().size(); ++i) {
-			VariableTree param = method.getParameters().get(i);
-			if (InternalUtils.isVarArg(param) && !param.getName().toString().equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
-				return i;
-			}
-		}
-		return -1;
-	}
-
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, MethodTree tree, GenerationContext<JS> context) {
 		TreeWrapper<MethodTree, JS> tw = context.getCurrentWrapper();
