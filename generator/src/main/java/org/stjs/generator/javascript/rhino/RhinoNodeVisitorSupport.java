@@ -45,6 +45,7 @@ import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.mozilla.javascript.ast.WhileLoop;
 import org.stjs.generator.javascript.rhino.types.Enum;
+import org.stjs.generator.javascript.rhino.types.Vararg;
 
 /**
  *
@@ -67,6 +68,12 @@ public class RhinoNodeVisitorSupport {
 			@Override
 			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
 				visitor.visitName((Name) node, param);
+			}
+		});
+		addCaller(Vararg.class, new Caller() {
+			@Override
+			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
+				visitor.visitVararg((Vararg) node, param);
 			}
 		});
 		addCaller(Label.class, new Caller() {

@@ -57,9 +57,13 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 	}
 
 	public static <JS> List<JS> getParams(List<? extends VariableTree> treeParams, GenerationContext<JS> context) {
-		List<JS> params = new ArrayList<JS>();
+		List<JS> params = new ArrayList<>();
 		for (VariableTree param : treeParams) {
-			params.add(context.js().name(changeName(param.getName().toString())));
+			if (InternalUtils.isVarArg(param)) {
+				params.add(context.js().vararg(changeName(param.getName().toString())));
+			} else {
+				params.add(context.js().name(changeName(param.getName().toString())));
+			}
 		}
 		return params;
 	}
@@ -112,11 +116,6 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 		String name = getAnonymousTypeConstructorName(tree, context);
 
 		JS decl = context.js().function(name, params, body);
-		int varArgsIndex = getVarArgs(tree);
-		if (varArgsIndex >= 0) {
-			JS varArgsWrapper = context.js().property(context.js().name("stjs"), "varargs");
-			decl = context.js().functionCall(varArgsWrapper, Arrays.asList(decl, context.js().number(2)));
-		}
 
 		// add the constructor.<name> or prototype.<name> if needed
 		if (!JavaNodes.isConstructor(tree) && !isMethodOfJavascriptFunction(context.getCurrentWrapper())) {

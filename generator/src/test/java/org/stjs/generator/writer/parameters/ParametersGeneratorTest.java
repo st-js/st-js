@@ -33,6 +33,6 @@ public class ParametersGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testVarArgsAfter() {
-		assertCodeContains(Parameters7.class, "method = stjs.varargs(function(a,b,other){}, 2)");
+		assertCodeContains(Parameters7.class, "method = function(a, b, ...other) {");
 	}
 }

@@ -55,6 +55,7 @@ import com.google.debugging.sourcemap.SourceMapFormat;
 import com.google.debugging.sourcemap.SourceMapGenerator;
 import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
 import org.stjs.generator.javascript.rhino.types.Enum;
+import org.stjs.generator.javascript.rhino.types.Vararg;
 
 /**
  * This class visits a JavaScript AST tree and generate the corresponding source code. It handles also the source maps.
@@ -583,6 +584,12 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	@Override
 	public void visitName(Name name, Boolean param) {
 		print(name.getIdentifier());
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public void visitVararg(Vararg name, Boolean param) {
+		print("..." + name.getIdentifier());
 	}
 
 	/** {@inheritDoc} */

@@ -3,5 +3,6 @@ package org.stjs.generator.javascript.rhino.types;
 public class TSToken extends org.mozilla.javascript.Token {
 	public static final int
 
-		ENUM = 200;
+		ENUM = 200,
+		VARARG = 201;
 }

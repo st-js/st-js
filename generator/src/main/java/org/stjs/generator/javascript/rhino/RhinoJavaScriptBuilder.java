@@ -60,6 +60,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.debugging.sourcemap.SourceMapGenerator;
 import org.stjs.generator.javascript.rhino.types.Enum;
+import org.stjs.generator.javascript.rhino.types.Vararg;
 
 import javax.annotation.Nonnull;
 
@@ -81,6 +82,14 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	@Override
 	public AstNode name(CharSequence name) {
 		Name n = new Name();
+		n.setIdentifier(name.toString());
+		return n;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public AstNode vararg(CharSequence name) {
+		Vararg n = new Vararg();
 		n.setIdentifier(name.toString());
 		return n;
 	}

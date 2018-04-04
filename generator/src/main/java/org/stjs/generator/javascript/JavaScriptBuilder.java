@@ -155,6 +155,14 @@ public interface JavaScriptBuilder<T> {
 	T name(@Nonnull CharSequence name);
 
 	/**
+	 * <p>vararg.</p>
+	 *
+	 * @param name a {@link java.lang.CharSequence} object.
+	 * @return a T object.
+	 */
+	T vararg(@Nonnull CharSequence name);
+
+	/**
 	 * <p>label.</p>
 	 *
 	 * @param name a {@link java.lang.CharSequence} object.

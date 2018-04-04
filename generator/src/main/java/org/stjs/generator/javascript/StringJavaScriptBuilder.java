@@ -123,6 +123,13 @@ public class StringJavaScriptBuilder implements JavaScriptBuilder<String> {
 
 	/** {@inheritDoc} */
 	@Override
+	public String vararg(CharSequence name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/** {@inheritDoc} */
+	@Override
 	public String newExpression(String target, Iterable<String> arguments) {
 		// TODO Auto-generated method stub
 		return null;
