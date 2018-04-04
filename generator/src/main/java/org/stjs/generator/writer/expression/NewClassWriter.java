@@ -7,6 +7,7 @@ import java.util.List;
 import javax.lang.model.element.Element;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.JavaScriptBuilder;
@@ -131,7 +132,7 @@ public class NewClassWriter<JS> implements WriterContributor<NewClassTree, JS> {
 			// bind for inline functions accessing the outher scope or with special this
 			JavaScriptBuilder<JS> js = tw.getContext().js();
 			JS target = js.keyword(Keyword.THIS);
-			JS stjsBind = js.property(js.name("stjs"), "bind");
+			JS stjsBind = js.property(js.name(GeneratorConstants.STJS), "bind");
 			return js.functionCall(stjsBind, Arrays.asList(target, func, js.number(specialThisParamPos)));
 		}
 

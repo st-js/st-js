@@ -17,6 +17,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.TypesUtils;
 import org.stjs.generator.javascript.BinaryOperator;
 import org.stjs.generator.javascript.JavaScriptBuilder;
@@ -56,7 +57,7 @@ public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 			JS or = b.binary(BinaryOperator.OR, asList(b.paren(expr), b.number(0)));
 			return b.paren(or);
 		}
-		
+
 		if (needCastToByte(fromKind, toKind)) {
 			// long l = 8*1024*1024*1024;
 			// byte a = (byte) l;
@@ -66,7 +67,7 @@ public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 			JS rsh = b.binary(RIGHT_SHIFT, asList(lsh, b.number(BYTE_SHIFT)));
 			return b.paren(rsh);
 		}
-		
+
 		if (needCastToShort(fromKind, toKind)) {
 			// int i = 2*1024*1024*1024; //MAX_VALUE
 			// short a = (short) i;
@@ -76,7 +77,7 @@ public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 			JS rsh = b.binary(RIGHT_SHIFT, asList(lsh, b.number(SHORT_SHIFT)));
 			return b.paren(rsh);
 		}
-		
+
 		if (needCastToChar(fromKind, toKind)) {
 			// int i = 2*1024*1024*1024; //MAX_VALUE
 			// char a = (char) i;
@@ -88,7 +89,7 @@ public class TypeCastWriter<JS> implements WriterContributor<TypeCastTree, JS> {
 
 		if (TypesUtils.isIntegral(type)) {
 			// add explicit cast in this case
-			JS target = b.property(b.name("stjs"), "trunc");
+			JS target = b.property(b.name(GeneratorConstants.STJS), "trunc");
 			expr = b.functionCall(target, Collections.singleton(expr));
 		}
 		// otherwise skip to cast type - continue with the expression

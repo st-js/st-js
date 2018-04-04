@@ -5,6 +5,7 @@ import java.util.Arrays;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.WriterContributor;
@@ -24,7 +25,7 @@ public class InstanceofWriter<JS> implements WriterContributor<InstanceOfTree, J
 
 		TypeMirror type = context.getTrees().getTypeMirror(new TreePath(context.getCurrentPath(), tree.getType()));
 		JS getConstructor = context.js().property(visitor.scan(tree.getExpression(), context), JavascriptKeywords.CONSTRUCTOR);
-		JS targetInst = context.js().property(context.js().name("stjs"), "isInstanceOf");
+		JS targetInst = context.js().property(context.js().name(GeneratorConstants.STJS), "isInstanceOf");
 		JS typeName = context.js().name(context.getNames().getTypeName(context, type, DependencyType.STATIC));
 		return context.js().functionCall(targetInst, Arrays.asList(getConstructor, typeName));
 	}

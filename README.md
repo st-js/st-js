@@ -6,6 +6,20 @@ STJS is an open source (Apache 2.0 licensed) Javascript code generator from a Ja
 
 Our full website can be found at http://st-js.org
 
+This branch
+-----------
+
+This branch is special as it outputs valid TypeScript.
+It's work in progress but it supports.
+
+Syntax changes are:
+
+- `let`/`const` instead of `var`
+- arrow functions where it can, keeping `stjs.bind()` where it can't
+- field getters/setters instead of `stjs.setField`/`stjs.getField`
+- enum instead of `stjs.enumeration`
+- varargs instead of `stjs.varargs`
+
 Compiling the Project
 ---------------------
 

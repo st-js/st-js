@@ -65,7 +65,7 @@ public class LambdaExpressionWriter<JS> implements WriterContributor<LambdaExpre
 		if (specialThisParamPos >= 0) {
 			JS lambdaFunc = js.function(null, params, body);
 			JS target = js.keyword(Keyword.THIS);
-			JS stjsBind = js.property(context.js().name("stjs"), "bind");
+			JS stjsBind = js.property(context.js().name(GeneratorConstants.STJS), "bind");
 			return js.functionCall(stjsBind, Arrays.asList(target, lambdaFunc, js.number(specialThisParamPos)));
 		}
 

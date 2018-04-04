@@ -10,6 +10,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.JavaNodes;
@@ -57,7 +58,7 @@ public class MemberReferenceWriter<JS> implements WriterContributor<MemberRefere
 		JavaScriptBuilder<JS> js = context.js();
 		Element type = methodElement.getEnclosingElement();
 		context.getNames().getTypeName(context, type, DependencyType.STATIC); // Make sure that we record the dependency on the type
-		JS stjsBind = context.js().property(context.js().name("stjs"), "bind");
+		JS stjsBind = context.js().property(context.js().name(GeneratorConstants.STJS), "bind");
 		JS methodName = js.string(tree.getName().toString());
 		return js.functionCall(stjsBind, Collections.singletonList(methodName));
 	}
@@ -70,7 +71,7 @@ public class MemberReferenceWriter<JS> implements WriterContributor<MemberRefere
 		JavaScriptBuilder<JS> js = context.js();
 		JS target = visitor.scan(tree.getQualifierExpression(), context);
 		JS methodName = js.string(tree.getName().toString());
-		JS stjsBind = context.js().property(context.js().name("stjs"), "bind");
+		JS stjsBind = context.js().property(context.js().name(GeneratorConstants.STJS), "bind");
 		return js.functionCall(stjsBind, Arrays.asList(target, methodName));
 	}
 

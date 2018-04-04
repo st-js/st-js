@@ -8,6 +8,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.TypesUtils;
 import org.stjs.generator.javascript.BinaryOperator;
 import org.stjs.generator.javascript.JavaScriptBuilder;
@@ -41,7 +42,7 @@ public class BinaryWriter<JS> implements WriterContributor<BinaryTree, JS> {
 
 		if (integerDivision) {
 			// force a cast for integer division to have the expected behavior in JavaScript too
-			JS target = b.property(b.name("stjs"), "trunc");
+			JS target = b.property(b.name(GeneratorConstants.STJS), "trunc");
 			return b.functionCall(target, Collections.singleton(expr));
 		}
 		return expr;

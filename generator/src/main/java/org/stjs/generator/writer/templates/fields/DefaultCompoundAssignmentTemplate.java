@@ -6,6 +6,7 @@ import java.util.Collections;
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
+import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.TypesUtils;
 import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.javascript.BinaryOperator;
@@ -31,7 +32,7 @@ public class DefaultCompoundAssignmentTemplate<JS> implements WriterContributor<
 
 		if (integerDivision) {
 			// force a cast for integer division to have the expected behavior in JavaScript too
-			JS target = js.property(js.name("stjs"), "trunc");
+			JS target = js.property(js.name(GeneratorConstants.STJS), "trunc");
 			JS expr = js.binary(BinaryOperator.DIVIDE, Arrays.asList(left, js.paren(right)));
 			return js.functionCall(target, Collections.singleton(expr));
 		}
