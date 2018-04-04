@@ -37,6 +37,6 @@ public class OverloadTest extends AbstractStjsTest {
 	@Test
 	public void testVarArgs() {
 		// check that no other method is generated
-		assertCodeContains(Overload6.class, "{prototype.method=function(_arguments){};}");
+		assertCodeContains(Overload6.class, "{prototype.method=function(..._arguments){};}");
 	}
 }
