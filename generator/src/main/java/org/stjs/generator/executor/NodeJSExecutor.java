@@ -73,13 +73,16 @@ public class NodeJSExecutor implements Executor {
 			value = "REC_CATCH_EXCEPTION")
 	public ExecutionResult run(Collection<File> srcFiles, boolean mainClassDisabled) throws ScriptException {
 		try {
-			File temp = createTempFile(srcFiles, mainClassDisabled);
-			temp.deleteOnExit();
+			// Concatenate all source files together
+			File concatenated = concatenateSourceFiles(srcFiles);
 
-			File converted = convertToTS(temp);
-			converted.deleteOnExit();
+			// Convert source to TypeScript
+			File converted = convertToTS(concatenated);
 
-			return runFile(new String[] {getExecutable(), converted.getAbsolutePath()});
+			// Add stjs.js to source file
+			File complete = finalizeConvertedFile(converted, mainClassDisabled);
+
+			return runFile(new String[] {getExecutable(), complete.getAbsolutePath()});
 		}
 		catch (IOException e) {
 			throw new ScriptException(e);
@@ -114,27 +117,41 @@ public class NodeJSExecutor implements Executor {
 			throw new ScriptException("Failed conversion to TypeScript: " + result.toString());
 		}
 
-		return new File(toConvert.getAbsolutePath().replace(".ts", ".js"));
+		File converted =  new File(toConvert.getAbsolutePath().replace(".ts", ".js"));
+		converted.deleteOnExit();
+
+		return converted;
 	}
 
-	private File createTempFile(Collection<File> srcFiles, boolean mainClassDisabled) throws IOException {
+	private File concatenateSourceFiles(Collection<File> srcFiles) throws IOException {
 		File temp = File.createTempFile("javascript", ".ts");
+		temp.deleteOnExit();
 
-		OutputStream out = new FileOutputStream(temp);
-
-		addScript(out, Thread.currentThread().getContextClassLoader().getResourceAsStream(Generator.STJS_PATH));
-
-		if (mainClassDisabled) {
-			out.write("stjs.mainCallDisabled=true;".getBytes(StandardCharsets.UTF_8));
+		try (OutputStream out = new FileOutputStream(temp)) {
+			for (File srcFile : srcFiles) {
+				addScript(out, new FileInputStream(srcFile));
+			}
 		}
-
-		for (File srcFile : srcFiles) {
-			addScript(out, new FileInputStream(srcFile));
-		}
-
-		out.close();
 
 		return temp;
+	}
+
+	private File finalizeConvertedFile(File converted, boolean mainClassDisabled) throws IOException {
+		File temp = File.createTempFile("javascriptAll", ".js");
+		temp.deleteOnExit();
+
+		try (OutputStream out = new FileOutputStream(temp)) {
+			addScript(out, Thread.currentThread().getContextClassLoader().getResourceAsStream(Generator.STJS_PATH));
+
+			if (mainClassDisabled) {
+				out.write("stjs.mainCallDisabled=true;".getBytes(StandardCharsets.UTF_8));
+			}
+
+			addScript(out, new FileInputStream(converted));
+		}
+
+		return temp;
+
 	}
 
 	private ExecutionResult runFile(String[] args) throws ScriptException {

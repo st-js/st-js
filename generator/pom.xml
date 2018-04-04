@@ -61,13 +61,12 @@
 <!-- 			<scope>test</scope> -->
 		</dependency>
 
-		<dependency>
-			<groupId>org.webjars.npm</groupId>
-			<artifactId>typescript</artifactId>
-			<version>2.7.2</version>
-			<scope>test</scope>
-		</dependency>
-
+        <dependency>
+            <groupId>org.webjars.npm</groupId>
+            <artifactId>typescript</artifactId>
+            <version>${typescript.version}</version>
+            <scope>test</scope>
+        </dependency>
 
 		<dependency>
 			<groupId>org.st-js</groupId>

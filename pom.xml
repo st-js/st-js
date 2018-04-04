@@ -48,6 +48,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+		<typescript.version>2.7.2</typescript.version>
+
 		<!-- Maven extensions versions -->
 		<wagon-webdav.version>1.0-beta-2</wagon-webdav.version>
 		<wagon-scm.version>1.0-beta-6</wagon-scm.version>

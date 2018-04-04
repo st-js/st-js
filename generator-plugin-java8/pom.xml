@@ -46,6 +46,13 @@
 			<version>4.01.0</version>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.webjars.npm</groupId>
+			<artifactId>typescript</artifactId>
+			<version>${typescript.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
