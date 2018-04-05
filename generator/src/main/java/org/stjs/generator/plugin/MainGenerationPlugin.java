@@ -21,6 +21,7 @@ import org.stjs.generator.check.expression.IdentifierGlobalScopeNameClashCheck;
 import org.stjs.generator.check.expression.MemberSelectGlobalScopeNameClashCheck;
 import org.stjs.generator.check.expression.MemberSelectOuterScopeCheck;
 import org.stjs.generator.check.expression.MemberSelectServerSideCheck;
+import org.stjs.generator.check.expression.MethodInvocationEnumCheck;
 import org.stjs.generator.check.expression.MethodInvocationMapConstructorCheck;
 import org.stjs.generator.check.expression.MethodInvocationOuterScopeCheck;
 import org.stjs.generator.check.expression.MethodInvocationServerSideCheck;
@@ -150,6 +151,7 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 
 		visitor.contribute(new BlockInstanceCheck());
 		visitor.contribute(new MethodInvocationMapConstructorCheck());
+		visitor.contribute(new MethodInvocationEnumCheck());
 		visitor.contribute(new SynchronizedCheck());
 		visitor.contribute(new MethodSynchronizedCheck());
 

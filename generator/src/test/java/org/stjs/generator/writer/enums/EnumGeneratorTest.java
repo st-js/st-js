@@ -2,7 +2,10 @@ package org.stjs.generator.writer.enums;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.stjs.generator.MultipleFileGenerationException;
 import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 
@@ -26,11 +29,39 @@ public class EnumGeneratorTest extends AbstractStjsTest {
 		generate(Enums9.class);
 	}
 
+	@Rule
+	public ExpectedException expectedEx = ExpectedException.none();
+
 	@Test
 	public void testEnumOrdinal() {
-		assertCodeContains(Enums5.class, "Enums5.Value.a.ordinal()");
-		assertCodeContains(Enums5.class, "constructor.Value = Enums5_Value;");
-		assertCodeContains(Enums5.class, "enum Enums5_Value {a, b, c}");
+		expectedEx.expect(MultipleFileGenerationException.class);
+		expectedEx.expectMessage("In TypeScript you cannot call methods on enums. Called '.ordinal()'");
+
+		generate(Enums5.class);
+	}
+
+	@Test
+	public void testEnumName() {
+		expectedEx.expect(MultipleFileGenerationException.class);
+		expectedEx.expectMessage("In TypeScript you cannot call methods on enums. Called '.name()'");
+
+		generate(Enums10.class);
+	}
+
+	@Test
+	public void testEnumValuesMethod() {
+		expectedEx.expect(MultipleFileGenerationException.class);
+		expectedEx.expectMessage("In TypeScript you cannot call methods on enums. Called '.values()'");
+
+		generate(Enums11.class);
+	}
+
+	@Test
+	public void testEnumValueOf() {
+		expectedEx.expect(MultipleFileGenerationException.class);
+		expectedEx.expectMessage("In TypeScript you cannot call methods on enums. Called '.valueOf()'");
+
+		generate(Enums12.class);
 	}
 
 	@Test
