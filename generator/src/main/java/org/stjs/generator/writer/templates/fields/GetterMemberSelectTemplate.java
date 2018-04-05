@@ -6,9 +6,7 @@ import java.util.List;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 
-import com.sun.source.tree.MethodInvocationTree;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.Keyword;
@@ -20,13 +18,11 @@ import org.stjs.generator.writer.WriterVisitor;
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.Tree;
-import org.stjs.generator.writer.expression.MethodInvocationWriter;
 
 /**
  * write member select access, for fields, types and methods.
  *
  * @author acraciun
- * @param <JS>
  */
 public class GetterMemberSelectTemplate<JS> implements WriterContributor<MemberSelectTree, JS> {
 

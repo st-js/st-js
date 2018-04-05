@@ -102,7 +102,6 @@ public final class AnnotationHelper {
 	}
 
 	private static boolean sameSignature(ExecutableElement member, ExecutableElement methodElement) {
-		// TODO Auto-generated method stub
 		return member.getSimpleName().equals(methodElement.getSimpleName());
 	}
 

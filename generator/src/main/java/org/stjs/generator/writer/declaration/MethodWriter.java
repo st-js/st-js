@@ -1,7 +1,6 @@
 package org.stjs.generator.writer.declaration;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.lang.model.element.Element;

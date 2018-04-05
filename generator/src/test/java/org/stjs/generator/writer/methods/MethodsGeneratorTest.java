@@ -64,7 +64,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testVarArgsMethod3() {
 		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
-		assertCodeContains(Methods11.class, "prototype.method=function(_arguments){}");
+		assertCodeContains(Methods11.class, "prototype.method=function(..._arguments){}");
 	}
 
 	@Test

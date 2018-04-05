@@ -308,8 +308,8 @@ public final class ElementUtils {
 	}
 
 	/**
-	 * Determine all type elements for the classes and interfaces referenced in the extends/implements clauses of the given type element. TODO:
-	 * can we learn from the implementation of com.sun.tools.javac.model.JavacElements.getAllMembers(TypeElement)?
+	 * Determine all type elements for the classes and interfaces referenced in the extends/implements clauses of the given type element.
+	 * TODO: can we learn from the implementation of com.sun.tools.javac.model.JavacElements.getAllMembers(TypeElement)?
 	 *
 	 * @param type a {@link javax.lang.model.element.TypeElement} object.
 	 * @return a {@link java.util.List} object.

@@ -12,13 +12,27 @@ This branch
 This branch is special as it outputs valid TypeScript.
 It's work in progress but it supports.
 
-Syntax changes are:
+### Syntax changes
 
 - `let`/`const` instead of `var`
 - arrow functions where it can, keeping `stjs.bind()` where it can't
 - field getters/setters instead of `stjs.setField`/`stjs.getField`
 - enum instead of `stjs.enumeration`
 - varargs instead of `stjs.varargs`
+
+### New Checks
+
+- You cannot call methods on Enums (like `.ordinal()` / `valueOf()` / `.name()` ...)
+
+### Roadmap
+
+- Convert interfaces
+- Convert classes
+- Change `isInstanceOf` to do a JavaScript `instanceof`
+- Add a check to forbid `instanceof` on interfaces
+
+### Open for discussion
+- Should we automatically replace ".equals()" with "==" ?
 
 Compiling the Project
 ---------------------

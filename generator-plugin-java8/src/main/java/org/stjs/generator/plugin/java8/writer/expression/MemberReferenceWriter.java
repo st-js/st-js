@@ -14,7 +14,6 @@ import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 

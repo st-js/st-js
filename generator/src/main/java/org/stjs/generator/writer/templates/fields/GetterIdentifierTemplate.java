@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
