@@ -49,6 +49,12 @@ import com.sun.source.tree.VariableTree;
 
 public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 
+	private EnumWriter enumWriter;
+
+	public ClassWriter() {
+		enumWriter = new EnumWriter();
+	}
+
 	/**
 	 * generate the namespace declaration stjs.ns("namespace") if needed
 	 */
@@ -132,21 +138,6 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		}
 		// no constructor found : interfaces, return an empty function
 		return context.js().function(null, Collections.<JS> emptyList(), null);
-	}
-
-	private List<Tree> getAllEnums(ClassTree clazz) {
-		List<Tree> enums = new ArrayList<Tree>();
-		for (Tree member : clazz.getMembers()) {
-			if (member instanceof ClassTree && member.getKind() == Tree.Kind.ENUM) {
-				enums.add(member);
-			}
-
-			// Get enums recursively
-			if (member instanceof ClassTree && member.getKind() == Tree.Kind.CLASS) {
-				enums.addAll(getAllEnums((ClassTree) member));
-			}
-		}
-		return enums;
 	}
 
 	private List<Tree> getAllMembersExceptConstructors(ClassTree clazz) {
@@ -416,70 +407,6 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		return context.js().object(props);
 	}
 
-	@SuppressWarnings("unused")
-	private boolean generateEnumReference(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
-		Element type = TreeUtils.elementFromDeclaration(tree);
-		if (type.getKind() != ElementKind.ENUM) {
-			return false;
-		}
-
-		JavaScriptBuilder<JS> js = context.js();
-
-		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
-
-		boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
-		if (innerClass) {
-			// TODO :: change `leftSide` to `js.name(typeName.substring(pos))` once classes are implemented
-			String leftSide = replaceFullNameWithConstructor(typeName);
-			typeName = typeName.replace('.', '_');
-
-			stmts.add(
-					js.expressionStatement(
-							js.assignment(
-									AssignOperator.ASSIGN,
-									js.name(leftSide),
-									js.name(typeName)
-							)
-					)
-			);
-		}
-
-		return true;
-	}
-
-	@SuppressWarnings("unused")
-	private void generateEnum(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
-		Element type = TreeUtils.elementFromDeclaration(tree);
-		if (type.getKind() != ElementKind.ENUM) {
-			return;
-		}
-
-		JavaScriptBuilder<JS> js = context.js();
-
-		// add all enum entries
-		List<String> enumEntries = new ArrayList<>();
-		for (Element member : ElementUtils.getAllFieldsIn((TypeElement) type)) {
-			if (member.getKind() == ElementKind.ENUM_CONSTANT) {
-				enumEntries.add(member.getSimpleName().toString());
-			}
-		}
-
-		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
-		String originalTypeName = typeName;
-
-		typeName = typeName.replace('.', '_');
-		stmts.add(js.enumDeclaration(typeName, enumEntries));
-
-		boolean outerClass = type.getEnclosingElement().getKind() == ElementKind.PACKAGE;
-		if (outerClass && !typeName.equals(originalTypeName)) {
-			stmts.add(js.assignment(
-					AssignOperator.ASSIGN,
-					js.name(originalTypeName),
-					js.name(typeName)
-			));
-		}
-	}
-
 	/**
 	 * Special generation for classes marked with {@link org.stjs.javascript.annotation.GlobalScope}. The name of the
 	 * class must appear nowhere.
@@ -552,29 +479,17 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		addNamespace(tree, context, stmts);
 
 		Element type = TreeUtils.elementFromDeclaration(tree);
-		boolean outerClass = type.getEnclosingElement().getKind() == ElementKind.PACKAGE;
 
-		// Move member enums to the top level
-		if (outerClass) {
-			List<Tree> enums = getAllEnums(tree);
-			for (Tree member : enums) {
-				generateEnum(visitor, (ClassTree) member, context, stmts);
-			}
-		}
-
-		// Render top level enums correctly
-
-		if (type.getKind() == ElementKind.ENUM && outerClass) {
-			generateEnum(visitor, tree, context, stmts);
-			// special construction for enums
-			return js.statements(stmts);
-		}
+		// Render all enums
+		enumWriter.generate(visitor, tree, context, stmts);
 
 		// Render members as references to the top level enums
-		if (generateEnumReference(visitor, tree, context, stmts)) {
-			// special construction for enums
+		if (type.getKind() == ElementKind.ENUM) {
+			enumWriter.generateReference(visitor, tree, context, stmts);
 			return js.statements(stmts);
 		}
+
+			return js.statements(stmts);
 
 		JS name = getClassName(tree, context);
 		JS superClazz = getSuperClass(tree, context);

@@ -282,7 +282,8 @@ public abstract class AbstractStjsTest {
 				.allowedPackage(clazz.getPackage().getName()) //
 				.sourceEncoding("UTF-8").generateSourceMap(withSourceMap) //
 				.stjsClassLoader(classLoader) //
-				.generationFolder(generationFolder).targetFolder(new File("target", "test-classes"))
+				.generationFolder(generationFolder) //
+				.targetFolder(new File("target", "test-classes")) //
 				.classResolver(new LazyGenerationClassResolver(classLoader, new LazyGenerator() {
 					@Override
 					public ClassWithJavascript generateJavaScript(String className) {

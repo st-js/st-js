@@ -159,7 +159,7 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 		return null;
 	}
 
-	private Class<?> getTreeInteface(Class<?> clazz) {
+	private Class<?> getTreeInterface(Class<?> clazz) {
 		Type[] interfaces = clazz.getGenericInterfaces();
 		for (Type iface : interfaces) {
 			if (iface instanceof Class<?>) {
@@ -188,7 +188,7 @@ public class TreePathScannerContributors<R, P extends TreePathHolder, V extends 
 		if (node == null) {
 			return r;
 		}
-		ContributorHolder<T> holder = (ContributorHolder<T>) contributors.get(getTreeInteface(node.getClass()));
+		ContributorHolder<T> holder = (ContributorHolder<T>) contributors.get(getTreeInterface(node.getClass()));
 		R lastR = holder == null ? null : holder.visit((V) this, node, p);
 		if (continueScanning) {
 			lastR = node.accept(this, p);

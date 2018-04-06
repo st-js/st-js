@@ -19,7 +19,7 @@ public class ClassImplementJavascriptFunctionCheck implements CheckContributor<C
 
 	private void checkInteface(TreeWrapper<Tree, Void> iface) {
 		if (iface.isJavaScriptFunction()) {
-			iface.addError("You cannot implement intefaces annotated with @JavascriptFunction. "
+			iface.addError("You cannot implement interfaces annotated with @JavascriptFunction. "
 					+ "You can only have inline object creation with this type of interfaces");
 		}
 	}
@@ -38,7 +38,7 @@ public class ClassImplementJavascriptFunctionCheck implements CheckContributor<C
 		if (tree.getExtendsClause() != null) {
 			TreeWrapper<Tree, Void> superType = tw.child(tree.getExtendsClause());
 			if (superType.isJavaScriptFunction()) {
-				superType.addError("You cannot extend intefaces annotated with @JavascriptFunction. "
+				superType.addError("You cannot extend interfaces annotated with @JavascriptFunction. "
 						+ "You can only have inline object creation with this type of interfaces");
 			}
 		}
