@@ -2,10 +2,16 @@ package org.stjs.generator.exec.inheritance;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.stjs.generator.MultipleFileGenerationException;
 import org.stjs.generator.utils.AbstractStjsTest;
 
 public class InheritanceTest extends AbstractStjsTest {
+
+	@Rule
+	public ExpectedException expectedEx = ExpectedException.none();
 
 	@Test
 	public void testReenteringSuper() {
@@ -33,11 +39,17 @@ public class InheritanceTest extends AbstractStjsTest {
 
 	@Test
 	public void testInstanceofInterface() {
+		expectedEx.expect(MultipleFileGenerationException.class);
+		expectedEx.expectMessage("You cannot call instanceof on an interface");
+
 		assertEquals(1.0, executeAndReturnNumber(Inheritance4.class), 0);
 	}
 
 	@Test
 	public void testInstanceofSuperInterface() {
+		expectedEx.expect(MultipleFileGenerationException.class);
+		expectedEx.expectMessage("You cannot call instanceof on an interface");
+
 		assertEquals(1.0, executeAndReturnNumber(Inheritance5.class), 0);
 	}
 }

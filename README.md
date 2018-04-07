@@ -23,13 +23,13 @@ It's work in progress but it supports.
 ### New Checks
 
 - You cannot call methods on Enums (like `.ordinal()` / `valueOf()` / `.name()` ...)
+- You cannot do `instanceof` on interfaces
 
 ### Roadmap
 
 - Convert interfaces
 - Convert classes
 - Change `isInstanceOf` to do a JavaScript `instanceof`
-- Add a check to forbid `instanceof` on interfaces
 
 ### Open for discussion
 - Should we automatically replace ".equals()" with "==" ?
