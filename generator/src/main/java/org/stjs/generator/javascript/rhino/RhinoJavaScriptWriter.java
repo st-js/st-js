@@ -501,11 +501,11 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	public void visitArrowFunctionNode(FunctionNode f, Boolean param) {
 		printComments(f);
 		if (f.getParams() == null) {
-			print("() =>");
+			print("() => ");
 		} else {
 			print("(");
 			printList(f.getParams(), param);
-			print(") =>");
+			print(") => ");
 		}
 		visitorSupport.accept(f.getBody(), this, param);
 	}

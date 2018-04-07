@@ -52,17 +52,17 @@ public class LambdaExpressionWriter<JS> implements WriterContributor<LambdaExpre
 		JavaScriptBuilder<JS> js = context.js();
 		JS body = visitor.scan(tree.getBody(), context);
 
-		if (tree.getBodyKind() == BodyKind.EXPRESSION) {
-			body = js.returnStatement(body);
-		}
-
-		if (!(tree.getBody() instanceof BlockTree)) {
-			body = js.block(Collections.singleton(body));
-		}
-
 		// Functions that have a custom "THIS" should not be arrow functions
 		int specialThisParamPos = MethodWriter.getTHISParamPos(tree.getParameters());
 		if (specialThisParamPos >= 0) {
+			if (tree.getBodyKind() == BodyKind.EXPRESSION) {
+				body = js.returnStatement(body);
+			}
+
+			if (!(tree.getBody() instanceof BlockTree)) {
+				body = js.block(Collections.singleton(body));
+			}
+
 			JS lambdaFunc = js.function(null, params, body);
 			JS target = js.keyword(Keyword.THIS);
 			JS stjsBind = js.property(context.js().name(GeneratorConstants.STJS), "bind");
