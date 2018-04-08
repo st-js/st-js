@@ -55,6 +55,9 @@ import com.google.debugging.sourcemap.SourceMapFormat;
 import com.google.debugging.sourcemap.SourceMapGenerator;
 import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
 import org.stjs.generator.javascript.rhino.types.Enum;
+import org.stjs.generator.javascript.rhino.types.FieldNode;
+import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
+import org.stjs.generator.javascript.rhino.types.MethodNode;
 import org.stjs.generator.javascript.rhino.types.Vararg;
 
 /**
@@ -475,7 +478,6 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	/** {@inheritDoc} */
 	@Override
 	public void visitFunctionNode(FunctionNode f, Boolean param) {
-
 		if (f.getFunctionType() == FunctionNode.ARROW_FUNCTION) {
 			visitArrowFunctionNode(f, param);
 			return;
@@ -495,6 +497,42 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 			print(") ");
 		}
 		visitorSupport.accept(f.getBody(), this, param);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public void visitMethodNode(MethodNode f, Boolean param) {
+		printComments(f);
+		if (f.getName() != null) {
+			print(f.getName());
+		}
+
+		boolean hasBody = f.getBody() != null;
+
+		if (f.getParams() == null) {
+			println("()" + (hasBody ? "" : ";"));
+		} else {
+			print("(");
+			printList(f.getParams(), param);
+			println(")" + (hasBody ? "" : ";"));
+		}
+
+		if (hasBody) {
+			visitorSupport.accept(f.getBody(), this, param);
+		}
+	}
+
+	public void visitFieldNode(FieldNode f, Boolean param) {
+		printComments(f);
+
+		if (f.getValue() == null) {
+			println(f.getName() + ";");
+			return;
+		}
+
+		print(f.getName());
+		print(" = ");
+		visitorSupport.accept(f.getValue(), this, param);
 	}
 
 	/** {@inheritDoc} */
@@ -796,6 +834,28 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	@Override
 	public void visitEnum(Enum s, Boolean param) {
 		println(s.toSource(level));
+	}
+
+	@Override
+	public void visitInterfaceDeclaration(InterfaceDeclaration s, Boolean param) {
+
+		print("interface " +  s.getName());
+		if (s.getExtends() != null && s.getExtends().size() > 0) {
+			print(" extends ");
+			printList(s.getExtends(), param);
+		}
+
+		println(" {");
+
+		if (s.getMembers() != null) {
+			indent();
+			for (AstNode stmt : s.getMembers()) {
+				visitorSupport.accept(stmt, this, param);
+			}
+			unindent();
+		}
+
+		println("}");
 	}
 
 	/**

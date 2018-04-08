@@ -40,6 +40,9 @@ import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.mozilla.javascript.ast.WhileLoop;
 import org.stjs.generator.javascript.rhino.types.Enum;
+import org.stjs.generator.javascript.rhino.types.FieldNode;
+import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
+import org.stjs.generator.javascript.rhino.types.MethodNode;
 import org.stjs.generator.javascript.rhino.types.Vararg;
 
 /**
@@ -153,6 +156,14 @@ public interface AstVisitor<T> {
 	 * @param param a T object.
 	 */
 	void visitFunctionNode(FunctionNode f, T param);
+
+	/**
+	 * <p>visitInterfaceFunctionNode.</p>
+	 *
+	 * @param f a {@link org.stjs.generator.javascript.rhino.types.MethodNode} object.
+	 * @param param a T object.
+	 */
+	void visitMethodNode(MethodNode f, T param);
 
 	/**
 	 * <p>visitObjectProperty.</p>
@@ -390,10 +401,26 @@ public interface AstVisitor<T> {
 	void visitEnum(Enum s, T param);
 
 	/**
+	 * <p>visitInterfaceDeclaration.</p>
+	 *
+	 * @param s a {@link org.stjs.generator.javascript.rhino.types.InterfaceDeclaration} object.
+	 * @param param a T object.
+	 */
+	void visitInterfaceDeclaration(InterfaceDeclaration s, T param);
+
+	/**
 	 * <p>visitVararg.</p>
 	 *
 	 * @param s a {@link org.stjs.generator.javascript.rhino.types.Vararg} object.
 	 * @param param a T object.
 	 */
 	void visitVararg(Vararg s, T param);
+
+	/**
+	 * <p>visitFieldNode.</p>
+	 *
+	 * @param s a {@link org.stjs.generator.javascript.rhino.types.FieldNode} object.
+	 * @param param a T object.
+	 */
+	void visitFieldNode(FieldNode s, T param);
 }

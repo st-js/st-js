@@ -95,11 +95,11 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testInterfaceMethods() {
-		// the class only contains abstract methods, therefore nothing must be generated
-		assertCodeContains(Methods15b.class, "stjs.extend(Methods15b, null, [], function(constructor, prototype){" //
-				+ "prototype.doSomething=function(){};" //
-				+ "prototype.doSomethingElse=function(){};" //
-				+ "}, {}, {});");
+		// the class only contains interface methods, therefore nothing must be generated
+		assertCodeContains(Methods15b.class, "interface Methods15b {" //
+				+ "doSomething();" //
+				+ "doSomethingElse();" //
+				+ "}");
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)

@@ -19,6 +19,7 @@ It's work in progress but it supports.
 - field getters/setters instead of `stjs.setField`/`stjs.getField`
 - enum instead of `stjs.enumeration`
 - varargs instead of `stjs.varargs`
+- Convert interfaces
 
 ### New Checks
 
@@ -28,9 +29,10 @@ It's work in progress but it supports.
 
 ### Roadmap
 
-- Convert interfaces
 - Convert classes
 - Change `isInstanceOf` to do a JavaScript `instanceof`
+- Check: Can't do instanceof on built-in types
+- Check: Can't put classes and enums inside interfaces
 
 ### Open for discussion
 - Should we automatically replace ".equals()" with "==" ?

@@ -45,6 +45,9 @@ import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.mozilla.javascript.ast.WhileLoop;
 import org.stjs.generator.javascript.rhino.types.Enum;
+import org.stjs.generator.javascript.rhino.types.FieldNode;
+import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
+import org.stjs.generator.javascript.rhino.types.MethodNode;
 import org.stjs.generator.javascript.rhino.types.Vararg;
 
 /**
@@ -324,6 +327,24 @@ public class RhinoNodeVisitorSupport {
 			@Override
 			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
 				visitor.visitEnum((Enum) node, param);
+			}
+		});
+		addCaller(InterfaceDeclaration.class, new Caller() {
+			@Override
+			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
+				visitor.visitInterfaceDeclaration((InterfaceDeclaration) node, param);
+			}
+		});
+		addCaller(MethodNode.class, new Caller() {
+			@Override
+			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
+				visitor.visitMethodNode((MethodNode) node, param);
+			}
+		});
+		addCaller(FieldNode.class, new Caller() {
+			@Override
+			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
+				visitor.visitFieldNode((FieldNode) node, param);
 			}
 		});
 	}

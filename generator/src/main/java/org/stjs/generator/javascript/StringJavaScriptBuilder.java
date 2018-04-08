@@ -109,6 +109,20 @@ public class StringJavaScriptBuilder implements JavaScriptBuilder<String> {
 
 	/** {@inheritDoc} */
 	@Override
+	public String method(String name, Iterable<String> params, String body) {
+		// Auto-generated method stub
+		return null;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public String field(@Nonnull String name, String value) {
+		// Auto-generated method stub
+		return null;
+	}
+
+	/** {@inheritDoc} */
+	@Override
 	public String arrowFunction(Iterable<String> params, String body) {
 		// Auto-generated method stub
 		return null;
@@ -303,8 +317,15 @@ public class StringJavaScriptBuilder implements JavaScriptBuilder<String> {
 		return null;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String enumDeclaration(@Nonnull String name, @Nonnull Iterable<String> values) {
+		return null;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public String interfaceDeclaration(@Nonnull String name, Iterable<String> members, Iterable<String> extension) {
 		return null;
 	}
 

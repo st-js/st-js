@@ -60,6 +60,9 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.debugging.sourcemap.SourceMapGenerator;
 import org.stjs.generator.javascript.rhino.types.Enum;
+import org.stjs.generator.javascript.rhino.types.FieldNode;
+import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
+import org.stjs.generator.javascript.rhino.types.MethodNode;
 import org.stjs.generator.javascript.rhino.types.Vararg;
 
 import javax.annotation.Nonnull;
@@ -290,6 +293,25 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 			func.setBody(addStatement(null, body));
 		}
 		return func;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public AstNode method(String name, Iterable<AstNode> params, AstNode originalBody) {
+		AstNode body = originalBody;
+		if (body != null && !(body instanceof Block)) {
+			body = addStatement(null, body);
+		}
+
+		// Auto-generated method stub
+		return new MethodNode(name, list(params), body);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public AstNode field(@Nonnull String name, AstNode value) {
+		// Auto-generated method stub
+		return new FieldNode(name, value);
 	}
 
 	/** {@inheritDoc} */
@@ -582,6 +604,11 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	@Override
 	public AstNode enumDeclaration(@Nonnull String name, @Nonnull Iterable<String> values) {
 		return new Enum(name, values);
+	}
+
+	@Override
+	public AstNode interfaceDeclaration(@Nonnull String name, Iterable<AstNode> members, Iterable<AstNode> extension) {
+		return new InterfaceDeclaration(name, members, list(extension));
 	}
 
 	/** {@inheritDoc} */

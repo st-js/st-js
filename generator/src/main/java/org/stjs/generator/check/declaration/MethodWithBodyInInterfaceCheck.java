@@ -1,16 +1,11 @@
 package org.stjs.generator.check.declaration;
 
 import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.Tree;
-import com.sun.source.tree.VariableTree;
 import com.sun.tools.javac.code.Type;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
-import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeWrapper;
-import org.stjs.generator.writer.MemberWriters;
 
 import javax.lang.model.type.TypeMirror;
 

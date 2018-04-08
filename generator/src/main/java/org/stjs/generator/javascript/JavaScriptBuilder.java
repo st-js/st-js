@@ -130,6 +130,25 @@ public interface JavaScriptBuilder<T> {
 	T arrowFunction(@Nonnull Iterable<T> params, @Nullable T body);
 
 	/**
+	 * <p>method.</p>
+	 *
+	 * @param name a {@link java.lang.String} object.
+	 * @param params a {@link java.lang.Iterable} object.
+	 * @param body a T object.
+	 * @return a T object.
+	 */
+	T method(@Nullable String name, @Nonnull Iterable<T> params, T body);
+
+	/**
+	 * <p>field.</p>
+	 *
+	 * @param name a {@link java.lang.String} object.
+	 * @param value a T object.
+	 * @return a T object.
+	 */
+	T field(@Nonnull String name, T value);
+
+	/**
 	 * <p>functionCall.</p>
 	 *
 	 * @param target a T object.
@@ -434,6 +453,14 @@ public interface JavaScriptBuilder<T> {
 	 * @return a T object.
 	 */
 	T enumDeclaration(@Nonnull String name, @Nonnull Iterable<String> values);
+
+	/**
+	 * Interface
+	 * @param name The interface's name
+	 * @param members The interface's members
+	 * @return a T object.
+	 */
+	T interfaceDeclaration(@Nonnull String name, Iterable<T> members, Iterable<T> extension);
 
 	/**
 	 * <p>writeJavaScript.</p>

@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
 
+import com.sun.tools.javac.code.Type;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.javac.TreeWrapper;
@@ -82,6 +83,13 @@ public class FieldWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 			// var field = init; //for global types
 			return context.js().variableDeclaration(true, fieldName, initializer, JavaNodes.isFinal(tree));
 		}
+
+		// Generate interface methods differently
+		TypeMirror type = context.getTrees().getTypeMirror(tw.getEnclosingType().getPath());
+		if (type instanceof Type.ClassType && ((Type.ClassType) type).isInterface()) {
+			return context.js().field(fieldName, null);
+		}
+
 		JS member = context.js().property(getMemberTarget(tw), fieldName);
 		return context.js().expressionStatement(context.js().assignment(AssignOperator.ASSIGN, member, initializer));
 	}

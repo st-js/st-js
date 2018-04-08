@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.type.TypeMirror;
 
+import com.sun.tools.javac.code.Type;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.InternalUtils;
@@ -113,6 +115,13 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 				// var method=function() ...; //for global types
 				return context.js().variableDeclaration(true, methodName, decl, true);
 			}
+
+			// Generate interface methods differently
+			TypeMirror type = context.getTrees().getTypeMirror(tw.getEnclosingType().getPath());
+			if (type instanceof Type.ClassType && ((Type.ClassType) type).isInterface()) {
+				return context.js().method(methodName, params, null);
+			}
+
 			JS member = context.js().property(getMemberTarget(tw), methodName);
 			return context.js().expressionStatement(context.js().assignment(AssignOperator.ASSIGN, member, decl));
 		}

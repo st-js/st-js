@@ -49,9 +49,11 @@ import com.sun.source.tree.VariableTree;
 
 public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 
+	private InterfaceWriter interfaceWriter;
 	private EnumWriter enumWriter;
 
 	public ClassWriter() {
+		interfaceWriter = new InterfaceWriter();
 		enumWriter = new EnumWriter();
 	}
 
@@ -483,13 +485,21 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		// Render all enums
 		enumWriter.generate(visitor, tree, context, stmts);
 
+		// Render all interfaces
+		interfaceWriter.generate(visitor, tree, context, stmts);
+
 		// Render members as references to the top level enums
 		if (type.getKind() == ElementKind.ENUM) {
 			enumWriter.generateReference(visitor, tree, context, stmts);
 			return js.statements(stmts);
 		}
 
+		// Render interfaces as references
+		if (type.getKind() == ElementKind.INTERFACE) {
+			// TODO :: do we need interface references ?
+			//interfaceWriter.generateReference(visitor, tree, context, stmts);
 			return js.statements(stmts);
+		}
 
 		JS name = getClassName(tree, context);
 		JS superClazz = getSuperClass(tree, context);

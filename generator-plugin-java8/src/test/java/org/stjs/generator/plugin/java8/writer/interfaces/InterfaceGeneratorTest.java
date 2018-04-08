@@ -22,6 +22,8 @@ public class InterfaceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testDefaultMethod() {
+		expectedEx.expect(MultipleFileGenerationException.class);
+		expectedEx.expectMessage("Methods in interfaces should not have a body.");
 		assertEquals(1, executeAndReturnNumber(Class2.class), 0);
 	}
 }

@@ -94,26 +94,28 @@ public class EnumWriter<JS> {
 
 	public void generateReference(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
 		Element type = TreeUtils.elementFromDeclaration(tree);
+		boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
 
-		JavaScriptBuilder<JS> js = context.js();
+		if (!innerClass) {
+			return;
+		}
 
 		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
 
-		boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
-		if (innerClass) {
-			// TODO :: change `leftSide` to `js.name(typeName.substring(pos))` once classes are implemented
-			String leftSide = replaceFullNameWithConstructor(typeName);
-			typeName = typeName.replace('.', '_');
+		// TODO :: change `leftSide` to `js.name(typeName.substring(pos))` once classes are implemented
+		String leftSide = replaceFullNameWithConstructor(typeName);
+		typeName = typeName.replace('.', '_');
 
-			stmts.add(
-					js.expressionStatement(
-							js.assignment(
-									AssignOperator.ASSIGN,
-									js.name(leftSide),
-									js.name(typeName)
-							)
-					)
-			);
-		}
+		JavaScriptBuilder<JS> js = context.js();
+
+		stmts.add(
+			js.expressionStatement(
+				js.assignment(
+					AssignOperator.ASSIGN,
+					js.name(leftSide),
+					js.name(typeName)
+				)
+			)
+		);
 	}
 }

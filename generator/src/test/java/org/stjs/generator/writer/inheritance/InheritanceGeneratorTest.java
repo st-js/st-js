@@ -23,7 +23,7 @@ public class InheritanceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testExtendsMore() {
-		assertCodeContains(Inheritance4.class, "stjs.extend(Inheritance4, null, [MyInterface, MyInterface2],");
+		assertCodeContains(Inheritance4.class, "interface Inheritance4 extends MyInterface, MyInterface2 {");
 	}
 
 	@Test
@@ -50,5 +50,15 @@ public class InheritanceGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testExtendsInnerClass() {
 		assertCodeContains(Inheritance8.class, "stjs.extend(Inheritance8, MyClass1.MyInnerClass, [],");
+	}
+
+	@Test
+	public void testInterface() {
+		assertCodeContains(MyInterface.class, "interface MyInterface {}");
+	}
+
+	@Test
+	public void testInterfaceMembers() {
+		assertCodeContains(MyInterface5.class, "interface MyInterface5 { someMethod(); someMethodWithParams(number, someArray); test; }");
 	}
 }
