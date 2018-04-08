@@ -24,6 +24,7 @@ It's work in progress but it supports.
 
 - You cannot call methods on Enums (like `.ordinal()` / `valueOf()` / `.name()` ...)
 - You cannot do `instanceof` on interfaces
+- You cannot add a body to an interface method
 
 ### Roadmap
 

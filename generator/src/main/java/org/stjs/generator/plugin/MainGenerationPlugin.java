@@ -14,6 +14,7 @@ import org.stjs.generator.check.declaration.MethodDeclarationTemplateCheck;
 import org.stjs.generator.check.declaration.MethodOverloadCheck;
 import org.stjs.generator.check.declaration.MethodSynchronizedCheck;
 import org.stjs.generator.check.declaration.MethodVarArgParamCheck;
+import org.stjs.generator.check.declaration.MethodWithBodyInInterfaceCheck;
 import org.stjs.generator.check.declaration.MethodWrongNameCheck;
 import org.stjs.generator.check.expression.IdentifierAccessOuterScopeCheck;
 import org.stjs.generator.check.expression.IdentifierAccessServerSideCheck;
@@ -137,6 +138,7 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(new VariableFinalInLoopCheck());
 		visitor.contribute(new VariableWrongNameCheck());
 		visitor.contribute(new MethodVarArgParamCheck());
+		visitor.contribute(new MethodWithBodyInInterfaceCheck());
 		visitor.contribute(new FieldInitializerCheck());
 		visitor.contribute(new ClassDuplicateMemberNameCheck());
 		visitor.contribute(new NewClassInlineFunctionCheck());
