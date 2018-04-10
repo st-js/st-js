@@ -391,24 +391,6 @@ stjs.getParameterAnnotation = function(clz, methodName, idx, annType) {
 	return ann ? ann[annType]: null;
 };
 
-/**
- * checks if the child is an instanceof parent. it checks recursively if "parent" is the child itself or it's found somewhere in the $inherit array
- */
-stjs.isInstanceOf=function(child, parent){
-	if (child == null)
-		return false;
-	if (child === parent)
-		return true;
-	if (!child.$inherit)
-		return false;
-	for(var i = 0; i < child.$inherit.length; ++i){
-		if (stjs.isInstanceOf(child.$inherit[i], parent)) {
-			return true;
-		}
-	}
-	return false;
-}
-
 stjs.enumEntry=function(idx, name){
 	this._name = name;
 	this._ordinal = idx;

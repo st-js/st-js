@@ -132,7 +132,7 @@ public class TypedArrayTest extends AbstractStjsTest {
 	@Test
 	public void testInstanceOf() {
 		String generated = generate(ArrayInstanceOf.class);
-		assertCodeContains(generated, "isInstanceOf(o.constructor, Int8Array)");
+		assertCodeContains(generated, "o instanceof Int8Array");
 		assertEquals(44., executeAndReturnNumber(ArrayInstanceOf.class), 0.01);
 	}
 }

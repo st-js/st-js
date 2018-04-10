@@ -288,7 +288,7 @@ public abstract class LongPollingBrowser extends AbstractBrowser {
 		// an exception was caught while executing the test method
 		resp.append("      if(!expectedException){\n");
 		resp.append("        stjsResult = ex;\n");
-		resp.append("      } else if (!stjs.isInstanceOf(ex.constructor,expectedException)){\n");
+		resp.append("      } else if (!(ex instanceof expectedException)){\n");
 		resp.append("        stjsResult = ex;\n");
 		resp.append("      }\n");
 		resp.append("    }finally{\n");

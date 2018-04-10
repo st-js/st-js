@@ -1,13 +1,10 @@
 package org.stjs.generator.writer.expression;
 
-import java.util.Arrays;
-
 import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.GeneratorConstants;
+import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.name.DependencyType;
-import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 
@@ -19,14 +16,9 @@ public class InstanceofWriter<JS> implements WriterContributor<InstanceOfTree, J
 	@SuppressWarnings("unchecked")
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, InstanceOfTree tree, GenerationContext<JS> context) {
-
-		// build stjs.isInstanceOf(expr.constructor, type);
-		// TODO do I need a check or parenthesis around !?
-
 		TypeMirror type = context.getTrees().getTypeMirror(new TreePath(context.getCurrentPath(), tree.getType()));
-		JS getConstructor = context.js().property(visitor.scan(tree.getExpression(), context), JavascriptKeywords.CONSTRUCTOR);
-		JS targetInst = context.js().property(context.js().name(GeneratorConstants.STJS), "isInstanceOf");
+		JS leftSide = visitor.scan(tree.getExpression(), context);
 		JS typeName = context.js().name(context.getNames().getTypeName(context, type, DependencyType.STATIC));
-		return context.js().functionCall(targetInst, Arrays.asList(getConstructor, typeName));
+		return context.js().assignment(AssignOperator.INSTANCE_OF, leftSide, typeName);
 	}
 }

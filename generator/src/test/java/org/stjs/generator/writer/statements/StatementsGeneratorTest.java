@@ -68,7 +68,7 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testInstanceof() {
-		assertCodeContains(Statements10.class, "stjs.isInstanceOf(arg.constructor, Statements10)");
+		assertCodeContains(Statements10.class, "arg instanceof Statements10");
 	}
 
 	@Test

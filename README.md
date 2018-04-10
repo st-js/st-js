@@ -19,8 +19,10 @@ It's work in progress but it supports.
 - field getters/setters instead of `stjs.setField`/`stjs.getField`
 - enum instead of `stjs.enumeration`
 - varargs instead of `stjs.varargs`
+- `instanceof` instead of `stjs.isInstanceOf`
 - Convert interfaces
 - Ignore `@Namespace` annotations (except for bridges)
+
 
 ### New Checks
 
@@ -31,7 +33,6 @@ It's work in progress but it supports.
 ### Roadmap
 
 - Convert classes
-- Change `isInstanceOf` to do a JavaScript `instanceof`
 - Check: Can't do instanceof on built-in types
 - Check: Can't put classes and enums inside interfaces
 - Check: Forbid Java specific methods on JavaScript (methods added by st-js, see below)
