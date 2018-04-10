@@ -442,7 +442,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		startPosition(f);
 		print("for (");
 		visitorSupport.accept(f.getIterator(), this, param);
-		print(" in ");
+		print(f.isForOf() ? " of " : " in ");
 		visitorSupport.accept(f.getIteratedObject(), this, param);
 		print(") ");
 		printStatementAsBlock(f.getBody(), param);

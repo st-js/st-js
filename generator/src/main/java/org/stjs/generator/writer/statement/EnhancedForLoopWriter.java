@@ -6,10 +6,7 @@ import javax.lang.model.type.TypeMirror;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TypesUtils;
-import org.stjs.generator.javascript.BinaryOperator;
 import org.stjs.generator.javascript.JavaScriptBuilder;
-import org.stjs.generator.javascript.NameValue;
-import org.stjs.generator.javascript.UnaryOperator;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.javascript.Array;
@@ -17,7 +14,6 @@ import org.stjs.javascript.Map;
 
 import com.sun.source.tree.EnhancedForLoopTree;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 /**
@@ -37,31 +33,6 @@ import java.util.Collections;
  * @author acraciun
  */
 public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForLoopTree, JS> {
-
-	private JS generateArrayHasOwnProperty(EnhancedForLoopTree tree, GenerationContext<JS> context, JS iterated, JS body) {
-		if (!context.getConfiguration().isGenerateArrayHasOwnProperty()) {
-			return body;
-		}
-
-		TypeMirror iteratedType = InternalUtils.typeOf(tree.getExpression());
-		if (!TypesUtils.isDeclaredOfName(iteratedType, Array.class.getName())) {
-			// only Arrays need hasOwnProperty. Maps are just plain JS objects and don't have any other enumerable properties.
-			return body;
-		}
-		JavaScriptBuilder<JS> js = context.js();
-
-		// !(iterated).hasOwnProperty(tree.getVariable().getName())
-		JS not =
-				js.unary(
-						UnaryOperator.LOGICAL_COMPLEMENT,
-						js.functionCall(
-								js.property(js.paren(iterated), "hasOwnProperty"),
-								Collections.singleton(js.name(tree.getVariable().getName()))));
-
-		JS ifs = js.ifStatement(not, js.continueStatement(null), null);
-		return js.addStatementBeginning(body, ifs);
-	}
-
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, EnhancedForLoopTree tree, GenerationContext<JS> context) {
 		// Java Statement
@@ -95,8 +66,7 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 	}
 
 	private JS generateForEachInObject(EnhancedForLoopTree tree, GenerationContext<JS> context, JS iterator, JS iterated, JS body) {
-		JS newBody = generateArrayHasOwnProperty(tree, context, iterated, body);
-		return context.withPosition(tree, context.js().forInLoop(iterator, iterated, newBody));
+		return context.withPosition(tree, context.js().forOfLoop(iterator, iterated, body));
 	}
 
 	private JS generateForEachWithIterable(EnhancedForLoopTree tree, GenerationContext<JS> context, JS iterated, JS body) {
@@ -144,24 +114,13 @@ public class EnhancedForLoopWriter<JS> implements WriterContributor<EnhancedForL
 		//
 		// Translated Javascript:
 		// ---------------------------------------------
-		//   for (var index$str = 0, arr$str = myStringArray; index$str < arr$str.length; index$str++) {
-		//     var str = arr$str[index$str];
+		//   for (let str of myStringArray) {
 		//	   // do whatever you want with 'str'
 		//   }
 		String initialForLoopVariableName = tree.getVariable().getName().toString();
 
-		String newIndexName = "index$" + initialForLoopVariableName;
-		String newArrayName = "arr$" + initialForLoopVariableName;
-		JS tmpArray = js.name(newArrayName);
-		JS index = js.name(newIndexName);
-		JS init = js.variableDeclaration(false, Arrays.asList(NameValue.of(newIndexName, js.number(0)), NameValue.of(newArrayName, iterated)), false);
-		JS condition = js.binary(BinaryOperator.LESS_THAN, Arrays.asList(index, js.property(tmpArray, "length")));
-		JS update = js.unary(UnaryOperator.POSTFIX_INCREMENT, index);
-
-		JS iteratorNextStatement = js.variableDeclaration(true, initialForLoopVariableName, js.elementGet(tmpArray, index), false);
-		JS newBody = js.addStatementBeginning(body, iteratorNextStatement);
-
-		return context.withPosition(tree, context.js().forLoop(init, condition, update, newBody));
+		JS iterator = js.variableDeclaration(false, initialForLoopVariableName, null, false);
+		return context.withPosition(tree, context.js().forOfLoop(iterator, iterated, body));
 	}
 
 }

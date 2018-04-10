@@ -73,7 +73,7 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testForEachArrayOneLine() {
-		assertCodeContains(Statements11.class, "if (!(a).hasOwnProperty(i)) continue;parseInt");
+		assertCodeContains(Statements11.class, "for (let i of a) { parseInt(a[i]); }");
 	}
 
 	@Test
@@ -83,19 +83,19 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testForEachArrayBlock() {
-		assertCodeContains(Statements12.class, "if (!(a).hasOwnProperty(i)) continue;let x");
+		assertCodeContains(Statements12.class, "for (let i of a) { let x");
 	}
 
 	@Test
 	public void testForEachArrayWithCast() {
-		assertCodeContains(Statements12b.class, "if (!(a).hasOwnProperty(i)) continue;");
+		assertCodeContains(Statements12b.class, "for (let i of a) {}");
 	}
 
 	@Test
 	public void testForEachMapBlock() {
 		String code = generate(Statements13.class);
 		assertCodeDoesNotContain(code, "hasOwnProperty");
-		assertCodeContains(code, "for (let i in a) {");
+		assertCodeContains(code, "for (let i of a) {");
 	}
 
 	@Test

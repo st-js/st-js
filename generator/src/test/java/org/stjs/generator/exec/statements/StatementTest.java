@@ -17,4 +17,8 @@ public class StatementTest extends AbstractStjsTest {
 		assertEquals(0.0, executeAndReturnNumber(Statements2.class), 0);
 	}
 
+	@Test
+	public void testCountElements() {
+		assertEquals(2.0, executeAndReturnNumber(Statements3.class), 0);
+	}
 }

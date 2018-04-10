@@ -14,13 +14,14 @@ It's work in progress but it supports.
 
 ### Syntax changes
 
+- Interfaces are converted to TypeScript interfaces
 - `let`/`const` instead of `var`
-- arrow functions where it can, keeping `stjs.bind()` where it can't
+- Use arrow functions where it can, keeping `stjs.bind()` where it can't do otherwise
 - field getters/setters instead of `stjs.setField`/`stjs.getField`
-- enum instead of `stjs.enumeration`
+- TypeScript enum instead of `stjs.enumeration`
 - varargs instead of `stjs.varargs`
 - `instanceof` instead of `stjs.isInstanceOf`
-- Convert interfaces
+- Java `for (String element : array)` loops are converted to `for ... of ` loops
 - Ignore `@Namespace` annotations (except for bridges)
 
 
@@ -36,7 +37,7 @@ It's work in progress but it supports.
 - Check: Can't do instanceof on built-in types
 - Check: Can't put classes and enums inside interfaces
 - Check: Forbid Java specific methods on JavaScript (methods added by st-js, see below)
-- Convert for loops into `for of` loops
+
 
 ### Open for discussion
 - Should we automatically replace ".equals()" with "==" or "===" ?

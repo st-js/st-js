@@ -378,6 +378,17 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 
 	/** {@inheritDoc} */
 	@Override
+	public AstNode forOfLoop(AstNode iterator, AstNode iteratedObject, AstNode body) {
+		ForInLoop loop = new ForInLoop();
+		loop.setIsForOf(true);
+		loop.setIterator(iterator);
+		loop.setIteratedObject(iteratedObject);
+		loop.setBody(body);
+		return loop;
+	}
+
+	/** {@inheritDoc} */
+	@Override
 	public AstNode forLoop(AstNode init, AstNode condition, AstNode update, AstNode body) {
 		ForLoop loop = new ForLoop();
 		loop.setInitializer(init);

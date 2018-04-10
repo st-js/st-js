@@ -305,7 +305,17 @@ public interface JavaScriptBuilder<T> {
 	T forInLoop(@Nullable T iterator, @Nullable T iterated, @Nullable T body);
 
 	/**
-	 * <p>forLoop.</p>
+	 * <p>for of Loop.</p>
+	 *
+	 * @param iterator a T object.
+	 * @param iterated a T object.
+	 * @param body a T object.
+	 * @return a T object.
+	 */
+	T forOfLoop(@Nullable T iterator, @Nullable T iterated, @Nullable T body);
+
+	/**
+	 * <p>for in Loop.</p>
 	 *
 	 * @param init a T object.
 	 * @param condition a T object.
