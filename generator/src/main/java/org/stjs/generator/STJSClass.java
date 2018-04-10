@@ -62,8 +62,6 @@ public class STJSClass implements ClassWithJavascript {
 	private Map<String, DependencyType> dependencies = Collections.emptyMap();
 	private List<ClassWithJavascript> directDependencies;
 	private Map<ClassWithJavascript, DependencyType> directDependenciesMap;
-	// null means namespace is unknown, empty string means no namespace
-	private String javascriptNamespace;
 
 	private URI generatedJavascriptFile;
 
@@ -86,7 +84,6 @@ public class STJSClass implements ClassWithJavascript {
 		this.javaClass = javaClass;
 		this.properties = new Properties();
 		this.classResolver = classResolver;
-		this.javascriptNamespace = null;
 	}
 
 	/**
@@ -111,13 +108,6 @@ public class STJSClass implements ClassWithJavascript {
 
 		// js file
 		generatedJavascriptFile = readGeneratedJavascriptFileProperty();
-
-		javascriptNamespace = readJavascriptNamespaceProperty();
-		if (javascriptNamespace == null) {
-			// Old versions of ST-JS did not set the jsNamespace property, so we must look into the compiled
-			// class to figure out the namespace
-			javascriptNamespace = readJavascriptNamespaceAnnotation();
-		}
 	}
 
 	private Properties loadProperties(ClassLoader classLoader) {
@@ -183,24 +173,6 @@ public class STJSClass implements ClassWithJavascript {
 		return null;
 	}
 
-	private String readJavascriptNamespaceProperty() {
-		return properties.getProperty(JS_NAMESPACE);
-	}
-
-	private String readJavascriptNamespaceAnnotation() {
-		// If the jsNamespace property is not defined, it means that class was
-		// generated with a version of ST-JS earlier than 3.1.2 that did not write that property down. Fortunately for us
-		// it also means that any namespace can be read by inspecting the @Namespace annotation directly on that
-		// class.
-		String ns = NamespaceUtil.resolveNamespaceSimple(javaClass);
-		if (ns == null) {
-			// With earlier versions of ST-JS (pre 3.1.2) if no namespace is found on the class, then there is
-			// no namespace at all
-			ns = "";
-		}
-		return ns;
-	}
-
 	/**
 	 * <p>getStjsPropertiesFile.</p>
 	 *
@@ -241,16 +213,6 @@ public class STJSClass implements ClassWithJavascript {
 				throw new JavascriptClassGenerationException(getJavaClassName(), e);
 			}
 		}
-	}
-
-	/**
-	 * <p>Setter for the field <code>javascriptNamespace</code>.</p>
-	 *
-	 * @param jsNamespace a {@link java.lang.String} object.
-	 */
-	public void setJavascriptNamespace(String jsNamespace) {
-		this.javascriptNamespace = jsNamespace;
-		properties.put(JS_NAMESPACE, jsNamespace);
 	}
 
 	/**
@@ -301,18 +263,14 @@ public class STJSClass implements ClassWithJavascript {
 	/** {@inheritDoc} */
 	@Override
 	public String getJavascriptClassName() {
-		String simpleName = getJavaClass().getSimpleName();
-		String ns = getJavascriptNamespace();
-		if (ns != null && !ns.isEmpty()) {
-			return ns + "." + simpleName;
-		}
-		return simpleName;
+		return getJavaClass().getSimpleName();
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String getJavascriptNamespace() {
-		return this.javascriptNamespace;
+		// Namespaces are ignored in STJS classes
+		return "";
 	}
 
 	/** {@inheritDoc} */

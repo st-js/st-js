@@ -19,6 +19,7 @@ import org.stjs.javascript.annotation.GlobalScope;
 import org.stjs.javascript.annotation.JavascriptFunction;
 import org.stjs.javascript.annotation.Namespace;
 import org.stjs.javascript.annotation.Native;
+import org.stjs.javascript.annotation.STJSBridge;
 import org.stjs.javascript.annotation.ServerSide;
 import org.stjs.javascript.annotation.SyntheticType;
 import org.stjs.javascript.annotation.Template;
@@ -186,6 +187,10 @@ public class TreeWrapper<T extends Tree, JS> {
 		return getAnnotation(GlobalScope.class) != null;
 	}
 
+	public boolean isBridge() {
+		return getAnnotation(STJSBridge.class) != null;
+	}
+
 	/**
 	 * <p>getNamespace.</p>
 	 *
@@ -199,6 +204,11 @@ public class TreeWrapper<T extends Tree, JS> {
 	}
 
 	private String doGetNamespace() {
+		// Only bridges can have namespaces
+		if (!isBridge()) {
+			return "";
+		}
+
 		// Check if we can find the namespace directly at the source level
 		String ns = getNamespaceFromElement();
 		if (ns != null) {

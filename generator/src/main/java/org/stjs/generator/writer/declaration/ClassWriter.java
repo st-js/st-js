@@ -58,23 +58,6 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	}
 
 	/**
-	 * generate the namespace declaration stjs.ns("namespace") if needed
-	 */
-	private void addNamespace(ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
-		Element type = TreeUtils.elementFromDeclaration(tree);
-		if (JavaNodes.isInnerType(type)) {
-			// this is an inner (anonymous or not) class - no namespace declaration is generated
-			return;
-		}
-		String namespace = context.getCurrentWrapper().getNamespace();
-		if (!namespace.isEmpty()) {
-			JavaScriptBuilder<JS> js = context.js();
-			JS target = js.property(js.name(GeneratorConstants.STJS), "ns");
-			stmts.add(js.expressionStatement(js.functionCall(target, Collections.singleton(js.string(namespace)))));
-		}
-	}
-
-	/**
 	 * @return the node to put in the super class. for intefaces, the super class goes also in the interfaces list
 	 */
 	private JS getSuperClass(ClassTree clazz, GenerationContext<JS> context) {
@@ -477,8 +460,6 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			// special construction for globals
 			return js.statements(stmts);
 		}
-
-		addNamespace(tree, context, stmts);
 
 		Element type = TreeUtils.elementFromDeclaration(tree);
 

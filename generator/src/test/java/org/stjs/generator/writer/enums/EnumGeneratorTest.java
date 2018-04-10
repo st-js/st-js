@@ -77,8 +77,7 @@ public class EnumGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testEnumsNamespace() {
-		assertCodeContains(EnumsNamespace.class, "stjs.ns(\"my.enums\");");
-		assertCodeContains(EnumsNamespace.class, "my.enums.EnumsNamespace = my_enums_EnumsNamespace");
-		assertCodeContains(EnumsNamespace.class, "enum my_enums_EnumsNamespace {A, B, C}");
+		assertCodeDoesNotContain(EnumsNamespace.class, "stjs.ns(\"my.enums\");");
+		assertCodeContains(EnumsNamespace.class, "enum EnumsNamespace {A, B, C}");
 	}
 }

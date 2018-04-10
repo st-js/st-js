@@ -20,6 +20,7 @@ It's work in progress but it supports.
 - enum instead of `stjs.enumeration`
 - varargs instead of `stjs.varargs`
 - Convert interfaces
+- Ignore `@Namespace` annotations (except for bridges)
 
 ### New Checks
 
