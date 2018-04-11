@@ -7,7 +7,7 @@ import org.stjs.generator.utils.AbstractStjsTest;
 public class TypesGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testClassDeclaration() {
-		assertCodeContains(Types1.class, "let Types1 = function(){};");
+		assertCodeContains(Types1.class, "class Types1 {}");
 	}
 
 	public void testForbidArrays() {

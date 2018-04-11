@@ -10,15 +10,19 @@ public class MethodNode extends AstNode {
 	private String name;
 	private List<AstNode> params;
 	private AstNode body;
+	private boolean isStatic;
+	private boolean isAbstract;
 
 	{
 		type = TSToken.METHODS;
 	}
 
-	public MethodNode(String name, List<AstNode> params, AstNode body) {
+	public MethodNode(String name, List<AstNode> params, AstNode body, boolean isStatic, boolean isAbstract) {
 		this.name = name;
 		this.params = params;
 		this.body = body;
+		this.isStatic = isStatic;
+		this.isAbstract = isAbstract;
 	}
 
 	@Override
@@ -48,4 +52,8 @@ public class MethodNode extends AstNode {
 	public AstNode getBody() {
 		return body;
 	}
+
+	public boolean isStatic() { return isStatic; }
+
+	public boolean isAbstract() { return isAbstract; }
 }

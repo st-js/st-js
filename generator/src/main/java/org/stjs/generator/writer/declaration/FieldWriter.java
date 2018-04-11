@@ -10,7 +10,6 @@ import com.sun.tools.javac.code.Type;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.STJSRuntimeException;
 import org.stjs.generator.javac.TreeWrapper;
-import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.JavaNodes;
@@ -28,7 +27,7 @@ import com.sun.source.tree.VariableTree;
  *
  * @author acraciun
  */
-public class FieldWriter<JS> extends AbstractMemberWriter<JS> implements WriterContributor<VariableTree, JS> {
+public class FieldWriter<JS> implements WriterContributor<VariableTree, JS> {
 	private static final Map<String, Class<?>> PRIMITIVE_CLASSES = new HashMap<String, Class<?>>();
 	static {
 		for (Class<?> cls : Primitives.allPrimitiveTypes()) {
@@ -87,10 +86,16 @@ public class FieldWriter<JS> extends AbstractMemberWriter<JS> implements WriterC
 		// Generate interface methods differently
 		TypeMirror type = context.getTrees().getTypeMirror(tw.getEnclosingType().getPath());
 		if (type instanceof Type.ClassType && ((Type.ClassType) type).isInterface()) {
-			return context.js().field(fieldName, null);
+			return context.js().field(fieldName, null, false);
 		}
 
-		JS member = context.js().property(getMemberTarget(tw), fieldName);
-		return context.js().expressionStatement(context.js().assignment(AssignOperator.ASSIGN, member, initializer));
+		if (type instanceof Type.ClassType) {
+			return context.js().field(fieldName, initializer, tw.isStatic());
+		}
+
+		throw new RuntimeException("Why do you even come here ?");
+
+		//JS member = context.js().property(getMemberTarget(tw), fieldName);
+		//return context.js().expressionStatement(context.js().assignment(AssignOperator.ASSIGN, member, initializer));
 	}
 }

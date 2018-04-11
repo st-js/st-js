@@ -12,7 +12,6 @@ import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TreeWrapper;
-import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
@@ -24,7 +23,7 @@ import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
 
-public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements WriterContributor<MethodTree, JS> {
+public class MethodWriter<JS> implements WriterContributor<MethodTree, JS> {
 
 	private static String changeName(String name) {
 		if (name.equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
@@ -108,25 +107,49 @@ public class MethodWriter<JS> extends AbstractMemberWriter<JS> implements Writer
 
 		JS decl = context.js().function(name, params, body);
 
-		// add the constructor.<name> or prototype.<name> if needed
-		if (!JavaNodes.isConstructor(tree) && !isMethodOfJavascriptFunction(context.getCurrentWrapper())) {
-			String methodName = context.getNames().getMethodName(context, tree, context.getCurrentPath());
-			if (tw.getEnclosingType().isGlobal()) {
-				// var method=function() ...; //for global types
-				return context.js().variableDeclaration(true, methodName, decl, true);
-			}
-
-			// Generate interface methods differently
-			TypeMirror type = context.getTrees().getTypeMirror(tw.getEnclosingType().getPath());
-			if (type instanceof Type.ClassType && ((Type.ClassType) type).isInterface()) {
-				return context.js().method(methodName, params, null);
-			}
-
-			JS member = context.js().property(getMemberTarget(tw), methodName);
-			return context.js().expressionStatement(context.js().assignment(AssignOperator.ASSIGN, member, decl));
+		if (isMethodOfJavascriptFunction(context.getCurrentWrapper())) {
+			return decl;
 		}
 
-		return decl;
+		String methodName = context.getNames().getMethodName(context, tree, context.getCurrentPath());
+
+		if (tw.getEnclosingType().isGlobal()) {
+			// var method=function() ...; //for global types
+			return context.js().variableDeclaration(true, methodName, decl, true);
+		}
+
+		if (JavaNodes.isConstructor(tree)) {
+			methodName = "constructor";
+
+			if (body == null && params.size() == 0) {
+				return null;
+			}
+		}
+
+		// Generate interface methods differently
+		TypeMirror type = context.getTrees().getTypeMirror(tw.getEnclosingType().getPath());
+
+
+		if (!(type instanceof Type.ClassType)) {
+			throw new RuntimeException("How do you even arrive here ?");
+		}
+
+		boolean isAbstract = tw.isAbstract();
+
+		if (body == null) {
+			body = context.js().block(new ArrayList<JS>());
+		}
+
+		if (tw.isAbstract()) {
+			body = null;
+		}
+
+		if (((Type.ClassType) type).isInterface()) {
+			isAbstract = false;
+			body = null;
+		}
+
+		return context.js().method(methodName, params, body, tw.isStatic(), isAbstract);
 	}
 
 }

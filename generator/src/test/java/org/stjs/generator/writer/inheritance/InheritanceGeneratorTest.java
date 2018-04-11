@@ -7,12 +7,12 @@ public class InheritanceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testImplements() {
-		assertCodeContains(Inheritance1.class, "stjs.extend(Inheritance1, null, [MyInterface],");
+		assertCodeContains(Inheritance1.class, "class Inheritance1 implements MyInterface {");
 	}
 
 	@Test
 	public void testExtends() {
-		assertCodeContains(Inheritance2.class, "stjs.extend(Inheritance2, MySuperClass, [],");
+		assertCodeContains(Inheritance2.class, "class Inheritance2 extends MySuperClass {");
 	}
 
 	@Test
@@ -28,28 +28,28 @@ public class InheritanceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testAbstractAndGeneric() {
-		assertCodeContains(Inheritance5.class, "stjs.extend(Inheritance5, null, [MyInterface3],");
+		assertCodeContains(Inheritance5.class, "abstract class Inheritance5 implements MyInterface3 {");
 	}
 
 	@Test
 	public void testImplementsSyntheticType() {
-		assertCodeContains(Inheritance6.class, "stjs.extend(Inheritance6, null, [],");
+		assertCodeContains(Inheritance6.class, "class Inheritance6 {");
 	}
 
 	@Test
 	public void testExtendsSyntheticType() {
-		assertCodeContains(Inheritance9.class, "stjs.extend(Inheritance9, null, [],");
+		assertCodeContains(Inheritance9.class, "class Inheritance9 {");
 	}
 
 	@Test
 	public void testExtendsEmptyContructor() {
 		// check that the super constructor is called for empty constructor in the child class
-		assertCodeContains(Inheritance7.class, "MySuperClass.call(this);");
+		assertCodeContains(Inheritance7.class, "super();");
 	}
 
 	@Test
 	public void testExtendsInnerClass() {
-		assertCodeContains(Inheritance8.class, "stjs.extend(Inheritance8, MyClass1.MyInnerClass, [],");
+		assertCodeContains(Inheritance8.class, "class Inheritance8 extends MyClass1_MyInnerClass {");
 	}
 
 	@Test

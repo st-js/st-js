@@ -26,15 +26,13 @@ import com.sun.source.tree.Tree;
 /**
  * This class checks if a method or a variable has the name of a Javascript keyword. Even though the Java compiler lets
  * the user use some of the keywords as variable names, the Generator should not generate code with these names.
- * 
+ *
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 
 public final class JavascriptKeywords {
 
-	public static final String PROTOTYPE = "prototype";
 	public static final String CONSTRUCTOR = "constructor";
-	public static final String VAR = "var";
 	public static final String THIS = "this";
 	public static final String NULL = "null";
 

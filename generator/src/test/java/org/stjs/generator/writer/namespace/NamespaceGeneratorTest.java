@@ -11,23 +11,24 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 	public void testDecl() {
 		assertCodeDoesNotContain(Namespace1.class, "stjs.ns(\"a.b\");");
 		assertCodeDoesNotContain(Namespace1.class, "let a.b");
-		assertCodeContains(Namespace1.class, "Namespace1=function()");
-		assertCodeContains(Namespace1.class, "prototype.instanceMethod=function()");
-		assertCodeContains(Namespace1.class, "prototype.instanceField=null");
-		assertCodeContains(Namespace1.class, "constructor.staticMethod=function()");
-		assertCodeContains(Namespace1.class, "constructor.staticField=null");
+		assertCodeContains(Namespace1.class, "class Namespace1 {\n" +
+				"    instanceMethod(){}\n" +
+				"    instanceField = null;\n" +
+				"    static staticMethod(){}\n" +
+				"    static staticField = null;\n" +
+				"}");
 	}
 
 	@Test
 	public void testExtends() {
-		assertCodeContains(Namespace2.class, "constructor.Child = stjs.extend(constructor.Child, Namespace2, [],");
+		assertCodeContains(Namespace2.class, "class Namespace2_Child extends Namespace2 {");
 		// call super
-		assertCodeContains(Namespace2.class, "Namespace2.call(this)");
+		assertCodeContains(Namespace2.class, "constructor() { super(); }");
 	}
 
 	@Test
 	public void testExtends2() {
-		assertCodeContains(Namespace2a.class, "stjs.extend(Namespace2a, Namespace1, [],");
+		assertCodeContains(Namespace2a.class, "class Namespace2a extends Namespace1 {");
 		assertCodeDoesNotContain(Namespace2a.class, "let a.b");
 	}
 
@@ -38,7 +39,7 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testCallSuper() {
-		assertCodeContains(Namespace4.class, "{ Namespace4.prototype.method.call(this); }");
+		assertCodeContains(Namespace4.class, "method(){ super.method(); }");
 	}
 
 	@Test
@@ -60,7 +61,7 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testInlineConstruct() {
-		assertCodeContains(Namespace8.class, "stjs.extend(function Namespace8$1(){Namespace8.call(this);}, Namespace8, [], ");
+		assertCodeContains(Namespace8.class, "class Namespace8_Namespace8$1 extends Namespace8 { constructor() { super(); } ");
 	}
 
 	@Test(
@@ -72,13 +73,13 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 	@Test()
 	public void testAnnotationAtPackageLevel(){
 		assertCodeDoesNotContain(PackageNamespace1.class, "a.b.PackageNamespace1 = function()");
-		assertCodeContains(PackageNamespace1.class, "PackageNamespace1 = function()");
+		assertCodeContains(PackageNamespace1.class, "class PackageNamespace1 {");
 	}
 
 	@Test()
 	public void testAnnotationAtPackageLevelRecursive(){
 		assertCodeDoesNotContain(PackageNamespace2.class, "a.b.PackageNamespace2 = function()");
-		assertCodeContains(PackageNamespace2.class, "PackageNamespace2 = function()");
+		assertCodeContains(PackageNamespace2.class, "class PackageNamespace2 {");
 	}
 
 	@Test()

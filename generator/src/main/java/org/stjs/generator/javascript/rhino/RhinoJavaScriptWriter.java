@@ -54,6 +54,7 @@ import com.google.debugging.sourcemap.FilePosition;
 import com.google.debugging.sourcemap.SourceMapFormat;
 import com.google.debugging.sourcemap.SourceMapGenerator;
 import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
+import org.stjs.generator.javascript.rhino.types.ClassDeclaration;
 import org.stjs.generator.javascript.rhino.types.Enum;
 import org.stjs.generator.javascript.rhino.types.FieldNode;
 import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
@@ -503,6 +504,15 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	@Override
 	public void visitMethodNode(MethodNode f, Boolean param) {
 		printComments(f);
+
+		if (f.isAbstract()) {
+			print("abstract ");
+		}
+
+		if (f.isStatic()) {
+			print("static ");
+		}
+
 		if (f.getName() != null) {
 			print(f.getName());
 		}
@@ -510,20 +520,27 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		boolean hasBody = f.getBody() != null;
 
 		if (f.getParams() == null) {
-			println("()" + (hasBody ? "" : ";"));
+			print("()");
 		} else {
 			print("(");
 			printList(f.getParams(), param);
-			println(")" + (hasBody ? "" : ";"));
+			print(")");
 		}
 
 		if (hasBody) {
 			visitorSupport.accept(f.getBody(), this, param);
+			println();
+		} else {
+			println(";");
 		}
 	}
 
 	public void visitFieldNode(FieldNode f, Boolean param) {
 		printComments(f);
+
+		if (f.isStatic()) {
+			print("static ");
+		}
 
 		if (f.getValue() == null) {
 			println(f.getName() + ";");
@@ -533,6 +550,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		print(f.getName());
 		print(" = ");
 		visitorSupport.accept(f.getValue(), this, param);
+		println(";");
 	}
 
 	/** {@inheritDoc} */
@@ -843,6 +861,40 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		if (s.getExtends() != null && s.getExtends().size() > 0) {
 			print(" extends ");
 			printList(s.getExtends(), param);
+		}
+
+		println(" {");
+
+		if (s.getMembers() != null) {
+			indent();
+			for (AstNode stmt : s.getMembers()) {
+				visitorSupport.accept(stmt, this, param);
+			}
+			unindent();
+		}
+
+		println("}");
+	}
+
+	@Override
+	public void visitClassDeclaration(ClassDeclaration s, Boolean param) {
+		if (s.isAbstract()) {
+			print("abstract ");
+		}
+
+		print("class ");
+		if (s.getName() != null) {
+			visitorSupport.accept(s.getName(), this, param);
+		}
+
+		if (s.getExtends() != null) {
+			print(" extends ");
+			visitorSupport.accept(s.getExtends(), this, param);
+		}
+
+		if (s.getInterfaces() != null && s.getInterfaces().size() > 0) {
+			print(" implements ");
+			printList(s.getInterfaces(), param);
 		}
 
 		println(" {");

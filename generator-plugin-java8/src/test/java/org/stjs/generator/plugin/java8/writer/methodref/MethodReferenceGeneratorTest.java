@@ -23,7 +23,7 @@ public class MethodReferenceGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testInstanceMethodRefWithInterface() {
 		assertCodeContains(MethodRef9.class,
-				"calculate(stjs.bind(\"inc2\"), new MethodRef9.IncImpl(), 1)");
+				"calculate(stjs.bind(\"inc2\"), new MethodRef9_IncImpl(), 1)");
 		assertEquals(3, executeAndReturnNumber(MethodRef9.class), 0);
 	}
 

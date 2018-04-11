@@ -135,18 +135,21 @@ public interface JavaScriptBuilder<T> {
 	 * @param name a {@link java.lang.String} object.
 	 * @param params a {@link java.lang.Iterable} object.
 	 * @param body a T object.
+	 * @param isStatic is it a static method ?
+	 * @param isAbstract is it an abstract method ?
 	 * @return a T object.
 	 */
-	T method(@Nullable String name, @Nonnull Iterable<T> params, T body);
+	T method(@Nullable String name, @Nonnull Iterable<T> params, T body, boolean isStatic, boolean isAbstract);
 
 	/**
 	 * <p>field.</p>
 	 *
 	 * @param name a {@link java.lang.String} object.
 	 * @param value a T object.
+	 * @param isStatic is it a static method ?
 	 * @return a T object.
 	 */
-	T field(@Nonnull String name, T value);
+	T field(@Nonnull String name, T value, boolean isStatic);
 
 	/**
 	 * <p>functionCall.</p>
@@ -471,6 +474,17 @@ public interface JavaScriptBuilder<T> {
 	 * @return a T object.
 	 */
 	T interfaceDeclaration(@Nonnull String name, Iterable<T> members, Iterable<T> extension);
+
+	/**
+	 * Class
+	 * @param name The class's name
+	 * @param members The class's members
+	 * @param extension The class it extends
+	 * @param interfaces The class's interfaces
+	 * @param isAbstract Is the class abstract ?
+	 * @return a T object.
+	 */
+	T classDeclaration(@Nonnull T name, Iterable<T> members, T extension, Iterable<T> interfaces, boolean isAbstract);
 
 	/**
 	 * <p>writeJavaScript.</p>

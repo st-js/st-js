@@ -21,12 +21,12 @@ public class GlobalScopeGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testQualifiedCall() {
-		assertCodeContains(GlobalScope1.class, "prototype.test=function(){method();};");
+		assertCodeContains(GlobalScope1.class, "test(){method();}");
 	}
 
 	@Test
 	public void testCallWithStaticImport() {
-		assertCodeContains(GlobalScope2.class, "prototype.test=function(){method();};");
+		assertCodeContains(GlobalScope2.class, "test(){method();}");
 	}
 
 	@Test

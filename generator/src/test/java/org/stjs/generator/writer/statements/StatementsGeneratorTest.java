@@ -175,6 +175,6 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testStaticBlock() {
-		assertCodeContains(Statements21.class, "new (stjs.extend(function Statements21$1(){}");
+		assertCodeContains(Statements21.class, "new (class Statements21$1 implements Statements21_MyInterface {");
 	}
 }

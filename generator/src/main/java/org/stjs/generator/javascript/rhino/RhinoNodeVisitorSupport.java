@@ -44,6 +44,7 @@ import org.mozilla.javascript.ast.UnaryExpression;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.mozilla.javascript.ast.WhileLoop;
+import org.stjs.generator.javascript.rhino.types.ClassDeclaration;
 import org.stjs.generator.javascript.rhino.types.Enum;
 import org.stjs.generator.javascript.rhino.types.FieldNode;
 import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
@@ -333,6 +334,12 @@ public class RhinoNodeVisitorSupport {
 			@Override
 			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
 				visitor.visitInterfaceDeclaration((InterfaceDeclaration) node, param);
+			}
+		});
+		addCaller(ClassDeclaration.class, new Caller() {
+			@Override
+			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
+				visitor.visitClassDeclaration((ClassDeclaration) node, param);
 			}
 		});
 		addCaller(MethodNode.class, new Caller() {

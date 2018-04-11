@@ -15,6 +15,7 @@ It's work in progress but it supports.
 ### Syntax changes
 
 - Interfaces are converted to TypeScript interfaces
+- Classes are converted to TypeScript classes
 - `let`/`const` instead of `var`
 - Use arrow functions where it can, keeping `stjs.bind()` where it can't do otherwise
 - field getters/setters instead of `stjs.setField`/`stjs.getField`
@@ -35,7 +36,6 @@ It's work in progress but it supports.
 
 ### Roadmap
 
-- Convert classes
 - Add type declarations to methods, fields and function arguments
 - Check: Forbid Java specific methods on JavaScript (methods added by st-js, see below)
 

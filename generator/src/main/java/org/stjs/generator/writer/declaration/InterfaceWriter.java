@@ -10,7 +10,6 @@ import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.JavaNodes;
-import org.stjs.generator.writer.JavascriptKeywords;
 import org.stjs.generator.writer.WriterVisitor;
 
 import javax.lang.model.element.Element;
@@ -19,14 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InterfaceWriter<JS> {
-
-	/**
-	 * transform a.b.type in constructor.type
-	 */
-	private String replaceFullNameWithConstructor(String typeName) {
-		int pos = typeName.lastIndexOf('.');
-		return JavascriptKeywords.CONSTRUCTOR + typeName.substring(pos);
-	}
 
 	private List<Tree> getAllInterfaces(ClassTree clazz) {
 		List<Tree> enums = new ArrayList<>();
@@ -43,20 +34,17 @@ public class InterfaceWriter<JS> {
 		return enums;
 	}
 
-	public void generate(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
+	public void generateAll(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
 		Element type = TreeUtils.elementFromDeclaration(tree);
-		boolean outerClass = type.getEnclosingElement().getKind() == ElementKind.PACKAGE;
 
 		// Move member interfaces to the top level
-		if (outerClass) {
-			List<Tree> enums = getAllInterfaces(tree);
-			for (Tree member : enums) {
-				generateInterface(visitor, (ClassTree) member, context, stmts);
-			}
+		List<Tree> interfaces = getAllInterfaces(tree);
+		for (Tree member : interfaces) {
+			generateInterface(visitor, (ClassTree) member, context, stmts);
 		}
 
 		// Render top level interfaces correctly
-		if (type.getKind() == ElementKind.INTERFACE && outerClass) {
+		if (type.getKind() == ElementKind.INTERFACE) {
 			generateInterface(visitor, tree, context, stmts);
 		}
 	}
@@ -147,32 +135,5 @@ public class InterfaceWriter<JS> {
 					js.name(typeName)
 			));
 		}
-	}
-
-	public void generateReference(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
-		Element type = TreeUtils.elementFromDeclaration(tree);
-		boolean innerClass = type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
-
-		if (!innerClass) {
-			return;
-		}
-
-		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
-
-		// TODO :: change `leftSide` to `js.name(typeName.substring(pos))` once classes are implemented
-		String leftSide = replaceFullNameWithConstructor(typeName);
-		typeName = typeName.replace('.', '_');
-
-		JavaScriptBuilder<JS> js = context.js();
-
-		stmts.add(
-				js.expressionStatement(
-						js.assignment(
-								AssignOperator.ASSIGN,
-								js.name(leftSide),
-								js.name(typeName)
-						)
-				)
-		);
 	}
 }

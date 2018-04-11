@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.Tree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.writer.WriterContributor;
@@ -15,7 +17,7 @@ import com.sun.source.tree.VariableTree;
 
 /**
  * regular blocks. The static blocks are wrapped in a anonymous function to prevent global scope pollution.
- * 
+ *
  * @author acraciun
  */
 public class BlockWriter<JS> implements WriterContributor<BlockTree, JS> {
@@ -40,9 +42,18 @@ public class BlockWriter<JS> implements WriterContributor<BlockTree, JS> {
 				jsNodes = multipleVariableWriter.visit(visitor, (List<VariableTree>) statements.subList(i, i + sameLineVars), context, true);
 				i += sameLineVars;
 			}
-			jsStatements.add(jsNodes);
+
+			if (jsNodes != null) {
+				jsStatements.add(jsNodes);
+			}
 		}
 		JS block = js.block(jsStatements);
+
+		// Allow to return null only for methods
+		Tree enclosing = context.getCurrentWrapper().getPath().getParentPath().getLeaf();
+		if (jsStatements.size() == 0 && enclosing instanceof MethodTree) {
+			return null;
+		}
 
 		if (tree.isStatic()) {
 			// generate the enclosing function call (function(){BLOCK()})() to avoid polluting the global scope

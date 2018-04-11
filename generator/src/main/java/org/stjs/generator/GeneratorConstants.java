@@ -30,11 +30,6 @@ public final class GeneratorConstants {
 	/** Constant <code>STJS="stjs"</code> */
 	public static final String STJS = "stjs";
 
-	/**
-	 * this is the type to be used when defining an inline type
-	 */
-	public static final String SPECIAL_INLINE_TYPE = "_InlineType";
-
 	/** Constant <code>SUPER="super"</code> */
 	public static final String SUPER = "super";
 
@@ -46,9 +41,6 @@ public final class GeneratorConstants {
 
 	/** Constant <code>ARGUMENTS_PARAMETER="arguments"</code> */
 	public static final String ARGUMENTS_PARAMETER = "arguments";
-
-	/** Constant <code>TYPE_DESCRIPTION_PROPERTY="$typeDescription"</code> */
-	public static final String TYPE_DESCRIPTION_PROPERTY = "$typeDescription";
 
 	/** Constant <code>NAMESPACE_PATTERN</code> */
 	public static final Pattern NAMESPACE_PATTERN = Pattern.compile("([A-Za-z_][A-Za-z_0-9]*)(?:\\.([A-Za-z_][A-Za-z_0-9]*))*");

@@ -10,7 +10,7 @@ public class SwitchGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testSwitchEnumsInnerClass() {
-		assertCodeContains(Enums3.class, "case Enums3.Value.a");
+		assertCodeContains(Enums3.class, "case Enums3_Value.a");
 	}
 
 	@Test

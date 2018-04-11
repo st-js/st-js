@@ -8,30 +8,28 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testPublicInstanceMethod() {
 		assertCodeContains(Methods1.class, //
-				"stjs.extend(Methods1, null, [], function(constructor, prototype){" + //
-						"prototype.method = function(arg1,arg2){return 0;}");
+				"class Methods1 {" + //
+						"method(arg1,arg2){return 0;}");
 	}
 
 	@Test
 	public void testPrivateInstanceMethod() {
 		// same as public
-		assertCodeContains(Methods2.class, //
-				"stjs.extend(Methods2, null, [], function(constructor, prototype){" + //
-						"prototype.method = function(arg1,arg2){");
+		assertCodeContains(Methods2.class, "class Methods2 { method(arg1, arg2){");
 	}
 
 	@Test
 	public void testPublicStaticMethod() {
 		assertCodeContains(Methods3.class, //
-				"stjs.extend(Methods3, null, [], function(constructor, prototype){" + //
-						"constructor.method = function(arg1,arg2){");
+				"class Methods3 {" + //
+						"static method(arg1,arg2){");
 	}
 
 	@Test
 	public void testPrivateStaticMethod() {
 		assertCodeContains(Methods4.class, //
-				"stjs.extend(Methods4, null, [], function(constructor, prototype){" + //
-						"constructor.method = function(arg1,arg2){");
+				"class Methods4 {" + //
+						"static method(arg1, arg2){");
 	}
 
 	@Test
@@ -42,13 +40,13 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testConstructor() {
-		assertCodeContains(Methods6.class, "Methods6=function(arg){");
+		assertCodeContains(Methods6.class, "class Methods6 { constructor(arg){} }");
 	}
 
 	@Test
 	public void testSpecialThis() {
 		// the special parameter THIS should not be added
-		assertCodeContains(Methods7.class, "prototype.method=function(THIS, arg2){");
+		assertCodeContains(Methods7.class, "method(THIS, arg2){");
 	}
 
 	@Test
@@ -64,12 +62,12 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testVarArgsMethod3() {
 		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
-		assertCodeContains(Methods11.class, "prototype.method=function(..._arguments){}");
+		assertCodeContains(Methods11.class, "method(..._arguments){}");
 	}
 
 	@Test
 	public void testVarArgsMethod4Native() {
-		assertCodeContains(Methods11_b.class, "prototype.test=function(props){}");
+		assertCodeContains(Methods11_b.class, "class Methods11_b { test(props){}");
 
 		assertCodeDoesNotContain(Methods11_b.class, "prototype.method=function");
 	}
@@ -87,10 +85,10 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testAbstractMethod() {
 		// the class only contains abstract methods, therefore nothing must be generated
-		assertCodeContains(Methods15.class, "stjs.extend(Methods15, null, [], function(constructor, prototype){" //
-				+ "prototype.doSomething=function(){};" //
-				+ "prototype.doSomethingElse=function(){};" //
-				+ "}, {}, {});");
+		assertCodeContains(Methods15.class, "abstract class Methods15 {" //
+				+ "abstract doSomething();" //
+				+ "abstract doSomethingElse();" //
+				+ "}");
 	}
 
 	@Test

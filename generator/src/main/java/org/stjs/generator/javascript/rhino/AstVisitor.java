@@ -39,6 +39,7 @@ import org.mozilla.javascript.ast.UnaryExpression;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.mozilla.javascript.ast.WhileLoop;
+import org.stjs.generator.javascript.rhino.types.ClassDeclaration;
 import org.stjs.generator.javascript.rhino.types.Enum;
 import org.stjs.generator.javascript.rhino.types.FieldNode;
 import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
@@ -407,6 +408,14 @@ public interface AstVisitor<T> {
 	 * @param param a T object.
 	 */
 	void visitInterfaceDeclaration(InterfaceDeclaration s, T param);
+
+	/**
+	 * <p>visitClassDeclaration.</p>
+	 *
+	 * @param s a {@link org.stjs.generator.javascript.rhino.types.ClassDeclaration} object.
+	 * @param param a T object.
+	 */
+	void visitClassDeclaration(ClassDeclaration s, T param);
 
 	/**
 	 * <p>visitVararg.</p>

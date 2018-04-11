@@ -47,7 +47,7 @@ public class NamesGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testStaticMethodInnerClass() {
-		assertCodeContains(Names9.class, "Names9.Inner.staticMethod()");
+		assertCodeContains(Names9.class, "Names9_Inner.staticMethod()");
 	}
 
 	@Test

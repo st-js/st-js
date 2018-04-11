@@ -25,15 +25,23 @@ public class InlineFunctionGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testInterfaceAndParam() {
 		assertCodeContains(InlineFunctions2b.class,
-				"stjs.extend(function InlineFunctions2b$1(){},  null, [FunctionInterface2], function(constructor, prototype){"
-						+ "prototype.test=2; prototype.$invoke=function(arg){arg=arg+1;}");
+				"InlineFunctions2b.method(new (class InlineFunctions2b_InlineFunctions2b$1 implements FunctionInterface2 {\n" +
+						"  test = 2;\n" +
+						"  $invoke(arg){\n" +
+						"    arg = arg + 1;\n" +
+						"  }");
 	}
 
 	@Test
 	public void testInterfaceTwoMethods() {
-		assertCodeContains(InlineFunctions3.class, "stjs.extend(function InlineFunctions3$1(){}, null, [FunctionInterface2], ");
-		assertCodeContains(InlineFunctions3.class, "prototype.$invoke=function(arg){arg=arg+1;};"
-				+ "prototype.$invoke2=function(arg2){arg2=arg2+1;};");
+		assertCodeContains(InlineFunctions3.class, "class InlineFunctions3_InlineFunctions3$1 implements FunctionInterface2 {\n" +
+				"            $invoke(arg){\n" +
+				"                arg = arg + 1;\n" +
+				"            }\n" +
+				"            $invoke2(arg2){\n" +
+				"                arg2 = arg2 + 1;\n" +
+				"            }\n" +
+				"        }");
 	}
 
 	@Test

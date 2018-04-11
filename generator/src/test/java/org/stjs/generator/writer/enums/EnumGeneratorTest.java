@@ -17,8 +17,8 @@ public class EnumGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testEnumReference() {
-		assertCodeContains(Enums2.class, "Enums2.Value.a");
-		assertCodeContains(Enums2.class, "constructor.Value = Enums2_Value;");
+		assertCodeContains(Enums2.class, "Enums2_Value.a");
+		assertCodeContains(Enums2.class, "static Value = Enums2_Value;");
 		assertCodeContains(Enums2.class, "enum Enums2_Value {a, b, c}");
 	}
 

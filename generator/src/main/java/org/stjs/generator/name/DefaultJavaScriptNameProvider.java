@@ -88,7 +88,7 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 			for (DeclaredType enclosingType = JavaNodes.getEnclosingType(declaredType); enclosingType != null; enclosingType = JavaNodes
 					.getEnclosingType(enclosingType)) {
 				rootTypeElement = enclosingType.asElement();
-				name = InternalUtils.getSimpleName(rootTypeElement) + "." + name;
+				name = InternalUtils.getSimpleName(rootTypeElement) + "_" + name;
 			}
 
 			checkAllowedType(rootTypeElement, context);

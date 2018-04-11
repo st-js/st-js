@@ -1,10 +1,8 @@
 package org.stjs.generator.javascript.rhino;
 
-import java.io.File;
-import java.io.Writer;
-import java.util.Iterator;
-import java.util.List;
-
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.debugging.sourcemap.SourceMapGenerator;
 import org.mozilla.javascript.Token;
 import org.mozilla.javascript.Token.CommentType;
 import org.mozilla.javascript.ast.ArrayLiteral;
@@ -55,10 +53,7 @@ import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.javascript.NameValue;
 import org.stjs.generator.javascript.UnaryOperator;
-
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.debugging.sourcemap.SourceMapGenerator;
+import org.stjs.generator.javascript.rhino.types.ClassDeclaration;
 import org.stjs.generator.javascript.rhino.types.Enum;
 import org.stjs.generator.javascript.rhino.types.FieldNode;
 import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
@@ -66,6 +61,10 @@ import org.stjs.generator.javascript.rhino.types.MethodNode;
 import org.stjs.generator.javascript.rhino.types.Vararg;
 
 import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.Writer;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * this JavaScript builder uses the rhino AST nodes to build the synthax tree.
@@ -297,21 +296,21 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 
 	/** {@inheritDoc} */
 	@Override
-	public AstNode method(String name, Iterable<AstNode> params, AstNode originalBody) {
+	public AstNode method(String name, Iterable<AstNode> params, AstNode originalBody, boolean isStatic, boolean isAbstract) {
 		AstNode body = originalBody;
 		if (body != null && !(body instanceof Block)) {
 			body = addStatement(null, body);
 		}
 
 		// Auto-generated method stub
-		return new MethodNode(name, list(params), body);
+		return new MethodNode(name, list(params), body, isStatic, isAbstract);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public AstNode field(@Nonnull String name, AstNode value) {
+	public AstNode field(@Nonnull String name, AstNode value, boolean isStatic) {
 		// Auto-generated method stub
-		return new FieldNode(name, value);
+		return new FieldNode(name, value, isStatic);
 	}
 
 	/** {@inheritDoc} */
@@ -620,6 +619,12 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	@Override
 	public AstNode interfaceDeclaration(@Nonnull String name, Iterable<AstNode> members, Iterable<AstNode> extension) {
 		return new InterfaceDeclaration(name, members, list(extension));
+	}
+
+	@Override
+	public AstNode classDeclaration(@Nonnull AstNode name, Iterable<AstNode> members,
+									AstNode extension, Iterable<AstNode> interfaces, boolean isAbstract) {
+		return new ClassDeclaration(name, members, extension, list(interfaces), isAbstract);
 	}
 
 	/** {@inheritDoc} */
