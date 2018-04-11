@@ -24,11 +24,10 @@ It's work in progress but it supports.
 - Java `for (String element : array)` loops are converted to `for ... of ` loops
 - Ignore `@Namespace` annotations (except for bridges)
 
-
 ### New Checks
 
 - You cannot call methods on Enums (like `.ordinal()` / `valueOf()` / `.name()` ...)
-- You cannot do `instanceof` on interfaces
+- You cannot do `instanceof` on interfaces nor primitive types
 - You cannot add a body to an interface method
 - You cannot define inner types (Class / Enum / Interface) inside interfaces
 - You cannot define inner types (Class / Enum / Interface) inside anonymous classes
@@ -37,7 +36,7 @@ It's work in progress but it supports.
 ### Roadmap
 
 - Convert classes
-- Check: Can't do instanceof on built-in types
+- Add type declarations to methods, fields and function arguments
 - Check: Forbid Java specific methods on JavaScript (methods added by st-js, see below)
 
 ### Open for discussion

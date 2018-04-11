@@ -3,11 +3,18 @@ package org.stjs.generator.writer.statements;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.stjs.generator.MultipleFileGenerationException;
 import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 
 public class StatementsGeneratorTest extends AbstractStjsTest {
+	@Rule
+	public ExpectedException expectedEx = ExpectedException.none();
+
+
 	@Test
 	public void testFor() {
 		assertCodeContains(Statements1.class, "for (let i = 0; i < 10; i++) {");
@@ -69,6 +76,13 @@ public class StatementsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testInstanceof() {
 		assertCodeContains(Statements10.class, "arg instanceof Statements10");
+	}
+
+	@Test
+	public void testInstanceofOnPrimitive() {
+		expectedEx.expect(MultipleFileGenerationException.class);
+		expectedEx.expectMessage("Using 'instanceof' on primitives does not work as you would expect, prefer using 'typeof' instead.");
+		generate(Statements23.class);
 	}
 
 	@Test

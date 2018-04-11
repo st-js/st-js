@@ -22,6 +22,7 @@ import org.stjs.generator.check.expression.IdentifierAccessOuterScopeCheck;
 import org.stjs.generator.check.expression.IdentifierAccessServerSideCheck;
 import org.stjs.generator.check.expression.IdentifierGlobalScopeNameClashCheck;
 import org.stjs.generator.check.expression.InstanceOfInterfaceCheck;
+import org.stjs.generator.check.expression.InstanceOfPrimitiveCheck;
 import org.stjs.generator.check.expression.MemberSelectGlobalScopeNameClashCheck;
 import org.stjs.generator.check.expression.MemberSelectOuterScopeCheck;
 import org.stjs.generator.check.expression.MemberSelectServerSideCheck;
@@ -167,6 +168,7 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(new AssertCheck());
 		visitor.contribute(new IdentifierGlobalScopeNameClashCheck());
 		visitor.contribute(new InstanceOfInterfaceCheck());
+		visitor.contribute(new InstanceOfPrimitiveCheck());
 		visitor.contribute(new MemberSelectGlobalScopeNameClashCheck());
 
 		visitor.contribute(new MethodDeclarationTemplateCheck());
