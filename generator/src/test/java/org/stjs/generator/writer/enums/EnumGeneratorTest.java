@@ -71,8 +71,9 @@ public class EnumGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testEnumDeclarationInInterface() {
-		assertCodeContains(Enums8.class, "constructor.MyEnum = Enums8_MyEnum;");
-		assertCodeContains(Enums8.class, "enum Enums8_MyEnum {a, b, c}");
+		expectedEx.expect(MultipleFileGenerationException.class);
+		expectedEx.expectMessage("You cannot define an inner type inside an interface. Please define it outside this interface.");
+		generate(Enums8.class);
 	}
 
 	@Test

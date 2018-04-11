@@ -3,11 +3,19 @@ package org.stjs.generator.writer.innerTypes;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.stjs.generator.MultipleFileGenerationException;
 import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
+import org.stjs.generator.writer.enums.Enums8;
 
 public class InnerTypesGeneratorTest extends AbstractStjsTest {
+
+	@Rule
+	public ExpectedException expectedEx = ExpectedException.none();
+
 	@Test
 	public void testCreateInstanceInnerType() {
 		assertCodeContains(InnerTypes1.class, "new InnerTypes1.InnerType()");
@@ -113,10 +121,9 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testInnerInsideAnonymous() {
-		String code = generate(InnerTypes16.class);
-		assertCodeContains(code, "let InnerTypes16 = function(){};" + "InnerTypes16 = stjs.extend(InnerTypes16, null, [], function(constructor, prototype){");
-		assertCodeContains(code, "let o = new (stjs.extend(function InnerTypes16$1(){}, Object, [], function(constructor, prototype){");
-		assertCodeContains(code, "};" + "constructor.InnerDeep = function(){}; constructor.InnerDeep = stjs.extend(constructor.InnerDeep, null, [], function(constructor, prototype){");
+		expectedEx.expect(MultipleFileGenerationException.class);
+		expectedEx.expectMessage("You cannot define an inner type inside an anonymous class. Please define it outside this class.");
+		generate(InnerTypes16.class);
 	}
 
 	@Test

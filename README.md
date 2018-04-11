@@ -30,14 +30,15 @@ It's work in progress but it supports.
 - You cannot call methods on Enums (like `.ordinal()` / `valueOf()` / `.name()` ...)
 - You cannot do `instanceof` on interfaces
 - You cannot add a body to an interface method
+- You cannot define inner types (Class / Enum / Interface) inside interfaces
+- You cannot define inner types (Class / Enum / Interface) inside anonymous classes
+- You cannot call `stjs.getTypeAnnotation` / `stjs.getAnnotations` / `stjs.getMemberAnnotation` / `stjs.getParameterAnnotation` as annotations aren't generated in TypeScript
 
 ### Roadmap
 
 - Convert classes
 - Check: Can't do instanceof on built-in types
-- Check: Can't put classes and enums inside interfaces
 - Check: Forbid Java specific methods on JavaScript (methods added by st-js, see below)
-
 
 ### Open for discussion
 - Should we automatically replace ".equals()" with "==" or "===" ?

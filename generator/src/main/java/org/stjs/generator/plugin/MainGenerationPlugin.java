@@ -5,6 +5,8 @@ import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.check.declaration.ArrayTypeForbiddenCheck;
 import org.stjs.generator.check.declaration.ClassDuplicateMemberNameCheck;
 import org.stjs.generator.check.declaration.ClassEnumWithoutMembersCheck;
+import org.stjs.generator.check.declaration.ClassForbidClassInAnonymousClassCheck;
+import org.stjs.generator.check.declaration.ClassForbidClassInInterfaceCheck;
 import org.stjs.generator.check.declaration.ClassGlobalForbidInnerCheck;
 import org.stjs.generator.check.declaration.ClassGlobalInstanceMembersCheck;
 import org.stjs.generator.check.declaration.ClassImplementJavascriptFunctionCheck;
@@ -23,6 +25,7 @@ import org.stjs.generator.check.expression.InstanceOfInterfaceCheck;
 import org.stjs.generator.check.expression.MemberSelectGlobalScopeNameClashCheck;
 import org.stjs.generator.check.expression.MemberSelectOuterScopeCheck;
 import org.stjs.generator.check.expression.MemberSelectServerSideCheck;
+import org.stjs.generator.check.expression.MethodInvocationAnnotationsCheck;
 import org.stjs.generator.check.expression.MethodInvocationEnumCheck;
 import org.stjs.generator.check.expression.MethodInvocationMapConstructorCheck;
 import org.stjs.generator.check.expression.MethodInvocationOuterScopeCheck;
@@ -150,11 +153,14 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(new NewClassObjectInitCheck());
 		visitor.contribute(new ArrayTypeForbiddenCheck());
 		visitor.contribute(new ClassEnumWithoutMembersCheck());
+		visitor.contribute(new ClassForbidClassInAnonymousClassCheck());
+		visitor.contribute(new ClassForbidClassInInterfaceCheck());
 		visitor.contribute(new NewArrayForbiddenCheck());
 
 		visitor.contribute(new BlockInstanceCheck());
 		visitor.contribute(new MethodInvocationMapConstructorCheck());
 		visitor.contribute(new MethodInvocationEnumCheck());
+		visitor.contribute(new MethodInvocationAnnotationsCheck());
 		visitor.contribute(new SynchronizedCheck());
 		visitor.contribute(new MethodSynchronizedCheck());
 

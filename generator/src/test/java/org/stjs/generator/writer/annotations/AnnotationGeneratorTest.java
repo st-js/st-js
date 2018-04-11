@@ -1,9 +1,12 @@
 package org.stjs.generator.writer.annotations;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.GeneratorConfigurationBuilder;
 
+// Annotations won't be generated in Typescript, tests aren't needed
+@Ignore
 public class AnnotationGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testSimpleClassAnnotation() {
