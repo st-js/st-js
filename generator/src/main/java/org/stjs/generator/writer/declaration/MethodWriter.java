@@ -105,15 +105,14 @@ public class MethodWriter<JS> implements WriterContributor<MethodTree, JS> {
 		// set if needed Type$1 name, if this is an anonymous type constructor
 		String name = getAnonymousTypeConstructorName(tree, context);
 
-		JS decl = context.js().function(name, params, body);
-
 		if (isMethodOfJavascriptFunction(context.getCurrentWrapper())) {
-			return decl;
+			return context.js().arrowFunction(params, body);
 		}
 
 		String methodName = context.getNames().getMethodName(context, tree, context.getCurrentPath());
 
 		if (tw.getEnclosingType().isGlobal()) {
+			JS decl = context.js().function(name, params, body);
 			// var method=function() ...; //for global types
 			return context.js().variableDeclaration(true, methodName, decl, true);
 		}

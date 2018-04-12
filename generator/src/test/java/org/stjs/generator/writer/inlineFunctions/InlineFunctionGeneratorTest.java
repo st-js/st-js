@@ -9,12 +9,7 @@ import org.stjs.generator.JavascriptFileGenerationException;
 public class InlineFunctionGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testInlineFunction() {
-		assertCodeContains(InlineFunctions1.class, "method(function(arg){arg=arg+1;})");
-	}
-
-	@Test
-	public void testInlineFunctionWithJavaFuncAnnotation() {
-		assertCodeContains(InlineFunctions1.class, "method(function(arg){arg=arg+1;})");
+		assertCodeContains(InlineFunctions1.class, "method((arg) => {arg=arg+1;})");
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
@@ -46,12 +41,12 @@ public class InlineFunctionGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testInlineFunctionAssign() {
-		assertCodeContains(InlineFunctions4.class, "func =  function(arg){arg=arg+1;}");
+		assertCodeContains(InlineFunctions4.class, "func =  (arg) => {arg=arg+1;}");
 	}
 
 	@Test
 	public void testInlineFunctionWithAbstractClass() {
-		assertCodeContains(InlineFunctions5.class, "method(function(){})");
+		assertCodeContains(InlineFunctions5.class, "method(() => {})");
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
