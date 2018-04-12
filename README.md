@@ -29,6 +29,7 @@ It's work in progress but it supports.
 
 ### New Checks
 
+- You cannot Java specific methods on JavaScript (methods added by st-js)
 - You cannot call methods on Enums (like `.ordinal()` / `valueOf()` / `.name()` ...)
 - You cannot do `instanceof` on interfaces nor primitive types
 - You cannot add a body to an interface method
@@ -45,7 +46,6 @@ It's work in progress but it supports.
   - Generics (for fields and classes)
   - Wildcard types
 - Create `type` declarations for Synthetic classes
-- Check: Forbid Java specific methods on JavaScript (methods added by st-js, see below)
 
 ## Not planned
 
@@ -54,46 +54,6 @@ It's work in progress but it supports.
 
 ### Open for discussion
 - Should we automatically replace ".equals()" with "==" or "===" ?
-
-### ST-JS added methods
-
-- `String.prototype.equals`
-- `String.prototype.getBytes` // not implemented
-- `String.prototype.getChars` // not implemented
-- `String.prototype.contentEquals` // not implemented
-- `String.prototype.matches`
-- `String.prototype.compareTo`
-- `String.prototype.compareToIgnoreCase`
-- `String.prototype.equalsIgnoreCase`
-- `String.prototype.codePointBefore` // not implemented
-- `String.prototype.codePointCount` // not implemented
-- `String.prototype.replaceAll`
-- `String.prototype.replaceFirst`
-- `String.prototype.regionMatches`
-- `String.prototype.contains`
-- `String.prototype.getClass`
-- `String.valueOf`
-- `Byte` / `Double` / `Float` / `Integer` / `Long` / `Short` constructors(extends `Number`)
-- `Number.prototype.intValue`
-- `Number.prototype.shortValue`
-- `Number.prototype.longValue`
-- `Number.prototype.byteValue`
-- `Number.prototype.floatValue`
-- `Number.prototype.doubleValue`
-- `Number.prototype.isNaN`
-- `Number.prototype.equals`
-- `Number.prototype.getClass`
-- `Number.parseInt`
-- `Number.parseShort`
-- `Number.parseLong`
-- `Number.parseByte`
-- `Number.parseDouble`
-- `Number.parseFloat`
-- `Number.isNaN`
-- `Number.valueOf`
-- `Boolean.prototype.equals`
-- `Boolean.prototype.getClass`
-- `Boolean.valueOf`
 
 Compiling the Project
 ---------------------

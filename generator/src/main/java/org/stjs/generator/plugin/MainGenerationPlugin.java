@@ -28,6 +28,7 @@ import org.stjs.generator.check.expression.MemberSelectOuterScopeCheck;
 import org.stjs.generator.check.expression.MemberSelectServerSideCheck;
 import org.stjs.generator.check.expression.MethodInvocationAnnotationsCheck;
 import org.stjs.generator.check.expression.MethodInvocationEnumCheck;
+import org.stjs.generator.check.expression.MethodInvocationJavaSpecific;
 import org.stjs.generator.check.expression.MethodInvocationMapConstructorCheck;
 import org.stjs.generator.check.expression.MethodInvocationOuterScopeCheck;
 import org.stjs.generator.check.expression.MethodInvocationServerSideCheck;
@@ -159,6 +160,7 @@ public class MainGenerationPlugin<JS> implements STJSGenerationPlugin<JS> {
 		visitor.contribute(new NewArrayForbiddenCheck());
 
 		visitor.contribute(new BlockInstanceCheck());
+		visitor.contribute(new MethodInvocationJavaSpecific());
 		visitor.contribute(new MethodInvocationMapConstructorCheck());
 		visitor.contribute(new MethodInvocationEnumCheck());
 		visitor.contribute(new MethodInvocationAnnotationsCheck());

@@ -19,7 +19,8 @@ public class MethodNode extends AstNode {
 		type = TSToken.METHODS;
 	}
 
-	public MethodNode(String name, List<AstNode> params, AstNode body, AstNode returnType, boolean isStatic, boolean isAbstract, boolean isPrivate) {
+	public MethodNode(String name, List<AstNode> params, AstNode body, AstNode returnType,
+			boolean isStatic, boolean isAbstract, boolean isPrivate) {
 		this.name = name;
 		this.params = params;
 		this.body = body;
