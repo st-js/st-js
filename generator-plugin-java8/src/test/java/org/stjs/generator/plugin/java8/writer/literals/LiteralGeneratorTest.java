@@ -6,11 +6,11 @@ import org.stjs.generator.utils.AbstractStjsTest;
 public class LiteralGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testUnderscore(){
-		assertCodeContains(Literal1.class, "n=100100");
+		assertCodeContains(Literal1.class, "n: number=100100");
 	}
-	
+
 	@Test
 	public void testBinary(){
-		assertCodeContains(Literal2.class, "n=37");
+		assertCodeContains(Literal2.class, "n: number=37");
 	}
 }
