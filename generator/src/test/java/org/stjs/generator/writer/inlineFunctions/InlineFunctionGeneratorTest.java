@@ -26,7 +26,7 @@ public class InlineFunctionGeneratorTest extends AbstractStjsTest {
 	public void testInterfaceAndParam() {
 		assertCodeContains(InlineFunctions2b.class,
 				"InlineFunctions2b.method(new (class InlineFunctions2b_InlineFunctions2b$1 implements FunctionInterface2 {\n" +
-						"  test = 2;\n" +
+						"  test: number = 2;\n" +
 						"  $invoke(arg){\n" +
 						"    arg = arg + 1;\n" +
 						"  }");

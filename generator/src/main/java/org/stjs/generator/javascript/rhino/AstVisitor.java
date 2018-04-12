@@ -42,6 +42,7 @@ import org.mozilla.javascript.ast.WhileLoop;
 import org.stjs.generator.javascript.rhino.types.ClassDeclaration;
 import org.stjs.generator.javascript.rhino.types.Enum;
 import org.stjs.generator.javascript.rhino.types.FieldNode;
+import org.stjs.generator.javascript.rhino.types.GenericType;
 import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
 import org.stjs.generator.javascript.rhino.types.MethodNode;
 import org.stjs.generator.javascript.rhino.types.Vararg;
@@ -416,6 +417,14 @@ public interface AstVisitor<T> {
 	 * @param param a T object.
 	 */
 	void visitClassDeclaration(ClassDeclaration s, T param);
+
+	/**
+	 * <p>visitGenericType.</p>
+	 *
+	 * @param s a {@link org.stjs.generator.javascript.rhino.types.GenericType} object.
+	 * @param param a T object.
+	 */
+	void visitGenericType(GenericType s, T param);
 
 	/**
 	 * <p>visitVararg.</p>

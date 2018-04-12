@@ -34,7 +34,7 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testDeclarationAndAccessInnerTypeInstanceField() {
-		assertCodeContains(InnerTypes4.class, "class InnerTypes4_InnerType { innerField = 0; }");
+		assertCodeContains(InnerTypes4.class, "class InnerTypes4_InnerType { innerField: number = 0; }");
 		assertCodeContains(InnerTypes4.class, "new InnerTypes4_InnerType().innerField");
 	}
 
@@ -109,10 +109,10 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(code, "class InnerTypes15 {");
 		assertCodeContains(code, "let deep = new InnerTypes15_Inner_InnerDeep()");
 		assertCodeContains(code, "class InnerTypes15_Inner_InnerDeep {\n" +
-				"    b = \"b\";\n" +
+				"    b: string = \"b\";\n" +
 				"}");
 		assertCodeContains(code, "class InnerTypes15_Inner {\n" +
-				"    a = \"a\";\n" +
+				"    a: string = \"a\";\n" +
 				"    static InnerDeep = InnerTypes15_Inner_InnerDeep;\n" +
 				"}");
 		assertCodeContains(code, "static Inner = InnerTypes15_Inner;");
@@ -153,7 +153,7 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 	public void testInnerConstantAssignment() {
 		assertEquals(2.0, executeAndReturnNumber(InnerTypes20.class));
 
-		assertCodeContains(InnerTypes20.class, "class InnerTypes20_Holder { static VALUE = 2; }");
+		assertCodeContains(InnerTypes20.class, "class InnerTypes20_Holder { static VALUE: number = 2; }");
 	}
 
 	@Test

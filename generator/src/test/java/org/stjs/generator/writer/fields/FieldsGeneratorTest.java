@@ -10,37 +10,37 @@ import org.stjs.generator.JavascriptFileGenerationException;
 public class FieldsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testPrimitiveIntInstanceField() {
-		assertCodeContains(Fields1.class, "x = 0;");
+		assertCodeContains(Fields1.class, "x: number = 0;");
 	}
 
 	@Test
 	public void testWrapperIntInstanceField() {
-		assertCodeContains(Fields1a.class, "x = null;");
+		assertCodeContains(Fields1a.class, "x: number = null;");
 	}
 
 	@Test
 	public void testPrimitiveDoubleField() {
-		assertCodeContains(Fields1b.class, "x = 0.0;");
+		assertCodeContains(Fields1b.class, "x: number = 0.0;");
 	}
 
 	@Test
 	public void testInstanceFieldAssigned() {
-		assertCodeContains(Fields2.class, "x = 2;");
+		assertCodeContains(Fields2.class, "x: number = 2;");
 	}
 
 	@Test
 	public void testInstanceFieldAssignedNegative() {
-		assertCodeContains(Fields2b.class, "x = -2;");
+		assertCodeContains(Fields2b.class, "x: number = -2;");
 	}
 
 	@Test
 	public void testMultipleInstanceField() {
-		assertCodeContains(Fields3.class, "x = 2; y = 3;");
+		assertCodeContains(Fields3.class, "x: number = 2; y: number = 3;");
 	}
 
 	@Test
 	public void testStaticField() {
-		assertCodeContains(Fields4.class, "static x = 2;");
+		assertCodeContains(Fields4.class, "static x: number = 2;");
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
@@ -50,6 +50,7 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testAllowStaticFieldInit() {
+		// TODO :: generate synthetic types as `type`
 		assertCodeContains(Fields7.class, "static x = {};");
 	}
 
@@ -60,11 +61,12 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testParameterizedType() {
-		assertCodeContains(Fields9.class, "field = null;");
+		assertCodeContains(Fields9.class, "field: Array<string> = null;");
 	}
 
 	@Test
 	public void testGeneric() {
+		// TODO :: handle generics at class level as well
 		assertCodeContains(Fields10.class, "field = null;");
 	}
 
@@ -80,7 +82,7 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testPrivateFinalBooleanBug() {
-		assertCodeContains(Fields13.class, "value = false;");
+		assertCodeContains(Fields13.class, "value: boolean = false;");
 	}
 
 	@Test

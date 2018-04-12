@@ -7,15 +7,17 @@ public class FieldNode extends AstNode {
 
 	private String name;
 	private AstNode value;
+	private AstNode fieldType;
 	private boolean isStatic;
 
 	{
 		type = TSToken.FIELD;
 	}
 
-	public FieldNode(String name, AstNode value, boolean isStatic) {
+	public FieldNode(String name, AstNode value, AstNode type, boolean isStatic) {
 		this.name = name;
 		this.value = value;
+		this.fieldType = type;
 		this.isStatic = isStatic;
 	}
 
@@ -39,6 +41,10 @@ public class FieldNode extends AstNode {
 
 	public boolean isStatic() {
 		return isStatic;
+	}
+
+	public AstNode getFieldType() {
+		return fieldType;
 	}
 }
 

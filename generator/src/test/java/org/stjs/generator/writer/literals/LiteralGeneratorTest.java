@@ -16,7 +16,7 @@ public class LiteralGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testFloatNumbers() {
-		assertCodeContains(Literal2.class, "field=2.0;");
+		assertCodeContains(Literal2.class, "field: number =2.0;");
 	}
 
 	@Test
@@ -26,6 +26,6 @@ public class LiteralGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testBoolean() {
-		assertCodeContains(Literal4.class, "field=false;");
+		assertCodeContains(Literal4.class, "field: boolean =false;");
 	}
 }

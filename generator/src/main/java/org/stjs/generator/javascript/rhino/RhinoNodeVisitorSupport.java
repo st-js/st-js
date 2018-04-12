@@ -47,6 +47,7 @@ import org.mozilla.javascript.ast.WhileLoop;
 import org.stjs.generator.javascript.rhino.types.ClassDeclaration;
 import org.stjs.generator.javascript.rhino.types.Enum;
 import org.stjs.generator.javascript.rhino.types.FieldNode;
+import org.stjs.generator.javascript.rhino.types.GenericType;
 import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
 import org.stjs.generator.javascript.rhino.types.MethodNode;
 import org.stjs.generator.javascript.rhino.types.Vararg;
@@ -352,6 +353,12 @@ public class RhinoNodeVisitorSupport {
 			@Override
 			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
 				visitor.visitFieldNode((FieldNode) node, param);
+			}
+		});
+		addCaller(GenericType.class, new Caller() {
+			@Override
+			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
+				visitor.visitGenericType((GenericType) node, param);
 			}
 		});
 	}

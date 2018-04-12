@@ -13,6 +13,7 @@ import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.writer.JavascriptTypes;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
@@ -27,7 +28,7 @@ import com.sun.source.tree.VariableTree;
  *
  * @author acraciun
  */
-public class FieldWriter<JS> implements WriterContributor<VariableTree, JS> {
+public class FieldWriter<JS> extends JavascriptTypes<JS> implements WriterContributor<VariableTree, JS> {
 	private static final Map<String, Class<?>> PRIMITIVE_CLASSES = new HashMap<String, Class<?>>();
 	static {
 		for (Class<?> cls : Primitives.allPrimitiveTypes()) {
@@ -84,13 +85,15 @@ public class FieldWriter<JS> implements WriterContributor<VariableTree, JS> {
 		}
 
 		// Generate interface methods differently
-		TypeMirror type = context.getTrees().getTypeMirror(tw.getEnclosingType().getPath());
-		if (type instanceof Type.ClassType && ((Type.ClassType) type).isInterface()) {
-			return context.js().field(fieldName, null, false);
+		TypeMirror type = context.getTrees().getTypeMirror(tw.getPath());
+		TypeMirror enclosingType = context.getTrees().getTypeMirror(tw.getEnclosingType().getPath());
+
+		if (enclosingType instanceof Type.ClassType && ((Type.ClassType) enclosingType).isInterface()) {
+			return context.js().field(fieldName, null, false, getFieldTypeDesc(type, context));
 		}
 
-		if (type instanceof Type.ClassType) {
-			return context.js().field(fieldName, initializer, tw.isStatic());
+		if (enclosingType instanceof Type.ClassType) {
+			return context.js().field(fieldName, initializer, tw.isStatic(), getFieldTypeDesc(type, context));
 		}
 
 		throw new RuntimeException("Why do you even come here ?");

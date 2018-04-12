@@ -56,6 +56,7 @@ import org.stjs.generator.javascript.UnaryOperator;
 import org.stjs.generator.javascript.rhino.types.ClassDeclaration;
 import org.stjs.generator.javascript.rhino.types.Enum;
 import org.stjs.generator.javascript.rhino.types.FieldNode;
+import org.stjs.generator.javascript.rhino.types.GenericType;
 import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
 import org.stjs.generator.javascript.rhino.types.MethodNode;
 import org.stjs.generator.javascript.rhino.types.Vararg;
@@ -308,9 +309,9 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 
 	/** {@inheritDoc} */
 	@Override
-	public AstNode field(@Nonnull String name, AstNode value, boolean isStatic) {
+	public AstNode field(@Nonnull String name, AstNode value, boolean isStatic, AstNode type) {
 		// Auto-generated method stub
-		return new FieldNode(name, value, isStatic);
+		return new FieldNode(name, value, type, isStatic);
 	}
 
 	/** {@inheritDoc} */
@@ -668,6 +669,11 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		KeywordLiteral k = new KeywordLiteral();
 		k.setType(token.getJavaScript());
 		return k;
+	}
+
+	@Override
+	public AstNode genericType(@Nonnull AstNode name, @Nonnull Iterable<AstNode> generics) {
+		return new GenericType(name, list(generics));
 	}
 
 	/** {@inheritDoc} */

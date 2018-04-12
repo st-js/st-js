@@ -6,36 +6,37 @@ import org.stjs.generator.utils.AbstractStjsTest;
 public class TypeDescTest extends AbstractStjsTest {
 	@Test
 	public void testBasicField() {
-		assertCodeContains(TypeDesc1.class, "{});");
+		assertCodeContains(TypeDesc1.class, "x: number");
 	}
 
 	@Test
 	public void testArrayOfBasicField() {
-		assertCodeContains(TypeDesc2.class, "{x:{name:\"Array\", arguments:[null]}}");
+		assertCodeContains(TypeDesc2.class, "x: Array<number>");
 	}
 
 	@Test
 	public void testNonBasicField() {
-		assertCodeContains(TypeDesc3.class, "{x:\"Date\"}");
+		assertCodeContains(TypeDesc3.class, "x: Date");
 	}
 
 	@Test
 	public void testArrayOfNonBasicField() {
-		assertCodeContains(TypeDesc4.class, "{x:{name:\"Array\", arguments:[\"Date\"]}}");
+		assertCodeContains(TypeDesc4.class, "x: Array<Date>");
 	}
 
 	@Test
 	public void testMapOfNonBasicField() {
-		assertCodeContains(TypeDesc5.class, "{x:{name:\"Map\", arguments:[null,\"Date\"]}}");
+		assertCodeContains(TypeDesc5.class, "x: {[key: string]: Date}");
 	}
 
 	@Test
 	public void testEnum() {
-		assertCodeContains(TypeDesc6.class, "{x:{name:\"Enum\", arguments:[\"TypeDesc6.Type\"]}}");
+		assertCodeContains(TypeDesc6.class, "x: TypeDesc6_Type");
 	}
 
 	@Test
 	public void testWildcards() {
-		assertCodeContains(TypeDesc7.class, "{field:{name:\"MyType1\", arguments:[\"Object\"]}}");
+		// TODO :: should be `x: MyType1<? extends MyType2>`
+		assertCodeContains(TypeDesc7.class, "field: MyType1<any>");
 	}
 }

@@ -13,9 +13,9 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 		assertCodeDoesNotContain(Namespace1.class, "let a.b");
 		assertCodeContains(Namespace1.class, "class Namespace1 {\n" +
 				"    instanceMethod(){}\n" +
-				"    instanceField = null;\n" +
+				"    instanceField: string = null;\n" +
 				"    static staticMethod(){}\n" +
-				"    static staticField = null;\n" +
+				"    static staticField: string = null;\n" +
 				"}");
 	}
 
@@ -56,7 +56,7 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testTypeDesc() {
-		assertCodeContains(Namespace7.class, "field:\"Namespace7\"");
+		assertCodeContains(Namespace7.class, "field: Namespace7");
 	}
 
 	@Test

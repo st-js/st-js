@@ -24,6 +24,8 @@ It's work in progress but it supports.
 - `instanceof` instead of `stjs.isInstanceOf`
 - Java `for (String element : array)` loops are converted to `for ... of ` loops
 - Ignore `@Namespace` annotations (except for bridges)
+- Write types
+  - Field Types are partially supported
 
 ### New Checks
 
@@ -36,8 +38,19 @@ It's work in progress but it supports.
 
 ### Roadmap
 
-- Add type declarations to methods, fields and function arguments
+- Type Declarations
+  - Fields (partially works already)
+  - Methods
+  - Parametrized types
+  - Generics (for fields and classes)
+  - Wildcard types
+- Create `type` declarations for Synthetic classes
 - Check: Forbid Java specific methods on JavaScript (methods added by st-js, see below)
+
+## Not planned
+
+- Add imports automatically
+- Add `export` and `export default` to classes / interfaces
 
 ### Open for discussion
 - Should we automatically replace ".equals()" with "==" or "===" ?

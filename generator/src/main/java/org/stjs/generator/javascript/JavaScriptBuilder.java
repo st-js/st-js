@@ -147,9 +147,10 @@ public interface JavaScriptBuilder<T> {
 	 * @param name a {@link java.lang.String} object.
 	 * @param value a T object.
 	 * @param isStatic is it a static method ?
+	 * @param type the field's type
 	 * @return a T object.
 	 */
-	T field(@Nonnull String name, T value, boolean isStatic);
+	T field(@Nonnull String name, T value, boolean isStatic, T type);
 
 	/**
 	 * <p>functionCall.</p>
@@ -167,6 +168,15 @@ public interface JavaScriptBuilder<T> {
 	 * @return a T object.
 	 */
 	T keyword(@Nonnull Keyword token);
+
+	/**
+	 * <p>genericType.</p>
+	 *
+	 * @param name a base type name
+	 * @param generics the generic parameters
+	 * @return a T object.
+	 */
+	T genericType(@Nonnull T name, @Nonnull Iterable<T> generics);
 
 	/**
 	 * <p>name.</p>

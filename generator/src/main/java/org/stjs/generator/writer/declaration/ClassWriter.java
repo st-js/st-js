@@ -182,78 +182,6 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		stmts.add(js.ifStatement(condition, thenPart, null));
 	}
 
-	/*
-	@SuppressWarnings("unchecked")
-	private JS getFieldTypeDesc(TypeMirror type, GenerationContext<JS> context) {
-		JavaScriptBuilder<JS> js = context.js();
-		if (JavaNodes.isJavaScriptPrimitive(type)) {
-			return js.keyword(Keyword.NULL);
-		}
-		JS typeName = js.string(context.getNames().getTypeName(context, type, DependencyType.OTHER));
-
-		if (type instanceof DeclaredType) {
-			DeclaredType declaredType = (DeclaredType) type;
-
-			// enum
-			if (declaredType.asElement().getKind() == ElementKind.ENUM) {
-				return js.object(Arrays.asList(NameValue.of("name", js.string("Enum")),
-						NameValue.of("arguments", js.array(Collections.singleton(typeName)))));
-			}
-			// parametrized type
-			if (!declaredType.getTypeArguments().isEmpty()) {
-				List<JS> array = new ArrayList<JS>();
-				for (TypeMirror arg : declaredType.getTypeArguments()) {
-					array.add(getFieldTypeDesc(arg, context));
-				}
-				return js.object(Arrays.asList(NameValue.of("name", typeName), NameValue.of("arguments", js.array(array))));
-			}
-
-		}
-
-		return typeName;
-	}
-
-	@SuppressWarnings("unused")
-	private JS getTypeDescription(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context) {
-		// if (isGlobal(type)) {
-		// printer.print(JavascriptKeywords.NULL);
-		// return;
-		// }
-
-		TypeElement type = TreeUtils.elementFromDeclaration(tree);
-
-		List<NameValue<JS>> props = new ArrayList<>();
-		for (Element member : ElementUtils.getAllFieldsIn(type)) {
-			TypeMirror memberType = ElementUtils.getType(member);
-			if (JavaNodes.isJavaScriptPrimitive(memberType)) {
-				continue;
-			}
-			if (member.getKind() == ElementKind.ENUM_CONSTANT) {
-				continue;
-			}
-			if (memberType instanceof TypeVariable) {
-				// what to do with fields of generic parameters !?
-				continue;
-			}
-			if (!skipTypeDescForField(member)) {
-				props.add(NameValue.of(member.getSimpleName(), getFieldTypeDesc(memberType, context)));
-			}
-		}
-		return context.js().object(props);
-	}
-
-	private boolean skipTypeDescForField(Element member) {
-		if (((TypeElement) member.getEnclosingElement()).getQualifiedName().toString().startsWith("java.lang.")) {
-			// maybe we should rather skip the bridge classes here
-			return true;
-		}
-		if (member.getAnnotation(ServerSide.class) != null) {
-			return true;
-		}
-		return false;
-	}
-	*/
-
 	private List<Tree> getAllClasses(ClassTree clazz) {
 		List<Tree> enums = new ArrayList<>();
 		for (Tree member : clazz.getMembers()) {
@@ -266,7 +194,6 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		}
 		return enums;
 	}
-
 
 	/**
 	 * Special generation for classes marked with {@link org.stjs.javascript.annotation.GlobalScope}. The name of the
@@ -339,7 +266,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 		JavaScriptBuilder<JS> js = context.js();
 
 		stmts.add(
-				js.field(name, js.name(typeName), true)
+				js.field(name, js.name(typeName), true, null)
 		);
 	}
 

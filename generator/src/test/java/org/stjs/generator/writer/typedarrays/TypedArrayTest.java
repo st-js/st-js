@@ -92,7 +92,21 @@ public class TypedArrayTest extends AbstractStjsTest {
 	@Test
     public void testPrimitiveArrayFields() throws Exception {
         String generated = generate(PrimitiveArrayFields.class);
-        assertCodeContains(generated, "bool: \"Int8Array\", b: \"Int8Array\", s: \"Int16Array\", c: \"Uint16Array\", i: \"Int32Array\", f: \"Float32Array\", d: \"Float64Array\", bool2d: \"Array\"");
+        assertCodeContains(generated, "    bool: Int8Array = null;\n"
+				+ "    b: Int8Array = null;\n"
+				+ "    s: Int16Array = null;\n"
+				+ "    c: Uint16Array = null;\n"
+				+ "    i: Int32Array = null;\n"
+				+ "    f: Float32Array = null;\n"
+				+ "    d: Float64Array = null;\n"
+				+ "    bool2d: Array = null;\n" // TODO :: original type is boolean[][] might need to specify this in some way
+				+ "    _bool: boolean = false;\n"
+				+ "    _b: any = 0;\n"
+				+ "    _s: number = 0;\n"
+				+ "    _c: any = '\\x00';\n"
+				+ "    _i: number = 0;\n"
+				+ "    _f: number = 0.0;\n"
+				+ "    _d: number = 0.0;\n");
     }
 
 	@Test

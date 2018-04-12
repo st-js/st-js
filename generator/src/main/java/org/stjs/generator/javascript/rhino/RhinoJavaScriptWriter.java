@@ -57,6 +57,7 @@ import com.google.debugging.sourcemap.SourceMapGeneratorFactory;
 import org.stjs.generator.javascript.rhino.types.ClassDeclaration;
 import org.stjs.generator.javascript.rhino.types.Enum;
 import org.stjs.generator.javascript.rhino.types.FieldNode;
+import org.stjs.generator.javascript.rhino.types.GenericType;
 import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
 import org.stjs.generator.javascript.rhino.types.MethodNode;
 import org.stjs.generator.javascript.rhino.types.Vararg;
@@ -542,12 +543,18 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 			print("static ");
 		}
 
+		print(f.getName());
+
+		if (f.getFieldType() != null) {
+			print(": ");
+			visitorSupport.accept(f.getFieldType(), this, param);
+		}
+
 		if (f.getValue() == null) {
-			println(f.getName() + ";");
+			println(";");
 			return;
 		}
 
-		print(f.getName());
 		print(" = ");
 		visitorSupport.accept(f.getValue(), this, param);
 		println(";");
@@ -908,6 +915,16 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		}
 
 		println("}");
+	}
+
+	@Override
+	public void visitGenericType(GenericType s, Boolean param) {
+		visitorSupport.accept(s.getName(), this, param);
+		print("<");
+		if (s.getGenerics() != null) {
+			printList(s.getGenerics(), param);
+		}
+		print(">");
 	}
 
 	/**
