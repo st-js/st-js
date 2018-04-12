@@ -125,6 +125,11 @@ public class MethodWriter<JS> implements WriterContributor<MethodTree, JS> {
 			}
 		}
 
+		// Do not generate synthetic constructors
+		if (InternalUtils.isSyntheticConstructor(tree)) {
+			return null;
+		}
+
 		// Generate interface methods differently
 		TypeMirror type = context.getTrees().getTypeMirror(tw.getEnclosingType().getPath());
 

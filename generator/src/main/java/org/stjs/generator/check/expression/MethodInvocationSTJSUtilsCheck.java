@@ -18,7 +18,7 @@ import com.sun.source.tree.MethodInvocationTree;
  *
  * @author sgoetz
  */
-public class MethodInvocationAnnotationsCheck implements CheckContributor<MethodInvocationTree> {
+public class MethodInvocationSTJSUtilsCheck implements CheckContributor<MethodInvocationTree> {
 
 	/**
 	 * {@inheritDoc}
@@ -31,22 +31,12 @@ public class MethodInvocationAnnotationsCheck implements CheckContributor<Method
 			return null;
 		}
 
-		// This only concerns the annotation methods in ST-JS
-		if (
-				!"getTypeAnnotation".equals(name)
-				&& !"getAnnotations".equals(name)
-				&& !"getMemberAnnotation".equals(name)
-				&& !"getParameterAnnotation".equals(name)
-				) {
-			return null;
-		}
-
 		Element methodElement = InternalUtils.symbol(tree);
 		TypeElement methodOwnerElement = (TypeElement) methodElement.getEnclosingElement();
 
 		String canonicalName = STJS.class.getCanonicalName();
 		if (canonicalName.equals(methodOwnerElement.toString())) {
-			context.addError(tree, "In TypeScript annotations aren't supported . Called 'stjs." + name + "()'");
+			context.addError(tree, "You can't use stjs utils anymore. Called 'stjs." + name + "()'");
 		}
 
 		return null;

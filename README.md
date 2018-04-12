@@ -29,7 +29,7 @@ It's work in progress but it supports.
 
 ### New Checks
 
-- You cannot Java specific methods on JavaScript (methods added by st-js)
+- You cannot call Java specific methods on JavaScript (methods added by st-js, or base methods from java.lang.Object)
 - You cannot call methods on Enums (like `.ordinal()` / `valueOf()` / `.name()` ...)
 - You cannot do `instanceof` on interfaces nor primitive types
 - You cannot add a body to an interface method
@@ -51,9 +51,6 @@ It's work in progress but it supports.
 
 - Add imports automatically
 - Add `export` and `export default` to classes / interfaces
-
-### Open for discussion
-- Should we automatically replace ".equals()" with "==" or "===" ?
 
 Compiling the Project
 ---------------------

@@ -14,7 +14,7 @@ public class AnnotationsTest extends AbstractStjsTest {
 	@Test
 	public void testAnnotationClass() {
 		expectedEx.expect(MultipleFileGenerationException.class);
-		expectedEx.expectMessage("In TypeScript annotations aren't supported . Called 'stjs.getTypeAnnotation()'");
+		expectedEx.expectMessage("You can't use stjs utils anymore. Called 'stjs.getTypeAnnotation()'");
 
 		generate(Annotation1.class);
 	}
@@ -22,7 +22,7 @@ public class AnnotationsTest extends AbstractStjsTest {
 	@Test
 	public void testAnnotationParam() {
 		expectedEx.expect(MultipleFileGenerationException.class);
-		expectedEx.expectMessage("In TypeScript annotations aren't supported . Called 'stjs.getParameterAnnotation()'");
+		expectedEx.expectMessage("You can't use stjs utils anymore. Called 'stjs.getParameterAnnotation()'");
 
 		generate(Annotation5.class);
 	}
