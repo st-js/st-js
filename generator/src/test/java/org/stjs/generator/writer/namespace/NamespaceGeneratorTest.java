@@ -21,9 +21,9 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testExtends() {
-		assertCodeContains(Namespace2.class, "class Namespace2_Child extends Namespace2 {");
+		assertCodeContains(Namespace2.class, "class Namespace2_Child extends Namespace2 {}");
 		// call super
-		assertCodeContains(Namespace2.class, "constructor() { super(); }");
+		assertCodeContains(Namespace2.class, "class Namespace2 { static Child = Namespace2_Child; }");
 	}
 
 	@Test
@@ -61,7 +61,7 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testInlineConstruct() {
-		assertCodeContains(Namespace8.class, "class Namespace8_Namespace8$1 extends Namespace8 { constructor() { super(); } ");
+		assertCodeContains(Namespace8.class, "class Namespace8_Namespace8$1 extends Namespace8 { method() {} } ");
 	}
 
 	@Test(

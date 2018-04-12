@@ -60,7 +60,7 @@ public class CallSuperGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testAddCallSuperConstructorUndefined() {
 		// call to super should be generated, when not defined explicitely
-		assertCodeContains(CallSuper9.class, "constructor(){super();}");
+		assertCodeContains(CallSuper9.class, "class CallSuper9 extends SuperClass { x: number = 0; }");
 	}
 
 	@Test
