@@ -297,14 +297,14 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 
 	/** {@inheritDoc} */
 	@Override
-	public AstNode method(String name, Iterable<AstNode> params, AstNode originalBody, boolean isStatic, boolean isAbstract) {
+	public AstNode method(String name, Iterable<AstNode> params, AstNode originalBody, AstNode returnType, boolean isStatic, boolean isAbstract, boolean isPrivate) {
 		AstNode body = originalBody;
 		if (body != null && !(body instanceof Block)) {
 			body = addStatement(null, body);
 		}
 
 		// Auto-generated method stub
-		return new MethodNode(name, list(params), body, isStatic, isAbstract);
+		return new MethodNode(name, list(params), body, returnType, isStatic, isAbstract, isPrivate);
 	}
 
 	/** {@inheritDoc} */

@@ -148,7 +148,7 @@ public class MethodWriter<JS> implements WriterContributor<MethodTree, JS> {
 			body = null;
 		}
 
-		return context.js().method(methodName, params, body, tw.isStatic(), isAbstract);
+		return context.js().method(methodName, params, body, null, tw.isStatic(), isAbstract, tw.isPrivate());
 	}
 
 }

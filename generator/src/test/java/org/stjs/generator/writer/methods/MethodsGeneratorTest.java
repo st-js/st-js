@@ -15,7 +15,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testPrivateInstanceMethod() {
 		// same as public
-		assertCodeContains(Methods2.class, "class Methods2 { method(arg1, arg2){");
+		assertCodeContains(Methods2.class, "class Methods2 { private method(arg1, arg2){");
 	}
 
 	@Test
@@ -29,7 +29,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	public void testPrivateStaticMethod() {
 		assertCodeContains(Methods4.class, //
 				"class Methods4 {" + //
-						"static method(arg1, arg2){");
+						"private static method(arg1, arg2){");
 	}
 
 	@Test

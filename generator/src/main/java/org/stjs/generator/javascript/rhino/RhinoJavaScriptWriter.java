@@ -506,6 +506,10 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	public void visitMethodNode(MethodNode f, Boolean param) {
 		printComments(f);
 
+		if (f.isPrivate()) {
+			print("private ");
+		}
+
 		if (f.isAbstract()) {
 			print("abstract ");
 		}
@@ -518,8 +522,6 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 			print(f.getName());
 		}
 
-		boolean hasBody = f.getBody() != null;
-
 		if (f.getParams() == null) {
 			print("()");
 		} else {
@@ -528,7 +530,12 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 			print(")");
 		}
 
-		if (hasBody) {
+		if (f.getReturnType() != null) {
+			print(": ");
+			visitorSupport.accept(f.getReturnType(), this, param);
+		}
+
+		if (f.getBody() != null) {
 			visitorSupport.accept(f.getBody(), this, param);
 			println();
 		} else {

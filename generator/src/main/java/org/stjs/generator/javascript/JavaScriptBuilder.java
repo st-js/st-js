@@ -135,11 +135,13 @@ public interface JavaScriptBuilder<T> {
 	 * @param name a {@link java.lang.String} object.
 	 * @param params a {@link java.lang.Iterable} object.
 	 * @param body a T object.
+	 * @param returnType a T object to represent the return type
 	 * @param isStatic is it a static method ?
 	 * @param isAbstract is it an abstract method ?
+	 * @param isPrivate is it a private method ?
 	 * @return a T object.
 	 */
-	T method(@Nullable String name, @Nonnull Iterable<T> params, T body, boolean isStatic, boolean isAbstract);
+	T method(@Nullable String name, @Nonnull Iterable<T> params, T body, T returnType, boolean isStatic, boolean isAbstract, boolean isPrivate);
 
 	/**
 	 * <p>field.</p>

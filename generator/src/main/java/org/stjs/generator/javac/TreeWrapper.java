@@ -120,6 +120,16 @@ public class TreeWrapper<T extends Tree, JS> {
 	}
 
 	/**
+	 * <p>isPrivate.</p>
+	 *
+	 * @return a boolean.
+	 */
+	public boolean isPrivate() {
+		Set<Modifier> modifiers = element.getModifiers();
+		return modifiers.contains(Modifier.PRIVATE);
+	}
+
+	/**
 	 * <p>isAbstract.</p>
 	 *
 	 * @return a boolean.
