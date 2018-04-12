@@ -42,7 +42,7 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 	}
 
 	/**
-	 * @return the node to put in the super class. for intefaces, the super class goes also in the interfaces list
+	 * @return the node to put in the super class. for interfaces, the super class goes also in the interfaces list
 	 */
 	private JS getSuperClass(ClassTree clazz, GenerationContext<JS> context) {
 		Element type = TreeUtils.elementFromDeclaration(clazz);

@@ -1,10 +1,16 @@
 package org.stjs.generator.writer.specialMethods;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.stjs.generator.MultipleFileGenerationException;
 import org.stjs.generator.utils.AbstractStjsTest;
 import org.stjs.generator.JavascriptFileGenerationException;
 
 public class SpecialMethodGeneratorTest extends AbstractStjsTest {
+
+	@Rule
+	public ExpectedException expectedEx = ExpectedException.none();
 
 	@Test
 	public void testSpecialGet() {
@@ -92,12 +98,16 @@ public class SpecialMethodGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testSpecialEquals() {
+		expectedEx.expect(MultipleFileGenerationException.class);
+		expectedEx.expectMessage("You are trying to call a method that exists only in Java. Called 'Integer.prototype.equals()'");
 		// no longer [x.equals(y) -> x == y], but keep equals as is
 		assertCodeContains(SpecialMethod10.class, "x.equals(2)");
 	}
 
 	@Test
 	public void testSpecialNotEquals() {
+		expectedEx.expect(MultipleFileGenerationException.class);
+		expectedEx.expectMessage("You are trying to call a method that exists only in Java. Called 'Integer.prototype.equals()'");
 		// no longer [!x.equals(y) -> !(x == y)], but keep equals as is
 		assertCodeContains(SpecialMethod11.class, "!x.equals(2)");
 	}

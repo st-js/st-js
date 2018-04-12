@@ -51,7 +51,7 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testAllowStaticFieldInit() {
 		// TODO :: generate synthetic types as `type`
-		assertCodeContains(Fields7.class, "static x = {};");
+		assertCodeContains(Fields7.class, "static x: Pojo = {};");
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)

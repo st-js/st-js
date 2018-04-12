@@ -3,9 +3,12 @@ package org.stjs.generator.sourcemap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.stjs.generator.utils.AbstractStjsTest;
 
+// We don't have to care about stacktraces, sourcemaps and stuff
+@Ignore
 public class StacktraceTest extends AbstractStjsTest {
 
 	@Test
