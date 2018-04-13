@@ -83,7 +83,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	private static final Object PACKAGE_INFO_JAVA = "package-info.java";
 
 	/**
-	
+
 	 */
 	@Parameter(
 			defaultValue = "${project}", required = true, readonly = true)
@@ -95,21 +95,21 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	protected BuildContext buildContext;
 	/**
 	 * The list of packages that can be referenced from the classes that will be processed by the generator
-	 * 
+	 *
 	 */
 	@Parameter
 	protected List<String> allowedPackages;
 
 	/**
 	 * A list of inclusion filters for the compiler.
-	 * 
+	 *
 	 */
 	@Parameter
 	protected Set<String> includes = new HashSet<String>();
 
 	/**
 	 * A list of exclusion filters for the compiler.
-	 * 
+	 *
 	 */
 	@Parameter
 	protected Set<String> excludes = new HashSet<String>();
@@ -117,7 +117,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	/**
 	 * Sets the granularity in milliseconds of the last modification date for testing whether a source needs
 	 * recompilation.
-	 * 
+	 *
 	 */
 	@Parameter(
 			defaultValue = "0")
@@ -125,7 +125,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 	/**
 	 * If true the check, if (!array.hasOwnProperty(index)) continue; is added in each "for" array iteration
-	 * 
+	 *
 	 */
 	@Parameter(
 			defaultValue = "true")
@@ -134,7 +134,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	/**
 	 * If true, it generates for each JavaScript the corresponding source map back to the corresponding Java file. It
 	 * also copies the Java source file in the same folder as the generated Javascript file.
-	 * 
+	 *
 	 */
 	@Parameter(
 			defaultValue = "false")
@@ -143,7 +143,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 	/**
 	 * If true, it packs all the generated Javascript file (using the correct dependency order) into a single file named
 	 * ${project.artifactName}.js
-	 * 
+	 *
 	 */
 	@Parameter(
 			defaultValue = "false")
@@ -157,7 +157,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 
 	/**
 	 * A list of annotations to be generated
-	 * 
+	 *
 	 */
 	@Parameter
 	protected Set<String> annotations = new HashSet<String>();

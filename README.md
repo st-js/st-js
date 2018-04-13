@@ -45,7 +45,6 @@ It's work in progress but it supports.
   - Parametrized types
   - Generics (for fields and classes)
   - Wildcard types
-- Create `type` declarations for Synthetic classes
 
 ## Not planned
 

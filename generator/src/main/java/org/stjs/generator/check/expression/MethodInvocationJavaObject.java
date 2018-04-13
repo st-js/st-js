@@ -12,7 +12,6 @@ import org.stjs.generator.check.CheckContributor;
 import org.stjs.generator.check.CheckVisitor;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.writer.expression.MethodInvocationWriter;
-import org.stjs.javascript.stjs.STJS;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -51,7 +50,7 @@ public class MethodInvocationJavaObject implements CheckContributor<MethodInvoca
 			}
 
 			String methodName = ((Symbol.MethodSymbol) member).name.toString();
-			String owner = ((Symbol.ClassSymbol)((Symbol.MethodSymbol) member).owner).type.toString();
+			String owner = ((Symbol.ClassSymbol) ((Symbol.MethodSymbol) member).owner).type.toString();
 
 			if (method.equals(methodName) && !owner.startsWith("java.lang.")) {
 				return ((Symbol.MethodSymbol) member);

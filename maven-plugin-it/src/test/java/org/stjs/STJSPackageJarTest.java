@@ -10,7 +10,7 @@ import org.junit.Test;
 
 /**
  * This integration test checks if a jar is correctly packaged
- * 
+ *
  * @author acraciun
  */
 public class STJSPackageJarTest extends AbstractPackagingTest {
