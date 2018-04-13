@@ -36,7 +36,7 @@ public class STJSPackageWarTest extends AbstractPackagingTest {
 		Set<String> entryNames = JarUtils.getJarEntries(artifactFile);
 
 		assertContainsEntry(entryNames, "generated-js/stjs.js");
-		assertContainsEntry(entryNames, "generated-js/org/stjs/example/lib/stjs/STJSLibExample.js");
+		assertContainsEntry(entryNames, "generated-js/org/stjs/example/lib/stjs/STJSLibExample.ts");
 		assertContainsEntry(entryNames, "WEB-INF/classes/org/stjs/example/lib/stjs/STJSLibExample.stjs");
 		assertContainsEntry(entryNames, "js/stjs/example/stjs-lib-example.js");
 		// check that jquery is copied as well
@@ -46,7 +46,7 @@ public class STJSPackageWarTest extends AbstractPackagingTest {
 		assertEntryContainsText( //
 				artifactFile, //
 				"WEB-INF/classes/org/stjs/example/lib/stjs/STJSLibExample.stjs", //
-				"js=/generated-js/org/stjs/example/lib/stjs/STJSLibExample.js" //
+				"js=/generated-js/org/stjs/example/lib/stjs/STJSLibExample.ts" //
 		);
 		verifier.resetStreams();
 

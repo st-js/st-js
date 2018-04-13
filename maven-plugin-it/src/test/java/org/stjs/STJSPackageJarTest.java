@@ -35,16 +35,16 @@ public class STJSPackageJarTest extends AbstractPackagingTest {
 		Set<String> entryNames = JarUtils.getJarEntries(artifactFile);
 
 		assertContainsEntry(entryNames, "stjs.js");
-		assertContainsEntry(entryNames, "org/stjs/example/lib/stjs/STJSLibExample.js");
+		assertContainsEntry(entryNames, "org/stjs/example/lib/stjs/STJSLibExample.ts");
 		assertContainsEntry(entryNames, "org/stjs/example/lib/stjs/STJSLibExample.stjs");
 		assertContainsEntry(entryNames, "stjs/example/stjs-lib-example.js");
-		assertContainsEntry(entryNames, "DefaultPackageExample.js");
+		assertContainsEntry(entryNames, "DefaultPackageExample.ts");
 
 
 		assertEntryContainsText( //
 				artifactFile, //
 				"org/stjs/example/lib/stjs/STJSLibExample.stjs", //
-				"js=classpath\\:/org/stjs/example/lib/stjs/STJSLibExample.js" //
+				"js=classpath\\:/org/stjs/example/lib/stjs/STJSLibExample.ts" //
 		);
 
 		verifier.resetStreams();

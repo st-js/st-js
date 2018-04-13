@@ -37,20 +37,20 @@ public class STJSPackageWebJarTest extends AbstractPackagingTest {
 		// all resources that must be loaded by a browser must be packaged in the folder
 		// specified in <generatedSourcesDirectory>
 		assertContainsEntry(entryNames,
-				"META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/org/stjs/example/lib/stjs/STJSLibExample.js");
+				"META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/org/stjs/example/lib/stjs/STJSLibExample.ts");
 		assertContainsEntry(entryNames,
 				"META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/org/stjs/example/lib/stjs/STJSLibExample.map");
 		assertContainsEntry(entryNames,
 				"META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/org/stjs/example/lib/stjs/STJSLibExample.java");
 		assertContainsEntry(entryNames, "META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/stjs/example/stjs-lib-example.js");
-		assertContainsEntry(entryNames, "META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/DefaultPackageExample.js");
+		assertContainsEntry(entryNames, "META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/DefaultPackageExample.ts");
 		assertContainsEntry(entryNames, "META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/DefaultPackageExample.map");
 		assertContainsEntry(entryNames, "META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/DefaultPackageExample.java");
 		assertNotContainsEntry(entryNames, "org/stjs/example/lib/stjs/STJSLibExample.js");
 		assertNotContainsEntry(entryNames, "org/stjs/example/lib/stjs/STJSLibExample.map");
 		assertNotContainsEntry(entryNames, "org/stjs/example/lib/stjs/STJSLibExample.java");
 		assertNotContainsEntry(entryNames, "stjs/example/stjs-lib-example.js");
-		assertNotContainsEntry(entryNames, "DefaultPackageExample.js");
+		assertNotContainsEntry(entryNames, "DefaultPackageExample.ts");
 		assertNotContainsEntry(entryNames, "DefaultPackageExample.map");
 		assertNotContainsEntry(entryNames, "DefaultPackageExample.java");
 
@@ -76,7 +76,7 @@ public class STJSPackageWebJarTest extends AbstractPackagingTest {
 		assertEntryContainsText( //
 				artifactFile, //
 				"META-INF/resources/webjars/package-js-webjar/1.0.0-SNAPSHOT/org/stjs/example/lib/stjs/STJSLibExample.stjs", //
-				"js=webjar\\:/org/stjs/example/lib/stjs/STJSLibExample.js" //
+				"js=webjar\\:/org/stjs/example/lib/stjs/STJSLibExample.ts" //
 		);
 
 		verifier.resetStreams();

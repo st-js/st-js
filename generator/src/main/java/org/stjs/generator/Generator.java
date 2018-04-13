@@ -144,7 +144,7 @@ public class Generator {
 	 * @return a {@link java.io.File} object.
 	 */
 	public File getOutputFile(File generationFolder, String className, boolean generateDirectory) {
-		File output = new File(generationFolder, className.replace('.', File.separatorChar) + ".js");
+		File output = new File(generationFolder, className.replace('.', File.separatorChar) + ".ts");
 		if (generateDirectory && !output.getParentFile().exists() && !output.getParentFile().mkdirs()) {
 			throw new STJSRuntimeException("Unable to create parent folder for the output file:" + output);
 		}
@@ -215,7 +215,7 @@ public class Generator {
 	}
 
 	private URI getRuntimeUri(String className) {
-		String jsFilePath = className.replace('.', '/') + ".js";
+		String jsFilePath = className.replace('.', '/') + ".ts";
 		return config.getGenerationFolder().getGeneratedSourcesRuntimePath().resolve(jsFilePath);
 	}
 

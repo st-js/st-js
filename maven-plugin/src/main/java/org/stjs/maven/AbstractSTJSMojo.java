@@ -273,7 +273,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		// scan the modified sources
 		for (String sourceRoot : getCompileSourceRoots()) {
 			File sourceDir = new File(sourceRoot);
-			SourceMapping mapping = new SuffixMapping(".java", ".js");
+			SourceMapping mapping = new SuffixMapping(".java", ".ts");
 			SourceMapping stjsMapping = new SuffixMapping(".java", ".stjs");
 
 			List<File> sources = accumulateSources(gendir, sourceDir, mapping, stjsMapping, staleMillis);
@@ -378,12 +378,12 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 		// pack the files
 		try {
 			DirectedGraph<String, DefaultEdge> dependencyGraph = new DefaultDirectedGraph<String, DefaultEdge>(DefaultEdge.class);
-			File outputFile = new File(gendir.getGeneratedSourcesAbsolutePath(), project.getArtifactId() + ".js");
+			File outputFile = new File(gendir.getGeneratedSourcesAbsolutePath(), project.getArtifactId() + ".ts");
 			allSourcesFile = new BufferedOutputStream(new FileOutputStream(outputFile));
 			for (String sourceRoot : getCompileSourceRoots()) {
 				File sourceDir = new File(sourceRoot);
 				List<File> sources = new ArrayList<File>();
-				SourceMapping mapping = new SuffixMapping(".java", ".js");
+				SourceMapping mapping = new SuffixMapping(".java", ".ts");
 				SourceMapping stjsMapping = new SuffixMapping(".java", ".stjs");
 
 				// take all the files
@@ -444,7 +444,7 @@ abstract public class AbstractSTJSMojo extends AbstractMojo {
 			if (generateSourceMap) {
 				File packMapFile = new File(gendir.getGeneratedSourcesAbsolutePath(), project.getArtifactId() + ".map");
 				packMapStream = new BufferedWriter(new FileWriter(packMapFile));
-				packSourceMap.appendTo(packMapStream, project.getArtifactId() + ".js");
+				packSourceMap.appendTo(packMapStream, project.getArtifactId() + ".ts");
 
 				allSourcesFile.write(("//# sourceMappingURL=" + project.getArtifactId() + ".map\n").getBytes());
 				allSourcesFile.flush();
