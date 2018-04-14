@@ -39,12 +39,17 @@ It's work in progress but it supports.
 
 ### Roadmap
 
-- Type Declarations
-  - Fields (partially works already)
-  - Methods
-  - Parametrized types
-  - Generics (for fields and classes)
+- Types of type declaration
+  - Simple types √
+  - Parametrized types √
   - Wildcard types
+
+- Type Declarations
+  - Fields √
+  - Methods √
+  - Method parameters
+  - Generics
+  
 
 ## Not planned
 

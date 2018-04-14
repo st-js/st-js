@@ -533,6 +533,7 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		if (f.getReturnType() != null) {
 			print(": ");
 			visitorSupport.accept(f.getReturnType(), this, param);
+			print(" ");
 		}
 
 		if (f.getBody() != null) {

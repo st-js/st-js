@@ -26,7 +26,7 @@ public class InnerTypesGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testDeclarationAndAccessInnerTypeInstanceMethod() {
-		assertCodeContains(InnerTypes3.class, "class InnerTypes3_InnerType { innerMethod() {} }");
+		assertCodeContains(InnerTypes3.class, "class InnerTypes3_InnerType { innerMethod(): void {} }");
 		assertCodeContains(InnerTypes3.class, "new InnerTypes3_InnerType().innerMethod()");
 		assertCodeContains(InnerTypes3.class, "let x = new InnerTypes3_InnerType()");
 		assertCodeDoesNotContain(InnerTypes3.class, "function(constructor, prototype){InnerTypes3.InnerType=");

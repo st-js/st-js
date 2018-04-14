@@ -9,27 +9,27 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	public void testPublicInstanceMethod() {
 		assertCodeContains(Methods1.class, //
 				"class Methods1 {" + //
-						"method(arg1,arg2){return 0;}");
+						"method(arg1,arg2): void {return 0;}");
 	}
 
 	@Test
 	public void testPrivateInstanceMethod() {
 		// same as public
-		assertCodeContains(Methods2.class, "class Methods2 { private method(arg1, arg2){");
+		assertCodeContains(Methods2.class, "class Methods2 { private method(arg1, arg2): void {");
 	}
 
 	@Test
 	public void testPublicStaticMethod() {
 		assertCodeContains(Methods3.class, //
 				"class Methods3 {" + //
-						"static method(arg1,arg2){");
+						"static method(arg1,arg2): void{");
 	}
 
 	@Test
 	public void testPrivateStaticMethod() {
 		assertCodeContains(Methods4.class, //
 				"class Methods4 {" + //
-						"private static method(arg1, arg2){");
+						"private static method(arg1, arg2): void {");
 	}
 
 	@Test
@@ -46,7 +46,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testSpecialThis() {
 		// the special parameter THIS should not be added
-		assertCodeContains(Methods7.class, "method(THIS, arg2){");
+		assertCodeContains(Methods7.class, "method(THIS, arg2): void{");
 	}
 
 	@Test
@@ -62,12 +62,12 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testVarArgsMethod3() {
 		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
-		assertCodeContains(Methods11.class, "method(..._arguments){}");
+		assertCodeContains(Methods11.class, "method(..._arguments): void {}");
 	}
 
 	@Test
 	public void testVarArgsMethod4Native() {
-		assertCodeContains(Methods11_b.class, "class Methods11_b { test(props){}");
+		assertCodeContains(Methods11_b.class, "class Methods11_b { test(props): void{}");
 
 		assertCodeDoesNotContain(Methods11_b.class, "prototype.method=function");
 	}
@@ -86,8 +86,8 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	public void testAbstractMethod() {
 		// the class only contains abstract methods, therefore nothing must be generated
 		assertCodeContains(Methods15.class, "abstract class Methods15 {" //
-				+ "abstract doSomething();" //
-				+ "abstract doSomethingElse();" //
+				+ "abstract doSomething(): void;" //
+				+ "abstract doSomethingElse(): void;" //
 				+ "}");
 	}
 
@@ -95,8 +95,8 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	public void testInterfaceMethods() {
 		// the class only contains interface methods, therefore nothing must be generated
 		assertCodeContains(Methods15b.class, "interface Methods15b {" //
-				+ "doSomething();" //
-				+ "doSomethingElse();" //
+				+ "doSomething(): void;" //
+				+ "doSomethingElse(): void;" //
 				+ "}");
 	}
 

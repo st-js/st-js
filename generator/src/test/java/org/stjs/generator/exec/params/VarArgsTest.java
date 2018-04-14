@@ -8,7 +8,7 @@ import org.stjs.generator.utils.AbstractStjsTest;
 public class VarArgsTest extends AbstractStjsTest {
 	@Test
 	public void testSimple() {
-		assertCodeContains(VarArgs1.class, "add(a, b, ...other) {");
+		assertCodeContains(VarArgs1.class, "add(a, b, ...other): void {");
 		Double result = executeAndReturnNumber(VarArgs1.class);
 		assertEquals(10.0, result, 0);
 	}

@@ -88,17 +88,14 @@ public class FieldWriter<JS> extends JavascriptTypes<JS> implements WriterContri
 		TypeMirror type = context.getTrees().getTypeMirror(tw.getPath());
 		TypeMirror enclosingType = context.getTrees().getTypeMirror(tw.getEnclosingType().getPath());
 
-		if (enclosingType instanceof Type.ClassType && ((Type.ClassType) enclosingType).isInterface()) {
+		if (!(enclosingType instanceof Type.ClassType)) {
+			throw new RuntimeException("How do you even arrive here ?");
+		}
+
+		if (((Type.ClassType) enclosingType).isInterface()) {
 			return context.js().field(fieldName, null, false, getFieldTypeDesc(type, context));
 		}
 
-		if (enclosingType instanceof Type.ClassType) {
-			return context.js().field(fieldName, initializer, tw.isStatic(), getFieldTypeDesc(type, context));
-		}
-
-		throw new RuntimeException("Why do you even come here ?");
-
-		//JS member = context.js().property(getMemberTarget(tw), fieldName);
-		//return context.js().expressionStatement(context.js().assignment(AssignOperator.ASSIGN, member, initializer));
+		return context.js().field(fieldName, initializer, tw.isStatic(), getFieldTypeDesc(type, context));
 	}
 }

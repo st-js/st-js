@@ -66,8 +66,7 @@ public class FieldsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testGeneric() {
-		// TODO :: handle generics at class level as well
-		assertCodeContains(Fields10.class, "field = null;");
+		assertCodeContains(Fields10.class, "field: T = null;");
 	}
 
 	@Test

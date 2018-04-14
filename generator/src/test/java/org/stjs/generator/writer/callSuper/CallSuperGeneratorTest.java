@@ -17,38 +17,38 @@ public class CallSuperGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testOverrideAndCallSuper() {
-		assertCodeContains(CallSuper3.class, "instanceMethod(arg){ super.instanceMethod(arg);}");
+		assertCodeContains(CallSuper3.class, "instanceMethod(arg): void { super.instanceMethod(arg);}");
 	}
 
 	@Test
 	public void testInstanceCallSuper() {
-		assertCodeContains(CallSuper4.class, "instanceMethod2(arg){ this.instanceMethod(arg);}");
+		assertCodeContains(CallSuper4.class, "instanceMethod2(arg): void { this.instanceMethod(arg);}");
 	}
 
 	@Test
 	public void testInstanceCallSuperImplementInterface() {
-		assertCodeContains(CallSuper4b.class, "instanceMethod2(arg){ this.instanceMethod(arg);}");
+		assertCodeContains(CallSuper4b.class, "instanceMethod2(arg): void { this.instanceMethod(arg);}");
 	}
 
 	@Test
 	public void testInstanceCallSuperIFromAnonymous() {
-		assertCodeContains(CallSuper4c.class, "someMethod(){ super.instanceMethod(arg);}");
+		assertCodeContains(CallSuper4c.class, "someMethod(): void { super.instanceMethod(arg);}");
 	}
 
 	@Test
 	public void testInstanceCallStaticSuperExplicit() {
-		assertCodeContains(CallSuper5.class, "instanceMethod(arg){ SuperClass.staticMethod(arg);}");
+		assertCodeContains(CallSuper5.class, "instanceMethod(arg): void { SuperClass.staticMethod(arg);}");
 	}
 
 	@Test
 	public void testInstanceCallStaticSuperNotExplicit() {
-		assertCodeContains(CallSuper6.class, "instanceMethod(arg){ SuperClass.staticMethod(arg);}");
+		assertCodeContains(CallSuper6.class, "instanceMethod(arg): void { SuperClass.staticMethod(arg);}");
 	}
 
 	@Test
 	public void testStaticCallStaticSuperNotExplicit() {
 		assertCodeContains(CallSuper7.class, //
-				"static staticMethod2(arg){ SuperClass.staticMethod(arg);}");
+				"static staticMethod2(arg): void { SuperClass.staticMethod(arg);}");
 	}
 
 	@Test

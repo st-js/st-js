@@ -13,6 +13,7 @@ import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TreeWrapper;
 import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.writer.JavascriptTypes;
 import org.stjs.generator.writer.MemberWriters;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
@@ -23,7 +24,7 @@ import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
 
-public class MethodWriter<JS> implements WriterContributor<MethodTree, JS> {
+public class MethodWriter<JS> extends JavascriptTypes<JS> implements WriterContributor<MethodTree, JS> {
 
 	private static String changeName(String name) {
 		if (name.equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
@@ -153,7 +154,18 @@ public class MethodWriter<JS> implements WriterContributor<MethodTree, JS> {
 			body = null;
 		}
 
-		return context.js().method(methodName, params, body, null, tw.isStatic(), isAbstract, tw.isPrivate());
+		JS returnType = null;
+
+		if (!JavaNodes.isConstructor(tree)) {
+			Element returnTypeElement = InternalUtils.symbol(tree.getReturnType());
+			if (returnTypeElement == null) {
+				returnType = context.js().name("void");
+			} else {
+				returnType = getFieldTypeDesc(returnTypeElement.asType(), context);
+			}
+		}
+
+		return context.js().method(methodName, params, body, returnType, tw.isStatic(), isAbstract, tw.isPrivate());
 	}
 
 }

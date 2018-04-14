@@ -17,6 +17,6 @@ public class SyntheticTypeGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testAllowCallSuperMethod() {
-		assertCodeContains(Synthetic3.class, "method2(){this.method();}");
+		assertCodeContains(Synthetic3.class, "method2(): void {this.method();}");
 	}
 }

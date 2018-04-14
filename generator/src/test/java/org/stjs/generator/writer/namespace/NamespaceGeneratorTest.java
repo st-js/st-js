@@ -12,9 +12,9 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 		assertCodeDoesNotContain(Namespace1.class, "stjs.ns(\"a.b\");");
 		assertCodeDoesNotContain(Namespace1.class, "let a.b");
 		assertCodeContains(Namespace1.class, "class Namespace1 {\n" +
-				"    instanceMethod(){}\n" +
+				"    instanceMethod(): void {}\n" +
 				"    instanceField: string = null;\n" +
-				"    static staticMethod(){}\n" +
+				"    static staticMethod(): void {}\n" +
 				"    static staticField: string = null;\n" +
 				"}");
 	}
@@ -39,7 +39,7 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testCallSuper() {
-		assertCodeContains(Namespace4.class, "method(){ super.method(); }");
+		assertCodeContains(Namespace4.class, "method(): void { super.method(); }");
 	}
 
 	@Test
@@ -61,7 +61,7 @@ public class NamespaceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testInlineConstruct() {
-		assertCodeContains(Namespace8.class, "class Namespace8_Namespace8$1 extends Namespace8 { method() {} } ");
+		assertCodeContains(Namespace8.class, "class Namespace8_Namespace8$1 extends Namespace8 { method(): void {} } ");
 	}
 
 	@Test(
