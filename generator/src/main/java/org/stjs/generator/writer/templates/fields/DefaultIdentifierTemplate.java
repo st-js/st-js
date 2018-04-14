@@ -59,7 +59,18 @@ public class DefaultIdentifierTemplate<JS> implements WriterContributor<Identifi
 				context.getNames().getTypeName(context, def, DependencyType.STATIC);
 				return null;
 			}
+
 			name = context.getNames().getTypeName(context, def, DependencyType.STATIC);
+
+			// All references tu number types must be replaced by "Number" as the specific
+			// ones don't exist in JavaScript
+			if (Float.class.getName().equals(def.toString())
+					|| Double.class.getName().equals(def.toString())
+					|| Long.class.getName().equals(def.toString())
+					|| Short.class.getName().equals(def.toString())
+					|| Integer.class.getName().equals(def.toString())) {
+				name = "Number";
+			}
 		}
 
 		// assume variable
