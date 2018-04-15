@@ -1,30 +1,33 @@
 package org.stjs.generator.writer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVariable;
-import javax.lang.model.type.WildcardType;
-
+import com.sun.source.tree.ClassTree;
+import org.mozilla.javascript.Token;
+import org.mozilla.javascript.ast.KeywordLiteral;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.ElementUtils;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javac.TypesUtils;
 import org.stjs.generator.javascript.JavaScriptBuilder;
+import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.javascript.NameValue;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.javascript.Map;
 import org.stjs.javascript.annotation.ServerSide;
 
-import com.sun.source.tree.ClassTree;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.NullType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
+import javax.lang.model.type.WildcardType;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * (c) Swissquote 12.04.18
@@ -33,7 +36,7 @@ import com.sun.source.tree.ClassTree;
  */
 abstract public class JavascriptTypes<JS> {
 
-	public JS mapPrimitiveType(TypeMirror type, GenerationContext<JS> context) {
+	private JS mapPrimitiveType(TypeMirror type, GenerationContext<JS> context) {
 		JavaScriptBuilder<JS> js = context.js();
 
 		String qualifiedName = "";
@@ -68,7 +71,7 @@ abstract public class JavascriptTypes<JS> {
 		return js.name("any");
 	}
 
-	public JS getParametrized(DeclaredType declaredType, GenerationContext<JS> context, JS typeName) {
+	private JS getParametrized(DeclaredType declaredType, GenerationContext<JS> context, JS typeName) {
 		JavaScriptBuilder<JS> js = context.js();
 		List<JS> array = new ArrayList<>();
 		for (TypeMirror arg : declaredType.getTypeArguments()) {
@@ -109,7 +112,14 @@ abstract public class JavascriptTypes<JS> {
 			}
 		} else if (type instanceof WildcardType) {
 			// TODO :: support ? extends T or similar annotations
-			return js.name("any");
+			return js.name("_any");
+			return js.name("_any");
+		} else if (type instanceof ArrayType) {
+			List<JS> types = new ArrayList<>();
+			types.add(getFieldTypeDesc(((ArrayType) type).getComponentType(), context));
+			return js.genericType(typeName, types);
+		} else if (type instanceof NullType) {
+			return js.keyword(Keyword.NULL);
 		} else {
 			System.out.println("What is this ? " + type.getClass());
 		}
@@ -118,7 +128,7 @@ abstract public class JavascriptTypes<JS> {
 	}
 
 	@SuppressWarnings("unused")
-	public JS getTypeDescription(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context) {
+	private JS getTypeDescription(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context) {
 		// if (isGlobal(type)) {
 		// printer.print(JavascriptKeywords.NULL);
 		// return;
@@ -146,7 +156,7 @@ abstract public class JavascriptTypes<JS> {
 		return context.js().object(props);
 	}
 
-	public boolean skipTypeDescForField(Element member) {
+	private boolean skipTypeDescForField(Element member) {
 		if (((TypeElement) member.getEnclosingElement()).getQualifiedName().toString().startsWith("java.lang.")) {
 			// maybe we should rather skip the bridge classes here
 			return true;

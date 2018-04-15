@@ -136,12 +136,13 @@ public interface JavaScriptBuilder<T> {
 	 * @param params a {@link java.lang.Iterable} object.
 	 * @param body a T object.
 	 * @param returnType a T object to represent the return type
+	 * @param typeParameters a T object to represent the type parameters
 	 * @param isStatic is it a static method ?
 	 * @param isAbstract is it an abstract method ?
 	 * @param isPrivate is it a private method ?
 	 * @return a T object.
 	 */
-	T method(@Nullable String name, @Nonnull Iterable<T> params, T body, T returnType, boolean isStatic, boolean isAbstract, boolean isPrivate);
+	T method(@Nullable String name, @Nonnull Iterable<T> params, T body, T returnType, Iterable<T> typeParameters, boolean isStatic, boolean isAbstract, boolean isPrivate);
 
 	/**
 	 * <p>field.</p>
@@ -249,6 +250,16 @@ public interface JavaScriptBuilder<T> {
 	 * @return a T object.
 	 */
 	T property(@Nullable T target, @Nonnull CharSequence name);
+
+	/**
+	 * <p>param.</p>
+	 *
+	 * @param name the name of the parameter
+	 * @param type a T object.
+	 * @param vararg is is a vararg param ?
+	 * @return a T object.
+	 */
+	T param(@Nonnull String name, @Nullable T type, @Nullable Boolean vararg);
 
 	/**
 	 * <p>string.</p>

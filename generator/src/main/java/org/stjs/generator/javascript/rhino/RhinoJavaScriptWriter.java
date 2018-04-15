@@ -60,6 +60,7 @@ import org.stjs.generator.javascript.rhino.types.FieldNode;
 import org.stjs.generator.javascript.rhino.types.GenericType;
 import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
 import org.stjs.generator.javascript.rhino.types.MethodNode;
+import org.stjs.generator.javascript.rhino.types.ParamNode;
 import org.stjs.generator.javascript.rhino.types.Vararg;
 
 /**
@@ -518,6 +519,12 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 			print("static ");
 		}
 
+		if (f.getTypeParameter() != null) {
+			print("<");
+			printList(f.getTypeParameter(), param);
+			print("> ");
+		}
+
 		if (f.getName() != null) {
 			print(f.getName());
 		}
@@ -566,6 +573,20 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		print(" = ");
 		visitorSupport.accept(f.getValue(), this, param);
 		println(";");
+	}
+
+	@Override
+	public void visitParam(ParamNode s, Boolean param) {
+		if (s.isVarargs()) {
+			print(" ...");
+		}
+
+		print(s.getName());
+
+		if (s.getParamType() != null) {
+			print(": ");
+			visitorSupport.accept(s.getParamType(), this, param);
+		}
 	}
 
 	/** {@inheritDoc} */

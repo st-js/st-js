@@ -11,6 +11,7 @@ public class MethodNode extends AstNode {
 	private List<AstNode> params;
 	private AstNode body;
 	private AstNode returnType;
+	private List<AstNode> typeParameter;
 	private boolean isStatic;
 	private boolean isAbstract;
 	private boolean isPrivate;
@@ -20,10 +21,11 @@ public class MethodNode extends AstNode {
 	}
 
 	public MethodNode(String name, List<AstNode> params, AstNode body, AstNode returnType,
-			boolean isStatic, boolean isAbstract, boolean isPrivate) {
+			List<AstNode> typeParameter, boolean isStatic, boolean isAbstract, boolean isPrivate) {
 		this.name = name;
 		this.params = params;
 		this.body = body;
+		this.typeParameter = typeParameter;
 		this.returnType = returnType;
 		this.isStatic = isStatic;
 		this.isAbstract = isAbstract;
@@ -58,13 +60,17 @@ public class MethodNode extends AstNode {
 		return body;
 	}
 
-	public boolean isStatic() { return isStatic; }
-
-	public boolean isAbstract() { return isAbstract; }
-
 	public AstNode getReturnType() {
 		return returnType;
 	}
+
+	public List<AstNode> getTypeParameter() {
+		return typeParameter;
+	}
+
+	public boolean isStatic() { return isStatic; }
+
+	public boolean isAbstract() { return isAbstract; }
 
 	public boolean isPrivate() {
 		return isPrivate;

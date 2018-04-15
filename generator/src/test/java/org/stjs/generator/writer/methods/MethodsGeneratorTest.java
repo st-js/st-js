@@ -9,27 +9,27 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	public void testPublicInstanceMethod() {
 		assertCodeContains(Methods1.class, //
 				"class Methods1 {" + //
-						"method(arg1,arg2): void {return 0;}");
+						"method(arg1: string, arg2: string): void {return 0;}");
 	}
 
 	@Test
 	public void testPrivateInstanceMethod() {
 		// same as public
-		assertCodeContains(Methods2.class, "class Methods2 { private method(arg1, arg2): void {");
+		assertCodeContains(Methods2.class, "class Methods2 { private method(arg1: string, arg2: string): void {");
 	}
 
 	@Test
 	public void testPublicStaticMethod() {
 		assertCodeContains(Methods3.class, //
 				"class Methods3 {" + //
-						"static method(arg1,arg2): void{");
+						"static method(arg1: string, arg2: string): void{");
 	}
 
 	@Test
 	public void testPrivateStaticMethod() {
 		assertCodeContains(Methods4.class, //
 				"class Methods4 {" + //
-						"private static method(arg1, arg2): void {");
+						"private static method(arg1: string, arg2: string): void {");
 	}
 
 	@Test
@@ -40,7 +40,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testConstructor() {
-		assertCodeContains(Methods6.class, "class Methods6 { constructor(arg){} }");
+		assertCodeContains(Methods6.class, "class Methods6 { constructor(arg: string){} }");
 	}
 
 	@Test
@@ -67,7 +67,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testVarArgsMethod4Native() {
-		assertCodeContains(Methods11_b.class, "class Methods11_b { test(props): void{}");
+		assertCodeContains(Methods11_b.class, "class Methods11_b { test(props: {[key: string]: any}): void{}");
 
 		assertCodeDoesNotContain(Methods11_b.class, "prototype.method=function");
 	}

@@ -6,6 +6,7 @@ import java.util.List;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
 
+import com.sun.source.tree.TypeParameterTree;
 import com.sun.tools.javac.code.Type;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
@@ -26,7 +27,7 @@ import com.sun.source.tree.VariableTree;
 
 public class MethodWriter<JS> extends JavascriptTypes<JS> implements WriterContributor<MethodTree, JS> {
 
-	private static String changeName(String name) {
+	private String changeName(String name) {
 		if (name.equals(GeneratorConstants.ARGUMENTS_PARAMETER)) {
 			return "_" + name;
 		}
@@ -57,14 +58,26 @@ public class MethodWriter<JS> extends JavascriptTypes<JS> implements WriterContr
 		return null;
 	}
 
-	public static <JS> List<JS> getParams(List<? extends VariableTree> treeParams, GenerationContext<JS> context) {
+	public List<JS> getParams(List<? extends VariableTree> treeParams, GenerationContext<JS> context) {
 		List<JS> params = new ArrayList<>();
 		for (VariableTree param : treeParams) {
-			if (InternalUtils.isVarArg(param)) {
-				params.add(context.js().vararg(changeName(param.getName().toString())));
-			} else {
-				params.add(context.js().name(changeName(param.getName().toString())));
-			}
+			String name = changeName(param.getName().toString());
+
+			JS type = getFieldTypeDesc(InternalUtils.symbol(param).asType(), context);;
+			params.add(context.js().param(name, type, InternalUtils.isVarArg(param)));
+		}
+		return params;
+	}
+
+	public List<JS> getTypeParams(List<? extends TypeParameterTree> treeParams, GenerationContext<JS> context) {
+		List<JS> params = new ArrayList<>();
+
+		if (treeParams.size() == 0) {
+			return null;
+		}
+
+		for (TypeParameterTree param : treeParams) {
+			params.add(getFieldTypeDesc(InternalUtils.symbol(param).asType(), context));
 		}
 		return params;
 	}
@@ -98,6 +111,8 @@ public class MethodWriter<JS> extends JavascriptTypes<JS> implements WriterContr
 		if (!accept(tw)) {
 			return null;
 		}
+
+		List<JS> typeParameters = getTypeParams(tree.getTypeParameters(), context);
 
 		List<JS> params = getParams(tree.getParameters(), context);
 
@@ -165,7 +180,7 @@ public class MethodWriter<JS> extends JavascriptTypes<JS> implements WriterContr
 			}
 		}
 
-		return context.js().method(methodName, params, body, returnType, tw.isStatic(), isAbstract, tw.isPrivate());
+		return context.js().method(methodName, params, body, returnType, typeParameters, tw.isStatic(), isAbstract, tw.isPrivate());
 	}
 
 }

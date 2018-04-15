@@ -43,11 +43,12 @@ It's work in progress but it supports.
   - Simple types √
   - Parametrized types √
   - Wildcard types
+  - Variable types
 
 - Type Declarations
   - Fields √
   - Methods √
-  - Method parameters
+  - Method parameters √
   - Generics
   
 

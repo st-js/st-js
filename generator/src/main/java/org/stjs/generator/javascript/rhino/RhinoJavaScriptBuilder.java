@@ -59,6 +59,7 @@ import org.stjs.generator.javascript.rhino.types.FieldNode;
 import org.stjs.generator.javascript.rhino.types.GenericType;
 import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
 import org.stjs.generator.javascript.rhino.types.MethodNode;
+import org.stjs.generator.javascript.rhino.types.ParamNode;
 import org.stjs.generator.javascript.rhino.types.Vararg;
 
 import javax.annotation.Nonnull;
@@ -298,14 +299,14 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	/** {@inheritDoc} */
 	@Override
 	public AstNode method(String name, Iterable<AstNode> params, AstNode originalBody, AstNode returnType,
-			boolean isStatic, boolean isAbstract, boolean isPrivate) {
+		  Iterable<AstNode> typeParameter, boolean isStatic, boolean isAbstract, boolean isPrivate) {
 		AstNode body = originalBody;
 		if (body != null && !(body instanceof Block)) {
 			body = addStatement(null, body);
 		}
 
 		// Auto-generated method stub
-		return new MethodNode(name, list(params), body, returnType, isStatic, isAbstract, isPrivate);
+		return new MethodNode(name, list(params), body, returnType, typeParameter != null ? list(typeParameter) : null, isStatic, isAbstract, isPrivate);
 	}
 
 	/** {@inheritDoc} */
@@ -497,6 +498,12 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 		prop.setTarget(target);
 		prop.setProperty((Name) name(name));
 		return prop;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public AstNode param(@Nonnull String name, @Nullable AstNode type, @Nullable Boolean vararg) {
+		return new ParamNode(name, type, vararg);
 	}
 
 	/** {@inheritDoc} */
