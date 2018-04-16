@@ -1,11 +1,10 @@
 package org.stjs.generator.writer;
 
-import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.TypeParameterTree;
 import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.KeywordLiteral;
 import org.stjs.generator.GenerationContext;
-import org.stjs.generator.javac.ElementUtils;
-import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TypesUtils;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.javascript.Keyword;
@@ -13,11 +12,7 @@ import org.stjs.generator.javascript.NameValue;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.javascript.Map;
-import org.stjs.javascript.annotation.ServerSide;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.NullType;
@@ -75,7 +70,7 @@ abstract public class JavascriptTypes<JS> {
 		JavaScriptBuilder<JS> js = context.js();
 		List<JS> array = new ArrayList<>();
 		for (TypeMirror arg : declaredType.getTypeArguments()) {
-			array.add(getFieldTypeDesc(arg, context));
+			array.add(getTypeDesc(arg, context, true));
 		}
 
 		String qualifiedName = TypesUtils.getQualifiedName(declaredType).toString();
@@ -90,7 +85,47 @@ abstract public class JavascriptTypes<JS> {
 		return js.genericType(typeName, array);
 	}
 
-	public JS getFieldTypeDesc(TypeMirror type, GenerationContext<JS> context) {
+	public List<JS> getTypeParams(List<? extends TypeParameterTree> treeParams, GenerationContext<JS> context) {
+		List<JS> params = new ArrayList<>();
+
+		if (treeParams.size() == 0) {
+			return null;
+		}
+
+		for (TypeParameterTree param : treeParams) {
+			params.add(getGenericTypeDesc(InternalUtils.symbol(param).asType(), context));
+		}
+		return params;
+	}
+
+	private JS getTypeVariable(TypeVariable variableType, GenerationContext<JS> context, JS typeName) {
+		JS upper = getFieldTypeDesc(variableType.getUpperBound(), context);
+		JS lower = getFieldTypeDesc(variableType.getLowerBound(), context);
+
+		if (lower instanceof KeywordLiteral && ((KeywordLiteral) lower).getType() == Token.NULL) {
+			lower = null;
+		}
+
+		if (upper instanceof KeywordLiteral && ((KeywordLiteral) upper).getType() == Token.NULL) {
+			upper = null;
+		}
+
+		return context.js().variableType(typeName, upper, lower);
+	}
+
+	private JS getWildcardVariable(WildcardType type, GenerationContext<JS> context) {
+		return context.js().name("any");
+
+		//TypeMirror upperType = type.getExtendsBound();
+		//TypeMirror lowerType = type.getSuperBound();
+
+		//JS upper = upperType == null ? null : getFieldTypeDesc(upperType, context);
+		//JS lower = lowerType == null ? null : getFieldTypeDesc(lowerType, context);
+
+		//return context.js().variableType(context.js().name("?"), upper, lower);
+	}
+
+	public JS getTypeDesc(TypeMirror type, GenerationContext<JS> context, Boolean genericDefinition) {
 		JavaScriptBuilder<JS> js = context.js();
 		if (JavaNodes.isJavaScriptPrimitive(type)) {
 			return mapPrimitiveType(type, context);
@@ -110,13 +145,26 @@ abstract public class JavascriptTypes<JS> {
 			if (!declaredType.getTypeArguments().isEmpty()) {
 				return getParametrized((DeclaredType) type, context, typeName);
 			}
+
+			// If this is an array, it must at least be parametrized as any
+			if ("org.stjs.javascript.Array".equals(qualifiedName)) {
+				List<JS> array = new ArrayList<>();
+				array.add(js.name("any"));
+				return js.genericType(typeName, array);
+			}
+
 		} else if (type instanceof WildcardType) {
-			// TODO :: support ? extends T or similar annotations
-			return js.name("_any");
-			return js.name("_any");
+			if (genericDefinition) {
+				return getWildcardVariable((WildcardType) type, context);
+			}
+		} else if (type instanceof TypeVariable) {
+			if (genericDefinition) {
+				return getTypeVariable((TypeVariable) type, context, typeName);
+			}
 		} else if (type instanceof ArrayType) {
 			List<JS> types = new ArrayList<>();
 			types.add(getFieldTypeDesc(((ArrayType) type).getComponentType(), context));
+
 			return js.genericType(typeName, types);
 		} else if (type instanceof NullType) {
 			return js.keyword(Keyword.NULL);
@@ -127,43 +175,11 @@ abstract public class JavascriptTypes<JS> {
 		return typeName;
 	}
 
-	@SuppressWarnings("unused")
-	private JS getTypeDescription(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context) {
-		// if (isGlobal(type)) {
-		// printer.print(JavascriptKeywords.NULL);
-		// return;
-		// }
-
-		TypeElement type = TreeUtils.elementFromDeclaration(tree);
-
-		List<NameValue<JS>> props = new ArrayList<>();
-		for (Element member : ElementUtils.getAllFieldsIn(type)) {
-			TypeMirror memberType = ElementUtils.getType(member);
-			if (JavaNodes.isJavaScriptPrimitive(memberType)) {
-				continue;
-			}
-			if (member.getKind() == ElementKind.ENUM_CONSTANT) {
-				continue;
-			}
-			if (memberType instanceof TypeVariable) {
-				// what to do with fields of generic parameters !?
-				continue;
-			}
-			if (!skipTypeDescForField(member)) {
-				props.add(NameValue.of(member.getSimpleName(), getFieldTypeDesc(memberType, context)));
-			}
-		}
-		return context.js().object(props);
+	public JS getFieldTypeDesc(TypeMirror type, GenerationContext<JS> context) {
+		return getTypeDesc(type, context, false);
 	}
 
-	private boolean skipTypeDescForField(Element member) {
-		if (((TypeElement) member.getEnclosingElement()).getQualifiedName().toString().startsWith("java.lang.")) {
-			// maybe we should rather skip the bridge classes here
-			return true;
-		}
-		if (member.getAnnotation(ServerSide.class) != null) {
-			return true;
-		}
-		return false;
+	public JS getGenericTypeDesc(TypeMirror type, GenerationContext<JS> context) {
+		return getTypeDesc(type, context, true);
 	}
 }

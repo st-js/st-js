@@ -46,6 +46,7 @@ import org.stjs.generator.javascript.rhino.types.GenericType;
 import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
 import org.stjs.generator.javascript.rhino.types.MethodNode;
 import org.stjs.generator.javascript.rhino.types.ParamNode;
+import org.stjs.generator.javascript.rhino.types.TypeVariableNode;
 import org.stjs.generator.javascript.rhino.types.Vararg;
 
 /**
@@ -450,4 +451,12 @@ public interface AstVisitor<T> {
 	 * @param param a T object.
 	 */
 	void visitParam(ParamNode s, T param);
+
+	/**
+	 * <p>visitFieldNode.</p>
+	 *
+	 * @param s a {@link org.stjs.generator.javascript.rhino.types.TypeVariableNode} object.
+	 * @param param a T object.
+	 */
+	void visitVariableType(TypeVariableNode s, T param);
 }

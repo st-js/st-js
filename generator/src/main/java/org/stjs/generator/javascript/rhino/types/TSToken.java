@@ -9,4 +9,5 @@ public class TSToken extends org.mozilla.javascript.Token {
 	public static final int CLASS = 205;
 	public static final int GENERICTYPE = 206;
 	public static final int PARAM = 207;
+	public static final int TYPEVARIABLE = 208;
 }

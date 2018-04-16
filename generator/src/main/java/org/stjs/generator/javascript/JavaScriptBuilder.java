@@ -142,7 +142,8 @@ public interface JavaScriptBuilder<T> {
 	 * @param isPrivate is it a private method ?
 	 * @return a T object.
 	 */
-	T method(@Nullable String name, @Nonnull Iterable<T> params, T body, T returnType, Iterable<T> typeParameters, boolean isStatic, boolean isAbstract, boolean isPrivate);
+	T method(@Nullable String name, @Nonnull Iterable<T> params, T body, T returnType,
+			Iterable<T> typeParameters, boolean isStatic, boolean isAbstract, boolean isPrivate);
 
 	/**
 	 * <p>field.</p>
@@ -154,6 +155,16 @@ public interface JavaScriptBuilder<T> {
 	 * @return a T object.
 	 */
 	T field(@Nonnull String name, T value, boolean isStatic, T type);
+
+	/**
+	 * <p>variableType.</p>
+	 *
+	 * @param name a {@link java.lang.String} object.
+	 * @param upperBound a T object.
+	 * @param lowerBound a T object.
+	 * @return a T object.
+	 */
+	T variableType(@Nonnull T name, T upperBound, T lowerBound);
 
 	/**
 	 * <p>functionCall.</p>

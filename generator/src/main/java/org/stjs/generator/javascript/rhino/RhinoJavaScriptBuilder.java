@@ -60,9 +60,11 @@ import org.stjs.generator.javascript.rhino.types.GenericType;
 import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
 import org.stjs.generator.javascript.rhino.types.MethodNode;
 import org.stjs.generator.javascript.rhino.types.ParamNode;
+import org.stjs.generator.javascript.rhino.types.TypeVariableNode;
 import org.stjs.generator.javascript.rhino.types.Vararg;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.Writer;
 import java.util.Iterator;
@@ -299,21 +301,28 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	/** {@inheritDoc} */
 	@Override
 	public AstNode method(String name, Iterable<AstNode> params, AstNode originalBody, AstNode returnType,
-		  Iterable<AstNode> typeParameter, boolean isStatic, boolean isAbstract, boolean isPrivate) {
+							Iterable<AstNode> typeParameter, boolean isStatic, boolean isAbstract, boolean isPrivate) {
 		AstNode body = originalBody;
 		if (body != null && !(body instanceof Block)) {
 			body = addStatement(null, body);
 		}
 
+		List<AstNode> typeParameters = typeParameter != null ? list(typeParameter) : null;
+
 		// Auto-generated method stub
-		return new MethodNode(name, list(params), body, returnType, typeParameter != null ? list(typeParameter) : null, isStatic, isAbstract, isPrivate);
+		return new MethodNode(name, list(params), body, returnType, typeParameters, isStatic, isAbstract, isPrivate);
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public AstNode field(@Nonnull String name, AstNode value, boolean isStatic, AstNode type) {
-		// Auto-generated method stub
 		return new FieldNode(name, value, type, isStatic);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public AstNode variableType(@Nonnull AstNode name, AstNode upperBound, AstNode lowerBound) {
+		return new TypeVariableNode(name, upperBound, lowerBound);
 	}
 
 	/** {@inheritDoc} */

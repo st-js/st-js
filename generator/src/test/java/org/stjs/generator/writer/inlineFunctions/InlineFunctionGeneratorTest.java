@@ -9,7 +9,7 @@ import org.stjs.generator.JavascriptFileGenerationException;
 public class InlineFunctionGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testInlineFunction() {
-		assertCodeContains(InlineFunctions1.class, "method((arg) => {arg=arg+1;})");
+		assertCodeContains(InlineFunctions1.class, "method((arg: number) => {arg=arg+1;})");
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)
@@ -22,20 +22,20 @@ public class InlineFunctionGeneratorTest extends AbstractStjsTest {
 		assertCodeContains(InlineFunctions2b.class,
 				"InlineFunctions2b.method(new (class InlineFunctions2b_InlineFunctions2b$1 implements FunctionInterface2 {\n" +
 						"  test: number = 2;\n" +
-						"  $invoke(arg): void { arg = arg + 1; }");
+						"  $invoke(arg: number): void { arg = arg + 1; }");
 	}
 
 	@Test
 	public void testInterfaceTwoMethods() {
 		assertCodeContains(InlineFunctions3.class, "class InlineFunctions3_InlineFunctions3$1 implements FunctionInterface2 {\n" +
-				"            $invoke(arg): void { arg = arg + 1; }\n" +
-				"            $invoke2(arg2): void { arg2 = arg2 + 1; }\n" +
+				"            $invoke(arg: number): void { arg = arg + 1; }\n" +
+				"            $invoke2(arg2: number): void { arg2 = arg2 + 1; }\n" +
 				"        }");
 	}
 
 	@Test
 	public void testInlineFunctionAssign() {
-		assertCodeContains(InlineFunctions4.class, "func =  (arg) => {arg=arg+1;}");
+		assertCodeContains(InlineFunctions4.class, "func = (arg: number) => {arg=arg+1;}");
 	}
 
 	@Test

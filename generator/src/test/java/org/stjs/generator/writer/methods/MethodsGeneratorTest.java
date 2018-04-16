@@ -46,7 +46,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testSpecialThis() {
 		// the special parameter THIS should not be added
-		assertCodeContains(Methods7.class, "method(THIS, arg2): void{");
+		assertCodeContains(Methods7.class, "method(THIS: string, arg2: string): void{");
 	}
 
 	@Test
@@ -62,7 +62,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testVarArgsMethod3() {
 		// only one var arg argument is allowed and the name should be "arguments" -> like the js variable
-		assertCodeContains(Methods11.class, "method(..._arguments): void {}");
+		assertCodeContains(Methods11.class, "method(..._arguments: Array<any>): void {}");
 	}
 
 	@Test
@@ -98,6 +98,19 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 				+ "doSomething(): void;" //
 				+ "doSomethingElse(): void;" //
 				+ "}");
+	}
+
+	@Test
+	public void testMethodsType() {
+		String code = generate(Methods18.class);
+
+		// the class only contains interface methods, therefore nothing must be generated
+		assertCodeContains(code, "class Methods18<T extends Methods18<any>> {");
+		assertCodeContains(code, "parent(): T {");
+		assertCodeContains(code, "someArray(arr: Array<number>): number {");
+		assertCodeContains(code, "somePrimitiveArray(arr: Array<number>): number {");
+		assertCodeContains(code, "someMap(a: {[key: string]: any}): string {");
+		assertCodeContains(code, "main(args: Array<string>): number {");
 	}
 
 	@Test(expected = JavascriptFileGenerationException.class)

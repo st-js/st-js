@@ -14,6 +14,7 @@ import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.javascript.UnaryOperator;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.writer.JavascriptTypes;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
 import org.stjs.javascript.annotation.STJSBridge;
@@ -31,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
+public class ClassWriter<JS> extends JavascriptTypes<JS> implements WriterContributor<ClassTree, JS> {
 
 	private InterfaceWriter interfaceWriter;
 	private EnumWriter enumWriter;
@@ -232,7 +233,15 @@ public class ClassWriter<JS> implements WriterContributor<ClassTree, JS> {
 			typeName = typeName.replace('.', '_');
 		}
 
-		return context.js().name(typeName);
+		List<JS> typeParameters = getTypeParams(tree.getTypeParameters(), context);
+
+		JS name = context.js().name(typeName);
+
+		if (typeParameters != null) {
+			return context.js().genericType(name, typeParameters);
+		}
+
+		return name;
 	}
 
 	public void generateClass(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {

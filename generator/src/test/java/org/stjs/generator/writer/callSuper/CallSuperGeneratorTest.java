@@ -12,22 +12,22 @@ public class CallSuperGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testCallSuperConstructorParent() {
-		assertCodeContains(CallSuper2.class, "class CallSuper2 extends SuperClass2 { constructor(arg){ super(arg); } }");
+		assertCodeContains(CallSuper2.class, "class CallSuper2 extends SuperClass2 { constructor(arg: string){ super(arg); } }");
 	}
 
 	@Test
 	public void testOverrideAndCallSuper() {
-		assertCodeContains(CallSuper3.class, "instanceMethod(arg): void { super.instanceMethod(arg);}");
+		assertCodeContains(CallSuper3.class, "instanceMethod(arg: string): void { super.instanceMethod(arg);}");
 	}
 
 	@Test
 	public void testInstanceCallSuper() {
-		assertCodeContains(CallSuper4.class, "instanceMethod2(arg): void { this.instanceMethod(arg);}");
+		assertCodeContains(CallSuper4.class, "instanceMethod2(arg: string): void { this.instanceMethod(arg);}");
 	}
 
 	@Test
 	public void testInstanceCallSuperImplementInterface() {
-		assertCodeContains(CallSuper4b.class, "instanceMethod2(arg): void { this.instanceMethod(arg);}");
+		assertCodeContains(CallSuper4b.class, "instanceMethod2(arg: string): void { this.instanceMethod(arg);}");
 	}
 
 	@Test
@@ -37,24 +37,24 @@ public class CallSuperGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testInstanceCallStaticSuperExplicit() {
-		assertCodeContains(CallSuper5.class, "instanceMethod(arg): void { SuperClass.staticMethod(arg);}");
+		assertCodeContains(CallSuper5.class, "instanceMethod(arg: string): void { SuperClass.staticMethod(arg);}");
 	}
 
 	@Test
 	public void testInstanceCallStaticSuperNotExplicit() {
-		assertCodeContains(CallSuper6.class, "instanceMethod(arg): void { SuperClass.staticMethod(arg);}");
+		assertCodeContains(CallSuper6.class, "instanceMethod(arg: string): void { SuperClass.staticMethod(arg);}");
 	}
 
 	@Test
 	public void testStaticCallStaticSuperNotExplicit() {
 		assertCodeContains(CallSuper7.class, //
-				"static staticMethod2(arg): void { SuperClass.staticMethod(arg);}");
+				"static staticMethod2(arg: string): void { SuperClass.staticMethod(arg);}");
 	}
 
 	@Test
 	public void testAddCallSuperConstructorDefined() {
 		// call to super should be generated, when not defined explicitely
-		assertCodeContains(CallSuper8.class, "class CallSuper8 extends SuperClass { constructor(x){ super(); let y = x; } }");
+		assertCodeContains(CallSuper8.class, "class CallSuper8 extends SuperClass { constructor(x: number){ super(); let y = x; } }");
 	}
 
 	@Test

@@ -13,13 +13,13 @@ public class OverloadTest extends AbstractStjsTest {
 	@Test
 	public void testOverloadDifferentParamNumber() {
 		// check that no other method is generated
-		assertCodeContains(Overload2.class, "{method(param1, param2): void {}}");
+		assertCodeContains(Overload2.class, "{method(param1: number, param2: number): void {}}");
 	}
 
 	@Test
 	public void testMoreGenericType() {
 		// check that no other method is generated
-		assertCodeContains(Overload3.class, "{method(param1): void {}}");
+		assertCodeContains(Overload3.class, "{method(param1: any): void {}}");
 	}
 
 	@Test(
@@ -37,6 +37,6 @@ public class OverloadTest extends AbstractStjsTest {
 	@Test
 	public void testVarArgs() {
 		// check that no other method is generated
-		assertCodeContains(Overload6.class, "{method(..._arguments): void {}}");
+		assertCodeContains(Overload6.class, "{method(..._arguments: Array<any>): void {}}");
 	}
 }

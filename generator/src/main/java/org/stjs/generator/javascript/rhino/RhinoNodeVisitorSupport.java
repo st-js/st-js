@@ -51,6 +51,7 @@ import org.stjs.generator.javascript.rhino.types.GenericType;
 import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
 import org.stjs.generator.javascript.rhino.types.MethodNode;
 import org.stjs.generator.javascript.rhino.types.ParamNode;
+import org.stjs.generator.javascript.rhino.types.TypeVariableNode;
 import org.stjs.generator.javascript.rhino.types.Vararg;
 
 /**
@@ -348,6 +349,12 @@ public class RhinoNodeVisitorSupport {
 			@Override
 			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
 				visitor.visitMethodNode((MethodNode) node, param);
+			}
+		});
+		addCaller(TypeVariableNode.class, new Caller() {
+			@Override
+			public <T> void call(Node node, AstVisitor<T> visitor, T param) {
+				visitor.visitVariableType((TypeVariableNode) node, param);
 			}
 		});
 		addCaller(ParamNode.class, new Caller() {

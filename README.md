@@ -25,7 +25,12 @@ It's work in progress but it supports.
 - Java `for (String element : array)` loops are converted to `for ... of ` loops
 - Ignore `@Namespace` annotations (except for bridges)
 - Write types
-  - Field Types are partially supported
+  - Field Types
+  - Method Return types
+  - Method arguments types
+  - Parametrized types
+  - Wildcard types ((Replaced by `any` as this doesn't exist in TypeScript))
+  - Generic Types
 
 ### New Checks
 
@@ -37,25 +42,11 @@ It's work in progress but it supports.
 - You cannot define inner types (Class / Enum / Interface) inside anonymous classes
 - You cannot call `stjs.getTypeAnnotation` / `stjs.getAnnotations` / `stjs.getMemberAnnotation` / `stjs.getParameterAnnotation` as annotations aren't generated in TypeScript
 
-### Roadmap
-
-- Types of type declaration
-  - Simple types √
-  - Parametrized types √
-  - Wildcard types
-  - Variable types
-
-- Type Declarations
-  - Fields √
-  - Methods √
-  - Method parameters √
-  - Generics
-  
-
-## Not planned
+## In idea
 
 - Add imports automatically
 - Add `export` and `export default` to classes / interfaces
+- Convert tests to a Jest test suite
 
 Compiling the Project
 ---------------------

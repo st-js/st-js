@@ -6,7 +6,6 @@ import java.util.List;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
 
-import com.sun.source.tree.TypeParameterTree;
 import com.sun.tools.javac.code.Type;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
@@ -65,19 +64,6 @@ public class MethodWriter<JS> extends JavascriptTypes<JS> implements WriterContr
 
 			JS type = getFieldTypeDesc(InternalUtils.symbol(param).asType(), context);;
 			params.add(context.js().param(name, type, InternalUtils.isVarArg(param)));
-		}
-		return params;
-	}
-
-	public List<JS> getTypeParams(List<? extends TypeParameterTree> treeParams, GenerationContext<JS> context) {
-		List<JS> params = new ArrayList<>();
-
-		if (treeParams.size() == 0) {
-			return null;
-		}
-
-		for (TypeParameterTree param : treeParams) {
-			params.add(getFieldTypeDesc(InternalUtils.symbol(param).asType(), context));
 		}
 		return params;
 	}

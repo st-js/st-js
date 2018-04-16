@@ -28,7 +28,7 @@ public class InheritanceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testAbstractAndGeneric() {
-		assertCodeContains(Inheritance5.class, "abstract class Inheritance5 implements MyInterface3 {");
+		assertCodeContains(Inheritance5.class, "abstract class Inheritance5<T> implements MyInterface3<T> {");
 	}
 
 	@Test
@@ -59,6 +59,10 @@ public class InheritanceGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testInterfaceMembers() {
-		assertCodeContains(MyInterface5.class, "interface MyInterface5 { someMethod(): void; someMethodWithParams(number, someArray): string; test: string; }");
+		assertCodeContains(MyInterface5.class, "interface MyInterface5 { " //
+				+ "someMethod(): void; " //
+				+ "someMethodWithParams(number: number, someArray: Array<any>): string; " //
+				+ "test: string; " //
+				+ "}");
 	}
 }

@@ -61,6 +61,7 @@ import org.stjs.generator.javascript.rhino.types.GenericType;
 import org.stjs.generator.javascript.rhino.types.InterfaceDeclaration;
 import org.stjs.generator.javascript.rhino.types.MethodNode;
 import org.stjs.generator.javascript.rhino.types.ParamNode;
+import org.stjs.generator.javascript.rhino.types.TypeVariableNode;
 import org.stjs.generator.javascript.rhino.types.Vararg;
 
 /**
@@ -519,14 +520,15 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 			print("static ");
 		}
 
-		if (f.getTypeParameter() != null) {
-			print("<");
-			printList(f.getTypeParameter(), param);
-			print("> ");
-		}
+
 
 		if (f.getName() != null) {
 			print(f.getName());
+		}
+		if (f.getTypeParameter() != null) {
+			print("<");
+			printList(f.getTypeParameter(), param);
+			print(">");
 		}
 
 		if (f.getParams() == null) {
@@ -586,6 +588,20 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 		if (s.getParamType() != null) {
 			print(": ");
 			visitorSupport.accept(s.getParamType(), this, param);
+		}
+	}
+
+	@Override
+	public void visitVariableType(TypeVariableNode s, Boolean param) {
+		visitorSupport.accept(s.getName(), this, param);
+		if (s.getUpperBound() != null) {
+			print(" extends ");
+			visitorSupport.accept(s.getUpperBound(), this, param);
+		}
+
+		if (s.getLowerBound() != null) {
+			print(" super ");
+			visitorSupport.accept(s.getLowerBound(), this, param);
 		}
 	}
 
