@@ -16,8 +16,6 @@ import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.utils.ClassUtils;
 import org.stjs.generator.utils.JavaNodes;
 
-import com.sun.source.tree.IdentifierTree;
-import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.util.TreePath;
 

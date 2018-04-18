@@ -3,6 +3,7 @@ package org.stjs.generator.writer.declaration;
 import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.ParameterizedTypeTree;
 import com.sun.source.tree.Tree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
@@ -52,13 +53,24 @@ public class ClassWriter<JS> extends JavascriptTypes<JS> implements WriterContri
 			return null;
 		}
 
-		TreeWrapper<Tree, JS> superType = context.getCurrentWrapper().child(clazz.getExtendsClause());
+		Tree superClazz = clazz.getExtendsClause();
+		TreeWrapper<Tree, JS> superType = context.getCurrentWrapper().child(superClazz);
 		if (superType.isSyntheticType()) {
 			return null;
 		}
 
 		DependencyType depType = getDependencyTypeForClassDef(type);
-		return context.js().name(superType.getTypeName(depType));
+
+		JS typeName = context.js().name(superType.getTypeName(depType));
+
+		if (superClazz instanceof ClassTree) {
+			List<JS> typeParameters = getTypeParams(((ClassTree) superClazz).getTypeParameters(), context);
+			if (typeParameters != null) {
+				return context.js().genericType(typeName, typeParameters);
+			}
+		}
+
+		return typeName;
 	}
 
 	private DependencyType getDependencyTypeForClassDef(Element type) {
@@ -79,15 +91,48 @@ public class ClassWriter<JS> extends JavascriptTypes<JS> implements WriterContri
 		List<JS> ifaces = new ArrayList<JS>();
 		for (Tree iface : clazz.getImplementsClause()) {
 			TreeWrapper<Tree, JS> ifaceType = context.getCurrentWrapper().child(iface);
-			if (!ifaceType.isSyntheticType()) {
-				ifaces.add(context.js().name(ifaceType.getTypeName(depType)));
+			if (ifaceType.isSyntheticType()) {
+				continue;
 			}
+
+			JS typeName = context.js().name(ifaceType.getTypeName(depType));
+
+			if (iface instanceof ParameterizedTypeTree) {
+				List<JS> typeParameters = getTypeParams(((ParameterizedTypeTree) iface).getTypeArguments(), context);
+				if (typeParameters != null) {
+					ifaces.add(context.js().genericType(typeName, typeParameters));
+					continue;
+				}
+			}
+
+			// TODO :: this might never come
+			/*if (iface instanceof ClassTree) {
+				List<JS> typeParameters = getTypeParams(((ClassTree) iface).getTypeParameters(), context);
+				if (typeParameters != null) {
+					ifaces.add(context.js().genericType(typeName, typeParameters));
+					continue;
+				}
+			}*/
+
+			ifaces.add(typeName);
+
 		}
 
 		if (clazz.getExtendsClause() != null && type.getKind() == ElementKind.INTERFACE) {
 			TreeWrapper<Tree, JS> superType = context.getCurrentWrapper().child(clazz.getExtendsClause());
 			if (!superType.isSyntheticType()) {
-				ifaces.add(0, context.js().name(superType.getTypeName(DependencyType.EXTENDS)));
+				JS typeName = context.js().name(superType.getTypeName(DependencyType.EXTENDS));
+
+				if (superType instanceof ClassTree) {
+					List<JS> typeParameters = getTypeParams(((ClassTree) superType).getTypeParameters(), context);
+					if (typeParameters != null) {
+						ifaces.add(0, context.js().genericType(typeName, typeParameters));
+					} else {
+						ifaces.add(0, typeName);
+					}
+				} else {
+					ifaces.add(0, typeName);
+				}
 			}
 		}
 		return ifaces;

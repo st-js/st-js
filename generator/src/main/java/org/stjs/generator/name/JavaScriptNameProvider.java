@@ -7,8 +7,6 @@ import javax.lang.model.type.TypeMirror;
 
 import org.stjs.generator.GenerationContext;
 
-import com.sun.source.tree.IdentifierTree;
-import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.util.TreePath;
 

@@ -42,6 +42,12 @@ It's work in progress but it supports.
 - You cannot define inner types (Class / Enum / Interface) inside anonymous classes
 - You cannot call `stjs.getTypeAnnotation` / `stjs.getAnnotations` / `stjs.getMemberAnnotation` / `stjs.getParameterAnnotation` as annotations aren't generated in TypeScript
 
+## Roadmap
+
+- Correctly write types for functional interfaces (lambdas) 
+  - instead of : `static method(f: Function1<number, number>): void {}`
+  - write : `static method(f: (param1: number) => number): void {}`
+
 ## In idea
 
 - Add imports automatically

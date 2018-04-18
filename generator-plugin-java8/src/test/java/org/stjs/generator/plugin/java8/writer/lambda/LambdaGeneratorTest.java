@@ -9,7 +9,7 @@ import org.stjs.generator.utils.AbstractStjsTest;
 public class LambdaGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testLambdaParamExpression() {
-		assertCodeContains(Lambda1.class, "method((x) => x+1)");
+		assertCodeContains(Lambda1.class, "method((x: number) => x+1)");
 	}
 
 	@Test
@@ -19,12 +19,12 @@ public class LambdaGeneratorTest extends AbstractStjsTest {
 
 	@Test
 	public void testLambdaNoReturnExpression() {
-		assertCodeContains(Lambda3.class, "method((x) =>{let y = x;})");
+		assertCodeContains(Lambda3.class, "method((x: number) =>{let y = x;})");
 	}
 
 	@Test
 	public void testLambdaTypeResolution() {
-		assertCodeContains(Lambda4.class, "method((x) => x.length + 1)");
+		assertCodeContains(Lambda4.class, "method((x: string) => x.length + 1)");
 	}
 
 	@Test

@@ -1,8 +1,9 @@
 package org.stjs.generator.writer;
 
-import com.sun.source.tree.TypeParameterTree;
+import com.sun.source.tree.Tree;
 import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.KeywordLiteral;
+import org.mozilla.javascript.ast.Name;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TypesUtils;
@@ -85,29 +86,34 @@ abstract public class JavascriptTypes<JS> {
 		return js.genericType(typeName, array);
 	}
 
-	public List<JS> getTypeParams(List<? extends TypeParameterTree> treeParams, GenerationContext<JS> context) {
+	public List<JS> getTypeParams(List<? extends Tree> treeParams, GenerationContext<JS> context) {
 		List<JS> params = new ArrayList<>();
 
 		if (treeParams.size() == 0) {
 			return null;
 		}
 
-		for (TypeParameterTree param : treeParams) {
+		for (Tree param : treeParams) {
+			// TypeParameterTree
 			params.add(getGenericTypeDesc(InternalUtils.symbol(param).asType(), context));
 		}
 		return params;
 	}
 
+	private Boolean isNullOrAny(JS element) {
+		return (element instanceof KeywordLiteral && ((KeywordLiteral) element).getType() == Token.NULL)
+				|| (element instanceof Name && "any".equals(((Name) element).getIdentifier()));
+	}
+
 	private JS getTypeVariable(TypeVariable variableType, GenerationContext<JS> context, JS typeName) {
 		JS upper = getFieldTypeDesc(variableType.getUpperBound(), context);
-		JS lower = getFieldTypeDesc(variableType.getLowerBound(), context);
-
-		if (lower instanceof KeywordLiteral && ((KeywordLiteral) lower).getType() == Token.NULL) {
-			lower = null;
+		if (isNullOrAny(upper)) {
+			upper = null;
 		}
 
-		if (upper instanceof KeywordLiteral && ((KeywordLiteral) upper).getType() == Token.NULL) {
-			upper = null;
+		JS lower = getFieldTypeDesc(variableType.getLowerBound(), context);
+		if (isNullOrAny(lower)) {
+			lower = null;
 		}
 
 		return context.js().variableType(typeName, upper, lower);
@@ -148,7 +154,7 @@ abstract public class JavascriptTypes<JS> {
 			}
 
 			// If this is an array, it must at least be parametrized as any
-			if ("org.stjs.javascript.Array".equals(qualifiedName) && typeNameString.equals("Array")) {
+			if ("org.stjs.javascript.Array".equals(qualifiedName) && "Array".equals(typeNameString)) {
 				List<JS> array = new ArrayList<>();
 				array.add(js.name("any"));
 				return js.genericType(typeName, array);
@@ -163,7 +169,7 @@ abstract public class JavascriptTypes<JS> {
 				return getTypeVariable((TypeVariable) type, context, typeName);
 			}
 		} else if (type instanceof ArrayType) {
-			if (typeNameString.equals("Array")) {
+			if ("Array".equals(typeNameString)) {
 				List<JS> types = new ArrayList<>();
 				types.add(getFieldTypeDesc(((ArrayType) type).getComponentType(), context));
 
