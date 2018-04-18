@@ -40,16 +40,6 @@ public interface JavaScriptNameProvider {
 	String getTypeName(GenerationContext<?> context, Element type, DependencyType dependencyType);
 
 	/**
-	 * <p>getVariableName.</p>
-	 *
-	 * @param context a {@link org.stjs.generator.GenerationContext} object.
-	 * @param treeNode a {@link com.sun.source.tree.IdentifierTree} object.
-	 * @param path a {@link com.sun.source.util.TreePath} object.
-	 * @return a {@link java.lang.String} object.
-	 */
-	String getVariableName(GenerationContext<?> context, IdentifierTree treeNode, TreePath path);
-
-	/**
 	 * <p>getMethodName.</p>
 	 *
 	 * @param context a {@link org.stjs.generator.GenerationContext} object.
@@ -58,16 +48,6 @@ public interface JavaScriptNameProvider {
 	 * @return a {@link java.lang.String} object.
 	 */
 	String getMethodName(GenerationContext<?> context, MethodTree tree, TreePath path);
-
-	/**
-	 * <p>getMethodName.</p>
-	 *
-	 * @param context a {@link org.stjs.generator.GenerationContext} object.
-	 * @param tree a {@link com.sun.source.tree.MethodInvocationTree} object.
-	 * @param path a {@link com.sun.source.util.TreePath} object.
-	 * @return a {@link java.lang.String} object.
-	 */
-	String getMethodName(GenerationContext<?> context, MethodInvocationTree tree, TreePath path);
 
 	/**
 	 * <p>getResolvedTypes.</p>

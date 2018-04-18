@@ -194,22 +194,8 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 
 	/** {@inheritDoc} */
 	@Override
-	public String getVariableName(GenerationContext<?> context, IdentifierTree treeNode, TreePath path) {
-		// Auto-generated method stub
-		return null;
-	}
-
-	/** {@inheritDoc} */
-	@Override
 	public String getMethodName(GenerationContext<?> context, MethodTree tree, TreePath path) {
 		return tree.getName().toString();
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public String getMethodName(GenerationContext<?> context, MethodInvocationTree tree, TreePath path) {
-		// Auto-generated method stub
-		return null;
 	}
 
 	/** {@inheritDoc} */

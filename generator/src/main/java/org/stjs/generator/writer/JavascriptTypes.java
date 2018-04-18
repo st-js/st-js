@@ -130,7 +130,8 @@ abstract public class JavascriptTypes<JS> {
 		if (JavaNodes.isJavaScriptPrimitive(type)) {
 			return mapPrimitiveType(type, context);
 		}
-		JS typeName = js.name(context.getNames().getTypeName(context, type, DependencyType.OTHER));
+		String typeNameString = context.getNames().getTypeName(context, type, DependencyType.OTHER);
+		JS typeName = js.name(typeNameString);
 
 		if (type instanceof DeclaredType) {
 			DeclaredType declaredType = (DeclaredType) type;
@@ -147,7 +148,7 @@ abstract public class JavascriptTypes<JS> {
 			}
 
 			// If this is an array, it must at least be parametrized as any
-			if ("org.stjs.javascript.Array".equals(qualifiedName)) {
+			if ("org.stjs.javascript.Array".equals(qualifiedName) && typeNameString.equals("Array")) {
 				List<JS> array = new ArrayList<>();
 				array.add(js.name("any"));
 				return js.genericType(typeName, array);
@@ -162,10 +163,12 @@ abstract public class JavascriptTypes<JS> {
 				return getTypeVariable((TypeVariable) type, context, typeName);
 			}
 		} else if (type instanceof ArrayType) {
-			List<JS> types = new ArrayList<>();
-			types.add(getFieldTypeDesc(((ArrayType) type).getComponentType(), context));
+			if (typeNameString.equals("Array")) {
+				List<JS> types = new ArrayList<>();
+				types.add(getFieldTypeDesc(((ArrayType) type).getComponentType(), context));
 
-			return js.genericType(typeName, types);
+				return js.genericType(typeName, types);
+			}
 		} else if (type instanceof NullType) {
 			return js.keyword(Keyword.NULL);
 		} else {
