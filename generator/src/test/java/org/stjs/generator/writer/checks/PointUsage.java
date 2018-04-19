@@ -9,11 +9,11 @@ import static org.stjs.javascript.JSObjectAdapter.$js;
  */
 public class PointUsage {
 
-	public boolean main(int[] args) {
+	public static int main(String[] args) {
 		Point2D first = new Point2D(2,2);
 		Point2D second = new Point2D(2,2);
 
-		Boolean result = first.equals(second);
+		int result = first.equals(second) ? 2 : 1;
 		$js("console.log(result)");
 		return result;
 	}

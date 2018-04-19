@@ -50,9 +50,12 @@ public class MethodInvocationJavaObject implements CheckContributor<MethodInvoca
 			}
 
 			String methodName = ((Symbol.MethodSymbol) member).name.toString();
-			String owner = ((Symbol.ClassSymbol) ((Symbol.MethodSymbol) member).owner).type.toString();
+			if (!method.equals(methodName)) {
+				continue;
+			}
 
-			if (method.equals(methodName) && !owner.startsWith("java.lang.")) {
+			String owner = ((Symbol.ClassSymbol) ((Symbol.MethodSymbol) member).owner).type.toString();
+			if (!owner.startsWith("java.lang.")) {
 				return ((Symbol.MethodSymbol) member);
 			}
 
@@ -87,7 +90,7 @@ public class MethodInvocationJavaObject implements CheckContributor<MethodInvoca
 
 		Symbol.MethodSymbol implementedMethod = getMethod(methodOwnerElement, name);
 
-		if (implementedMethod != null) {
+		if (implementedMethod == null) {
 			context.addError(tree, "Methods inherited from Object can't be used unless they're implemented. Called '" + name + "()'");
 		}
 
