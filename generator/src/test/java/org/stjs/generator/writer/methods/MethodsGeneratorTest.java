@@ -9,27 +9,27 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	public void testPublicInstanceMethod() {
 		assertCodeContains(Methods1.class, //
 				"class Methods1 {" + //
-						"method(arg1: string, arg2: string): void {return 0;}");
+						"method(arg1: string, arg2: string): number {return 0;}");
 	}
 
 	@Test
 	public void testPrivateInstanceMethod() {
 		// same as public
-		assertCodeContains(Methods2.class, "class Methods2 { private method(arg1: string, arg2: string): void {");
+		assertCodeContains(Methods2.class, "class Methods2 { private method(arg1: string, arg2: string): number {");
 	}
 
 	@Test
 	public void testPublicStaticMethod() {
 		assertCodeContains(Methods3.class, //
 				"class Methods3 {" + //
-						"static method(arg1: string, arg2: string): void{");
+						"static method(arg1: string, arg2: string): number{");
 	}
 
 	@Test
 	public void testPrivateStaticMethod() {
 		assertCodeContains(Methods4.class, //
 				"class Methods4 {" + //
-						"private static method(arg1: string, arg2: string): void {");
+						"private static method(arg1: string, arg2: string): number {");
 	}
 
 	@Test
@@ -46,7 +46,7 @@ public class MethodsGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testSpecialThis() {
 		// the special parameter THIS should not be added
-		assertCodeContains(Methods7.class, "method(THIS: string, arg2: string): void{");
+		assertCodeContains(Methods7.class, "method(THIS: string, arg2: string): number {");
 	}
 
 	@Test

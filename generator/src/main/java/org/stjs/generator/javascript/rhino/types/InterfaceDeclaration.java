@@ -7,7 +7,7 @@ import java.util.List;
 
 public class InterfaceDeclaration extends AstNode {
 
-	private String name;
+	private AstNode name;
 	private Iterable<AstNode> members;
 	private List<AstNode> extension;
 
@@ -15,7 +15,7 @@ public class InterfaceDeclaration extends AstNode {
 		type = TSToken.INTERFACE;
 	}
 
-	public InterfaceDeclaration(String name, Iterable<AstNode> members, List<AstNode> extension) {
+	public InterfaceDeclaration(AstNode name, Iterable<AstNode> members, List<AstNode> extension) {
 		this.name = name;
 		this.members = members;
 		this.extension = extension;
@@ -31,7 +31,7 @@ public class InterfaceDeclaration extends AstNode {
 
 	}
 
-	public String getName() {
+	public AstNode getName() {
 		return name;
 	}
 

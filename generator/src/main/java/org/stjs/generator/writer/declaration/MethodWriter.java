@@ -158,11 +158,11 @@ public class MethodWriter<JS> extends JavascriptTypes<JS> implements WriterContr
 		JS returnType = null;
 
 		if (!JavaNodes.isConstructor(tree)) {
-			Element returnTypeElement = InternalUtils.symbol(tree.getReturnType());
+			TypeMirror returnTypeElement = InternalUtils.typeOf(tree.getReturnType());
 			if (returnTypeElement == null) {
 				returnType = context.js().name("void");
 			} else {
-				returnType = getFieldTypeDesc(returnTypeElement.asType(), context);
+				returnType = getFieldTypeDesc(returnTypeElement, context);
 			}
 		}
 

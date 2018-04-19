@@ -60,7 +60,7 @@ public class InheritanceGeneratorTest extends AbstractStjsTest {
 	@Test
 	public void testInterfaceMembers() {
 		assertCodeContains(MyInterface5.class, "interface MyInterface5 { " //
-				+ "someMethod(): void; " //
+				+ "someMethod(): boolean; " //
 				+ "someMethodWithParams(number: number, someArray: Array<any>): string; " //
 				+ "test: string; " //
 				+ "}");

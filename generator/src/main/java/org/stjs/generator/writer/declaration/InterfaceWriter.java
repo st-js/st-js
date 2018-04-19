@@ -136,6 +136,25 @@ public class InterfaceWriter<JS> extends JavascriptTypes<JS> {
 		return ifaces;
 	}
 
+	public JS getInterfaceName(ClassTree tree, GenerationContext<JS> context) {
+		Element type = TreeUtils.elementFromDeclaration(tree);
+		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
+
+		if (typeName.contains(".") && type.getEnclosingElement().getKind() != ElementKind.PACKAGE) {
+			typeName = typeName.replace('.', '_');
+		}
+
+		List<JS> typeParameters = getTypeParams(tree.getTypeParameters(), context);
+
+		JS name = context.js().name(typeName);
+
+		if (typeParameters != null) {
+			return context.js().genericType(name, typeParameters);
+		}
+
+		return name;
+	}
+
 	public void generateInterface(WriterVisitor<JS> visitor, ClassTree tree, GenerationContext<JS> context, List<JS> stmts) {
 		Element type = TreeUtils.elementFromDeclaration(tree);
 		if (type.getKind() != ElementKind.INTERFACE) {
@@ -145,20 +164,21 @@ public class InterfaceWriter<JS> extends JavascriptTypes<JS> {
 		// TODO :: implements
 		List<JS> members = getMembers(visitor, tree, context);
 
-		String typeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
-		String originalTypeName = typeName;
+		JS typeName = getInterfaceName(tree, context);
 
 		JavaScriptBuilder<JS> js = context.js();
 
-		typeName = typeName.replace('.', '_');
 		stmts.add(js.interfaceDeclaration(typeName, members, getInterfaces(tree, context)));
 
+		String simpleTypeName = context.getNames().getTypeName(context, type, DependencyType.EXTENDS);
+		String originalTypeName = simpleTypeName;
+		simpleTypeName = simpleTypeName.replace('.', '_');
 		boolean outerClass = type.getEnclosingElement().getKind() == ElementKind.PACKAGE;
-		if (outerClass && !typeName.equals(originalTypeName)) {
+		if (outerClass && !simpleTypeName.equals(originalTypeName)) {
 			stmts.add(js.assignment(
 					AssignOperator.ASSIGN,
 					js.name(originalTypeName),
-					js.name(typeName)
+					js.name(simpleTypeName)
 			));
 		}
 	}

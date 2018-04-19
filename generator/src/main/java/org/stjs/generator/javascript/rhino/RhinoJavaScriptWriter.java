@@ -909,7 +909,9 @@ public class RhinoJavaScriptWriter implements AstVisitor<Boolean> {
 	@Override
 	public void visitInterfaceDeclaration(InterfaceDeclaration s, Boolean param) {
 
-		print("interface " +  s.getName());
+		print("interface ");
+		visitorSupport.accept(s.getName(), this, param);
+
 		if (s.getExtends() != null && s.getExtends().size() > 0) {
 			print(" extends ");
 			printList(s.getExtends(), param);

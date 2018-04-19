@@ -507,7 +507,7 @@ public interface JavaScriptBuilder<T> {
 	 * @param members The interface's members
 	 * @return a T object.
 	 */
-	T interfaceDeclaration(@Nonnull String name, Iterable<T> members, Iterable<T> extension);
+	T interfaceDeclaration(@Nonnull T name, Iterable<T> members, Iterable<T> extension);
 
 	/**
 	 * Class

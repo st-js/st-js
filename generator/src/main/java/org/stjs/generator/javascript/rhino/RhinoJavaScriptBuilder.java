@@ -635,7 +635,7 @@ public class RhinoJavaScriptBuilder implements JavaScriptBuilder<AstNode> {
 	}
 
 	@Override
-	public AstNode interfaceDeclaration(@Nonnull String name, Iterable<AstNode> members, Iterable<AstNode> extension) {
+	public AstNode interfaceDeclaration(@Nonnull AstNode name, Iterable<AstNode> members, Iterable<AstNode> extension) {
 		return new InterfaceDeclaration(name, members, list(extension));
 	}
 

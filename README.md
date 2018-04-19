@@ -46,8 +46,7 @@ It's work in progress but it supports.
 
 - Don't rely on stjs.bind for method references
 - Write types for variables
-- Write generic types for interfaces
-- Correctly write complex generic types (M extends Serie & FinancialSerie)
+- Correctly write complex generic types (M extends Serie & FinancialSerie) (Situation improved, still not great)
 - Correctly write types for functional interfaces (lambdas) 
   - instead of : `static method(f: Function1<number, number>): void {}`
   - write : `static method(f: (param1: number) => number): void {}`

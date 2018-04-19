@@ -102,7 +102,7 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 		if (type instanceof WildcardType) {
 			// ? extends Type1 super Type2
 			// XXX what to return here !?
-			return "Object";
+			return "any";
 		}
 		return type.toString();
 	}

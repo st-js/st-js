@@ -1,12 +1,15 @@
 package org.stjs.generator.writer;
 
 import com.sun.source.tree.Tree;
+import com.sun.tools.javac.code.Type;
 import org.mozilla.javascript.Token;
 import org.mozilla.javascript.ast.KeywordLiteral;
 import org.mozilla.javascript.ast.Name;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TypesUtils;
+import org.stjs.generator.javascript.AssignOperator;
+import org.stjs.generator.javascript.BinaryOperator;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.javascript.NameValue;
@@ -16,6 +19,7 @@ import org.stjs.javascript.Map;
 
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.NoType;
 import javax.lang.model.type.NullType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -56,22 +60,14 @@ abstract public class JavascriptTypes<JS> {
 			return js.name("string");
 		}
 
-		/*
-		qualifiedName.equals("java.lang.Byte")
-				|| qualifiedName.equals("java.lang.Character")
-		case BYTE:
-		case CHAR:
-			   */
-
-		// TODO :: make sure that's what we want
 		return js.name("any");
 	}
 
-	private JS getParametrized(DeclaredType declaredType, GenerationContext<JS> context, JS typeName) {
+	private JS getParametrized(DeclaredType declaredType, GenerationContext<JS> context, JS typeName, Boolean genericDefinition) {
 		JavaScriptBuilder<JS> js = context.js();
 		List<JS> array = new ArrayList<>();
 		for (TypeMirror arg : declaredType.getTypeArguments()) {
-			array.add(getTypeDesc(arg, context, true));
+			array.add(getTypeDesc(arg, context, genericDefinition));
 		}
 
 		String qualifiedName = TypesUtils.getQualifiedName(declaredType).toString();
@@ -84,20 +80,6 @@ abstract public class JavascriptTypes<JS> {
 		}
 
 		return js.genericType(typeName, array);
-	}
-
-	public List<JS> getTypeParams(List<? extends Tree> treeParams, GenerationContext<JS> context) {
-		List<JS> params = new ArrayList<>();
-
-		if (treeParams.size() == 0) {
-			return null;
-		}
-
-		for (Tree param : treeParams) {
-			// TypeParameterTree
-			params.add(getGenericTypeDesc(InternalUtils.symbol(param).asType(), context));
-		}
-		return params;
 	}
 
 	private Boolean isNullOrAny(JS element) {
@@ -131,11 +113,23 @@ abstract public class JavascriptTypes<JS> {
 		//return context.js().variableType(context.js().name("?"), upper, lower);
 	}
 
-	public JS getTypeDesc(TypeMirror type, GenerationContext<JS> context, Boolean genericDefinition) {
+	private JS getTypeDesc(TypeMirror type, GenerationContext<JS> context, Boolean genericDefinition) {
 		JavaScriptBuilder<JS> js = context.js();
 		if (JavaNodes.isJavaScriptPrimitive(type)) {
 			return mapPrimitiveType(type, context);
 		}
+
+		if (type instanceof Type.IntersectionClassType) {
+			List<JS> bounds = new ArrayList<>();
+
+			for (TypeMirror bound : ((Type.IntersectionClassType) type ).getBounds()) {
+				bounds.add(getTypeDesc(bound, context, false));
+			}
+
+			// TODO :: what happens if there is more than two ?
+			return js.binary(BinaryOperator.AND, bounds);
+		}
+
 		String typeNameString = context.getNames().getTypeName(context, type, DependencyType.OTHER);
 		JS typeName = js.name(typeNameString);
 
@@ -150,7 +144,7 @@ abstract public class JavascriptTypes<JS> {
 
 			// parametrized type
 			if (!declaredType.getTypeArguments().isEmpty()) {
-				return getParametrized((DeclaredType) type, context, typeName);
+				return getParametrized((DeclaredType) type, context, typeName, genericDefinition);
 			}
 
 			// If this is an array, it must at least be parametrized as any
@@ -177,6 +171,8 @@ abstract public class JavascriptTypes<JS> {
 			}
 		} else if (type instanceof NullType) {
 			return js.keyword(Keyword.NULL);
+		} else if (type instanceof NoType) {
+			return js.name("void");
 		} else {
 			System.out.println("What is this ? " + type.getClass());
 		}
@@ -184,11 +180,24 @@ abstract public class JavascriptTypes<JS> {
 		return typeName;
 	}
 
-	public JS getFieldTypeDesc(TypeMirror type, GenerationContext<JS> context) {
+	private JS getGenericTypeDesc(TypeMirror type, GenerationContext<JS> context) {
+		return getTypeDesc(type, context, true);
+	}
+
+	protected JS getFieldTypeDesc(TypeMirror type, GenerationContext<JS> context) {
 		return getTypeDesc(type, context, false);
 	}
 
-	public JS getGenericTypeDesc(TypeMirror type, GenerationContext<JS> context) {
-		return getTypeDesc(type, context, true);
+	protected List<JS> getTypeParams(List<? extends Tree> treeParams, GenerationContext<JS> context) {
+		List<JS> params = new ArrayList<>();
+
+		if (treeParams.size() == 0) {
+			return null;
+		}
+
+		for (Tree param : treeParams) {
+			params.add(getGenericTypeDesc(InternalUtils.symbol(param).asType(), context));
+		}
+		return params;
 	}
 }
