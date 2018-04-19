@@ -2,6 +2,7 @@ package org.stjs.generator.writer.declaration;
 
 import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.ParameterizedTypeTree;
 import com.sun.source.tree.Tree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.TreeUtils;
@@ -10,6 +11,7 @@ import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.name.DependencyType;
 import org.stjs.generator.utils.JavaNodes;
+import org.stjs.generator.writer.JavascriptTypes;
 import org.stjs.generator.writer.WriterVisitor;
 
 import javax.lang.model.element.Element;
@@ -17,7 +19,7 @@ import javax.lang.model.element.ElementKind;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InterfaceWriter<JS> {
+public class InterfaceWriter<JS> extends JavascriptTypes<JS> {
 
 	private List<Tree> getAllInterfaces(ClassTree clazz) {
 		List<Tree> enums = new ArrayList<>();
@@ -96,15 +98,39 @@ public class InterfaceWriter<JS> {
 		List<JS> ifaces = new ArrayList<>();
 		for (Tree iface : clazz.getImplementsClause()) {
 			TreeWrapper<Tree, JS> ifaceType = context.getCurrentWrapper().child(iface);
-			if (!ifaceType.isSyntheticType()) {
-				ifaces.add(context.js().name(ifaceType.getTypeName(depType)));
+			if (ifaceType.isSyntheticType()) {
+				continue;
 			}
+
+			JS typeName = context.js().name(ifaceType.getTypeName(depType));
+
+			if (iface instanceof ParameterizedTypeTree) {
+				List<JS> typeParameters = getTypeParams(((ParameterizedTypeTree) iface).getTypeArguments(), context);
+				if (typeParameters != null) {
+					ifaces.add(context.js().genericType(typeName, typeParameters));
+					continue;
+				}
+			}
+
+			ifaces.add(typeName);
+
 		}
 
 		if (clazz.getExtendsClause() != null && type.getKind() == ElementKind.INTERFACE) {
 			TreeWrapper<Tree, JS> superType = context.getCurrentWrapper().child(clazz.getExtendsClause());
 			if (!superType.isSyntheticType()) {
-				ifaces.add(0, context.js().name(superType.getTypeName(DependencyType.EXTENDS)));
+				JS typeName = context.js().name(superType.getTypeName(DependencyType.EXTENDS));
+
+				if (superType instanceof ClassTree) {
+					List<JS> typeParameters = getTypeParams(((ClassTree) superType).getTypeParameters(), context);
+					if (typeParameters != null) {
+						ifaces.add(0, context.js().genericType(typeName, typeParameters));
+					} else {
+						ifaces.add(0, typeName);
+					}
+				} else {
+					ifaces.add(0, typeName);
+				}
 			}
 		}
 		return ifaces;

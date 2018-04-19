@@ -88,7 +88,7 @@ public class MethodInvocationJavaObject implements CheckContributor<MethodInvoca
 		Symbol.MethodSymbol implementedMethod = getMethod(methodOwnerElement, name);
 
 		if (implementedMethod != null) {
-			context.addError(tree, "Methods inherited from Object can't be used unless they're implemented. . Called '" + name + "()'");
+			context.addError(tree, "Methods inherited from Object can't be used unless they're implemented. Called '" + name + "()'");
 		}
 
 		return null;
