@@ -43,4 +43,15 @@ public class ConversionTest extends AbstractStjsTest {
 		assertCodeContains(code, "result6 = parseInt(entry6);");
 		assertCodeContains(code, "result7 = isNaN(entry6);");
 	}
+
+	@Test
+	public void testEqualsConversion() {
+		String code = generate(Conversion4.class);
+		assertCodeContains(code, "entry1 == 2;");
+		assertCodeContains(code, "entry2 == \"ho\";");
+		assertCodeContains(code, "entry3 == true;");
+		assertCodeContains(code, "entry4.equals(new Conversion4());");
+
+		assertCodeContains(code, " if (entry3 != true) {");
+	}
 }

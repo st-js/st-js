@@ -1,5 +1,7 @@
 package org.stjs.generator.check.expression;
 
+import static org.stjs.generator.writer.templates.DefaultTemplate.isConvertedEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -102,6 +104,10 @@ public class MethodInvocationJavaObject implements CheckContributor<MethodInvoca
 
 		Element methodElement = InternalUtils.symbol(tree);
 		TypeElement methodOwnerElement = (TypeElement) methodElement.getEnclosingElement();
+
+		if ("equals".equals(name) && isConvertedEquals(name)) {
+			return null;
+		}
 
 		Symbol.MethodSymbol implementedMethod = getMethod(methodOwnerElement, name);
 

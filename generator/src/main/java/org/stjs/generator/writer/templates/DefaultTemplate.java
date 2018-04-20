@@ -28,7 +28,7 @@ import com.sun.source.tree.MethodInvocationTree;
 public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
 
 	private static final List<String> NUMBER_TYPES;
-	private static final List<String> VALUEOF_TYPES;
+	private static final List<String> BASIC_TYPES;
 	private static final List<String> STATIC_NUMBER_METHODS;
 	private static final List<String> PROTOTYPE_NUMBER_METHODS;
 
@@ -41,11 +41,11 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 				Long.class.getCanonicalName(),
 				Short.class.getCanonicalName()
 		));
-		VALUEOF_TYPES = new ArrayList<>(Arrays.asList(
+		BASIC_TYPES = new ArrayList<>(Arrays.asList(
 				String.class.getCanonicalName(),
 				Boolean.class.getCanonicalName()
 		));
-		VALUEOF_TYPES.addAll(NUMBER_TYPES);
+		BASIC_TYPES.addAll(NUMBER_TYPES);
 
 		STATIC_NUMBER_METHODS = new ArrayList<>(Arrays.asList(
 				"parseInt",
@@ -66,6 +66,10 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 				"doubleValue",
 				"isNaN"
 		));
+	}
+
+	public static boolean isConvertedEquals(String owner) {
+		return BASIC_TYPES.contains(owner);
 	}
 
 	private boolean isCallToSuperConstructor(MethodInvocationTree tree) {
@@ -119,7 +123,7 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		Element methodElement = TreeUtils.elementFromUse(tree);
 		String methodOwner = methodElement.getEnclosingElement().toString();
 
-		return "valueOf".equals(name) && VALUEOF_TYPES.contains(methodOwner);
+		return "valueOf".equals(name) && isConvertedEquals(methodOwner);
 	}
 
 	private JS convertedValueOf(MethodInvocationTree tree, GenerationContext<JS> context, List<JS> arguments) {
@@ -156,7 +160,7 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		return isStatic && STATIC_NUMBER_METHODS.contains(name) || !isStatic && PROTOTYPE_NUMBER_METHODS.contains(name);
 	}
 
-	private JS convertedNumberMethod(MethodInvocationTree tree, GenerationContext<JS> context, String name, List<JS> arguments) {
+	private JS convertedNumberMethod(GenerationContext<JS> context, String name, List<JS> arguments) {
 		JavaScriptBuilder<JS> js = context.js();
 
 		if ("parseDouble".equals(name) || "parseFloat".equals(name) || "floatValue".equals(name) || "doubleValue".equals(name)) {
@@ -168,6 +172,33 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		}
 
 		return js.functionCall(js.name("parseInt"), arguments);
+	}
+
+	private boolean isEquals(boolean isStatic, String name, Element methodElement) {
+		if (isStatic || !"equals".equals(name)) {
+			return false;
+		}
+
+		String methodOwner = methodElement.getEnclosingElement().toString();
+
+		return BASIC_TYPES.contains(methodOwner);
+	}
+
+	private boolean hasUnaryNotAround(MethodInvocationTree tree,  GenerationContext<JS> context) {
+		// TODO :: implement this
+		/*
+		Element type = InternalUtils.symbol(tree);
+		type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
+        */
+
+		return false;
+	}
+
+	private JS convertEquals(MethodInvocationTree tree, GenerationContext<JS> context, JS left, JS right) {
+		JavaScriptBuilder<JS> js = context.js();
+		BinaryOperator operator = hasUnaryNotAround(tree, context) ? BinaryOperator.NOT_EQUAL_TO : BinaryOperator.EQUAL_TO;
+
+		return js.binary(operator, Arrays.asList(left, right));
 	}
 
 	@Override
@@ -188,10 +219,13 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		}
 
 		if (isJavaNumberMethod(tree, name)) {
-			return convertedNumberMethod(tree, context, name, isStatic ? arguments : Arrays.asList(target));
+			return convertedNumberMethod(context, name, isStatic ? arguments : Arrays.asList(target));
+		}
+
+		if (isEquals(isStatic, name, methodElement)) {
+			return convertEquals(tree, context, target, arguments.get(0));
 		}
 
 		return context.js().functionCall(context.js().property(target, name), arguments);
 	}
-
 }
