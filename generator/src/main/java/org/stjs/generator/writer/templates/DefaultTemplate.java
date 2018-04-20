@@ -1,5 +1,7 @@
 package org.stjs.generator.writer.templates;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.lang.model.element.Element;
@@ -8,6 +10,9 @@ import javax.lang.model.element.TypeElement;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.TreeUtils;
+import org.stjs.generator.javascript.BinaryOperator;
+import org.stjs.generator.javascript.JavaScriptBuilder;
+import org.stjs.generator.javascript.UnaryOperator;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.WriterContributor;
 import org.stjs.generator.writer.WriterVisitor;
@@ -21,6 +26,21 @@ import com.sun.source.tree.MethodInvocationTree;
  * @author acraciun
  */
 public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTree, JS> {
+
+	private static final List<String> VALUEOF_TYPES;
+
+	static {
+		VALUEOF_TYPES = new ArrayList<>(Arrays.asList(
+				Byte.class.getCanonicalName(),
+				Double.class.getCanonicalName(),
+				Float.class.getCanonicalName(),
+				Integer.class.getCanonicalName(),
+				Long.class.getCanonicalName(),
+				Short.class.getCanonicalName(),
+				String.class.getCanonicalName(),
+				Boolean.class.getCanonicalName()
+		));
+	}
 
 	private boolean isCallToSuperConstructor(MethodInvocationTree tree) {
 		if (!TreeUtils.isSuperCall(tree)) {
@@ -69,6 +89,36 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		return context.js().functionCall(leftSide, arguments);
 	}
 
+	public boolean isCallToValueOf(MethodInvocationTree tree, String name) {
+		Element methodElement = TreeUtils.elementFromUse(tree);
+
+		boolean isStatic = JavaNodes.isStatic(methodElement);
+		String methodOwner = methodElement.getEnclosingElement().toString();
+
+		return isStatic && "valueOf".equals(name) && VALUEOF_TYPES.contains(methodOwner);
+	}
+
+	private JS customValueOf(MethodInvocationTree tree, GenerationContext<JS> context, List<JS> arguments) {
+		JavaScriptBuilder<JS> js = context.js();
+
+		Element methodElement = TreeUtils.elementFromUse(tree);
+		String methodOwner = methodElement.getEnclosingElement().toString();
+
+		if (String.class.getCanonicalName().equals(methodOwner)) {
+			List<JS> args = new ArrayList<>();
+			args.add(js.string(""));
+			args.add(arguments.get(0));
+			return js.binary(BinaryOperator.PLUS, args);
+		}
+
+		if (Boolean.class.getCanonicalName().equals(methodOwner)) {
+			return js.unary(UnaryOperator.LOGICAL_COMPLEMENT, js.unary(UnaryOperator.LOGICAL_COMPLEMENT, arguments.get(0)));
+		}
+
+		JS newNumber = js.newExpression(js.name("Number"), arguments);
+		return js.functionCall(js.property(newNumber, "valueOf"), new ArrayList<JS>());
+	}
+
 	@Override
 	public JS visit(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		if (isCallToSuperConstructor(tree)) {
@@ -78,6 +128,11 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		JS target = MethodInvocationWriter.buildTarget(visitor, context.<MethodInvocationTree> getCurrentWrapper());
 		String name = MethodInvocationWriter.buildMethodName(tree);
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
+
+		if (isCallToValueOf(tree, name)) {
+			return customValueOf(tree, context, arguments);
+		}
+
 		return context.js().functionCall(context.js().property(target, name), arguments);
 	}
 }

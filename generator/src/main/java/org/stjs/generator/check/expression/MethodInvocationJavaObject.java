@@ -1,5 +1,9 @@
 package org.stjs.generator.check.expression;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.MethodTree;
@@ -22,6 +26,17 @@ import javax.lang.model.element.TypeElement;
  * @author sgoetz
  */
 public class MethodInvocationJavaObject implements CheckContributor<MethodInvocationTree> {
+
+	private static final List<String> OBJECT_METHODS;
+
+	static {
+		OBJECT_METHODS = new ArrayList<>(Arrays.asList(
+			"hashCode",
+			"equals",
+			"clone",
+			"toString"
+		));
+	}
 
 	public boolean implementsMethod(ClassTree tree, GenerationContext<Void> context, String method) {
 		for (Tree member : tree.getMembers()) {
@@ -81,7 +96,7 @@ public class MethodInvocationJavaObject implements CheckContributor<MethodInvoca
 			return null;
 		}
 
-		if (!"equals".equals(name)) {
+		if (!OBJECT_METHODS.contains(name)) {
 			return null;
 		}
 

@@ -51,7 +51,7 @@ public class MethodInvocationJavaSpecific implements CheckContributor<MethodInvo
 
 		STJS_INSTANCE_METHODS = new HashMap<>();
 		// String, Number, Boolean
-		STJS_INSTANCE_METHODS.put("equals", allTypes);
+		//STJS_INSTANCE_METHODS.put("equals", allTypes); // This is checked separately
 		STJS_INSTANCE_METHODS.put("getClass", allTypes);
 
 		// Number methods
@@ -64,9 +64,9 @@ public class MethodInvocationJavaSpecific implements CheckContributor<MethodInvo
 		STJS_INSTANCE_METHODS.put("isNaN", numberTypes);
 
 		// String methods
-		STJS_INSTANCE_METHODS.put("getBytes", stringType); // not implemented
-		STJS_INSTANCE_METHODS.put("getChars", stringType); // not implemented
-		STJS_INSTANCE_METHODS.put("contentEquals", stringType); // not implemented
+		STJS_INSTANCE_METHODS.put("getBytes", stringType); // wasn't implemented in stjs.js anyway
+		STJS_INSTANCE_METHODS.put("getChars", stringType); // wasn't implemented in stjs.js anyway
+		STJS_INSTANCE_METHODS.put("contentEquals", stringType); // wasn't implemented in stjs.js anyway
 		STJS_INSTANCE_METHODS.put("matches", stringType);
 		STJS_INSTANCE_METHODS.put("compareTo", stringType);
 		STJS_INSTANCE_METHODS.put("compareToIgnoreCase", stringType);
@@ -80,7 +80,7 @@ public class MethodInvocationJavaSpecific implements CheckContributor<MethodInvo
 
 		// Static methods
 		STJS_STATIC_METHODS = new HashMap<>();
-		STJS_STATIC_METHODS.put("valueOf", allTypes);
+		//STJS_STATIC_METHODS.put("valueOf", allTypes); // This is automatically fixed
 		STJS_STATIC_METHODS.put("parseInt", numberTypes);
 		STJS_STATIC_METHODS.put("parseShort", numberTypes);
 		STJS_STATIC_METHODS.put("parseLong", numberTypes);

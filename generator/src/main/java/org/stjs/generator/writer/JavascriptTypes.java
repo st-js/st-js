@@ -8,7 +8,6 @@ import org.mozilla.javascript.ast.Name;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.javac.InternalUtils;
 import org.stjs.generator.javac.TypesUtils;
-import org.stjs.generator.javascript.AssignOperator;
 import org.stjs.generator.javascript.BinaryOperator;
 import org.stjs.generator.javascript.JavaScriptBuilder;
 import org.stjs.generator.javascript.Keyword;
@@ -122,7 +121,7 @@ abstract public class JavascriptTypes<JS> {
 		if (type instanceof Type.IntersectionClassType) {
 			List<JS> bounds = new ArrayList<>();
 
-			for (TypeMirror bound : ((Type.IntersectionClassType) type ).getBounds()) {
+			for (TypeMirror bound : ((Type.IntersectionClassType) type).getBounds()) {
 				bounds.add(getTypeDesc(bound, context, false));
 			}
 
