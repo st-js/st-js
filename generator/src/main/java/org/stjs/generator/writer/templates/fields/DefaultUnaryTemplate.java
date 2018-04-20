@@ -24,7 +24,7 @@ import com.sun.source.tree.UnaryTree;
 public class DefaultUnaryTemplate<JS> implements WriterContributor<UnaryTree, JS> {
 
 	private boolean isNotEquals(UnaryOperator op, Tree tree, GenerationContext<JS> context) {
-		if (UnaryOperator.LOGICAL_COMPLEMENT.equals(op)) {
+		if (!UnaryOperator.LOGICAL_COMPLEMENT.equals(op)) {
 			return false;
 		}
 
@@ -54,7 +54,6 @@ public class DefaultUnaryTemplate<JS> implements WriterContributor<UnaryTree, JS
 
 		// If it's a not equal that is converted separately,
 		// we'll just do that in the equals
-		//FIXME This isn't working at the moment
 		if (isNotEquals(op, tree.getExpression(), context)) {
 			return operand;
 		}

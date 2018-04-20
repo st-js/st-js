@@ -31,6 +31,14 @@ It's work in progress but it supports.
   - Parametrized types
   - Wildcard types ((Replaced by `any` as this doesn't exist in TypeScript))
   - Generic Types
+  
+## Auto fixes
+- `String.prototype.equals()` is replaced by `==` and `!String.prototype.equals()` is replaced by `!=`
+- `Integer.parseInt()`, `Short.parseShort()`, `Float.parseFloat()`, ... replaced by `parseInt()` and `parseFloat()`
+- `Integer.prototype.shortValue()`, `Short.prototype.intValue()`, ... replaced by `parseInt()` and `parseFloat()`
+- `Boolean.valueOf(foo)` replaced by `!!foo`
+- `String.valueOf(foo)` replaced by `"" + foo`
+- `Integer.valueOf(foo)` replaced by `new Number(foo).valueOf()`
 
 ### New Checks
 

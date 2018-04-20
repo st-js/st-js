@@ -7,6 +7,8 @@ import java.util.List;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
+import com.sun.source.tree.Tree;
+import com.sun.source.tree.UnaryTree;
 import org.stjs.generator.GenerationContext;
 import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.TreeUtils;
@@ -184,19 +186,20 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		return BASIC_TYPES.contains(methodOwner);
 	}
 
-	private boolean hasUnaryNotAround(MethodInvocationTree tree,  GenerationContext<JS> context) {
-		// TODO :: implement this
-		/*
-		Element type = InternalUtils.symbol(tree);
-		type.getEnclosingElement().getKind() != ElementKind.PACKAGE;
-        */
+	private boolean hasUnaryNotAround(GenerationContext<JS> context) {
+		Tree parent = context.getCurrentWrapper().getPath().getParentPath().getLeaf();
 
-		return false;
+		if (!(parent instanceof UnaryTree)) {
+			return false;
+		}
+
+		UnaryOperator op = UnaryOperator.valueOf(parent.getKind());
+		return UnaryOperator.LOGICAL_COMPLEMENT.equals(op);
 	}
 
-	private JS convertEquals(MethodInvocationTree tree, GenerationContext<JS> context, JS left, JS right) {
+	private JS convertEquals(GenerationContext<JS> context, JS left, JS right) {
 		JavaScriptBuilder<JS> js = context.js();
-		BinaryOperator operator = hasUnaryNotAround(tree, context) ? BinaryOperator.NOT_EQUAL_TO : BinaryOperator.EQUAL_TO;
+		BinaryOperator operator = hasUnaryNotAround(context) ? BinaryOperator.NOT_EQUAL_TO : BinaryOperator.EQUAL_TO;
 
 		return js.binary(operator, Arrays.asList(left, right));
 	}
@@ -223,7 +226,7 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		}
 
 		if (isEquals(isStatic, name, methodElement)) {
-			return convertEquals(tree, context, target, arguments.get(0));
+			return convertEquals(context, target, arguments.get(0));
 		}
 
 		return context.js().functionCall(context.js().property(target, name), arguments);

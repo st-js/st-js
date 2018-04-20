@@ -105,7 +105,7 @@ public class MethodInvocationJavaObject implements CheckContributor<MethodInvoca
 		Element methodElement = InternalUtils.symbol(tree);
 		TypeElement methodOwnerElement = (TypeElement) methodElement.getEnclosingElement();
 
-		if ("equals".equals(name) && isConvertedEquals(name)) {
+		if ("equals".equals(name) && isConvertedEquals(methodOwnerElement.toString())) {
 			return null;
 		}
 

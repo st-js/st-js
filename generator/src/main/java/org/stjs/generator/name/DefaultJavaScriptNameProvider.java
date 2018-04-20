@@ -93,6 +93,14 @@ public class DefaultJavaScriptNameProvider implements JavaScriptNameProvider {
 			addResolvedType(rootTypeElement, dependencyType);
 
 			String fullName = addNameSpace(rootTypeElement, context, name);
+
+			String qualifiedName = declaredType.toString();
+			if ("java.lang.Short".equals(qualifiedName)
+					|| "java.lang.Integer".equals(qualifiedName) || "java.lang.Long".equals(qualifiedName)
+					|| "java.lang.Double".equals(qualifiedName) || "java.lang.Float".equals(qualifiedName)) {
+				fullName = "Number";
+			}
+
 			resolvedTypes.put(type, new TypeInfo(fullName, rootTypeElement));
 			return fullName;
 		}
