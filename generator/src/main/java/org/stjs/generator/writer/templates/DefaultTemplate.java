@@ -29,7 +29,8 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 
 	private static final List<String> NUMBER_TYPES;
 	private static final List<String> VALUEOF_TYPES;
-	private static final List<String> PARSE_METHODS;
+	private static final List<String> STATIC_NUMBER_METHODS;
+	private static final List<String> PROTOTYPE_NUMBER_METHODS;
 
 	static {
 		NUMBER_TYPES = new ArrayList<>(Arrays.asList(
@@ -46,13 +47,23 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		));
 		VALUEOF_TYPES.addAll(NUMBER_TYPES);
 
-		PARSE_METHODS = new ArrayList<>(Arrays.asList(
+		STATIC_NUMBER_METHODS = new ArrayList<>(Arrays.asList(
 				"parseInt",
 				"parseShort",
 				"parseLong",
 				"parseByte",
 				"parseDouble",
 				"parseFloat",
+				"isNaN"
+		));
+
+		PROTOTYPE_NUMBER_METHODS = new ArrayList<>(Arrays.asList(
+				"intValue",
+				"shortValue",
+				"longValue",
+				"byteValue",
+				"floatValue",
+				"doubleValue",
 				"isNaN"
 		));
 	}
@@ -106,14 +117,12 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 
 	public boolean isCallToValueOf(MethodInvocationTree tree, String name) {
 		Element methodElement = TreeUtils.elementFromUse(tree);
-
-		boolean isStatic = JavaNodes.isStatic(methodElement);
 		String methodOwner = methodElement.getEnclosingElement().toString();
 
-		return isStatic && "valueOf".equals(name) && VALUEOF_TYPES.contains(methodOwner);
+		return "valueOf".equals(name) && VALUEOF_TYPES.contains(methodOwner);
 	}
 
-	private JS customValueOf(MethodInvocationTree tree, GenerationContext<JS> context, List<JS> arguments) {
+	private JS convertedValueOf(MethodInvocationTree tree, GenerationContext<JS> context, List<JS> arguments) {
 		JavaScriptBuilder<JS> js = context.js();
 
 		Element methodElement = TreeUtils.elementFromUse(tree);
@@ -134,19 +143,23 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		return js.functionCall(js.property(newNumber, "valueOf"), new ArrayList<JS>());
 	}
 
-	private boolean isNumberParsing(MethodInvocationTree tree, String name) {
+	private boolean isJavaNumberMethod(MethodInvocationTree tree, String name) {
 		Element methodElement = TreeUtils.elementFromUse(tree);
 
 		boolean isStatic = JavaNodes.isStatic(methodElement);
 		String methodOwner = methodElement.getEnclosingElement().toString();
 
-		return isStatic && PARSE_METHODS.contains(name) && NUMBER_TYPES.contains(methodOwner);
+		if (!NUMBER_TYPES.contains(methodOwner)) {
+			return false;
+		}
+
+		return isStatic && STATIC_NUMBER_METHODS.contains(name) || !isStatic && PROTOTYPE_NUMBER_METHODS.contains(name);
 	}
 
-	private JS customNumberParsing(MethodInvocationTree tree, GenerationContext<JS> context, String name, List<JS> arguments) {
+	private JS convertedNumberMethod(MethodInvocationTree tree, GenerationContext<JS> context, String name, List<JS> arguments) {
 		JavaScriptBuilder<JS> js = context.js();
 
-		if ("parseDouble".equals(name) || "parseFloat".equals(name)) {
+		if ("parseDouble".equals(name) || "parseFloat".equals(name) || "floatValue".equals(name) || "doubleValue".equals(name)) {
 			return js.functionCall(js.name("parseFloat"), arguments);
 		}
 
@@ -167,12 +180,15 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		String name = MethodInvocationWriter.buildMethodName(tree);
 		List<JS> arguments = MethodInvocationWriter.buildArguments(visitor, tree, context);
 
-		if (isCallToValueOf(tree, name)) {
-			return customValueOf(tree, context, arguments);
+		Element methodElement = TreeUtils.elementFromUse(tree);
+
+		boolean isStatic = JavaNodes.isStatic(methodElement);
+		if (isStatic && isCallToValueOf(tree, name)) {
+			return convertedValueOf(tree, context, arguments);
 		}
 
-		if (isNumberParsing(tree, name)) {
-			return customNumberParsing(tree, context, name, arguments);
+		if (isJavaNumberMethod(tree, name)) {
+			return convertedNumberMethod(tree, context, name, isStatic ? arguments : Arrays.asList(target));
 		}
 
 		return context.js().functionCall(context.js().property(target, name), arguments);

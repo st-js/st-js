@@ -31,4 +31,16 @@ public class ConversionTest extends AbstractStjsTest {
 		assertCodeContains(code, "result6 = parseFloat(\"2.0\");");
 		assertCodeContains(code, "result7 = isNaN(400);");
 	}
+
+	@Test
+	public void testXXValueConversion() {
+		String code = generate(Conversion3.class);
+		assertCodeContains(code, "result1 = parseInt(entry1);");
+		assertCodeContains(code, "result2 = parseInt(entry2);");
+		assertCodeContains(code, "result3 = parseInt(entry3);");
+		assertCodeContains(code, "result4 = parseFloat(entry4);");
+		assertCodeContains(code, "result5 = parseFloat(entry5);");
+		assertCodeContains(code, "result6 = parseInt(entry6);");
+		assertCodeContains(code, "result7 = isNaN(entry6);");
+	}
 }

@@ -53,15 +53,6 @@ public class MethodInvocationJavaSpecific implements CheckContributor<MethodInvo
 		//STJS_INSTANCE_METHODS.put("equals", allTypes); // This is checked separately
 		STJS_INSTANCE_METHODS.put("getClass", allTypes);
 
-		// Number methods
-		STJS_INSTANCE_METHODS.put("intValue", numberTypes);
-		STJS_INSTANCE_METHODS.put("shortValue", numberTypes);
-		STJS_INSTANCE_METHODS.put("longValue", numberTypes);
-		STJS_INSTANCE_METHODS.put("byteValue", numberTypes);
-		STJS_INSTANCE_METHODS.put("floatValue", numberTypes);
-		STJS_INSTANCE_METHODS.put("doubleValue", numberTypes);
-		STJS_INSTANCE_METHODS.put("isNaN", numberTypes);
-
 		// String methods
 		STJS_INSTANCE_METHODS.put("getBytes", stringType); // wasn't implemented in stjs.js anyway
 		STJS_INSTANCE_METHODS.put("getChars", stringType); // wasn't implemented in stjs.js anyway

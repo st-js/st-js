@@ -14,8 +14,5 @@ public class Conversion2 {
 		Double result5 = Double.parseDouble("5.0");
 		Float result6 = Float.parseFloat("2.0");
 		Boolean result7 = Double.isNaN(400);
-
-		//STJS_STATIC_METHODS.put("isNaN", numberTypes);
-
 	}
 }
