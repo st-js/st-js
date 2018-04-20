@@ -18,4 +18,17 @@ public class ConversionTest extends AbstractStjsTest {
 		assertCodeContains(code, "result2 = \"\" + 25;");
 		assertCodeContains(code, "result3 = new Number(\"25\").valueOf();");
 	}
+
+	@Test
+	public void testParseNumberConversion() {
+		String code = generate(Conversion2.class);
+
+		assertCodeContains(code, "result1 = parseInt(\"1\");");
+		assertCodeContains(code, "result2 = parseInt(\"2\");");
+		assertCodeContains(code, "result3 = parseInt(\"3\");");
+		assertCodeContains(code, "result4 = parseInt(\"4\");");
+		assertCodeContains(code, "result5 = parseFloat(\"5.0\");");
+		assertCodeContains(code, "result6 = parseFloat(\"2.0\");");
+		assertCodeContains(code, "result7 = isNaN(400);");
+	}
 }

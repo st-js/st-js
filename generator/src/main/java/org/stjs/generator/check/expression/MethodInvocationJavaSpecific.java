@@ -26,7 +26,6 @@ import com.sun.source.tree.MethodInvocationTree;
  */
 public class MethodInvocationJavaSpecific implements CheckContributor<MethodInvocationTree> {
 	private static final Map<String, List<String>> STJS_INSTANCE_METHODS;
-	private static final Map<String, List<String>> STJS_STATIC_METHODS;
 
 	static String name(Class clazz) {
 		return clazz.getCanonicalName();
@@ -77,17 +76,6 @@ public class MethodInvocationJavaSpecific implements CheckContributor<MethodInvo
 		STJS_INSTANCE_METHODS.put("replaceFirst", stringType);
 		STJS_INSTANCE_METHODS.put("regionMatches", stringType);
 		STJS_INSTANCE_METHODS.put("contains", stringType);
-
-		// Static methods
-		STJS_STATIC_METHODS = new HashMap<>();
-		//STJS_STATIC_METHODS.put("valueOf", allTypes); // This is automatically fixed
-		STJS_STATIC_METHODS.put("parseInt", numberTypes);
-		STJS_STATIC_METHODS.put("parseShort", numberTypes);
-		STJS_STATIC_METHODS.put("parseLong", numberTypes);
-		STJS_STATIC_METHODS.put("parseByte", numberTypes);
-		STJS_STATIC_METHODS.put("parseDouble", numberTypes);
-		STJS_STATIC_METHODS.put("parseFloat", numberTypes);
-		STJS_STATIC_METHODS.put("isNaN", numberTypes);
 	}
 
 	/**
@@ -98,40 +86,22 @@ public class MethodInvocationJavaSpecific implements CheckContributor<MethodInvo
 		String name = MethodInvocationWriter.buildMethodName(tree);
 		Element methodElement = TreeUtils.elementFromUse(tree);
 
-		if (GeneratorConstants.SUPER.equals(name)) {
+		if (GeneratorConstants.SUPER.equals(name) || JavaNodes.isStatic(methodElement)) {
 			return null;
 		}
 
-		boolean isStatic = JavaNodes.isStatic(methodElement);
 		TypeElement methodOwnerElement = (TypeElement) methodElement.getEnclosingElement();
 
-		List<String> methodImplementations;
-		if (isStatic) {
-			// If the method isn't used, we're not concerned
-			if (!STJS_STATIC_METHODS.containsKey(name)) {
-				return null;
-			}
+		// If the method isn't used, we're not concerned
+		if (!STJS_INSTANCE_METHODS.containsKey(name)) {
+			return null;
+		}
 
-			methodImplementations = STJS_STATIC_METHODS.get(name);
-
-			if (methodImplementations.contains(methodOwnerElement.toString())) {
-				context.addError(tree,
-						"You are trying to call a method that exists only in Java. Called '" + methodOwnerElement.getSimpleName().toString()
-								+ "." + name + "()'");
-			}
-		} else {
-			// If the method isn't used, we're not concerned
-			if (!STJS_INSTANCE_METHODS.containsKey(name)) {
-				return null;
-			}
-
-			methodImplementations = STJS_INSTANCE_METHODS.get(name);
-
-			if (methodImplementations.contains(methodOwnerElement.toString())) {
-				context.addError(tree,
-						"You are trying to call a method that exists only in Java. Called '" + methodOwnerElement.getSimpleName().toString()
-								+ ".prototype." + name + "()'");
-			}
+		List<String> methodImplementations = STJS_INSTANCE_METHODS.get(name);
+		if (methodImplementations.contains(methodOwnerElement.toString())) {
+			context.addError(tree,
+					"You are trying to call a method that exists only in Java. Called '" + methodOwnerElement.getSimpleName().toString()
+							+ ".prototype." + name + "()'");
 		}
 
 		return null;
