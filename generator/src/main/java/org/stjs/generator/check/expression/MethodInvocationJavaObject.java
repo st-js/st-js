@@ -6,10 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.MethodInvocationTree;
-import com.sun.source.tree.MethodTree;
-import com.sun.source.tree.Tree;
 import com.sun.tools.javac.code.Scope;
 import com.sun.tools.javac.code.Symbol;
 import org.stjs.generator.GenerationContext;
@@ -40,19 +37,8 @@ public class MethodInvocationJavaObject implements CheckContributor<MethodInvoca
 		));
 	}
 
-	public boolean implementsMethod(ClassTree tree, GenerationContext<Void> context, String method) {
-		for (Tree member : tree.getMembers()) {
-
-			if (member instanceof MethodTree) {
-				String methodName = context.getNames().getMethodName(context, (MethodTree) member, context.getCurrentPath());
-
-				if (method.equals(methodName)) {
-					return true;
-				}
-			}
-		}
-
-		return false;
+	public static boolean isJavaObjectMethod(String name) {
+		return OBJECT_METHODS.contains(name);
 	}
 
 	public Symbol.MethodSymbol getMethod(TypeElement methodOwnerElement, String method) {
@@ -98,7 +84,7 @@ public class MethodInvocationJavaObject implements CheckContributor<MethodInvoca
 			return null;
 		}
 
-		if (!OBJECT_METHODS.contains(name)) {
+		if (!isJavaObjectMethod(name)) {
 			return null;
 		}
 

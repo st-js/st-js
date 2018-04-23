@@ -1,5 +1,7 @@
 package org.stjs.generator.check.expression;
 
+import static org.stjs.generator.check.expression.MethodInvocationJavaObject.isJavaObjectMethod;
+
 import java.util.List;
 
 import javax.lang.model.element.Element;
@@ -38,7 +40,7 @@ public class MethodInvocationEnumCheck implements CheckContributor<MethodInvocat
 	public Void visit(CheckVisitor visitor, MethodInvocationTree tree, GenerationContext<Void> context) {
 		String name = MethodInvocationWriter.buildMethodName(tree);
 
-		if (GeneratorConstants.SUPER.equals(name)) {
+		if (GeneratorConstants.SUPER.equals(name) || isJavaObjectMethod(name)) {
 			return null;
 		}
 

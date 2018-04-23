@@ -39,6 +39,10 @@ It's work in progress but it supports.
 - `Boolean.valueOf(foo)` replaced by `!!foo`
 - `String.valueOf(foo)` replaced by `"" + foo`
 - `Integer.valueOf(foo)` replaced by `new Number(foo).valueOf()`
+- `foo.replaceFirst("bar", "baz")` replaced by `foo.replace(new RegExp("bar"), "baz")`
+- `foo.replaceAll("bar", "baz")` replaced by `foo.replace(new RegExp("bar", "g"), "baz")`
+- `foo.contains(bar)` replaced by `foo.indexOf(bar) >= 0`
+- `foo.matches(bar)` replaced by `foo.match("^" + regexp + "$") != null`
 
 ### New Checks
 

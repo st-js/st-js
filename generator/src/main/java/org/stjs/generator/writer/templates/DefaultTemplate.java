@@ -14,6 +14,7 @@ import org.stjs.generator.GeneratorConstants;
 import org.stjs.generator.javac.TreeUtils;
 import org.stjs.generator.javascript.BinaryOperator;
 import org.stjs.generator.javascript.JavaScriptBuilder;
+import org.stjs.generator.javascript.Keyword;
 import org.stjs.generator.javascript.UnaryOperator;
 import org.stjs.generator.utils.JavaNodes;
 import org.stjs.generator.writer.WriterContributor;
@@ -176,8 +177,8 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		return js.functionCall(js.name("parseInt"), arguments);
 	}
 
-	private boolean isEquals(boolean isStatic, String name, Element methodElement) {
-		if (isStatic || !"equals".equals(name)) {
+	private boolean isEquals(String name, Element methodElement) {
+		if (!"equals".equals(name)) {
 			return false;
 		}
 
@@ -217,18 +218,75 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 		Element methodElement = TreeUtils.elementFromUse(tree);
 
 		boolean isStatic = JavaNodes.isStatic(methodElement);
+
+		// Replace `Boolean.valueOf(foo)` replaced by `!!foo`
+		// Replace `String.valueOf(foo)` replaced by `"" + foo`
+		// Replace `Integer.valueOf(foo)` replaced by `new Number(foo).valueOf()`
 		if (isStatic && isCallToValueOf(tree, name)) {
 			return convertedValueOf(tree, context, arguments);
 		}
-
+		// Replace `Integer.parseInt()`, `Short.parseShort()`, `Float.parseFloat()`, ... replaced by `parseInt()` and `parseFloat()`
+		// Replace `Integer.prototype.shortValue()`, `Short.prototype.intValue()`, ... replaced by `parseInt()` and `parseFloat()`
 		if (isJavaNumberMethod(tree, name)) {
 			return convertedNumberMethod(context, name, isStatic ? arguments : Arrays.asList(target));
 		}
 
-		if (isEquals(isStatic, name, methodElement)) {
-			return convertEquals(context, target, arguments.get(0));
+		if (!isStatic) {
+			// Replace `foo.equals(bar)` with `foo == bar`
+			// Replace `!foo.equals(bar)` with `foo != bar`
+			if (isEquals(name, methodElement)) {
+				return convertEquals(context, target, arguments.get(0));
+			}
+
+			String methodOwner = methodElement.getEnclosingElement().toString();
+			if (String.class.getCanonicalName().equals(methodOwner)) {
+				// Replace `foo.replaceFirst("bar", "baz")` with `foo.replace(new RegExp("bar"), "baz")`
+				// Replace `foo.replaceAll("bar", "baz")` with `foo.replace(new RegExp("bar", "g"), "baz")`
+				if ("replaceAll".equals(name) || "replaceFirst".equals(name)) {
+					return convertReplace(context, name, target, arguments);
+				}
+
+				// Replace `foo.contains(bar)` with `foo.indexOf(bar) >= 0`
+				if ("contains".equals(name)) {
+					return convertContains(context, target, arguments);
+				}
+
+				// Replace `foo.matches(bar)` with `foo.match("^" + regexp + "$") != null`
+				if ("matches".equals(name)) {
+					return convertMatches(context, target, arguments);
+				}
+			}
 		}
 
 		return context.js().functionCall(context.js().property(target, name), arguments);
+	}
+
+	private JS convertMatches(GenerationContext<JS> context, JS target, List<JS> arguments) {
+		JavaScriptBuilder<JS> js = context.js();
+
+		JS matchArg = js.binary(BinaryOperator.PLUS, Arrays.asList(js.string("^"), arguments.get(0), js.string("$")));
+		JS matchCall = js.functionCall(js.property(target, "match"), Arrays.asList(matchArg));
+
+		return js.binary(BinaryOperator.NOT_EQUAL_TO, Arrays.asList(matchCall, js.keyword(Keyword.NULL)));
+	}
+
+	private JS convertContains(GenerationContext<JS> context, JS target, List<JS> arguments) {
+		JavaScriptBuilder<JS> js = context.js();
+
+		JS containsCall = js.functionCall(js.property(target, "indexOf"), arguments);
+		return js.binary(BinaryOperator.GREATER_THAN_EQUAL, Arrays.asList(containsCall, js.number(0)));
+	}
+
+	private JS convertReplace(GenerationContext<JS> context, String name, JS target, List<JS> arguments) {
+		JavaScriptBuilder<JS> js = context.js();
+
+		List<JS> newRegexArguments = new ArrayList<>(Arrays.asList(arguments.get(0)));
+
+		if ("replaceAll".equals(name)) {
+			newRegexArguments.add(js.string("g"));
+		}
+
+		JS newRegex = js.newExpression(js.name("RegExp"), newRegexArguments);
+		return js.functionCall(js.property(target, "replace"), Arrays.asList(newRegex, arguments.get(1)));
 	}
 }

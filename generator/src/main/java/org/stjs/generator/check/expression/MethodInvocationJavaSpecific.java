@@ -57,16 +57,12 @@ public class MethodInvocationJavaSpecific implements CheckContributor<MethodInvo
 		STJS_INSTANCE_METHODS.put("getBytes", stringType); // wasn't implemented in stjs.js anyway
 		STJS_INSTANCE_METHODS.put("getChars", stringType); // wasn't implemented in stjs.js anyway
 		STJS_INSTANCE_METHODS.put("contentEquals", stringType); // wasn't implemented in stjs.js anyway
-		STJS_INSTANCE_METHODS.put("matches", stringType);
 		STJS_INSTANCE_METHODS.put("compareTo", stringType);
 		STJS_INSTANCE_METHODS.put("compareToIgnoreCase", stringType);
 		STJS_INSTANCE_METHODS.put("equalsIgnoreCase", stringType);
 		STJS_INSTANCE_METHODS.put("codePointBefore", stringType); // not implemented
 		STJS_INSTANCE_METHODS.put("codePointCount", stringType); // not implemented
-		STJS_INSTANCE_METHODS.put("replaceAll", stringType);
-		STJS_INSTANCE_METHODS.put("replaceFirst", stringType);
 		STJS_INSTANCE_METHODS.put("regionMatches", stringType);
-		STJS_INSTANCE_METHODS.put("contains", stringType);
 	}
 
 	/**
@@ -91,8 +87,8 @@ public class MethodInvocationJavaSpecific implements CheckContributor<MethodInvo
 		List<String> methodImplementations = STJS_INSTANCE_METHODS.get(name);
 		if (methodImplementations.contains(methodOwnerElement.toString())) {
 			context.addError(tree,
-					"You are trying to call a method that exists only in Java. Called '" + methodOwnerElement.getSimpleName().toString()
-							+ ".prototype." + name + "()'");
+					"The method '" + methodOwnerElement.getSimpleName().toString()
+							+ ".prototype." + name + "()' only exists in Java.");
 		}
 
 		return null;
