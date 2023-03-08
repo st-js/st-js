@@ -10,7 +10,7 @@ import org.stjs.generator.writer.expression.MethodInvocationWriter;
 import com.sun.source.tree.MethodInvocationTree;
 
 /**
- * x.$invoke(a,b) -> x(a,b)
+ * x.$invoke(a,b) to x(a,b)
  * 
  * @author acraciun
  */

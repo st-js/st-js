@@ -9,7 +9,7 @@ import org.stjs.generator.writer.expression.MethodInvocationWriter;
 import com.sun.source.tree.MethodInvocationTree;
 
 /**
- * map.$delete(key) -> delete map[key]
+ * map.$delete(key) to delete map[key]
  * 
  * @author acraciun
  */

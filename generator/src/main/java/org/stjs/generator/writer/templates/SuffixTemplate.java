@@ -11,12 +11,12 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * This template can be used to suffix the name of a method that can be Java keyword.<br>
- * When used without parameters as <tt>@Template("suffix")</tt>, this template simply strips the
+ * When used without parameters as <tt>Template("suffix")</tt>, this template simply strips the
  * trailing character of the Java method name<br>
- * method_() => method() or method$() => method() <br>
+ * method_() to method() or method$() to method() <br>
  *
  * When used with a single parameters, this template removes the last <tt>param.length</tt> characters
- * @Template("suffix(Extended)") methodExtended() => method(), or @Template("suffix(Bar)") fooBar() => foo()
+ * Template("suffix(Extended)") methodExtended() to method(), or Template("suffix(Bar)") fooBar() to foo()
  *
  * @author acraciun
  */

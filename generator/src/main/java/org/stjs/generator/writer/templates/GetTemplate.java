@@ -8,7 +8,7 @@ import org.stjs.generator.writer.expression.MethodInvocationWriter;
 import com.sun.source.tree.MethodInvocationTree;
 
 /**
- * array.$get(x) -> array[x], or $get(obj, prop) -> obj[prop]
+ * array.$get(x) to array[x], or $get(obj, prop) to obj[prop]
  * 
  * @author acraciun
  */

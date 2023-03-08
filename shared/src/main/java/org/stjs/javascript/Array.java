@@ -15,7 +15,19 @@
  */
 package org.stjs.javascript;
 
-import java.util.*;
+import static org.stjs.javascript.JSGlobal.String;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.stjs.javascript.annotation.BrowserCompatibility;
 import org.stjs.javascript.annotation.ServerSide;
@@ -25,15 +37,13 @@ import org.stjs.javascript.functions.Callback3;
 import org.stjs.javascript.functions.Function3;
 import org.stjs.javascript.functions.Function4;
 
-import static org.stjs.javascript.JSGlobal.String;
-
 /**
  * This interface represents an array from Javascript.The value may be typed. The iteration is done on the indexes to have the javascript
  * equivalent of <br>
  * <b>for(var key in array)</b> <br>
  * The methods are prefixed with $ to let the generator know that is should generate braket access instead, i.e <br>
- * array.$get(key) => array[key] <br>
- * array.$set(key, value) => array[key]=value It is generally a bad idea for code written in ST-JS to create subclasses of Array, as that will
+ * array.$get(key) to array[key] <br>
+ * array.$set(key, value) to array[key]=value It is generally a bad idea for code written in ST-JS to create subclasses of Array, as that will
  * not be translated properly. However, it may be useful for some bridges.
  * <p>
  * The documentation of this class is mostly adapted from the ECMAScript 5.1 Specification:
@@ -79,7 +89,6 @@ public class Array<V> implements Iterable<String> {
 	 * in the List are considered to be set to null in the returned Array.
 	 *
 	 * @param values the list of values to add to this array
-	 * @return a new Array that is equivalent to the specified List
 	 */
 	@ServerSide
 	public Array(List<V> values) {
@@ -1165,7 +1174,7 @@ public class Array<V> implements Iterable<String> {
 	 *
 	 * @param callbackfn
 	 *            the callback function to call
-	 * @return <tt>true</tt> if </tt>callbackfn</tt> returns <tt>true</tt> for ALL the elements in this <tt>Array</tt>,
+	 * @return <tt>true</tt> if <tt>callbackfn</tt> returns <tt>true</tt> for ALL the elements in this <tt>Array</tt>,
 	 *         <tt>false</tt> if not
 	 */
 	@BrowserCompatibility("IE:9+")

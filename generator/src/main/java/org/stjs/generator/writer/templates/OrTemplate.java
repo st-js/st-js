@@ -11,7 +11,7 @@ import org.stjs.generator.writer.expression.MethodInvocationWriter;
 import com.sun.source.tree.MethodInvocationTree;
 
 /**
- * $or(x, y, z) -> (x || y || z)
+ * $or(x, y, z) to (x || y || z)
  * 
  * @author acraciun
  */

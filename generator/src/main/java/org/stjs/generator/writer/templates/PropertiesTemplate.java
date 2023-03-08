@@ -7,7 +7,7 @@ import org.stjs.generator.writer.WriterVisitor;
 import com.sun.source.tree.MethodInvocationTree;
 
 /**
- * $properties(obj) -> obj
+ * $properties(obj) to obj
  * 
  * @author acraciun
  */

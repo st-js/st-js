@@ -9,7 +9,7 @@ import org.stjs.generator.writer.expression.MethodInvocationWriter;
 import com.sun.source.tree.MethodInvocationTree;
 
 /**
- * array.$set(index, value) -> array[index] = value, or $set(obj, prop, value) -> obj[prop]=value
+ * array.$set(index, value) to array[index] = value, or $set(obj, prop, value) to obj[prop]=value
  *
  * @author acraciun
  */

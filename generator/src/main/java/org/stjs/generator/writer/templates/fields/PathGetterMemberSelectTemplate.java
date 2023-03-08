@@ -94,7 +94,7 @@ public class PathGetterMemberSelectTemplate<JS> implements WriterContributor<Mem
 	private boolean checkTemplateParams(String[] params, GenerationContext<JS> context, TreeWrapper<ExpressionTree, JS> currentWrapper) {
 		if (params == null || params.length == 0) {
 			context.addError(currentWrapper.getTree(),
-					"The 'path' template needs a parameter designating the method to be called, like this @Template(\"path(methodName)\")");
+					"The 'path' template needs a parameter designating the method to be called, like this Template(\"path(methodName)\")");
 			return false;
 		}
 		return true;

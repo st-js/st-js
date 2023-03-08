@@ -7,7 +7,7 @@ import org.stjs.generator.writer.WriterVisitor;
 import com.sun.source.tree.ArrayAccessTree;
 
 /**
- * array access -> used only in very specific case, otherwise the arrays are forbidden
+ * array access to used only in very specific case, otherwise the arrays are forbidden
  * 
  * @author acraciun
  * 

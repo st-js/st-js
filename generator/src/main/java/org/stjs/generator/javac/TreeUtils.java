@@ -195,7 +195,7 @@ public final class TreeUtils {
 	 * 
 	 * @param path
 	 *            the path defining the tree node
-	 * @param kinds
+	 * @param clz
 	 *            the set of kinds of the desired tree
 	 * @return the enclosing tree of the given type as given by the path
 	 */
@@ -286,7 +286,7 @@ public final class TreeUtils {
 	}
 
 	/**
-	 * Gets the enclosing class of the tree node defined by the given {@code {@link TreePath} . It returns a
+	 * Gets the enclosing class of the tree node defined by the given {@code {@link TreePath}} . It returns a
 	 * {@link Tree}, from which {@code checkers.types.AnnotatedTypeMirror} or {@link Element} can be obtained.
 	 * 
 	 * @param path
@@ -309,7 +309,7 @@ public final class TreeUtils {
 	}
 
 	/**
-	 * Gets the enclosing method of the tree node defined by the given {@code {@link TreePath} . It returns a
+	 * Gets the enclosing method of the tree node defined by the given {@code {@link TreePath}} . It returns a
 	 * {@link Tree}, from which an {@code checkers.types.AnnotatedTypeMirror} or {@link Element} can be obtained.
 	 * 
 	 * @param path

@@ -24,7 +24,7 @@ import com.sun.source.tree.Tree;
 
 /**
  * this check verifies that only one method (or constructor) with a given name has actually a body, all the other should be marked as native (or
- * @Native). More the method having the body must be the more generic than the other overloaded methods, so , when generated in the JavaScript,
+ * Native). More the method having the body must be the more generic than the other overloaded methods, so , when generated in the JavaScript,
  *           it knows how to handle all the calls.
  * @author acraciun
  */

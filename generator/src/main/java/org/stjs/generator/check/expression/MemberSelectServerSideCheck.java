@@ -11,7 +11,6 @@ import org.stjs.javascript.annotation.ServerSide;
 import com.sun.source.tree.MemberSelectTree;
 
 /**
- * @see {@link IdentifierGlobalScopeNameClashCheck}
  * @author acraciun
  */
 public class MemberSelectServerSideCheck implements CheckContributor<MemberSelectTree> {
