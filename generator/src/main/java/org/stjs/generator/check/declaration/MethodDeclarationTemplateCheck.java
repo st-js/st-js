@@ -10,7 +10,7 @@ import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.Tree;
 
 /**
- * this class verifies that you use Template only inside a bridge
+ * this class verifies that you use @Template only inside a bridge
  * 
  * @author acraciun
  */

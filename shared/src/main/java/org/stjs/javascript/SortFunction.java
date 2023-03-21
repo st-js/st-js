@@ -29,7 +29,7 @@ public interface SortFunction<V> {
 	 * <ul>
 	 * <li><em>a &lt;<sub>CF</sub> b</em> means <tt>comparefn(a,b) &lt; 0</tt>
 	 * <li><em>a =<sub>CF</sub> b</em> means <tt>comparefn(a,b) = 0</tt> (of either sign)
-	 * <li><em>a gt <sub>CF</sub> b</em> means <tt>comparefn(a,b) gt 0</tt>
+	 * <li><em>a ><sub>CF</sub> b</em> means <tt>comparefn(a,b) > 0</tt>
 	 * </ul>
 	 * 
 	 * <p>A function <tt>comparefn</tt> is a consistent comparison function for a set of values 
@@ -41,7 +41,7 @@ public interface SortFunction<V> {
 	 *     specific pair of values <em>a</em> and <em>b</em> as its two arguments. Furthermore, 
 	 *     <tt>Type(v)</tt> is <tt>Number</tt>, and <tt>v</tt> is not <tt>NaN</tt>. Note that this 
 	 *     implies that exactly one of <em>a &lt;<sub>CF</sub> b</em>, <em>a =<sub>CF</sub> b</em>,
-	 *     and <em>a gt<sub>CF</sub> b</em> will be true for a given pair of <em>a</em> and <em>b</em>.
+	 *     and <em>a ><sub>CF</sub> b</em> will be true for a given pair of <em>a</em> and <em>b</em>.
 	 * <li>Calling <tt>comparefn(a,b)</tt> does not modify the this object 
 	 * <li><em>a =<sub>CF</sub> a</em> (reflexivity)
 	 * <li>If <em>a =<sub>CF</sub> b</em>, then <em>b =<sub>CF</sub> a</em> (symmetry)
@@ -49,8 +49,8 @@ public interface SortFunction<V> {
 	 *     c</em> (transitivity of =<sub>CF</sub>)
 	 * <li>If <em>a &lt;<sub>CF</sub> b</em> and <em>b &lt;<sub>CF</sub> c</em>, then <em>a 
 	 *     &lt;<sub>CF</sub> c</em> (transitivity of &lt;<sub>CF</sub>)
-	 * <li>If <em>a gt<sub>CF</sub> b</em> and <em>b gt<sub>CF</sub> c</em>, then <em>a gt<sub>CF</sub>
-	 *     c</em> (transitivity of gt<sub>CF</sub>)
+	 * <li>If <em>a ><sub>CF</sub> b</em> and <em>b ><sub>CF</sub> c</em>, then <em>a ><sub>CF</sub>
+	 *     c</em> (transitivity of ><sub>CF</sub>)
 	 * </ul>
 	 * 
 	 * @param a the first object to be compared

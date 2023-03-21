@@ -19,6 +19,9 @@ import org.stjs.generator.GeneratorConstants;
 
 /**
  *
+ * @goal generate-test
+ * @phase process-test-classes
+ * @requiresDependencyResolution test
  * @author acraciun
  *
  */

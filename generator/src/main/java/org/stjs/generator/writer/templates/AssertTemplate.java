@@ -12,7 +12,7 @@ import com.sun.source.tree.MethodInvocationTree;
 /**
  * This template generate a code that allows you to add into the javascript file the original java code and its position
  * in the source file. It's no longer very useful since the javaScript stacktrace can be translated back to Java
- * stacktrace. assertMethod(params) to assertMethod("sourceFile:line", "assertMethod(params)", params);
+ * stacktrace. assertMethod(params) -> assertMethod("sourceFile:line", "assertMethod(params)", params);
  * 
  * @author acraciun
  */

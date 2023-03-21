@@ -60,7 +60,7 @@ public final class InternalUtils {
 	 *            the {@link Tree} node to get the symbol for
 	 * @throws IllegalArgumentException
 	 *             if {@code tree} is null or is not a valid javac-internal tree (JCTree)
-	 * @return the {@code {@link Symbol}} for the given tree, or null if one could not be found
+	 * @return the {@code {@link Symbol} for the given tree, or null if one could not be found
 	 */
 	public static/* @Nullable */Element symbol(/* @Nullable */Tree tree) {
 		if (tree == null) {

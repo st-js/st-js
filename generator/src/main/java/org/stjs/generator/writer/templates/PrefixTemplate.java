@@ -11,13 +11,13 @@ import com.sun.source.tree.MethodInvocationTree;
 
 /**
  * This template can be used to prefix the name of a method that can be Java keyword.<br>
- * When used without parameters as <tt>Template("prefix")</tt>, this template simply strips the
+ * When used without parameters as <tt>@Template("prefix")</tt>, this template simply strips the
  * leading character of the Java method name<br>
- * $method() to method() or _method() to method() <br>
+ * $method() => method() or _method() => method() <br>
  *
  * When used with a single parameters, this template removes the first <tt>param.length</tt> characters
  * from the java method name and makes the first letter of the resulting identifier lowercase<br>
- * Template("prefix(special)") specialMethod() to method(), or Template("prefix(foo)") fooBar() to bar()
+ * @Template("prefix(special)") specialMethod() => method(), or @Template("prefix(foo)") fooBar() => bar()
  *
  * @author acraciun
  */

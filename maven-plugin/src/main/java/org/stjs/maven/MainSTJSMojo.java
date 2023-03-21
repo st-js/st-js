@@ -13,14 +13,17 @@ import org.stjs.generator.GenerationDirectory;
 
 /**
  * @author acraciun
+ * @goal generate
+ * @phase process-classes
+ * @requiresDependencyResolution compile
  */
 public class MainSTJSMojo extends AbstractSTJSMojo {
 
 	/**
 	 * The source directories containing the sources to be compiled.
 	 *
-	 * default-value="${project.compileSourceRoots}"
-	 *
+	 * @parameter default-value="${project.compileSourceRoots}"
+	 * @required
 	 */
 	private List<String> compileSourceRoots;
 
@@ -32,11 +35,12 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 	 * Default value for webjar: "${project.build.outputDirectory}/META-INF/resources/webjar/${project.artifactId}/${project.version}"
 	 * </p>
 	 *
+	 * @parameter
 	 */
 	private File generatedSourcesDirectory;
 
 	/**
-	 * default-value="${project.build.outputDirectory}"
+	 * @parameter default-value="${project.build.outputDirectory}"
 	 */
 	private File buildOutputDirectory;
 
@@ -45,7 +49,7 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 	 *
 	 * The runtime will not be copied if the "webjar" setting is set to "true"
 	 *
-	 * default-value="true"
+	 * @parameter default-value="true"
 	 */
 	private boolean includeStjsSupportFile;
 
@@ -53,7 +57,7 @@ public class MainSTJSMojo extends AbstractSTJSMojo {
 	 * Sets up ST-JS to generate webjar compliant jars. This option is only compatible with jar packaging and will not
 	 * work if you have explicitly set the value of generatedSourcesDirectory.
 	 *
-	 * default-value="false"
+	 * @parameter default-value="false"
 	 */
 	private boolean webjar;
 

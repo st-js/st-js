@@ -7,6 +7,7 @@ import org.stjs.generator.check.CheckVisitor;
 import com.sun.source.tree.MemberSelectTree;
 
 /**
+ * @see {@link IdentifierGlobalScopeNameClashCheck}
  * @author acraciun
  */
 public class MemberSelectGlobalScopeNameClashCheck implements CheckContributor<MemberSelectTree> {

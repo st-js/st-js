@@ -30,6 +30,9 @@ import org.apache.maven.project.MavenProject;
 
 /**
  * This Maven plugin copies the Javascript (generated or bridged) from dependencies to the final artifact
+ * @goal copy-js
+ * @phase prepare-package
+ * @requiresDependencyResolution compile
  * @author <a href='mailto:ax.craciun@gmail.com'>Alexandru Craciun</a>
  */
 public class CopySTJSMojo extends AbstractMojo {
@@ -37,13 +40,15 @@ public class CopySTJSMojo extends AbstractMojo {
 	private static final String STJS_LIBRARY_ENTRY = "STJS-Library";
 
 	/**
-	 * expression="${project}"
+	 * @parameter expression="${project}"
+	 * @required
+	 * @readonly
 	 */
 	protected MavenProject project;
 
 	/**
 	 * Sets the granularity in milliseconds of the last modification date for testing whether a source needs recompilation.
-	 * expression="${lastModGranularityMs}" default-value="0"
+	 * @parameter expression="${lastModGranularityMs}" default-value="0"
 	 */
 	protected int staleMillis;
 
@@ -51,7 +56,7 @@ public class CopySTJSMojo extends AbstractMojo {
 	 * <p>
 	 * Specify where to place generated source files
 	 * </p>
-	 * default-value="${project.build.directory}/${project.build.finalName}/generated-js"
+	 * @parameter default-value="${project.build.directory}/${project.build.finalName}/generated-js"
 	 */
 	private File generatedSourcesDirectory;
 

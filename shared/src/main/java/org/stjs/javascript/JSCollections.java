@@ -20,7 +20,7 @@ import org.stjs.javascript.annotation.Template;
 
 /**
  * this class offers map and array builders for both client and server side. For the server side, it delegates the execution to an instance of
- * On the client side, it simply throws an {@link UnsupportedOperationException} like all the client-side
+ * {@link JSCollectionsImplementor}. On the client side, it simply throws an {@link UnsupportedOperationException} like all the client-side
  * bridges.
  * @author acraciun
  */

@@ -27,8 +27,8 @@ import org.stjs.javascript.annotation.Template;
  * javascript equivalent of <br>
  * <b>for(var key in map)</b> <br>
  * The methods are prefixed with $ to let the generator know that is should generate bracket access instead, i.e <br>
- * map.$get(key) to map[key] <br>
- * map.$put(key, value) to map[key]=value
+ * map.$get(key) => map[key] <br>
+ * map.$put(key, value) => map[key]=value
  * @author acraciun
  */
 @SyntheticType
@@ -51,6 +51,8 @@ public class Map<K extends String, V> implements Iterable<K> {
 
 	/**
 	 * constructors used on the server side only. It only wraps the given map, no copy is done
+	 * @param list
+	 * @return
 	 */
 	@ServerSide
 	public static <KK extends String, VV> Map<KK, VV> wrap(java.util.Map<KK, VV> map) {
@@ -59,6 +61,8 @@ public class Map<K extends String, V> implements Iterable<K> {
 
 	/**
 	 * constructors used on the server side only. It copies the given parameter
+	 * @param list
+	 * @return
 	 */
 	@ServerSide
 	public static <KK extends String, VV> Map<KK, VV> copyOf(java.util.Map<KK, VV> map) {
@@ -67,6 +71,7 @@ public class Map<K extends String, V> implements Iterable<K> {
 
 	/**
 	 * this gives access to the java implementation. used on the server side only
+	 * @return
 	 */
 	@ServerSide
 	public java.util.Map<K, V> java() {

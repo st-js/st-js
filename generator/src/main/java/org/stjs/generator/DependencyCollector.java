@@ -118,7 +118,8 @@ public class DependencyCollector {
 		 * @param a
 		 * @param b
 		 * @return
-		 * throws exception if there is a situation where the method cannot decide weather it should return -1 or 1
+		 * @throws if
+		 *             there is a situation where the method cannot decide weather it should return -1 or 1
 		 */
 		@Override
 		public int compare(Class<?> a, Class<?> b) {

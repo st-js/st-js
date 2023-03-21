@@ -39,7 +39,7 @@ public class DefaultTemplate<JS> implements WriterContributor<MethodInvocationTr
 	}
 
 	/**
-	 * super(args) to SuperType.call(this, args)
+	 * super(args) -> SuperType.call(this, args)
 	 */
 	private JS callToSuperConstructor(WriterVisitor<JS> visitor, MethodInvocationTree tree, GenerationContext<JS> context) {
 		Element methodElement = TreeUtils.elementFromUse(tree);

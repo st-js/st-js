@@ -51,6 +51,8 @@ public class TestResultCollection {
 	}
 
 	/**
+	 * @param className
+	 * @param methodName
 	 * @param testClassLoader
 	 *            - the classloader that "knows" about all the resources involved in the test. See
 	 *            {@link WebAppClassLoader}

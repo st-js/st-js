@@ -11,7 +11,7 @@ import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MethodInvocationTree;
 
 /**
- * $array() to []
+ * $array() -> []
  * 
  * @author acraciun
  */

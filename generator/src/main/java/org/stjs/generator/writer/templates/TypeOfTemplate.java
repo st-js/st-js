@@ -8,7 +8,7 @@ import org.stjs.generator.writer.WriterVisitor;
 import com.sun.source.tree.MethodInvocationTree;
 
 /**
- * $typeOf(arg) to (typeof arg)
+ * $typeOf(arg) -> (typeof arg)
  * 
  * @author acraciun
  */

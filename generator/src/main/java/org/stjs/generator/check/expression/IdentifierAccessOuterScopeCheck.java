@@ -38,7 +38,7 @@ public class IdentifierAccessOuterScopeCheck implements CheckContributor<Identif
 	/**
 	 * if the block is an anonymous initializer, then return the outer class
 	 *
-	 * @param path
+	 * @param element
 	 * @return
 	 */
 	public static ClassTree enclosingClassSkipAnonymousInitializer(TreePath path) {

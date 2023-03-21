@@ -11,7 +11,7 @@ import com.sun.source.tree.Tree;
 import com.sun.source.tree.TryTree;
 
 /**
- * Try blocks to as in java
+ * Try blocks -> as in java
  * 
  * @author acraciun
  */
