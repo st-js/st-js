@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.st-js</groupId>
 	<artifactId>stjs</artifactId>
-	<version>3.3.2-java8-SNAPSHOT</version>
+	<version>3.3.2-java8</version>
 	<packaging>pom</packaging>
 	<name>Strongly-typed Javascript</name>
 	<description>Javascript code generator from Java source code</description>
@@ -91,6 +91,19 @@
 						<phase>verify</phase>
 						<goals>
 							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>jar</goal>
 						</goals>
 					</execution>
 				</executions>
