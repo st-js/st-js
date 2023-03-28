@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.st-js</groupId>
 	<artifactId>stjs</artifactId>
-	<version>3.3.2.1</version>
+	<version>3.3.2.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Strongly-typed Javascript</name>
 	<description>Javascript code generator from Java source code</description>
@@ -268,6 +268,6 @@
 		<connection>scm:git:https://github.com/st-js/st-js.git</connection>
 		<developerConnection>scm:git:https://github.com/st-js/st-js.git</developerConnection>
 		<url>scm:git:https://github.com/st-js/st-js</url>
-		<tag>stjs-3.3.2.1</tag>
+		<tag>HEAD</tag>
 	</scm>
 </project>
